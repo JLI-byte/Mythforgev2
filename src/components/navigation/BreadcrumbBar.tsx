@@ -17,6 +17,7 @@ export function BreadcrumbBar() {
     const atmospheresEnabled = useWorkspaceStore(state => state.atmospheresEnabled);
 
     const [isPickerOpen, setIsPickerOpen] = useState(false);
+    const [pickerPosition, setPickerPosition] = useState<{ top: number; left: number } | null>(null);
     const pickerRef = useRef<HTMLDivElement>(null);
 
     const activeProject = projects.find(p => p.id === activeProjectId);
@@ -61,7 +62,31 @@ export function BreadcrumbBar() {
                 <div className={styles.atmosphereSection} ref={pickerRef}>
                     <button
                         className={`${styles.atmospherePill} ${!currentAtmosphere ? styles.muted : ''}`}
-                        onClick={() => setIsPickerOpen(!isPickerOpen)}
+                        onClick={(e) => {
+                            if (isPickerOpen) {
+                                setIsPickerOpen(false);
+                                setPickerPosition(null);
+                            } else {
+                                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                                const pickerWidth = 280;
+                                const pickerHeight = 420;
+
+                                let left = rect.right - pickerWidth;
+                                let top = rect.bottom + 8;
+
+                                // Flip up if not enough space below
+                                if (window.innerHeight - rect.bottom < pickerHeight + 8) {
+                                    top = rect.top - pickerHeight - 8;
+                                }
+
+                                // Clamp to viewport
+                                left = Math.max(8, Math.min(left, window.innerWidth - pickerWidth - 8));
+                                top = Math.max(8, top);
+
+                                setIsPickerOpen(true);
+                                setPickerPosition({ top, left });
+                            }
+                        }}
                     >
                         {currentAtmosphere ? (
                             <>
@@ -76,12 +101,16 @@ export function BreadcrumbBar() {
                         )}
                     </button>
 
-                    {isPickerOpen && (
-                        <div className={styles.pickerPopup}>
+                    {isPickerOpen && pickerPosition && (
+                        <div
+                            ref={pickerRef}
+                            style={{ position: 'fixed', top: pickerPosition.top, left: pickerPosition.left, zIndex: 9999 }}
+                            onClick={e => e.stopPropagation()}
+                        >
                             <AtmospherePicker
                                 sceneId={activeScene.id}
                                 currentAtmosphereId={activeScene.atmosphereId}
-                                onClose={() => setIsPickerOpen(false)}
+                                onClose={() => { setIsPickerOpen(false); setPickerPosition(null); }}
                             />
                         </div>
                     )}

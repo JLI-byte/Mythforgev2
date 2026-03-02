@@ -1,19 +1,17 @@
 .pickerPopover {
-    position: absolute;
-    /* NavigationPanel row will be relative. Position it to the right of the panel */
-    left: 100%;
-    top: 0;
-    margin-left: 0.5rem;
+    position: fixed;
     width: 280px;
+    max-width: calc(100vw - 1rem);
     background-color: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-    z-index: 50;
+    z-index: 9999;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     font-family: inherit;
+    max-height: calc(100vh - 2rem);
 }
 
 .header {

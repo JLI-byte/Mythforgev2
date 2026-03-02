@@ -51,14 +51,3 @@
 .atmospherePill.muted {
     color: var(--muted);
 }
-
-.pickerPopup {
-    position: absolute;
-    top: calc(100% + 0.5rem);
-    right: 0;
-    z-index: 1001;
-    background-color: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-}

@@ -37,6 +37,7 @@ export function NavigationPanel() {
     const [editModeName, setEditModeName] = useState('');
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const [openPickerId, setOpenPickerId] = useState<string | null>(null);
+    const [pickerPosition, setPickerPosition] = useState<{ top: number; left: number } | null>(null);
 
     const theme = useWorkspaceStore(state => state.theme);
     const customAtmospheres = useWorkspaceStore(state => state.customAtmospheres);
@@ -368,9 +369,37 @@ export function NavigationPanel() {
                                                                 style={{ fontSize: '0.9rem', padding: '0.1rem 0.2rem' }}
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    const nextId = openPickerId === scene.id ? null : scene.id;
-                                                                    setOpenMenuId(null);
-                                                                    setOpenPickerId(nextId);
+                                                                    if (openPickerId === scene.id) {
+                                                                        setOpenPickerId(null);
+                                                                        setPickerPosition(null);
+                                                                    } else {
+                                                                        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                                                                        const pickerWidth = 280;
+                                                                        const pickerHeight = 420;
+                                                                        const spaceRight = window.innerWidth - rect.right;
+                                                                        const spaceBelow = window.innerHeight - rect.bottom;
+
+                                                                        let left = rect.right + 8;
+                                                                        let top = rect.top;
+
+                                                                        // Flip left if not enough space on right
+                                                                        if (spaceRight < pickerWidth + 8) {
+                                                                            left = rect.left - pickerWidth - 8;
+                                                                        }
+
+                                                                        // Flip up if not enough space below
+                                                                        if (spaceBelow < pickerHeight) {
+                                                                            top = Math.max(8, rect.bottom - pickerHeight);
+                                                                        }
+
+                                                                        // Clamp to viewport
+                                                                        left = Math.max(8, Math.min(left, window.innerWidth - pickerWidth - 8));
+                                                                        top = Math.max(8, Math.min(top, window.innerHeight - pickerHeight - 8));
+
+                                                                        setOpenPickerId(scene.id);
+                                                                        setPickerPosition({ top, left });
+                                                                        setOpenMenuId(null);
+                                                                    }
                                                                 }}
                                                                 title="Set Atmosphere"
                                                             >
@@ -412,12 +441,16 @@ export function NavigationPanel() {
                                                         </div>
                                                     )}
 
-                                                    {openPickerId === scene.id && (
-                                                        <div ref={menuRef} onClick={e => e.stopPropagation()}>
+                                                    {openPickerId === scene.id && pickerPosition && (
+                                                        <div
+                                                            ref={menuRef}
+                                                            style={{ position: 'fixed', top: pickerPosition.top, left: pickerPosition.left, zIndex: 9999 }}
+                                                            onClick={e => e.stopPropagation()}
+                                                        >
                                                             <AtmospherePicker
                                                                 sceneId={scene.id}
                                                                 currentAtmosphereId={scene.atmosphereId}
-                                                                onClose={() => setOpenPickerId(null)}
+                                                                onClose={() => { setOpenPickerId(null); setPickerPosition(null); }}
                                                             />
                                                         </div>
                                                     )}
