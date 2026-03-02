@@ -24,6 +24,8 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
 
     const atmospheresEnabled = useWorkspaceStore((state) => state.atmospheresEnabled);
     const setAtmospheresEnabled = useWorkspaceStore((state) => state.setAtmospheresEnabled);
+    const atmosphereGlobalOverlay = useWorkspaceStore((state) => state.atmosphereGlobalOverlay);
+    const setAtmosphereGlobalOverlay = useWorkspaceStore((state) => state.setAtmosphereGlobalOverlay);
     const atmosphereTypographyEnabled = useWorkspaceStore((state) => state.atmosphereTypographyEnabled);
     const setAtmosphereTypographyEnabled = useWorkspaceStore((state) => state.setAtmosphereTypographyEnabled);
     const atmosphereReducedMotion = useWorkspaceStore((state) => state.atmosphereReducedMotion);
@@ -41,6 +43,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
 
     // Atmosphere settings
     const [localAtmospheresEnabled, setLocalAtmospheresEnabled] = useState(atmospheresEnabled);
+    const [localAtmosphereGlobalOverlay, setLocalAtmosphereGlobalOverlay] = useState(atmosphereGlobalOverlay);
     const [localAtmosphereTypographyEnabled, setLocalAtmosphereTypographyEnabled] = useState(atmosphereTypographyEnabled);
     const [localAtmosphereReducedMotion, setLocalAtmosphereReducedMotion] = useState(atmosphereReducedMotion);
 
@@ -60,6 +63,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
         });
         setEditorWidth(localWidth);
         setAtmospheresEnabled(localAtmospheresEnabled);
+        setAtmosphereGlobalOverlay(localAtmosphereGlobalOverlay);
         setAtmosphereTypographyEnabled(localAtmosphereTypographyEnabled);
         setAtmosphereReducedMotion(localAtmosphereReducedMotion);
         onClose();
@@ -231,6 +235,19 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                                 type="checkbox"
                                 checked={localAtmospheresEnabled}
                                 onChange={(e) => setLocalAtmospheresEnabled(e.target.checked)}
+                                style={{ margin: 0, transform: 'scale(1.2)', cursor: 'pointer' }}
+                            />
+                        </div>
+
+                        <div className={styles.inputGroup} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', opacity: localAtmospheresEnabled ? 1 : 0.5, pointerEvents: localAtmospheresEnabled ? 'auto' : 'none' }}>
+                            <div>
+                                <label className={styles.label} style={{ marginBottom: '0.2rem' }}>Global Overlay</label>
+                                <p style={{ fontSize: '0.75rem', color: 'var(--muted)', margin: 0 }}>Apply atmosphere tint to the whole screen (Global) vs Editor Area only.</p>
+                            </div>
+                            <input
+                                type="checkbox"
+                                checked={localAtmosphereGlobalOverlay}
+                                onChange={(e) => setLocalAtmosphereGlobalOverlay(e.target.checked)}
                                 style={{ margin: 0, transform: 'scale(1.2)', cursor: 'pointer' }}
                             />
                         </div>

@@ -29,6 +29,7 @@ export default function Home() {
   const scenes = useWorkspaceStore((state) => state.scenes);
   const customAtmospheres = useWorkspaceStore((state) => state.customAtmospheres);
   const atmospheresEnabled = useWorkspaceStore((state) => state.atmospheresEnabled);
+  const atmosphereGlobalOverlay = useWorkspaceStore((state) => state.atmosphereGlobalOverlay);
   const theme = useWorkspaceStore((state) => state.theme);
   const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
@@ -56,14 +57,16 @@ export default function Home() {
     ? ATMOSPHERE_PRESETS.find(a => a.id === activeScene.atmosphereId) || customAtmospheres.find(a => a.id === activeScene.atmosphereId)
     : undefined;
 
+  const atmosphereStyleVars = currentAtmosphere ? {
+    '--background': isDark ? currentAtmosphere.darkBackground : currentAtmosphere.lightBackground,
+    '--surface': isDark ? currentAtmosphere.darkBackground : currentAtmosphere.lightBackground,
+    transition: 'background-color 500ms ease'
+  } as React.CSSProperties : undefined;
+
   return (
     <main
       className={`${styles.workspace} ${isFullscreen ? styles.fullscreenMode : ''}`}
-      style={currentAtmosphere ? {
-        '--background': isDark ? currentAtmosphere.darkBackground : currentAtmosphere.lightBackground,
-        '--surface': isDark ? currentAtmosphere.darkBackground : currentAtmosphere.lightBackground,
-        transition: 'background-color 500ms ease'
-      } as React.CSSProperties : undefined}
+      style={atmosphereGlobalOverlay ? atmosphereStyleVars : undefined}
     >
       <div className={styles.toolbarContainer}>
         <Toolbar />
@@ -71,7 +74,10 @@ export default function Home() {
       <div className={styles.navigationPanelContainer}>
         <NavigationPanel />
       </div>
-      <div className={styles.editorContainer}>
+      <div
+        className={styles.editorContainer}
+        style={!atmosphereGlobalOverlay ? atmosphereStyleVars : undefined}
+      >
         <WritingEditor key={activeSceneId} />
       </div>
 

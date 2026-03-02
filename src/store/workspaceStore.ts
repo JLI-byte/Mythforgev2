@@ -181,6 +181,9 @@ interface WorkspaceState {
     /** Master toggle for scene visual atmospheres */
     atmospheresEnabled: boolean;
 
+    /** Toggle for whether atmosphere tint applies to the full window or just the editor */
+    atmosphereGlobalOverlay: boolean;
+
     /** Toggle for typography shifts when atmosphere is active */
     atmosphereTypographyEnabled: boolean;
 
@@ -281,6 +284,7 @@ interface WorkspaceState {
     updateCustomAtmosphere: (id: string, updates: Partial<Omit<Atmosphere, 'id' | 'createdAt'>>) => void;
     deleteCustomAtmosphere: (id: string) => void;
     setAtmospheresEnabled: (enabled: boolean) => void;
+    setAtmosphereGlobalOverlay: (enabled: boolean) => void;
     setAtmosphereTypographyEnabled: (enabled: boolean) => void;
     setAtmosphereReducedMotion: (enabled: boolean) => void;
 
@@ -345,6 +349,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             sessionWordCount: 0,
             customAtmospheres: [],
             atmospheresEnabled: true,
+            atmosphereGlobalOverlay: true,
             atmosphereTypographyEnabled: true,
             atmosphereReducedMotion: false,
 
@@ -593,6 +598,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             setAtmospheresEnabled: (enabled) =>
                 set(() => ({ atmospheresEnabled: enabled })),
+
+            setAtmosphereGlobalOverlay: (enabled) =>
+                set(() => ({ atmosphereGlobalOverlay: enabled })),
 
             setAtmosphereTypographyEnabled: (enabled) =>
                 set(() => ({ atmosphereTypographyEnabled: enabled })),
