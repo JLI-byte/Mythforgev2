@@ -11,6 +11,7 @@ import { Toolbar } from '@/components/ui/Toolbar';
 import { EntityDetailPanel } from '@/components/world/EntityDetailPanel';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
+import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 
 /**
  * Main Workspace View
@@ -25,6 +26,11 @@ export default function Home() {
   const isFullscreen = useWorkspaceStore((state) => state.isFullscreen);
   const toggleFullscreen = useWorkspaceStore((state) => state.toggleFullscreen);
   const activeSceneId = useWorkspaceStore((state) => state.activeSceneId);
+  const scenes = useWorkspaceStore((state) => state.scenes);
+  const customAtmospheres = useWorkspaceStore((state) => state.customAtmospheres);
+  const atmospheresEnabled = useWorkspaceStore((state) => state.atmospheresEnabled);
+  const theme = useWorkspaceStore((state) => state.theme);
+  const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -45,8 +51,19 @@ export default function Home() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [setCommandPaletteOpen, isFullscreen, toggleFullscreen]);
 
+  const activeScene = scenes.find((s) => s.id === activeSceneId);
+  const currentAtmosphere = atmospheresEnabled && activeScene?.atmosphereId
+    ? ATMOSPHERE_PRESETS.find(a => a.id === activeScene.atmosphereId) || customAtmospheres.find(a => a.id === activeScene.atmosphereId)
+    : undefined;
+
   return (
     <main className={`${styles.workspace} ${isFullscreen ? styles.fullscreenMode : ''}`}>
+      {currentAtmosphere && (
+        <div
+          className={styles.globalAtmosphereTint}
+          style={{ backgroundColor: isDark ? currentAtmosphere.darkBackground : currentAtmosphere.lightBackground }}
+        />
+      )}
       <div className={styles.toolbarContainer}>
         <Toolbar />
       </div>

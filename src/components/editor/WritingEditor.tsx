@@ -410,12 +410,7 @@ export default function WritingEditor() {
                 } : {})
             } as React.CSSProperties}
         >
-            {currentAtmosphere && (
-                <div
-                    className={styles.atmosphereTint}
-                    style={{ backgroundColor: isDark ? currentAtmosphere.darkBackground : currentAtmosphere.lightBackground }}
-                />
-            )}
+
             {!isFullscreen && <BreadcrumbBar />}
 
             {isFullscreen && showFullscreenHint && (
