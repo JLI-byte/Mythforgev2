@@ -55,17 +55,16 @@ export default function WritingEditor() {
     const sessionWordCount = useWorkspaceStore((state) => state.sessionWordCount);
     const setSessionWordCount = useWorkspaceStore((state) => state.setSessionWordCount);
     const isTypewriterMode = useWorkspaceStore((state) => state.isTypewriterMode);
+    const toggleTypewriterMode = useWorkspaceStore((state) => state.toggleTypewriterMode);
     const isFullscreen = useWorkspaceStore((state) => state.isFullscreen);
+    const toggleFullscreen = useWorkspaceStore((state) => state.toggleFullscreen);
     const editorWidth = useWorkspaceStore((state) => state.editorWidth);
 
     // Atmosphere state
-    const theme = useWorkspaceStore((state) => state.theme);
     const customAtmospheres = useWorkspaceStore((state) => state.customAtmospheres);
     const atmospheresEnabled = useWorkspaceStore((state) => state.atmospheresEnabled);
     const atmosphereTypographyEnabled = useWorkspaceStore((state) => state.atmosphereTypographyEnabled);
     const atmosphereReducedMotion = useWorkspaceStore((state) => state.atmosphereReducedMotion);
-
-    const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
     // FIX: ZUSTAND SELECTOR STABILITY
     // Tiptap's `useEditor` config object does not reliably react to external state
@@ -410,6 +409,28 @@ export default function WritingEditor() {
                 } : {})
             } as React.CSSProperties}
         >
+
+            {!isFullscreen && (
+                <div className={styles.editorToolbar}>
+                    {/* Editor toolbar — typewriter and fullscreen toggles, top-right of writing surface */}
+                    <button
+                        className={`${styles.editorToolbarButton} ${isTypewriterMode ? styles.active : ''}`}
+                        onClick={toggleTypewriterMode}
+                        title="Typewriter Mode"
+                        aria-label="Toggle Typewriter Mode"
+                    >
+                        ✍️
+                    </button>
+                    <button
+                        className={`${styles.editorToolbarButton} ${isFullscreen ? styles.active : ''}`}
+                        onClick={toggleFullscreen}
+                        title="Fullscreen Mode (F11)"
+                        aria-label="Toggle Fullscreen Mode"
+                    >
+                        ⛶
+                    </button>
+                </div>
+            )}
 
             {!isFullscreen && <BreadcrumbBar />}
 

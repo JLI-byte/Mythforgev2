@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './page.module.css';
 import WritingEditor from '@/components/editor/WritingEditor';
 import { NavigationPanel } from '@/components/editor/NavigationPanel';
-import WorldBible from '@/components/world/WorldBible';
+import { WorldBiblePanel } from '@/components/layout/WorldBiblePanel';
+import { WorldBibleTab } from '@/components/layout/WorldBibleTab';
 import InlineEntryCreator from '@/components/world/InlineEntryCreator';
 import HoverPreview from '@/components/world/HoverPreview';
-import { Toolbar } from '@/components/ui/Toolbar';
 import { EntityDetailPanel } from '@/components/world/EntityDetailPanel';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
@@ -21,7 +21,7 @@ import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
  */
 // Note: Configured as a Client Component to dynamically bind Zustand layout state natively.
 export default function Home() {
-  const isSidebarOpen = useWorkspaceStore((state) => state.isSidebarOpen);
+  const [worldBibleOpen, setWorldBibleOpen] = useState(false);
   const setCommandPaletteOpen = useWorkspaceStore((state) => state.setCommandPaletteOpen);
   const isFullscreen = useWorkspaceStore((state) => state.isFullscreen);
   const toggleFullscreen = useWorkspaceStore((state) => state.toggleFullscreen);
@@ -68,9 +68,6 @@ export default function Home() {
       className={`${styles.workspace} ${isFullscreen ? styles.fullscreenMode : ''}`}
       style={atmosphereGlobalOverlay ? atmosphereStyleVars : undefined}
     >
-      <div className={styles.toolbarContainer}>
-        <Toolbar />
-      </div>
       <div className={styles.navigationPanelContainer}>
         <NavigationPanel />
       </div>
@@ -82,11 +79,11 @@ export default function Home() {
       </div>
 
       {/* 
-        The World Bible layer lives exactly where the writer needs it 
+        World Bible Slide-Out Overlay
+        Fixed to the right edge. Does not shift the editor.
       */}
-      <div className={`${styles.sidebarContainer} ${!isSidebarOpen ? styles.sidebarCollapsed : ''}`}>
-        <WorldBible />
-      </div>
+      <WorldBibleTab isOpen={worldBibleOpen} onOpen={() => setWorldBibleOpen(true)} />
+      <WorldBiblePanel isOpen={worldBibleOpen} onClose={() => setWorldBibleOpen(false)} />
 
       {/* Global modal overlays */}
       <InlineEntryCreator />

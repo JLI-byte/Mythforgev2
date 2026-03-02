@@ -7,6 +7,7 @@ import { useWorkspaceStore, Atmosphere } from '@/store/workspaceStore';
 import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 import { AtmospherePicker } from '../ui/AtmospherePicker';
 import { SpotifyPlayer } from '../ui/SpotifyPlayer';
+import SettingsModal from '../ui/SettingsModal';
 
 /**
  * NavigationPanel UI Component
@@ -40,8 +41,10 @@ export function NavigationPanel() {
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const [openPickerId, setOpenPickerId] = useState<string | null>(null);
     const [pickerPosition, setPickerPosition] = useState<{ top: number; left: number } | null>(null);
+    const [showSettings, setShowSettings] = useState(false);
 
     const theme = useWorkspaceStore(state => state.theme);
+    const setTheme = useWorkspaceStore(state => state.setTheme);
     const customAtmospheres = useWorkspaceStore(state => state.customAtmospheres);
     const atmospheresEnabled = useWorkspaceStore(state => state.atmospheresEnabled);
     const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -227,10 +230,16 @@ export function NavigationPanel() {
         setDragOverSceneId(null);
     };
 
-    const handleExport = () => {
-        if (!activeProjectId) return;
-        setDraggedSceneId(null);
-        setDragOverSceneId(null);
+    const handleThemeToggle = () => {
+        if (theme === 'light') setTheme('dark');
+        else if (theme === 'dark') setTheme('system');
+        else setTheme('light');
+    };
+
+    const renderThemeIcon = () => {
+        if (theme === 'light') return '☀️';
+        if (theme === 'dark') return '🌙';
+        return '🖥️';
     };
 
     return (
@@ -488,8 +497,27 @@ export function NavigationPanel() {
             ) : null}
 
             <div style={{ flexShrink: 0, marginTop: 'auto' }}>
+                {/* Panel footer — settings and theme toggle, pinned to bottom of nav */}
+                <div className={styles.panelFooter}>
+                    <button
+                        className={styles.iconButton}
+                        onClick={() => setShowSettings(true)}
+                        title="Settings"
+                    >
+                        ⚙️
+                    </button>
+                    <button
+                        className={styles.iconButton}
+                        onClick={handleThemeToggle}
+                        title={`Theme: ${theme}`}
+                    >
+                        {renderThemeIcon()}
+                    </button>
+                </div>
                 <SpotifyPlayer />
             </div>
+
+            {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
         </div>
     );
 }
