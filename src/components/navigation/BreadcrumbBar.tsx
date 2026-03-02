@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from './BreadcrumbBar.module.css';
 import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
@@ -101,7 +102,7 @@ export function BreadcrumbBar() {
                         )}
                     </button>
 
-                    {isPickerOpen && pickerPosition && (
+                    {isPickerOpen && pickerPosition && typeof document !== 'undefined' && createPortal(
                         <div
                             ref={pickerRef}
                             style={{ position: 'fixed', top: pickerPosition.top, left: pickerPosition.left, zIndex: 9999 }}
@@ -112,7 +113,8 @@ export function BreadcrumbBar() {
                                 currentAtmosphereId={activeScene.atmosphereId}
                                 onClose={() => { setIsPickerOpen(false); setPickerPosition(null); }}
                             />
-                        </div>
+                        </div>,
+                        document.body
                     )}
                 </div>
             )}

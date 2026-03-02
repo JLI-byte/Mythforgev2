@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './NavigationPanel.module.css';
 import { useWorkspaceStore, Atmosphere } from '@/store/workspaceStore';
 import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
@@ -441,7 +442,7 @@ export function NavigationPanel() {
                                                         </div>
                                                     )}
 
-                                                    {openPickerId === scene.id && pickerPosition && (
+                                                    {openPickerId === scene.id && pickerPosition && typeof document !== 'undefined' && createPortal(
                                                         <div
                                                             ref={menuRef}
                                                             style={{ position: 'fixed', top: pickerPosition.top, left: pickerPosition.left, zIndex: 9999 }}
@@ -452,7 +453,8 @@ export function NavigationPanel() {
                                                                 currentAtmosphereId={scene.atmosphereId}
                                                                 onClose={() => { setOpenPickerId(null); setPickerPosition(null); }}
                                                             />
-                                                        </div>
+                                                        </div>,
+                                                        document.body
                                                     )}
                                                 </div>
                                             )
