@@ -77,9 +77,9 @@ export default function ExportModal({ onClose }: ExportModalProps) {
 
                 <div className={styles.content}>
                     <section className={styles.section}>
-                        <h3>Export Document</h3>
+                        <h3>Export Chapter</h3>
                         <p className={styles.subtext}>
-                            Exports the current document: <strong>{activeDocument?.title || 'Untitled'}</strong>
+                            Exports the current chapter: <strong>{activeDocument?.title || 'Untitled'}</strong>
                         </p>
 
                         <div className={styles.actionRow}>

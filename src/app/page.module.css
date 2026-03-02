@@ -41,9 +41,14 @@
     }
 }
 
+.navigationPanelContainer {
+    flex-shrink: 0;
+    height: 100%;
+}
+
 /* Fullscreen Mode Overrides */
 .fullscreenMode .sidebarContainer,
-.fullscreenMode .scenePanelContainer {
+.fullscreenMode .navigationPanelContainer {
     display: none;
 }
 

@@ -365,8 +365,27 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             setActiveProject: (id) =>
                 set(() => ({ activeProjectId: id })),
 
+            /**
+             * Sets the active document.
+             * Automatically selects the first scene belonging to the document (by order).
+             * If no scenes exist, clears the active scene.
+             */
             setActiveDocument: (id) =>
-                set(() => ({ activeDocumentId: id })),
+                set((state) => {
+                    let nextActiveSceneId: string | null = null;
+                    if (id) {
+                        const documentScenes = state.scenes
+                            .filter(s => s.documentId === id)
+                            .sort((a, b) => a.order - b.order);
+                        if (documentScenes.length > 0) {
+                            nextActiveSceneId = documentScenes[0].id;
+                        }
+                    }
+                    return {
+                        activeDocumentId: id,
+                        activeSceneId: nextActiveSceneId
+                    };
+                }),
 
             addScene: (scene) =>
                 set((state) => {

@@ -342,7 +342,7 @@ export default function WritingEditor() {
     if (!activeDocument) {
         return (
             <div className={styles.editorWrapper} style={{ paddingTop: '2rem', paddingBottom: '2rem', paddingLeft: '2rem', paddingRight: '2rem', color: '#888', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                Loading document...
+                Loading chapter...
             </div>
         );
     }

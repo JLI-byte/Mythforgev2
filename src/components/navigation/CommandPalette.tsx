@@ -56,7 +56,7 @@ export function CommandPalette() {
                 flatList.push({
                     id: d.id,
                     type: 'document',
-                    title: d.title || 'Untitled Document',
+                    title: d.title || 'Untitled Chapter',
                     subtitle: p.name,
                     projectId: p.id
                 });
@@ -121,7 +121,7 @@ export function CommandPalette() {
             addDocument({
                 id: newDocId,
                 projectId: newProjectId,
-                title: 'Untitled Document',
+                title: 'Untitled Chapter',
                 content: '',
                 createdAt: new Date(),
             });
@@ -169,7 +169,7 @@ export function CommandPalette() {
                         ref={inputRef}
                         type="text"
                         className={styles.searchInput}
-                        placeholder="Search projects and documents..."
+                        placeholder="Search projects and chapters..."
                         value={search}
                         onChange={e => {
                             setSearch(e.target.value);
@@ -195,7 +195,7 @@ export function CommandPalette() {
                                         className={styles.listItem}
                                         onClick={() => handleCreateQuick('document')}
                                     >
-                                        <div className={styles.itemMain}>Create document: &quot;{search}&quot;</div>
+                                        <div className={styles.itemMain}>Create chapter: &quot;{search}&quot;</div>
                                         <div className={styles.itemSub}>In {projects.find(p => p.id === activeProjectId)?.name || 'Current Project'}</div>
                                     </button>
                                 )}

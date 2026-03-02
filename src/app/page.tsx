@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import styles from './page.module.css';
 import WritingEditor from '@/components/editor/WritingEditor';
-import { ScenePanel } from '@/components/editor/ScenePanel';
+import { NavigationPanel } from '@/components/editor/NavigationPanel';
 import WorldBible from '@/components/world/WorldBible';
 import InlineEntryCreator from '@/components/world/InlineEntryCreator';
 import HoverPreview from '@/components/world/HoverPreview';
@@ -50,8 +50,8 @@ export default function Home() {
       <div className={styles.toolbarContainer}>
         <Toolbar />
       </div>
-      <div className={styles.scenePanelContainer}>
-        <ScenePanel />
+      <div className={styles.navigationPanelContainer}>
+        <NavigationPanel />
       </div>
       <div className={styles.editorContainer}>
         <WritingEditor key={activeSceneId} />

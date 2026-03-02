@@ -11,20 +11,16 @@
  */
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from './BreadcrumbBar.module.css';
-import { ProjectSwitcher } from './ProjectSwitcher';
-import { DocumentSwitcher } from './DocumentSwitcher';
+
 
 export function BreadcrumbBar() {
     const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
     const activeDocumentId = useWorkspaceStore(state => state.activeDocumentId);
     const projects = useWorkspaceStore(state => state.projects);
     const documents = useWorkspaceStore(state => state.documents);
-
-    const [showProjectSwitcher, setShowProjectSwitcher] = useState(false);
-    const [showDocSwitcher, setShowDocSwitcher] = useState(false);
 
     const activeProject = projects.find(p => p.id === activeProjectId);
     const activeDocument = documents.find(d => d.id === activeDocumentId);
@@ -37,30 +33,13 @@ export function BreadcrumbBar() {
 
     return (
         <div className={styles.breadcrumbBar}>
-            <button
-                className={styles.crumbButton}
-                onClick={() => setShowProjectSwitcher(true)}
-                title="Switch Project"
-            >
+            <span className={styles.crumbLabel}>
                 {activeProject.name}
-            </button>
+            </span>
             <span className={styles.separator}>›</span>
-            <button
-                className={styles.crumbButton}
-                onClick={() => setShowDocSwitcher(true)}
-                disabled={!activeDocument}
-                title="Switch Document"
-            >
-                {activeDocument ? activeDocument.title || 'Untitled Document' : 'No Document Selected'}
-            </button>
-
-            {showProjectSwitcher && (
-                <ProjectSwitcher onClose={() => setShowProjectSwitcher(false)} />
-            )}
-
-            {showDocSwitcher && (
-                <DocumentSwitcher onClose={() => setShowDocSwitcher(false)} />
-            )}
+            <span className={styles.crumbLabel}>
+                {activeDocument ? activeDocument.title || 'Untitled Chapter' : 'No Chapter Selected'}
+            </span>
         </div>
     );
 }

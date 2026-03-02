@@ -1,5 +1,5 @@
-.scenePanel {
-    width: 200px;
+.navigationPanel {
+    width: 220px;
     flex-shrink: 0;
     border-right: 1px solid var(--border);
     background-color: var(--surface);
@@ -14,12 +14,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem;
+    padding: 1rem 0.75rem;
     border-bottom: 1px solid var(--border);
 }
 
 .title {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--muted);
     text-transform: uppercase;
@@ -43,9 +43,11 @@
 .addButton:hover {
     background-color: var(--surface);
     color: var(--foreground);
+    border: 1px solid var(--border);
+    padding: calc(0.25rem - 1px);
 }
 
-.sceneList {
+.chapterList {
     flex: 1;
     overflow-y: auto;
     padding: 0.5rem;
@@ -54,7 +56,7 @@
     gap: 0.25rem;
 }
 
-.sceneItem {
+.chapterItem {
     display: flex;
     flex-direction: column;
     padding: 0.5rem 0.75rem;
@@ -65,8 +67,84 @@
     border-left: 3px solid transparent;
 }
 
+.chapterItem:hover {
+    background-color: var(--surface);
+    opacity: 0.95;
+}
+
+.chapterItem.active {
+    background-color: var(--surface);
+    border-left-color: var(--accent);
+}
+
+.chapterItemContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chapterInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    gap: 0.1rem;
+}
+
+.chapterHeaderRow {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.chevron {
+    color: var(--muted);
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.chapterTitle {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--foreground);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sceneCount {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-left: 1.05rem;
+    /* align with text after chevron */
+}
+
+/* Scenes inside chapter */
+.sceneList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    margin-top: 0.25rem;
+}
+
+.sceneItem {
+    display: flex;
+    padding: 0.4rem 0.75rem 0.4rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    position: relative;
+    border-left: 3px solid transparent;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .sceneItem:hover {
     background-color: var(--surface);
+    opacity: 0.95;
 }
 
 .sceneItem.active {
@@ -74,46 +152,64 @@
     border-left-color: var(--accent);
 }
 
-.sceneItemContent {
-    display: flex;
-    justify-content: space-between;
-    align-items: stretch;
-}
-
 .sceneInfo {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
     overflow: hidden;
 }
 
 .sceneTitle {
-    font-size: 0.875rem;
-    color: var(--foreground);
+    font-size: 0.85rem;
+    color: var(--muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
+.sceneItem.active .sceneTitle {
+    color: var(--foreground);
+}
+
 .wordCount {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: var(--muted);
 }
 
+.addSceneBtn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-align: left;
+    padding: 0.4rem 0.75rem 0.4rem 1.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-top: 0.25rem;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.addSceneBtn:hover {
+    color: var(--foreground);
+    background-color: var(--surface);
+}
+
+/* Options Menus */
 .optionsButton {
     background: none;
     border: none;
     color: var(--muted);
     cursor: pointer;
-    padding: 0.25rem;
+    padding: 0.2rem;
     border-radius: 4px;
     display: none;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
-.sceneItem:hover .optionsButton {
+.chapterItem:hover>.chapterItemContent>.optionsButton,
+.sceneItem:hover>.optionsButton {
     display: flex;
 }
 
@@ -137,6 +233,10 @@
     padding: 0.25rem;
 }
 
+.sceneItem .optionsMenu {
+    top: 1.5rem;
+}
+
 .menuItem {
     background: none;
     border: none;
@@ -151,6 +251,7 @@
 
 .menuItem:hover:not(:disabled) {
     background-color: var(--surface);
+    filter: brightness(1.2);
 }
 
 .menuItem:disabled {
@@ -165,11 +266,12 @@
 
 .menuItem.destructive:hover:not(:disabled) {
     background-color: rgba(239, 68, 68, 0.1);
-    /* light red hover */
 }
 
+/* Rename inputs */
 .renameInput {
     font-size: 0.875rem;
+    font-weight: 600;
     font-family: inherit;
     color: var(--foreground);
     background-color: var(--border);
@@ -180,6 +282,12 @@
     outline: none;
 }
 
+.sceneItem .renameInput {
+    font-size: 0.85rem;
+    font-weight: normal;
+}
+
+/* Empty states */
 .emptyState {
     display: flex;
     flex-direction: column;
@@ -208,10 +316,10 @@
 }
 
 .emptyStateButton:hover {
-    background-color: var(--surface);
+    filter: brightness(1.2);
 }
 
-/* Drag and Drop visually */
+/* Drag and Drop */
 .dragging {
     opacity: 0.5;
 }
