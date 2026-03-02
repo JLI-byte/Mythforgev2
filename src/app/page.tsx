@@ -11,7 +11,6 @@ import { Toolbar } from '@/components/ui/Toolbar';
 import { EntityDetailPanel } from '@/components/world/EntityDetailPanel';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
-import { SpotifyPlayer } from '@/components/ui/SpotifyPlayer';
 import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 
 /**
@@ -92,7 +91,6 @@ export default function Home() {
       {/* Global modal overlays */}
       <InlineEntryCreator />
       <EntityDetailPanel />
-      <SpotifyPlayer />
       <CommandPalette />
 
       {/* 
