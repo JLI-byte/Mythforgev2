@@ -34,7 +34,14 @@ export default function WritingEditor() {
     const activeProjectId = useWorkspaceStore((state) => state.activeProjectId);
     const updateDocument = useWorkspaceStore((state) => state.updateDocument);
 
+    const scenes = useWorkspaceStore((state) => state.scenes);
+    const activeSceneId = useWorkspaceStore((state) => state.activeSceneId);
+    const updateScene = useWorkspaceStore((state) => state.updateScene);
+    const addScene = useWorkspaceStore((state) => state.addScene);
+    const setActiveScene = useWorkspaceStore((state) => state.setActiveScene);
+
     const activeDocument = documents.find(d => d.id === activeDocumentId);
+    const activeScene = scenes.find(s => s.id === activeSceneId);
 
     const [showHint, setShowHint] = useState(() => {
         return getStoredValue('mythforge-hint-dismissed') !== 'true';
@@ -64,7 +71,7 @@ export default function WritingEditor() {
     const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     const saveStateTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
-    const [liveWordCount, setLiveWordCount] = useState<number>(activeDocument?.wordCount || 0);
+    const [liveWordCount, setLiveWordCount] = useState<number>(activeScene?.wordCount || 0);
     const initialWordCountRef = React.useRef<number | null>(null);
 
     useEffect(() => {
@@ -93,9 +100,9 @@ export default function WritingEditor() {
             EntityMark,
         ],
         // MIGRATION: 
-        // We now initialize directly from our activeDocument content mapped within the store.
+        // We now initialize directly from our activeScene content mapped within the store.
         // We fall back conditionally to our placeholder constant.
-        content: activeDocument?.content || EDITOR_PLACEHOLDER,
+        content: activeScene?.content || EDITOR_PLACEHOLDER,
         autofocus: true,
         immediatelyRender: false,
         onCreate: ({ editor }) => {
@@ -251,9 +258,9 @@ export default function WritingEditor() {
 
                 // Guard against empty state overwrite pollution
                 if (rawContent === EDITOR_PLACEHOLDER) {
-                    if (activeDocumentId) updateDocument(activeDocumentId, { content: '', wordCount: 0 });
+                    if (activeSceneId) updateScene(activeSceneId, { content: '', wordCount: 0 });
                 } else {
-                    if (activeDocumentId) updateDocument(activeDocumentId, { content: rawContent, wordCount: count });
+                    if (activeSceneId) updateScene(activeSceneId, { content: rawContent, wordCount: count });
                 }
 
                 setSaveState('saved');
@@ -340,6 +347,39 @@ export default function WritingEditor() {
         );
     }
 
+    if (!activeScene) {
+        return (
+            <div className={styles.editorWrapper} style={{ paddingTop: '2rem', paddingBottom: '2rem', paddingLeft: '2rem', paddingRight: '2rem', color: '#888', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+                <p>No scene selected</p>
+                <button
+                    onClick={() => {
+                        const newScene = {
+                            id: crypto.randomUUID(),
+                            documentId: activeDocument.id,
+                            projectId: activeDocument.projectId,
+                            title: `Scene ${scenes.filter(s => s.documentId === activeDocument.id).length + 1}`,
+                            content: '',
+                            order: scenes.filter(s => s.documentId === activeDocument.id).length,
+                            createdAt: new Date()
+                        };
+                        addScene(newScene);
+                        setActiveScene(newScene.id);
+                    }}
+                    style={{
+                        padding: '0.5rem 1rem',
+                        background: 'var(--surface)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text-primary)',
+                        borderRadius: 'var(--radius-md)',
+                        cursor: 'pointer'
+                    }}
+                >
+                    Create Scene
+                </button>
+            </div>
+        );
+    }
+
     return (
         <div
             className={`${styles.editorWrapper} ${isTypewriterMode ? styles.typewriterActive : ''}`}
@@ -408,12 +448,12 @@ export default function WritingEditor() {
                         <div className={styles.goalRow}>
                             <div className={styles.goalInfo}>
                                 <span>Daily Target</span>
-                                <span>{activeDocument?.wordCount || liveWordCount} / {writingGoal.dailyTarget}</span>
+                                <span>{activeScene?.wordCount || liveWordCount} / {writingGoal.dailyTarget}</span>
                             </div>
                             <div className={styles.progressBar}>
                                 <div
-                                    className={`${styles.progressFill} ${(activeDocument?.wordCount || liveWordCount) >= writingGoal.dailyTarget ? styles.goalMet : ''}`}
-                                    style={{ width: `${Math.min(100, ((activeDocument?.wordCount || liveWordCount) / writingGoal.dailyTarget) * 100)}%` }}
+                                    className={`${styles.progressFill} ${(activeScene?.wordCount || liveWordCount) >= writingGoal.dailyTarget ? styles.goalMet : ''}`}
+                                    style={{ width: `${Math.min(100, ((activeScene?.wordCount || liveWordCount) / writingGoal.dailyTarget) * 100)}%` }}
                                 />
                             </div>
                         </div>

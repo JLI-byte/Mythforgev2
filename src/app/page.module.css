@@ -42,7 +42,8 @@
 }
 
 /* Fullscreen Mode Overrides */
-.fullscreenMode .sidebarContainer {
+.fullscreenMode .sidebarContainer,
+.fullscreenMode .scenePanelContainer {
     display: none;
 }
 

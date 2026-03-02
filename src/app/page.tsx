@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import styles from './page.module.css';
 import WritingEditor from '@/components/editor/WritingEditor';
+import { ScenePanel } from '@/components/editor/ScenePanel';
 import WorldBible from '@/components/world/WorldBible';
 import InlineEntryCreator from '@/components/world/InlineEntryCreator';
 import HoverPreview from '@/components/world/HoverPreview';
@@ -23,6 +24,7 @@ export default function Home() {
   const setCommandPaletteOpen = useWorkspaceStore((state) => state.setCommandPaletteOpen);
   const isFullscreen = useWorkspaceStore((state) => state.isFullscreen);
   const toggleFullscreen = useWorkspaceStore((state) => state.toggleFullscreen);
+  const activeSceneId = useWorkspaceStore((state) => state.activeSceneId);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -48,8 +50,11 @@ export default function Home() {
       <div className={styles.toolbarContainer}>
         <Toolbar />
       </div>
+      <div className={styles.scenePanelContainer}>
+        <ScenePanel />
+      </div>
       <div className={styles.editorContainer}>
-        <WritingEditor />
+        <WritingEditor key={activeSceneId} />
       </div>
 
       {/* 

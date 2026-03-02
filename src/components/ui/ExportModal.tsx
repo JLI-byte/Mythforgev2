@@ -17,6 +17,7 @@ interface ExportModalProps {
 
 export default function ExportModal({ onClose }: ExportModalProps) {
     const documents = useWorkspaceStore(state => state.documents);
+    const scenes = useWorkspaceStore(state => state.scenes);
     const activeDocumentId = useWorkspaceStore(state => state.activeDocumentId);
     const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
     const projects = useWorkspaceStore(state => state.projects);
@@ -26,6 +27,7 @@ export default function ExportModal({ onClose }: ExportModalProps) {
     const [exportError, setExportError] = useState<string | null>(null);
 
     const activeDocument = documents.find(d => d.id === activeDocumentId);
+    const documentScenes = scenes.filter(s => s.documentId === activeDocumentId);
     const activeProject = projects.find(p => p.id === activeProjectId);
     const projectEntities = allEntities.filter(e => e.projectId === activeProjectId);
 
@@ -33,7 +35,7 @@ export default function ExportModal({ onClose }: ExportModalProps) {
         if (!activeDocument || !activeProject) return;
         setExportError(null);
         try {
-            exportAsMarkdown(activeDocument);
+            exportAsMarkdown(activeDocument, documentScenes);
         } catch (err: unknown) {
             setExportError(err instanceof Error ? err.message : 'Unknown error during Markdown export');
         }
@@ -44,7 +46,7 @@ export default function ExportModal({ onClose }: ExportModalProps) {
         setExportError(null);
         setIsExporting(true);
         try {
-            await exportAsDocx(activeDocument);
+            await exportAsDocx(activeDocument, documentScenes);
         } catch (err: unknown) {
             setExportError(err instanceof Error ? err.message : 'Unknown error during Docx export');
         } finally {

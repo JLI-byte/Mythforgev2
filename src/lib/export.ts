@@ -6,7 +6,7 @@
  * Handles the browser Blob bridging to trigger direct file downloads natively.
  */
 
-import { Document as MFDocument, Entity } from '@/store/workspaceStore';
+import { Document as MFDocument, Entity, Scene } from '@/store/workspaceStore';
 import { Document as DocxDocument, Paragraph, TextRun, Packer } from 'docx';
 
 /**
@@ -76,11 +76,16 @@ function slugify(text: string): string {
  * @param {MFDocument} document - The MythForge document to serialize.
  * @param {string} projectName - The name of the project context, usually unused in markdown but required for standard signature.
  */
-export function exportAsMarkdown(document: MFDocument): void {
+export function exportAsMarkdown(document: MFDocument, scenes: Scene[]): void {
     const title = document.title || 'Untitled Document';
-    const markdownBody = htmlToMarkdown(document.content);
+    let finalMarkdown = `# ${title}\n\n`;
 
-    const finalMarkdown = `# ${title}\n\n${markdownBody}`;
+    const orderedScenes = [...scenes].sort((a, b) => a.order - b.order);
+
+    orderedScenes.forEach((scene) => {
+        finalMarkdown += `## ${scene.title}\n\n`;
+        finalMarkdown += `${htmlToMarkdown(scene.content)}\n\n`;
+    });
 
     downloadFile(finalMarkdown, `${slugify(title)}.md`, 'text/markdown');
 }
@@ -92,13 +97,9 @@ export function exportAsMarkdown(document: MFDocument): void {
  * @param {string} projectName - The name of the project context.
  * @returns {Promise<void>} 
  */
-export async function exportAsDocx(document: MFDocument): Promise<void> {
+export async function exportAsDocx(document: MFDocument, scenes: Scene[]): Promise<void> {
     const title = document.title || 'Untitled Document';
-
-    // Use DOMParser to walk the nodes and extract inline styling correctly
     const parser = new DOMParser();
-    const doc = parser.parseFromString(document.content, 'text/html');
-    const pElements = Array.from(doc.querySelectorAll('p'));
 
     const docxParagraphs: Paragraph[] = [
         new Paragraph({
@@ -108,39 +109,51 @@ export async function exportAsDocx(document: MFDocument): Promise<void> {
         })
     ];
 
-    pElements.forEach(pNode => {
-        // If it's an empty line breaker
-        if (!pNode.textContent?.trim()) {
-            docxParagraphs.push(new Paragraph({ text: "" }));
-            return;
-        }
+    const orderedScenes = [...scenes].sort((a, b) => a.order - b.order);
 
-        const runs: TextRun[] = [];
-        pNode.childNodes.forEach(child => {
-            if (child.nodeType === Node.TEXT_NODE) {
-                if (child.textContent) {
-                    runs.push(new TextRun({ text: child.textContent }));
-                }
-            } else if (child.nodeType === Node.ELEMENT_NODE) {
-                const element = child as HTMLElement;
-                const textContent = element.textContent || '';
-
-                // Track style derivations
-                const isBold = element.tagName === 'STRONG' || element.tagName === 'B';
-                const isItalic = element.tagName === 'EM' || element.tagName === 'I';
-
-                // Entity spans inherently lack visual decorators on export, they just become plain text.
-                runs.push(new TextRun({
-                    text: textContent,
-                    bold: isBold,
-                    italics: isItalic
-                }));
-            }
-        });
-
+    orderedScenes.forEach((scene) => {
         docxParagraphs.push(new Paragraph({
-            children: runs,
+            text: scene.title,
+            heading: "Heading2"
         }));
+
+        const doc = parser.parseFromString(scene.content, 'text/html');
+        const pElements = Array.from(doc.querySelectorAll('p'));
+
+        pElements.forEach(pNode => {
+            // If it's an empty line breaker
+            if (!pNode.textContent?.trim()) {
+                docxParagraphs.push(new Paragraph({ text: "" }));
+                return;
+            }
+
+            const runs: TextRun[] = [];
+            pNode.childNodes.forEach(child => {
+                if (child.nodeType === Node.TEXT_NODE) {
+                    if (child.textContent) {
+                        runs.push(new TextRun({ text: child.textContent }));
+                    }
+                } else if (child.nodeType === Node.ELEMENT_NODE) {
+                    const element = child as HTMLElement;
+                    const textContent = element.textContent || '';
+
+                    // Track style derivations
+                    const isBold = element.tagName === 'STRONG' || element.tagName === 'B';
+                    const isItalic = element.tagName === 'EM' || element.tagName === 'I';
+
+                    // Entity spans inherently lack visual decorators on export, they just become plain text.
+                    runs.push(new TextRun({
+                        text: textContent,
+                        bold: isBold,
+                        italics: isItalic
+                    }));
+                }
+            });
+
+            docxParagraphs.push(new Paragraph({
+                children: runs,
+            }));
+        });
     });
 
     const docxApp = new DocxDocument({
@@ -180,6 +193,20 @@ export async function exportAsDocx(document: MFDocument): Promise<void> {
                         size: 48, // 24pt
                         bold: true,
                         color: "000000"
+                    }
+                },
+                heading2: {
+                    run: {
+                        font: "Times New Roman",
+                        size: 32, // 16pt
+                        bold: true,
+                        color: "000000"
+                    },
+                    paragraph: {
+                        spacing: {
+                            before: 240,
+                            after: 120
+                        }
                     }
                 }
             }

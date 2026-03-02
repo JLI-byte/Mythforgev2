@@ -29,6 +29,18 @@ export interface Document {
     wordCount?: number;
 }
 
+export interface Scene {
+    id: string;
+    documentId: string;
+    projectId: string;
+    title: string;
+    content: string;
+    order: number;
+    createdAt: Date;
+    updatedAt?: Date;
+    wordCount?: number;
+}
+
 /**
  * A central mapping for EntityType strings to their human-readable UI labels.
  * This should be used anywhere an entity type is rendered to the user.
@@ -62,8 +74,10 @@ interface WorkspaceState {
     // --- STATE FIELDS ---
     projects: Project[];
     documents: Document[];
+    scenes: Scene[];
     activeProjectId: string | null;
     activeDocumentId: string | null;
+    activeSceneId: string | null;
 
     /**
      * Global core data structure: The list of established world entities.
@@ -153,6 +167,12 @@ interface WorkspaceState {
     addDocument: (document: Document) => void;
     updateDocument: (id: string, updates: Partial<Omit<Document, 'id' | 'projectId' | 'createdAt'>>) => void;
     deleteDocument: (id: string) => void;
+
+    addScene: (scene: Scene) => void;
+    updateScene: (id: string, updates: Partial<Omit<Scene, 'id' | 'documentId' | 'projectId' | 'createdAt'>>) => void;
+    deleteScene: (id: string) => void;
+    setActiveScene: (id: string | null) => void;
+    reorderScenes: (documentId: string, orderedIds: string[]) => void;
 
     setActiveProject: (id: string | null) => void;
     setActiveDocument: (id: string | null) => void;
@@ -263,8 +283,10 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         (set) => ({
             projects: [],
             documents: [],
+            scenes: [],
             activeProjectId: null,
             activeDocumentId: null,
+            activeSceneId: null,
             entities: [],
             hoveredEntityId: null,
             isInlineCreatorOpen: false,
@@ -306,9 +328,11 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     return {
                         projects: state.projects.filter(p => p.id !== id),
                         documents: state.documents.filter(d => d.projectId !== id),
+                        scenes: state.scenes.filter(s => s.projectId !== id),
                         entities: state.entities.filter(e => e.projectId !== id),
                         activeProjectId: state.activeProjectId === id ? null : state.activeProjectId,
                         activeDocumentId: state.documents.find(d => d.id === state.activeDocumentId)?.projectId === id ? null : state.activeDocumentId,
+                        activeSceneId: state.scenes.find(s => s.id === state.activeSceneId)?.projectId === id ? null : state.activeSceneId,
                         selectedEntityId: state.entities.find(e => e.id === state.selectedEntityId)?.projectId === id ? null : state.selectedEntityId,
                     };
                 }),
@@ -332,7 +356,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     logger.info('Document deleted:', id);
                     return {
                         documents: state.documents.filter(d => d.id !== id),
+                        scenes: state.scenes.filter(s => s.documentId !== id),
                         activeDocumentId: state.activeDocumentId === id ? null : state.activeDocumentId,
+                        activeSceneId: state.scenes.find(s => s.id === state.activeSceneId)?.documentId === id ? null : state.activeSceneId,
                     };
                 }),
 
@@ -341,6 +367,75 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             setActiveDocument: (id) =>
                 set(() => ({ activeDocumentId: id })),
+
+            addScene: (scene) =>
+                set((state) => {
+                    logger.info('Scene added:', scene.title);
+                    return { scenes: [...state.scenes, scene] };
+                }),
+
+            updateScene: (id, updates) =>
+                set((state) => {
+                    logger.info('Scene updated:', id);
+                    return {
+                        scenes: state.scenes.map(s => s.id === id ? { ...s, ...updates, updatedAt: new Date() } : s),
+                    };
+                }),
+
+            deleteScene: (id) =>
+                set((state) => {
+                    logger.info('Scene deleted:', id);
+
+                    const sceneToDelete = state.scenes.find(s => s.id === id);
+                    if (!sceneToDelete) return state;
+
+                    const activeWillBeDeleted = state.activeSceneId === id;
+                    let nextActiveSceneId = state.activeSceneId;
+
+                    if (activeWillBeDeleted) {
+                        const documentScenes = state.scenes
+                            .filter(s => s.documentId === sceneToDelete.documentId)
+                            .sort((a, b) => a.order - b.order);
+
+                        const deletedIndex = documentScenes.findIndex(s => s.id === id);
+                        if (documentScenes.length > 1) {
+                            if (deletedIndex < documentScenes.length - 1) {
+                                nextActiveSceneId = documentScenes[deletedIndex + 1].id;
+                            } else {
+                                nextActiveSceneId = documentScenes[deletedIndex - 1].id;
+                            }
+                        } else {
+                            nextActiveSceneId = null;
+                        }
+                    }
+
+                    return {
+                        scenes: state.scenes.filter(s => s.id !== id),
+                        activeSceneId: nextActiveSceneId
+                    };
+                }),
+
+            setActiveScene: (id) =>
+                set(() => ({ activeSceneId: id })),
+
+            reorderScenes: (documentId, orderedIds) =>
+                set((state) => {
+                    logger.info(`Reordering ${orderedIds.length} scenes in document ${documentId}`);
+
+                    const orderMap = new Map();
+                    orderedIds.forEach((id, index) => {
+                        orderMap.set(id, index);
+                    });
+
+                    return {
+                        scenes: state.scenes.map(s => {
+                            if (s.documentId === documentId && orderMap.has(s.id)) {
+                                return { ...s, order: orderMap.get(s.id) };
+                            }
+                            return s;
+                        })
+                    };
+                }),
 
             addEntity: (entity) =>
                 set((state) => {
@@ -421,8 +516,10 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             partialize: (state) => ({
                 projects: state.projects,
                 documents: state.documents,
+                scenes: state.scenes,
                 activeProjectId: state.activeProjectId,
                 activeDocumentId: state.activeDocumentId,
+                activeSceneId: state.activeSceneId,
                 entities: state.entities,
                 theme: state.theme,
                 isSidebarOpen: state.isSidebarOpen,
@@ -458,6 +555,36 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         state.activeProjectId = defaultProject.id;
                         state.activeDocumentId = defaultDocument.id;
                         state.entities = state.entities.map(e => ({ ...e, projectId: defaultProject.id }));
+                    }
+
+                    // WORKAROUND(migration): Migrate Document content down to Scene layer (Sprint 20).
+                    if ((!state.scenes || state.scenes.length === 0) && state.documents.length > 0) {
+                        logger.info('Migrating document content to Scene layer.');
+                        const newScenes: Scene[] = [];
+                        let newActiveSceneId: string | null = null;
+
+                        state.documents.forEach(doc => {
+                            const sceneId = crypto.randomUUID();
+                            newScenes.push({
+                                id: sceneId,
+                                documentId: doc.id,
+                                projectId: doc.projectId,
+                                title: 'Scene 1',
+                                content: doc.content || '',
+                                order: 0,
+                                createdAt: new Date()
+                            });
+
+                            // Clear content from document
+                            doc.content = '';
+
+                            if (doc.id === state.activeDocumentId) {
+                                newActiveSceneId = sceneId;
+                            }
+                        });
+
+                        state.scenes = newScenes;
+                        state.activeSceneId = newActiveSceneId;
                     }
 
                     state.setHasHydrated(true);
