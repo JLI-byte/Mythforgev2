@@ -57,13 +57,14 @@ export default function Home() {
     : undefined;
 
   return (
-    <main className={`${styles.workspace} ${isFullscreen ? styles.fullscreenMode : ''}`}>
-      {currentAtmosphere && (
-        <div
-          className={styles.globalAtmosphereTint}
-          style={{ backgroundColor: isDark ? currentAtmosphere.darkBackground : currentAtmosphere.lightBackground }}
-        />
-      )}
+    <main
+      className={`${styles.workspace} ${isFullscreen ? styles.fullscreenMode : ''}`}
+      style={currentAtmosphere ? {
+        '--background': isDark ? currentAtmosphere.darkBackground : currentAtmosphere.lightBackground,
+        '--surface': isDark ? currentAtmosphere.darkBackground : currentAtmosphere.lightBackground,
+        transition: 'background-color 500ms ease'
+      } as React.CSSProperties : undefined}
+    >
       <div className={styles.toolbarContainer}>
         <Toolbar />
       </div>
