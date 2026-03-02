@@ -1,0 +1,76 @@
+.previewCard {
+    position: fixed;
+    /* Temporary static placement left of the 350px sidebar pending dynamic editor hover support */
+    right: 370px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 320px;
+    background: var(--background);
+    border-radius: 8px;
+    padding: 1.25rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+    border: 1px solid var(--border);
+    z-index: 50;
+
+    /* Micro animation for smooth pop-ins */
+    animation: previewFadeIn 0.15s ease-out forwards;
+}
+
+@keyframes previewFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.previewHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.previewHeader h4 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--foreground);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.entityTypeBadge {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: var(--border);
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    color: #666;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: 0.75rem;
+}
+
+@media (prefers-color-scheme: dark) {
+    .entityTypeBadge {
+        color: #ccc;
+    }
+}
+
+.previewDescription {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #555;
+    margin: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+    .previewDescription {
+        color: #aaa;
+    }
+}

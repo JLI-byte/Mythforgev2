@@ -1,0 +1,72 @@
+.workspace {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    background-color: var(--background);
+}
+
+.editorContainer {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding: 4rem 2rem;
+    overflow-y: auto;
+}
+
+.sidebarContainer {
+    width: 350px;
+    border-left: 1px solid var(--border);
+    background-color: var(--surface);
+    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.03);
+    overflow-y: auto;
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sidebarCollapsed {
+    width: 0;
+    overflow: hidden;
+    border-left: none;
+    padding: 0;
+}
+
+/* Responsive collapse for smaller screens */
+@media (max-width: 1024px) {
+    .sidebarContainer {
+        position: absolute;
+        right: 0;
+        top: 0;
+        height: 100%;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+    }
+}
+
+/* Fullscreen Mode Overrides */
+.fullscreenMode .sidebarContainer {
+    display: none;
+}
+
+.toolbarContainer {
+    transition: opacity 0.3s ease;
+}
+
+.fullscreenMode .toolbarContainer {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.fullscreenMode .toolbarContainer::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    z-index: 999;
+    pointer-events: auto;
+}
+
+.fullscreenMode .toolbarContainer:hover {
+    opacity: 1;
+    pointer-events: auto;
+}

@@ -1,0 +1,89 @@
+.editorWrapper {
+    width: 100%;
+    max-width: var(--editor-width, 800px);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.editorHeader {
+    margin-bottom: 3rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.documentTitle {
+    font-family: var(--font-sans);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--foreground);
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.documentTitle:empty::before {
+    content: "Untitled Chapter";
+    color: #999;
+}
+
+.editorContent {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    line-height: 1.8;
+    color: var(--foreground);
+    border: none;
+    outline: none;
+    min-height: 50vh;
+}
+
+.editorContent p {
+    margin-bottom: 1.5em;
+}
+
+.editorContent:empty::before {
+    content: "Start writing your story here...";
+    color: #999;
+}
+
+.writingGoals {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px dashed var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.goalRow {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.goalInfo {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: var(--font-sans);
+}
+
+.progressBar {
+    height: 4px;
+    background: var(--surface);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: var(--border);
+    transition: width 0.3s ease, background 0.3s ease;
+}
+
+.progressFill.goalMet {
+    background: var(--accent);
+}

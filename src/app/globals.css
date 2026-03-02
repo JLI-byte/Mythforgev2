@@ -1,26 +1,93 @@
-@import "tailwindcss";
+/* 
+ * Global Styles for MythForge
+ * Adheres to "Procreate, not Photoshop" - clean, minimal, distraction-free.
+ */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fdfdfd;
+  --background-rgb: 253, 253, 253;
+  --surface: #f7f7f7;
+  --foreground: #222222;
+  --accent: #005bb5;
+  --border: #eaeaea;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Merriweather', 'Georgia', serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+input,
+textarea,
+button,
+select {
+  font-family: inherit;
+}
+
+option {
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #171717;
+    --background-rgb: 23, 23, 23;
+    --surface: #1e1e1e;
     --foreground: #ededed;
+    --accent: #3a86ff;
+    --border: #333333;
   }
 }
 
+/* Manual overrides driven by JS toggle */
+:root[data-theme="dark"] {
+  --background: #171717;
+  --background-rgb: 23, 23, 23;
+  --surface: #1e1e1e;
+  --foreground: #ededed;
+  --border: #333333;
+  --accent: #3a86ff;
+}
+
+:root[data-theme="light"] {
+  --background: #ffffff;
+  --background-rgb: 253, 253, 253;
+  --surface: #f7f7f7;
+  --foreground: #171717;
+  --border: #e2e8f0;
+  --accent: #005bb5;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Applied natively by the EntityMark Tiptap extension to highlight known world entities */
+.entity-tag {
+  border-bottom: 1px solid var(--accent);
+  cursor: pointer;
+  transition: border-bottom-color 0.2s ease;
+}
+
+.entity-tag:hover {
+  border-bottom: 2px solid var(--accent);
 }

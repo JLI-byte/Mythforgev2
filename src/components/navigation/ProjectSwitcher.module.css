@@ -1,0 +1,323 @@
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+}
+
+.modal {
+    width: 460px;
+    max-width: 90vw;
+    max-height: 80vh;
+    background: var(--surface);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--foreground);
+    font-family: var(--font-sans);
+}
+
+.closeBtn {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--muted);
+    line-height: 1;
+    padding: 0;
+    transition: color 0.15s;
+}
+
+.closeBtn:hover {
+    color: var(--foreground);
+}
+
+.list {
+    flex: 1;
+    overflow: visible;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.projectItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+}
+
+.projectRow {
+    position: relative;
+    border-radius: 6px;
+    margin-bottom: 2px;
+    overflow: visible;
+}
+
+.projectRow:hover {
+    background: rgba(var(--foreground-rgb), 0.04);
+}
+
+.projectRow.active {
+    background: rgba(var(--accent-rgb), 0.1);
+    color: var(--accent);
+}
+
+.projectMainBtn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    color: inherit;
+}
+
+.projectName {
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.docCount {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-right: 0;
+}
+
+.projectRow.active .docCount {
+    color: inherit;
+    opacity: 0.8;
+}
+
+.optionsContainer {
+    position: absolute;
+    right: 0.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    display: none;
+}
+
+.projectRow:hover .optionsContainer,
+.optionsContainer:focus-within {
+    display: block;
+}
+
+.optionsTrigger {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 1.1rem;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.optionsTrigger:hover {
+    background: rgba(var(--foreground-rgb), 0.08);
+    color: var(--foreground);
+}
+
+.optionsMenu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    min-width: 140px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 400;
+}
+
+.optionsMenu button {
+    background: transparent;
+    border: none;
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    color: var(--foreground);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.optionsMenu button:hover {
+    background: rgba(var(--foreground-rgb), 0.05);
+}
+
+.menuDanger {
+    color: #ef4444 !important;
+}
+
+.menuDanger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.inlineEditState,
+.inlineConfirmState {
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.inlineInput {
+    flex: 1;
+    padding: 0.5rem;
+    background: var(--background);
+    border: 1px solid var(--accent);
+    color: var(--foreground);
+    border-radius: 4px;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.confirmText {
+    font-size: 0.85rem;
+    color: var(--foreground);
+    font-weight: 500;
+}
+
+.dangerBtn {
+    padding: 0.4rem 0.75rem;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.dangerBtn:hover {
+    background: #dc2626;
+}
+
+.footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+    background: rgba(var(--background-rgb), 0.3);
+}
+
+.createTrigger {
+    width: 100%;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    padding: 0.75rem;
+    color: var(--muted);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.createTrigger:hover {
+    border-color: var(--foreground);
+    color: var(--foreground);
+}
+
+.createForm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.createInput {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--background);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+}
+
+.createInput:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.formActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.cancelBtn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.cancelBtn:hover {
+    background: rgba(var(--foreground-rgb), 0.05);
+}
+
+.confirmBtn {
+    padding: 0.5rem 1rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.confirmBtn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
