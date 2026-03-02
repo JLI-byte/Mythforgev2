@@ -1,0 +1,210 @@
+.pickerPopover {
+    position: absolute;
+    /* NavigationPanel row will be relative. Position it to the right of the panel */
+    left: 100%;
+    top: 0;
+    margin-left: 0.5rem;
+    width: 280px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: inherit;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--foreground);
+    margin: 0;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1.2rem;
+    line-height: 1;
+    padding: 0;
+}
+
+.closeButton:hover {
+    color: var(--foreground);
+}
+
+.tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+}
+
+.tab {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.tab:hover {
+    color: var(--foreground);
+}
+
+.tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.content {
+    padding: 0.75rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.noneOption {
+    width: 100%;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.5rem;
+    text-align: left;
+    font-size: 0.85rem;
+    color: var(--foreground);
+    cursor: pointer;
+    margin-bottom: 0.75rem;
+    transition: background-color 0.2s;
+}
+
+.noneOption:hover {
+    background-color: var(--border);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.75rem 0.5rem;
+    background-color: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+    position: relative;
+    text-align: center;
+}
+
+.item:hover {
+    border-color: var(--muted);
+    background-color: var(--surface);
+}
+
+.item.active {
+    border-color: var(--accent);
+    background-color: var(--border);
+}
+
+.icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.4rem;
+}
+
+.name {
+    font-size: 0.75rem;
+    color: var(--foreground);
+    line-height: 1.2;
+    margin-bottom: 0.4rem;
+    text-align: center;
+    width: 100%;
+    /* Truncation */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.duplicateOverlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(var(--surface-rgb, 20, 20, 20), 0.9);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 2;
+}
+
+.item:hover .duplicateOverlay {
+    opacity: 1;
+}
+
+.duplicateButton {
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.duplicateButton:hover {
+    filter: brightness(1.1);
+}
+
+.footer {
+    padding: 0.75rem;
+    border-top: 1px solid var(--border);
+}
+
+.createNewButton {
+    width: 100%;
+    background-color: var(--border);
+    color: var(--foreground);
+    border: 1px solid transparent;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.createNewButton:hover {
+    background-color: var(--surface);
+    border-color: var(--muted);
+}

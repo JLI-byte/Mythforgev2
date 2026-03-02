@@ -8,6 +8,7 @@ import { useWorkspaceStore } from '@/store/workspaceStore';
 import { getStoredValue, setStoredValue } from '@/lib/storage';
 import { EntityMark } from '@/lib/EntityMark';
 import { BreadcrumbBar } from '@/components/navigation/BreadcrumbBar';
+import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 
 const EDITOR_PLACEHOLDER = '<p>Start writing your story here...</p>';
 
@@ -56,6 +57,15 @@ export default function WritingEditor() {
     const isTypewriterMode = useWorkspaceStore((state) => state.isTypewriterMode);
     const isFullscreen = useWorkspaceStore((state) => state.isFullscreen);
     const editorWidth = useWorkspaceStore((state) => state.editorWidth);
+
+    // Atmosphere state
+    const theme = useWorkspaceStore((state) => state.theme);
+    const customAtmospheres = useWorkspaceStore((state) => state.customAtmospheres);
+    const atmospheresEnabled = useWorkspaceStore((state) => state.atmospheresEnabled);
+    const atmosphereTypographyEnabled = useWorkspaceStore((state) => state.atmosphereTypographyEnabled);
+    const atmosphereReducedMotion = useWorkspaceStore((state) => state.atmosphereReducedMotion);
+
+    const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
     // FIX: ZUSTAND SELECTOR STABILITY
     // Tiptap's `useEditor` config object does not reliably react to external state
@@ -380,15 +390,32 @@ export default function WritingEditor() {
         );
     }
 
+    const getAtmosphere = (id?: string) => {
+        if (!id) return undefined;
+        return ATMOSPHERE_PRESETS.find(p => p.id === id) || customAtmospheres.find(a => a.id === id);
+    };
+
+    const currentAtmosphere = atmospheresEnabled ? getAtmosphere(activeScene.atmosphereId) : undefined;
+
     return (
         <div
-            className={`${styles.editorWrapper} ${isTypewriterMode ? styles.typewriterActive : ''}`}
+            className={`${styles.editorWrapper} ${isTypewriterMode ? styles.typewriterActive : ''} ${atmosphereReducedMotion ? styles.reducedMotion : ''}`}
             style={{
                 paddingTop: isTypewriterMode ? '45vh' : undefined,
                 paddingBottom: isTypewriterMode ? '45vh' : undefined,
-                '--editor-width': `${editorWidth}px`
+                '--editor-width': `${editorWidth}px`,
+                ...(currentAtmosphere && atmosphereTypographyEnabled ? {
+                    '--atmosphere-line-height-shift': currentAtmosphere.lineHeightShift,
+                    '--atmosphere-letter-spacing-shift': currentAtmosphere.letterSpacingShift
+                } : {})
             } as React.CSSProperties}
         >
+            {currentAtmosphere && (
+                <div
+                    className={styles.atmosphereTint}
+                    style={{ backgroundColor: isDark ? currentAtmosphere.darkBackground : currentAtmosphere.lightBackground }}
+                />
+            )}
             {!isFullscreen && <BreadcrumbBar />}
 
             {isFullscreen && showFullscreenHint && (

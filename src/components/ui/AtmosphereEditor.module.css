@@ -1,0 +1,244 @@
+.backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--foreground);
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--muted);
+    cursor: pointer;
+    line-height: 1;
+}
+
+.closeButton:hover {
+    color: var(--foreground);
+}
+
+.content {
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--foreground);
+}
+
+.input {
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+}
+
+.input:focus {
+    border-color: var(--accent);
+}
+
+.colorPickers {
+    display: flex;
+    gap: 1rem;
+}
+
+.colorGroup {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.colorInput {
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    background: none;
+}
+
+.colorInput::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.colorInput::-webkit-color-swatch {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+.hexValue {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-family: monospace;
+}
+
+.sliderGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.sliderHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.valueLabel {
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.slider {
+    width: 100%;
+    cursor: pointer;
+    accent-color: var(--accent);
+}
+
+.emojiGrid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    background-color: var(--background);
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+
+.emojiBtn {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.2rem;
+    transition: background-color 0.2s;
+}
+
+.emojiBtn:hover {
+    background-color: var(--surface);
+    border-color: var(--border);
+}
+
+.previewPane {
+    margin-top: 1rem;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    transition: background-color 0.3s ease;
+}
+
+.previewPane h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.previewText {
+    color: var(--foreground);
+    margin: 0;
+    transition: line-height 0.3s ease, letter-spacing 0.3s ease;
+    /* base sizes match WritingEditor standard */
+    font-size: 1.125rem;
+}
+
+.footer {
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.cancelBtn {
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--foreground);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.cancelBtn:hover {
+    background-color: var(--surface);
+}
+
+.saveBtn {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--accent);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.saveBtn:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
+
+.saveBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.errorText {
+    color: #ff4d4f;
+    font-size: 0.8rem;
+    margin-top: -0.25rem;
+}

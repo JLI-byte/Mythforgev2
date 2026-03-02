@@ -4,6 +4,7 @@
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    position: relative;
 }
 
 .editorHeader {
@@ -32,11 +33,13 @@
 .editorContent {
     font-family: var(--font-serif);
     font-size: 1.25rem;
-    line-height: 1.8;
+    line-height: calc(1.8 + var(--atmosphere-line-height-shift, 0));
+    letter-spacing: calc(0em + var(--atmosphere-letter-spacing-shift, 0em));
     color: var(--foreground);
     border: none;
     outline: none;
     min-height: 50vh;
+    transition: line-height 300ms ease-in-out, letter-spacing 300ms ease-in-out;
 }
 
 .editorContent p {
@@ -86,4 +89,29 @@
 
 .progressFill.goalMet {
     background: var(--accent);
+}
+
+.atmosphereTint {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.08;
+    transition: background-color 300ms ease-in-out, opacity 300ms ease-in-out;
+}
+
+.reducedMotion .atmosphereTint,
+.reducedMotion .editorContent {
+    transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .atmosphereTint,
+    .editorContent {
+        transition: none !important;
+    }
 }

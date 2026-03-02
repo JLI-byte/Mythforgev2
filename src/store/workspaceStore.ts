@@ -9,6 +9,21 @@ export interface WritingGoal {
     sessionTarget: number;
 }
 
+export interface Atmosphere {
+    id: string;
+    name: string;
+    icon: string;                    // emoji string
+    lightBackground: string;         // hex color for light mode
+    darkBackground: string;          // hex color for dark mode
+    soundType: 'silence' | 'brown-noise' | 'white-noise' | 'pink-noise' | 'dark-ambient' | 'warm-loop' | 'energetic-loop' | 'cafe-ambient';
+    soundVolume: number;             // 0–1, default 0.35, reserved for Sprint 23
+    lineHeightShift: number;         // e.g. 0.15 means add 0.15 to base line-height. 0 = no change
+    letterSpacingShift: number;      // e.g. 0.02 means add 0.02em. 0 = no change
+    isPreset: boolean;
+    projectId: string | null;        // null = global preset available to all projects
+    createdAt: Date;
+}
+
 export type EntityType = 'character' | 'location' | 'faction' | 'artifact' | 'lore';
 export type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -39,6 +54,7 @@ export interface Scene {
     createdAt: Date;
     updatedAt?: Date;
     wordCount?: number;
+    atmosphereId?: string;
 }
 
 /**
@@ -159,6 +175,18 @@ interface WorkspaceState {
      */
     sessionWordCount: number;
 
+    /** User-defined custom scene atmospheres */
+    customAtmospheres: Atmosphere[];
+
+    /** Master toggle for scene visual atmospheres */
+    atmospheresEnabled: boolean;
+
+    /** Toggle for typography shifts when atmosphere is active */
+    atmosphereTypographyEnabled: boolean;
+
+    /** Toggle for reduced motion (disables smooth transitions for atmospheres) */
+    atmosphereReducedMotion: boolean;
+
     // --- ACTIONS ---
     addProject: (project: Project) => void;
     updateProject: (id: string, updates: Partial<Omit<Project, 'id' | 'createdAt'>>) => void;
@@ -248,6 +276,14 @@ interface WorkspaceState {
      */
     setHasHydrated: (state: boolean) => void;
 
+    // --- ATMOSPHERE ACTIONS ---
+    addCustomAtmosphere: (atmosphere: Atmosphere) => void;
+    updateCustomAtmosphere: (id: string, updates: Partial<Omit<Atmosphere, 'id' | 'createdAt'>>) => void;
+    deleteCustomAtmosphere: (id: string) => void;
+    setAtmospheresEnabled: (enabled: boolean) => void;
+    setAtmosphereTypographyEnabled: (enabled: boolean) => void;
+    setAtmosphereReducedMotion: (enabled: boolean) => void;
+
     /**
      * Submits partial updates to the AI provider configuration.
      */
@@ -307,6 +343,10 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             },
             writingGoal: { dailyTarget: 0, sessionTarget: 0 },
             sessionWordCount: 0,
+            customAtmospheres: [],
+            atmospheresEnabled: true,
+            atmosphereTypographyEnabled: true,
+            atmosphereReducedMotion: false,
 
             addProject: (project) =>
                 set((state) => {
@@ -526,6 +566,39 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 set(() => ({
                     sessionWordCount: count
                 })),
+
+            addCustomAtmosphere: (atmosphere) =>
+                set((state) => {
+                    logger.info('Custom atmosphere added:', atmosphere.name);
+                    return { customAtmospheres: [...state.customAtmospheres, atmosphere] };
+                }),
+
+            updateCustomAtmosphere: (id, updates) =>
+                set((state) => {
+                    logger.info('Custom atmosphere updated:', id);
+                    return {
+                        customAtmospheres: state.customAtmospheres.map(a => a.id === id ? { ...a, ...updates } : a)
+                    };
+                }),
+
+            deleteCustomAtmosphere: (id) =>
+                set((state) => {
+                    logger.info('Custom atmosphere deleted:', id);
+                    return {
+                        customAtmospheres: state.customAtmospheres.filter(a => a.id !== id),
+                        // Also remove it from any scenes using it
+                        scenes: state.scenes.map(s => s.atmosphereId === id ? { ...s, atmosphereId: undefined, updatedAt: new Date() } : s)
+                    };
+                }),
+
+            setAtmospheresEnabled: (enabled) =>
+                set(() => ({ atmospheresEnabled: enabled })),
+
+            setAtmosphereTypographyEnabled: (enabled) =>
+                set(() => ({ atmosphereTypographyEnabled: enabled })),
+
+            setAtmosphereReducedMotion: (enabled) =>
+                set(() => ({ atmosphereReducedMotion: enabled })),
         }),
         {
             name: 'mythforge-workspace',
@@ -545,7 +618,11 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 isTypewriterMode: state.isTypewriterMode,
                 editorWidth: state.editorWidth,
                 aiConfig: state.aiConfig,
-                writingGoal: state.writingGoal
+                writingGoal: state.writingGoal,
+                customAtmospheres: state.customAtmospheres,
+                atmospheresEnabled: state.atmospheresEnabled,
+                atmosphereTypographyEnabled: state.atmosphereTypographyEnabled,
+                atmosphereReducedMotion: state.atmosphereReducedMotion
             }),
 
             // Track hydration phases allowing components to await persistence payload dynamically

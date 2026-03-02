@@ -2,7 +2,9 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './NavigationPanel.module.css';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useWorkspaceStore, Atmosphere } from '@/store/workspaceStore';
+import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
+import { AtmospherePicker } from '../ui/AtmospherePicker';
 
 /**
  * NavigationPanel UI Component
@@ -34,6 +36,12 @@ export function NavigationPanel() {
     const [editType, setEditType] = useState<'chapter' | 'scene' | null>(null);
     const [editModeName, setEditModeName] = useState('');
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+    const [openPickerId, setOpenPickerId] = useState<string | null>(null);
+
+    const theme = useWorkspaceStore(state => state.theme);
+    const customAtmospheres = useWorkspaceStore(state => state.customAtmospheres);
+    const atmospheresEnabled = useWorkspaceStore(state => state.atmospheresEnabled);
+    const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
     // Drag State for scenes
     const [draggedSceneId, setDraggedSceneId] = useState<string | null>(null);
@@ -46,16 +54,17 @@ export function NavigationPanel() {
         const handleClickOutside = (event: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
                 setOpenMenuId(null);
+                setOpenPickerId(null);
             }
         };
 
-        if (openMenuId) {
+        if (openMenuId || openPickerId) {
             document.addEventListener('mousedown', handleClickOutside);
         }
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [openMenuId]);
+    }, [openMenuId, openPickerId]);
 
     useEffect(() => {
         if (editingId && editInputRef.current) {
@@ -141,6 +150,11 @@ export function NavigationPanel() {
             setEditingId(null);
             setEditType(null);
         }
+    };
+
+    const getAtmosphere = (id?: string | null): Atmosphere | undefined => {
+        if (!id) return undefined;
+        return ATMOSPHERE_PRESETS.find(p => p.id === id) || customAtmospheres.find(a => a.id === id);
     };
 
     const handleDeleteChapter = (id: string, e: React.MouseEvent) => {
@@ -305,76 +319,111 @@ export function NavigationPanel() {
                                 {/* Expanded Scenes Rendering */}
                                 {isExpanded && (
                                     <div className={styles.sceneList}>
-                                        {chapterScenes.map((scene) => (
-                                            <div
-                                                key={scene.id}
-                                                draggable
-                                                onDragStart={(e) => handleDragStart(e, scene.id)}
-                                                onDragOver={(e) => handleDragOver(e, scene.id)}
-                                                onDragLeave={handleDragLeave}
-                                                onDrop={(e) => handleDrop(e, scene.id)}
-                                                onDragEnd={handleDragEnd}
-                                                className={`
+                                        {chapterScenes.map((scene) => {
+                                            const atmosphere = atmospheresEnabled ? getAtmosphere(scene.atmosphereId) : undefined;
+                                            const customBorder = atmosphere ? { borderLeftColor: isDark ? atmosphere.darkBackground : atmosphere.lightBackground } : {};
+
+                                            return (
+                                                <div
+                                                    key={scene.id}
+                                                    draggable
+                                                    onDragStart={(e) => handleDragStart(e, scene.id)}
+                                                    onDragOver={(e) => handleDragOver(e, scene.id)}
+                                                    onDragLeave={handleDragLeave}
+                                                    onDrop={(e) => handleDrop(e, scene.id)}
+                                                    onDragEnd={handleDragEnd}
+                                                    className={`
                                                     ${styles.sceneItem} 
                                                     ${activeSceneId === scene.id ? styles.active : ''}
                                                     ${draggedSceneId === scene.id ? styles.dragging : ''}
                                                     ${dragOverSceneId === scene.id ? styles.dragOver : ''}
                                                 `}
-                                                onClick={() => setActiveScene(scene.id)}
-                                            >
-                                                <div className={styles.sceneInfo}>
-                                                    {editingId === scene.id && editType === 'scene' ? (
-                                                        <input
-                                                            ref={editInputRef}
-                                                            className={styles.renameInput}
-                                                            value={editModeName}
-                                                            onChange={(e) => setEditModeName(e.target.value)}
-                                                            onBlur={handleCommitRename}
-                                                            onKeyDown={handleKeyDown}
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        />
-                                                    ) : (
-                                                        <span className={styles.sceneTitle}>{scene.title}</span>
-                                                    )}
-                                                    <span className={styles.wordCount}>{scene.wordCount || 0} words</span>
-                                                </div>
-
-                                                {(!editingId || editType !== 'scene' || editingId !== scene.id) && (
-                                                    <button
-                                                        className={styles.optionsButton}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setOpenMenuId(openMenuId === scene.id ? null : scene.id);
-                                                        }}
-                                                    >
-                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                            <circle cx="12" cy="12" r="1.5"></circle>
-                                                            <circle cx="19" cy="12" r="1.5"></circle>
-                                                            <circle cx="5" cy="12" r="1.5"></circle>
-                                                        </svg>
-                                                    </button>
-                                                )}
-
-                                                {openMenuId === scene.id && (
-                                                    <div className={styles.optionsMenu} ref={menuRef} onClick={e => e.stopPropagation()}>
-                                                        <button
-                                                            className={styles.menuItem}
-                                                            onClick={(e) => handleStartRename(scene.id, scene.title, 'scene', e)}
-                                                        >
-                                                            Rename
-                                                        </button>
-                                                        <button
-                                                            className={`${styles.menuItem} ${styles.destructive}`}
-                                                            disabled={activeChapterScenes.length === 1}
-                                                            onClick={(e) => handleDeleteScene(scene.id, e)}
-                                                            title={activeChapterScenes.length === 1 ? "Cannot delete the only scene. Delete chapter instead." : ""}
-                                                        >
-                                                            Delete
-                                                        </button>
+                                                    style={customBorder}
+                                                    onClick={() => setActiveScene(scene.id)}
+                                                >
+                                                    <div className={styles.sceneInfo}>
+                                                        {editingId === scene.id && editType === 'scene' ? (
+                                                            <input
+                                                                ref={editInputRef}
+                                                                className={styles.renameInput}
+                                                                value={editModeName}
+                                                                onChange={(e) => setEditModeName(e.target.value)}
+                                                                onBlur={handleCommitRename}
+                                                                onKeyDown={handleKeyDown}
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            />
+                                                        ) : (
+                                                            <span className={styles.sceneTitle}>
+                                                                {atmosphere && <span style={{ marginRight: '0.4rem', fontSize: '0.9rem' }}>{atmosphere.icon}</span>}
+                                                                {scene.title}
+                                                            </span>
+                                                        )}
+                                                        <span className={styles.wordCount}>{scene.wordCount || 0} words</span>
                                                     </div>
-                                                )}
-                                            </div>
-                                        ))}
+
+                                                    {(!editingId || editType !== 'scene' || editingId !== scene.id) && (
+                                                        <div style={{ display: 'flex', gap: '0.2rem', alignItems: 'center' }}>
+                                                            <button
+                                                                className={`${styles.optionsButton} ${!scene.atmosphereId ? styles.atmosphereAffordance : ''}`}
+                                                                style={{ fontSize: '0.9rem', padding: '0.1rem 0.2rem' }}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    const nextId = openPickerId === scene.id ? null : scene.id;
+                                                                    setOpenMenuId(null);
+                                                                    setOpenPickerId(nextId);
+                                                                }}
+                                                                title="Set Atmosphere"
+                                                            >
+                                                                🎨
+                                                            </button>
+                                                            <button
+                                                                className={styles.optionsButton}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setOpenPickerId(null);
+                                                                    setOpenMenuId(openMenuId === scene.id ? null : scene.id);
+                                                                }}
+                                                            >
+                                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                    <circle cx="12" cy="12" r="1.5"></circle>
+                                                                    <circle cx="19" cy="12" r="1.5"></circle>
+                                                                    <circle cx="5" cy="12" r="1.5"></circle>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    )}
+
+                                                    {openMenuId === scene.id && (
+                                                        <div className={styles.optionsMenu} ref={menuRef} onClick={e => e.stopPropagation()}>
+                                                            <button
+                                                                className={styles.menuItem}
+                                                                onClick={(e) => handleStartRename(scene.id, scene.title, 'scene', e)}
+                                                            >
+                                                                Rename
+                                                            </button>
+                                                            <button
+                                                                className={`${styles.menuItem} ${styles.destructive}`}
+                                                                disabled={activeChapterScenes.length === 1}
+                                                                onClick={(e) => handleDeleteScene(scene.id, e)}
+                                                                title={activeChapterScenes.length === 1 ? "Cannot delete the only scene. Delete chapter instead." : ""}
+                                                            >
+                                                                Delete
+                                                            </button>
+                                                        </div>
+                                                    )}
+
+                                                    {openPickerId === scene.id && (
+                                                        <div ref={menuRef} onClick={e => e.stopPropagation()}>
+                                                            <AtmospherePicker
+                                                                sceneId={scene.id}
+                                                                currentAtmosphereId={scene.atmosphereId}
+                                                                onClose={() => setOpenPickerId(null)}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )
+                                        })}
 
                                         <button className={styles.addSceneBtn} onClick={handleAddScene}>
                                             + Add Scene

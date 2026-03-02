@@ -209,8 +209,17 @@
 }
 
 .chapterItem:hover>.chapterItemContent>.optionsButton,
-.sceneItem:hover>.optionsButton {
-    display: flex;
+.sceneItem:hover>.optionsButton,
+.atmosphereAffordance {
+    display: flex !important;
+}
+
+.atmosphereAffordance {
+    opacity: 0.35;
+}
+
+.atmosphereAffordance:hover {
+    opacity: 1;
 }
 
 .optionsButton:hover {
