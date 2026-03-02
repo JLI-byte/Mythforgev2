@@ -161,6 +161,16 @@ interface WorkspaceState {
     _hasHydrated: boolean;
 
     /**
+     * The URL of the Spotify playlist or track attached to the workspace.
+     */
+    spotifyUrl: string | null;
+
+    /**
+     * Whether the Spotify Mini-Player is currently expanded.
+     */
+    isSpotifyOpen: boolean;
+
+    /**
      * The multi-provider configuration used for the AI Consistency Checker.
      */
     aiConfig: AIProviderConfig;
@@ -254,6 +264,10 @@ interface WorkspaceState {
      */
     toggleFullscreen: () => void;
 
+    /** Spotify Controls */
+    setSpotifyUrl: (url: string | null) => void;
+    setSpotifyOpen: (isOpen: boolean) => void;
+
     /**
      * Customizes the max-width bounding box for the writing editor text block.
      */
@@ -336,6 +350,10 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             isCommandPaletteOpen: false,
             isTypewriterMode: false,
             isFullscreen: false,
+
+            spotifyUrl: null,
+            isSpotifyOpen: false,
+
             editorWidth: 800,
             selectedEntityId: null,
             _hasHydrated: false,
@@ -531,6 +549,12 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             toggleFullscreen: () =>
                 set((state) => ({ isFullscreen: !state.isFullscreen })),
+
+            setSpotifyUrl: (url) =>
+                set(() => ({ spotifyUrl: url })),
+
+            setSpotifyOpen: (isOpen) =>
+                set(() => ({ isSpotifyOpen: isOpen })),
 
             setEditorWidth: (width) =>
                 set(() => ({ editorWidth: width })),

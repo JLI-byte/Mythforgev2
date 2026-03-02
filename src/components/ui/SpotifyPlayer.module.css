@@ -1,0 +1,194 @@
+.collapsedBtn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #1DB954;
+    /* Spotify Green */
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.2s;
+}
+
+.collapsedBtn:hover {
+    transform: scale(1.1);
+    filter: brightness(1.1);
+}
+
+.playerContainer {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 320px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.playerHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--border);
+}
+
+.headerControls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.headerTitle {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--foreground);
+    letter-spacing: 0.5px;
+}
+
+.iconBtn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.iconBtn:hover {
+    background-color: var(--border);
+    color: var(--foreground);
+}
+
+.editBtn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.editBtn:hover {
+    color: var(--foreground);
+}
+
+.playerContent {
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+}
+
+.iframeWrapper {
+    width: 100%;
+    /* 352px matches spotify's standard embed height */
+    height: 352px;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.iframeWrapper iframe {
+    display: block;
+}
+
+.inputState {
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.helpText {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin: 0;
+}
+
+.urlInput {
+    background-color: transparent;
+    border: 1px solid var(--border);
+    color: var(--foreground);
+    padding: 0.6rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    width: 100%;
+}
+
+.urlInput:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+}
+
+.cancelBtn,
+.saveBtn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.cancelBtn {
+    background: transparent;
+    color: var(--muted);
+}
+
+.cancelBtn:hover {
+    color: var(--foreground);
+}
+
+.saveBtn {
+    background: #1DB954;
+    color: white;
+}
+
+.saveBtn:hover {
+    background: #1ed760;
+}
+
+.errorState {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--error);
+    font-size: 0.85rem;
+}
