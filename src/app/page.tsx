@@ -6,6 +6,8 @@ import WritingEditor from '@/components/editor/WritingEditor';
 import { NavigationPanel } from '@/components/editor/NavigationPanel';
 import { WorldBiblePanel } from '@/components/layout/WorldBiblePanel';
 import { WorldBibleTab } from '@/components/layout/WorldBibleTab';
+import { ConsistencyPanel } from '@/components/layout/ConsistencyPanel';
+import { ConsistencyTab } from '@/components/layout/ConsistencyTab';
 import InlineEntryCreator from '@/components/world/InlineEntryCreator';
 import HoverPreview from '@/components/world/HoverPreview';
 import { EntityDetailPanel } from '@/components/world/EntityDetailPanel';
@@ -22,6 +24,7 @@ import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 // Note: Configured as a Client Component to dynamically bind Zustand layout state natively.
 export default function Home() {
   const [worldBibleOpen, setWorldBibleOpen] = useState(false);
+  const [consistencyOpen, setConsistencyOpen] = useState(false);
   const setCommandPaletteOpen = useWorkspaceStore((state) => state.setCommandPaletteOpen);
   const isFullscreen = useWorkspaceStore((state) => state.isFullscreen);
   const toggleFullscreen = useWorkspaceStore((state) => state.toggleFullscreen);
@@ -84,6 +87,9 @@ export default function Home() {
       */}
       <WorldBibleTab isOpen={worldBibleOpen} onOpen={() => setWorldBibleOpen(true)} />
       <WorldBiblePanel isOpen={worldBibleOpen} onClose={() => setWorldBibleOpen(false)} />
+
+      <ConsistencyTab isOpen={consistencyOpen} onOpen={() => setConsistencyOpen(true)} />
+      <ConsistencyPanel isOpen={consistencyOpen} onClose={() => setConsistencyOpen(false)} />
 
       {/* Global modal overlays */}
       <InlineEntryCreator />
