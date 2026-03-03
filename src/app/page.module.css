@@ -11,7 +11,6 @@
     justify-content: center;
     padding: 4rem 2rem;
     padding-right: 64px;
-    overflow-y: auto;
     background-color: var(--background);
     transition: background-color 500ms ease;
 }
@@ -50,4 +49,11 @@
 .fullscreenMode .toolbarContainer:hover {
     opacity: 1;
     pointer-events: auto;
+}
+
+/* Scroll container is separate from layout container so overflow-x doesn't clip fixed panels */
+.editorScrollContainer {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: clip;
 }

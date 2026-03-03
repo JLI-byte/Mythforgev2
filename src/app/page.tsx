@@ -81,7 +81,9 @@ export default function Home() {
         className={styles.editorContainer}
         style={!atmosphereGlobalOverlay ? atmosphereStyleVars : undefined}
       >
-        <WritingEditor key={activeSceneId} />
+        <div className={styles.editorScrollContainer}>
+          <WritingEditor key={activeSceneId} />
+        </div>
       </div>
 
       {/* 
