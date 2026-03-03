@@ -79,9 +79,8 @@
     pointer-events: auto;
 }
 
-/* Prevent editor text from running under the right tab rail on narrow screens */
-@media (max-width: 900px) {
-    .editorContainer {
-        padding-right: calc(2rem + 48px);
-    }
+/* Editor right padding accounts for panel tabs at all screen sizes */
+/* Tab intrudes ~44px from right edge */
+.editorContainer {
+    padding-right: 52px;
 }

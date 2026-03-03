@@ -6,7 +6,6 @@ import WritingEditor from '@/components/editor/WritingEditor';
 import { NavigationPanel } from '@/components/editor/NavigationPanel';
 import { WorldBiblePanel } from '@/components/layout/WorldBiblePanel';
 import { ConsistencyPanel } from '@/components/layout/ConsistencyPanel';
-import { RightTabRail, RightPanelId } from '@/components/layout/RightTabRail';
 import InlineEntryCreator from '@/components/world/InlineEntryCreator';
 import HoverPreview from '@/components/world/HoverPreview';
 import { EntityDetailPanel } from '@/components/world/EntityDetailPanel';
@@ -23,9 +22,9 @@ import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 // Note: Configured as a Client Component to dynamically bind Zustand layout state natively.
 export default function Home() {
   // One active panel at a time — null means all closed
-  const [activePanel, setActivePanel] = useState<RightPanelId | null>(null);
+  const [activePanel, setActivePanel] = useState<'worldBible' | 'consistency' | null>(null);
 
-  const handlePanelToggle = (id: RightPanelId) => {
+  const handlePanelToggle = (id: 'worldBible' | 'consistency') => {
     setActivePanel(prev => prev === id ? null : id);
   };
 
@@ -89,9 +88,16 @@ export default function Home() {
         Right-edge panels & filing cabinet tabs
         Fixed to the right edge. Does not shift the editor.
       */}
-      <RightTabRail activePanel={activePanel} onToggle={handlePanelToggle} />
-      <WorldBiblePanel isOpen={activePanel === 'worldBible'} onClose={() => setActivePanel(null)} />
-      <ConsistencyPanel isOpen={activePanel === 'consistency'} onClose={() => setActivePanel(null)} />
+      <WorldBiblePanel
+        isOpen={activePanel === 'worldBible'}
+        onClose={() => setActivePanel(null)}
+        onTabClick={() => handlePanelToggle('worldBible')}
+      />
+      <ConsistencyPanel
+        isOpen={activePanel === 'consistency'}
+        onClose={() => setActivePanel(null)}
+        onTabClick={() => handlePanelToggle('consistency')}
+      />
 
       {/* Global modal overlays */}
       <InlineEntryCreator />
