@@ -5,9 +5,8 @@ import styles from './page.module.css';
 import WritingEditor from '@/components/editor/WritingEditor';
 import { NavigationPanel } from '@/components/editor/NavigationPanel';
 import { WorldBiblePanel } from '@/components/layout/WorldBiblePanel';
-import { WorldBibleTab } from '@/components/layout/WorldBibleTab';
 import { ConsistencyPanel } from '@/components/layout/ConsistencyPanel';
-import { ConsistencyTab } from '@/components/layout/ConsistencyTab';
+import { RightTabRail, RightPanelId } from '@/components/layout/RightTabRail';
 import InlineEntryCreator from '@/components/world/InlineEntryCreator';
 import HoverPreview from '@/components/world/HoverPreview';
 import { EntityDetailPanel } from '@/components/world/EntityDetailPanel';
@@ -23,8 +22,13 @@ import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
  */
 // Note: Configured as a Client Component to dynamically bind Zustand layout state natively.
 export default function Home() {
-  const [worldBibleOpen, setWorldBibleOpen] = useState(false);
-  const [consistencyOpen, setConsistencyOpen] = useState(false);
+  // One active panel at a time — null means all closed
+  const [activePanel, setActivePanel] = useState<RightPanelId | null>(null);
+
+  const handlePanelToggle = (id: RightPanelId) => {
+    setActivePanel(prev => prev === id ? null : id);
+  };
+
   const setCommandPaletteOpen = useWorkspaceStore((state) => state.setCommandPaletteOpen);
   const isFullscreen = useWorkspaceStore((state) => state.isFullscreen);
   const toggleFullscreen = useWorkspaceStore((state) => state.toggleFullscreen);
@@ -82,14 +86,12 @@ export default function Home() {
       </div>
 
       {/* 
-        World Bible Slide-Out Overlay
+        Right-edge panels & filing cabinet tabs
         Fixed to the right edge. Does not shift the editor.
       */}
-      <WorldBibleTab isOpen={worldBibleOpen} onOpen={() => setWorldBibleOpen(true)} />
-      <WorldBiblePanel isOpen={worldBibleOpen} onClose={() => setWorldBibleOpen(false)} />
-
-      <ConsistencyTab isOpen={consistencyOpen} onOpen={() => setConsistencyOpen(true)} />
-      <ConsistencyPanel isOpen={consistencyOpen} onClose={() => setConsistencyOpen(false)} />
+      <RightTabRail activePanel={activePanel} onToggle={handlePanelToggle} />
+      <WorldBiblePanel isOpen={activePanel === 'worldBible'} onClose={() => setActivePanel(null)} />
+      <ConsistencyPanel isOpen={activePanel === 'consistency'} onClose={() => setActivePanel(null)} />
 
       {/* Global modal overlays */}
       <InlineEntryCreator />
