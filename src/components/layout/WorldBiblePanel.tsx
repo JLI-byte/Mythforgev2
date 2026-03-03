@@ -8,6 +8,8 @@ interface WorldBiblePanelProps {
     isOpen: boolean;
     onClose: () => void;
     onTabClick: () => void;
+    tabWidth: number;
+    onTabWidthChange: (width: number) => void;
 }
 
 const BookIcon = () => (
@@ -18,16 +20,39 @@ const BookIcon = () => (
 );
 
 // WorldBiblePanel — slide-out reference panel, fixed right edge
-export function WorldBiblePanel({ isOpen, onClose, onTabClick }: WorldBiblePanelProps) {
+export function WorldBiblePanel({ isOpen, onClose, onTabClick, tabWidth, onTabWidthChange }: WorldBiblePanelProps) {
     return (
         <div className={`${styles.panel} ${isOpen ? styles.open : ''}`}>
             {/* Tab that sticks out the left side of the panel — moves with the panel */}
             <button
                 className={styles.sideTab}
+                style={{ width: tabWidth, left: -tabWidth }}
                 onClick={onTabClick}
                 title="World Bible"
                 aria-label="Toggle World Bible"
             >
+                <div
+                    className={styles.dragHandle}
+                    onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const startX = e.clientX;
+                        const startWidth = tabWidth;
+                        const onMouseMove = (moveEvent: MouseEvent) => {
+                            // Dragging left increases width, dragging right decreases
+                            const delta = startX - moveEvent.clientX;
+                            const newWidth = Math.min(120, Math.max(44, startWidth + delta));
+                            onTabWidthChange(newWidth);
+                        };
+                        const onMouseUp = () => {
+                            document.removeEventListener('mousemove', onMouseMove);
+                            document.removeEventListener('mouseup', onMouseUp);
+                        };
+                        document.addEventListener('mousemove', onMouseMove);
+                        document.addEventListener('mouseup', onMouseUp);
+                    }}
+                    title="Drag to resize tab"
+                />
                 <BookIcon />
                 <span className={styles.sideTabLabel}>World Bible</span>
             </button>

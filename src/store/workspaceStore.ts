@@ -148,6 +148,9 @@ interface WorkspaceState {
      */
     editorWidth: number;
 
+    /** Width of the right-edge panel tabs in pixels. User-adjustable. */
+    tabRailWidth: number;
+
     /**
      * The currently selected entity for the detail panel view.
      * This is intentionally not persisted (resets to null on refresh).
@@ -273,6 +276,8 @@ interface WorkspaceState {
      */
     setEditorWidth: (width: number) => void;
 
+    setTabRailWidth: (width: number) => void;
+
     /**
      * Sets the currently selected entity for the detail view.
      */
@@ -355,6 +360,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             isSpotifyOpen: false,
 
             editorWidth: 800,
+            tabRailWidth: 72,
             selectedEntityId: null,
             _hasHydrated: false,
             aiConfig: {
@@ -559,6 +565,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             setEditorWidth: (width) =>
                 set(() => ({ editorWidth: width })),
 
+            setTabRailWidth: (width) => set(() => ({ tabRailWidth: width })),
+
             setSelectedEntity: (id) =>
                 set(() => ({ selectedEntityId: id })),
 
@@ -649,6 +657,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 isSidebarOpen: state.isSidebarOpen,
                 isTypewriterMode: state.isTypewriterMode,
                 editorWidth: state.editorWidth,
+                tabRailWidth: state.tabRailWidth,
                 aiConfig: state.aiConfig,
                 writingGoal: state.writingGoal,
                 customAtmospheres: state.customAtmospheres,

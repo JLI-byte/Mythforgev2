@@ -33,9 +33,7 @@
 /* Tab attached to left edge of panel — slides out with the drawer */
 .sideTab {
     position: absolute;
-    left: -72px;
     top: 0;
-    width: 72px;
     padding: 16px 10px;
     display: flex;
     flex-direction: column;
@@ -104,4 +102,20 @@
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+/* Drag handle on left edge of tab */
+.dragHandle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    cursor: ew-resize;
+    background: transparent;
+    transition: background 150ms ease;
+}
+
+.dragHandle:hover {
+    background: rgba(128, 128, 128, 0.2);
 }
