@@ -20,6 +20,15 @@
     transform: translateX(0);
 }
 
+/* Inner container clips panel content — sideTab must remain outside this */
+.panelInner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    width: 360px;
+}
+
 /* Tab attached to left edge of panel — slides out with the drawer */
 .sideTab {
     position: absolute;

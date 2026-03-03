@@ -32,19 +32,22 @@ export function WorldBiblePanel({ isOpen, onClose, onTabClick }: WorldBiblePanel
                 <span className={styles.sideTabLabel}>World Bible</span>
             </button>
 
-            <div className={styles.header}>
-                <h2 className={styles.title}>World Bible</h2>
-                <button
-                    className={styles.closeButton}
-                    onClick={onClose}
-                    aria-label="Close World Bible"
-                    title="Close"
-                >
-                    &times;
-                </button>
-            </div>
-            <div className={styles.contentWrapper}>
-                <WorldBible />
+            {/* panelInner clips content so it doesn't bleed when panel is closed */}
+            <div className={styles.panelInner}>
+                <div className={styles.header}>
+                    <h2 className={styles.title}>World Bible</h2>
+                    <button
+                        className={styles.closeButton}
+                        onClick={onClose}
+                        aria-label="Close World Bible"
+                        title="Close"
+                    >
+                        &times;
+                    </button>
+                </div>
+                <div className={styles.contentWrapper}>
+                    <WorldBible />
+                </div>
             </div>
         </div>
     );

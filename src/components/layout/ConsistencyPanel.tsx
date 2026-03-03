@@ -32,19 +32,22 @@ export function ConsistencyPanel({ isOpen, onClose, onTabClick }: ConsistencyPan
                 <span className={styles.sideTabLabel}>Consistency</span>
             </button>
 
-            <div className={styles.header}>
-                <h2 className={styles.title}>Consistency Report</h2>
-                <button
-                    className={styles.closeButton}
-                    onClick={onClose}
-                    aria-label="Close"
-                    title="Close"
-                >
-                    &times;
-                </button>
-            </div>
-            <div className={styles.contentWrapper}>
-                <ConsistencyChecker />
+            {/* panelInner clips content so it doesn't bleed when panel is closed */}
+            <div className={styles.panelInner}>
+                <div className={styles.header}>
+                    <h2 className={styles.title}>Consistency Report</h2>
+                    <button
+                        className={styles.closeButton}
+                        onClick={onClose}
+                        aria-label="Close"
+                        title="Close"
+                    >
+                        &times;
+                    </button>
+                </div>
+                <div className={styles.contentWrapper}>
+                    <ConsistencyChecker />
+                </div>
             </div>
         </div>
     );
