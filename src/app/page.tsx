@@ -6,6 +6,9 @@ import WritingEditor from '@/components/editor/WritingEditor';
 import { NavigationPanel } from '@/components/editor/NavigationPanel';
 import { WorldBiblePanel } from '@/components/layout/WorldBiblePanel';
 import { ConsistencyPanel } from '@/components/layout/ConsistencyPanel';
+import { WritingGoalsPanel } from '@/components/layout/WritingGoalsPanel';
+import { WritingStatsPanel } from '@/components/layout/WritingStatsPanel';
+import { AIChatbotPanel } from '@/components/layout/AIChatbotPanel';
 import InlineEntryCreator from '@/components/world/InlineEntryCreator';
 import HoverPreview from '@/components/world/HoverPreview';
 import { EntityDetailPanel } from '@/components/world/EntityDetailPanel';
@@ -22,9 +25,9 @@ import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 // Note: Configured as a Client Component to dynamically bind Zustand layout state natively.
 export default function Home() {
   // One active panel at a time — null means all closed
-  const [activePanel, setActivePanel] = useState<'worldBible' | 'consistency' | null>(null);
+  const [activePanel, setActivePanel] = useState<'worldBible' | 'consistency' | 'writingGoals' | 'writingStats' | 'aiChatbot' | null>(null);
 
-  const handlePanelToggle = (id: 'worldBible' | 'consistency') => {
+  const handlePanelToggle = (id: 'worldBible' | 'consistency' | 'writingGoals' | 'writingStats' | 'aiChatbot') => {
     setActivePanel(prev => prev === id ? null : id);
   };
 
@@ -107,6 +110,33 @@ export default function Home() {
         isOpen={activePanel === 'consistency'}
         onClose={() => setActivePanel(null)}
         onTabClick={() => handlePanelToggle('consistency')}
+        tabWidth={tabRailWidth}
+        onTabWidthChange={setTabRailWidth}
+        panelWidth={panelWidth}
+        onPanelWidthChange={setPanelWidth}
+      />
+      <WritingGoalsPanel
+        isOpen={activePanel === 'writingGoals'}
+        onClose={() => setActivePanel(null)}
+        onTabClick={() => handlePanelToggle('writingGoals')}
+        tabWidth={tabRailWidth}
+        onTabWidthChange={setTabRailWidth}
+        panelWidth={panelWidth}
+        onPanelWidthChange={setPanelWidth}
+      />
+      <WritingStatsPanel
+        isOpen={activePanel === 'writingStats'}
+        onClose={() => setActivePanel(null)}
+        onTabClick={() => handlePanelToggle('writingStats')}
+        tabWidth={tabRailWidth}
+        onTabWidthChange={setTabRailWidth}
+        panelWidth={panelWidth}
+        onPanelWidthChange={setPanelWidth}
+      />
+      <AIChatbotPanel
+        isOpen={activePanel === 'aiChatbot'}
+        onClose={() => setActivePanel(null)}
+        onTabClick={() => handlePanelToggle('aiChatbot')}
         tabWidth={tabRailWidth}
         onTabWidthChange={setTabRailWidth}
         panelWidth={panelWidth}
