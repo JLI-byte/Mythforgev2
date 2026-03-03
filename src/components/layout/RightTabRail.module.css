@@ -1,5 +1,6 @@
 /* RightTabRail — filing cabinet tabs, fixed top-right edge */
 /* Tabs attach to the right edge and slide out on hover/active */
+/* Tab rail total intrusion width = ~42px. Editor right padding uses --tab-rail-width to compensate. */
 .rail {
     position: fixed;
     top: 48px;

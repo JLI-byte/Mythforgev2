@@ -79,9 +79,9 @@
     pointer-events: auto;
 }
 
-/* Prevent editor text running under the right tab rail on narrow/vertical screens */
+/* Prevent editor text from running under the right tab rail on narrow screens */
 @media (max-width: 900px) {
     .editorContainer {
-        padding-right: 48px;
+        padding-right: calc(2rem + 48px);
     }
 }
