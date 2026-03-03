@@ -78,9 +78,3 @@
     opacity: 1;
     pointer-events: auto;
 }
-
-/* Editor right padding accounts for panel tabs at all screen sizes */
-/* Tab intrudes ~44px from right edge */
-.editorContainer {
-    padding-right: 52px;
-}

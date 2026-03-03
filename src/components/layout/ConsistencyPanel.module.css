@@ -1,10 +1,10 @@
 .panel {
     position: fixed;
-    top: 0;
+    top: calc(48px + 44px + 8px);
     right: 0;
     bottom: 0;
     width: 360px;
-    transform: translateX(100%);
+    transform: translateX(calc(100% - 44px));
     transition: transform 280ms ease-in-out;
     z-index: 200;
     background-color: var(--surface);
@@ -67,8 +67,7 @@
     position: absolute;
     left: -44px;
     /* width of tab */
-    top: 160px;
-    /* Offset for filing cabinet effect so it doesn't overlap the first tab */
+    top: 0;
     width: 44px;
     padding: 14px 8px;
     display: flex;
