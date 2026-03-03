@@ -72,7 +72,7 @@ export function ConsistencyPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
                         const startWidth = panelWidth;
                         const onMouseMove = (moveEvent: MouseEvent) => {
                             const delta = startX - moveEvent.clientX;
-                            const newWidth = Math.min(800, Math.max(300, startWidth + delta));
+                            const newWidth = Math.min(1600, Math.max(300, startWidth + delta));
                             onPanelWidthChange(newWidth);
                         };
                         const onMouseUp = () => {
