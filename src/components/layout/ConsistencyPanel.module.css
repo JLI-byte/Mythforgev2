@@ -33,9 +33,9 @@
 /* Tab attached to left edge of panel — slides out with the drawer */
 .sideTab {
     position: absolute;
-    left: -56px;
+    left: -72px;
     top: 0;
-    width: 56px;
+    width: 72px;
     padding: 16px 10px;
     display: flex;
     flex-direction: column;
@@ -60,7 +60,7 @@
     writing-mode: vertical-rl;
     text-orientation: mixed;
     transform: rotate(180deg);
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     font-weight: 500;
     letter-spacing: 0.04em;
     text-transform: uppercase;

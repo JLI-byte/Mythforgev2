@@ -7,8 +7,9 @@ import styles from './WritingEditor.module.css';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { getStoredValue, setStoredValue } from '@/lib/storage';
 import { EntityMark } from '@/lib/EntityMark';
-import { BreadcrumbBar } from '@/components/navigation/BreadcrumbBar';
+import { createPortal } from 'react-dom';
 import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
+import { AtmospherePicker } from '../ui/AtmospherePicker';
 
 const EDITOR_PLACEHOLDER = '<p>Start writing your story here...</p>';
 
@@ -82,6 +83,24 @@ export default function WritingEditor() {
     const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
     const [liveWordCount, setLiveWordCount] = useState<number>(activeScene?.wordCount || 0);
     const initialWordCountRef = React.useRef<number | null>(null);
+
+    const [isPickerOpen, setIsPickerOpen] = useState(false);
+    const [pickerPosition, setPickerPosition] = useState<{ top: number; left: number } | null>(null);
+    const pickerRef = React.useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
+                setIsPickerOpen(false);
+            }
+        };
+        if (isPickerOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isPickerOpen]);
 
     useEffect(() => {
         openInlineCreatorRef.current = openInlineCreator;
@@ -432,8 +451,6 @@ export default function WritingEditor() {
                 </div>
             )}
 
-            {!isFullscreen && <BreadcrumbBar />}
-
             {isFullscreen && showFullscreenHint && (
                 <div style={{
                     position: 'fixed',
@@ -455,32 +472,89 @@ export default function WritingEditor() {
                 </div>
             )}
 
-            <div className={styles.editorHeader} style={{ display: 'flex', alignItems: 'center' }}>
-                {/* Document Title / Chapter Metadata */}
-                <input
-                    type="text"
-                    className={styles.documentTitle}
-                    value={activeDocument.title}
-                    onChange={(e) => {
-                        updateDocument(activeDocumentId!, { title: e.target.value });
-                        setSaveState('saving');
-                        if (saveStateTimerRef.current) clearTimeout(saveStateTimerRef.current);
-                        saveStateTimerRef.current = setTimeout(() => {
-                            setSaveState('saved');
-                            saveStateTimerRef.current = setTimeout(() => setSaveState('idle'), 2000);
-                        }, 500);
-                    }}
-                    placeholder="Untitled Chapter"
-                    style={{ flex: 1 }}
-                />
-                {saveState !== 'idle' && (
-                    <span style={{ fontSize: '0.8rem', color: 'var(--muted)', marginLeft: '1rem', whiteSpace: 'nowrap' }}>
-                        {saveState === 'saving' ? 'Saving...' : '✓ Saved'}
-                    </span>
-                )}
-                <span style={{ fontSize: '0.8rem', color: 'var(--muted)', marginLeft: '1rem', whiteSpace: 'nowrap' }}>
-                    {liveWordCount} words
-                </span>
+            <div className={styles.editorHeader} style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                    {/* Document Title / Chapter Metadata */}
+                    <input
+                        type="text"
+                        className={styles.documentTitle}
+                        value={activeDocument.title}
+                        onChange={(e) => {
+                            updateDocument(activeDocumentId!, { title: e.target.value });
+                            setSaveState('saving');
+                            if (saveStateTimerRef.current) clearTimeout(saveStateTimerRef.current);
+                            saveStateTimerRef.current = setTimeout(() => {
+                                setSaveState('saved');
+                                saveStateTimerRef.current = setTimeout(() => setSaveState('idle'), 2000);
+                            }, 500);
+                        }}
+                        placeholder="Untitled Chapter"
+                        style={{ flex: 1 }}
+                    />
+                    {saveState !== 'idle' && (
+                        <span style={{ fontSize: '0.8rem', color: 'var(--muted)', marginLeft: '1rem', whiteSpace: 'nowrap' }}>
+                            {saveState === 'saving' ? 'Saving...' : '✓ Saved'}
+                        </span>
+                    )}
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', padding: '0.25rem 0 0.75rem 0', fontSize: '0.8rem', color: 'var(--muted)' }}>
+                    {atmospheresEnabled && activeScene && (
+                        <div ref={pickerRef} style={{ display: 'inline-flex', alignItems: 'center', position: 'relative' }}>
+                            <button
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.4rem',
+                                    background: 'transparent',
+                                    border: '1px solid var(--border)',
+                                    borderRadius: '4px',
+                                    padding: '0.1rem 0.5rem',
+                                    color: currentAtmosphere ? 'var(--foreground)' : 'var(--muted)',
+                                    fontSize: 'inherit',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                                onClick={(e) => {
+                                    if (isPickerOpen) {
+                                        setIsPickerOpen(false);
+                                        setPickerPosition(null);
+                                    } else {
+                                        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                                        setIsPickerOpen(true);
+                                        setPickerPosition({ top: rect.bottom + 8, left: rect.left });
+                                    }
+                                }}
+                            >
+                                {currentAtmosphere ? (
+                                    <>
+                                        <span>{currentAtmosphere.icon}</span>
+                                        <span>{currentAtmosphere.name}</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>✦</span>
+                                        <span>Set atmosphere</span>
+                                    </>
+                                )}
+                            </button>
+                            {isPickerOpen && pickerPosition && typeof document !== 'undefined' && createPortal(
+                                <div
+                                    style={{ position: 'fixed', top: pickerPosition.top, left: pickerPosition.left, zIndex: 9999 }}
+                                    onClick={e => e.stopPropagation()}
+                                >
+                                    <AtmospherePicker
+                                        sceneId={activeScene.id}
+                                        currentAtmosphereId={activeScene.atmosphereId}
+                                        onClose={() => { setIsPickerOpen(false); setPickerPosition(null); }}
+                                    />
+                                </div>,
+                                document.body
+                            )}
+                        </div>
+                    )}
+                    <span>{liveWordCount} words</span>
+                </div>
             </div>
 
             <EditorContent editor={editor} />
