@@ -1,8 +1,8 @@
 /* WritingStatsPanel — slide-out panel, fixed right edge */
 .panel {
     position: fixed;
-    top: calc(48px + 104px + 122px + 94px);
-    /* Previous + Goals (94) */
+    top: calc(48px + 156px);
+    /* 48 + 52*3 */
     right: 0;
     bottom: 0;
     width: 360px;

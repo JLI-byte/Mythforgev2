@@ -1,8 +1,8 @@
 /* WritingGoalsPanel — slide-out panel, fixed right edge */
 .panel {
     position: fixed;
-    top: calc(48px + 104px + 122px);
-    /* 48px header + WorldBible (104) + Consistency (122) */
+    top: calc(48px + 104px);
+    /* 48 + 52*2 */
     right: 0;
     bottom: 0;
     width: 360px;
