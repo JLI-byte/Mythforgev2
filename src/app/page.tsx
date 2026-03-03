@@ -39,6 +39,8 @@ export default function Home() {
   const theme = useWorkspaceStore((state) => state.theme);
   const tabRailWidth = useWorkspaceStore((state) => state.tabRailWidth);
   const setTabRailWidth = useWorkspaceStore((state) => state.setTabRailWidth);
+  const panelWidth = useWorkspaceStore((state) => state.panelWidth);
+  const setPanelWidth = useWorkspaceStore((state) => state.setPanelWidth);
   const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   useEffect(() => {
@@ -98,6 +100,8 @@ export default function Home() {
         onTabClick={() => handlePanelToggle('worldBible')}
         tabWidth={tabRailWidth}
         onTabWidthChange={setTabRailWidth}
+        panelWidth={panelWidth}
+        onPanelWidthChange={setPanelWidth}
       />
       <ConsistencyPanel
         isOpen={activePanel === 'consistency'}
@@ -105,6 +109,8 @@ export default function Home() {
         onTabClick={() => handlePanelToggle('consistency')}
         tabWidth={tabRailWidth}
         onTabWidthChange={setTabRailWidth}
+        panelWidth={panelWidth}
+        onPanelWidthChange={setPanelWidth}
       />
 
       {/* Global modal overlays */}

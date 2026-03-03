@@ -10,6 +10,8 @@ interface WorldBiblePanelProps {
     onTabClick: () => void;
     tabWidth: number;
     onTabWidthChange: (width: number) => void;
+    panelWidth: number;
+    onPanelWidthChange: (width: number) => void;
 }
 
 const BookIcon = () => (
@@ -20,9 +22,12 @@ const BookIcon = () => (
 );
 
 // WorldBiblePanel — slide-out reference panel, fixed right edge
-export function WorldBiblePanel({ isOpen, onClose, onTabClick, tabWidth, onTabWidthChange }: WorldBiblePanelProps) {
+export function WorldBiblePanel({ isOpen, onClose, onTabClick, tabWidth, onTabWidthChange, panelWidth, onPanelWidthChange }: WorldBiblePanelProps) {
     return (
-        <div className={`${styles.panel} ${isOpen ? styles.open : ''}`}>
+        <div
+            className={`${styles.panel} ${isOpen ? styles.open : ''}`}
+            style={{ width: panelWidth }}
+        >
             {/* Tab that sticks out the left side of the panel — moves with the panel */}
             <button
                 className={styles.sideTab}
@@ -59,6 +64,26 @@ export function WorldBiblePanel({ isOpen, onClose, onTabClick, tabWidth, onTabWi
 
             {/* panelInner clips content so it doesn't bleed when panel is closed */}
             <div className={styles.panelInner}>
+                <div
+                    className={styles.panelResizeHandle}
+                    onMouseDown={(e) => {
+                        e.preventDefault();
+                        const startX = e.clientX;
+                        const startWidth = panelWidth;
+                        const onMouseMove = (moveEvent: MouseEvent) => {
+                            const delta = startX - moveEvent.clientX;
+                            const newWidth = Math.min(800, Math.max(300, startWidth + delta));
+                            onPanelWidthChange(newWidth);
+                        };
+                        const onMouseUp = () => {
+                            document.removeEventListener('mousemove', onMouseMove);
+                            document.removeEventListener('mouseup', onMouseUp);
+                        };
+                        document.addEventListener('mousemove', onMouseMove);
+                        document.addEventListener('mouseup', onMouseUp);
+                    }}
+                    title="Drag to resize panel"
+                />
                 <div className={styles.header}>
                     <h2 className={styles.title}>World Bible</h2>
                     <button
