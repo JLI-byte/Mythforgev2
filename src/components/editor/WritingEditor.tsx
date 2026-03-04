@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import Underline from '@tiptap/extension-underline';
+import TextAlign from '@tiptap/extension-text-align';
 import styles from './WritingEditor.module.css';
 import { useWorkspaceStore, Scene } from '@/store/workspaceStore';
 import { getStoredValue, setStoredValue } from '@/lib/storage';
 import { EntityMark } from '@/lib/EntityMark';
-import { createPortal } from 'react-dom';
 import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
-import { AtmospherePicker } from '../ui/AtmospherePicker';
 
 const EDITOR_PLACEHOLDER = '<p>Start writing your story here...</p>';
 
@@ -15,7 +15,7 @@ const EDITOR_PLACEHOLDER = '<p>Start writing your story here...</p>';
  * Scene Editor Component
  * Manages an individual Tiptap instance for a specific scene.
  */
-function SceneEditor({ scene, index }: { scene: Scene, index: number }) {
+function SceneEditor({ scene, index, editorRef }: { scene: Scene, index: number, editorRef?: React.MutableRefObject<ReturnType<typeof useEditor> | null> }) {
     const activeProjectId = useWorkspaceStore((state) => state.activeProjectId);
     const updateScene = useWorkspaceStore((state) => state.updateScene);
     const openInlineCreator = useWorkspaceStore((state) => state.openInlineCreator);
@@ -38,22 +38,6 @@ function SceneEditor({ scene, index }: { scene: Scene, index: number }) {
     const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     const initialWordCountRef = React.useRef<number | null>(null);
 
-    const [isPickerOpen, setIsPickerOpen] = useState(false);
-    const [pickerPosition, setPickerPosition] = useState<{ top: number; left: number } | null>(null);
-    const pickerRef = React.useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
-                setIsPickerOpen(false);
-            }
-        };
-        if (isPickerOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [isPickerOpen]);
-
     useEffect(() => {
         openInlineCreatorRef.current = openInlineCreator;
         entitiesRef.current = entities.filter(e => e.projectId === activeProjectId);
@@ -62,12 +46,20 @@ function SceneEditor({ scene, index }: { scene: Scene, index: number }) {
     }, [openInlineCreator, entities, activeProjectId, setHoveredEntity, isTypewriterMode]);
 
     const editor = useEditor({
-        extensions: [StarterKit, EntityMark],
+        extensions: [
+            StarterKit,
+            EntityMark,
+            Underline,
+            TextAlign.configure({ types: ['heading', 'paragraph'] }),
+        ],
         content: scene.content || '',
         // Only autofocus the very first scene if it's not a rehydration flash
         autofocus: index === 0 ? 'end' : false,
         immediatelyRender: false,
         onCreate: ({ editor }) => {
+            if (editorRef) {
+                editorRef.current = editor;
+            }
             const count = editor.getText().split(/\s+/).filter(w => w.length > 0).length;
             initialWordCountRef.current = count;
 
@@ -287,46 +279,8 @@ function SceneEditor({ scene, index }: { scene: Scene, index: number }) {
         >
             <div className={styles.sceneToolbar}>
                 <span style={{ fontWeight: 600, color: 'var(--text-primary)', marginRight: 'auto' }}>
-                    {currentAtmosphere && <span style={{ marginRight: '0.4rem', fontSize: '0.9rem' }}>{currentAtmosphere.icon}</span>}
                     {scene.title}
                 </span>
-
-                {atmospheresEnabled && (
-                    <div ref={pickerRef} style={{ display: 'inline-flex', alignItems: 'center', position: 'relative' }}>
-                        <button
-                            className={styles.sceneToolbarButton}
-                            onClick={(e) => {
-                                if (isPickerOpen) {
-                                    setIsPickerOpen(false);
-                                    setPickerPosition(null);
-                                } else {
-                                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                                    setIsPickerOpen(true);
-                                    setPickerPosition({ top: rect.bottom + 8, left: rect.left });
-                                }
-                            }}
-                        >
-                            {currentAtmosphere ? (
-                                <><span>{currentAtmosphere.icon}</span><span>{currentAtmosphere.name}</span></>
-                            ) : (
-                                <><span>✦</span><span>Atmosphere</span></>
-                            )}
-                        </button>
-                        {isPickerOpen && pickerPosition && typeof document !== 'undefined' && createPortal(
-                            <div
-                                style={{ position: 'fixed', top: pickerPosition.top, left: pickerPosition.left, zIndex: 9999 }}
-                                onClick={e => e.stopPropagation()}
-                            >
-                                <AtmospherePicker
-                                    sceneId={scene.id}
-                                    currentAtmosphereId={scene.atmosphereId}
-                                    onClose={() => { setIsPickerOpen(false); setPickerPosition(null); }}
-                                />
-                            </div>,
-                            document.body
-                        )}
-                    </div>
-                )}
                 <span>{scene.wordCount || 0} words</span>
             </div>
 
@@ -370,8 +324,12 @@ export default function WritingEditor() {
     const toggleTypewriterMode = useWorkspaceStore((state) => state.toggleTypewriterMode);
     const isFullscreen = useWorkspaceStore((state) => state.isFullscreen);
     const toggleFullscreen = useWorkspaceStore((state) => state.toggleFullscreen);
+    const isToolbarVisible = useWorkspaceStore((state) => state.isToolbarVisible);
+    const toggleToolbarVisible = useWorkspaceStore((state) => state.toggleToolbarVisible);
     const editorWidth = useWorkspaceStore((state) => state.editorWidth);
     const atmosphereReducedMotion = useWorkspaceStore((state) => state.atmosphereReducedMotion);
+
+    const firstEditorRef = React.useRef<ReturnType<typeof useEditor> | null>(null);
 
     const saveStateTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
@@ -446,25 +404,62 @@ export default function WritingEditor() {
             } as React.CSSProperties}
         >
 
-            {!isFullscreen && (
-                <div className={styles.editorToolbar}>
-                    <button
-                        className={`${styles.editorToolbarButton} ${isTypewriterMode ? styles.active : ''}`}
-                        onClick={toggleTypewriterMode}
-                        title="Typewriter Mode"
-                        aria-label="Toggle Typewriter Mode"
-                    >
-                        ✍️
-                    </button>
-                    <button
-                        className={`${styles.editorToolbarButton} ${isFullscreen ? styles.active : ''}`}
-                        onClick={toggleFullscreen}
-                        title="Fullscreen Mode (F11)"
-                        aria-label="Toggle Fullscreen Mode"
-                    >
-                        ⛶
-                    </button>
+            {!isFullscreen && isToolbarVisible && (
+                <div className={styles.richToolbar}>
+                    {/* --- Formatting group --- */}
+                    <div className={styles.toolbarGroup}>
+                        {/* Paragraph style dropdown */}
+                        <select
+                            className={styles.toolbarSelect}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (val === 'p') firstEditorRef.current?.chain().focus().setParagraph().run();
+                                else if (val === 'h1') firstEditorRef.current?.chain().focus().toggleHeading({ level: 1 }).run();
+                                else if (val === 'h2') firstEditorRef.current?.chain().focus().toggleHeading({ level: 2 }).run();
+                                else if (val === 'h3') firstEditorRef.current?.chain().focus().toggleHeading({ level: 3 }).run();
+                                else if (val === 'blockquote') firstEditorRef.current?.chain().focus().toggleBlockquote().run();
+                            }}
+                            value={'p'}
+                        >
+                            <option value="p">Paragraph</option>
+                            <option value="h1">Heading 1</option>
+                            <option value="h2">Heading 2</option>
+                            <option value="h3">Heading 3</option>
+                            <option value="blockquote">Blockquote</option>
+                        </select>
+                    </div>
+
+                    {/* --- Text style group --- */}
+                    <div className={styles.toolbarGroup}>
+                        <button className={styles.toolbarBtn} onClick={() => firstEditorRef.current?.chain().focus().toggleBold().run()} title="Bold"><strong>B</strong></button>
+                        <button className={styles.toolbarBtn} onClick={() => firstEditorRef.current?.chain().focus().toggleItalic().run()} title="Italic"><em>I</em></button>
+                        <button className={styles.toolbarBtn} onClick={() => firstEditorRef.current?.chain().focus().toggleUnderline().run()} title="Underline"><u>U</u></button>
+                        <button className={styles.toolbarBtn} onClick={() => firstEditorRef.current?.chain().focus().toggleStrike().run()} title="Strikethrough"><s>S</s></button>
+                    </div>
+
+                    {/* --- Alignment group --- */}
+                    <div className={styles.toolbarGroup}>
+                        <button className={styles.toolbarBtn} onClick={() => firstEditorRef.current?.chain().focus().setTextAlign('left').run()} title="Align Left">⬤</button>
+                        <button className={styles.toolbarBtn} onClick={() => firstEditorRef.current?.chain().focus().setTextAlign('center').run()} title="Align Center">⬤</button>
+                        <button className={styles.toolbarBtn} onClick={() => firstEditorRef.current?.chain().focus().setTextAlign('right').run()} title="Align Right">⬤</button>
+                    </div>
+
+                    {/* --- List group --- */}
+                    <div className={styles.toolbarGroup}>
+                        <button className={styles.toolbarBtn} onClick={() => firstEditorRef.current?.chain().focus().toggleBulletList().run()} title="Bullet List">• List</button>
+                        <button className={styles.toolbarBtn} onClick={() => firstEditorRef.current?.chain().focus().toggleOrderedList().run()} title="Numbered List">1. List</button>
+                    </div>
+
+                    {/* --- Mode group (right side) --- */}
+                    <div className={styles.toolbarGroupRight}>
+                        <button className={`${styles.toolbarBtn} ${isTypewriterMode ? styles.toolbarBtnActive : ''}`} onClick={toggleTypewriterMode} title="Typewriter Mode">✍️</button>
+                        <button className={`${styles.toolbarBtn} ${isFullscreen ? styles.toolbarBtnActive : ''}`} onClick={toggleFullscreen} title="Fullscreen">⛶</button>
+                        <button className={styles.toolbarBtn} onClick={toggleToolbarVisible} title="Hide Toolbar">⊟</button>
+                    </div>
                 </div>
+            )}
+            {!isFullscreen && !isToolbarVisible && (
+                <button className={styles.toolbarShowBtn} onClick={toggleToolbarVisible} title="Show Toolbar">⊞</button>
             )}
 
             {isFullscreen && showFullscreenHint && (
@@ -517,9 +512,9 @@ export default function WritingEditor() {
             {/* RENDER ALL SCENES */}
             {activeScenes.map((scene, index) => (
                 <React.Fragment key={scene.id}>
-                    <SceneEditor scene={scene} index={index} />
+                    <SceneEditor scene={scene} index={index} editorRef={index === 0 ? firstEditorRef : undefined} />
                     {index < activeScenes.length - 1 && (
-                        <div className={styles.sceneSeparator}>* * *</div>
+                        <hr className={styles.sceneSeparator} />
                     )}
                 </React.Fragment>
             ))}

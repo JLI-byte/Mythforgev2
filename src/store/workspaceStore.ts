@@ -206,6 +206,10 @@ interface WorkspaceState {
     /** Toggle for reduced motion (disables smooth transitions for atmospheres) */
     atmosphereReducedMotion: boolean;
 
+    /** Toggle for persistent rich text toolbar visibility */
+    isToolbarVisible: boolean;
+
+
     // --- ACTIONS ---
     addProject: (project: Project) => void;
     updateProject: (id: string, updates: Partial<Omit<Project, 'id' | 'createdAt'>>) => void;
@@ -311,6 +315,10 @@ interface WorkspaceState {
     setAtmosphereTypographyEnabled: (enabled: boolean) => void;
     setAtmosphereReducedMotion: (enabled: boolean) => void;
 
+    /** Toggles the rich text toolbar visibility */
+    toggleToolbarVisible: () => void;
+
+
     /**
      * Submits partial updates to the AI provider configuration.
      */
@@ -381,6 +389,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             atmosphereGlobalOverlay: false,
             atmosphereTypographyEnabled: true,
             atmosphereReducedMotion: false,
+            isToolbarVisible: true,
+
 
             addProject: (project) =>
                 set((state) => {
@@ -646,6 +656,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             setAtmosphereReducedMotion: (enabled) =>
                 set(() => ({ atmosphereReducedMotion: enabled })),
+
+            toggleToolbarVisible: () => set(s => ({ isToolbarVisible: !s.isToolbarVisible })),
+
         }),
         {
             name: 'mythforge-workspace',
@@ -671,7 +684,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 customAtmospheres: state.customAtmospheres,
                 atmospheresEnabled: state.atmospheresEnabled,
                 atmosphereTypographyEnabled: state.atmosphereTypographyEnabled,
-                atmosphereReducedMotion: state.atmosphereReducedMotion
+                atmosphereReducedMotion: state.atmosphereReducedMotion,
+                isToolbarVisible: state.isToolbarVisible
             }),
 
             // Track hydration phases allowing components to await persistence payload dynamically
