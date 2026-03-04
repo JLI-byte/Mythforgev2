@@ -69,14 +69,21 @@
 
 .titleInput {
     width: 100%;
-    background: var(--background);
+    /* Hardcoded dark background so text is always visible regardless of theme variable resolution */
+    background: #1e1e1e;
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: 0.6rem 0.8rem;
     font-size: 1rem;
-    color: var(--foreground);
+    color: #ffffff;
+    -webkit-text-fill-color: #ffffff;
     outline: none;
     box-sizing: border-box;
+}
+
+.titleInput::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.4);
 }
 
 .titleInput:focus {
