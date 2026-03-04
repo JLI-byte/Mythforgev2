@@ -12,7 +12,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useWorkspaceStore, COVER_COLORS } from '@/store/workspaceStore';
 import { sanitizeLabel } from '@/lib/sanitize';
 import styles from './ProjectSwitcher.module.css';
 
@@ -74,6 +74,8 @@ export function ProjectSwitcher({ onClose }: ProjectSwitcherProps) {
         addProject({
             id: newProjectId,
             name: trimmed,
+            writingMode: 'novel',
+            coverColor: COVER_COLORS[projects.length % COVER_COLORS.length],
             createdAt: new Date(),
             updatedAt: new Date()
         });

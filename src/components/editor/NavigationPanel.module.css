@@ -9,6 +9,92 @@
     font-family: inherit;
 }
 
+/* Project header — sits above chapter list */
+.projectHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.projectCover {
+    width: 40px;
+    height: 56px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.projectCoverInitials {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+    letter-spacing: 0.05em;
+}
+
+.projectMeta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    overflow: hidden;
+}
+
+.projectTitle {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--foreground);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.projectControls {
+    display: flex;
+    gap: 0.2rem;
+    align-items: center;
+}
+
+.projectNavBtn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.1rem 0.25rem;
+    border-radius: 3px;
+    line-height: 1;
+}
+
+.projectNavBtn:hover {
+    color: var(--foreground);
+    background: var(--background);
+}
+
+.projectGridBtn,
+.projectNewBtn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    line-height: 1.4;
+    margin-left: 0.15rem;
+}
+
+.projectGridBtn:hover,
+.projectNewBtn:hover {
+    color: var(--foreground);
+    border-color: var(--muted);
+}
+
 .panelHeader {
     display: flex;
     justify-content: space-between;

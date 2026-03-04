@@ -8,6 +8,8 @@ import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 import { AtmospherePicker } from '../ui/AtmospherePicker';
 import { SpotifyPlayer } from '../ui/SpotifyPlayer';
 import SettingsModal from '../ui/SettingsModal';
+import ProjectSwitcher from '../ui/ProjectSwitcher';
+import NewProjectModal from '../ui/NewProjectModal';
 
 /**
  * NavigationPanel UI Component
@@ -18,10 +20,13 @@ import SettingsModal from '../ui/SettingsModal';
  */
 export function NavigationPanel() {
     const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
+    const projects = useWorkspaceStore(state => state.projects);
     const documents = useWorkspaceStore(state => state.documents);
     const scenes = useWorkspaceStore(state => state.scenes);
     const activeDocumentId = useWorkspaceStore(state => state.activeDocumentId);
     const activeSceneId = useWorkspaceStore(state => state.activeSceneId);
+
+    const setActiveProject = useWorkspaceStore(state => state.setActiveProject);
 
     const addDocument = useWorkspaceStore(state => state.addDocument);
     const updateDocument = useWorkspaceStore(state => state.updateDocument);
@@ -42,6 +47,8 @@ export function NavigationPanel() {
     const [openPickerId, setOpenPickerId] = useState<string | null>(null);
     const [pickerPosition, setPickerPosition] = useState<{ top: number; left: number } | null>(null);
     const [showSettings, setShowSettings] = useState(false);
+    const [showSwitcher, setShowSwitcher] = useState(false);
+    const [showNewProject, setShowNewProject] = useState(false);
 
     const theme = useWorkspaceStore(state => state.theme);
     const setTheme = useWorkspaceStore(state => state.setTheme);
@@ -106,6 +113,21 @@ export function NavigationPanel() {
     const activeChapterScenes = scenes
         .filter(s => s.documentId === activeDocumentId)
         .sort((a, b) => a.order - b.order);
+
+    const activeProject = projects.find(p => p.id === activeProjectId);
+    const currentIndex = projects.findIndex(p => p.id === activeProjectId);
+
+    const goToPrevProject = () => {
+        if (projects.length < 2) return;
+        const prev = (currentIndex - 1 + projects.length) % projects.length;
+        setActiveProject(projects[prev].id);
+    };
+
+    const goToNextProject = () => {
+        if (projects.length < 2) return;
+        const next = (currentIndex + 1) % projects.length;
+        setActiveProject(projects[next].id);
+    };
 
     // --- Actions ---
     const handleAddChapter = () => {
@@ -263,6 +285,30 @@ export function NavigationPanel() {
 
     return (
         <div className={styles.navigationPanel}>
+            {/* Project header — book cover + title + navigation */}
+            <div className={styles.projectHeader}>
+                {/* Book cover */}
+                <div
+                    className={styles.projectCover}
+                    style={{ background: activeProject?.coverColor || 'var(--surface)' }}
+                >
+                    <span className={styles.projectCoverInitials}>
+                        {activeProject?.name?.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase() || '?'}
+                    </span>
+                </div>
+
+                {/* Title and controls */}
+                <div className={styles.projectMeta}>
+                    <span className={styles.projectTitle}>{activeProject?.name || 'No Project'}</span>
+                    <div className={styles.projectControls}>
+                        <button className={styles.projectNavBtn} onClick={goToPrevProject} title="Previous project">‹</button>
+                        <button className={styles.projectNavBtn} onClick={goToNextProject} title="Next project">›</button>
+                        <button className={styles.projectGridBtn} onClick={() => setShowSwitcher(true)} title="All projects">⊞</button>
+                        <button className={styles.projectNewBtn} onClick={() => setShowNewProject(true)} title="New project">+</button>
+                    </div>
+                </div>
+            </div>
+
             {activeProjectId ? (
                 <>
                     <div className={styles.panelHeader}>
@@ -558,6 +604,16 @@ export function NavigationPanel() {
             </div>
 
             {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+
+            <ProjectSwitcher
+                isOpen={showSwitcher}
+                onClose={() => setShowSwitcher(false)}
+                onCreateNew={() => { setShowSwitcher(false); setShowNewProject(true); }}
+            />
+            <NewProjectModal
+                isOpen={showNewProject}
+                onClose={() => setShowNewProject(false)}
+            />
         </div>
     );
 }

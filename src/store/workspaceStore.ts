@@ -4,6 +4,11 @@ import { logger } from '@/lib/logger';
 import { getStoredValue } from '@/lib/storage';
 import { AIProviderConfig } from '@/types';
 
+export const COVER_COLORS = [
+    '#4A6FA5', '#6B4C9A', '#2E8B57', '#C0392B',
+    '#D46A1A', '#1A7A8A', '#7A4A2E', '#4A4A8A'
+];
+
 export interface WritingGoal {
     dailyTarget: number;
     sessionTarget: number;
@@ -32,6 +37,9 @@ export interface Project {
     name: string;
     createdAt: Date;
     updatedAt?: Date;
+    writingMode: 'novel' | 'screenplay' | 'markdown' | 'poetry';
+    coverColor: string;
+    coverImageUrl?: string;
 }
 
 export interface Document {
@@ -209,11 +217,6 @@ interface WorkspaceState {
     /** Toggle for persistent rich text toolbar visibility */
     isToolbarVisible: boolean;
 
-    /** Editor layout and typography mode */
-    writingMode: 'novel' | 'screenplay' | 'markdown' | 'poetry';
-
-
-
     // --- ACTIONS ---
     addProject: (project: Project) => void;
     updateProject: (id: string, updates: Partial<Omit<Project, 'id' | 'createdAt'>>) => void;
@@ -322,9 +325,6 @@ interface WorkspaceState {
     /** Toggles the rich text toolbar visibility */
     toggleToolbarVisible: () => void;
 
-    /** Sets the current layout/typography writing mode */
-    setWritingMode: (mode: 'novel' | 'screenplay' | 'markdown' | 'poetry') => void;
-
 
 
     /**
@@ -398,7 +398,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             atmosphereTypographyEnabled: true,
             atmosphereReducedMotion: false,
             isToolbarVisible: true,
-            writingMode: 'novel',
 
 
 
@@ -669,8 +668,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             toggleToolbarVisible: () => set(s => ({ isToolbarVisible: !s.isToolbarVisible })),
 
-            setWritingMode: (mode) => set(() => ({ writingMode: mode })),
-
 
         }),
         {
@@ -698,8 +695,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 atmospheresEnabled: state.atmospheresEnabled,
                 atmosphereTypographyEnabled: state.atmosphereTypographyEnabled,
                 atmosphereReducedMotion: state.atmosphereReducedMotion,
-                isToolbarVisible: state.isToolbarVisible,
-                writingMode: state.writingMode
+                isToolbarVisible: state.isToolbarVisible
             }),
 
             // Track hydration phases allowing components to await persistence payload dynamically
@@ -713,7 +709,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         const defaultProject: Project = {
                             id: crypto.randomUUID(),
                             name: 'My First Project',
-                            createdAt: new Date()
+                            createdAt: new Date(),
+                            writingMode: 'novel',
+                            coverColor: COVER_COLORS[0]
                         };
                         const defaultDocument: Document = {
                             id: crypto.randomUUID(),

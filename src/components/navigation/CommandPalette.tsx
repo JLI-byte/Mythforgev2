@@ -11,7 +11,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useWorkspaceStore, COVER_COLORS } from '@/store/workspaceStore';
 import { sanitizeLabel } from '@/lib/sanitize';
 import styles from './CommandPalette.module.css';
 
@@ -117,6 +117,8 @@ export function CommandPalette() {
                 id: newProjectId,
                 name: trimmed,
                 createdAt: new Date(),
+                writingMode: 'novel',
+                coverColor: COVER_COLORS[projects.length % COVER_COLORS.length]
             });
             addDocument({
                 id: newDocId,

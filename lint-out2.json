@@ -1,0 +1,365 @@
+[
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\app\\layout.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\app\\page.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\checker\\ConsistencyChecker.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\editor\\NavigationPanel.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\editor\\WritingEditor.tsx",
+    "messages": [],
+    "suppressedMessages": [
+      {
+        "ruleId": "@typescript-eslint/no-explicit-any",
+        "severity": 2,
+        "message": "Unexpected any. Specify a different type.",
+        "line": 153,
+        "column": 86,
+        "nodeType": "TSAnyKeyword",
+        "messageId": "unexpectedAny",
+        "endLine": 153,
+        "endColumn": 89,
+        "suggestions": [
+          {
+            "messageId": "suggestUnknown",
+            "fix": {
+              "range": [
+                7318,
+                7321
+              ],
+              "text": "unknown"
+            },
+            "desc": "Use `unknown` instead, this will force you to explicitly, and safely assert the type is correct."
+          },
+          {
+            "messageId": "suggestNever",
+            "fix": {
+              "range": [
+                7318,
+                7321
+              ],
+              "text": "never"
+            },
+            "desc": "Use `never` instead, this is useful when instantiating generic type parameters that you don't need to know the type of."
+          }
+        ],
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": ""
+          }
+        ]
+      },
+      {
+        "ruleId": "react-hooks/set-state-in-effect",
+        "severity": 2,
+        "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\nE:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\editor\\WritingEditor.tsx:404:13\n  402 |         /* eslint-disable react-hooks/set-state-in-effect */\n  403 |         if (isFullscreen) {\n> 404 |             setShowFullscreenHint(true);\n      |             ^^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  405 |             const t = setTimeout(() => {\n  406 |                 setShowFullscreenHint(false);\n  407 |             }, 3000);",
+        "line": 404,
+        "column": 13,
+        "nodeType": null,
+        "endLine": 404,
+        "endColumn": 34,
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": ""
+          }
+        ]
+      }
+    ],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\layout\\AIChatbotPanel.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\layout\\ConsistencyPanel.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\layout\\WorldBiblePanel.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\layout\\WritingGoalsPanel.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\layout\\WritingStatsPanel.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\navigation\\BreadcrumbBar.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\navigation\\CommandPalette.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\navigation\\ProjectSwitcher.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\ui\\AtmosphereEditor.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\ui\\AtmospherePicker.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\ui\\ExportModal.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\ui\\NewProjectModal.tsx",
+    "messages": [
+      {
+        "ruleId": "react-hooks/set-state-in-effect",
+        "severity": 2,
+        "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\nE:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\ui\\NewProjectModal.tsx:33:13\n  31 |     useEffect(() => {\n  32 |         if (isOpen) {\n> 33 |             setTitle('');\n     |             ^^^^^^^^ Avoid calling setState() directly within an effect\n  34 |             setSelectedMode('novel');\n  35 |         }\n  36 |     }, [isOpen]);",
+        "line": 33,
+        "column": 13,
+        "nodeType": null,
+        "endLine": 33,
+        "endColumn": 21
+      }
+    ],
+    "suppressedMessages": [],
+    "errorCount": 1,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "source": "import React, { useState, useEffect } from 'react';\r\nimport styles from './NewProjectModal.module.css';\r\nimport { useWorkspaceStore, COVER_COLORS } from '@/store/workspaceStore';\r\n\r\ninterface NewProjectModalProps {\r\n    isOpen: boolean;\r\n    onClose: () => void;\r\n}\r\n\r\nconst MODES = [\r\n    { id: 'novel', icon: '📖', name: 'Novel', desc: 'Long-form fiction with chapters and scenes' },\r\n    { id: 'screenplay', icon: '🎬', name: 'Screenplay', desc: 'Script format with elements and scenes' },\r\n    { id: 'markdown', icon: '📝', name: 'Notes/Lore', desc: 'Research, worldbuilding, and reference' },\r\n    { id: 'poetry', icon: '✍️', name: 'Poetry', desc: 'Verse, stanzas, and lyric writing' }\r\n] as const;\r\n\r\nexport default function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {\r\n    const [title, setTitle] = useState('');\r\n    const [selectedMode, setSelectedMode] = useState<'novel' | 'screenplay' | 'markdown' | 'poetry'>('novel');\r\n\r\n    const projects = useWorkspaceStore(state => state.projects);\r\n    const addProject = useWorkspaceStore(state => state.addProject);\r\n    const addDocument = useWorkspaceStore(state => state.addDocument);\r\n    const addScene = useWorkspaceStore(state => state.addScene);\r\n    const setActiveProject = useWorkspaceStore(state => state.setActiveProject);\r\n    const setActiveDocument = useWorkspaceStore(state => state.setActiveDocument);\r\n    const setActiveScene = useWorkspaceStore(state => state.setActiveScene);\r\n\r\n    const coverColor = COVER_COLORS[projects.length % COVER_COLORS.length];\r\n\r\n    useEffect(() => {\r\n        if (isOpen) {\r\n            setTitle('');\r\n            setSelectedMode('novel');\r\n        }\r\n    }, [isOpen]);\r\n\r\n    useEffect(() => {\r\n        const handleKeyDown = (e: KeyboardEvent) => {\r\n            if (e.key === 'Escape' && isOpen) {\r\n                onClose();\r\n            }\r\n        };\r\n        window.addEventListener('keydown', handleKeyDown);\r\n        return () => window.removeEventListener('keydown', handleKeyDown);\r\n    }, [isOpen, onClose]);\r\n\r\n    if (!isOpen) return null;\r\n\r\n    const handleCreate = () => {\r\n        if (!title.trim()) return;\r\n\r\n        const newProjectId = crypto.randomUUID();\r\n        const color = COVER_COLORS[projects.length % COVER_COLORS.length];\r\n\r\n        addProject({\r\n            id: newProjectId,\r\n            name: title.trim(),\r\n            writingMode: selectedMode,\r\n            coverColor: color,\r\n            createdAt: new Date()\r\n        });\r\n\r\n        const newDocId = crypto.randomUUID();\r\n        addDocument({\r\n            id: newDocId,\r\n            projectId: newProjectId,\r\n            title: 'Chapter 1',\r\n            content: '',\r\n            createdAt: new Date()\r\n        });\r\n\r\n        const newSceneId = crypto.randomUUID();\r\n        addScene({\r\n            id: newSceneId,\r\n            documentId: newDocId,\r\n            projectId: newProjectId,\r\n            title: 'Scene 1',\r\n            content: '',\r\n            order: 0,\r\n            createdAt: new Date()\r\n        });\r\n\r\n        setActiveProject(newProjectId);\r\n        setActiveDocument(newDocId);\r\n        setActiveScene(newSceneId);\r\n        onClose();\r\n    };\r\n\r\n    const initials = title.trim().split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();\r\n\r\n    return (\r\n        <div className={styles.overlay} onClick={onClose}>\r\n            <div className={styles.card} onClick={e => e.stopPropagation()}>\r\n                <div className={styles.header}>\r\n                    <h2 className={styles.title}>New Project</h2>\r\n                    <button className={styles.closeBtn} onClick={onClose} title=\"Close\">&times;</button>\r\n                </div>\r\n\r\n                <div className={styles.content}>\r\n                    <div className={styles.coverPreviewContainer}>\r\n                        <div\r\n                            className={styles.coverPreview}\r\n                            style={{ background: coverColor }}\r\n                        >\r\n                            {initials || '?'}\r\n                        </div>\r\n                    </div>\r\n\r\n                    <div className={styles.formGroup}>\r\n                        <label className={styles.label}>Project Title</label>\r\n                        <input\r\n                            type=\"text\"\r\n                            className={styles.input}\r\n                            value={title}\r\n                            onChange={e => setTitle(e.target.value)}\r\n                            placeholder=\"My Epic Masterpiece\"\r\n                            autoFocus\r\n                        />\r\n                    </div>\r\n\r\n                    <div className={styles.formGroup}>\r\n                        <label className={styles.label}>Writing Mode</label>\r\n                        <div className={styles.modeGrid}>\r\n                            {MODES.map(mode => (\r\n                                <div\r\n                                    key={mode.id}\r\n                                    className={`${styles.modeCard} ${selectedMode === mode.id ? styles.modeCardActive : ''}`}\r\n                                    onClick={() => setSelectedMode(mode.id)}\r\n                                >\r\n                                    <div className={styles.modeHeader}>\r\n                                        <span className={styles.modeIcon}>{mode.icon}</span>\r\n                                        <span>{mode.name}</span>\r\n                                    </div>\r\n                                    <div className={styles.modeDesc}>{mode.desc}</div>\r\n                                </div>\r\n                            ))}\r\n                        </div>\r\n                    </div>\r\n                </div>\r\n\r\n                <div className={styles.footer}>\r\n                    <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>\r\n                    <button\r\n                        className={styles.createBtn}\r\n                        onClick={handleCreate}\r\n                        disabled={!title.trim()}\r\n                    >\r\n                        Create Project\r\n                    </button>\r\n                </div>\r\n            </div>\r\n        </div>\r\n    );\r\n}\r\n",
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\ui\\ProjectSwitcher.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\ui\\SettingsModal.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\ui\\SpotifyPlayer.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\world\\EntityDetailPanel.tsx",
+    "messages": [],
+    "suppressedMessages": [
+      {
+        "ruleId": "react-hooks/exhaustive-deps",
+        "severity": 1,
+        "message": "React Hook useEffect has a missing dependency: 'selectedEntity'. Either include it or remove the dependency array.",
+        "line": 38,
+        "column": 8,
+        "nodeType": "ArrayExpression",
+        "endLine": 38,
+        "endColumn": 26,
+        "suggestions": [
+          {
+            "desc": "Update the dependencies array to be: [selectedEntity, selectedEntityId]",
+            "fix": {
+              "range": [
+                1898,
+                1916
+              ],
+              "text": "[selectedEntity, selectedEntityId]"
+            }
+          }
+        ],
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": ""
+          }
+        ]
+      }
+    ],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\world\\HoverPreview.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\world\\InlineEntryCreator.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\AI_Projects\\MythforgeV2\\Program\\src\\components\\world\\WorldBible.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  }
+]

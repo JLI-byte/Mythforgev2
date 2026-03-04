@@ -25,7 +25,9 @@ function SceneEditor({ scene, index }: { scene: Scene, index: number }) {
     const atmosphereTypographyEnabled = useWorkspaceStore((state) => state.atmosphereTypographyEnabled);
 
     const setSessionWordCount = useWorkspaceStore((state) => state.setSessionWordCount);
-    const writingMode = useWorkspaceStore((state) => state.writingMode);
+    const projects = useWorkspaceStore((state) => state.projects);
+    const activeProject = projects.find(p => p.id === activeProjectId);
+    const writingMode = activeProject?.writingMode || 'novel';
 
     const openInlineCreatorRef = React.useRef(openInlineCreator);
     const entitiesRef = React.useRef(entities.filter(e => e.projectId === activeProjectId));
@@ -376,8 +378,12 @@ export default function WritingEditor() {
 
     const writingGoal = useWorkspaceStore((state) => state.writingGoal);
     const sessionWordCount = useWorkspaceStore((state) => state.sessionWordCount);
-    const writingMode = useWorkspaceStore((state) => state.writingMode);
-    const setWritingMode = useWorkspaceStore((state) => state.setWritingMode);
+    const activeProjectId = useWorkspaceStore((state) => state.activeProjectId);
+    const projects = useWorkspaceStore((state) => state.projects);
+    const updateProject = useWorkspaceStore((state) => state.updateProject);
+    const activeProject = projects.find(p => p.id === activeProjectId);
+    const writingMode = activeProject?.writingMode || 'novel';
+
     const isTypewriterMode = useWorkspaceStore((state) => state.isTypewriterMode);
     const toggleTypewriterMode = useWorkspaceStore((state) => state.toggleTypewriterMode);
     const isFullscreen = useWorkspaceStore((state) => state.isFullscreen);
@@ -465,8 +471,12 @@ export default function WritingEditor() {
                     {/* Writing mode */}
                     <select
                         className={styles.toolbarSelect}
-                        value={writingMode || 'novel'}
-                        onChange={(e) => setWritingMode(e.target.value as 'novel' | 'screenplay' | 'markdown' | 'poetry')}
+                        value={writingMode}
+                        onChange={(e) => {
+                            if (activeProjectId) {
+                                updateProject(activeProjectId, { writingMode: e.target.value as 'novel' | 'screenplay' | 'markdown' | 'poetry' });
+                            }
+                        }}
                         title="Writing Mode"
                     >
                         <option value="novel">📖 Novel</option>

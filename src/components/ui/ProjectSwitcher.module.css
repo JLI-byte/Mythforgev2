@@ -1,0 +1,144 @@
+/* src/components/ui/ProjectSwitcher.module.css */
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card {
+    background: var(--surface);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 720px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.closeBtn:hover {
+    color: var(--text-primary);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+    padding: 1.5rem;
+}
+
+.projectCard {
+    background: var(--background);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: border-color 150ms ease, background 150ms ease;
+    min-height: 180px;
+}
+
+.projectCard:hover {
+    background: var(--surface-hover, rgba(255, 255, 255, 0.05));
+}
+
+.projectCardActive {
+    border-color: var(--accent);
+}
+
+.cover {
+    width: 100%;
+    height: 80px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+}
+
+.projectTitle {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 0.25rem;
+}
+
+.badge {
+    font-size: 0.7rem;
+    background: var(--border);
+    color: var(--text-secondary);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    align-self: flex-start;
+}
+
+.wordCount {
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+
+.newCard {
+    border: 2px dashed var(--border);
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 100%;
+    min-height: 180px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--muted);
+    transition: color 150ms ease, border-color 150ms ease;
+}
+
+.newCard:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.newIcon {
+    font-size: 2rem;
+    color: inherit;
+    line-height: 1;
+}
