@@ -378,7 +378,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             sessionWordCount: 0,
             customAtmospheres: [],
             atmospheresEnabled: true,
-            atmosphereGlobalOverlay: true,
+            atmosphereGlobalOverlay: false,
             atmosphereTypographyEnabled: true,
             atmosphereReducedMotion: false,
 

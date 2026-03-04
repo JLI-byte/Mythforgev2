@@ -53,6 +53,22 @@ export function NavigationPanel() {
     const [draggedSceneId, setDraggedSceneId] = useState<string | null>(null);
     const [dragOverSceneId, setDragOverSceneId] = useState<string | null>(null);
 
+    // Expanded Chapters State
+    // Default to expanding the active document's chapter on initial load
+    const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set([activeDocumentId].filter(Boolean) as string[]));
+
+    const toggleChapterExpanded = (chapterId: string) => {
+        setExpandedChapters(prev => {
+            const next = new Set(prev);
+            if (next.has(chapterId)) {
+                next.delete(chapterId);
+            } else {
+                next.add(chapterId);
+            }
+            return next;
+        });
+    };
+
     const editInputRef = useRef<HTMLInputElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -118,6 +134,9 @@ export function NavigationPanel() {
         addScene(newScene);
         setActiveDocument(newDocId);
         setActiveScene(newSceneId);
+
+        // Auto-expand new chapter
+        setExpandedChapters(prev => new Set([...prev, newDocId]));
     };
 
     const handleAddScene = (chapterId: string) => {
@@ -266,23 +285,39 @@ export function NavigationPanel() {
                     ) : (
                         <div className={styles.chapterList}>
                             {projectChapters.map(chapter => {
-                                const isExpanded = activeDocumentId === chapter.id;
-                                const chapterScenes = isExpanded ? activeChapterScenes : scenes.filter(s => s.documentId === chapter.id);
+                                const isActive = activeDocumentId === chapter.id;
+                                const isExpanded = expandedChapters.has(chapter.id);
+                                const chapterScenes = isActive ? activeChapterScenes : scenes.filter(s => s.documentId === chapter.id);
 
                                 return (
                                     <React.Fragment key={chapter.id}>
                                         <div
-                                            className={`${styles.chapterItem} ${isExpanded ? styles.active : ''}`}
+                                            className={`${styles.chapterItem} ${isActive && !activeSceneId ? styles.active : ''}`}
                                             onClick={() => {
-                                                if (!isExpanded) {
+                                                // Single click now just activates the chapter, it doesn't toggle collapse
+                                                if (!isActive) {
                                                     setActiveDocument(chapter.id);
                                                 }
+                                                // Clear active scene to show the whole chapter
+                                                setActiveScene(null);
+                                            }}
+                                            onDoubleClick={() => {
+                                                // Double click toggles the expanded state AND activates
+                                                if (!isActive) setActiveDocument(chapter.id);
+                                                setActiveScene(null);
+                                                toggleChapterExpanded(chapter.id);
                                             }}
                                         >
                                             <div className={styles.chapterItemContent}>
                                                 <div className={styles.chapterInfo}>
                                                     <div className={styles.chapterHeaderRow}>
-                                                        <span className={styles.chevron}>
+                                                        <span
+                                                            className={styles.chevron}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation(); // prevent triggering the chapter onClick
+                                                                toggleChapterExpanded(chapter.id);
+                                                            }}
+                                                        >
                                                             {isExpanded ? '▾' : '▸'}
                                                         </span>
                                                         {editingId === chapter.id && editType === 'chapter' ? (
@@ -364,7 +399,12 @@ export function NavigationPanel() {
                                                             ${dragOverSceneId === scene.id ? styles.dragOver : ''}
                                                         `}
                                                             style={customBorder}
-                                                            onClick={() => setActiveScene(scene.id)}
+                                                            onClick={() => {
+                                                                if (!isActive) {
+                                                                    setActiveDocument(scene.documentId);
+                                                                }
+                                                                setActiveScene(scene.id);
+                                                            }}
                                                         >
                                                             <div className={styles.sceneInfo}>
                                                                 {editingId === scene.id && editType === 'scene' ? (

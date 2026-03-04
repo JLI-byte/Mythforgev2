@@ -67,12 +67,11 @@
 }
 
 .chapterItem:hover {
-    background-color: var(--surface);
-    opacity: 0.95;
+    background-color: var(--background);
 }
 
 .chapterItem.active {
-    background-color: var(--surface);
+    background-color: var(--background);
     border-left-color: var(--accent);
 }
 
@@ -98,11 +97,18 @@
 
 .chevron {
     color: var(--muted);
-    font-size: 0.8rem;
+    font-size: 1.1rem;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+}
+
+.chevron:hover {
+    color: var(--foreground);
 }
 
 .chapterTitle {
@@ -131,7 +137,8 @@
 
 .sceneItem {
     display: flex;
-    padding: 0.4rem 0.75rem 0.4rem 1.5rem;
+    margin-left: 1rem;
+    padding: 0.4rem 0.75rem 0.4rem 0.75rem;
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s;
@@ -142,12 +149,11 @@
 }
 
 .sceneItem:hover {
-    background-color: var(--surface);
-    opacity: 0.95;
+    background-color: var(--background);
 }
 
 .sceneItem.active {
-    background-color: var(--surface);
+    background-color: var(--background);
     border-left-color: var(--accent);
 }
 
@@ -181,7 +187,8 @@
     color: var(--muted);
     font-size: 0.8rem;
     text-align: left;
-    padding: 0.4rem 0.75rem 0.4rem 1.5rem;
+    margin-left: 1rem;
+    padding: 0.4rem 0.75rem 0.4rem 0.75rem;
     cursor: pointer;
     border-radius: 4px;
     margin-top: 0.25rem;
@@ -190,8 +197,9 @@
 
 .addSceneBtn:hover {
     color: var(--foreground);
-    background-color: var(--surface);
+    background-color: var(--background);
 }
+
 
 /* Options Menus */
 .optionsButton {

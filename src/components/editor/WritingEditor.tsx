@@ -1,10 +1,8 @@
-"use client";
-
 import React, { useEffect, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import styles from './WritingEditor.module.css';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useWorkspaceStore, Scene } from '@/store/workspaceStore';
 import { getStoredValue, setStoredValue } from '@/lib/storage';
 import { EntityMark } from '@/lib/EntityMark';
 import { createPortal } from 'react-dom';
@@ -14,74 +12,30 @@ import { AtmospherePicker } from '../ui/AtmospherePicker';
 const EDITOR_PLACEHOLDER = '<p>Start writing your story here...</p>';
 
 /**
- * Writing Editor
- * 
- * The primary surface for the application. This must remain distraction-free.
- * 
- * WHY TIPTAP INSTEAD OF NATIVE contentEditable?
- * We rely on Tiptap because native `contentEditable` is notoriously unpredictable across browsers.
- * For our core promise "Creation happens at the point of inspiration," we need absolute certainty 
- * when capturing keystrokes, managing the cursor position, and programmatically inserting 
- * Entity Tags without destroying the DOM or the writer's flow. 
- * Tiptap provides a headless, predictable ProseMirror foundation we can cleanly build upon.
- * 
- * WHY A CONTROLLED INPUT FOR THE TITLE?
- * The document title is distinct from the rich text flow. Using a standard controlled React input
- * allows us to cleanly parse the chapter name in the React boundary without dealing with nested 
- * contentEditable nodes or ProseMirror documents. It looks identical to the text flow via CSS.
+ * Scene Editor Component
+ * Manages an individual Tiptap instance for a specific scene.
  */
-export default function WritingEditor() {
-    const documents = useWorkspaceStore((state) => state.documents);
-    const activeDocumentId = useWorkspaceStore((state) => state.activeDocumentId);
+function SceneEditor({ scene, index }: { scene: Scene, index: number }) {
     const activeProjectId = useWorkspaceStore((state) => state.activeProjectId);
-    const updateDocument = useWorkspaceStore((state) => state.updateDocument);
-
-    const scenes = useWorkspaceStore((state) => state.scenes);
-    const activeSceneId = useWorkspaceStore((state) => state.activeSceneId);
     const updateScene = useWorkspaceStore((state) => state.updateScene);
-    const addScene = useWorkspaceStore((state) => state.addScene);
-    const setActiveScene = useWorkspaceStore((state) => state.setActiveScene);
-
-    const activeDocument = documents.find(d => d.id === activeDocumentId);
-    const activeScene = scenes.find(s => s.id === activeSceneId);
-
-    const [showHint, setShowHint] = useState(() => {
-        return getStoredValue('mythforge-hint-dismissed') !== 'true';
-    });
-
     const openInlineCreator = useWorkspaceStore((state) => state.openInlineCreator);
     const entities = useWorkspaceStore((state) => state.entities);
     const setHoveredEntity = useWorkspaceStore((state) => state.setHoveredEntity);
-    const writingGoal = useWorkspaceStore((state) => state.writingGoal);
-    const sessionWordCount = useWorkspaceStore((state) => state.sessionWordCount);
-    const setSessionWordCount = useWorkspaceStore((state) => state.setSessionWordCount);
     const isTypewriterMode = useWorkspaceStore((state) => state.isTypewriterMode);
-    const toggleTypewriterMode = useWorkspaceStore((state) => state.toggleTypewriterMode);
-    const isFullscreen = useWorkspaceStore((state) => state.isFullscreen);
-    const toggleFullscreen = useWorkspaceStore((state) => state.toggleFullscreen);
-    const editorWidth = useWorkspaceStore((state) => state.editorWidth);
 
     // Atmosphere state
     const customAtmospheres = useWorkspaceStore((state) => state.customAtmospheres);
     const atmospheresEnabled = useWorkspaceStore((state) => state.atmospheresEnabled);
     const atmosphereTypographyEnabled = useWorkspaceStore((state) => state.atmosphereTypographyEnabled);
-    const atmosphereReducedMotion = useWorkspaceStore((state) => state.atmosphereReducedMotion);
 
-    // FIX: ZUSTAND SELECTOR STABILITY
-    // Tiptap's `useEditor` config object does not reliably react to external state
-    // changes once initialized without causing re-renders or stale closures during
-    // rapid typing (onUpdate). By storing our Zustand action in a mutable ref, we 
-    // guarantee `onUpdate` always calls the freshest version of the function.
+    const setSessionWordCount = useWorkspaceStore((state) => state.setSessionWordCount);
+
     const openInlineCreatorRef = React.useRef(openInlineCreator);
     const entitiesRef = React.useRef(entities.filter(e => e.projectId === activeProjectId));
     const setHoveredEntityRef = React.useRef(setHoveredEntity);
     const isTypewriterModeRef = React.useRef(isTypewriterMode);
 
-    // TRACKER: Defends the main thread from rapid keystroke starvation.
     const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-    const saveStateTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-    const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
-    const [liveWordCount, setLiveWordCount] = useState<number>(activeScene?.wordCount || 0);
     const initialWordCountRef = React.useRef<number | null>(null);
 
     const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -97,9 +51,7 @@ export default function WritingEditor() {
         if (isPickerOpen) {
             document.addEventListener('mousedown', handleClickOutside);
         }
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [isPickerOpen]);
 
     useEffect(() => {
@@ -109,50 +61,39 @@ export default function WritingEditor() {
         isTypewriterModeRef.current = isTypewriterMode;
     }, [openInlineCreator, entities, activeProjectId, setHoveredEntity, isTypewriterMode]);
 
-    const [showFullscreenHint, setShowFullscreenHint] = useState(false);
-
-    useEffect(() => {
-        if (isFullscreen) {
-            // eslint-disable-next-line
-            setShowFullscreenHint(true);
-            const t = setTimeout(() => setShowFullscreenHint(false), 3000);
-            return () => clearTimeout(t);
-        } else {
-            setShowFullscreenHint(false);
-        }
-    }, [isFullscreen]);
-
     const editor = useEditor({
-        extensions: [
-            StarterKit,
-            EntityMark,
-        ],
-        // MIGRATION: 
-        // We now initialize directly from our activeScene content mapped within the store.
-        // We fall back conditionally to our placeholder constant.
-        content: activeScene?.content || EDITOR_PLACEHOLDER,
-        autofocus: true,
+        extensions: [StarterKit, EntityMark],
+        content: scene.content || '',
+        // Only autofocus the very first scene if it's not a rehydration flash
+        autofocus: index === 0 ? 'end' : false,
         immediatelyRender: false,
         onCreate: ({ editor }) => {
             const count = editor.getText().split(/\s+/).filter(w => w.length > 0).length;
-            setLiveWordCount(count);
             initialWordCountRef.current = count;
+
+            // Sync initial content if empty so the placeholder works
+            if (!scene.content) {
+                editor.commands.setContent('');
+            }
         },
         editorProps: {
             attributes: {
                 class: styles.editorContent,
+                'data-placeholder': 'Start writing your story here...'
             },
         },
         onUpdate: ({ editor }) => {
-            setSaveState('saving');
-
             const currentText = editor.getText();
             const count = currentText.split(/\s+/).filter(w => w.length > 0).length;
-            setLiveWordCount(count);
 
             if (initialWordCountRef.current !== null) {
                 const added = count - initialWordCountRef.current;
-                setSessionWordCount(Math.max(0, added));
+                // Only increment session if we actually added words globally
+                if (added > 0) {
+                    setSessionWordCount(added);
+                    // Reset the initial word count ref so we don't double count if they jump around
+                    initialWordCountRef.current = count;
+                }
             }
 
             if (isTypewriterModeRef.current) {
@@ -168,9 +109,6 @@ export default function WritingEditor() {
 
             // DETECT ENTITY TRIGGER `[[`
             if (currentText.includes('[[')) {
-                // Find all text block nodes where the `[[` was typed.
-                // We use ProseMirror's state structure to cleanly delete just the trigger characters
-                // without erasing any preceding real text.
                 const state = editor.state;
                 const tr = state.tr;
                 let triggerFound = false;
@@ -178,30 +116,19 @@ export default function WritingEditor() {
                 state.doc.descendants((node, pos) => {
                     if (node.isText && node.text?.includes('[[')) {
                         const triggerStart = pos + node.text.indexOf('[[');
-                        // Delete exactly the two `[` characters
                         tr.delete(triggerStart, triggerStart + 2);
                         triggerFound = true;
                     }
                 });
 
                 if (triggerFound) {
-                    // 1. Dispatch the deletion transaction back to the editor
                     editor.view.dispatch(tr);
-
-                    // 2. Call the ref-stabilized Zustand action
                     openInlineCreatorRef.current();
                 }
             }
 
             // ENTITY DETECTION PASS
-            // PERFORMANCE DEBOUNCE: Scanning the full document tree and dispatching 
-            // ProseMirror Mark transactions on every keystroke causes severe input lag 
-            // on large documents. We debounce this pass by 300ms, ensuring it only 
-            // evaluates when the user naturally pauses typing.
-            if (debounceTimerRef.current) {
-                clearTimeout(debounceTimerRef.current);
-            }
-
+            if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
             debounceTimerRef.current = setTimeout(() => {
                 if (editor.isDestroyed) return;
 
@@ -209,7 +136,6 @@ export default function WritingEditor() {
                 const pmState = editor.state;
                 const pmTr = pmState.tr;
                 let marksChanged = false;
-
                 const desiredMarks: { start: number, end: number, id: string }[] = [];
 
                 pmState.doc.descendants((node, pos) => {
@@ -222,14 +148,14 @@ export default function WritingEditor() {
                             if (!matchStr.trim()) return;
 
                             let startIndex = 0;
-                            let index;
-                            while ((index = textLower.indexOf(matchStr, startIndex)) > -1) {
+                            let idx;
+                            while ((idx = textLower.indexOf(matchStr, startIndex)) > -1) {
                                 desiredMarks.push({
-                                    start: pos + index,
-                                    end: pos + index + entity.name.length,
+                                    start: pos + idx,
+                                    end: pos + idx + entity.name.length,
                                     id: entity.id
                                 });
-                                startIndex = index + matchStr.length;
+                                startIndex = idx + matchStr.length;
                             }
                         });
                     }
@@ -284,43 +210,28 @@ export default function WritingEditor() {
                 // CACHE PROSEMIRROR FLOW
                 const rawContent = editor.getHTML();
 
-                // Guard against empty state overwrite pollution
-                if (rawContent === EDITOR_PLACEHOLDER) {
-                    if (activeSceneId) updateScene(activeSceneId, { content: '', wordCount: 0 });
+                // If it's just the empty paragraph tag, save as empty string so placeholder works
+                if (rawContent === '<p></p>' || rawContent === EDITOR_PLACEHOLDER) {
+                    updateScene(scene.id, { content: '', wordCount: 0 });
                 } else {
-                    if (activeSceneId) updateScene(activeSceneId, { content: rawContent, wordCount: count });
+                    updateScene(scene.id, { content: rawContent, wordCount: count });
                 }
-
-                setSaveState('saved');
-                if (saveStateTimerRef.current) clearTimeout(saveStateTimerRef.current);
-                saveStateTimerRef.current = setTimeout(() => setSaveState('idle'), 2000);
 
             }, 300);
         },
-    });
+    }, [scene.id]); // Re-init if scene ID changes entirely
 
-    // FIX: DECOUPLED EDITOR FOCUS
     // We listen for a custom event emitted by UI modals when they close.
-    // This allows the UI overlays to return focus to the writing flow without
-    // needing a direct React prop/ref dependency to this specific component instance.
     useEffect(() => {
         const handleFocusReturn = () => {
-            if (editor && !editor.isDestroyed) {
-                editor.commands.focus();
-            }
+            // Only focus the last active editor or just default to the first one?
+            // Since we have multiple scenes, focusing all is bad. Let's let the user click back.
         };
-
         window.addEventListener('mythforge:returnFocusToEditor', handleFocusReturn);
+        return () => window.removeEventListener('mythforge:returnFocusToEditor', handleFocusReturn);
+    }, []);
 
-        return () => {
-            window.removeEventListener('mythforge:returnFocusToEditor', handleFocusReturn);
-        };
-    }, [editor]);
-
-    // DOM EVENT DELEGATION
-    // Attach pure DOM event listeners to the editor root element to capture pointer
-    // events bubbling up from the dynamic `.entity-tag` spans injected by the EntityMark.
-    // This allows seamless hover-previews without muddying the React render cycle or ProseMirror state.
+    // DOM EVENT DELEGATION for entities
     useEffect(() => {
         if (!editor || editor.isDestroyed) return;
 
@@ -328,9 +239,7 @@ export default function WritingEditor() {
             const target = e.target as HTMLElement;
             if (target && target.classList.contains('entity-tag')) {
                 const entityId = target.getAttribute('data-entity-id');
-                if (entityId) {
-                    setHoveredEntityRef.current(entityId);
-                }
+                if (entityId) setHoveredEntityRef.current(entityId);
             }
         };
 
@@ -354,19 +263,140 @@ export default function WritingEditor() {
     // Cleanup editor on unmount
     useEffect(() => {
         return () => {
-            if (debounceTimerRef.current) {
-                clearTimeout(debounceTimerRef.current);
-            }
-            if (editor) {
-                editor.destroy();
-            }
+            if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+            if (editor) editor.destroy();
         };
     }, [editor]);
 
-    // --- RENDER ---
+    const getAtmosphere = (id?: string) => {
+        if (!id) return undefined;
+        return ATMOSPHERE_PRESETS.find(p => p.id === id) || customAtmospheres.find(a => a.id === id);
+    };
 
-    // Guard against mounting the editor shell if Rehydration hasn't resolved
-    // the document targeting yet. Prevents flashing defaults.
+    const currentAtmosphere = atmospheresEnabled ? getAtmosphere(scene.atmosphereId) : undefined;
+
+    return (
+        <div
+            className={styles.sceneContainer}
+            style={{
+                ...(currentAtmosphere && atmosphereTypographyEnabled ? {
+                    '--atmosphere-line-height-shift': currentAtmosphere.lineHeightShift,
+                    '--atmosphere-letter-spacing-shift': currentAtmosphere.letterSpacingShift
+                } : {})
+            } as React.CSSProperties}
+        >
+            <div className={styles.sceneToolbar}>
+                <span style={{ fontWeight: 600, color: 'var(--text-primary)', marginRight: 'auto' }}>
+                    {currentAtmosphere && <span style={{ marginRight: '0.4rem', fontSize: '0.9rem' }}>{currentAtmosphere.icon}</span>}
+                    {scene.title}
+                </span>
+
+                {atmospheresEnabled && (
+                    <div ref={pickerRef} style={{ display: 'inline-flex', alignItems: 'center', position: 'relative' }}>
+                        <button
+                            className={styles.sceneToolbarButton}
+                            onClick={(e) => {
+                                if (isPickerOpen) {
+                                    setIsPickerOpen(false);
+                                    setPickerPosition(null);
+                                } else {
+                                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                                    setIsPickerOpen(true);
+                                    setPickerPosition({ top: rect.bottom + 8, left: rect.left });
+                                }
+                            }}
+                        >
+                            {currentAtmosphere ? (
+                                <><span>{currentAtmosphere.icon}</span><span>{currentAtmosphere.name}</span></>
+                            ) : (
+                                <><span>✦</span><span>Atmosphere</span></>
+                            )}
+                        </button>
+                        {isPickerOpen && pickerPosition && typeof document !== 'undefined' && createPortal(
+                            <div
+                                style={{ position: 'fixed', top: pickerPosition.top, left: pickerPosition.left, zIndex: 9999 }}
+                                onClick={e => e.stopPropagation()}
+                            >
+                                <AtmospherePicker
+                                    sceneId={scene.id}
+                                    currentAtmosphereId={scene.atmosphereId}
+                                    onClose={() => { setIsPickerOpen(false); setPickerPosition(null); }}
+                                />
+                            </div>,
+                            document.body
+                        )}
+                    </div>
+                )}
+                <span>{scene.wordCount || 0} words</span>
+            </div>
+
+            <EditorContent editor={editor} />
+        </div>
+    );
+}
+
+/**
+ * Writing Editor Container
+ * Renders all scenes in the active chapter.
+ */
+export default function WritingEditor() {
+    const documents = useWorkspaceStore((state) => state.documents);
+    const activeDocumentId = useWorkspaceStore((state) => state.activeDocumentId);
+    const activeSceneId = useWorkspaceStore((state) => state.activeSceneId);
+    const updateDocument = useWorkspaceStore((state) => state.updateDocument);
+
+    const scenes = useWorkspaceStore((state) => state.scenes);
+    const addScene = useWorkspaceStore((state) => state.addScene);
+
+    const activeDocument = documents.find(d => d.id === activeDocumentId);
+
+    // Sort active scenes by their order, and optionally filter by activeScene
+    const activeScenes = React.useMemo(() => {
+        const docScenes = scenes
+            .filter(s => s.documentId === activeDocumentId)
+            .sort((a, b) => a.order - b.order);
+
+        if (activeSceneId) {
+            return docScenes.filter(s => s.id === activeSceneId);
+        }
+        return docScenes;
+    }, [scenes, activeDocumentId, activeSceneId]);
+
+    const [showHint, setShowHint] = useState(() => getStoredValue('mythforge-hint-dismissed') !== 'true');
+
+    const writingGoal = useWorkspaceStore((state) => state.writingGoal);
+    const sessionWordCount = useWorkspaceStore((state) => state.sessionWordCount);
+    const isTypewriterMode = useWorkspaceStore((state) => state.isTypewriterMode);
+    const toggleTypewriterMode = useWorkspaceStore((state) => state.toggleTypewriterMode);
+    const isFullscreen = useWorkspaceStore((state) => state.isFullscreen);
+    const toggleFullscreen = useWorkspaceStore((state) => state.toggleFullscreen);
+    const editorWidth = useWorkspaceStore((state) => state.editorWidth);
+    const atmosphereReducedMotion = useWorkspaceStore((state) => state.atmosphereReducedMotion);
+
+    const saveStateTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
+
+    const [showFullscreenHint, setShowFullscreenHint] = useState(false);
+
+    useEffect(() => {
+        /* eslint-disable react-hooks/set-state-in-effect */
+        if (isFullscreen) {
+            setShowFullscreenHint(true);
+            const t = setTimeout(() => {
+                setShowFullscreenHint(false);
+            }, 3000);
+            return () => clearTimeout(t);
+        } else {
+            setShowFullscreenHint(false);
+        }
+        /* eslint-enable react-hooks/set-state-in-effect */
+    }, [isFullscreen]);
+
+    // Aggregate word count for the entire chapter
+    const currentChapterWordCount = React.useMemo(() => {
+        return activeScenes.reduce((acc, scene) => acc + (scene.wordCount || 0), 0);
+    }, [activeScenes]);
+
     if (!activeDocument) {
         return (
             <div className={styles.editorWrapper} style={{ paddingTop: '2rem', paddingBottom: '2rem', paddingLeft: '2rem', paddingRight: '2rem', color: '#888', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -375,23 +405,22 @@ export default function WritingEditor() {
         );
     }
 
-    if (!activeScene) {
+    if (activeScenes.length === 0) {
         return (
             <div className={styles.editorWrapper} style={{ paddingTop: '2rem', paddingBottom: '2rem', paddingLeft: '2rem', paddingRight: '2rem', color: '#888', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
-                <p>No scene selected</p>
+                <p>No scenes in this chapter</p>
                 <button
                     onClick={() => {
                         const newScene = {
                             id: crypto.randomUUID(),
                             documentId: activeDocument.id,
                             projectId: activeDocument.projectId,
-                            title: `Scene ${scenes.filter(s => s.documentId === activeDocument.id).length + 1}`,
+                            title: `Scene 1`,
                             content: '',
-                            order: scenes.filter(s => s.documentId === activeDocument.id).length,
+                            order: 0,
                             createdAt: new Date()
                         };
                         addScene(newScene);
-                        setActiveScene(newScene.id);
                     }}
                     style={{
                         padding: '0.5rem 1rem',
@@ -408,30 +437,17 @@ export default function WritingEditor() {
         );
     }
 
-    const getAtmosphere = (id?: string) => {
-        if (!id) return undefined;
-        return ATMOSPHERE_PRESETS.find(p => p.id === id) || customAtmospheres.find(a => a.id === id);
-    };
-
-    const currentAtmosphere = atmospheresEnabled ? getAtmosphere(activeScene.atmosphereId) : undefined;
-
     return (
         <div
             className={`${styles.editorWrapper} ${isTypewriterMode ? styles.typewriterActive : ''} ${atmosphereReducedMotion ? styles.reducedMotion : ''}`}
             style={{
                 paddingTop: isTypewriterMode ? '45vh' : undefined,
-                paddingBottom: isTypewriterMode ? '45vh' : undefined,
                 '--editor-width': `${editorWidth}px`,
-                ...(currentAtmosphere && atmosphereTypographyEnabled ? {
-                    '--atmosphere-line-height-shift': currentAtmosphere.lineHeightShift,
-                    '--atmosphere-letter-spacing-shift': currentAtmosphere.letterSpacingShift
-                } : {})
             } as React.CSSProperties}
         >
 
             {!isFullscreen && (
                 <div className={styles.editorToolbar}>
-                    {/* Editor toolbar — typewriter and fullscreen toggles, top-right of writing surface */}
                     <button
                         className={`${styles.editorToolbarButton} ${isTypewriterMode ? styles.active : ''}`}
                         onClick={toggleTypewriterMode}
@@ -474,7 +490,6 @@ export default function WritingEditor() {
 
             <div className={styles.editorHeader} style={{ display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                    {/* Document Title / Chapter Metadata */}
                     <input
                         type="text"
                         className={styles.documentTitle}
@@ -497,67 +512,17 @@ export default function WritingEditor() {
                         </span>
                     )}
                 </div>
-
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', padding: '0.25rem 0 0.75rem 0', fontSize: '0.8rem', color: 'var(--muted)' }}>
-                    {atmospheresEnabled && activeScene && (
-                        <div ref={pickerRef} style={{ display: 'inline-flex', alignItems: 'center', position: 'relative' }}>
-                            <button
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.4rem',
-                                    background: 'transparent',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: '4px',
-                                    padding: '0.1rem 0.5rem',
-                                    color: currentAtmosphere ? 'var(--foreground)' : 'var(--muted)',
-                                    fontSize: 'inherit',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s'
-                                }}
-                                onClick={(e) => {
-                                    if (isPickerOpen) {
-                                        setIsPickerOpen(false);
-                                        setPickerPosition(null);
-                                    } else {
-                                        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                                        setIsPickerOpen(true);
-                                        setPickerPosition({ top: rect.bottom + 8, left: rect.left });
-                                    }
-                                }}
-                            >
-                                {currentAtmosphere ? (
-                                    <>
-                                        <span>{currentAtmosphere.icon}</span>
-                                        <span>{currentAtmosphere.name}</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <span>✦</span>
-                                        <span>Set atmosphere</span>
-                                    </>
-                                )}
-                            </button>
-                            {isPickerOpen && pickerPosition && typeof document !== 'undefined' && createPortal(
-                                <div
-                                    style={{ position: 'fixed', top: pickerPosition.top, left: pickerPosition.left, zIndex: 9999 }}
-                                    onClick={e => e.stopPropagation()}
-                                >
-                                    <AtmospherePicker
-                                        sceneId={activeScene.id}
-                                        currentAtmosphereId={activeScene.atmosphereId}
-                                        onClose={() => { setIsPickerOpen(false); setPickerPosition(null); }}
-                                    />
-                                </div>,
-                                document.body
-                            )}
-                        </div>
-                    )}
-                    <span>{liveWordCount} words</span>
-                </div>
             </div>
 
-            <EditorContent editor={editor} />
+            {/* RENDER ALL SCENES */}
+            {activeScenes.map((scene, index) => (
+                <React.Fragment key={scene.id}>
+                    <SceneEditor scene={scene} index={index} />
+                    {index < activeScenes.length - 1 && (
+                        <div className={styles.sceneSeparator}>* * *</div>
+                    )}
+                </React.Fragment>
+            ))}
 
             {(writingGoal.dailyTarget > 0 || writingGoal.sessionTarget > 0) && (
                 <div className={styles.writingGoals}>
@@ -565,12 +530,12 @@ export default function WritingEditor() {
                         <div className={styles.goalRow}>
                             <div className={styles.goalInfo}>
                                 <span>Daily Target</span>
-                                <span>{activeScene?.wordCount || liveWordCount} / {writingGoal.dailyTarget}</span>
+                                <span>{currentChapterWordCount} / {writingGoal.dailyTarget}</span>
                             </div>
                             <div className={styles.progressBar}>
                                 <div
-                                    className={`${styles.progressFill} ${(activeScene?.wordCount || liveWordCount) >= writingGoal.dailyTarget ? styles.goalMet : ''}`}
-                                    style={{ width: `${Math.min(100, ((activeScene?.wordCount || liveWordCount) / writingGoal.dailyTarget) * 100)}%` }}
+                                    className={`${styles.progressFill} ${currentChapterWordCount >= writingGoal.dailyTarget ? styles.goalMet : ''}`}
+                                    style={{ width: `${Math.min(100, (currentChapterWordCount / writingGoal.dailyTarget) * 100)}%` }}
                                 />
                             </div>
                         </div>
@@ -592,17 +557,11 @@ export default function WritingEditor() {
                 </div>
             )}
 
-            {/* 
-             * FIRST-RUN ONBOARDING PATTERN: 
-             * Contextual onboarding is less disruptive than upfront tours.
-             * We guide the writer towards power features (slash commands / inline entries)
-             * at the point of need, and save their dismissal natively. 
-             */}
             {showHint && (
                 <div style={{
                     fontSize: '0.85rem',
                     color: '#888',
-                    marginTop: '1rem',
+                    marginTop: '2rem',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',

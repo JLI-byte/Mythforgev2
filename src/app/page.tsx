@@ -34,6 +34,7 @@ export default function Home() {
   const setCommandPaletteOpen = useWorkspaceStore((state) => state.setCommandPaletteOpen);
   const isFullscreen = useWorkspaceStore((state) => state.isFullscreen);
   const toggleFullscreen = useWorkspaceStore((state) => state.toggleFullscreen);
+  const activeDocumentId = useWorkspaceStore((state) => state.activeDocumentId);
   const activeSceneId = useWorkspaceStore((state) => state.activeSceneId);
   const scenes = useWorkspaceStore((state) => state.scenes);
   const customAtmospheres = useWorkspaceStore((state) => state.customAtmospheres);
@@ -89,7 +90,8 @@ export default function Home() {
         style={!atmosphereGlobalOverlay ? atmosphereStyleVars : undefined}
       >
         <div className={styles.editorScrollContainer}>
-          <WritingEditor key={activeSceneId} />
+          {/* Key by document so editor remounts on chapter change, not scene click */}
+          <WritingEditor key={activeDocumentId} />
         </div>
       </div>
 
