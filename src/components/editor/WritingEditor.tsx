@@ -27,8 +27,6 @@ function SceneEditor({ scene, index }: { scene: Scene, index: number }) {
     const setSessionWordCount = useWorkspaceStore((state) => state.setSessionWordCount);
     const writingMode = useWorkspaceStore((state) => state.writingMode);
 
-    const [isFocused, setIsFocused] = useState(false);
-
     const openInlineCreatorRef = React.useRef(openInlineCreator);
     const entitiesRef = React.useRef(entities.filter(e => e.projectId === activeProjectId));
     const setHoveredEntityRef = React.useRef(setHoveredEntity);
@@ -68,10 +66,6 @@ function SceneEditor({ scene, index }: { scene: Scene, index: number }) {
             attributes: {
                 class: styles.editorContent,
                 'data-placeholder': 'Start writing your story here...'
-            },
-            handleDOMEvents: {
-                focus: () => { setIsFocused(true); return false; },
-                blur: () => { setIsFocused(false); return false; },
             }
         },
         onUpdate: ({ editor }) => {
@@ -284,69 +278,67 @@ function SceneEditor({ scene, index }: { scene: Scene, index: number }) {
                 <span>{scene.wordCount || 0} words</span>
             </div>
 
-            {/* Per-scene formatting toolbar — appears when scene is focused */}
-            {(isFocused || index === 0) && (
-                <div className={styles.sceneFormatBar}>
-                    {/* Paragraph style */}
-                    <select
-                        className={styles.toolbarSelect}
-                        value={
-                            editor?.isActive('heading', { level: 1 }) ? 'h1' :
-                                editor?.isActive('heading', { level: 2 }) ? 'h2' :
-                                    editor?.isActive('heading', { level: 3 }) ? 'h3' :
-                                        editor?.isActive('blockquote') ? 'blockquote' : 'p'
-                        }
-                        onChange={(e) => {
-                            const val = e.target.value;
-                            if (val === 'p') editor?.chain().focus().setParagraph().run();
-                            else if (val === 'h1') editor?.chain().focus().toggleHeading({ level: 1 }).run();
-                            else if (val === 'h2') editor?.chain().focus().toggleHeading({ level: 2 }).run();
-                            else if (val === 'h3') editor?.chain().focus().toggleHeading({ level: 3 }).run();
-                            else if (val === 'blockquote') editor?.chain().focus().toggleBlockquote().run();
-                        }}
-                    >
-                        <option value="p">Paragraph</option>
-                        <option value="h1">Heading 1</option>
-                        <option value="h2">Heading 2</option>
-                        <option value="h3">Heading 3</option>
-                        <option value="blockquote">Block Quote</option>
-                    </select>
+            {/* Formatting toolbar — always visible, highlights on focus */}
+            <div className={styles.sceneFormatBar}>
+                {/* Paragraph style */}
+                <select
+                    className={styles.toolbarSelect}
+                    value={
+                        editor?.isActive('heading', { level: 1 }) ? 'h1' :
+                            editor?.isActive('heading', { level: 2 }) ? 'h2' :
+                                editor?.isActive('heading', { level: 3 }) ? 'h3' :
+                                    editor?.isActive('blockquote') ? 'blockquote' : 'p'
+                    }
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === 'p') editor?.chain().focus().setParagraph().run();
+                        else if (val === 'h1') editor?.chain().focus().toggleHeading({ level: 1 }).run();
+                        else if (val === 'h2') editor?.chain().focus().toggleHeading({ level: 2 }).run();
+                        else if (val === 'h3') editor?.chain().focus().toggleHeading({ level: 3 }).run();
+                        else if (val === 'blockquote') editor?.chain().focus().toggleBlockquote().run();
+                    }}
+                >
+                    <option value="p">Paragraph</option>
+                    <option value="h1">Heading 1</option>
+                    <option value="h2">Heading 2</option>
+                    <option value="h3">Heading 3</option>
+                    <option value="blockquote">Block Quote</option>
+                </select>
 
-                    {/* Text formatting */}
-                    <div className={styles.toolbarGroup}>
-                        <button className={`${styles.toolbarBtn} ${editor?.isActive('bold') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleBold().run(); }} title="Bold"><strong>B</strong></button>
-                        <button className={`${styles.toolbarBtn} ${editor?.isActive('italic') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleItalic().run(); }} title="Italic"><em>I</em></button>
-                        <button className={`${styles.toolbarBtn} ${editor?.isActive('underline') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleUnderline().run(); }} title="Underline"><u>U</u></button>
-                        <button className={`${styles.toolbarBtn} ${editor?.isActive('strike') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleStrike().run(); }} title="Strikethrough"><s>S</s></button>
-                        <button className={`${styles.toolbarBtn} ${editor?.isActive('blockquote') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleBlockquote().run(); }} title="Block Quote">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" /><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" /></svg>
-                        </button>
-                    </div>
-
-                    {/* Alignment */}
-                    <div className={styles.toolbarGroup}>
-                        <button className={`${styles.toolbarBtn} ${editor?.isActive({ textAlign: 'left' }) ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().setTextAlign('left').run(); }} title="Align Left">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="15" y2="12" /><line x1="3" y1="18" x2="18" y2="18" /></svg>
-                        </button>
-                        <button className={`${styles.toolbarBtn} ${editor?.isActive({ textAlign: 'center' }) ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().setTextAlign('center').run(); }} title="Align Center">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="6" y1="12" x2="18" y2="12" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
-                        </button>
-                        <button className={`${styles.toolbarBtn} ${editor?.isActive({ textAlign: 'right' }) ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().setTextAlign('right').run(); }} title="Align Right">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="9" y1="12" x2="21" y2="12" /><line x1="6" y1="18" x2="21" y2="18" /></svg>
-                        </button>
-                    </div>
-
-                    {/* Lists */}
-                    <div className={styles.toolbarGroup}>
-                        <button className={`${styles.toolbarBtn} ${editor?.isActive('bulletList') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleBulletList().run(); }} title="Bullet List">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="9" y1="6" x2="20" y2="6" /><line x1="9" y1="12" x2="20" y2="12" /><line x1="9" y1="18" x2="20" y2="18" /><circle cx="4" cy="6" r="1.5" fill="currentColor" /><circle cx="4" cy="12" r="1.5" fill="currentColor" /><circle cx="4" cy="18" r="1.5" fill="currentColor" /></svg>
-                        </button>
-                        <button className={`${styles.toolbarBtn} ${editor?.isActive('orderedList') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleOrderedList().run(); }} title="Numbered List">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="10" y1="6" x2="21" y2="6" /><line x1="10" y1="12" x2="21" y2="12" /><line x1="10" y1="18" x2="21" y2="18" /><text x="1" y="8" fontSize="6" fill="currentColor" stroke="none">1.</text><text x="1" y="14" fontSize="6" fill="currentColor" stroke="none">2.</text><text x="1" y="20" fontSize="6" fill="currentColor" stroke="none">3.</text></svg>
-                        </button>
-                    </div>
+                {/* Text formatting */}
+                <div className={styles.toolbarGroup}>
+                    <button className={`${styles.toolbarBtn} ${editor?.isActive('bold') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleBold().run(); }} title="Bold"><strong>B</strong></button>
+                    <button className={`${styles.toolbarBtn} ${editor?.isActive('italic') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleItalic().run(); }} title="Italic"><em>I</em></button>
+                    <button className={`${styles.toolbarBtn} ${editor?.isActive('underline') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleUnderline().run(); }} title="Underline"><u>U</u></button>
+                    <button className={`${styles.toolbarBtn} ${editor?.isActive('strike') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleStrike().run(); }} title="Strikethrough"><s>S</s></button>
+                    <button className={`${styles.toolbarBtn} ${editor?.isActive('blockquote') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleBlockquote().run(); }} title="Block Quote">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" /><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" /></svg>
+                    </button>
                 </div>
-            )}
+
+                {/* Alignment */}
+                <div className={styles.toolbarGroup}>
+                    <button className={`${styles.toolbarBtn} ${editor?.isActive({ textAlign: 'left' }) ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().setTextAlign('left').run(); }} title="Align Left">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="15" y2="12" /><line x1="3" y1="18" x2="18" y2="18" /></svg>
+                    </button>
+                    <button className={`${styles.toolbarBtn} ${editor?.isActive({ textAlign: 'center' }) ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().setTextAlign('center').run(); }} title="Align Center">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="6" y1="12" x2="18" y2="12" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
+                    </button>
+                    <button className={`${styles.toolbarBtn} ${editor?.isActive({ textAlign: 'right' }) ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().setTextAlign('right').run(); }} title="Align Right">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="9" y1="12" x2="21" y2="12" /><line x1="6" y1="18" x2="21" y2="18" /></svg>
+                    </button>
+                </div>
+
+                {/* Lists */}
+                <div className={styles.toolbarGroup}>
+                    <button className={`${styles.toolbarBtn} ${editor?.isActive('bulletList') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleBulletList().run(); }} title="Bullet List">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="9" y1="6" x2="20" y2="6" /><line x1="9" y1="12" x2="20" y2="12" /><line x1="9" y1="18" x2="20" y2="18" /><circle cx="4" cy="6" r="1.5" fill="currentColor" /><circle cx="4" cy="12" r="1.5" fill="currentColor" /><circle cx="4" cy="18" r="1.5" fill="currentColor" /></svg>
+                    </button>
+                    <button className={`${styles.toolbarBtn} ${editor?.isActive('orderedList') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleOrderedList().run(); }} title="Numbered List">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="10" y1="6" x2="21" y2="6" /><line x1="10" y1="12" x2="21" y2="12" /><line x1="10" y1="18" x2="21" y2="18" /><text x="1" y="8" fontSize="6" fill="currentColor" stroke="none">1.</text><text x="1" y="14" fontSize="6" fill="currentColor" stroke="none">2.</text><text x="1" y="20" fontSize="6" fill="currentColor" stroke="none">3.</text></svg>
+                    </button>
+                </div>
+            </div>
 
             <EditorContent editor={editor} />
         </div>
