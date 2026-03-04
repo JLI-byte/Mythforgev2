@@ -209,6 +209,10 @@ interface WorkspaceState {
     /** Toggle for persistent rich text toolbar visibility */
     isToolbarVisible: boolean;
 
+    /** Editor layout and typography mode */
+    writingMode: 'novel' | 'screenplay' | 'markdown' | 'poetry';
+
+
 
     // --- ACTIONS ---
     addProject: (project: Project) => void;
@@ -318,6 +322,10 @@ interface WorkspaceState {
     /** Toggles the rich text toolbar visibility */
     toggleToolbarVisible: () => void;
 
+    /** Sets the current layout/typography writing mode */
+    setWritingMode: (mode: 'novel' | 'screenplay' | 'markdown' | 'poetry') => void;
+
+
 
     /**
      * Submits partial updates to the AI provider configuration.
@@ -390,6 +398,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             atmosphereTypographyEnabled: true,
             atmosphereReducedMotion: false,
             isToolbarVisible: true,
+            writingMode: 'novel',
+
 
 
             addProject: (project) =>
@@ -659,6 +669,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             toggleToolbarVisible: () => set(s => ({ isToolbarVisible: !s.isToolbarVisible })),
 
+            setWritingMode: (mode) => set(() => ({ writingMode: mode })),
+
+
         }),
         {
             name: 'mythforge-workspace',
@@ -685,7 +698,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 atmospheresEnabled: state.atmospheresEnabled,
                 atmosphereTypographyEnabled: state.atmosphereTypographyEnabled,
                 atmosphereReducedMotion: state.atmosphereReducedMotion,
-                isToolbarVisible: state.isToolbarVisible
+                isToolbarVisible: state.isToolbarVisible,
+                writingMode: state.writingMode
             }),
 
             // Track hydration phases allowing components to await persistence payload dynamically
