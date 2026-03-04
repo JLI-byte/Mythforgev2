@@ -8,8 +8,8 @@ import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 import { AtmospherePicker } from '../ui/AtmospherePicker';
 import { SpotifyPlayer } from '../ui/SpotifyPlayer';
 import SettingsModal from '../ui/SettingsModal';
-import ProjectSwitcher from '../ui/ProjectSwitcher';
-import NewProjectModal from '../ui/NewProjectModal';
+import { ProjectSwitcher } from '../ui/ProjectSwitcher';
+import { NewProjectModal } from '../ui/NewProjectModal';
 
 /**
  * NavigationPanel UI Component
@@ -301,8 +301,8 @@ export function NavigationPanel() {
                 <div className={styles.projectMeta}>
                     <span className={styles.projectTitle}>{activeProject?.name || 'No Project'}</span>
                     <div className={styles.projectControls}>
-                        <button className={styles.projectNavBtn} onClick={goToPrevProject} title="Previous project">‹</button>
-                        <button className={styles.projectNavBtn} onClick={goToNextProject} title="Next project">›</button>
+                        <button className={styles.projectNavBtn} onClick={goToPrevProject} title="Previous project" disabled={projects.length < 2}>‹</button>
+                        <button className={styles.projectNavBtn} onClick={goToNextProject} title="Next project" disabled={projects.length < 2}>›</button>
                         <button className={styles.projectGridBtn} onClick={() => setShowSwitcher(true)} title="All projects">⊞</button>
                         <button className={styles.projectNewBtn} onClick={() => setShowNewProject(true)} title="New project">+</button>
                     </div>

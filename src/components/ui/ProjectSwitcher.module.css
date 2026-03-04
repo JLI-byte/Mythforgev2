@@ -1,39 +1,36 @@
-/* src/components/ui/ProjectSwitcher.module.css */
 .overlay {
     position: fixed;
     inset: 0;
-    z-index: 1000;
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px);
+    z-index: 1000;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 1rem;
 }
 
-.card {
+.modal {
     background: var(--surface);
-    border-radius: 8px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
     width: 100%;
-    max-width: 720px;
+    max-width: 680px;
     max-height: 80vh;
     overflow-y: auto;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    display: flex;
-    flex-direction: column;
+    padding: 1.5rem;
 }
 
 .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.25rem;
 }
 
 .title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
     margin: 0;
 }
 
@@ -41,104 +38,106 @@
     background: none;
     border: none;
     color: var(--muted);
-    font-size: 1.5rem;
+    font-size: 1rem;
     cursor: pointer;
-    line-height: 1;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
 }
 
 .closeBtn:hover {
-    color: var(--text-primary);
+    color: var(--foreground);
+    background: var(--background);
 }
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 1rem;
-    padding: 1.5rem;
 }
 
-.projectCard {
-    background: var(--background);
-    border: 2px solid transparent;
-    border-radius: 8px;
-    padding: 0.75rem;
+.card {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     cursor: pointer;
+    border-radius: 8px;
+    padding: 0.5rem;
+    border: 2px solid transparent;
     transition: border-color 150ms ease, background 150ms ease;
-    min-height: 180px;
 }
 
-.projectCard:hover {
-    background: var(--surface-hover, rgba(255, 255, 255, 0.05));
+.card:hover {
+    background: var(--background);
 }
 
-.projectCardActive {
-    border-color: var(--accent);
+.activeCard {
+    border-color: var(--accent, #4A6FA5);
 }
 
 .cover {
     width: 100%;
-    height: 80px;
-    border-radius: 8px;
+    aspect-ratio: 2/3;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.initials {
     font-size: 1.5rem;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    flex-shrink: 0;
 }
 
-.projectTitle {
-    font-size: 0.9rem;
+.cardMeta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.cardTitle {
+    font-size: 0.8rem;
     font-weight: 600;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-top: 0.25rem;
+    color: var(--foreground);
 }
 
-.badge {
+.cardMode {
     font-size: 0.7rem;
-    background: var(--border);
-    color: var(--text-secondary);
-    padding: 0.15rem 0.4rem;
-    border-radius: 4px;
-    align-self: flex-start;
+    color: var(--muted);
 }
 
-.wordCount {
-    font-size: 0.75rem;
+.cardWords {
+    font-size: 0.7rem;
     color: var(--muted);
 }
 
 .newCard {
-    border: 2px dashed var(--border);
-    background: transparent;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    height: 100%;
-    min-height: 180px;
-    border-radius: 8px;
     cursor: pointer;
-    color: var(--muted);
-    transition: color 150ms ease, border-color 150ms ease;
+    border-radius: 8px;
+    border: 2px dashed var(--border);
+    padding: 1rem;
+    aspect-ratio: 2/3;
+    transition: border-color 150ms ease, background 150ms ease;
+    min-height: 120px;
 }
 
 .newCard:hover {
-    border-color: var(--accent);
-    color: var(--accent);
+    border-color: var(--muted);
+    background: var(--background);
 }
 
 .newIcon {
-    font-size: 2rem;
-    color: inherit;
-    line-height: 1;
+    font-size: 1.5rem;
+    color: var(--muted);
+}
+
+.newLabel {
+    font-size: 0.75rem;
+    color: var(--muted);
 }

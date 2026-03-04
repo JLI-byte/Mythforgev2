@@ -758,6 +758,13 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         state.activeSceneId = newActiveSceneId;
                     }
 
+                    // Migration: patch existing projects missing writingMode or coverColor
+                    state.projects = state.projects.map((p, i) => ({
+                        ...p,
+                        writingMode: (p as Project & { writingMode?: string }).writingMode || 'novel',
+                        coverColor: (p as Project & { coverColor?: string }).coverColor || COVER_COLORS[i % COVER_COLORS.length]
+                    })) as Project[];
+
                     state.setHasHydrated(true);
                 }
             },

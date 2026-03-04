@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+"use client";
+import React, { useState, useEffect, useCallback } from 'react';
 import styles from './NewProjectModal.module.css';
 import { useWorkspaceStore, COVER_COLORS } from '@/store/workspaceStore';
 
@@ -7,17 +8,16 @@ interface NewProjectModalProps {
     onClose: () => void;
 }
 
-const MODES = [
-    { id: 'novel', icon: '📖', name: 'Novel', desc: 'Long-form fiction with chapters and scenes' },
-    { id: 'screenplay', icon: '🎬', name: 'Screenplay', desc: 'Script format with elements and scenes' },
-    { id: 'markdown', icon: '📝', name: 'Notes/Lore', desc: 'Research, worldbuilding, and reference' },
-    { id: 'poetry', icon: '✍️', name: 'Poetry', desc: 'Verse, stanzas, and lyric writing' }
-] as const;
+type WritingMode = 'novel' | 'screenplay' | 'markdown' | 'poetry';
 
-export default function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
-    const [title, setTitle] = useState('');
-    const [selectedMode, setSelectedMode] = useState<'novel' | 'screenplay' | 'markdown' | 'poetry'>('novel');
+const MODES: { id: WritingMode; label: string; icon: string; desc: string }[] = [
+    { id: 'novel', label: 'Novel', icon: '📖', desc: 'Long-form fiction with chapters and scenes' },
+    { id: 'screenplay', label: 'Screenplay', icon: '🎬', desc: 'Script format with elements and scenes' },
+    { id: 'markdown', label: 'Notes / Lore', icon: '📝', desc: 'Research, worldbuilding, and reference' },
+    { id: 'poetry', label: 'Poetry', icon: '✍', desc: 'Verse, stanzas, and lyric writing' },
+];
 
+export function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
     const projects = useWorkspaceStore(state => state.projects);
     const addProject = useWorkspaceStore(state => state.addProject);
     const addDocument = useWorkspaceStore(state => state.addDocument);
@@ -26,128 +26,93 @@ export default function NewProjectModal({ isOpen, onClose }: NewProjectModalProp
     const setActiveDocument = useWorkspaceStore(state => state.setActiveDocument);
     const setActiveScene = useWorkspaceStore(state => state.setActiveScene);
 
-    const coverColor = COVER_COLORS[projects.length % COVER_COLORS.length];
+    const [title, setTitle] = useState('');
+    const [selectedMode, setSelectedMode] = useState<WritingMode>('novel');
 
-    const handleClose = () => {
+    const coverColor = COVER_COLORS[projects.length % COVER_COLORS.length];
+    const initials = title.trim().split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?';
+
+    const handleClose = useCallback(() => {
         setTitle('');
         setSelectedMode('novel');
         onClose();
-    };
+    }, [onClose]);
 
     useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && isOpen) {
-                handleClose();
-            }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, onClose]);
+        const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose(); };
+        if (isOpen) document.addEventListener('keydown', handleKey);
+        return () => document.removeEventListener('keydown', handleKey);
+    }, [isOpen, handleClose]);
 
     if (!isOpen) return null;
 
     const handleCreate = () => {
         if (!title.trim()) return;
-
         const newProjectId = crypto.randomUUID();
-        const color = COVER_COLORS[projects.length % COVER_COLORS.length];
+        const newDocId = crypto.randomUUID();
+        const newSceneId = crypto.randomUUID();
 
         addProject({
             id: newProjectId,
             name: title.trim(),
             writingMode: selectedMode,
-            coverColor: color,
+            coverColor,
             createdAt: new Date()
         });
-
-        const newDocId = crypto.randomUUID();
-        addDocument({
-            id: newDocId,
-            projectId: newProjectId,
-            title: 'Chapter 1',
-            content: '',
-            createdAt: new Date()
-        });
-
-        const newSceneId = crypto.randomUUID();
-        addScene({
-            id: newSceneId,
-            documentId: newDocId,
-            projectId: newProjectId,
-            title: 'Scene 1',
-            content: '',
-            order: 0,
-            createdAt: new Date()
-        });
-
+        addDocument({ id: newDocId, projectId: newProjectId, title: 'Chapter 1', content: '', createdAt: new Date() });
+        addScene({ id: newSceneId, documentId: newDocId, projectId: newProjectId, title: 'Scene 1', content: '', order: 0, createdAt: new Date() });
         setActiveProject(newProjectId);
         setActiveDocument(newDocId);
         setActiveScene(newSceneId);
         handleClose();
     };
 
-    const initials = title.trim().split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-
     return (
         <div className={styles.overlay} onClick={handleClose}>
-            <div className={styles.card} onClick={e => e.stopPropagation()}>
+            <div className={styles.modal} onClick={e => e.stopPropagation()}>
                 <div className={styles.header}>
                     <h2 className={styles.title}>New Project</h2>
-                    <button className={styles.closeBtn} onClick={handleClose} title="Close">&times;</button>
+                    <button className={styles.closeBtn} onClick={handleClose}>✕</button>
                 </div>
 
-                <div className={styles.content}>
-                    <div className={styles.coverPreviewContainer}>
-                        <div
-                            className={styles.coverPreview}
-                            style={{ background: coverColor }}
+                {/* Cover preview */}
+                <div className={styles.coverPreview} style={{ background: coverColor }}>
+                    <span className={styles.coverInitials}>{initials}</span>
+                </div>
+
+                {/* Title input */}
+                <input
+                    className={styles.titleInput}
+                    type="text"
+                    placeholder="Project title..."
+                    value={title}
+                    onChange={e => setTitle(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && title.trim()) handleCreate(); }}
+                    autoFocus
+                />
+
+                {/* Mode selector */}
+                <div className={styles.modeGrid}>
+                    {MODES.map(mode => (
+                        <button
+                            key={mode.id}
+                            className={`${styles.modeCard} ${selectedMode === mode.id ? styles.modeCardActive : ''}`}
+                            onClick={() => setSelectedMode(mode.id)}
                         >
-                            {initials || '?'}
-                        </div>
-                    </div>
-
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>Project Title</label>
-                        <input
-                            type="text"
-                            className={styles.input}
-                            value={title}
-                            onChange={e => setTitle(e.target.value)}
-                            placeholder="My Epic Masterpiece"
-                            autoFocus
-                        />
-                    </div>
-
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>Writing Mode</label>
-                        <div className={styles.modeGrid}>
-                            {MODES.map(mode => (
-                                <div
-                                    key={mode.id}
-                                    className={`${styles.modeCard} ${selectedMode === mode.id ? styles.modeCardActive : ''}`}
-                                    onClick={() => setSelectedMode(mode.id)}
-                                >
-                                    <div className={styles.modeHeader}>
-                                        <span className={styles.modeIcon}>{mode.icon}</span>
-                                        <span>{mode.name}</span>
-                                    </div>
-                                    <div className={styles.modeDesc}>{mode.desc}</div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                            <span className={styles.modeIcon}>{mode.icon}</span>
+                            <span className={styles.modeLabel}>{mode.label}</span>
+                            <span className={styles.modeDesc}>{mode.desc}</span>
+                        </button>
+                    ))}
                 </div>
 
-                <div className={styles.footer}>
-                    <button className={styles.cancelBtn} onClick={handleClose}>Cancel</button>
-                    <button
-                        className={styles.createBtn}
-                        onClick={handleCreate}
-                        disabled={!title.trim()}
-                    >
-                        Create Project
-                    </button>
-                </div>
+                <button
+                    className={styles.createBtn}
+                    onClick={handleCreate}
+                    disabled={!title.trim()}
+                >
+                    Create Project
+                </button>
             </div>
         </div>
     );
