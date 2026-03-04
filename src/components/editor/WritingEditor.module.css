@@ -239,3 +239,47 @@
         transition: none !important;
     }
 }
+
+.novelMode .editorContent {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    line-height: 1.9;
+}
+
+.screenplayMode .editorContent {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.markdownMode .editorContent {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.poetryMode .editorContent {
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    line-height: 2.2;
+    text-align: center;
+}
+
+/* Per-scene formatting toolbar — appears on focus */
+.sceneFormatBar {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.35rem 0;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.sceneContainer:focus-within .sceneFormatBar {
+    opacity: 1;
+    transform: translateY(0);
+}

@@ -11,21 +11,7 @@ import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 
 const EDITOR_PLACEHOLDER = '<p>Start writing your story here...</p>';
 
-export interface EditorStates {
-    bold: boolean;
-    italic: boolean;
-    underline: boolean;
-    strike: boolean;
-    blockquote: boolean;
-    alignLeft: boolean;
-    alignCenter: boolean;
-    alignRight: boolean;
-    bulletList: boolean;
-    orderedList: boolean;
-    headingLevel: number;
-}
-
-function SceneEditor({ scene, index, editorRef, onEditorUpdate }: { scene: Scene, index: number, editorRef?: React.MutableRefObject<ReturnType<typeof useEditor> | null>, onEditorUpdate?: (states: EditorStates) => void }) {
+function SceneEditor({ scene, index }: { scene: Scene, index: number }) {
     const activeProjectId = useWorkspaceStore((state) => state.activeProjectId);
     const updateScene = useWorkspaceStore((state) => state.updateScene);
     const openInlineCreator = useWorkspaceStore((state) => state.openInlineCreator);
@@ -39,6 +25,9 @@ function SceneEditor({ scene, index, editorRef, onEditorUpdate }: { scene: Scene
     const atmosphereTypographyEnabled = useWorkspaceStore((state) => state.atmosphereTypographyEnabled);
 
     const setSessionWordCount = useWorkspaceStore((state) => state.setSessionWordCount);
+    const writingMode = useWorkspaceStore((state) => state.writingMode);
+
+    const [isFocused, setIsFocused] = useState(false);
 
     const openInlineCreatorRef = React.useRef(openInlineCreator);
     const entitiesRef = React.useRef(entities.filter(e => e.projectId === activeProjectId));
@@ -67,9 +56,6 @@ function SceneEditor({ scene, index, editorRef, onEditorUpdate }: { scene: Scene
         autofocus: index === 0 ? 'end' : false,
         immediatelyRender: false,
         onCreate: ({ editor }) => {
-            if (editorRef) {
-                editorRef.current = editor;
-            }
             const count = editor.getText().split(/\s+/).filter(w => w.length > 0).length;
             initialWordCountRef.current = count;
 
@@ -78,30 +64,15 @@ function SceneEditor({ scene, index, editorRef, onEditorUpdate }: { scene: Scene
                 editor.commands.setContent('');
             }
         },
-        onTransaction: ({ editor: tEditor }) => {
-            if (onEditorUpdate) {
-                onEditorUpdate({
-                    bold: tEditor.isActive('bold'),
-                    italic: tEditor.isActive('italic'),
-                    underline: tEditor.isActive('underline'),
-                    strike: tEditor.isActive('strike'),
-                    blockquote: tEditor.isActive('blockquote'),
-                    alignLeft: tEditor.isActive({ textAlign: 'left' }),
-                    alignCenter: tEditor.isActive({ textAlign: 'center' }),
-                    alignRight: tEditor.isActive({ textAlign: 'right' }),
-                    bulletList: tEditor.isActive('bulletList'),
-                    orderedList: tEditor.isActive('orderedList'),
-                    headingLevel: tEditor.isActive('heading', { level: 1 }) ? 1 :
-                        tEditor.isActive('heading', { level: 2 }) ? 2 :
-                            tEditor.isActive('heading', { level: 3 }) ? 3 : 0
-                });
-            }
-        },
         editorProps: {
             attributes: {
                 class: styles.editorContent,
                 'data-placeholder': 'Start writing your story here...'
             },
+            handleDOMEvents: {
+                focus: () => { setIsFocused(true); return false; },
+                blur: () => { setIsFocused(false); return false; },
+            }
         },
         onUpdate: ({ editor }) => {
             const currentText = editor.getText();
@@ -298,7 +269,7 @@ function SceneEditor({ scene, index, editorRef, onEditorUpdate }: { scene: Scene
 
     return (
         <div
-            className={styles.sceneContainer}
+            className={`${styles.sceneContainer} ${styles[(writingMode || 'novel') + 'Mode'] || ''}`}
             style={{
                 ...(currentAtmosphere && atmosphereTypographyEnabled ? {
                     '--atmosphere-line-height-shift': currentAtmosphere.lineHeightShift,
@@ -312,6 +283,70 @@ function SceneEditor({ scene, index, editorRef, onEditorUpdate }: { scene: Scene
                 </span>
                 <span>{scene.wordCount || 0} words</span>
             </div>
+
+            {/* Per-scene formatting toolbar — appears when scene is focused */}
+            {(isFocused || index === 0) && (
+                <div className={styles.sceneFormatBar}>
+                    {/* Paragraph style */}
+                    <select
+                        className={styles.toolbarSelect}
+                        value={
+                            editor?.isActive('heading', { level: 1 }) ? 'h1' :
+                                editor?.isActive('heading', { level: 2 }) ? 'h2' :
+                                    editor?.isActive('heading', { level: 3 }) ? 'h3' :
+                                        editor?.isActive('blockquote') ? 'blockquote' : 'p'
+                        }
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === 'p') editor?.chain().focus().setParagraph().run();
+                            else if (val === 'h1') editor?.chain().focus().toggleHeading({ level: 1 }).run();
+                            else if (val === 'h2') editor?.chain().focus().toggleHeading({ level: 2 }).run();
+                            else if (val === 'h3') editor?.chain().focus().toggleHeading({ level: 3 }).run();
+                            else if (val === 'blockquote') editor?.chain().focus().toggleBlockquote().run();
+                        }}
+                    >
+                        <option value="p">Paragraph</option>
+                        <option value="h1">Heading 1</option>
+                        <option value="h2">Heading 2</option>
+                        <option value="h3">Heading 3</option>
+                        <option value="blockquote">Block Quote</option>
+                    </select>
+
+                    {/* Text formatting */}
+                    <div className={styles.toolbarGroup}>
+                        <button className={`${styles.toolbarBtn} ${editor?.isActive('bold') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleBold().run(); }} title="Bold"><strong>B</strong></button>
+                        <button className={`${styles.toolbarBtn} ${editor?.isActive('italic') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleItalic().run(); }} title="Italic"><em>I</em></button>
+                        <button className={`${styles.toolbarBtn} ${editor?.isActive('underline') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleUnderline().run(); }} title="Underline"><u>U</u></button>
+                        <button className={`${styles.toolbarBtn} ${editor?.isActive('strike') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleStrike().run(); }} title="Strikethrough"><s>S</s></button>
+                        <button className={`${styles.toolbarBtn} ${editor?.isActive('blockquote') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleBlockquote().run(); }} title="Block Quote">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" /><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" /></svg>
+                        </button>
+                    </div>
+
+                    {/* Alignment */}
+                    <div className={styles.toolbarGroup}>
+                        <button className={`${styles.toolbarBtn} ${editor?.isActive({ textAlign: 'left' }) ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().setTextAlign('left').run(); }} title="Align Left">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="15" y2="12" /><line x1="3" y1="18" x2="18" y2="18" /></svg>
+                        </button>
+                        <button className={`${styles.toolbarBtn} ${editor?.isActive({ textAlign: 'center' }) ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().setTextAlign('center').run(); }} title="Align Center">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="6" y1="12" x2="18" y2="12" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
+                        </button>
+                        <button className={`${styles.toolbarBtn} ${editor?.isActive({ textAlign: 'right' }) ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().setTextAlign('right').run(); }} title="Align Right">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="9" y1="12" x2="21" y2="12" /><line x1="6" y1="18" x2="21" y2="18" /></svg>
+                        </button>
+                    </div>
+
+                    {/* Lists */}
+                    <div className={styles.toolbarGroup}>
+                        <button className={`${styles.toolbarBtn} ${editor?.isActive('bulletList') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleBulletList().run(); }} title="Bullet List">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="9" y1="6" x2="20" y2="6" /><line x1="9" y1="12" x2="20" y2="12" /><line x1="9" y1="18" x2="20" y2="18" /><circle cx="4" cy="6" r="1.5" fill="currentColor" /><circle cx="4" cy="12" r="1.5" fill="currentColor" /><circle cx="4" cy="18" r="1.5" fill="currentColor" /></svg>
+                        </button>
+                        <button className={`${styles.toolbarBtn} ${editor?.isActive('orderedList') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); editor?.chain().focus().toggleOrderedList().run(); }} title="Numbered List">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="10" y1="6" x2="21" y2="6" /><line x1="10" y1="12" x2="21" y2="12" /><line x1="10" y1="18" x2="21" y2="18" /><text x="1" y="8" fontSize="6" fill="currentColor" stroke="none">1.</text><text x="1" y="14" fontSize="6" fill="currentColor" stroke="none">2.</text><text x="1" y="20" fontSize="6" fill="currentColor" stroke="none">3.</text></svg>
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <EditorContent editor={editor} />
         </div>
@@ -359,26 +394,6 @@ export default function WritingEditor() {
     const toggleToolbarVisible = useWorkspaceStore((state) => state.toggleToolbarVisible);
     const editorWidth = useWorkspaceStore((state) => state.editorWidth);
     const atmosphereReducedMotion = useWorkspaceStore((state) => state.atmosphereReducedMotion);
-
-    const firstEditorRef = React.useRef<ReturnType<typeof useEditor> | null>(null);
-
-    const [activeStates, setActiveStates] = useState<EditorStates>({
-        bold: false,
-        italic: false,
-        underline: false,
-        strike: false,
-        blockquote: false,
-        alignLeft: false,
-        alignCenter: false,
-        alignRight: false,
-        bulletList: false,
-        orderedList: false,
-        headingLevel: 0,
-    });
-
-    const handleTransactionUpdate = (states: EditorStates) => {
-        if (states) setActiveStates(states);
-    };
 
     const saveStateTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
@@ -446,7 +461,7 @@ export default function WritingEditor() {
 
     return (
         <div
-            className={`${styles.editorWrapper} ${isTypewriterMode ? styles.typewriterActive : ''} ${atmosphereReducedMotion ? styles.reducedMotion : ''} ${styles[(writingMode || 'novel') + 'Mode'] || ''}`}
+            className={`${styles.editorWrapper} ${isTypewriterMode ? styles.typewriterActive : ''} ${atmosphereReducedMotion ? styles.reducedMotion : ''}`}
             style={{
                 paddingTop: isTypewriterMode ? '45vh' : undefined,
                 '--editor-width': `${editorWidth}px`,
@@ -455,91 +470,21 @@ export default function WritingEditor() {
 
             {!isFullscreen && isToolbarVisible && (
                 <div className={styles.richToolbar}>
-                    {/* --- Formatting group --- */}
-                    <div className={styles.toolbarGroup}>
-                        {/* Paragraph style dropdown */}
-                        <select
-                            className={styles.toolbarSelect}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                if (val === 'p') firstEditorRef.current?.chain().focus().setParagraph().run();
-                                else if (val === 'h1') firstEditorRef.current?.chain().focus().toggleHeading({ level: 1 }).run();
-                                else if (val === 'h2') firstEditorRef.current?.chain().focus().toggleHeading({ level: 2 }).run();
-                                else if (val === 'h3') firstEditorRef.current?.chain().focus().toggleHeading({ level: 3 }).run();
-                                else if (val === 'blockquote') firstEditorRef.current?.chain().focus().toggleBlockquote().run();
-                            }}
-                            value={(() => {
-                                if (activeStates.headingLevel === 1) return 'h1';
-                                if (activeStates.headingLevel === 2) return 'h2';
-                                if (activeStates.headingLevel === 3) return 'h3';
-                                if (activeStates.blockquote) return 'blockquote';
-                                return 'p';
-                            })()}
-                        >
-                            <option value="p">Paragraph</option>
-                            <option value="h1">Heading 1</option>
-                            <option value="h2">Heading 2</option>
-                            <option value="h3">Heading 3</option>
-                            <option value="blockquote">Blockquote</option>
-                        </select>
-                    </div>
+                    {/* Writing mode */}
+                    <select
+                        className={styles.toolbarSelect}
+                        value={writingMode || 'novel'}
+                        onChange={(e) => setWritingMode(e.target.value as 'novel' | 'screenplay' | 'markdown' | 'poetry')}
+                        title="Writing Mode"
+                    >
+                        <option value="novel">📖 Novel</option>
+                        <option value="screenplay">🎬 Screenplay</option>
+                        <option value="markdown">📝 Markdown</option>
+                        <option value="poetry">✍️ Poetry</option>
+                    </select>
 
-                    {/* --- Text style group --- */}
-                    <div className={styles.toolbarGroup}>
-                        <button className={`${styles.toolbarBtn} ${activeStates.bold ? styles.toolbarBtnActive : ''}`} onClick={() => firstEditorRef.current?.chain().focus().toggleBold().run()} title="Bold"><strong>B</strong></button>
-                        <button className={`${styles.toolbarBtn} ${activeStates.italic ? styles.toolbarBtnActive : ''}`} onClick={() => firstEditorRef.current?.chain().focus().toggleItalic().run()} title="Italic"><em>I</em></button>
-                        <button className={`${styles.toolbarBtn} ${activeStates.underline ? styles.toolbarBtnActive : ''}`} onClick={() => firstEditorRef.current?.chain().focus().toggleUnderline().run()} title="Underline"><u>U</u></button>
-                        <button className={`${styles.toolbarBtn} ${activeStates.strike ? styles.toolbarBtnActive : ''}`} onClick={() => firstEditorRef.current?.chain().focus().toggleStrike().run()} title="Strikethrough"><s>S</s></button>
-                        <button className={`${styles.toolbarBtn} ${activeStates.blockquote ? styles.toolbarBtnActive : ''}`} onClick={() => firstEditorRef.current?.chain().focus().toggleBlockquote().run()} title="Blockquote">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" /><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" /></svg>
-                        </button>
-                    </div>
-
-                    {/* --- Alignment group --- */}
-                    <div className={styles.toolbarGroup}>
-                        <button
-                            className={`${styles.toolbarBtn} ${activeStates.alignLeft ? styles.toolbarBtnActive : ''}`}
-                            onClick={() => firstEditorRef.current?.chain().focus().setTextAlign('left').run()}
-                            title="Align Left"
-                        >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="15" y2="12" /><line x1="3" y1="18" x2="18" y2="18" /></svg>
-                        </button>
-                        <button
-                            className={`${styles.toolbarBtn} ${activeStates.alignCenter ? styles.toolbarBtnActive : ''}`}
-                            onClick={() => firstEditorRef.current?.chain().focus().setTextAlign('center').run()}
-                            title="Align Center"
-                        >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="6" y1="12" x2="18" y2="12" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
-                        </button>
-                        <button
-                            className={`${styles.toolbarBtn} ${activeStates.alignRight ? styles.toolbarBtnActive : ''}`}
-                            onClick={() => firstEditorRef.current?.chain().focus().setTextAlign('right').run()}
-                            title="Align Right"
-                        >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="6" y1="18" x2="21" y2="18" /></svg>
-                        </button>
-                    </div>
-
-                    {/* --- List group --- */}
-                    <div className={styles.toolbarGroup}>
-                        <button className={`${styles.toolbarBtn} ${activeStates.bulletList ? styles.toolbarBtnActive : ''}`} onClick={() => firstEditorRef.current?.chain().focus().toggleBulletList().run()} title="Bullet List">• List</button>
-                        <button className={`${styles.toolbarBtn} ${activeStates.orderedList ? styles.toolbarBtnActive : ''}`} onClick={() => firstEditorRef.current?.chain().focus().toggleOrderedList().run()} title="Numbered List">1. List</button>
-                    </div>
-
-                    {/* --- Mode group (right side) --- */}
+                    {/* Right side controls */}
                     <div className={styles.toolbarGroupRight}>
-                        {/* Writing mode switcher */}
-                        <select
-                            className={styles.toolbarSelect}
-                            value={writingMode || 'novel'}
-                            onChange={(e) => setWritingMode(e.target.value as 'novel' | 'screenplay' | 'markdown' | 'poetry')}
-                            title="Writing Mode"
-                        >
-                            <option value="novel">📖 Novel</option>
-                            <option value="screenplay">🎬 Screenplay</option>
-                            <option value="markdown">📝 Markdown</option>
-                            <option value="poetry">✍️ Poetry</option>
-                        </select>
                         <button className={`${styles.toolbarBtn} ${isTypewriterMode ? styles.toolbarBtnActive : ''}`} onClick={toggleTypewriterMode} title="Typewriter Mode">✍️</button>
                         <button className={`${styles.toolbarBtn} ${isFullscreen ? styles.toolbarBtnActive : ''}`} onClick={toggleFullscreen} title="Fullscreen">⛶</button>
                         <button className={styles.toolbarBtn} onClick={toggleToolbarVisible} title="Hide Toolbar">⊟</button>
@@ -607,7 +552,7 @@ export default function WritingEditor() {
             {/* RENDER ALL SCENES */}
             {activeScenes.map((scene, index) => (
                 <React.Fragment key={scene.id}>
-                    <SceneEditor scene={scene} index={index} editorRef={index === 0 ? firstEditorRef : undefined} onEditorUpdate={index === 0 ? handleTransactionUpdate : undefined} />
+                    <SceneEditor scene={scene} index={index} />
                     {index < activeScenes.length - 1 && (
                         <hr className={styles.sceneSeparator} />
                     )}
