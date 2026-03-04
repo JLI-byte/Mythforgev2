@@ -246,10 +246,12 @@
     line-height: 1.9;
 }
 
-.screenplayMode .editorContent {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 1rem;
-    line-height: 1.6;
+/* Screenplay mode — editor wrapper adjustments */
+/* The visual styling lives in ScreenplayEditor.module.css */
+/* Here we just reset padding/max-width since the page component handles its own width */
+.screenplayMode {
+    max-width: 100%;
+    padding: 0;
 }
 
 .markdownMode .editorContent {
