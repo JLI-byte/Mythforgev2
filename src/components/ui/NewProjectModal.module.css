@@ -32,21 +32,23 @@
     font-size: 1.1rem;
     font-weight: 600;
     margin: 0;
+    color: var(--foreground);
 }
 
 .closeBtn {
     background: none;
     border: none;
-    color: var(--muted);
+    color: var(--foreground);
     font-size: 1rem;
     cursor: pointer;
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
+    opacity: 0.5;
 }
 
 .closeBtn:hover {
-    color: var(--foreground);
-    background: var(--background);
+    opacity: 1;
+    background: var(--border);
 }
 
 .coverPreview {
@@ -67,27 +69,28 @@
     color: rgba(255, 255, 255, 0.9);
 }
 
+/* Input uses foreground/background variables — works in both light and dark */
 .titleInput {
     width: 100%;
-    /* Hardcoded dark background so text is always visible regardless of theme variable resolution */
-    background: #1e1e1e;
+    background: var(--background);
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: 0.6rem 0.8rem;
     font-size: 1rem;
-    color: #ffffff;
-    -webkit-text-fill-color: #ffffff;
+    color: var(--foreground);
     outline: none;
     box-sizing: border-box;
+    /* Force inherited font so system fonts don't override */
+    font-family: inherit;
 }
 
 .titleInput::placeholder {
-    color: rgba(255, 255, 255, 0.4);
-    -webkit-text-fill-color: rgba(255, 255, 255, 0.4);
+    color: var(--foreground);
+    opacity: 0.4;
 }
 
 .titleInput:focus {
-    border-color: var(--muted);
+    border-color: var(--accent);
 }
 
 .modeGrid {
@@ -111,7 +114,7 @@
 }
 
 .modeCard:hover {
-    border-color: var(--muted);
+    border-color: var(--accent);
 }
 
 .modeCardActive {
@@ -131,7 +134,8 @@
 
 .modeDesc {
     font-size: 0.7rem;
-    color: var(--muted);
+    color: var(--foreground);
+    opacity: 0.55;
     line-height: 1.3;
 }
 
