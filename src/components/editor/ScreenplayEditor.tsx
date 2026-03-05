@@ -20,6 +20,7 @@ export default function ScreenplayEditor({ scene }: { scene: Scene }) {
     const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const editor = useEditor({
+        immediatelyRender: false,
         extensions: [
             StarterKit.configure({}),
             ...ScreenplayNodes,
