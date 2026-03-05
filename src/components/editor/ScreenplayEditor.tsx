@@ -21,20 +21,7 @@ export default function ScreenplayEditor({ scene }: { scene: Scene }) {
 
     const editor = useEditor({
         extensions: [
-            StarterKit.configure({
-                paragraph: false,
-                heading: false,
-                bold: false,
-                italic: false,
-                strike: false,
-                code: false,
-                blockquote: false,
-                horizontalRule: false,
-                bulletList: false,
-                orderedList: false,
-                listItem: false,
-                codeBlock: false
-            }),
+            StarterKit.configure({}),
             ...ScreenplayNodes,
             ScreenplayKeymap
         ],
