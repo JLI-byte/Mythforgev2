@@ -9,13 +9,158 @@ import { getStoredValue, setStoredValue } from '@/lib/storage';
 import { EntityMark } from '@/lib/EntityMark';
 import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 import ScreenplayEditor from './ScreenplayEditor';
+import { Extension } from '@tiptap/core';
+import { Plugin, PluginKey } from '@tiptap/pm/state';
+import { Decoration, DecorationSet } from '@tiptap/pm/view';
 
-// TypeScript declaration for window.find (non-standard but supported in all major browsers)
-declare global {
-    interface Window {
-        find(text: string, caseSensitive?: boolean, backwards?: boolean, wrapAround?: boolean, wholeWord?: boolean, searchInFrames?: boolean, showDialog?: boolean): boolean;
-    }
+/**
+ * Custom FindReplace TipTap extension — ProseMirror-based, no npm packages.
+ * Stores searchTerm, replaceTerm, matches[], and currentIndex in extension storage.
+ * Adds decorations via a ProseMirror plugin to highlight matches in the document.
+ */
+interface FindReplaceStorage {
+    searchTerm: string;
+    results: { from: number; to: number }[];
+    currentIndex: number;
 }
+
+const findReplacePluginKey = new PluginKey('findReplace');
+
+/** Scans a ProseMirror doc for all case-insensitive occurrences of `term` */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function findAllMatches(doc: any, term: string): { from: number; to: number }[] {
+    if (!term) return [];
+    const results: { from: number; to: number }[] = [];
+    const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escapedTerm, 'gi');
+    doc.descendants((node: { isText: boolean; text?: string }, pos: number) => {
+        if (node.isText && node.text) {
+            let match;
+            while ((match = regex.exec(node.text)) !== null) {
+                results.push({ from: pos + match.index, to: pos + match.index + match[0].length });
+            }
+        }
+    });
+    return results;
+}
+
+const FindReplace = Extension.create<Record<string, never>, FindReplaceStorage>({
+    name: 'findReplace',
+
+    addStorage() {
+        return {
+            searchTerm: '',
+            results: [],
+            currentIndex: 0,
+        };
+    },
+
+    // @ts-expect-error — Custom commands do not satisfy Partial<RawCommands> but work at runtime
+    addCommands() {
+        return {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            setSearchTerm: (term: string) => ({ editor }: { editor: any }) => {
+                this.storage.searchTerm = term;
+                this.storage.results = findAllMatches(editor.state.doc, term);
+                this.storage.currentIndex = this.storage.results.length > 0 ? 0 : -1;
+                // Force plugin state update by dispatching a no-op transaction
+                editor.view.dispatch(editor.state.tr.setMeta(findReplacePluginKey, { updated: true }));
+                return true;
+            },
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            findNext: () => ({ editor }: { editor: any }) => {
+                const { results } = this.storage;
+                if (results.length === 0) return false;
+                this.storage.currentIndex = (this.storage.currentIndex + 1) % results.length;
+                const match = results[this.storage.currentIndex];
+                editor.view.dispatch(editor.state.tr.setMeta(findReplacePluginKey, { updated: true }));
+                // Scroll the current match into view by setting selection there
+                editor.chain().setTextSelection(match).scrollIntoView().run();
+                return true;
+            },
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            findPrev: () => ({ editor }: { editor: any }) => {
+                const { results } = this.storage;
+                if (results.length === 0) return false;
+                this.storage.currentIndex = (this.storage.currentIndex - 1 + results.length) % results.length;
+                const match = results[this.storage.currentIndex];
+                editor.view.dispatch(editor.state.tr.setMeta(findReplacePluginKey, { updated: true }));
+                editor.chain().setTextSelection(match).scrollIntoView().run();
+                return true;
+            },
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            replaceOne: (replacement: string) => ({ editor }: { editor: any }) => {
+                const { results, currentIndex } = this.storage;
+                if (results.length === 0 || currentIndex < 0) return false;
+                const match = results[currentIndex];
+                // Replace via a ProseMirror transaction
+                editor.chain()
+                    .setTextSelection(match)
+                    .insertContent(replacement)
+                    .run();
+                // Re-scan after replacement
+                this.storage.results = findAllMatches(editor.state.doc, this.storage.searchTerm);
+                if (this.storage.currentIndex >= this.storage.results.length) {
+                    this.storage.currentIndex = 0;
+                }
+                editor.view.dispatch(editor.state.tr.setMeta(findReplacePluginKey, { updated: true }));
+                return true;
+            },
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            replaceAll: (term: string, replacement: string) => ({ editor }: { editor: any }) => {
+                const matches = findAllMatches(editor.state.doc, term);
+                if (matches.length === 0) return false;
+                // Process in reverse order so earlier positions aren't shifted
+                const { tr } = editor.state;
+                for (let i = matches.length - 1; i >= 0; i--) {
+                    tr.replaceWith(matches[i].from, matches[i].to, editor.state.schema.text(replacement));
+                }
+                editor.view.dispatch(tr);
+                // Clear search results after replacing all
+                this.storage.results = [];
+                this.storage.currentIndex = -1;
+                editor.view.dispatch(editor.state.tr.setMeta(findReplacePluginKey, { updated: true }));
+                return true;
+            },
+        };
+    },
+
+    addProseMirrorPlugins() {
+        const extensionStorage = this.storage;
+        return [
+            new Plugin({
+                key: findReplacePluginKey,
+                state: {
+                    init() {
+                        return DecorationSet.empty;
+                    },
+                    apply(tr, oldDecorations) {
+                        // Only rebuild decorations when our meta flag is set
+                        if (!tr.getMeta(findReplacePluginKey) && !tr.docChanged) {
+                            return oldDecorations;
+                        }
+                        const { results, currentIndex } = extensionStorage;
+                        if (results.length === 0) return DecorationSet.empty;
+                        const decorations = results.map((match, i) => {
+                            const className = i === currentIndex ? 'mythforge-search-current' : 'mythforge-search-match';
+                            return Decoration.inline(match.from, match.to, { class: className });
+                        });
+                        return DecorationSet.create(tr.doc, decorations);
+                    },
+                },
+                props: {
+                    decorations(state) {
+                        return this.getState(state) ?? DecorationSet.empty;
+                    },
+                },
+            }),
+        ];
+    },
+});
 
 const EDITOR_PLACEHOLDER = '<p>Start writing your story here...</p>';
 
@@ -58,6 +203,7 @@ function SceneEditor({ scene, index }: { scene: Scene, index: number }) {
             EntityMark,
             Underline,
             TextAlign.configure({ types: ['heading', 'paragraph'] }),
+            FindReplace,
         ],
         content: scene.content || '',
         // Only autofocus the very first scene if it's not a rehydration flash
@@ -267,6 +413,54 @@ function SceneEditor({ scene, index }: { scene: Scene, index: number }) {
         };
     }, [editor]);
 
+    // Listen for global find/replace events from the FindReplaceBar
+    useEffect(() => {
+        if (!editor || editor.isDestroyed) return;
+
+        // When the search term changes, scan this editor's document
+        const handleSearchChange = (e: Event) => {
+            const detail = (e as CustomEvent<{ term: string }>).detail;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (editor.commands as any).setSearchTerm(detail.term);
+        };
+        // Navigate to next match in this editor
+        const handleFindNext = () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (editor.commands as any).findNext();
+        };
+        // Navigate to previous match
+        const handleFindPrev = () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (editor.commands as any).findPrev();
+        };
+        // Replace current match
+        const handleReplaceOne = (e: Event) => {
+            const detail = (e as CustomEvent<{ replacement: string }>).detail;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (editor.commands as any).replaceOne(detail.replacement);
+        };
+        // Replace all matches
+        const handleReplaceAll = (e: Event) => {
+            const detail = (e as CustomEvent<{ term: string; replacement: string }>).detail;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (editor.commands as any).replaceAll(detail.term, detail.replacement);
+        };
+
+        window.addEventListener('mythforge:searchChange', handleSearchChange);
+        window.addEventListener('mythforge:findNext', handleFindNext);
+        window.addEventListener('mythforge:findPrev', handleFindPrev);
+        window.addEventListener('mythforge:replaceOne', handleReplaceOne);
+        window.addEventListener('mythforge:replaceAll', handleReplaceAll);
+
+        return () => {
+            window.removeEventListener('mythforge:searchChange', handleSearchChange);
+            window.removeEventListener('mythforge:findNext', handleFindNext);
+            window.removeEventListener('mythforge:findPrev', handleFindPrev);
+            window.removeEventListener('mythforge:replaceOne', handleReplaceOne);
+            window.removeEventListener('mythforge:replaceAll', handleReplaceAll);
+        };
+    }, [editor]);
+
     const getAtmosphere = (id?: string) => {
         if (!id) return undefined;
         return ATMOSPHERE_PRESETS.find(p => p.id === id) || customAtmospheres.find(a => a.id === id);
@@ -444,13 +638,11 @@ export default function WritingEditor() {
         return () => window.removeEventListener('mythforge:contentSaved', handleContentSaved);
     }, []);
 
-    // Task 3: Find & Replace state (custom, no npm packages)
+    // Task 3: Find & Replace state — dispatches events to all SceneEditors
     const [isFindOpen, setIsFindOpen] = useState(false);
     const [isReplaceVisible, setIsReplaceVisible] = useState(false);
     const [findTerm, setFindTerm] = useState('');
     const [replaceTerm, setReplaceTerm] = useState('');
-    const [matchCount, setMatchCount] = useState(0);
-    const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
 
     // Ctrl+F and Ctrl+H keyboard shortcuts for find/replace
     useEffect(() => {
@@ -470,87 +662,42 @@ export default function WritingEditor() {
                 /* eslint-enable react-hooks/set-state-in-effect */
                 setTimeout(() => document.getElementById('mythforge-replace-input')?.focus(), 50);
             } else if (e.key === 'Escape' && isFindOpen) {
-                // Close find/replace bar on Escape
+                // Close find/replace bar and clear search highlights
                 setIsFindOpen(false);
                 setFindTerm('');
                 setReplaceTerm('');
+                // Clear highlights from all editors
+                window.dispatchEvent(new CustomEvent('mythforge:searchChange', { detail: { term: '' } }));
             }
         };
         window.addEventListener('keydown', handleFindKeys);
         return () => window.removeEventListener('keydown', handleFindKeys);
     }, [isFindOpen]);
 
-    // Count matches whenever findTerm changes
+    // Dispatch searchTerm to all SceneEditors whenever it changes
     useEffect(() => {
-        if (!findTerm) {
-            setMatchCount(0);
-            setCurrentMatchIndex(0);
-            // Remove any existing highlights
-            document.querySelectorAll('.mythforge-search-highlight').forEach(el => {
-                const parent = el.parentNode;
-                if (parent) {
-                    parent.replaceChild(document.createTextNode(el.textContent || ''), el);
-                    parent.normalize();
-                }
-            });
-            return;
-        }
-        // Highlight logic is deferred to when the user navigates — we just count here
-        const editorWrapper = document.querySelector(`.${styles.editorWrapper}`);
-        if (!editorWrapper) return;
-        const textContent = editorWrapper.textContent || '';
-        const regex = new RegExp(findTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-        const matches = textContent.match(regex);
-        setMatchCount(matches ? matches.length : 0);
-        setCurrentMatchIndex(matches && matches.length > 0 ? 1 : 0);
+        window.dispatchEvent(new CustomEvent('mythforge:searchChange', { detail: { term: findTerm } }));
     }, [findTerm]);
 
-    // Find next match and scroll to it
+    // ProseMirror-based find next: dispatch event to all SceneEditors
     const handleFindNext = React.useCallback(() => {
-        if (!findTerm || matchCount === 0) return;
-        // Use window.find for native browser text search navigation
-        const found = window.find(findTerm, false, false, true, false, false, false);
-        if (!found) {
-            // Wrap around to beginning
-            const sel = window.getSelection();
-            if (sel) sel.removeAllRanges();
-            window.find(findTerm, false, false, true, false, false, false);
-        }
-        setCurrentMatchIndex(prev => prev >= matchCount ? 1 : prev + 1);
-    }, [findTerm, matchCount]);
+        window.dispatchEvent(new CustomEvent('mythforge:findNext'));
+    }, []);
 
-    // Find previous match
+    // ProseMirror-based find previous
     const handleFindPrev = React.useCallback(() => {
-        if (!findTerm || matchCount === 0) return;
-        const found = window.find(findTerm, false, true, true, false, false, false);
-        if (!found) {
-            const sel = window.getSelection();
-            if (sel) sel.removeAllRanges();
-            window.find(findTerm, false, true, true, false, false, false);
-        }
-        setCurrentMatchIndex(prev => prev <= 1 ? matchCount : prev - 1);
-    }, [findTerm, matchCount]);
+        window.dispatchEvent(new CustomEvent('mythforge:findPrev'));
+    }, []);
 
-    // Replace current match
+    // Replace current match via ProseMirror transaction
     const handleReplaceOne = React.useCallback(() => {
-        if (!findTerm) return;
-        const sel = window.getSelection();
-        // Only replace if the current selection matches the find term
-        if (sel && sel.toString().toLowerCase() === findTerm.toLowerCase()) {
-            document.execCommand('insertText', false, replaceTerm);
-            // After replacing, the match count changed — recount
-            setMatchCount(prev => Math.max(0, prev - 1));
-        }
-        // Advance to next match
-        handleFindNext();
-    }, [findTerm, replaceTerm, handleFindNext]);
+        window.dispatchEvent(new CustomEvent('mythforge:replaceOne', { detail: { replacement: replaceTerm } }));
+    }, [replaceTerm]);
 
-    // Replace all matches
+    // Replace all via ProseMirror transactions (reverse iteration)
     const handleReplaceAll = React.useCallback(() => {
-        if (!findTerm) return;
-        // Dispatch replaceAll event to all SceneEditors
         window.dispatchEvent(new CustomEvent('mythforge:replaceAll', {
-            detail: { findTerm, replaceTerm }
+            detail: { term: findTerm, replacement: replaceTerm }
         }));
     }, [findTerm, replaceTerm]);
 
@@ -655,7 +802,7 @@ export default function WritingEditor() {
                                 if (e.key === 'Enter') { e.preventDefault(); handleFindNext(); }
                             }}
                         />
-                        <span className={styles.findCount}>{matchCount > 0 ? `${currentMatchIndex}/${matchCount}` : '0'}</span>
+                        <span className={styles.findCount}>{findTerm ? '🔍' : ''}</span>
                         <button className={styles.findBtn} onMouseDown={(e) => { e.preventDefault(); handleFindPrev(); }} title="Previous">←</button>
                         <button className={styles.findBtn} onMouseDown={(e) => { e.preventDefault(); handleFindNext(); }} title="Next">→</button>
                         {isReplaceVisible && (

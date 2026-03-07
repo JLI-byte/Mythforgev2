@@ -106,3 +106,14 @@ a:hover {
 [data-scroll="main"]::-webkit-scrollbar-thumb:hover {
     background: var(--accent);
 }
+
+/* FindReplace ProseMirror decorations — applied by custom FindReplace extension */
+.mythforge-search-match {
+    background-color: rgba(255, 215, 0, 0.35);
+    border-radius: 2px;
+}
+.mythforge-search-current {
+    background-color: rgba(255, 140, 0, 0.55);
+    border-radius: 2px;
+    outline: 1px solid rgba(255, 140, 0, 0.7);
+}
