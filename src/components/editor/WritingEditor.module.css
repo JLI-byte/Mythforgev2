@@ -91,10 +91,18 @@
     opacity: 0.6;
 }
 
-.breadcrumbNameEmpty {
-    display: inline-block;
-    width: 0.3rem;
-    cursor: pointer;
+.breadcrumbNamePlaceholder {
+    color: var(--muted);
+    cursor: text;
+    font-size: 0.78rem;
+    font-style: italic;
+    opacity: 0.6;
+    margin-left: 0.25rem;
+    transition: opacity 150ms ease;
+}
+
+.breadcrumbNamePlaceholder:hover {
+    opacity: 1;
 }
 
 .breadcrumbSep {

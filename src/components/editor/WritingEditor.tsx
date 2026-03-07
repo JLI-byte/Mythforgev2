@@ -164,6 +164,26 @@ const FindReplace = Extension.create<Record<string, never>, FindReplaceStorage>(
 
 const EDITOR_PLACEHOLDER = '<p>Start writing your story here...</p>';
 
+/**
+ * Convert a string to title case.
+ * Capitalizes the first letter of every word EXCEPT common small words
+ * (a, an, the, and, but, or, for, nor, on, at, to, by, in, of, up)
+ * unless they are the first word of the string.
+ */
+const TITLE_CASE_EXCEPTIONS = new Set(['a', 'an', 'the', 'and', 'but', 'or', 'for', 'nor', 'on', 'at', 'to', 'by', 'in', 'of', 'up']);
+function toTitleCase(str: string): string {
+    return str
+        .trim()
+        .split(/\s+/)
+        .map((word, index) => {
+            if (index === 0 || !TITLE_CASE_EXCEPTIONS.has(word.toLowerCase())) {
+                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+            }
+            return word.toLowerCase();
+        })
+        .join(' ');
+}
+
 function SceneEditor({ scene, index, onEditorFocus, containerRef }: { scene: Scene, index: number, onEditorFocus: (editor: ReturnType<typeof useEditor>) => void, containerRef: (el: HTMLDivElement | null) => void }) {
     const activeProjectId = useWorkspaceStore((state) => state.activeProjectId);
     const updateScene = useWorkspaceStore((state) => state.updateScene);
@@ -562,18 +582,18 @@ function ContextBar({
     // Visible scene word count
     const visibleWordCount = visibleScene?.wordCount || 0;
 
-    // Chapter name save
+    // Chapter name save — auto title case before persisting
     const saveChapterName = () => {
-        if (activeDocumentId) {
-            updateDocument(activeDocumentId, { title: chapterDraft });
+        if (activeDocumentId && chapterDraft.trim()) {
+            updateDocument(activeDocumentId, { title: toTitleCase(chapterDraft) });
         }
         setEditingChapter(false);
     };
 
-    // Scene name save
+    // Scene name save — auto title case before persisting
     const saveSceneName = () => {
-        if (visibleScene) {
-            updateScene(visibleScene.id, { title: sceneDraft });
+        if (visibleScene && sceneDraft.trim()) {
+            updateScene(visibleScene.id, { title: toTitleCase(sceneDraft) });
         }
         setEditingScene(false);
     };
@@ -606,10 +626,12 @@ function ContextBar({
                     </span>
                 ) : (
                     <span
-                        className={styles.breadcrumbNameEmpty}
+                        className={styles.breadcrumbNamePlaceholder}
                         onClick={() => { setChapterDraft(''); setEditingChapter(true); }}
                         title="Click to add chapter name"
-                    />
+                    >
+                        + name
+                    </span>
                 )}
 
                 {/* Separator */}
@@ -639,10 +661,12 @@ function ContextBar({
                     </span>
                 ) : (
                     <span
-                        className={styles.breadcrumbNameEmpty}
+                        className={styles.breadcrumbNamePlaceholder}
                         onClick={() => { setSceneDraft(''); setEditingScene(true); }}
                         title="Click to add scene name"
-                    />
+                    >
+                        + name
+                    </span>
                 )}
 
                 {/* Word count — after scene portion, updates with visibleSceneId */}
