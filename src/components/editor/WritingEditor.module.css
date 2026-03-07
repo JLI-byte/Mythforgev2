@@ -24,77 +24,109 @@
     opacity: 0.4;
 }
 
-.editorHeader {
-    margin-top: 1.5rem;
-    margin-bottom: 3rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border);
-}
 
-.documentTitle {
-    font-family: var(--font-sans);
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--foreground);
-    border: none;
-    outline: none;
-    background: transparent;
-    width: 100%;
-    box-sizing: border-box;
-}
 
-.documentTitle:empty::before {
-    content: "Untitled Chapter";
-    color: #999;
-}
 
-.sceneToolbar {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    padding: 0.25rem 0 0.75rem 0;
-    font-size: 0.8rem;
-    color: var(--muted);
-    font-family: var(--font-sans);
-}
 
-.sceneToolbarButton {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0.1rem 0.5rem;
-    color: var(--muted);
-    font-size: inherit;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.sceneToolbarButton:hover {
-    color: var(--foreground);
-    border-color: var(--muted);
-}
-
-.sceneToolbarButton.active {
-    color: var(--foreground);
-    background: var(--surface);
-}
-
-/* Rich text toolbar — always visible above chapter title */
-.richToolbar {
+/* Sprint 44: Sticky Context Bar — replaces richToolbar + sceneToolbar + sceneFormatBar */
+.contextBar {
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    padding: 0.4rem 0.5rem;
+    padding: 0.3rem 0.5rem;
     border-bottom: 1px solid var(--border);
     background: var(--surface);
-    flex-wrap: wrap;
     position: sticky;
     top: 0;
     z-index: 10;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
+    min-height: 36px;
+    max-height: 40px;
+    font-family: var(--font-sans);
+}
+
+/* Left — breadcrumb context */
+.contextBreadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+}
+
+.breadcrumbNumber {
+    color: var(--muted);
+    user-select: none;
+}
+
+.breadcrumbName {
+    color: var(--foreground);
+    cursor: pointer;
+    margin-left: 0.15rem;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 150ms ease;
+}
+
+.breadcrumbName:hover {
+    border-bottom-color: var(--muted);
+}
+
+.breadcrumbNameEmpty {
+    display: inline-block;
+    width: 0.3rem;
+    cursor: pointer;
+}
+
+.breadcrumbSep {
+    color: var(--muted);
+    margin: 0 0.3rem;
+    user-select: none;
+}
+
+.breadcrumbInput {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--accent);
+    outline: none;
+    color: var(--foreground);
+    font-size: 0.8rem;
+    font-family: var(--font-sans);
+    padding: 0 0.15rem;
+    margin-left: 0.15rem;
+    min-width: 60px;
+    max-width: 180px;
+}
+
+.breadcrumbSave {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-left: 0.75rem;
+    white-space: nowrap;
+}
+
+/* Center — formatting tools */
+.contextFormatting {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin: 0 auto;
+}
+
+/* Right — mode selector, word count, toggles */
+.contextRight {
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.contextWordCount {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin: 0 0.35rem;
+    white-space: nowrap;
 }
 
 .toolbarGroup {
@@ -269,24 +301,7 @@
     text-align: center;
 }
 
-/* Per-scene formatting toolbar — appears on focus */
-.sceneFormatBar {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.35rem 0;
-    margin-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border);
-    flex-wrap: wrap;
-    opacity: 0;
-    transform: translateY(-4px);
-    transition: opacity 150ms ease, transform 150ms ease;
-}
 
-.sceneContainer:focus-within .sceneFormatBar {
-    opacity: 1;
-    transform: translateY(0);
-}
 
 /* Task 3: Find & Replace bar — compact single row below richToolbar */
 .findReplaceBar {
