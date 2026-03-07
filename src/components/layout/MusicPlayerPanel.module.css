@@ -17,6 +17,8 @@
 
 .panel.open {
     transform: translateX(0);
+    top: 48px;
+    height: calc(100vh - 48px);
 }
 
 .sideTab {
