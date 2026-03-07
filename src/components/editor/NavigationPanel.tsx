@@ -6,7 +6,6 @@ import styles from './NavigationPanel.module.css';
 import { useWorkspaceStore, Atmosphere } from '@/store/workspaceStore';
 import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 import { AtmospherePicker } from '../ui/AtmospherePicker';
-import { SpotifyPlayer } from '../ui/SpotifyPlayer';
 import SettingsModal from '../ui/SettingsModal';
 import { ProjectSwitcher } from '@/components/navigation/ProjectSwitcher';
 import { NewProjectModal } from '../ui/NewProjectModal';
@@ -600,7 +599,6 @@ export function NavigationPanel() {
                         {renderThemeIcon()}
                     </button>
                 </div>
-                <SpotifyPlayer />
             </div>
 
             {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}

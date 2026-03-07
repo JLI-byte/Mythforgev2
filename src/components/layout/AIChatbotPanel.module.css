@@ -34,7 +34,7 @@
 /* Tab attached to left edge of panel */
 .sideTab {
     position: absolute;
-    top: 0;
+    top: 320px;
     padding: 16px 10px;
     display: flex;
     flex-direction: column;

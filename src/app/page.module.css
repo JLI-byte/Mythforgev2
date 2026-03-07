@@ -9,7 +9,7 @@
     flex: 1;
     display: flex;
     justify-content: flex-start;
-    padding: 4rem 2rem 4rem 3rem;
+    padding: 4rem 2rem 4rem 1rem;
     padding-right: 80px;
     background-color: var(--background);
     transition: background-color 500ms ease;
@@ -51,14 +51,12 @@
     pointer-events: auto;
 }
 
-/* RTL flips scrollbar to left edge, child reversal keeps content LTR */
+/* RTL trick flips scrollbar to left edge — child rule keeps content LTR */
 .editorScrollContainer {
     flex: 1;
     overflow-y: auto;
     overflow-x: clip;
     direction: rtl;
-    max-width: 860px;
-    margin: 0 auto;
 }
 
 .editorScrollContainer > * {

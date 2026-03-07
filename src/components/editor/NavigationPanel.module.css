@@ -141,6 +141,24 @@
     gap: 0.25rem;
 }
 
+/* Thin subtle scrollbar matching the main editor scrollbar style */
+.chapterList::-webkit-scrollbar {
+    width: 4px;
+}
+
+.chapterList::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chapterList::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 99px;
+}
+
+.chapterList::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
 .chapterItem {
     display: flex;
     flex-direction: column;

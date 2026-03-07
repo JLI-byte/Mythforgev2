@@ -21,7 +21,7 @@
 
 .sideTab {
     position: absolute;
-    top: 0;
+    top: 380px;
     padding: 16px 10px;
     display: flex;
     flex-direction: column;
