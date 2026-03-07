@@ -8,7 +8,7 @@
     width: 480px;
     transform: translateX(100%);
     transition: transform 280ms ease-in-out;
-    z-index: 200;
+    z-index: 60;
     background-color: var(--surface);
     border-left: 1px solid var(--border);
     display: flex;
