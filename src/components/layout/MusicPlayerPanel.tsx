@@ -45,6 +45,9 @@ function processUrl(url: string): string {
 }
 
 export function MusicPlayerPanel({ isOpen, onClose, onTabClick, tabWidth, onTabWidthChange, panelWidth, onPanelWidthChange }: MusicPlayerPanelProps) {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => { setMounted(true); }, []);
+
     const [embedUrl, setEmbedUrl] = useState('');
     const [inputUrl, setInputUrl] = useState('');
     const [isEditing, setIsEditing] = useState(false);
@@ -72,7 +75,7 @@ export function MusicPlayerPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
 
     return (
         <>
-            {typeof document !== 'undefined' && createPortal(
+            {mounted && createPortal(
                 <button
                     className={`${styles.sideTab} ${isOpen ? styles.sideTabActive : ''}`}
                     style={{

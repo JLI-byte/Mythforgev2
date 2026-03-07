@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './WorldBiblePanel.module.css';
 import WorldBible from '../world/WorldBible';
@@ -24,9 +24,12 @@ const BookIcon = () => (
 
 // WorldBiblePanel — slide-out reference panel, fixed right edge
 export function WorldBiblePanel({ isOpen, onClose, onTabClick, tabWidth, onTabWidthChange, panelWidth, onPanelWidthChange }: WorldBiblePanelProps) {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => { setMounted(true); }, []);
+
     return (
         <>
-            {typeof document !== 'undefined' && createPortal(
+            {mounted && createPortal(
                 <button
                     className={`${styles.sideTab} ${isOpen ? styles.sideTabActive : ''}`}
                     style={{

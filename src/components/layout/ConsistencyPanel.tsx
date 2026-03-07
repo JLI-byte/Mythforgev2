@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './ConsistencyPanel.module.css';
 import ConsistencyChecker from '../checker/ConsistencyChecker';
@@ -24,9 +24,12 @@ const CheckIcon = () => (
 
 // ConsistencyPanel — slide-out panel for AI consistency checker, fixed right edge
 export function ConsistencyPanel({ isOpen, onClose, onTabClick, tabWidth, onTabWidthChange, panelWidth, onPanelWidthChange }: ConsistencyPanelProps) {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => { setMounted(true); }, []);
+
     return (
         <>
-            {typeof document !== 'undefined' && createPortal(
+            {mounted && createPortal(
                 <button
                     className={`${styles.sideTab} ${isOpen ? styles.sideTabActive : ''}`}
                     style={{
