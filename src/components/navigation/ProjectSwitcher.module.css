@@ -120,11 +120,11 @@
     position: absolute;
     top: 6px;
     left: 6px;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    background: var(--accent);
-    color: white;
+    background: rgba(255,255,255,0.9);
+    color: #1a1a1a;
     font-size: 0.65rem;
     font-weight: 700;
     display: flex;
@@ -299,21 +299,22 @@
 /* Background set via inline style (project.coverColor) */
 .card_novel {
     color: white;
-    box-shadow: 4px 4px 12px rgba(0,0,0,0.4);
+    box-shadow: 4px 4px 16px rgba(0,0,0,0.45),
+               inset -1px 0 0 rgba(255,255,255,0.1);
     border-radius: 2px 6px 6px 2px;
     overflow: hidden;
 }
 
-/* Book spine — darker left edge via pseudo-element */
+/* Book spine — dark left strip simulating a book-in-shelf look */
 .card_novel::before {
     content: '';
     position: absolute;
     left: 0;
     top: 0;
-    bottom: 0;
-    width: 8px;
-    background: inherit;
-    filter: brightness(0.7);
+    width: 10px;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.25);
+    pointer-events: none;
     z-index: 2;
     border-radius: 2px 0 0 2px;
 }
@@ -328,7 +329,8 @@
 }
 
 .card_novel:hover {
-    box-shadow: 6px 6px 20px rgba(0,0,0,0.5);
+    box-shadow: 6px 6px 24px rgba(0,0,0,0.55),
+               inset -1px 0 0 rgba(255,255,255,0.15);
 }
 
 .card_novel.cardActive {
