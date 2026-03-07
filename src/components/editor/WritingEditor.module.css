@@ -4,7 +4,9 @@
     display: flex;
     flex-direction: column;
     position: relative;
+    padding-top: 4rem;
     padding-bottom: 20vh;
+    padding-left: 2rem;
 }
 
 .sceneContainer {

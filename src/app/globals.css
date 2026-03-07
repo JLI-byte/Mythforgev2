@@ -92,7 +92,7 @@ a:hover {
   border-bottom: 2px solid var(--accent);
 }
 
-/* Main editor scrollbar — thin, subtle, left-aligned via RTL trick */
+/* Main editor scrollbar — repositioned to left edge via transform */
 [data-scroll="main"]::-webkit-scrollbar {
     width: 5px;
 }
@@ -105,5 +105,4 @@ a:hover {
 }
 [data-scroll="main"]::-webkit-scrollbar-thumb:hover {
     background: var(--accent);
-    opacity: 1;
 }
