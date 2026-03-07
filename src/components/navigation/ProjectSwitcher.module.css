@@ -1,3 +1,6 @@
+/* Sprint 45: Project Gallery — visual card-based project switcher */
+
+/* Backdrop overlay */
 .backdrop {
     position: fixed;
     inset: 0;
@@ -9,9 +12,10 @@
     backdrop-filter: blur(2px);
 }
 
+/* Wider modal for gallery layout */
 .modal {
-    width: 460px;
-    max-width: 90vw;
+    width: 860px;
+    max-width: 92vw;
     max-height: 80vh;
     background: var(--surface);
     border-radius: 12px;
@@ -23,17 +27,11 @@
 }
 
 @keyframes scaleIn {
-    from {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
+    from { opacity: 0; transform: scale(0.95); }
+    to   { opacity: 1; transform: scale(1); }
 }
 
+/* Header */
 .header {
     display: flex;
     align-items: center;
@@ -44,7 +42,7 @@
 
 .header h3 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: var(--foreground);
     font-family: var(--font-sans);
@@ -65,104 +63,108 @@
     color: var(--foreground);
 }
 
-.list {
+/* Scrollable body */
+.body {
     flex: 1;
+    overflow-y: auto;
+    padding: 1rem 1.5rem;
+}
+
+/* ------ TYPE SECTIONS ------ */
+.typeSection {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.typeSection:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.sectionHeader {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--muted);
+    font-family: var(--font-sans);
+    letter-spacing: 0.02em;
+}
+
+/* Card grid — horizontal auto-fill */
+.cardGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 180px));
+    gap: 1rem;
+}
+
+/* ------ BASE CARD ------ */
+.card {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    border-radius: 6px;
     overflow: visible;
-    padding: 0.5rem;
     display: flex;
     flex-direction: column;
-}
-
-.projectItem {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem 1rem;
-    background: transparent;
-    border: none;
-    border-radius: 6px;
+    transition: transform 200ms ease, box-shadow 200ms ease;
     cursor: pointer;
-    text-align: left;
-    transition: background 0.15s;
 }
 
-.projectRow {
-    position: relative;
-    border-radius: 6px;
-    margin-bottom: 2px;
-    overflow: visible;
+.card:hover {
+    transform: translateY(-4px);
 }
 
-.projectRow:hover {
-    background: rgba(var(--foreground-rgb), 0.04);
-}
-
-.projectRow.active {
-    background: rgba(var(--accent-rgb), 0.1);
-    color: var(--accent);
-}
-
-.projectMainBtn {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 0.75rem 2.5rem 0.75rem 1rem;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    text-align: left;
-    color: inherit;
-}
-
-.projectName {
-    font-weight: 500;
-    font-size: 0.95rem;
-}
-
-.docCount {
-    font-size: 0.8rem;
-    color: var(--muted);
-    margin-right: 0;
-}
-
-.projectRow.active .docCount {
-    color: inherit;
-    opacity: 0.8;
-}
-
-.optionsContainer {
+/* Active badge — checkmark top-left */
+.activeBadge {
     position: absolute;
-    right: 0.25rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 32px;
-    display: none;
-}
-
-.projectRow:hover .optionsContainer,
-.optionsContainer:focus-within {
-    display: block;
-}
-
-.optionsTrigger {
-    background: transparent;
-    border: none;
-    color: var(--muted);
-    font-size: 1.1rem;
-    padding: 0.25rem 0.5rem;
-    cursor: pointer;
-    border-radius: 4px;
+    top: 6px;
+    left: 6px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 3;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
-.optionsTrigger:hover {
-    background: rgba(var(--foreground-rgb), 0.08);
-    color: var(--foreground);
+/* ⋯ menu — top-right, appears on hover */
+.cardMenu {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 4;
+    opacity: 0;
+    transition: opacity 150ms ease;
 }
 
+.card:hover .cardMenu {
+    opacity: 1;
+}
+
+.cardMenuTrigger {
+    background: rgba(0,0,0,0.3);
+    border: none;
+    color: white;
+    font-size: 1rem;
+    padding: 0.15rem 0.4rem;
+    cursor: pointer;
+    border-radius: 4px;
+    line-height: 1;
+    backdrop-filter: blur(4px);
+}
+
+.cardMenuTrigger:hover {
+    background: rgba(0,0,0,0.5);
+}
+
+/* Options dropdown menu — reused from old design */
 .optionsMenu {
     position: absolute;
     top: 100%;
@@ -174,7 +176,7 @@
     padding: 0.25rem;
     display: flex;
     flex-direction: column;
-    min-width: 140px;
+    min-width: 120px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     z-index: 400;
 }
@@ -184,7 +186,7 @@
     border: none;
     text-align: left;
     padding: 0.5rem 0.75rem;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--foreground);
     border-radius: 4px;
     cursor: pointer;
@@ -203,46 +205,263 @@
     cursor: not-allowed;
 }
 
-.inlineEditState,
-.inlineConfirmState {
-    padding: 0.5rem;
+/* Card body — clickable interior */
+.cardBody {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
+    justify-content: center;
+    flex: 1;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 1rem;
+    color: inherit;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+    text-align: center;
 }
 
-.inlineInput {
-    flex: 1;
-    padding: 0.5rem;
+/* Card title text */
+.cardTitle {
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+/* Decorative text at card bottom (FADE IN:, — ✦ —) */
+.cardDecor {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.65rem;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Doc count at card bottom */
+.cardDocCount {
+    position: absolute;
+    bottom: 10px;
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+/* Inline edit overlay — covers the card */
+.cardEditOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(var(--background-rgb), 0.95);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    z-index: 5;
+    padding: 0.75rem;
+}
+
+.cardEditInput {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
     background: var(--background);
     border: 1px solid var(--accent);
     color: var(--foreground);
     border-radius: 4px;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     outline: none;
+    text-align: center;
 }
 
-.confirmText {
+.cardDeleteText {
     font-size: 0.85rem;
     color: var(--foreground);
-    font-weight: 500;
+    font-weight: 600;
 }
 
-.dangerBtn {
-    padding: 0.4rem 0.75rem;
-    background: #ef4444;
+.cardDeleteActions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+
+/* ========================================
+   TYPE-SPECIFIC CARD STYLES
+   ======================================== */
+
+/* --- NOVEL CARDS --- */
+/* Background set via inline style (project.coverColor) */
+.card_novel {
     color: white;
-    border: none;
-    border-radius: 4px;
+    box-shadow: 4px 4px 12px rgba(0,0,0,0.4);
+    border-radius: 2px 6px 6px 2px;
+    overflow: hidden;
+}
+
+/* Book spine — darker left edge via pseudo-element */
+.card_novel::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    background: inherit;
+    filter: brightness(0.7);
+    z-index: 2;
+    border-radius: 2px 0 0 2px;
+}
+
+.card_novel .cardTitle {
+    color: white;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+.card_novel .cardDocCount {
+    color: white;
+}
+
+.card_novel:hover {
+    box-shadow: 6px 6px 20px rgba(0,0,0,0.5);
+}
+
+.card_novel.cardActive {
+    border: 2px solid #F5C842;
+}
+
+
+/* --- SCREENPLAY CARDS --- */
+.card_screenplay {
+    background: #f8f8f8;
+    border: 1px solid #ccc;
+    border-top: 4px solid #1a1a1a;
+    color: #1a1a1a;
+}
+
+.card_screenplay .cardTitle {
+    font-family: var(--font-mono, monospace);
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #1a1a1a;
+}
+
+.card_screenplay .cardDecor {
+    font-family: monospace;
+    font-size: 0.65rem;
+    color: #999;
+    opacity: 1;
+}
+
+.card_screenplay:hover {
+    box-shadow: 2px 4px 12px rgba(0,0,0,0.12);
+}
+
+.card_screenplay.cardActive {
+    border: 2px solid #4A6FA5;
+    border-top: 4px solid #1a1a1a;
+}
+
+
+/* --- POETRY CARDS --- */
+.card_poetry {
+    background: #f5f0e4;
+    border: 1px solid #c8b89a;
+    color: #3d2b1f;
+}
+
+/* Decorative inner scroll borders — top and bottom inset lines */
+.card_poetry::before,
+.card_poetry::after {
+    content: '';
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    height: 1px;
+    background: #c8b89a;
+    z-index: 2;
+}
+
+.card_poetry::before { top: 8px; }
+.card_poetry::after  { bottom: 8px; }
+
+.card_poetry .cardTitle {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 0.9rem;
+    color: #3d2b1f;
+    padding: 0.5rem 0;
+}
+
+.card_poetry .cardDecor {
+    color: #c8b89a;
+    font-size: 0.7rem;
+    opacity: 1;
+}
+
+.card_poetry:hover {
+    box-shadow: 2px 4px 12px rgba(0,0,0,0.1);
+}
+
+.card_poetry.cardActive {
+    border: 2px solid #8B6914;
+}
+
+
+/* --- MARKDOWN CARDS --- */
+.card_markdown {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+}
+
+/* Large watermark "#" in background */
+.card_markdown::before {
+    content: '#';
+    position: absolute;
+    font-size: 6rem;
+    color: var(--border);
+    opacity: 0.3;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.card_markdown .cardTitle {
+    font-family: var(--font-mono, monospace);
     font-size: 0.85rem;
-    cursor: pointer;
+    font-weight: 600;
+    color: var(--foreground);
+    position: relative;
+    z-index: 1;
 }
 
-.dangerBtn:hover {
-    background: #dc2626;
+.card_markdown .cardDocCount {
+    color: var(--muted);
+    position: relative;
+    z-index: 1;
 }
 
+.card_markdown:hover {
+    box-shadow: 2px 4px 12px rgba(0,0,0,0.08);
+}
+
+.card_markdown.cardActive {
+    border: 2px solid var(--accent);
+}
+
+
+/* ======== FOOTER ======== */
 .footer {
     padding: 1rem 1.5rem;
     border-top: 1px solid var(--border);
@@ -272,6 +491,37 @@
     gap: 0.75rem;
 }
 
+/* Writing type selector row */
+.typeSelector {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.typeSelectorBtn {
+    flex: 1;
+    padding: 0.5rem 0.25rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 150ms ease;
+    text-align: center;
+}
+
+.typeSelectorBtn:hover {
+    border-color: var(--foreground);
+    color: var(--foreground);
+}
+
+.typeSelectorActive {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.1);
+    font-weight: 600;
+}
+
 .createInput {
     width: 100%;
     padding: 0.75rem;
@@ -295,12 +545,13 @@
 }
 
 .cancelBtn {
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 0.75rem;
     background: transparent;
     border: none;
     color: var(--muted);
     cursor: pointer;
     border-radius: 4px;
+    font-size: 0.85rem;
 }
 
 .cancelBtn:hover {
@@ -308,16 +559,31 @@
 }
 
 .confirmBtn {
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 0.75rem;
     background: var(--accent);
     color: white;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
+    font-size: 0.85rem;
 }
 
 .confirmBtn:disabled {
     opacity: 0.5;
     cursor: default;
+}
+
+.dangerBtn {
+    padding: 0.3rem 0.6rem;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.dangerBtn:hover {
+    background: #dc2626;
 }
