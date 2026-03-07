@@ -4,6 +4,7 @@ import { logger } from '@/lib/logger';
 import { getStoredValue } from '@/lib/storage';
 import { AIProviderConfig } from '@/types';
 
+// Cover colors auto-assigned to new projects in rotation
 export const COVER_COLORS = [
     '#4A6FA5', '#6B4C9A', '#2E8B57', '#C0392B',
     '#D46A1A', '#1A7A8A', '#7A4A2E', '#4A4A8A'
@@ -35,11 +36,11 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 export interface Project {
     id: string;
     name: string;
-    createdAt: Date;
-    updatedAt?: Date;
     writingMode: 'novel' | 'screenplay' | 'markdown' | 'poetry';
     coverColor: string;
     coverImageUrl?: string;
+    createdAt: Date;
+    updatedAt?: Date;
 }
 
 export interface Document {
@@ -217,6 +218,12 @@ interface WorkspaceState {
     /** Toggle for persistent rich text toolbar visibility */
     isToolbarVisible: boolean;
 
+    /**
+     * Global fallback writing mode. Per-project mode (project.writingMode) takes precedence.
+     * Kept for backward compatibility with WritingEditor fallback logic.
+     */
+    writingMode: 'novel' | 'screenplay' | 'markdown' | 'poetry';
+
     // --- ACTIONS ---
     addProject: (project: Project) => void;
     updateProject: (id: string, updates: Partial<Omit<Project, 'id' | 'createdAt'>>) => void;
@@ -241,7 +248,7 @@ interface WorkspaceState {
     addEntity: (entity: Entity) => void;
 
     /**
-     * Updates the currently hovered entity ID. 
+     * Updates the currently hovered entity ID.
      * Passing `null` dismisses the HoverPreview.
      */
     setHoveredEntity: (id: string | null) => void;
@@ -325,7 +332,8 @@ interface WorkspaceState {
     /** Toggles the rich text toolbar visibility */
     toggleToolbarVisible: () => void;
 
-
+    /** Sets the global fallback writing mode */
+    setWritingMode: (mode: 'novel' | 'screenplay' | 'markdown' | 'poetry') => void;
 
     /**
      * Submits partial updates to the AI provider configuration.
@@ -345,16 +353,16 @@ interface WorkspaceState {
 
 /**
  * Global Workspace Store
- * 
- * Manages the UI overlay states (what is hovered, is the creator open) 
- * and the actual world data (the entity list). 
- * Built with Zustand to allow precise, re-render-free subscriptions 
+ *
+ * Manages the UI overlay states (what is hovered, is the creator open)
+ * and the actual world data (the entity list).
+ * Built with Zustand to allow precise, re-render-free subscriptions
  * from the WritingEditor surface.
- * 
+ *
  * PERSISTENCE ARCHITECTURE:
- * We use Zustand's persist middleware configured cleanly via `localStorage` natively 
- * supporting the mythforge offline standalone nature. 
- * `partialize` explicitly omits standard transient UI variables (`hoveredEntityId`, etc) 
+ * We use Zustand's persist middleware configured cleanly via `localStorage` natively
+ * supporting the mythforge offline standalone nature.
+ * `partialize` explicitly omits standard transient UI variables (`hoveredEntityId`, etc)
  * so refreshing never caches a stuck hover box overlay.
  */
 export const useWorkspaceStore = create<WorkspaceState>()(
@@ -375,10 +383,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             isCommandPaletteOpen: false,
             isTypewriterMode: false,
             isFullscreen: false,
-
             spotifyUrl: null,
             isSpotifyOpen: false,
-
             editorWidth: 800,
             tabRailWidth: 72,
             panelWidth: 480,
@@ -398,8 +404,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             atmosphereTypographyEnabled: true,
             atmosphereReducedMotion: false,
             isToolbarVisible: true,
-
-
+            writingMode: 'novel',
 
             addProject: (project) =>
                 set((state) => {
@@ -411,7 +416,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 set((state) => {
                     logger.info('Project updated:', id);
                     return {
-                        projects: state.projects.map(p => p.id === id ? { ...p, ...updates, updatedAt: new Date() } : p),
+                        projects: state.projects.map(p =>
+                            p.id === id ? { ...p, ...updates, updatedAt: new Date() } : p
+                        ),
                     };
                 }),
 
@@ -440,7 +447,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 set((state) => {
                     logger.info('Document updated:', id);
                     return {
-                        documents: state.documents.map(d => d.id === id ? { ...d, ...updates, updatedAt: new Date() } : d),
+                        documents: state.documents.map(d =>
+                            d.id === id ? { ...d, ...updates, updatedAt: new Date() } : d
+                        ),
                     };
                 }),
 
@@ -490,7 +499,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 set((state) => {
                     logger.info('Scene updated:', id);
                     return {
-                        scenes: state.scenes.map(s => s.id === id ? { ...s, ...updates, updatedAt: new Date() } : s),
+                        scenes: state.scenes.map(s =>
+                            s.id === id ? { ...s, ...updates, updatedAt: new Date() } : s
+                        ),
                     };
                 }),
 
@@ -552,10 +563,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             addEntity: (entity) =>
                 set((state) => {
                     logger.info('Entity added:', entity.name);
-                    return {
-                        entities: [...state.entities, entity],
-                    };
+                    return { entities: [...state.entities, entity] };
                 }),
+
             setHoveredEntity: (id) =>
                 set(() => ({ hoveredEntityId: id })),
 
@@ -589,9 +599,11 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             setEditorWidth: (width) =>
                 set(() => ({ editorWidth: width })),
 
-            setTabRailWidth: (width) => set(() => ({ tabRailWidth: width })),
+            setTabRailWidth: (width) =>
+                set(() => ({ tabRailWidth: width })),
 
-            setPanelWidth: (width) => set(() => ({ panelWidth: width })),
+            setPanelWidth: (width) =>
+                set(() => ({ panelWidth: width })),
 
             setSelectedEntity: (id) =>
                 set(() => ({ selectedEntityId: id })),
@@ -600,35 +612,29 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 set((state) => {
                     logger.info('Entity updated:', id);
                     return {
-                        entities: state.entities.map(e => e.id === id ? { ...e, ...updates, updatedAt: new Date() } : e),
+                        entities: state.entities.map(e =>
+                            e.id === id ? { ...e, ...updates, updatedAt: new Date() } : e
+                        ),
                     };
                 }),
 
             deleteEntity: (id) =>
                 set((state) => {
                     logger.info('Entity deleted:', id);
-                    return {
-                        entities: state.entities.filter(e => e.id !== id),
-                    };
+                    return { entities: state.entities.filter(e => e.id !== id) };
                 }),
 
             setHasHydrated: (state) =>
                 set(() => ({ _hasHydrated: state })),
 
             setAIConfig: (config) =>
-                set((state) => ({
-                    aiConfig: { ...state.aiConfig, ...config }
-                })),
+                set((state) => ({ aiConfig: { ...state.aiConfig, ...config } })),
 
             setWritingGoal: (goal) =>
-                set((state) => ({
-                    writingGoal: { ...state.writingGoal, ...goal }
-                })),
+                set((state) => ({ writingGoal: { ...state.writingGoal, ...goal } })),
 
             setSessionWordCount: (count) =>
-                set(() => ({
-                    sessionWordCount: count
-                })),
+                set(() => ({ sessionWordCount: count })),
 
             addCustomAtmosphere: (atmosphere) =>
                 set((state) => {
@@ -640,7 +646,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 set((state) => {
                     logger.info('Custom atmosphere updated:', id);
                     return {
-                        customAtmospheres: state.customAtmospheres.map(a => a.id === id ? { ...a, ...updates } : a)
+                        customAtmospheres: state.customAtmospheres.map(a =>
+                            a.id === id ? { ...a, ...updates } : a
+                        )
                     };
                 }),
 
@@ -649,8 +657,10 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     logger.info('Custom atmosphere deleted:', id);
                     return {
                         customAtmospheres: state.customAtmospheres.filter(a => a.id !== id),
-                        // Also remove it from any scenes using it
-                        scenes: state.scenes.map(s => s.atmosphereId === id ? { ...s, atmosphereId: undefined, updatedAt: new Date() } : s)
+                        // Also clear atmosphereId from any scenes that used this atmosphere
+                        scenes: state.scenes.map(s =>
+                            s.atmosphereId === id ? { ...s, atmosphereId: undefined, updatedAt: new Date() } : s
+                        )
                     };
                 }),
 
@@ -666,15 +676,17 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             setAtmosphereReducedMotion: (enabled) =>
                 set(() => ({ atmosphereReducedMotion: enabled })),
 
-            toggleToolbarVisible: () => set(s => ({ isToolbarVisible: !s.isToolbarVisible })),
+            toggleToolbarVisible: () =>
+                set((state) => ({ isToolbarVisible: !state.isToolbarVisible })),
 
-
+            setWritingMode: (mode) =>
+                set(() => ({ writingMode: mode })),
         }),
         {
             name: 'mythforge-workspace',
 
-            // Explicitly only persist core data points natively, dump transient UI flags on mount memory limits
-            // SECURITY NOTE: apiKey stored in localStorage. Never log or expose this value.
+            // Only persist core data — transient UI flags (hover state, open modals, etc.) reset on reload.
+            // SECURITY NOTE: apiKey is stored in localStorage. Never log or expose this value.
             partialize: (state) => ({
                 projects: state.projects,
                 documents: state.documents,
@@ -695,7 +707,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 atmospheresEnabled: state.atmospheresEnabled,
                 atmosphereTypographyEnabled: state.atmosphereTypographyEnabled,
                 atmosphereReducedMotion: state.atmosphereReducedMotion,
-                isToolbarVisible: state.isToolbarVisible
+                isToolbarVisible: state.isToolbarVisible,
+                writingMode: state.writingMode,
             }),
 
             // Track hydration phases allowing components to await persistence payload dynamically
@@ -709,9 +722,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         const defaultProject: Project = {
                             id: crypto.randomUUID(),
                             name: 'My First Project',
-                            createdAt: new Date(),
                             writingMode: 'novel',
-                            coverColor: COVER_COLORS[0]
+                            coverColor: COVER_COLORS[0],
+                            createdAt: new Date()
                         };
                         const defaultDocument: Document = {
                             id: crypto.randomUUID(),
@@ -746,7 +759,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                                 createdAt: new Date()
                             });
 
-                            // Clear content from document
+                            // Clear content from document layer — it now lives in scenes
                             doc.content = '';
 
                             if (doc.id === state.activeDocumentId) {
@@ -758,7 +771,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         state.activeSceneId = newActiveSceneId;
                     }
 
-                    // Migration: patch existing projects missing writingMode or coverColor
+                    // Migration: patch existing projects missing writingMode or coverColor (Sprint 38)
                     state.projects = state.projects.map((p, i) => ({
                         ...p,
                         writingMode: (p as Project & { writingMode?: string }).writingMode || 'novel',
@@ -769,15 +782,13 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 }
             },
 
-            // Intercept JSON deserialization to properly reconstruct native Javascript `Date` objects
+            // Intercept JSON deserialization to properly reconstruct native JavaScript `Date` objects
             storage: createJSONStorage(() => localStorage, {
                 reviver: (key, value) => {
-                    // Check if the current value iteration dictates an internal array
-                    // This handles `entities`, `projects`, and `documents` equally since they all have `createdAt` Date stamps.
+                    // Handles `entities`, `projects`, `documents`, and `scenes` — all have `createdAt` Date stamps
                     if (Array.isArray(value)) {
                         return value.map((item: Record<string, unknown>) => ({
                             ...item,
-                            // Verify structural mapping if it contains our `createdAt` tag
                             ...(item.createdAt ? { createdAt: new Date(item.createdAt as string) } : {}),
                             ...(item.updatedAt ? { updatedAt: new Date(item.updatedAt as string) } : {})
                         }));
@@ -788,3 +799,5 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         }
     )
 );
+
+

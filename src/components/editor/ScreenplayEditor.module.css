@@ -14,7 +14,7 @@
     width: 8.5in;
     max-width: 98%;
     min-height: 11in;
-    padding: 1in 1in 1in 1.5in;
+    padding: 5rem 5rem 5rem 8rem;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
     font-family: 'Courier New', Courier, monospace;
     font-size: 12pt;
@@ -59,6 +59,45 @@
     font-size: 0.75rem;
 }
 
+.elementBadge {
+    font-size: 0.8rem;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    color: var(--foreground);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    background: var(--background);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.legend {
+    display: flex;
+    gap: 1rem;
+    padding: 0.3rem 1rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.72rem;
+    color: var(--foreground);
+    opacity: 0.6;
+    font-family: var(--font-sans);
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
 /* TipTap editor content area */
 .editor {
     outline: none;
@@ -71,35 +110,46 @@
 .editor [data-screenplay-type="sceneHeading"] {
     text-transform: uppercase;
     font-weight: bold;
-    margin-top: 2em;
+    margin-top: 2.5em;
     margin-bottom: 0;
+    border-left: 3px solid #e05c00;
+    padding-left: 0.75rem;
+    letter-spacing: 0.05em;
 }
 
 .editor [data-screenplay-type="action"] {
-    margin-top: 1em;
+    margin-top: 0.8em;
     margin-bottom: 0;
     text-transform: none;
+    border-left: 3px solid transparent;
+    padding-left: 0.75rem;
 }
 
 .editor [data-screenplay-type="character"] {
     text-transform: uppercase;
     margin-top: 1em;
     margin-bottom: 0;
-    margin-left: 2.2in;
+    margin-left: 13rem;
+    border-left: 3px solid #2563eb;
+    padding-left: 0.75rem;
 }
 
 .editor [data-screenplay-type="parenthetical"] {
-    margin-left: 1.6in;
-    margin-right: 2.4in;
     margin-top: 0;
     margin-bottom: 0;
+    margin-left: 9.5rem;
+    margin-right: 14.5rem;
+    border-left: 3px solid #7c3aed;
+    padding-left: 0.75rem;
 }
 
 .editor [data-screenplay-type="dialogue"] {
-    margin-left: 1in;
-    margin-right: 1.5in;
     margin-top: 0;
     margin-bottom: 0;
+    margin-left: 6rem;
+    margin-right: 9rem;
+    border-left: 3px solid #059669;
+    padding-left: 0.75rem;
 }
 
 .editor [data-screenplay-type="transition"] {
@@ -107,6 +157,8 @@
     text-align: right;
     margin-top: 1em;
     margin-bottom: 1em;
+    border-left: 3px solid #dc2626;
+    padding-left: 0.75rem;
 }
 
 /* Dark mode */

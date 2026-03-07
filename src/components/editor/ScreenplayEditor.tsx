@@ -44,6 +44,19 @@ export default function ScreenplayEditor({ scene }: { scene: Scene }) {
                 const rawContent = editor.getHTML();
                 updateScene(scene.id, { content: rawContent, wordCount });
             }, 300);
+        },
+        editorProps: {
+            handleTextInput(view, from, to, text) {
+                const { state } = view;
+                const nodeName = state.selection.$anchor.parent.type.name;
+                // Auto-uppercase for scene headings and character cues
+                if (nodeName === 'sceneHeading' || nodeName === 'character') {
+                    const tr = state.tr.insertText(text.toUpperCase(), from, to);
+                    view.dispatch(tr);
+                    return true; // tell TipTap we handled it
+                }
+                return false; // let TipTap handle normally for all other types
+            }
         }
     }, [scene.id]);
 
@@ -57,6 +70,17 @@ export default function ScreenplayEditor({ scene }: { scene: Scene }) {
     return (
         <div>
             <div className={styles.toolbar}>
+                {/* Current element type badge */}
+                <span className={styles.elementBadge}>
+                    {{
+                        sceneHeading: '🎬 Scene Heading',
+                        action: '📋 Action',
+                        character: '👤 Character',
+                        parenthetical: '💬 Parenthetical',
+                        dialogue: '🗣 Dialogue',
+                        transition: '⚡ Transition',
+                    }[currentType] || currentType}
+                </span>
                 <select
                     className={styles.toolbarSelect}
                     value={currentType}
@@ -74,6 +98,15 @@ export default function ScreenplayEditor({ scene }: { scene: Scene }) {
                 </select>
                 <span className={styles.hint}>Tab to cycle &bull; Enter to advance</span>
                 <span className={styles.pageCount}>~{estimatedPages} pg</span>
+            </div>
+
+            {/* Color legend — shows what each border color represents */}
+            <div className={styles.legend}>
+                <span className={styles.legendItem}><span className={styles.dot} style={{background:'#e05c00'}}/>Scene</span>
+                <span className={styles.legendItem}><span className={styles.dot} style={{background:'#2563eb'}}/>Character</span>
+                <span className={styles.legendItem}><span className={styles.dot} style={{background:'#059669'}}/>Dialogue</span>
+                <span className={styles.legendItem}><span className={styles.dot} style={{background:'#7c3aed'}}/>Parenthetical</span>
+                <span className={styles.legendItem}><span className={styles.dot} style={{background:'#dc2626'}}/>Transition</span>
             </div>
 
             <div className={styles.canvas}>

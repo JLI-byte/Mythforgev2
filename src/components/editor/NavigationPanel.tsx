@@ -8,7 +8,7 @@ import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 import { AtmospherePicker } from '../ui/AtmospherePicker';
 import { SpotifyPlayer } from '../ui/SpotifyPlayer';
 import SettingsModal from '../ui/SettingsModal';
-import { ProjectSwitcher } from '../ui/ProjectSwitcher';
+import { ProjectSwitcher } from '@/components/navigation/ProjectSwitcher';
 import { NewProjectModal } from '../ui/NewProjectModal';
 
 /**
@@ -605,11 +605,9 @@ export function NavigationPanel() {
 
             {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
 
-            <ProjectSwitcher
-                isOpen={showSwitcher}
-                onClose={() => setShowSwitcher(false)}
-                onCreateNew={() => { setShowSwitcher(false); setShowNewProject(true); }}
-            />
+            {showSwitcher && (
+                <ProjectSwitcher onClose={() => setShowSwitcher(false)} />
+            )}
             <NewProjectModal
                 isOpen={showNewProject}
                 onClose={() => setShowNewProject(false)}
