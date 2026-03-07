@@ -602,7 +602,7 @@ function ContextBar({
                         onClick={() => { setChapterDraft(docTitle); setEditingChapter(true); }}
                         title="Click to rename chapter"
                     >
-                        : {docTitle}
+                        : {docTitle}<span className={styles.breadcrumbPencil}>✏</span>
                     </span>
                 ) : (
                     <span
@@ -635,7 +635,7 @@ function ContextBar({
                         onClick={() => { setSceneDraft(sceneTitle); setEditingScene(true); }}
                         title="Click to rename scene"
                     >
-                        : {sceneTitle}
+                        : {sceneTitle}<span className={styles.breadcrumbPencil}>✏</span>
                     </span>
                 ) : (
                     <span
@@ -644,6 +644,9 @@ function ContextBar({
                         title="Click to add scene name"
                     />
                 )}
+
+                {/* Word count — after scene portion, updates with visibleSceneId */}
+                <span className={styles.breadcrumbWordCount}>· {visibleWordCount.toLocaleString()} words</span>
 
                 {/* Autosave indicator */}
                 {saveState !== 'idle' && (
@@ -717,7 +720,7 @@ function ContextBar({
                 </div>
             )}
 
-            {/* RIGHT — Mode selector, word count, toggles */}
+            {/* RIGHT — Mode selector, toggles */}
             <div className={styles.contextRight}>
                 <select
                     className={styles.toolbarSelect}
@@ -734,7 +737,6 @@ function ContextBar({
                     <option value="markdown">📝 Markdown</option>
                     <option value="poetry">✍️ Poetry</option>
                 </select>
-                <span className={styles.contextWordCount}>{visibleWordCount} words</span>
                 <button className={`${styles.toolbarBtn} ${isTypewriterMode ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleTypewriterMode(); }} title="Typewriter Mode">✍️</button>
                 <button className={`${styles.toolbarBtn} ${isFocusMode ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleFocusMode(); }} title="Focus Mode">◎</button>
                 <button className={`${styles.toolbarBtn} ${isFullscreen ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleFullscreen(); }} title="Fullscreen">⛶</button>

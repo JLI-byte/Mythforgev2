@@ -40,9 +40,9 @@
     top: 0;
     z-index: 10;
     margin-bottom: 0.5rem;
-    min-height: 36px;
-    max-height: 40px;
+    min-height: 44px;
     font-family: var(--font-sans);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
 /* Left — breadcrumb context */
@@ -52,24 +52,41 @@
     gap: 0;
     flex-shrink: 0;
     font-size: 0.8rem;
+    padding: 0 0.75rem 0 0;
+    border-right: 1px solid var(--border);
 }
 
 .breadcrumbNumber {
     color: var(--muted);
+    font-weight: 600;
     user-select: none;
 }
 
 .breadcrumbName {
     color: var(--foreground);
-    cursor: pointer;
+    cursor: text;
+    font-weight: 400;
     margin-left: 0.15rem;
     text-decoration: none;
     border-bottom: 1px solid transparent;
     transition: border-color 150ms ease;
+    position: relative;
 }
 
 .breadcrumbName:hover {
     border-bottom-color: var(--muted);
+}
+
+/* Pencil edit affordance — visible only on hover */
+.breadcrumbPencil {
+    opacity: 0;
+    margin-left: 0.2rem;
+    font-size: 0.7rem;
+    transition: opacity 150ms ease;
+}
+
+.breadcrumbName:hover .breadcrumbPencil {
+    opacity: 0.5;
 }
 
 .breadcrumbNameEmpty {
@@ -80,7 +97,7 @@
 
 .breadcrumbSep {
     color: var(--muted);
-    margin: 0 0.3rem;
+    margin: 0 0.4rem;
     user-select: none;
 }
 
@@ -105,28 +122,33 @@
     white-space: nowrap;
 }
 
+/* Word count in breadcrumb — dot separator */
+.breadcrumbWordCount {
+    color: var(--muted);
+    font-weight: 400;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+    white-space: nowrap;
+}
+
 /* Center — formatting tools */
 .contextFormatting {
     display: flex;
     align-items: center;
     gap: 0.25rem;
     margin: 0 auto;
+    padding: 0 0.75rem;
+    border-right: 1px solid var(--border);
 }
 
-/* Right — mode selector, word count, toggles */
+/* Right — mode selector, toggles */
 .contextRight {
     display: flex;
     align-items: center;
     gap: 0.1rem;
     margin-left: auto;
     flex-shrink: 0;
-}
-
-.contextWordCount {
-    font-size: 0.75rem;
-    color: var(--muted);
-    margin: 0 0.35rem;
-    white-space: nowrap;
+    padding-left: 0.75rem;
 }
 
 .toolbarGroup {
@@ -138,12 +160,7 @@
     margin-right: 0.25rem;
 }
 
-.toolbarGroupRight {
-    display: flex;
-    align-items: center;
-    gap: 0.1rem;
-    margin-left: auto;
-}
+
 
 .toolbarBtn {
     background: none;
@@ -154,17 +171,20 @@
     color: var(--muted);
     font-size: 0.85rem;
     line-height: 1;
-    transition: background 120ms ease, color 120ms ease;
+    opacity: 0.7;
+    transition: background 120ms ease, color 120ms ease, opacity 120ms ease;
 }
 
 .toolbarBtn:hover {
     background: var(--background);
     color: var(--foreground);
+    opacity: 1;
 }
 
 .toolbarBtnActive {
     background: var(--background);
     color: var(--foreground);
+    opacity: 1;
 }
 
 .toolbarSelect {
