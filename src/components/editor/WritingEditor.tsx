@@ -10,6 +10,13 @@ import { EntityMark } from '@/lib/EntityMark';
 import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 import ScreenplayEditor from './ScreenplayEditor';
 
+// TypeScript declaration for window.find (non-standard but supported in all major browsers)
+declare global {
+    interface Window {
+        find(text: string, caseSensitive?: boolean, backwards?: boolean, wrapAround?: boolean, wholeWord?: boolean, searchInFrames?: boolean, showDialog?: boolean): boolean;
+    }
+}
+
 const EDITOR_PLACEHOLDER = '<p>Start writing your story here...</p>';
 
 function SceneEditor({ scene, index }: { scene: Scene, index: number }) {
@@ -206,6 +213,9 @@ function SceneEditor({ scene, index }: { scene: Scene, index: number }) {
                     updateScene(scene.id, { content: rawContent, wordCount: count });
                 }
 
+                // Task 1: Dispatch custom event so the autosave indicator in WritingEditor fires
+                window.dispatchEvent(new CustomEvent('mythforge:contentSaved'));
+
             }, 300);
         },
     }, [scene.id]); // Re-init if scene ID changes entirely
@@ -391,6 +401,8 @@ export default function WritingEditor() {
     const toggleTypewriterMode = useWorkspaceStore((state) => state.toggleTypewriterMode);
     const isFullscreen = useWorkspaceStore((state) => state.isFullscreen);
     const toggleFullscreen = useWorkspaceStore((state) => state.toggleFullscreen);
+    const isFocusMode = useWorkspaceStore((state) => state.isFocusMode);
+    const toggleFocusMode = useWorkspaceStore((state) => state.toggleFocusMode);
     const isToolbarVisible = useWorkspaceStore((state) => state.isToolbarVisible);
     const toggleToolbarVisible = useWorkspaceStore((state) => state.toggleToolbarVisible);
     const editorWidth = useWorkspaceStore((state) => state.editorWidth);
@@ -414,6 +426,133 @@ export default function WritingEditor() {
         }
         /* eslint-enable react-hooks/set-state-in-effect */
     }, [isFullscreen]);
+
+    // Task 1: Wire autosave indicator to content changes via mythforge:contentSaved event
+    useEffect(() => {
+        const handleContentSaved = () => {
+            /* eslint-disable react-hooks/set-state-in-effect */
+            setSaveState('saving');
+            if (saveStateTimerRef.current) clearTimeout(saveStateTimerRef.current);
+            // Visual delay to show "Saving..." briefly before "Saved"
+            setTimeout(() => {
+                setSaveState('saved');
+                saveStateTimerRef.current = setTimeout(() => setSaveState('idle'), 2000);
+            }, 500);
+            /* eslint-enable react-hooks/set-state-in-effect */
+        };
+        window.addEventListener('mythforge:contentSaved', handleContentSaved);
+        return () => window.removeEventListener('mythforge:contentSaved', handleContentSaved);
+    }, []);
+
+    // Task 3: Find & Replace state (custom, no npm packages)
+    const [isFindOpen, setIsFindOpen] = useState(false);
+    const [isReplaceVisible, setIsReplaceVisible] = useState(false);
+    const [findTerm, setFindTerm] = useState('');
+    const [replaceTerm, setReplaceTerm] = useState('');
+    const [matchCount, setMatchCount] = useState(0);
+    const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
+
+    // Ctrl+F and Ctrl+H keyboard shortcuts for find/replace
+    useEffect(() => {
+        const handleFindKeys = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                /* eslint-disable react-hooks/set-state-in-effect */
+                setIsFindOpen(true);
+                setIsReplaceVisible(false);
+                /* eslint-enable react-hooks/set-state-in-effect */
+                setTimeout(() => document.getElementById('mythforge-find-input')?.focus(), 50);
+            } else if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+                e.preventDefault();
+                /* eslint-disable react-hooks/set-state-in-effect */
+                setIsFindOpen(true);
+                setIsReplaceVisible(true);
+                /* eslint-enable react-hooks/set-state-in-effect */
+                setTimeout(() => document.getElementById('mythforge-replace-input')?.focus(), 50);
+            } else if (e.key === 'Escape' && isFindOpen) {
+                // Close find/replace bar on Escape
+                setIsFindOpen(false);
+                setFindTerm('');
+                setReplaceTerm('');
+            }
+        };
+        window.addEventListener('keydown', handleFindKeys);
+        return () => window.removeEventListener('keydown', handleFindKeys);
+    }, [isFindOpen]);
+
+    // Count matches whenever findTerm changes
+    useEffect(() => {
+        if (!findTerm) {
+            setMatchCount(0);
+            setCurrentMatchIndex(0);
+            // Remove any existing highlights
+            document.querySelectorAll('.mythforge-search-highlight').forEach(el => {
+                const parent = el.parentNode;
+                if (parent) {
+                    parent.replaceChild(document.createTextNode(el.textContent || ''), el);
+                    parent.normalize();
+                }
+            });
+            return;
+        }
+        // Highlight logic is deferred to when the user navigates — we just count here
+        const editorWrapper = document.querySelector(`.${styles.editorWrapper}`);
+        if (!editorWrapper) return;
+        const textContent = editorWrapper.textContent || '';
+        const regex = new RegExp(findTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+        const matches = textContent.match(regex);
+        setMatchCount(matches ? matches.length : 0);
+        setCurrentMatchIndex(matches && matches.length > 0 ? 1 : 0);
+    }, [findTerm]);
+
+    // Find next match and scroll to it
+    const handleFindNext = React.useCallback(() => {
+        if (!findTerm || matchCount === 0) return;
+        // Use window.find for native browser text search navigation
+        const found = window.find(findTerm, false, false, true, false, false, false);
+        if (!found) {
+            // Wrap around to beginning
+            const sel = window.getSelection();
+            if (sel) sel.removeAllRanges();
+            window.find(findTerm, false, false, true, false, false, false);
+        }
+        setCurrentMatchIndex(prev => prev >= matchCount ? 1 : prev + 1);
+    }, [findTerm, matchCount]);
+
+    // Find previous match
+    const handleFindPrev = React.useCallback(() => {
+        if (!findTerm || matchCount === 0) return;
+        const found = window.find(findTerm, false, true, true, false, false, false);
+        if (!found) {
+            const sel = window.getSelection();
+            if (sel) sel.removeAllRanges();
+            window.find(findTerm, false, true, true, false, false, false);
+        }
+        setCurrentMatchIndex(prev => prev <= 1 ? matchCount : prev - 1);
+    }, [findTerm, matchCount]);
+
+    // Replace current match
+    const handleReplaceOne = React.useCallback(() => {
+        if (!findTerm) return;
+        const sel = window.getSelection();
+        // Only replace if the current selection matches the find term
+        if (sel && sel.toString().toLowerCase() === findTerm.toLowerCase()) {
+            document.execCommand('insertText', false, replaceTerm);
+            // After replacing, the match count changed — recount
+            setMatchCount(prev => Math.max(0, prev - 1));
+        }
+        // Advance to next match
+        handleFindNext();
+    }, [findTerm, replaceTerm, handleFindNext]);
+
+    // Replace all matches
+    const handleReplaceAll = React.useCallback(() => {
+        if (!findTerm) return;
+        // Dispatch replaceAll event to all SceneEditors
+        window.dispatchEvent(new CustomEvent('mythforge:replaceAll', {
+            detail: { findTerm, replaceTerm }
+        }));
+    }, [findTerm, replaceTerm]);
 
     // Aggregate word count for the entire chapter
     const currentChapterWordCount = React.useMemo(() => {
@@ -490,14 +629,73 @@ export default function WritingEditor() {
 
                     {/* Right side controls */}
                     <div className={styles.toolbarGroupRight}>
-                        <button className={`${styles.toolbarBtn} ${isTypewriterMode ? styles.toolbarBtnActive : ''}`} onClick={toggleTypewriterMode} title="Typewriter Mode">✍️</button>
-                        <button className={`${styles.toolbarBtn} ${isFullscreen ? styles.toolbarBtnActive : ''}`} onClick={toggleFullscreen} title="Fullscreen">⛶</button>
-                        <button className={styles.toolbarBtn} onClick={toggleToolbarVisible} title="Hide Toolbar">⊟</button>
+                        <button className={`${styles.toolbarBtn} ${isTypewriterMode ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleTypewriterMode(); }} title="Typewriter Mode">✍️</button>
+                        <button className={`${styles.toolbarBtn} ${isFocusMode ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleFocusMode(); }} title="Focus Mode">◎</button>
+                        <button className={`${styles.toolbarBtn} ${isFullscreen ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleFullscreen(); }} title="Fullscreen">⛶</button>
+                        <button className={styles.toolbarBtn} onMouseDown={(e) => { e.preventDefault(); toggleToolbarVisible(); }} title="Hide Toolbar">⊟</button>
                     </div>
                 </div>
             )}
             {!isFullscreen && !isToolbarVisible && (
-                <button className={styles.toolbarShowBtn} onClick={toggleToolbarVisible} title="Show Toolbar">⊞</button>
+                <button className={styles.toolbarShowBtn} onMouseDown={(e) => { e.preventDefault(); toggleToolbarVisible(); }} title="Show Toolbar">⊞</button>
+            )}
+
+            {/* Task 3: Find & Replace Bar — sticky below toolbar, above editor header */}
+            {isFindOpen && (
+                <div className={styles.findReplaceBar}>
+                    <div className={styles.findRow}>
+                        <input
+                            id="mythforge-find-input"
+                            type="text"
+                            className={styles.findInput}
+                            placeholder="Find..."
+                            value={findTerm}
+                            onChange={(e) => setFindTerm(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') { e.preventDefault(); handleFindNext(); }
+                            }}
+                        />
+                        <span className={styles.findCount}>{matchCount > 0 ? `${currentMatchIndex}/${matchCount}` : '0'}</span>
+                        <button className={styles.findBtn} onMouseDown={(e) => { e.preventDefault(); handleFindPrev(); }} title="Previous">←</button>
+                        <button className={styles.findBtn} onMouseDown={(e) => { e.preventDefault(); handleFindNext(); }} title="Next">→</button>
+                        {isReplaceVisible && (
+                            <>
+                                <input
+                                    id="mythforge-replace-input"
+                                    type="text"
+                                    className={styles.findInput}
+                                    placeholder="Replace..."
+                                    value={replaceTerm}
+                                    onChange={(e) => setReplaceTerm(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') { e.preventDefault(); handleReplaceOne(); }
+                                    }}
+                                />
+                                <button className={styles.findBtn} onMouseDown={(e) => { e.preventDefault(); handleReplaceOne(); }} title="Replace">Replace</button>
+                                <button className={styles.findBtn} onMouseDown={(e) => { e.preventDefault(); handleReplaceAll(); }} title="Replace All">All</button>
+                            </>
+                        )}
+                        <button
+                            className={styles.findBtn}
+                            onMouseDown={(e) => { e.preventDefault(); setIsReplaceVisible(!isReplaceVisible); }}
+                            title={isReplaceVisible ? 'Hide Replace' : 'Show Replace'}
+                        >
+                            {isReplaceVisible ? '▲' : '▼'}
+                        </button>
+                        <button
+                            className={styles.findCloseBtn}
+                            onMouseDown={(e) => {
+                                e.preventDefault();
+                                setIsFindOpen(false);
+                                setFindTerm('');
+                                setReplaceTerm('');
+                            }}
+                            title="Close"
+                        >
+                            ×
+                        </button>
+                    </div>
+                </div>
             )}
 
             {isFullscreen && showFullscreenHint && (
@@ -634,6 +832,17 @@ export default function WritingEditor() {
                         ×
                     </button>
                 </div>
+            )}
+
+            {/* Task 2: Exit Focus pill — persistent bottom-center button when focus mode is on */}
+            {isFocusMode && (
+                <button
+                    className={styles.exitFocusPill}
+                    onMouseDown={(e) => { e.preventDefault(); toggleFocusMode(); }}
+                    title="Exit Focus Mode (Esc)"
+                >
+                    Exit Focus
+                </button>
             )}
         </div>
     );

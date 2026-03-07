@@ -45,3 +45,10 @@ build-output.log
 lint.json
 lint_output.txt
 *.log
+
+# Debug/temp output files
+lint-out.json
+lint-out2.json
+git_log.txt
+lint-nav.txt
+my_lint.txt

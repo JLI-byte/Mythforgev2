@@ -35,6 +35,8 @@ export default function Home() {
   const setCommandPaletteOpen = useWorkspaceStore((state) => state.setCommandPaletteOpen);
   const isFullscreen = useWorkspaceStore((state) => state.isFullscreen);
   const toggleFullscreen = useWorkspaceStore((state) => state.toggleFullscreen);
+  const isFocusMode = useWorkspaceStore((state) => state.isFocusMode);
+  const toggleFocusMode = useWorkspaceStore((state) => state.toggleFocusMode);
   const activeDocumentId = useWorkspaceStore((state) => state.activeDocumentId);
   const activeSceneId = useWorkspaceStore((state) => state.activeSceneId);
   const scenes = useWorkspaceStore((state) => state.scenes);
@@ -60,12 +62,16 @@ export default function Home() {
       } else if (e.key === 'Escape' && isFullscreen) {
         e.preventDefault();
         toggleFullscreen();
+      } else if (e.key === 'Escape' && isFocusMode) {
+        // Esc exits focus mode
+        e.preventDefault();
+        toggleFocusMode();
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [setCommandPaletteOpen, isFullscreen, toggleFullscreen]);
+  }, [setCommandPaletteOpen, isFullscreen, toggleFullscreen, isFocusMode, toggleFocusMode]);
 
   const activeScene = scenes.find((s) => s.id === activeSceneId);
   const currentAtmosphere = atmospheresEnabled && activeScene?.atmosphereId
@@ -80,7 +86,7 @@ export default function Home() {
 
   return (
     <main
-      className={`${styles.workspace} ${isFullscreen ? styles.fullscreenMode : ''}`}
+      className={`${styles.workspace} ${isFullscreen ? styles.fullscreenMode : ''} ${isFocusMode ? styles.focusMode : ''}`}
       style={atmosphereGlobalOverlay ? atmosphereStyleVars : undefined}
     >
       <div className={styles.navigationPanelContainer}>

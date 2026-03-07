@@ -287,3 +287,105 @@
     opacity: 1;
     transform: translateY(0);
 }
+
+/* Task 3: Find & Replace bar — compact single row below richToolbar */
+.findReplaceBar {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.35rem 0.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 9;
+}
+
+.findRow {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.findInput {
+    background: var(--background);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    outline: none;
+    min-width: 120px;
+    flex: 0 1 180px;
+}
+
+.findInput:focus {
+    border-color: var(--accent);
+}
+
+.findCount {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: var(--font-sans);
+    min-width: 30px;
+    text-align: center;
+}
+
+.findBtn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.2rem 0.5rem;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 0.8rem;
+    line-height: 1;
+    transition: background 120ms ease, color 120ms ease;
+    white-space: nowrap;
+}
+
+.findBtn:hover {
+    background: var(--background);
+    color: var(--foreground);
+}
+
+.findCloseBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0 0.3rem;
+}
+
+.findCloseBtn:hover {
+    color: var(--foreground);
+}
+
+/* Task 2: Exit Focus Mode pill — fixed at bottom center */
+.exitFocusPill {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(var(--background-rgb, 22, 22, 22), 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+    padding: 0.4rem 1.25rem;
+    border-radius: 24px;
+    font-size: 0.85rem;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    z-index: 9999;
+    transition: opacity 200ms ease, background 200ms ease;
+    opacity: 0.7;
+}
+
+.exitFocusPill:hover {
+    opacity: 1;
+    background: rgba(var(--background-rgb, 22, 22, 22), 0.95);
+}

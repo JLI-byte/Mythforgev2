@@ -153,6 +153,11 @@ interface WorkspaceState {
     isFullscreen: boolean;
 
     /**
+     * Focus mode hides sidebar and right rail panels for distraction-free writing.
+     */
+    isFocusMode: boolean;
+
+    /**
      * Width constraints for the main WritingEditor flow. Default 800px.
      */
     editorWidth: number;
@@ -288,6 +293,11 @@ interface WorkspaceState {
      */
     toggleFullscreen: () => void;
 
+    /**
+     * Toggles Focus mode (hides sidebar and right rail).
+     */
+    toggleFocusMode: () => void;
+
     /** Spotify Controls */
     setSpotifyUrl: (url: string | null) => void;
     setSpotifyOpen: (isOpen: boolean) => void;
@@ -383,6 +393,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             isCommandPaletteOpen: false,
             isTypewriterMode: false,
             isFullscreen: false,
+            isFocusMode: false,
             spotifyUrl: null,
             isSpotifyOpen: false,
             editorWidth: 800,
@@ -590,6 +601,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             toggleFullscreen: () =>
                 set((state) => ({ isFullscreen: !state.isFullscreen })),
 
+            toggleFocusMode: () =>
+                set((state) => ({ isFocusMode: !state.isFocusMode })),
+
             setSpotifyUrl: (url) =>
                 set(() => ({ spotifyUrl: url })),
 
@@ -698,6 +712,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 theme: state.theme,
                 isSidebarOpen: state.isSidebarOpen,
                 isTypewriterMode: state.isTypewriterMode,
+                isFocusMode: state.isFocusMode,
                 editorWidth: state.editorWidth,
                 tabRailWidth: state.tabRailWidth,
                 panelWidth: state.panelWidth,

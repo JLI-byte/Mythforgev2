@@ -16,18 +16,45 @@
     max-height: 100vh;
     overflow: hidden;
     background-color: var(--background);
-    transition: background-color 500ms ease;
+    transition: background-color 500ms ease, padding-right 200ms ease;
 }
 
-
+/* Sidebar transitions for smooth focus mode animation */
 .navigationPanelContainer {
     flex-shrink: 0;
     height: 100%;
+    overflow: hidden;
+    transition: width 200ms ease, opacity 200ms ease;
 }
 
 /* Fullscreen Mode Overrides */
 .fullscreenMode .navigationPanelContainer {
     display: none;
+}
+
+/* Focus Mode Overrides — slide sidebar and right rail away smoothly */
+.focusMode .navigationPanelContainer {
+    width: 0 !important;
+    min-width: 0 !important;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Hide right rail tabs and panels when in focus mode */
+.focusMode [class*="sideTabContainer"] {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 200ms ease !important;
+}
+.focusMode [class*="panelContainer"] {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 200ms ease !important;
+}
+
+/* Remove editor right padding when panels are hidden */
+.focusMode .editorContainer {
+    padding-right: 0;
 }
 
 .toolbarContainer {
