@@ -28,7 +28,11 @@ export function WritingStatsPanel({ isOpen, onClose, onTabClick, tabWidth, onTab
             {typeof document !== 'undefined' && createPortal(
                 <button
                     className={`${styles.sideTab} ${isOpen ? styles.sideTabActive : ''}`}
-                    style={{ width: tabWidth }}
+                    style={{
+                        width: tabWidth,
+                        right: isOpen ? panelWidth : 0,
+                        transition: 'right 280ms ease-in-out'
+                    }}
                     onClick={onTabClick}
                     title="Writing Stats"
                     aria-label="Toggle Writing Stats"

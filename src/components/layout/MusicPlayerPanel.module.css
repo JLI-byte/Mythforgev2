@@ -21,7 +21,6 @@
 
 .sideTab {
     position: fixed;
-    right: 0;
     top: 638px;
     padding: 16px 10px;
     display: flex;

@@ -26,7 +26,11 @@ export function AIChatbotPanel({ isOpen, onClose, onTabClick, tabWidth, onTabWid
             {typeof document !== 'undefined' && createPortal(
                 <button
                     className={`${styles.sideTab} ${isOpen ? styles.sideTabActive : ''}`}
-                    style={{ width: tabWidth }}
+                    style={{
+                        width: tabWidth,
+                        right: isOpen ? panelWidth : 0,
+                        transition: 'right 280ms ease-in-out'
+                    }}
                     onClick={onTabClick}
                     title="AI Assistant"
                     aria-label="Toggle AI Assistant"

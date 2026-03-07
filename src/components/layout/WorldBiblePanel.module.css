@@ -34,7 +34,6 @@
 /* Tab attached to left edge of panel — slides out with the drawer */
 .sideTab {
     position: fixed;
-    right: 0;
     top: 48px;
     padding: 16px 10px;
     display: flex;
