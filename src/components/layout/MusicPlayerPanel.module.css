@@ -1,8 +1,8 @@
 .panel {
     position: fixed;
-    top: 48px;
+    top: 518px;
     right: 0;
-    bottom: 0;
+    height: calc(100vh - 518px);
     width: 480px;
     transform: translateX(100%);
     transition: transform 280ms ease-in-out;
@@ -21,7 +21,7 @@
 
 .sideTab {
     position: absolute;
-    top: 520px;
+    top: 0;
     padding: 16px 10px;
     display: flex;
     flex-direction: column;

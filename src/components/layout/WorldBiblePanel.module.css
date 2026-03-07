@@ -4,7 +4,7 @@
     position: fixed;
     top: 48px;
     right: 0;
-    bottom: 0;
+    height: calc(100vh - 48px);
     width: 480px;
     transform: translateX(100%);
     transition: transform 280ms ease-in-out;
@@ -34,7 +34,7 @@
 /* Tab attached to left edge of panel — slides out with the drawer */
 .sideTab {
     position: absolute;
-    top: 60px;
+    top: 0;
     padding: 16px 10px;
     display: flex;
     flex-direction: column;

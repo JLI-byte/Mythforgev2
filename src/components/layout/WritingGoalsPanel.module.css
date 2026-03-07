@@ -1,10 +1,9 @@
 /* WritingGoalsPanel — slide-out panel, fixed right edge */
 .panel {
     position: fixed;
-    top: calc(48px + 104px);
-    /* 48 + 52*2 */
+    top: 236px;
     right: 0;
-    bottom: 0;
+    height: calc(100vh - 236px);
     width: 360px;
     transform: translateX(100%);
     transition: transform 280ms ease-in-out;
@@ -34,7 +33,7 @@
 /* Tab attached to left edge of panel */
 .sideTab {
     position: absolute;
-    top: 244px;
+    top: 0;
     padding: 16px 10px;
     display: flex;
     flex-direction: column;
