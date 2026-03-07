@@ -1,9 +1,9 @@
 /* WritingStatsPanel — slide-out panel, fixed right edge */
 .panel {
     position: fixed;
-    top: 434px;
+    top: 48px;
     right: 0;
-    height: calc(100vh - 434px);
+    height: calc(100vh - 48px);
     width: 360px;
     transform: translateX(100%);
     transition: transform 280ms ease-in-out;
@@ -18,8 +18,6 @@
 
 .panel.open {
     transform: translateX(0);
-    top: 48px;
-    height: calc(100vh - 48px);
 }
 
 /* Inner container clips panel content — sideTab must remain outside this */
@@ -35,7 +33,8 @@
 /* Tab attached to left edge of panel */
 .sideTab {
     position: absolute;
-    top: 0;
+    top: 386px;
+    z-index: 999;
     padding: 16px 10px;
     display: flex;
     flex-direction: column;

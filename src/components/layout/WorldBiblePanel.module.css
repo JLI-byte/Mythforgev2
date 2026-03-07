@@ -19,8 +19,6 @@
 
 .panel.open {
     transform: translateX(0);
-    top: 48px;
-    height: calc(100vh - 48px);
 }
 
 /* Inner container clips panel content — sideTab must remain outside this */
@@ -36,7 +34,8 @@
 /* Tab attached to left edge of panel — slides out with the drawer */
 .sideTab {
     position: absolute;
-    top: 0;
+    top: 0px;
+    z-index: 999;
     padding: 16px 10px;
     display: flex;
     flex-direction: column;
