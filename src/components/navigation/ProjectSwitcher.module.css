@@ -420,21 +420,20 @@
 
 /* --- MARKDOWN CARDS --- */
 .card_markdown {
-    background: var(--surface);
-    border: 1px solid var(--border);
+    background: #1e1e2e;
+    border: 1px solid rgba(255,255,255,0.12);
     color: var(--foreground);
 }
 
-/* Large watermark "#" in background */
+/* Watermark "#" — anchored bottom-right, very faint */
 .card_markdown::before {
     content: '#';
     position: absolute;
-    font-size: 6rem;
-    color: var(--border);
-    opacity: 0.3;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    font-size: 5rem;
+    color: var(--foreground);
+    opacity: 0.08;
+    bottom: 8px;
+    right: 8px;
     pointer-events: none;
     user-select: none;
     z-index: 0;
