@@ -28,7 +28,7 @@ export function WorldBiblePanel({ isOpen, onClose, onTabClick, tabWidth, onTabWi
         <>
             {typeof document !== 'undefined' && createPortal(
                 <button
-                    className={styles.sideTab}
+                    className={`${styles.sideTab} ${isOpen ? styles.sideTabActive : ''}`}
                     style={{ width: tabWidth }}
                     onClick={onTabClick}
                     title="World Bible"

@@ -74,7 +74,7 @@ export function MusicPlayerPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
         <>
             {typeof document !== 'undefined' && createPortal(
                 <button
-                    className={styles.sideTab}
+                    className={`${styles.sideTab} ${isOpen ? styles.sideTabActive : ''}`}
                     style={{ width: tabWidth }}
                     onClick={onTabClick}
                     title="Music Player"
