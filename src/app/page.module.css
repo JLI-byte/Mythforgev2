@@ -51,9 +51,17 @@
     pointer-events: auto;
 }
 
-/* Scroll container is separate from layout container so overflow-x doesn't clip fixed panels */
+/* Scroll container — overflow drives the main editor scroll */
+/* direction: rtl flips the scrollbar to the left side, */
+/* then we reverse it on the child so text stays left-aligned */
 .editorScrollContainer {
     flex: 1;
     overflow-y: auto;
     overflow-x: clip;
+    direction: rtl;
+}
+
+/* Reverse the RTL trick on the child so content renders LTR */
+.editorScrollContainer > * {
+    direction: ltr;
 }

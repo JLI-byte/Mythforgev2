@@ -9,6 +9,7 @@ import { ConsistencyPanel } from '@/components/layout/ConsistencyPanel';
 import { WritingGoalsPanel } from '@/components/layout/WritingGoalsPanel';
 import { WritingStatsPanel } from '@/components/layout/WritingStatsPanel';
 import { AIChatbotPanel } from '@/components/layout/AIChatbotPanel';
+import { MusicPlayerPanel } from '@/components/layout/MusicPlayerPanel';
 import InlineEntryCreator from '@/components/world/InlineEntryCreator';
 import HoverPreview from '@/components/world/HoverPreview';
 import { EntityDetailPanel } from '@/components/world/EntityDetailPanel';
@@ -25,9 +26,9 @@ import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 // Note: Configured as a Client Component to dynamically bind Zustand layout state natively.
 export default function Home() {
   // One active panel at a time — null means all closed
-  const [activePanel, setActivePanel] = useState<'worldBible' | 'consistency' | 'writingGoals' | 'writingStats' | 'aiChatbot' | null>(null);
+  const [activePanel, setActivePanel] = useState<'worldBible' | 'consistency' | 'writingGoals' | 'writingStats' | 'aiChatbot' | 'music' | null>(null);
 
-  const handlePanelToggle = (id: 'worldBible' | 'consistency' | 'writingGoals' | 'writingStats' | 'aiChatbot') => {
+  const handlePanelToggle = (id: 'worldBible' | 'consistency' | 'writingGoals' | 'writingStats' | 'aiChatbot' | 'music') => {
     setActivePanel(prev => prev === id ? null : id);
   };
 
@@ -139,6 +140,15 @@ export default function Home() {
         isOpen={activePanel === 'aiChatbot'}
         onClose={() => setActivePanel(null)}
         onTabClick={() => handlePanelToggle('aiChatbot')}
+        tabWidth={tabRailWidth}
+        onTabWidthChange={setTabRailWidth}
+        panelWidth={panelWidth}
+        onPanelWidthChange={setPanelWidth}
+      />
+      <MusicPlayerPanel
+        isOpen={activePanel === 'music'}
+        onClose={() => setActivePanel(null)}
+        onTabClick={() => handlePanelToggle('music')}
         tabWidth={tabRailWidth}
         onTabWidthChange={setTabRailWidth}
         panelWidth={panelWidth}

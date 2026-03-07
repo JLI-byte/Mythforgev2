@@ -91,3 +91,22 @@ a:hover {
 .entity-tag:hover {
   border-bottom: 2px solid var(--accent);
 }
+
+/* Custom scrollbar — thin and subtle, matches the app's minimal aesthetic */
+.editorScrollContainer::-webkit-scrollbar {
+    width: 6px;
+}
+
+.editorScrollContainer::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.editorScrollContainer::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+.editorScrollContainer::-webkit-scrollbar-thumb:hover {
+    background: var(--foreground);
+    opacity: 0.3;
+}
