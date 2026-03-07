@@ -8,8 +8,8 @@
 .editorContainer {
     flex: 1;
     display: flex;
-    justify-content: center;
-    padding: 4rem 2rem;
+    justify-content: flex-start;
+    padding: 4rem 2rem 4rem 3rem;
     padding-right: 80px;
     background-color: var(--background);
     transition: background-color 500ms ease;
@@ -51,17 +51,16 @@
     pointer-events: auto;
 }
 
-/* Scroll container — overflow drives the main editor scroll */
-/* direction: rtl flips the scrollbar to the left side, */
-/* then we reverse it on the child so text stays left-aligned */
+/* RTL flips scrollbar to left edge, child reversal keeps content LTR */
 .editorScrollContainer {
     flex: 1;
     overflow-y: auto;
     overflow-x: clip;
     direction: rtl;
+    max-width: 860px;
+    margin: 0 auto;
 }
 
-/* Reverse the RTL trick on the child so content renders LTR */
 .editorScrollContainer > * {
     direction: ltr;
 }

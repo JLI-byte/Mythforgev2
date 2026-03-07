@@ -90,7 +90,7 @@ export default function Home() {
         className={styles.editorContainer}
         style={!atmosphereGlobalOverlay ? atmosphereStyleVars : undefined}
       >
-        <div className={styles.editorScrollContainer}>
+        <div className={styles.editorScrollContainer} data-scroll="main">
           {/* Key by document so editor remounts on chapter change, not scene click */}
           <WritingEditor key={activeDocumentId} />
         </div>
