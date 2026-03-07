@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import styles from './WritingStatsPanel.module.css';
 
 interface WritingStatsPanelProps {
@@ -23,43 +24,47 @@ const ChartIcon = () => (
 
 export function WritingStatsPanel({ isOpen, onClose, onTabClick, tabWidth, onTabWidthChange, panelWidth, onPanelWidthChange }: WritingStatsPanelProps) {
     return (
-        <div
-            className={`${styles.panel} ${isOpen ? styles.open : ''}`}
-            style={{ width: panelWidth }}
-        >
-            <button
-                className={styles.sideTab}
-                style={{ width: tabWidth, left: -tabWidth }}
-                onClick={onTabClick}
-                title="Writing Stats"
-                aria-label="Toggle Writing Stats"
-            >
-                <div
-                    className={styles.dragHandle}
-                    onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        const startX = e.clientX;
-                        const startWidth = tabWidth;
-                        const onMouseMove = (moveEvent: MouseEvent) => {
-                            const delta = startX - moveEvent.clientX;
-                            const newWidth = Math.min(120, Math.max(44, startWidth + delta));
-                            onTabWidthChange(newWidth);
-                        };
-                        const onMouseUp = () => {
-                            document.removeEventListener('mousemove', onMouseMove);
-                            document.removeEventListener('mouseup', onMouseUp);
-                        };
-                        document.addEventListener('mousemove', onMouseMove);
-                        document.addEventListener('mouseup', onMouseUp);
-                    }}
-                    title="Drag to resize tab"
-                />
-                <ChartIcon />
-                <span className={styles.sideTabLabel}>Stats</span>
-            </button>
+        <>
+            {typeof document !== 'undefined' && createPortal(
+                <button
+                    className={styles.sideTab}
+                    style={{ width: tabWidth }}
+                    onClick={onTabClick}
+                    title="Writing Stats"
+                    aria-label="Toggle Writing Stats"
+                >
+                    <div
+                        className={styles.dragHandle}
+                        onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const startX = e.clientX;
+                            const startWidth = tabWidth;
+                            const onMouseMove = (moveEvent: MouseEvent) => {
+                                const delta = startX - moveEvent.clientX;
+                                const newWidth = Math.min(120, Math.max(44, startWidth + delta));
+                                onTabWidthChange(newWidth);
+                            };
+                            const onMouseUp = () => {
+                                document.removeEventListener('mousemove', onMouseMove);
+                                document.removeEventListener('mouseup', onMouseUp);
+                            };
+                            document.addEventListener('mousemove', onMouseMove);
+                            document.addEventListener('mouseup', onMouseUp);
+                        }}
+                        title="Drag to resize tab"
+                    />
+                    <ChartIcon />
+                    <span className={styles.sideTabLabel}>Stats</span>
+                </button>,
+                document.body
+            )}
 
-            <div className={styles.panelInner}>
+            <div
+                className={`${styles.panel} ${isOpen ? styles.open : ''}`}
+                style={{ width: panelWidth }}
+            >
+                <div className={styles.panelInner}>
                 <div
                     className={styles.panelResizeHandle}
                     onMouseDown={(e) => {
@@ -96,5 +101,6 @@ export function WritingStatsPanel({ isOpen, onClose, onTabClick, tabWidth, onTab
                 </div>
             </div>
         </div>
+        </>
     );
 }

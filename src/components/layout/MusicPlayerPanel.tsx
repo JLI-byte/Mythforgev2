@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './MusicPlayerPanel.module.css';
 
 interface MusicPlayerPanelProps {
@@ -70,34 +71,43 @@ export function MusicPlayerPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
     };
 
     return (
-        <div className={`${styles.panel} ${isOpen ? styles.open : ''}`} style={{ width: panelWidth }}>
-            {/* Side tab — identical mechanism to WorldBiblePanel */}
-            <button className={styles.sideTab} style={{ width: tabWidth, left: -tabWidth }} onClick={onTabClick}>
-                <div 
-                    className={styles.dragHandle} 
-                    onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        const startX = e.clientX;
-                        const startWidth = tabWidth;
-                        const onMouseMove = (moveEvent: MouseEvent) => {
-                            const delta = startX - moveEvent.clientX;
-                            const newWidth = Math.min(120, Math.max(44, startWidth + delta));
-                            onTabWidthChange(newWidth);
-                        };
-                        const onMouseUp = () => {
-                            document.removeEventListener('mousemove', onMouseMove);
-                            document.removeEventListener('mouseup', onMouseUp);
-                        };
-                        document.addEventListener('mousemove', onMouseMove);
-                        document.addEventListener('mouseup', onMouseUp);
-                    }}
-                />
-                <span className={styles.tabLabel}>♪</span>
-                <span className={styles.tabText}>Music</span>
-            </button>
+        <>
+            {typeof document !== 'undefined' && createPortal(
+                <button
+                    className={styles.sideTab}
+                    style={{ width: tabWidth }}
+                    onClick={onTabClick}
+                    title="Music Player"
+                    aria-label="Toggle Music Player"
+                >
+                    <div 
+                        className={styles.dragHandle} 
+                        onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const startX = e.clientX;
+                            const startWidth = tabWidth;
+                            const onMouseMove = (moveEvent: MouseEvent) => {
+                                const delta = startX - moveEvent.clientX;
+                                const newWidth = Math.min(120, Math.max(44, startWidth + delta));
+                                onTabWidthChange(newWidth);
+                            };
+                            const onMouseUp = () => {
+                                document.removeEventListener('mousemove', onMouseMove);
+                                document.removeEventListener('mouseup', onMouseUp);
+                            };
+                            document.addEventListener('mousemove', onMouseMove);
+                            document.addEventListener('mouseup', onMouseUp);
+                        }}
+                    />
+                    <span className={styles.tabLabel}>♪</span>
+                    <span className={styles.tabText}>Music</span>
+                </button>,
+                document.body
+            )}
 
-            {/* Panel content */}
+            <div className={`${styles.panel} ${isOpen ? styles.open : ''}`} style={{ width: panelWidth }}>
+                {/* Panel content */}
             <div className={styles.panelInner}>
                 <header className={styles.header}>
                     <span className={styles.title}>Music Player</span>
@@ -165,5 +175,6 @@ export function MusicPlayerPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
                 }}
             />
         </div>
+        </>
     );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import styles from './ConsistencyPanel.module.css';
 import ConsistencyChecker from '../checker/ConsistencyChecker';
 
@@ -24,45 +25,48 @@ const CheckIcon = () => (
 // ConsistencyPanel — slide-out panel for AI consistency checker, fixed right edge
 export function ConsistencyPanel({ isOpen, onClose, onTabClick, tabWidth, onTabWidthChange, panelWidth, onPanelWidthChange }: ConsistencyPanelProps) {
     return (
-        <div
-            className={`${styles.panel} ${isOpen ? styles.open : ''}`}
-            style={{ width: panelWidth }}
-        >
-            {/* Tab that sticks out the left side of the panel — moves with the panel */}
-            <button
-                className={styles.sideTab}
-                style={{ width: tabWidth, left: -tabWidth }}
-                onClick={onTabClick}
-                title="Consistency Report"
-                aria-label="Toggle Consistency Report"
-            >
-                <div
-                    className={styles.dragHandle}
-                    onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        const startX = e.clientX;
-                        const startWidth = tabWidth;
-                        const onMouseMove = (moveEvent: MouseEvent) => {
-                            // Dragging left increases width, dragging right decreases
-                            const delta = startX - moveEvent.clientX;
-                            const newWidth = Math.min(120, Math.max(44, startWidth + delta));
-                            onTabWidthChange(newWidth);
-                        };
-                        const onMouseUp = () => {
-                            document.removeEventListener('mousemove', onMouseMove);
-                            document.removeEventListener('mouseup', onMouseUp);
-                        };
-                        document.addEventListener('mousemove', onMouseMove);
-                        document.addEventListener('mouseup', onMouseUp);
-                    }}
-                    title="Drag to resize tab"
-                />
-                <CheckIcon />
-                <span className={styles.sideTabLabel}>Consistency</span>
-            </button>
+        <>
+            {typeof document !== 'undefined' && createPortal(
+                <button
+                    className={styles.sideTab}
+                    style={{ width: tabWidth }}
+                    onClick={onTabClick}
+                    title="Consistency Report"
+                    aria-label="Toggle Consistency Report"
+                >
+                    <div
+                        className={styles.dragHandle}
+                        onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const startX = e.clientX;
+                            const startWidth = tabWidth;
+                            const onMouseMove = (moveEvent: MouseEvent) => {
+                                // Dragging left increases width, dragging right decreases
+                                const delta = startX - moveEvent.clientX;
+                                const newWidth = Math.min(120, Math.max(44, startWidth + delta));
+                                onTabWidthChange(newWidth);
+                            };
+                            const onMouseUp = () => {
+                                document.removeEventListener('mousemove', onMouseMove);
+                                document.removeEventListener('mouseup', onMouseUp);
+                            };
+                            document.addEventListener('mousemove', onMouseMove);
+                            document.addEventListener('mouseup', onMouseUp);
+                        }}
+                        title="Drag to resize tab"
+                    />
+                    <CheckIcon />
+                    <span className={styles.sideTabLabel}>Consistency</span>
+                </button>,
+                document.body
+            )}
 
-            {/* panelInner clips content so it doesn't bleed when panel is closed */}
+            <div
+                className={`${styles.panel} ${isOpen ? styles.open : ''}`}
+                style={{ width: panelWidth }}
+            >
+                {/* panelInner clips content so it doesn't bleed when panel is closed */}
             <div className={styles.panelInner}>
                 <div
                     className={styles.panelResizeHandle}
@@ -100,5 +104,6 @@ export function ConsistencyPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
                 </div>
             </div>
         </div>
+        </>
     );
 }

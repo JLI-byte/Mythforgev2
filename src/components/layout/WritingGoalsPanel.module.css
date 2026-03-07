@@ -12,7 +12,7 @@
     border-left: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    overflow: visible;
+    overflow: hidden;
     box-shadow: -3px 2px 10px rgba(0, 0, 0, 0.10);
 }
 
@@ -32,9 +32,9 @@
 
 /* Tab attached to left edge of panel */
 .sideTab {
-    position: absolute;
-    top: 286px;
-    z-index: 999;
+    position: fixed;
+    right: 0;
+    top: 334px;
     padding: 16px 10px;
     display: flex;
     flex-direction: column;
@@ -48,6 +48,7 @@
     color: var(--muted);
     transition: color 150ms ease, background-color 150ms ease;
     box-shadow: -3px 2px 10px rgba(0, 0, 0, 0.10);
+    z-index: 9999;
 }
 
 .sideTab:hover {
