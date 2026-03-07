@@ -120,19 +120,29 @@
     position: absolute;
     top: 6px;
     left: 6px;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.92);
     color: #1a1a1a;
     font-size: 0.65rem;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 3;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    z-index: 2;
+    pointer-events: none;
 }
+
+/* Active project outline — uses outline so it isn't clipped by overflow:hidden */
+.cardActive {
+    outline: 2px solid #F5C842;
+    outline-offset: 2px;
+}
+
+.card_screenplay.cardActive { outline-color: #4A6FA5; }
+.card_poetry.cardActive     { outline-color: #8B6914; }
+.card_markdown.cardActive   { outline-color: var(--accent); }
 
 /* ⋯ menu — top-right, appears on hover */
 .cardMenu {
@@ -333,9 +343,7 @@
                inset -1px 0 0 rgba(255,255,255,0.15);
 }
 
-.card_novel.cardActive {
-    border: 2px solid #F5C842;
-}
+
 
 
 /* --- SCREENPLAY CARDS --- */
@@ -364,10 +372,7 @@
     box-shadow: 2px 4px 12px rgba(0,0,0,0.12);
 }
 
-.card_screenplay.cardActive {
-    border: 2px solid #4A6FA5;
-    border-top: 4px solid #1a1a1a;
-}
+
 
 
 /* --- POETRY CARDS --- */
@@ -410,9 +415,7 @@
     box-shadow: 2px 4px 12px rgba(0,0,0,0.1);
 }
 
-.card_poetry.cardActive {
-    border: 2px solid #8B6914;
-}
+
 
 
 /* --- MARKDOWN CARDS --- */
@@ -458,9 +461,7 @@
     box-shadow: 2px 4px 12px rgba(0,0,0,0.08);
 }
 
-.card_markdown.cardActive {
-    border: 2px solid var(--accent);
-}
+
 
 
 /* ======== FOOTER ======== */
