@@ -1,9 +1,9 @@
 /* WritingGoalsPanel — slide-out panel, fixed right edge */
 .panel {
     position: fixed;
-    top: 236px;
+    top: 334px;
     right: 0;
-    height: calc(100vh - 236px);
+    height: calc(100vh - 334px);
     width: 360px;
     transform: translateX(100%);
     transition: transform 280ms ease-in-out;

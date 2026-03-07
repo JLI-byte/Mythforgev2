@@ -2,9 +2,9 @@
 /* Sits below WorldBiblePanel tab. Closed: tab visible. Open: fully visible. */
 .panel {
     position: fixed;
-    top: 142px;
+    top: 188px;
     right: 0;
-    height: calc(100vh - 142px);
+    height: calc(100vh - 188px);
     width: 360px;
     transform: translateX(100%);
     transition: transform 280ms ease-in-out;

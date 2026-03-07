@@ -1,8 +1,8 @@
 .panel {
     position: fixed;
-    top: 518px;
+    top: 638px;
     right: 0;
-    height: calc(100vh - 518px);
+    height: calc(100vh - 638px);
     width: 480px;
     transform: translateX(100%);
     transition: transform 280ms ease-in-out;
