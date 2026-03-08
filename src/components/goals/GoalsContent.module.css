@@ -329,11 +329,17 @@
 .calStats {
     display: flex;
     justify-content: space-between;
-    margin-top: 0.5rem;
+    padding: 0.4rem 0 0;
+    width: 100%;
+    box-sizing: border-box;
     font-size: 0.78rem;
     color: var(--muted);
-    white-space: nowrap;
     overflow: visible;
+}
+
+.calStats span {
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 
