@@ -1,111 +1,275 @@
-/* Sprint 46A: WorldBibleHome styles */
+/* Sprint 46A redesign: WorldBibleHome — 4-section layout */
 
 .homeContainer {
-    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
-/* --- Favorites strip --- */
-.favoritesSection {
-    margin-bottom: 1rem;
+
+/* ========================================
+   Section 1 — Top toolbar
+   ======================================== */
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
 }
 
-.favoritesHeader {
+.searchInput {
+    flex: 1;
+    max-width: 60%;
     font-size: 0.8rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.3rem 0.6rem;
+    color: var(--foreground);
+    outline: none;
+}
+
+.searchInput:focus {
+    border-color: var(--accent);
+}
+
+.searchInput::placeholder {
+    color: var(--muted);
+}
+
+.entryCount {
+    color: var(--muted);
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+.sortBtn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 0.9rem;
+    padding: 0.2rem 0.35rem;
+    cursor: pointer;
+    border-radius: 4px;
+    line-height: 1;
+}
+
+.sortBtn:hover {
+    color: var(--foreground);
+    background: rgba(var(--foreground-rgb), 0.06);
+}
+
+
+/* ========================================
+   Section 2 — Favorites row
+   ======================================== */
+.favoritesHeader {
+    font-size: 0.72rem;
     font-weight: 600;
     color: var(--muted);
-    margin: 0 0 0.5rem 0;
+    padding: 0.5rem 0.75rem 0 0.75rem;
+    margin: 0;
     letter-spacing: 0.02em;
 }
 
-.favoritesStrip {
+.favoritesRow {
     display: flex;
-    gap: 0.4rem;
+    gap: 0.5rem;
     overflow-x: auto;
-    padding-bottom: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
 }
 
-/* Hide scrollbar for a cleaner look */
-.favoritesStrip::-webkit-scrollbar {
+/* Hide scrollbar for cleaner look */
+.favoritesRow::-webkit-scrollbar {
     height: 3px;
 }
 
-.favoritesStrip::-webkit-scrollbar-thumb {
+.favoritesRow::-webkit-scrollbar-thumb {
     background: var(--border);
     border-radius: 2px;
 }
 
-.favoriteChip {
+/* Individual favorite card */
+.favoriteCard {
     flex-shrink: 0;
-    padding: 0.3rem 0.6rem;
-    background: rgba(var(--foreground-rgb), 0.06);
+    width: 72px;
+    height: 72px;
+    background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    color: var(--foreground);
-    font-size: 0.72rem;
+    border-radius: 6px;
     cursor: pointer;
-    transition: background 150ms ease;
+    overflow: hidden;
+    transition: transform 150ms ease;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
+
+.favoriteCard:hover {
+    transform: translateY(-2px);
+}
+
+/* Top 60% — image or icon area */
+.favoriteImage {
+    height: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.favoriteIcon {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+/* Bottom 40% — entity name */
+.favoriteName {
+    height: 40%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: var(--foreground);
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
+    padding: 0 0.2rem;
+    text-align: center;
 }
 
-.favoriteChip:hover {
-    background: rgba(var(--foreground-rgb), 0.12);
-}
-
-.favoritesEmpty {
-    font-size: 0.78rem;
-    color: var(--muted);
-    font-style: italic;
-    margin: 0;
-}
-
-/* --- Root category cards --- */
-.categoryGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-}
-
-.categoryCard {
+/* Empty state placeholder card */
+.favoritePlaceholder {
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.35rem;
-    padding: 1.25rem 0.75rem;
+    gap: 0.15rem;
+}
+
+.favoritePlaceholderIcon {
+    color: var(--muted);
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.favoritePlaceholderText {
+    color: var(--muted);
+    font-size: 0.6rem;
+}
+
+
+/* ========================================
+   Section 3 — Category cards (stacked)
+   ======================================== */
+.categoryStack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 0.75rem;
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Individual landscape category card */
+.categoryCard {
+    display: flex;
+    align-items: stretch;
+    height: 110px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
     cursor: pointer;
+    overflow: hidden;
     transition: transform 150ms ease, box-shadow 150ms ease;
-    text-align: center;
+    text-align: left;
+    padding: 0;
+    color: inherit;
 }
 
 .categoryCard:hover {
     transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Left: icon with colored background */
+.categoryIconWrap {
+    width: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 .categoryIcon {
-    font-size: 1.75rem;
+    font-size: 2.5rem;
     line-height: 1;
 }
 
+/* Center: label + count + subcategory pills */
+.categoryCenter {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0.6rem 0.5rem;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
 .categoryLabel {
-    font-size: 0.9rem;
-    font-weight: 600;
+    font-size: 1.1rem;
+    font-weight: 700;
     color: var(--foreground);
 }
 
 .categoryCount {
-    font-size: 0.72rem;
+    font-size: 0.78rem;
     color: var(--muted);
 }
 
-/* --- Add entry button --- */
+.subcategoryPills {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-top: 0.3rem;
+}
+
+.subcategoryPill {
+    font-size: 0.7rem;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+/* Right: chevron */
+.categoryChevron {
+    width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+
+/* ========================================
+   Section 4 — Add Entry button
+   ======================================== */
 .addEntryBtn {
-    width: 100%;
+    width: calc(100% - 1.5rem);
     padding: 0.6rem;
+    margin: 0 0.75rem 0.75rem 0.75rem;
     background: transparent;
     border: 1px dashed var(--border);
     border-radius: 6px;
@@ -114,6 +278,7 @@
     font-weight: 500;
     cursor: pointer;
     transition: all 150ms ease;
+    flex-shrink: 0;
 }
 
 .addEntryBtn:hover {
