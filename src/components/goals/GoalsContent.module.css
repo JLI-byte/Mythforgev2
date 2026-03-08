@@ -1,0 +1,494 @@
+/* Sprint 47B: GoalsContent — Writing Goals panel inner content */
+
+.container {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    height: 100%;
+    padding-bottom: 1rem;
+}
+
+
+/* ========================================
+   ZONE 1 — Goal Setup Banner
+   ======================================== */
+.setupBanner {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 1rem;
+    margin: 0.75rem;
+}
+
+.setupTitle {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: white;
+    margin: 0 0 0.25rem 0;
+}
+
+.setupSubtext {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0 0 0.75rem 0;
+}
+
+.setupOptions {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 0.4rem;
+}
+
+.setupOption {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 150ms ease;
+    flex: 1;
+}
+
+.setupOption:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.setupOptionSelected {
+    background: white;
+    color: #1a1a2e;
+    border-color: white;
+    font-weight: 600;
+}
+
+.setupHint {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.4);
+    margin: 0.3rem 0 0.75rem 0;
+}
+
+.setupStartBtn {
+    width: 100%;
+    background: #F5C842;
+    color: #1a1a1a;
+    font-weight: 700;
+    font-size: 0.88rem;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem;
+    cursor: pointer;
+    transition: opacity 150ms ease;
+}
+
+.setupStartBtn:hover {
+    opacity: 0.9;
+}
+
+
+/* ========================================
+   ZONE 2 — Today Card (hero)
+   ======================================== */
+.todayCard {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin: 0 0.75rem 0.75rem 0.75rem;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 120px;
+}
+
+/* Progress ring wrapper */
+.ringWrap {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+}
+
+.ringWrap svg {
+    display: block;
+}
+
+.ringText {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.ringWords {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--foreground);
+    line-height: 1.1;
+}
+
+.ringTarget {
+    font-size: 0.65rem;
+    color: var(--muted);
+}
+
+/* Center: streak display */
+.todayCenter {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.streakDisplay {
+    display: flex;
+    flex-direction: column;
+}
+
+.streakNumber {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--foreground);
+    line-height: 1.1;
+}
+
+.streakLabel {
+    font-size: 0.72rem;
+    color: var(--muted);
+}
+
+.goalMet {
+    color: #22c55e;
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+.goalRemaining {
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+
+/* Right: session info */
+.todayRight {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.6rem;
+    flex-shrink: 0;
+}
+
+.sessionStat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.sessionNumber {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--foreground);
+    line-height: 1.1;
+}
+
+.sessionLabel {
+    font-size: 0.72rem;
+    color: var(--muted);
+}
+
+
+/* ========================================
+   Shared section header
+   ======================================== */
+.sectionHeader {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin: 0;
+    padding: 0 0.75rem 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+
+/* ========================================
+   ZONE 3 — Calendar Heatmap
+   ======================================== */
+.calendarWrap {
+    padding: 0 0.75rem 0.75rem;
+}
+
+.calHeaders {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: 2px;
+}
+
+.calHeaderDay {
+    text-align: center;
+    font-size: 0.65rem;
+    color: var(--muted);
+    padding: 0.15rem 0;
+}
+
+.calGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+/* Base day cell */
+.calDay {
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 28px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    position: relative;
+}
+
+.calDayNum {
+    font-size: 0.6rem;
+    color: var(--muted);
+    line-height: 1;
+}
+
+/* Empty padding cell */
+.calDayEmpty {
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 28px;
+    margin: 0 auto;
+}
+
+/* Future date — invisible */
+.calDayFuture {
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 28px;
+    margin: 0 auto;
+    opacity: 0.2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Past date, no writing */
+.calDayNone {
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+/* Partial writing (some words but goal not met) */
+.calDayPartial {
+    background: #1a3a5c;
+}
+
+.calDayPartial .calDayNum {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Goal met */
+.calDayMet {
+    background: #4A6FA5;
+}
+
+.calDayMet .calDayNum {
+    color: white;
+}
+
+/* Exceeded (1.5x target) */
+.calDayExceeded {
+    background: #F5C842;
+}
+
+.calDayExceeded .calDayNum {
+    color: #1a1a1a;
+}
+
+/* Today ring */
+.calDayToday {
+    outline: 2px solid var(--foreground);
+    outline-offset: -1px;
+}
+
+/* Stats below calendar */
+.calStats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+
+/* ========================================
+   ZONE 4 — Project Progress
+   ======================================== */
+.projectsList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.projectCard {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem;
+}
+
+.projectTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.4rem;
+}
+
+.projectName {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--foreground);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+}
+
+.projectWords {
+    font-size: 0.78rem;
+    color: var(--muted);
+    flex-shrink: 0;
+    margin-left: 0.5rem;
+}
+
+.progressBar {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    overflow: hidden;
+    margin-bottom: 0.25rem;
+}
+
+.progressFill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 300ms ease;
+}
+
+.projectPct {
+    font-size: 0.7rem;
+    color: var(--muted);
+}
+
+.emptyState {
+    font-size: 0.82rem;
+    color: var(--muted);
+    font-style: italic;
+    text-align: center;
+    padding: 1rem 0.75rem;
+    margin: 0;
+}
+
+
+/* ========================================
+   ZONE 5 — Achievements
+   ======================================== */
+.achievementsHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0.75rem 0.4rem;
+}
+
+.achievementsCount {
+    font-size: 0.72rem;
+    color: var(--muted);
+}
+
+.badgeGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding: 0 0.75rem 0.75rem;
+}
+
+.badgeCard {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.badgeEarned {
+    border-color: rgba(245, 200, 66, 0.3);
+}
+
+.badgeLocked {
+    opacity: 0.7;
+}
+
+/* Earned checkmark */
+.badgeCheck {
+    position: absolute;
+    top: 3px;
+    right: 5px;
+    font-size: 0.6rem;
+    color: #F5C842;
+    font-weight: 700;
+}
+
+/* Badge icon */
+.badgeIcon {
+    font-size: 1.5rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.badgeIconLocked {
+    opacity: 0.3;
+    filter: grayscale(1);
+}
+
+/* Badge info text */
+.badgeInfo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.badgeName {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--foreground);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.badgeLocked .badgeName {
+    color: var(--muted);
+}
+
+.badgeDesc {
+    font-size: 0.68rem;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
