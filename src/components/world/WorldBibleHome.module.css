@@ -1,0 +1,122 @@
+/* Sprint 46A: WorldBibleHome styles */
+
+.homeContainer {
+    padding: 0.75rem;
+}
+
+/* --- Favorites strip --- */
+.favoritesSection {
+    margin-bottom: 1rem;
+}
+
+.favoritesHeader {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin: 0 0 0.5rem 0;
+    letter-spacing: 0.02em;
+}
+
+.favoritesStrip {
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+}
+
+/* Hide scrollbar for a cleaner look */
+.favoritesStrip::-webkit-scrollbar {
+    height: 3px;
+}
+
+.favoritesStrip::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
+}
+
+.favoriteChip {
+    flex-shrink: 0;
+    padding: 0.3rem 0.6rem;
+    background: rgba(var(--foreground-rgb), 0.06);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--foreground);
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: background 150ms ease;
+    white-space: nowrap;
+}
+
+.favoriteChip:hover {
+    background: rgba(var(--foreground-rgb), 0.12);
+}
+
+.favoritesEmpty {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-style: italic;
+    margin: 0;
+}
+
+/* --- Root category cards --- */
+.categoryGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.categoryCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 1.25rem 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 150ms ease, box-shadow 150ms ease;
+    text-align: center;
+}
+
+.categoryCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.categoryIcon {
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.categoryLabel {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.categoryCount {
+    font-size: 0.72rem;
+    color: var(--muted);
+}
+
+/* --- Add entry button --- */
+.addEntryBtn {
+    width: 100%;
+    padding: 0.6rem;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 150ms ease;
+}
+
+.addEntryBtn:hover {
+    border-color: var(--foreground);
+    color: var(--foreground);
+}

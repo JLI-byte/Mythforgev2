@@ -1,0 +1,76 @@
+/* Sprint 46A: WorldBibleNav — sticky navigation bar */
+
+.navBar {
+    height: 36px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+    flex-shrink: 0;
+}
+
+/* Back / Forward navigation buttons */
+.navBtn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding: 0.2rem 0.35rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: color 150ms ease, opacity 150ms ease;
+    line-height: 1;
+}
+
+.navBtn:hover:not(:disabled) {
+    color: var(--foreground);
+    background: rgba(var(--foreground-rgb), 0.06);
+}
+
+.navBtn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+/* Breadcrumb text — fills available space */
+.breadcrumb {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--foreground);
+    font-weight: 500;
+}
+
+.crumbMuted {
+    color: var(--muted);
+    font-weight: 400;
+}
+
+.crumbSep {
+    color: var(--muted);
+    margin: 0 0.2rem;
+}
+
+/* Home button */
+.homeBtn {
+    background: transparent;
+    border: none;
+    font-size: 0.85rem;
+    padding: 0.2rem 0.35rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: opacity 150ms ease;
+    line-height: 1;
+}
+
+.homeBtn:hover {
+    background: rgba(var(--foreground-rgb), 0.06);
+}

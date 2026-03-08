@@ -1,0 +1,70 @@
+/* Sprint 46A: WorldBibleRoot — root category view styles */
+
+.rootContainer {
+    padding: 0.75rem;
+}
+
+.rootHeader {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--foreground);
+    margin: 0 0 0.75rem 0;
+}
+
+/* Subcategory card grid */
+.subcategoryGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.subcategoryCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 1.25rem 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 150ms ease, box-shadow 150ms ease;
+    text-align: center;
+}
+
+.subcategoryCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.subcategoryIcon {
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.subcategoryLabel {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.subcategoryCount {
+    font-size: 0.72rem;
+    color: var(--muted);
+}
+
+/* Custom category button — disabled for now */
+.addCustomBtn {
+    width: 100%;
+    padding: 0.6rem;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: not-allowed;
+    opacity: 0.5;
+}

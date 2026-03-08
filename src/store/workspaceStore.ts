@@ -93,6 +93,14 @@ export interface Entity {
     createdAt: Date;
     /** Timestamp of when the entity was last updated */
     updatedAt?: Date;
+    /** Sprint 46A: base64 or URL for card image */
+    imageUrl?: string;
+    /** Sprint 46A: pinned to favorites strip */
+    isFavorite?: boolean;
+    /** Sprint 46A: user-defined or preset sublabel */
+    subcategory?: string;
+    /** Sprint 46A: flexible key/value pairs for custom metadata */
+    customFields?: { label: string; value: string }[];
 }
 
 interface WorkspaceState {
@@ -324,6 +332,12 @@ interface WorkspaceState {
      * Deletes an entity by ID.
      */
     deleteEntity: (id: string) => void;
+
+    /** Sprint 46A: Toggle an entity's favorite status */
+    toggleEntityFavorite: (id: string) => void;
+
+    /** Sprint 46A: Update an entity's image URL */
+    updateEntityImage: (id: string, imageUrl: string) => void;
 
     /**
      * Updates the internal tracking flag verifying persistence load.
@@ -638,6 +652,22 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     return { entities: state.entities.filter(e => e.id !== id) };
                 }),
 
+            // Sprint 46A: Toggle an entity's favorite pin
+            toggleEntityFavorite: (id) =>
+                set((state) => ({
+                    entities: state.entities.map(e =>
+                        e.id === id ? { ...e, isFavorite: !e.isFavorite } : e
+                    ),
+                })),
+
+            // Sprint 46A: Update an entity's card image
+            updateEntityImage: (id, imageUrl) =>
+                set((state) => ({
+                    entities: state.entities.map(e =>
+                        e.id === id ? { ...e, imageUrl } : e
+                    ),
+                })),
+
             setHasHydrated: (state) =>
                 set(() => ({ _hasHydrated: state })),
 
@@ -792,6 +822,15 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         writingMode: (p as Project & { writingMode?: string }).writingMode || 'novel',
                         coverColor: (p as Project & { coverColor?: string }).coverColor || COVER_COLORS[i % COVER_COLORS.length]
                     })) as Project[];
+
+                    // Migration: patch existing entities missing Sprint 46A fields
+                    state.entities = state.entities.map(e => ({
+                        ...e,
+                        isFavorite: e.isFavorite ?? false,
+                        imageUrl: e.imageUrl ?? '',
+                        subcategory: e.subcategory ?? '',
+                        customFields: e.customFields ?? [],
+                    }));
 
                     state.setHasHydrated(true);
                 }
