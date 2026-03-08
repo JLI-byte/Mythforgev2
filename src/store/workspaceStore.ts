@@ -103,6 +103,88 @@ export interface Entity {
     customFields?: { label: string; value: string }[];
 }
 
+// =============================================
+// Sprint 47A: Goals System Interfaces
+// =============================================
+
+/** One entry per project per calendar day — auto-tracked from editor */
+interface WritingDay {
+    id: string;
+    projectId: string;
+    date: string;             // YYYY-MM-DD format
+    wordsWritten: number;
+    minutesWritten: number;
+    goalMet: boolean;
+}
+
+/** User-configured goal settings */
+interface GoalConfig {
+    dailyWordTarget: number;       // default: 200
+    dailyTimeTarget: number;       // minutes, default: 20
+    primaryMetric: 'words' | 'time'; // default: 'words'
+    writingDaysPerWeek: number;    // default: 5
+    streakRepairsAvailable: number; // default: 1
+    goalConfigured: boolean;       // false until user sets goal
+}
+
+/** Cached streak state — derived from WritingDay history */
+interface StreakState {
+    currentStreak: number;         // consecutive writing days
+    longestStreak: number;         // all-time longest streak
+    lastWritingDate: string;       // YYYY-MM-DD
+    totalWritingDays: number;      // all-time days written
+    totalWordsAllTime: number;     // all-time word count
+}
+
+/** Static badge definitions — IDs are stable strings used as keys */
+export const BADGE_DEFINITIONS = {
+    first_day: {
+        id: 'first_day',
+        name: 'The First Day',
+        description: 'You showed up. That is how every story starts.',
+        icon: '✏️',
+    },
+    seven_day_streak: {
+        id: 'seven_day_streak',
+        name: 'The Habit',
+        description: 'Seven days. You showed up seven days in a row.',
+        icon: '🔥',
+    },
+    ten_thousand_words: {
+        id: 'ten_thousand_words',
+        name: 'Ten Thousand',
+        description: 'Ten thousand words. A short story\'s worth of showing up.',
+        icon: '📖',
+    },
+    thirty_day_streak: {
+        id: 'thirty_day_streak',
+        name: 'The Ritual',
+        description: 'Thirty days. Writing is no longer something you do. It is who you are.',
+        icon: '⭐',
+    },
+    fifty_thousand_words: {
+        id: 'fifty_thousand_words',
+        name: 'Novel Length',
+        description: 'Fifty thousand words. You have written a novel\'s worth of words.',
+        icon: '🏆',
+    },
+} as const;
+
+/** Earned badge record — stored per user */
+interface EarnedBadge {
+    badgeId: keyof typeof BADGE_DEFINITIONS;
+    earnedAt: Date;
+}
+
+/** XP event log — data layer only, not shown in UI yet */
+interface XPEvent {
+    id: string;
+    type: 'goal_met' | 'streak_milestone' | 'project_milestone' | 'first_session';
+    xp: number;
+    projectId?: string;
+    earnedAt: Date;
+}
+
 interface WorkspaceState {
     // --- STATE FIELDS ---
     projects: Project[];
@@ -373,6 +455,24 @@ interface WorkspaceState {
      * Set the current running session's word count derived from editor diffs.
      */
     setSessionWordCount: (count: number) => void;
+
+    // --- SPRINT 47A: GOALS SYSTEM ACTIONS ---
+    writingDays: WritingDay[];
+    goalConfig: GoalConfig;
+    streakState: StreakState;
+    earnedBadges: EarnedBadge[];
+    xpEvents: XPEvent[];
+
+    /** Record a writing session — called by editor autosave flow */
+    recordWritingSession: (projectId: string, wordsAdded: number, minutesSpent: number) => void;
+    /** Update goal configuration — sets goalConfigured: true */
+    updateGoalConfig: (updates: Partial<GoalConfig>) => void;
+    /** Repair a broken streak by marking a date as goalMet */
+    repairStreak: (date: string) => void;
+    /** Recompute streakState from writingDays history */
+    computeStreakState: () => StreakState;
+    /** Check milestones and award badges that haven't been earned yet */
+    checkAndAwardBadges: () => void;
 }
 
 /**
@@ -389,9 +489,103 @@ interface WorkspaceState {
  * `partialize` explicitly omits standard transient UI variables (`hoveredEntityId`, etc)
  * so refreshing never caches a stuck hover box overlay.
  */
+
+// =============================================
+// Sprint 47A: Pure helper functions for goals
+// =============================================
+
+/**
+ * Compute streak state from a list of WritingDay entries.
+ * Pure function — no store dependency.
+ */
+function computeStreakFromDays(days: WritingDay[]): StreakState {
+    // Get unique dates where goal was met (across all projects)
+    const metDates = [...new Set(
+        days.filter(d => d.goalMet).map(d => d.date)
+    )].sort(); // ascending
+
+    // Total words across all entries
+    const totalWordsAllTime = days.reduce((sum, d) => sum + d.wordsWritten, 0);
+
+    // Total unique writing days (goal met)
+    const totalWritingDays = metDates.length;
+
+    // Last writing date (any words > 0)
+    const datesWithWords = [...new Set(
+        days.filter(d => d.wordsWritten > 0).map(d => d.date)
+    )].sort();
+    const lastWritingDate = datesWithWords.length > 0
+        ? datesWithWords[datesWithWords.length - 1]
+        : '';
+
+    if (metDates.length === 0) {
+        return { currentStreak: 0, longestStreak: 0, lastWritingDate, totalWritingDays, totalWordsAllTime };
+    }
+
+    // Helper: add N days to a YYYY-MM-DD string
+    const addDays = (dateStr: string, n: number): string => {
+        const d = new Date(dateStr + 'T00:00:00');
+        d.setDate(d.getDate() + n);
+        return d.toISOString().split('T')[0];
+    };
+
+    const metSet = new Set(metDates);
+    const today = new Date().toISOString().split('T')[0];
+
+    // Current streak: count consecutive days backward from today (or yesterday)
+    let currentStreak = 0;
+    let checkDate = metSet.has(today) ? today : addDays(today, -1);
+    while (metSet.has(checkDate)) {
+        currentStreak++;
+        checkDate = addDays(checkDate, -1);
+    }
+
+    // Longest streak: scan all met dates for longest consecutive run
+    let longestStreak = 0;
+    let runLength = 1;
+    for (let i = 1; i < metDates.length; i++) {
+        const expected = addDays(metDates[i - 1], 1);
+        if (metDates[i] === expected) {
+            runLength++;
+        } else {
+            longestStreak = Math.max(longestStreak, runLength);
+            runLength = 1;
+        }
+    }
+    longestStreak = Math.max(longestStreak, runLength);
+
+    return { currentStreak, longestStreak, lastWritingDate, totalWritingDays, totalWordsAllTime };
+}
+
+/**
+ * Check badge conditions and return any newly earned badges.
+ * Pure function — compares streak state against already-earned badges.
+ */
+function checkBadges(streak: StreakState, earned: EarnedBadge[]): EarnedBadge[] {
+    const earnedIds = new Set(earned.map(b => b.badgeId));
+    const newBadges: EarnedBadge[] = [];
+    const now = new Date();
+
+    const conditions: [keyof typeof BADGE_DEFINITIONS, boolean][] = [
+        ['first_day', streak.totalWritingDays >= 1],
+        ['seven_day_streak', streak.currentStreak >= 7],
+        ['thirty_day_streak', streak.currentStreak >= 30],
+        ['ten_thousand_words', streak.totalWordsAllTime >= 10000],
+        ['fifty_thousand_words', streak.totalWordsAllTime >= 50000],
+    ];
+
+    for (const [id, met] of conditions) {
+        if (met && !earnedIds.has(id)) {
+            newBadges.push({ badgeId: id, earnedAt: now });
+        }
+    }
+
+    return newBadges;
+}
+
 export const useWorkspaceStore = create<WorkspaceState>()(
     persist(
-        (set) => ({
+        (set, get) => ({
             projects: [],
             documents: [],
             scenes: [],
@@ -430,6 +624,26 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             atmosphereReducedMotion: false,
             isToolbarVisible: true,
             writingMode: 'novel',
+
+            // Sprint 47A: Goals system initial state
+            writingDays: [],
+            goalConfig: {
+                dailyWordTarget: 200,
+                dailyTimeTarget: 20,
+                primaryMetric: 'words',
+                writingDaysPerWeek: 5,
+                streakRepairsAvailable: 1,
+                goalConfigured: false,
+            },
+            streakState: {
+                currentStreak: 0,
+                longestStreak: 0,
+                lastWritingDate: '',
+                totalWritingDays: 0,
+                totalWordsAllTime: 0,
+            },
+            earnedBadges: [],
+            xpEvents: [],
 
             addProject: (project) =>
                 set((state) => {
@@ -725,6 +939,131 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             setWritingMode: (mode) =>
                 set(() => ({ writingMode: mode })),
+
+            // =============================================
+            // Sprint 47A: Goals System Actions
+            // =============================================
+
+            // This action is called by the writing editor via
+            // window.dispatchEvent(new CustomEvent('mythforge:sessionUpdate',
+            // { detail: { projectId, wordsAdded, minutesSpent } }))
+            // The Goals panel listens for this event.
+            // Do NOT call this directly from the store — it is
+            // triggered by the editor's autosave flow.
+            recordWritingSession: (projectId, wordsAdded, minutesSpent) =>
+                set((state) => {
+                    const today = new Date().toISOString().split('T')[0];
+                    const existing = state.writingDays.find(
+                        d => d.projectId === projectId && d.date === today
+                    );
+
+                    let updatedDays: WritingDay[];
+                    if (existing) {
+                        // Accumulate onto existing day entry
+                        const updated: WritingDay = {
+                            ...existing,
+                            wordsWritten: existing.wordsWritten + wordsAdded,
+                            minutesWritten: existing.minutesWritten + minutesSpent,
+                            goalMet: false, // recomputed below
+                        };
+                        // Compute goalMet based on primaryMetric
+                        updated.goalMet = state.goalConfig.primaryMetric === 'words'
+                            ? updated.wordsWritten >= state.goalConfig.dailyWordTarget
+                            : updated.minutesWritten >= state.goalConfig.dailyTimeTarget;
+                        updatedDays = state.writingDays.map(d =>
+                            d.id === existing.id ? updated : d
+                        );
+                    } else {
+                        // Create new day entry
+                        const newDay: WritingDay = {
+                            id: crypto.randomUUID(),
+                            projectId,
+                            date: today,
+                            wordsWritten: wordsAdded,
+                            minutesWritten: minutesSpent,
+                            goalMet: state.goalConfig.primaryMetric === 'words'
+                                ? wordsAdded >= state.goalConfig.dailyWordTarget
+                                : minutesSpent >= state.goalConfig.dailyTimeTarget,
+                        };
+                        updatedDays = [...state.writingDays, newDay];
+                    }
+
+                    // Recompute streak from updated days
+                    const streakState = computeStreakFromDays(updatedDays);
+
+                    // Check and award badges inline
+                    const newBadges = checkBadges(streakState, state.earnedBadges);
+
+                    return {
+                        writingDays: updatedDays,
+                        streakState,
+                        earnedBadges: newBadges.length > 0
+                            ? [...state.earnedBadges, ...newBadges]
+                            : state.earnedBadges,
+                    };
+                }),
+
+            updateGoalConfig: (updates) =>
+                set((state) => {
+                    const newConfig = { ...state.goalConfig, ...updates, goalConfigured: true };
+
+                    // Recompute goalMet on existing days with new targets
+                    const updatedDays = state.writingDays.map(d => ({
+                        ...d,
+                        goalMet: newConfig.primaryMetric === 'words'
+                            ? d.wordsWritten >= newConfig.dailyWordTarget
+                            : d.minutesWritten >= newConfig.dailyTimeTarget,
+                    }));
+
+                    const streakState = computeStreakFromDays(updatedDays);
+
+                    return {
+                        goalConfig: newConfig,
+                        writingDays: updatedDays,
+                        streakState,
+                    };
+                }),
+
+            repairStreak: (date) =>
+                set((state) => {
+                    if (state.goalConfig.streakRepairsAvailable <= 0) return {};
+
+                    // Add a repaired day entry
+                    const repairedDay: WritingDay = {
+                        id: crypto.randomUUID(),
+                        projectId: state.activeProjectId || '',
+                        date,
+                        wordsWritten: 0,
+                        minutesWritten: 0,
+                        goalMet: true,
+                    };
+
+                    const updatedDays = [...state.writingDays, repairedDay];
+                    const streakState = computeStreakFromDays(updatedDays);
+
+                    return {
+                        writingDays: updatedDays,
+                        goalConfig: {
+                            ...state.goalConfig,
+                            streakRepairsAvailable: state.goalConfig.streakRepairsAvailable - 1,
+                        },
+                        streakState,
+                    };
+                }),
+
+            computeStreakState: () => {
+                const state = get();
+                const streakState = computeStreakFromDays(state.writingDays);
+                set({ streakState });
+                return streakState;
+            },
+
+            checkAndAwardBadges: () =>
+                set((state) => {
+                    const newBadges = checkBadges(state.streakState, state.earnedBadges);
+                    if (newBadges.length === 0) return {};
+                    return { earnedBadges: [...state.earnedBadges, ...newBadges] };
+                }),
         }),
         {
             name: 'mythforge-workspace',
@@ -754,6 +1093,11 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 atmosphereReducedMotion: state.atmosphereReducedMotion,
                 isToolbarVisible: state.isToolbarVisible,
                 writingMode: state.writingMode,
+                // Sprint 47A: persist goals data (streakState is derived, not persisted)
+                writingDays: state.writingDays,
+                goalConfig: state.goalConfig,
+                earnedBadges: state.earnedBadges,
+                xpEvents: state.xpEvents,
             }),
 
             // Track hydration phases allowing components to await persistence payload dynamically
@@ -831,6 +1175,24 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         subcategory: e.subcategory ?? '',
                         customFields: e.customFields ?? [],
                     }));
+
+                    // Sprint 47A: initialize goals fields for existing users
+                    if (!(state as unknown as Record<string, unknown>).goalConfig) {
+                        state.goalConfig = {
+                            dailyWordTarget: 200,
+                            dailyTimeTarget: 20,
+                            primaryMetric: 'words',
+                            writingDaysPerWeek: 5,
+                            streakRepairsAvailable: 1,
+                            goalConfigured: false,
+                        };
+                    }
+                    if (!(state as unknown as Record<string, unknown>).writingDays) state.writingDays = [];
+                    if (!(state as unknown as Record<string, unknown>).earnedBadges) state.earnedBadges = [];
+                    if (!(state as unknown as Record<string, unknown>).xpEvents) state.xpEvents = [];
+
+                    // Recompute streak on rehydration (streakState is never persisted)
+                    state.streakState = computeStreakFromDays(state.writingDays ?? []);
 
                     state.setHasHydrated(true);
                 }
