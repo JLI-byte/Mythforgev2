@@ -1,12 +1,11 @@
 /**
  * WorldBible — Router Shell
  *
- * Sprint 46A: Rewrote from a flat entity list into a navigation router.
+ * Sprint 46A/B: Rewrote from a flat entity list into a navigation router.
  * Owns the history stack and renders the correct view component
  * based on the current navigation position.
  *
  * Hierarchy: Home → Root Category → Subcategory → Entry
- * (Subcategory and Entry views are placeholders until Sprint 46B)
  */
 "use client";
 
@@ -16,6 +15,8 @@ import { WBView } from '@/lib/worldBibleNav';
 import WorldBibleNav from './WorldBibleNav';
 import WorldBibleHome from './WorldBibleHome';
 import WorldBibleRoot from './WorldBibleRoot';
+import WorldBibleSubcategory from './WorldBibleSubcategory';
+import WorldBibleEntry from './WorldBibleEntry';
 
 export default function WorldBible() {
     // Navigation history stack — starts at home
@@ -69,10 +70,17 @@ export default function WorldBible() {
                     <WorldBibleRoot root={currentView.root} onNavigate={navigateTo} />
                 )}
                 {currentView.level === 'subcategory' && (
-                    <div className={styles.placeholder}>Coming in 46B</div>
+                    <WorldBibleSubcategory
+                        root={currentView.root}
+                        entityType={currentView.entityType}
+                        onNavigate={navigateTo}
+                    />
                 )}
                 {currentView.level === 'entry' && (
-                    <div className={styles.placeholder}>Coming in 46B</div>
+                    <WorldBibleEntry
+                        entityId={currentView.entityId}
+                        onNavigate={navigateTo}
+                    />
                 )}
             </div>
         </aside>

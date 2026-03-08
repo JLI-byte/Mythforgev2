@@ -1,0 +1,290 @@
+/* Sprint 46B: WorldBibleEntry — article view styles */
+
+.entryContainer {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    height: 100%;
+}
+
+
+/* ======== Hero image area ======== */
+.heroImage {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.heroIcon {
+    font-size: 4rem;
+    line-height: 1;
+    opacity: 0.6;
+}
+
+/* Gradient overlay at bottom of hero with entity name */
+.heroOverlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.75rem;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    display: flex;
+    align-items: flex-end;
+}
+
+.heroName {
+    color: white;
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Top-right controls on hero */
+.heroControls {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 0.35rem;
+    z-index: 2;
+}
+
+.heroBtn {
+    background: rgba(0, 0, 0, 0.35);
+    border: none;
+    color: white;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.35rem;
+    border-radius: 4px;
+    cursor: pointer;
+    line-height: 1;
+    backdrop-filter: blur(4px);
+    transition: background 150ms ease;
+}
+
+.heroBtn:hover {
+    background: rgba(0, 0, 0, 0.55);
+}
+
+/* Gold glow when favorited */
+.heroBtnFavActive {
+    filter: drop-shadow(0 0 3px rgba(255, 200, 0, 0.6));
+}
+
+
+/* ======== Image upload button ======== */
+.uploadBtn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 0.78rem;
+    padding: 0.4rem 0.75rem;
+    cursor: pointer;
+    text-align: center;
+    transition: color 150ms ease;
+    flex-shrink: 0;
+}
+
+.uploadBtn:hover {
+    color: var(--foreground);
+}
+
+.hiddenInput {
+    display: none;
+}
+
+
+/* ======== Info section ======== */
+.infoSection {
+    padding: 0.75rem;
+}
+
+/* Type badge pill */
+.typeBadge {
+    display: inline-block;
+    font-size: 0.72rem;
+    border-radius: 12px;
+    padding: 0.2rem 0.6rem;
+    font-weight: 500;
+}
+
+.description {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--foreground);
+    margin: 0.75rem 0 0 0;
+    white-space: pre-wrap;
+}
+
+.descriptionEmpty {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-style: italic;
+    margin: 0.75rem 0 0 0;
+}
+
+
+/* ======== Custom fields section ======== */
+.fieldsSection {
+    padding: 0 0.75rem;
+}
+
+.fieldsHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.fieldsTitle {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.addFieldBtn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    transition: color 150ms ease;
+}
+
+.addFieldBtn:hover {
+    color: var(--foreground);
+}
+
+/* Individual field row */
+.fieldRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.fieldLabel {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--muted);
+    min-width: 60px;
+}
+
+.fieldValue {
+    flex: 1;
+    font-size: 0.82rem;
+    color: var(--foreground);
+}
+
+.fieldRemoveBtn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0 0.25rem;
+    opacity: 0.5;
+    transition: opacity 150ms ease;
+    line-height: 1;
+}
+
+.fieldRemoveBtn:hover {
+    opacity: 1;
+    color: #ef4444;
+}
+
+/* Inline add field form */
+.addFieldForm {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+}
+
+.addFieldInput {
+    flex: 1;
+    padding: 0.3rem 0.5rem;
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--foreground);
+    font-size: 0.78rem;
+    outline: none;
+}
+
+.addFieldInput:focus {
+    border-color: var(--accent);
+}
+
+.addFieldConfirm,
+.addFieldCancel {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    padding: 0.2rem 0.4rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.addFieldConfirm:hover {
+    color: #22c55e;
+    border-color: #22c55e;
+}
+
+.addFieldCancel:hover {
+    color: #ef4444;
+    border-color: #ef4444;
+}
+
+
+/* ======== Metadata footer ======== */
+.metaFooter {
+    border-top: 1px solid var(--border);
+    padding: 0.75rem;
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+    flex-shrink: 0;
+}
+
+
+/* ======== Not found fallback ======== */
+.notFound {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 3rem 1rem;
+    color: var(--muted);
+}
+
+.backBtn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    transition: all 150ms ease;
+}
+
+.backBtn:hover {
+    border-color: var(--foreground);
+    color: var(--foreground);
+}
