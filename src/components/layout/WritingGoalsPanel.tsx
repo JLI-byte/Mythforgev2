@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './WritingGoalsPanel.module.css';
+import GoalsContent from '@/components/goals/GoalsContent';
 
 interface WritingGoalsPanelProps {
     isOpen: boolean;
@@ -104,7 +105,7 @@ export function WritingGoalsPanel({ isOpen, onClose, onTabClick, tabWidth, onTab
                     </button>
                 </div>
                 <div className={styles.contentWrapper}>
-                    {/* Empty placeholder */}
+                    <GoalsContent />
                 </div>
             </div>
         </div>
