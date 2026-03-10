@@ -103,6 +103,23 @@ export interface Entity {
     customFields?: { label: string; value: string }[];
 }
 
+/**
+ * Extended entity type for characters — adds character-specific fields
+ * that don't apply to locations, factions, etc.
+ */
+export interface CharacterEntity extends Entity {
+    type: 'character';
+    voiceSamples?: string[];
+}
+
+/**
+ * Type guard to narrow an Entity to CharacterEntity.
+ * Use wherever character-specific fields (e.g. voiceSamples) are accessed.
+ */
+export function isCharacterEntity(entity: Entity): entity is CharacterEntity {
+    return entity.type === 'character';
+}
+
 // =============================================
 // Sprint 47A: Goals System Interfaces
 // =============================================
