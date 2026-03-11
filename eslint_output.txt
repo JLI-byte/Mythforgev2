@@ -1,0 +1,204 @@
+
+E:\AI_Projects\MythforgeV2\Program\src\components\layout\AIChatbotPanel.tsx
+   77:23  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+E:\AI_Projects\MythforgeV2\Program\src\components\layout\AIChatbotPanel.tsx:77:23
+  75 |     const selectedCharacter = characters.find(c => c.id === selectedCharacterId);
+  76 |
+> 77 |     useEffect(() => { setMounted(true); }, []);
+     |                       ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  78 |
+  79 |     // Auto-scroll to bottom of messages
+  80 |     useEffect(() => {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      react-hooks/set-state-in-effect
+  219:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @next/next/no-img-element
+  245:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @next/next/no-img-element
+  434:26  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+E:\AI_Projects\MythforgeV2\Program\src\components\layout\AIChatbotPanel.tsx:434:26
+  432 |                     {/* Content Wrapper (Inner flex container) */}
+  433 |                     <div className={`${styles.contentWrapper} flex flex-col h-full bg-[var(--background)] overflow-hidden`}>
+> 434 |                         <ModeSwitcher />
+      |                          ^^^^^^^^^^^^ This component is created during render
+  435 |
+  436 |                         <div key={mode} className="flex-1 flex flex-col overflow-hidden">
+  437 |                             {mode === 'oracle' && messages.length === 0 && <OracleEmptyState />}
+
+E:\AI_Projects\MythforgeV2\Program\src\components\layout\AIChatbotPanel.tsx:143:26
+  141 |     // --- Sub-Components ---
+  142 |
+> 143 |     const ModeSwitcher = () => (
+      |                          ^^^^^^^
+> 144 |         <div className="flex p-3 border-b border-[var(--border)] shrink-0 bg-[var(--background)]">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 145 |             <div className="flex w-full p-1 gap-1 bg-[var(--surface)] rounded-full">
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 167 |         </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 168 |     );
+      | ^^^^^^ The component is created during render here
+  169 |
+  170 |     const OracleEmptyState = () => (
+  171 |         <div className="flex-1 flex flex-col items-center justify-center p-6 gap-0 overflow-y-auto">  react-hooks/static-components
+  437:77  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+E:\AI_Projects\MythforgeV2\Program\src\components\layout\AIChatbotPanel.tsx:437:77
+  435 |
+  436 |                         <div key={mode} className="flex-1 flex flex-col overflow-hidden">
+> 437 |                             {mode === 'oracle' && messages.length === 0 && <OracleEmptyState />}
+      |                                                                             ^^^^^^^^^^^^^^^^ This component is created during render
+  438 |                             {mode === 'character' && !selectedCharacterId && <CharacterSelector />}
+  439 |                             {mode === 'character' && selectedCharacterId && <ActiveCharacterHeader />}
+  440 |
+
+E:\AI_Projects\MythforgeV2\Program\src\components\layout\AIChatbotPanel.tsx:170:30
+  168 |     );
+  169 |
+> 170 |     const OracleEmptyState = () => (
+      |                              ^^^^^^^
+> 171 |         <div className="flex-1 flex flex-col items-center justify-center p-6 gap-0 overflow-y-auto">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 172 |             <div className="flex flex-col items-center text-center gap-3 mb-8">
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 197 |         </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 198 |     );
+      | ^^^^^^ The component is created during render here
+  199 |
+  200 |     const CharacterSelector = () => (
+  201 |         <div className="flex-1 flex flex-col overflow-y-auto">                          react-hooks/static-components
+  438:79  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+E:\AI_Projects\MythforgeV2\Program\src\components\layout\AIChatbotPanel.tsx:438:79
+  436 |                         <div key={mode} className="flex-1 flex flex-col overflow-hidden">
+  437 |                             {mode === 'oracle' && messages.length === 0 && <OracleEmptyState />}
+> 438 |                             {mode === 'character' && !selectedCharacterId && <CharacterSelector />}
+      |                                                                               ^^^^^^^^^^^^^^^^^ This component is created during render
+  439 |                             {mode === 'character' && selectedCharacterId && <ActiveCharacterHeader />}
+  440 |
+  441 |                             {/* Only show messages if oracle has messages OR character is selected */}
+
+E:\AI_Projects\MythforgeV2\Program\src\components\layout\AIChatbotPanel.tsx:200:31
+  198 |     );
+  199 |
+> 200 |     const CharacterSelector = () => (
+      |                               ^^^^^^^
+> 201 |         <div className="flex-1 flex flex-col overflow-y-auto">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 202 |             <div className="p-4 border-b border-[var(--border)] shrink-0 bg-[var(--background)] z-10 sticky top-0">
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 236 |         </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 237 |     );
+      | ^^^^^^ The component is created during render here
+  238 |
+  239 |     const ActiveCharacterHeader = () => {
+  240 |         if (!selectedCharacter) return null;                                                react-hooks/static-components
+  439:78  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+E:\AI_Projects\MythforgeV2\Program\src\components\layout\AIChatbotPanel.tsx:439:78
+  437 |                             {mode === 'oracle' && messages.length === 0 && <OracleEmptyState />}
+  438 |                             {mode === 'character' && !selectedCharacterId && <CharacterSelector />}
+> 439 |                             {mode === 'character' && selectedCharacterId && <ActiveCharacterHeader />}
+      |                                                                              ^^^^^^^^^^^^^^^^^^^^^ This component is created during render
+  440 |
+  441 |                             {/* Only show messages if oracle has messages OR character is selected */}
+  442 |                             {((mode === 'oracle' && messages.length > 0) || (mode === 'character' && selectedCharacterId)) && (
+
+E:\AI_Projects\MythforgeV2\Program\src\components\layout\AIChatbotPanel.tsx:239:35
+  237 |     );
+  238 |
+> 239 |     const ActiveCharacterHeader = () => {
+      |                                   ^^^^^^^
+> 240 |         if (!selectedCharacter) return null;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 241 |         return (
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 270 |         );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 271 |     };
+      | ^^^^^^ The component is created during render here
+  272 |
+  273 |     const MessageThread = () => (
+  274 |         <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-[var(--background)] relative">                                                                                                                          react-hooks/static-components
+  443:34  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+E:\AI_Projects\MythforgeV2\Program\src\components\layout\AIChatbotPanel.tsx:443:34
+  441 |                             {/* Only show messages if oracle has messages OR character is selected */}
+  442 |                             {((mode === 'oracle' && messages.length > 0) || (mode === 'character' && selectedCharacterId)) && (
+> 443 |                                 <MessageThread />
+      |                                  ^^^^^^^^^^^^^ This component is created during render
+  444 |                             )}
+  445 |                         </div>
+  446 |
+
+E:\AI_Projects\MythforgeV2\Program\src\components\layout\AIChatbotPanel.tsx:273:27
+  271 |     };
+  272 |
+> 273 |     const MessageThread = () => (
+      |                           ^^^^^^^
+> 274 |         <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-[var(--background)] relative">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 275 |             {messages.map((msg) => (
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 316 |         </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 317 |     );
+      | ^^^^^^ The component is created during render here
+  318 |
+  319 |     const InputArea = () => {
+  320 |         const isInputDisabled = isLoading || (mode === 'character' && !selectedCharacterId);                                                                                                                                  react-hooks/static-components
+  447:26  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+E:\AI_Projects\MythforgeV2\Program\src\components\layout\AIChatbotPanel.tsx:447:26
+  445 |                         </div>
+  446 |
+> 447 |                         <InputArea />
+      |                          ^^^^^^^^^ This component is created during render
+  448 |                     </div>
+  449 |                 </div>
+  450 |             </div>
+
+E:\AI_Projects\MythforgeV2\Program\src\components\layout\AIChatbotPanel.tsx:319:23
+  317 |     );
+  318 |
+> 319 |     const InputArea = () => {
+      |                       ^^^^^^^
+> 320 |         const isInputDisabled = isLoading || (mode === 'character' && !selectedCharacterId);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 321 |         
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 347 |         );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 348 |     };
+      | ^^^^^^ The component is created during render here
+  349 |
+  350 |     // --- Main Render ---
+  351 |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/static-components
+
+✖ 9 problems (7 errors, 2 warnings)
+
+

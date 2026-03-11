@@ -104,7 +104,7 @@ export function WritingGoalsPanel({ isOpen, onClose, onTabClick, tabWidth, onTab
                         &times;
                     </button>
                 </div>
-                <div className={styles.contentWrapper}>
+                <div className={styles.contentWrapper} style={{ paddingRight: tabWidth }}>
                     <GoalsContent />
                 </div>
             </div>

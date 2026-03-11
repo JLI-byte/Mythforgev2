@@ -87,7 +87,11 @@ export default function Home() {
   return (
     <main
       className={`${styles.workspace} ${isFullscreen ? styles.fullscreenMode : ''} ${isFocusMode ? styles.focusMode : ''}`}
-      style={atmosphereGlobalOverlay ? atmosphereStyleVars : undefined}
+      style={{
+        ...(atmosphereGlobalOverlay ? atmosphereStyleVars : undefined),
+        paddingRight: activePanel ? panelWidth + tabRailWidth + 8 : tabRailWidth + 8,
+        transition: 'padding-right 280ms ease-in-out',
+      }}
     >
       <div className={styles.navigationPanelContainer}>
         <NavigationPanel />

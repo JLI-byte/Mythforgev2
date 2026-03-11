@@ -8,15 +8,15 @@
 
 .editorContainer {
     flex: 1;
+    min-width: 0;
     display: flex;
     align-items: flex-start;
     padding: 0;
-    padding-right: 80px;
     height: 100vh;
     max-height: 100vh;
     overflow: hidden;
     background-color: var(--background);
-    transition: background-color 500ms ease, padding-right 200ms ease;
+    transition: background-color 500ms ease;
 }
 
 /* Sidebar transitions for smooth focus mode animation */
@@ -85,6 +85,7 @@
 /* Main editor scroll container — scrollbar on left via CSS only */
 .editorScrollContainer {
     flex: 1;
+    min-width: 0;
     overflow-y: auto;
     overflow-x: clip;
     height: 100vh;

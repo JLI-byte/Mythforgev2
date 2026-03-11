@@ -3,13 +3,13 @@
  *
  * A slide-out panel providing a dual-mode AI Chat interface for writers.
  * Connects to the useAIChat hook to provide World Oracle (world-building assistant)
- * and Character Chat (roleplay) modes.
+ * and Character Chat (roleplay) modes, with a new option to assume a persona.
  */
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Sparkles, X, ArrowUp } from 'lucide-react';
+import { Sparkles, X, ArrowUp, User as UserIcon, Check } from 'lucide-react';
 import styles from './AIChatbotPanel.module.css';
 import { useAIChat, ChatMode } from '@/hooks/useAIChat';
 import { useWorkspaceStore } from '@/store/workspaceStore';
@@ -44,17 +44,25 @@ function getSwatchColor(name: string): string {
     return SWATCH_COLORS[Math.abs(hash) % SWATCH_COLORS.length];
 }
 
+// We define a simpler Character interface sufficient for these components
+interface MinimalCharacter {
+    id: string;
+    name: string;
+    imageUrl?: string;
+    subcategory?: string;
+}
+
 // --- Sub-Components ---
 
 const ModeSwitcher = ({ mode, handleModeSwitch }: { mode: ChatMode, handleModeSwitch: (mode: ChatMode) => void }) => (
-    <div className="flex p-3 border-b border-[var(--border)] shrink-0 bg-[var(--background)]">
-        <div className="flex w-full p-1 gap-1 bg-[var(--surface)] rounded-full">
+    <div className="p-3 border-b border-[var(--border)] bg-[var(--background)] shrink-0">
+        <div className="flex w-full p-1 gap-1 bg-[var(--surface)] rounded-full border border-[var(--border)]">
             <button
                 onClick={() => handleModeSwitch('oracle')}
                 className={`flex-1 rounded-full py-1.5 text-sm font-medium transition-all duration-200 ${
                     mode === 'oracle' 
                         ? 'bg-[var(--accent)] text-white shadow-sm' 
-                        : 'text-[var(--muted)] hover:bg-[var(--background)]/50'
+                        : 'bg-transparent text-[var(--muted)] hover:bg-[var(--background)]/50'
                 }`}
             >
                 World Oracle
@@ -64,7 +72,7 @@ const ModeSwitcher = ({ mode, handleModeSwitch }: { mode: ChatMode, handleModeSw
                 className={`flex-1 rounded-full py-1.5 text-sm font-medium transition-all duration-200 ${
                     mode === 'character' 
                         ? 'bg-[var(--accent)] text-white shadow-sm' 
-                        : 'text-[var(--muted)] hover:bg-[var(--background)]/50'
+                        : 'bg-transparent text-[var(--muted)] hover:bg-[var(--background)]/50'
                 }`}
             >
                 Character Chat
@@ -74,10 +82,10 @@ const ModeSwitcher = ({ mode, handleModeSwitch }: { mode: ChatMode, handleModeSw
 );
 
 const OracleEmptyState = ({ handleSuggestionClick }: { handleSuggestionClick: (text: string) => void }) => (
-    <div className="flex-1 flex flex-col items-center justify-center p-6 gap-0 overflow-y-auto">
+    <div className="flex flex-col items-center justify-center h-full px-6 py-10 overflow-y-auto w-full">
         <div className="flex flex-col items-center text-center gap-3 mb-8">
-            <div className="w-14 h-14 rounded-full bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)] mb-2">
-                <Sparkles className="w-7 h-7" />
+            <div className="w-14 h-14 rounded-full bg-[var(--accent)]/10 border border-[var(--accent)]/20 flex items-center justify-center">
+                <Sparkles className="w-7 h-7 text-[var(--accent)]" />
             </div>
             <h3 className="text-xl font-semibold text-[var(--foreground)]">World Oracle</h3>
             <p className="text-sm text-[var(--muted)] max-w-[220px] text-center mx-auto">
@@ -94,7 +102,7 @@ const OracleEmptyState = ({ handleSuggestionClick }: { handleSuggestionClick: (t
                 <button
                     key={chip}
                     onClick={() => handleSuggestionClick(chip)}
-                    className="w-full text-left text-sm px-4 py-3 rounded-xl border border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--surface)] hover:border-[var(--accent)] transition-all"
+                    className="w-full text-left text-sm py-3 px-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] hover:border-[var(--accent)]/50 hover:bg-[var(--accent)]/5 transition-all cursor-pointer"
                 >
                     {chip}
                 </button>
@@ -102,15 +110,6 @@ const OracleEmptyState = ({ handleSuggestionClick }: { handleSuggestionClick: (t
         </div>
     </div>
 );
-
-// We define a simpler Character interface sufficient for these components to avoid full store dependency imports if possible,
-// but since we need it, we'll use a local minimal type.
-interface MinimalCharacter {
-    id: string;
-    name: string;
-    imageUrl?: string;
-    subcategory?: string;
-}
 
 const CharacterSelector = ({ characters, setSelectedCharacterId }: { characters: MinimalCharacter[], setSelectedCharacterId: (id: string) => void }) => (
     <div className="flex-1 flex flex-col overflow-y-auto">
@@ -128,13 +127,13 @@ const CharacterSelector = ({ characters, setSelectedCharacterId }: { characters:
                     <button
                         key={char.id}
                         onClick={() => setSelectedCharacterId(char.id)}
-                        className="flex flex-col items-start p-3 border border-[var(--border)] rounded-xl hover:border-[var(--accent)]/60 hover:bg-[var(--surface)] transition-all text-left group"
+                        className="flex flex-col items-start p-3 rounded-xl border border-[var(--border)] hover:border-[var(--accent)]/60 hover:bg-[var(--surface)] transition-all text-left group"
                     >
                         {char.imageUrl ? (
                             <img src={char.imageUrl} alt={char.name} className="w-10 h-10 rounded-lg mb-2 object-cover border border-[var(--border)] shrink-0" />
                         ) : (
                             <div 
-                                className="w-10 h-10 rounded-lg mb-2 flex items-center justify-center text-white text-sm font-bold shrink-0"
+                                className="w-10 h-10 rounded-lg mb-2 flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm"
                                 style={{ backgroundColor: getSwatchColor(char.name) }}
                             >
                                 {char.name.charAt(0).toUpperCase()}
@@ -151,7 +150,7 @@ const CharacterSelector = ({ characters, setSelectedCharacterId }: { characters:
     </div>
 );
 
-const ActiveCharacterHeader = ({ selectedCharacter, handleExitCharacter }: { selectedCharacter: MinimalCharacter | undefined, handleExitCharacter: () => void }) => {
+const CleanActiveCharacterHeader = ({ selectedCharacter, handleExitCharacter }: { selectedCharacter: MinimalCharacter | undefined, handleExitCharacter: () => void }) => {
     if (!selectedCharacter) return null;
     return (
         <div className="flex items-center justify-between p-3 border-b border-[var(--border)] shrink-0 bg-[var(--surface)] text-[var(--foreground)]">
@@ -185,6 +184,156 @@ const ActiveCharacterHeader = ({ selectedCharacter, handleExitCharacter }: { sel
     );
 };
 
+// --- PersonaBar Sub-component ---
+const PersonaBar = ({ 
+    personaId, 
+    showPersonaPicker, 
+    setShowPersonaPicker, 
+    characters, 
+    activeCharacterId,
+    setPersonaId
+}: { 
+    personaId: string | null, 
+    showPersonaPicker: boolean, 
+    setShowPersonaPicker: (val: boolean) => void,
+    characters: MinimalCharacter[],
+    activeCharacterId: string,
+    setPersonaId: (id: string | null) => void
+}) => {
+    const activePersona = characters.find(c => c.id === personaId);
+    
+    // Filter out the character we are chatting with
+    const availablePersonas = characters.filter(c => c.id !== activeCharacterId);
+
+    if (showPersonaPicker) {
+        return (
+            <div className="flex flex-col border-b border-[var(--border)] bg-[var(--surface)] shrink-0">
+                <div className="flex items-center justify-between p-3 border-b border-[var(--border)]/50">
+                    <span className="text-sm font-medium">Speak as...</span>
+                    <button 
+                        onClick={() => setShowPersonaPicker(false)}
+                        className="p-1 text-[var(--muted)] hover:text-[var(--foreground)] rounded-md hover:bg-[var(--border)]"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
+                </div>
+                <div className="max-h-60 overflow-y-auto p-2 flex flex-col gap-1">
+                    {/* Yourself option */}
+                    <button 
+                        onClick={() => {
+                            setPersonaId(null);
+                            setShowPersonaPicker(false);
+                        }}
+                        className={`flex items-center justify-between p-2 rounded-lg text-left transition-all overflow-hidden ${
+                            personaId === null ? 'bg-[var(--accent)]/10 border-[var(--accent)]/40' : 'hover:bg-[var(--accent)]/5 hover:border-[var(--border)] border-transparent'
+                        } border`}
+                    >
+                        <div className="flex items-center gap-2 overflow-hidden">
+                            <div className="w-8 h-8 rounded-lg bg-[var(--muted)]/20 flex items-center justify-center shrink-0">
+                                <UserIcon className="w-4 h-4 text-[var(--foreground)]/70" />
+                            </div>
+                            <span className="text-sm font-medium">Yourself</span>
+                            <span className="text-xs text-[var(--muted)] ml-1 shrink-0">- No persona</span>
+                        </div>
+                        {personaId === null && <Check className="w-4 h-4 text-[var(--accent)] shrink-0 mr-2" />}
+                    </button>
+                    
+                    {/* Other Characters */}
+                    {availablePersonas.map(char => (
+                        <button 
+                            key={char.id}
+                            onClick={() => {
+                                setPersonaId(char.id);
+                                setShowPersonaPicker(false);
+                            }}
+                            className={`flex items-center justify-between p-2 rounded-lg text-left transition-all overflow-hidden ${
+                                personaId === char.id ? 'bg-[var(--accent)]/10 border-[var(--accent)]/40' : 'hover:bg-[var(--accent)]/5 hover:border-[var(--accent)]/40 border-transparent'
+                            } border`}
+                        >
+                            <div className="flex items-center gap-2 overflow-hidden w-full">
+                                {char.imageUrl ? (
+                                    <img src={char.imageUrl} alt="" className="w-8 h-8 rounded-lg object-cover border border-[var(--border)] shrink-0" />
+                                ) : (
+                                    <div 
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm"
+                                        style={{ backgroundColor: getSwatchColor(char.name) }}
+                                    >
+                                        {char.name.charAt(0).toUpperCase()}
+                                    </div>
+                                )}
+                                <div className="flex flex-col truncate">
+                                    <span className="text-sm font-medium truncate leading-tight">{char.name}</span>
+                                    {char.subcategory && <span className="text-xs text-[var(--muted)] truncate">{char.subcategory}</span>}
+                                </div>
+                            </div>
+                            {personaId === char.id && <Check className="w-4 h-4 text-[var(--accent)] shrink-0 mr-2" />}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="p-2 px-3 border-b border-[var(--border)] bg-[var(--surface)] flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2 truncate pr-2">
+                <span className="text-[10px] uppercase tracking-wider text-[var(--muted)] shrink-0">Speaking as</span>
+                {activePersona ? (
+                    <div className="flex items-center gap-1.5 truncate">
+                        {activePersona.imageUrl ? (
+                            <img src={activePersona.imageUrl} alt="" className="w-4 h-4 rounded shrink-0 object-cover" />
+                        ) : (
+                            <div 
+                                className="w-4 h-4 rounded shrink-0 flex items-center justify-center text-white text-[8px] font-bold"
+                                style={{ backgroundColor: getSwatchColor(activePersona.name) }}
+                            >
+                                {activePersona.name.charAt(0).toUpperCase()}
+                            </div>
+                        )}
+                        <span className="text-xs font-medium truncate">{activePersona.name}</span>
+                    </div>
+                ) : (
+                    <span className="text-xs italic text-[var(--muted)]">Yourself</span>
+                )}
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+                {personaId && (
+                    <button 
+                        onClick={() => setPersonaId(null)}
+                        className="text-[10px] text-[var(--muted)] hover:text-red-400 font-medium px-1"
+                    >
+                        Clear
+                    </button>
+                )}
+                <button 
+                    onClick={() => setShowPersonaPicker(true)}
+                    className="text-xs text-[var(--foreground)] hover:text-[var(--accent)] transition-colors px-2 py-1 rounded bg-[var(--border)]/30 hover:bg-[var(--border)]/70 font-medium"
+                >
+                    {personaId ? 'Change' : 'Assume Persona'}
+                </button>
+            </div>
+        </div>
+    );
+};
+
+const ContextCard = ({ selectedCharacter, personaName }: { selectedCharacter: MinimalCharacter | undefined, personaName?: string }) => {
+    if (!selectedCharacter) return null;
+    
+    return (
+        <div className="p-3">
+            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-3 w-full text-center">
+                <p className="text-xs text-[var(--muted)]">
+                    {personaName 
+                        ? <><strong className="text-[var(--foreground)]">{selectedCharacter.name}</strong> is in character · speaking to <strong className="text-[var(--foreground)]">{personaName}</strong>. Their relationship will shape the response.</>
+                        : <><strong className="text-[var(--foreground)]">{selectedCharacter.name}</strong> is in character. Ask them anything.</>
+                    }
+                </p>
+            </div>
+        </div>
+    );
+};
+
+
 // We define a simpler Message interface sufficient for these components
 interface MinimalMessage {
     id: string;
@@ -192,13 +341,20 @@ interface MinimalMessage {
     content: string;
 }
 
-const MessageThread = ({ messages, isLoading, error, messagesEndRef, handleRetry }: { messages: MinimalMessage[], isLoading: boolean, error: string | null, messagesEndRef: React.RefObject<HTMLDivElement | null>, handleRetry: () => void }) => (
-    <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-[var(--background)] relative">
+const MessageThread = ({ 
+    messages, isLoading, error, messagesEndRef, handleRetry, personaName 
+}: { 
+    messages: MinimalMessage[], isLoading: boolean, error: string | null, messagesEndRef: React.RefObject<HTMLDivElement | null>, handleRetry: () => void, personaName?: string 
+}) => (
+    <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-[var(--background)] relative w-full">
         {messages.map((msg) => (
             <div 
                 key={msg.id} 
                 className={`flex flex-col max-w-[85%] ${msg.role === 'user' ? 'self-end' : 'self-start'}`}
             >
+                {msg.role === 'user' && personaName && (
+                    <span className="text-[10px] text-[var(--muted)] mb-1 mr-1 text-right">{personaName}</span>
+                )}
                 <div 
                     className={`px-4 py-2.5 text-[14px] leading-relaxed whitespace-pre-wrap ${
                         msg.role === 'user' 
@@ -238,11 +394,17 @@ const MessageThread = ({ messages, isLoading, error, messagesEndRef, handleRetry
 );
 
 const InputArea = ({ 
-    isLoading, mode, selectedCharacterId, textareaRef, inputText, handleTextareaContent, handleKeyDown, handleSend 
+    isLoading, mode, selectedCharacterId, textareaRef, inputText, handleTextareaContent, handleKeyDown, handleSend, personaName 
 }: { 
-    isLoading: boolean, mode: ChatMode, selectedCharacterId: string | null, textareaRef: React.RefObject<HTMLTextAreaElement | null>, inputText: string, handleTextareaContent: (e: React.ChangeEvent<HTMLTextAreaElement>) => void, handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void, handleSend: () => void 
+    isLoading: boolean, mode: ChatMode, selectedCharacterId: string | null, textareaRef: React.RefObject<HTMLTextAreaElement | null>, inputText: string, handleTextareaContent: (e: React.ChangeEvent<HTMLTextAreaElement>) => void, handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void, handleSend: () => void, personaName?: string 
 }) => {
     const isInputDisabled = isLoading || (mode === 'character' && !selectedCharacterId);
+    let placeholderTxt = "Message...";
+    if (isInputDisabled) {
+        placeholderTxt = mode === 'character' ? "Select a character..." : "Waiting...";
+    } else if (mode === 'character' && personaName) {
+        placeholderTxt = `Speaking as ${personaName}...`;
+    }
     
     return (
         <div className="p-3 border-t border-[var(--border)] bg-[var(--background)] shrink-0 flex flex-col items-center">
@@ -252,7 +414,7 @@ const InputArea = ({
                     value={inputText}
                     onChange={handleTextareaContent}
                     onKeyDown={handleKeyDown}
-                    placeholder={isInputDisabled ? (mode === 'character' ? "Select a character..." : "Waiting...") : "Message..."}
+                    placeholder={placeholderTxt}
                     disabled={isInputDisabled}
                     className="w-full max-h-[120px] bg-[var(--surface)] text-[var(--foreground)] text-sm rounded-2xl py-2.5 pl-4 pr-12 resize-none outline-none border border-[var(--border)] focus:border-[var(--accent)] transition-colors disabled:opacity-50 min-h-[42px] placeholder:text-[var(--muted)]"
                     rows={1}
@@ -293,6 +455,10 @@ export function AIChatbotPanel({ isOpen, onClose, onTabClick, tabWidth, onTabWid
     const [lastUserMessage, setLastUserMessage] = useState("");
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    
+    // Assume Persona Local State
+    const [personaId, setPersonaId] = useState<string | null>(null);
+    const [showPersonaPicker, setShowPersonaPicker] = useState(false);
 
     // Global Store
     const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
@@ -301,6 +467,14 @@ export function AIChatbotPanel({ isOpen, onClose, onTabClick, tabWidth, onTabWid
     // Derived Data
     const characters = entities.filter(e => e.projectId === activeProjectId && e.type === 'character') as MinimalCharacter[];
     const selectedCharacter = characters.find(c => c.id === selectedCharacterId);
+    const selectedPersonaCharacter = characters.find(c => c.id === personaId);
+
+    // Reset persona state if changing modes or active character changes.
+    // Spec says: Mode switch -> clear, Exit char -> clear, Select new char -> clear
+    useEffect(() => {
+        setPersonaId(null);
+        setShowPersonaPicker(false);
+    }, [mode, selectedCharacterId]);
 
     useEffect(() => { 
         // Delay setting mounted to avoid synchronous setState inside render-phase effect
@@ -326,7 +500,7 @@ export function AIChatbotPanel({ isOpen, onClose, onTabClick, tabWidth, onTabWid
         
         setLastUserMessage(text);
         setInputText("");
-        sendMessage(text);
+        sendMessage(text, selectedPersonaCharacter?.name);
         
         // Reset textarea height
         if (textareaRef.current) {
@@ -356,13 +530,13 @@ export function AIChatbotPanel({ isOpen, onClose, onTabClick, tabWidth, onTabWid
 
     const handleRetry = () => {
         if (lastUserMessage && !isLoading) {
-            sendMessage(lastUserMessage);
+            sendMessage(lastUserMessage, selectedPersonaCharacter?.name);
         }
     };
 
     const handleSuggestionClick = (text: string) => {
         setLastUserMessage(text);
-        sendMessage(text);
+        sendMessage(text, selectedPersonaCharacter?.name); // Oracles don't use personaName anyway, but signature accepts it safely
     };
 
     const handleExitCharacter = () => {
@@ -453,17 +627,41 @@ export function AIChatbotPanel({ isOpen, onClose, onTabClick, tabWidth, onTabWid
                     </div>
 
                     {/* Content Wrapper (Inner flex container) */}
-                    <div className={`${styles.contentWrapper} flex flex-col h-full bg-[var(--background)] overflow-hidden`}>
+                    <div className={`${styles.contentWrapper} flex flex-col h-full bg-[var(--background)] overflow-hidden`} style={{ paddingRight: tabWidth }}>
                         <ModeSwitcher mode={mode} handleModeSwitch={handleModeSwitch} />
 
-                        <div key={mode} className="flex-1 flex flex-col overflow-hidden">
+                        <div key={mode} className="flex-1 flex flex-col overflow-hidden w-full">
                             {mode === 'oracle' && messages.length === 0 && <OracleEmptyState handleSuggestionClick={handleSuggestionClick} />}
                             {mode === 'character' && !selectedCharacterId && <CharacterSelector characters={characters} setSelectedCharacterId={setSelectedCharacterId} />}
-                            {mode === 'character' && selectedCharacterId && <ActiveCharacterHeader selectedCharacter={selectedCharacter} handleExitCharacter={handleExitCharacter} />}
+                            
+                            {/* Top info for active character context */}
+                            {mode === 'character' && selectedCharacterId && (
+                                <>
+                                    <CleanActiveCharacterHeader selectedCharacter={selectedCharacter} handleExitCharacter={handleExitCharacter} />
+                                    <PersonaBar 
+                                        personaId={personaId} 
+                                        showPersonaPicker={showPersonaPicker} 
+                                        setShowPersonaPicker={setShowPersonaPicker} 
+                                        characters={characters} 
+                                        activeCharacterId={selectedCharacterId} 
+                                        setPersonaId={setPersonaId} 
+                                    />
+                                </>
+                            )}
 
                             {/* Only show messages if oracle has messages OR character is selected */}
                             {((mode === 'oracle' && messages.length > 0) || (mode === 'character' && selectedCharacterId)) && (
-                                <MessageThread messages={messages} isLoading={isLoading} error={error} messagesEndRef={messagesEndRef} handleRetry={handleRetry} />
+                                <>
+                                    {mode === 'character' && <ContextCard selectedCharacter={selectedCharacter} personaName={selectedPersonaCharacter?.name} />}
+                                    <MessageThread 
+                                        messages={messages} 
+                                        isLoading={isLoading} 
+                                        error={error} 
+                                        messagesEndRef={messagesEndRef} 
+                                        handleRetry={handleRetry} 
+                                        personaName={mode === 'character' ? selectedPersonaCharacter?.name : undefined}
+                                    />
+                                </>
                             )}
                         </div>
 
@@ -476,6 +674,7 @@ export function AIChatbotPanel({ isOpen, onClose, onTabClick, tabWidth, onTabWid
                             handleTextareaContent={handleTextareaContent} 
                             handleKeyDown={handleKeyDown} 
                             handleSend={handleSend} 
+                            personaName={selectedPersonaCharacter?.name}
                         />
                     </div>
                 </div>

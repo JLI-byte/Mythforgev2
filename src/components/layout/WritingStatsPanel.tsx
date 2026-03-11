@@ -103,7 +103,7 @@ export function WritingStatsPanel({ isOpen, onClose, onTabClick, tabWidth, onTab
                         &times;
                     </button>
                 </div>
-                <div className={styles.contentWrapper}>
+                <div className={styles.contentWrapper} style={{ paddingRight: tabWidth }}>
                     {/* Empty placeholder */}
                 </div>
             </div>

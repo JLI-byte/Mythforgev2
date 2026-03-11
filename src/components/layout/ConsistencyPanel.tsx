@@ -106,7 +106,7 @@ export function ConsistencyPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
                         &times;
                     </button>
                 </div>
-                <div className={styles.contentWrapper}>
+                <div className={styles.contentWrapper} style={{ paddingRight: tabWidth }}>
                     <ConsistencyChecker />
                 </div>
             </div>

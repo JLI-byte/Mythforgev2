@@ -115,7 +115,7 @@ export function MusicPlayerPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
 
             <div className={`${styles.panel} ${isOpen ? styles.open : ''}`} style={{ width: panelWidth }}>
                 {/* Panel content */}
-            <div className={styles.panelInner}>
+            <div className={styles.panelInner} style={{ paddingRight: tabWidth }}>
                 <header className={styles.header}>
                     <span className={styles.title}>Music Player</span>
                     <button className={styles.editBtn} onClick={() => setIsEditing(!isEditing)} title="Change source">

@@ -106,7 +106,7 @@ export function WorldBiblePanel({ isOpen, onClose, onTabClick, tabWidth, onTabWi
                         &times;
                     </button>
                 </div>
-                <div className={styles.contentWrapper}>
+                <div className={styles.contentWrapper} style={{ paddingRight: tabWidth }}>
                     <WorldBible />
                 </div>
             </div>

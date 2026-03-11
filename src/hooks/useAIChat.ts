@@ -37,7 +37,7 @@ export interface UseAIChatReturn {
     selectedCharacterId: string | null;
     setMode: (mode: ChatMode) => void;
     setSelectedCharacterId: (id: string | null) => void;
-    sendMessage: (content: string) => Promise<void>;
+    sendMessage: (content: string, personaCharacterName?: string | null) => Promise<void>;
     clearMessages: () => void;
     clearError: () => void;
 }
@@ -69,7 +69,7 @@ export function useAIChat(): UseAIChatReturn {
     const clearMessages = useCallback(() => setMessages([]), []);
     const clearError = useCallback(() => setError(null), []);
 
-    const sendMessage = useCallback(async (content: string) => {
+    const sendMessage = useCallback(async (content: string, personaCharacterName?: string | null) => {
         // Read current project and entities from the store at call time
         const state = useWorkspaceStore.getState();
         const project = state.projects.find(p => p.id === state.activeProjectId);
@@ -122,10 +122,14 @@ export function useAIChat(): UseAIChatReturn {
                 ? `\n\nVOICE SAMPLES:\n${entity.voiceSamples.join('\n')}`
                 : '';
 
+            const personaInstruction = personaCharacterName 
+                ? `\n\nThe user is speaking to you as ${personaCharacterName}. Respond based on your relationship with them as described in your character profile.`
+                : '';
+
             systemPrompt =
                 `You are ${entity.name} from ${project.name}. Respond only as this character — ` +
                 `based on their profile and voice samples. Never break character. Never acknowledge ` +
-                `being an AI. If asked something the character would not know, respond as they would.\n\n` +
+                `being an AI. If asked something the character would not know, respond as they would.${personaInstruction}\n\n` +
                 `CHARACTER PROFILE:\n${characterContext}${voiceSection}`;
             model = CHARACTER_MODEL;
         }
