@@ -15,6 +15,7 @@ import {
     SUBCATEGORY_LABELS,
     RootCategory,
 } from '@/lib/worldBibleNav';
+import { exportWorldBible } from '@/lib/export';
 
 interface WorldBibleNavProps {
     currentView: WBView;
@@ -34,6 +35,16 @@ export default function WorldBibleNav({
     onHome,
 }: WorldBibleNavProps) {
     const entities = useWorkspaceStore(state => state.entities);
+    const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
+    const projects = useWorkspaceStore(state => state.projects);
+
+    const handleExportBible = () => {
+        const activeProject = projects.find(p => p.id === activeProjectId);
+        if (!activeProject) return;
+        
+        const projectEntities = entities.filter(e => e.projectId === activeProject.id);
+        exportWorldBible(projectEntities, activeProject.name);
+    };
 
     /** Build the breadcrumb text based on the current view */
     const renderBreadcrumb = () => {
@@ -102,15 +113,24 @@ export default function WorldBibleNav({
                 {renderBreadcrumb()}
             </div>
 
-            {/* Home button — always navigates to home */}
-            <button
-                className={styles.homeBtn}
-                onClick={onHome}
-                aria-label="Go to World Bible home"
-                title="Home"
-            >
-                🏠
-            </button>
+            <div className={styles.actionGroup}>
+                <button
+                    className={styles.homeBtn}
+                    onClick={handleExportBible}
+                    aria-label="Export World Bible"
+                    title="Export World Bible"
+                >
+                    📖
+                </button>
+                <button
+                    className={styles.homeBtn}
+                    onClick={onHome}
+                    aria-label="Go to World Bible home"
+                    title="Home"
+                >
+                    🏠
+                </button>
+            </div>
         </nav>
     );
 }

@@ -269,6 +269,18 @@ interface WorkspaceState {
      */
     editorWidth: number;
 
+    /** Width of the left navigation sidebar in pixels. User-adjustable. */
+    navPanelWidth: number;
+
+    /** Optional maximum width for the editor. If null, uses flex behavior. */
+    editorMaxWidth: number | null;
+
+    /** Caches editorMaxWidth before snapping to standard format. */
+    cachedEditorMaxWidth: number | null;
+
+    /** Whether the editor is snapped to a 720px standard text width. */
+    isStandardFormat: boolean;
+
     /** Width of the right-edge panel tabs in pixels. User-adjustable. */
     tabRailWidth: number;
 
@@ -416,6 +428,10 @@ interface WorkspaceState {
 
     setTabRailWidth: (width: number) => void;
     setPanelWidth: (width: number) => void;
+
+    setNavPanelWidth: (width: number) => void;
+    setEditorMaxWidth: (width: number | null) => void;
+    toggleStandardFormat: () => void;
 
     /**
      * Sets the currently selected entity for the detail view.
@@ -622,6 +638,10 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             spotifyUrl: null,
             isSpotifyOpen: false,
             editorWidth: 800,
+            navPanelWidth: 220,
+            editorMaxWidth: null,
+            cachedEditorMaxWidth: null,
+            isStandardFormat: false,
             tabRailWidth: 72,
             panelWidth: 480,
             selectedEntityId: null,
@@ -863,6 +883,30 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             setPanelWidth: (width) =>
                 set(() => ({ panelWidth: width })),
+
+            setNavPanelWidth: (width) =>
+                set(() => ({ navPanelWidth: width })),
+
+            setEditorMaxWidth: (width) =>
+                set(() => ({ editorMaxWidth: width })),
+
+            toggleStandardFormat: () =>
+                set((state) => {
+                    const nextIsStandard = !state.isStandardFormat;
+                    if (nextIsStandard) {
+                        return {
+                            isStandardFormat: true,
+                            cachedEditorMaxWidth: state.editorMaxWidth,
+                            editorMaxWidth: 720,
+                        };
+                    } else {
+                        return {
+                            isStandardFormat: false,
+                            editorMaxWidth: state.cachedEditorMaxWidth,
+                            cachedEditorMaxWidth: null,
+                        };
+                    }
+                }),
 
             setSelectedEntity: (id) =>
                 set(() => ({ selectedEntityId: id })),
@@ -1110,6 +1154,10 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 atmosphereReducedMotion: state.atmosphereReducedMotion,
                 isToolbarVisible: state.isToolbarVisible,
                 writingMode: state.writingMode,
+                navPanelWidth: state.navPanelWidth,
+                editorMaxWidth: state.editorMaxWidth,
+                cachedEditorMaxWidth: state.cachedEditorMaxWidth,
+                isStandardFormat: state.isStandardFormat,
                 // Sprint 47A: persist goals data (streakState is derived, not persisted)
                 writingDays: state.writingDays,
                 goalConfig: state.goalConfig,

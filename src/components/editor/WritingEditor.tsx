@@ -533,6 +533,9 @@ function ContextBar({
     toggleFullscreen,
     toggleToolbarVisible,
     saveState,
+    isStandardFormat,
+    toggleStandardFormat,
+    isCompact,
 }: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     activeEditor: any;
@@ -554,6 +557,9 @@ function ContextBar({
     toggleFullscreen: () => void;
     toggleToolbarVisible: () => void;
     saveState: 'idle' | 'saving' | 'saved';
+    isStandardFormat: boolean;
+    toggleStandardFormat: () => void;
+    isCompact?: boolean;
 }) {
     // Inline editing state for chapter and scene names
     const [editingChapter, setEditingChapter] = useState(false);
@@ -599,173 +605,352 @@ function ContextBar({
     };
 
     return (
-        <div className={styles.contextBar}>
-            {/* LEFT — Breadcrumb context */}
-            <div className={styles.contextBreadcrumb}>
-                {/* Chapter number (read-only) */}
-                <span className={styles.breadcrumbNumber}>Chapter {chapterNumber}</span>
+        <div className={`${styles.contextBar} ${isCompact ? styles.contextBarCompact : ''}`}>
+            {isCompact ? (
+                <>
+                    <div className={styles.contextBarRow}>
+                        {/* LEFT — Breadcrumb context */}
+                        <div className={styles.contextBreadcrumb}>
+                            {/* Chapter number (read-only) */}
+                            <span className={styles.breadcrumbNumber}>Chapter {chapterNumber}</span>
 
-                {/* Chapter custom name — click to edit */}
-                {editingChapter ? (
-                    <input
-                        className={styles.breadcrumbInput}
-                        value={chapterDraft}
-                        onChange={(e) => setChapterDraft(e.target.value)}
-                        onBlur={saveChapterName}
-                        onKeyDown={(e) => { if (e.key === 'Enter') saveChapterName(); }}
-                        autoFocus
-                        placeholder="Chapter name"
-                    />
-                ) : hasCustomDocTitle ? (
-                    <span
-                        className={styles.breadcrumbName}
-                        onClick={() => { setChapterDraft(docTitle); setEditingChapter(true); }}
-                        title="Click to rename chapter"
-                    >
-                        : {docTitle}<span className={styles.breadcrumbPencil}>✏</span>
-                    </span>
-                ) : (
-                    <span
-                        className={styles.breadcrumbNamePlaceholder}
-                        onClick={() => { setChapterDraft(''); setEditingChapter(true); }}
-                        title="Click to add chapter name"
-                    >
-                        + name
-                    </span>
-                )}
+                            {/* Chapter custom name — click to edit */}
+                            {editingChapter ? (
+                                <input
+                                    className={styles.breadcrumbInput}
+                                    value={chapterDraft}
+                                    onChange={(e) => setChapterDraft(e.target.value)}
+                                    onBlur={saveChapterName}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') saveChapterName(); }}
+                                    autoFocus
+                                    placeholder="Chapter name"
+                                />
+                            ) : hasCustomDocTitle ? (
+                                <span
+                                    className={styles.breadcrumbName}
+                                    onClick={() => { setChapterDraft(docTitle); setEditingChapter(true); }}
+                                    title="Click to rename chapter"
+                                >
+                                    : {docTitle}<span className={styles.breadcrumbPencil}>✏</span>
+                                </span>
+                            ) : (
+                                <span
+                                    className={styles.breadcrumbNamePlaceholder}
+                                    onClick={() => { setChapterDraft(''); setEditingChapter(true); }}
+                                    title="Click to add chapter name"
+                                >
+                                    + name
+                                </span>
+                            )}
 
-                {/* Separator */}
-                <span className={styles.breadcrumbSep}>›</span>
+                            {/* Separator */}
+                            <span className={styles.breadcrumbSep}>›</span>
 
-                {/* Scene number (read-only) */}
-                <span className={styles.breadcrumbNumber}>Scene {sceneNumber}</span>
+                            {/* Scene number (read-only) */}
+                            <span className={styles.breadcrumbNumber}>Scene {sceneNumber}</span>
 
-                {/* Scene custom name — click to edit */}
-                {editingScene ? (
-                    <input
-                        className={styles.breadcrumbInput}
-                        value={sceneDraft}
-                        onChange={(e) => setSceneDraft(e.target.value)}
-                        onBlur={saveSceneName}
-                        onKeyDown={(e) => { if (e.key === 'Enter') saveSceneName(); }}
-                        autoFocus
-                        placeholder="Scene name"
-                    />
-                ) : hasCustomSceneTitle ? (
-                    <span
-                        className={styles.breadcrumbName}
-                        onClick={() => { setSceneDraft(sceneTitle); setEditingScene(true); }}
-                        title="Click to rename scene"
-                    >
-                        : {sceneTitle}<span className={styles.breadcrumbPencil}>✏</span>
-                    </span>
-                ) : (
-                    <span
-                        className={styles.breadcrumbNamePlaceholder}
-                        onClick={() => { setSceneDraft(''); setEditingScene(true); }}
-                        title="Click to add scene name"
-                    >
-                        + name
-                    </span>
-                )}
+                            {/* Scene custom name — click to edit */}
+                            {editingScene ? (
+                                <input
+                                    className={styles.breadcrumbInput}
+                                    value={sceneDraft}
+                                    onChange={(e) => setSceneDraft(e.target.value)}
+                                    onBlur={saveSceneName}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') saveSceneName(); }}
+                                    autoFocus
+                                    placeholder="Scene name"
+                                />
+                            ) : hasCustomSceneTitle ? (
+                                <span
+                                    className={styles.breadcrumbName}
+                                    onClick={() => { setSceneDraft(sceneTitle); setEditingScene(true); }}
+                                    title="Click to rename scene"
+                                >
+                                    : {sceneTitle}<span className={styles.breadcrumbPencil}>✏</span>
+                                </span>
+                            ) : (
+                                <span
+                                    className={styles.breadcrumbNamePlaceholder}
+                                    onClick={() => { setSceneDraft(''); setEditingScene(true); }}
+                                    title="Click to add scene name"
+                                >
+                                    + name
+                                </span>
+                            )}
 
-                {/* Word count — after scene portion, updates with visibleSceneId */}
-                <span className={styles.breadcrumbWordCount}>· {visibleWordCount.toLocaleString()} words</span>
+                            {/* Word count — after scene portion, updates with visibleSceneId */}
+                            <span className={styles.breadcrumbWordCount}>· {visibleWordCount.toLocaleString()} words</span>
 
-                {/* Autosave indicator */}
-                {saveState !== 'idle' && (
-                    <span className={styles.breadcrumbSave}>
-                        {saveState === 'saving' ? 'Saving...' : '✓ Saved'}
-                    </span>
-                )}
-            </div>
+                            {/* Autosave indicator */}
+                            {saveState !== 'idle' && (
+                                <span className={styles.breadcrumbSave}>
+                                    {saveState === 'saving' ? 'Saving...' : '✓ Saved'}
+                                </span>
+                            )}
+                        </div>
 
-            {/* CENTER — Formatting tools (only for non-screenplay modes) */}
-            {writingMode !== 'screenplay' && (
-                <div className={styles.contextFormatting}>
-                    {/* Paragraph style dropdown */}
-                    <select
-                        className={styles.toolbarSelect}
-                        value={
-                            activeEditor?.isActive('heading', { level: 1 }) ? 'h1' :
-                                activeEditor?.isActive('heading', { level: 2 }) ? 'h2' :
-                                    activeEditor?.isActive('heading', { level: 3 }) ? 'h3' :
-                                        activeEditor?.isActive('blockquote') ? 'blockquote' : 'p'
-                        }
-                        onChange={(e) => {
-                            const val = e.target.value;
-                            if (val === 'p') activeEditor?.chain().focus().setParagraph().run();
-                            else if (val === 'h1') activeEditor?.chain().focus().toggleHeading({ level: 1 }).run();
-                            else if (val === 'h2') activeEditor?.chain().focus().toggleHeading({ level: 2 }).run();
-                            else if (val === 'h3') activeEditor?.chain().focus().toggleHeading({ level: 3 }).run();
-                            else if (val === 'blockquote') activeEditor?.chain().focus().toggleBlockquote().run();
-                        }}
-                    >
-                        <option value="p">Paragraph</option>
-                        <option value="h1">H1</option>
-                        <option value="h2">H2</option>
-                        <option value="h3">H3</option>
-                        <option value="blockquote">Quote</option>
-                    </select>
-
-                    {/* Text formatting */}
-                    <div className={styles.toolbarGroup}>
-                        <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('bold') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleBold().run(); }} title="Bold"><strong>B</strong></button>
-                        <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('italic') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleItalic().run(); }} title="Italic"><em>I</em></button>
-                        <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('underline') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleUnderline().run(); }} title="Underline"><u>U</u></button>
-                        <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('strike') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleStrike().run(); }} title="Strikethrough"><s>S</s></button>
-                        <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('blockquote') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleBlockquote().run(); }} title="Block Quote">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" /><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" /></svg>
-                        </button>
+                        {/* RIGHT — Mode selector, toggles */}
+                        <div className={styles.contextRight}>
+                            <select
+                                className={styles.toolbarSelect}
+                                value={writingMode}
+                                onChange={(e) => {
+                                    if (activeProjectId) {
+                                        updateProject(activeProjectId, { writingMode: e.target.value });
+                                    }
+                                }}
+                                title="Writing Mode"
+                            >
+                                <option value="novel">📖 Novel</option>
+                                <option value="screenplay">🎬 Screenplay</option>
+                                <option value="markdown">📝 Markdown</option>
+                                <option value="poetry">✍️ Poetry</option>
+                            </select>
+                            <button className={`${styles.toolbarBtn} ${isTypewriterMode ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleTypewriterMode(); }} title="Typewriter Mode (Ctrl+Shift+W)">✍️</button>
+                            <button className={`${styles.toolbarBtn} ${isStandardFormat ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleStandardFormat(); }} title="Standard Format (720px) (Ctrl+Shift+P)">📄</button>
+                            <button className={`${styles.toolbarBtn} ${isFocusMode ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleFocusMode(); }} title="Focus Mode">◎</button>
+                            <button className={`${styles.toolbarBtn} ${isFullscreen ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleFullscreen(); }} title="Fullscreen">⛶</button>
+                            <button className={styles.toolbarBtn} onMouseDown={(e) => { e.preventDefault(); toggleToolbarVisible(); }} title="Hide Toolbar">⊟</button>
+                        </div>
                     </div>
 
-                    {/* Alignment */}
-                    <div className={styles.toolbarGroup}>
-                        <button className={`${styles.toolbarBtn} ${activeEditor?.isActive({ textAlign: 'left' }) ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().setTextAlign('left').run(); }} title="Align Left">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="15" y2="12" /><line x1="3" y1="18" x2="18" y2="18" /></svg>
-                        </button>
-                        <button className={`${styles.toolbarBtn} ${activeEditor?.isActive({ textAlign: 'center' }) ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().setTextAlign('center').run(); }} title="Align Center">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="6" y1="12" x2="18" y2="12" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
-                        </button>
-                        <button className={`${styles.toolbarBtn} ${activeEditor?.isActive({ textAlign: 'right' }) ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().setTextAlign('right').run(); }} title="Align Right">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="9" y1="12" x2="21" y2="12" /><line x1="6" y1="18" x2="21" y2="18" /></svg>
-                        </button>
+                    <div className={styles.contextBarRow}>
+                        {/* CENTER — Formatting tools (only for non-screenplay modes) */}
+                        {writingMode !== 'screenplay' && (
+                            <div className={styles.contextFormatting}>
+                                {/* Paragraph style dropdown */}
+                                <select
+                                    className={styles.toolbarSelect}
+                                    value={
+                                        activeEditor?.isActive('heading', { level: 1 }) ? 'h1' :
+                                            activeEditor?.isActive('heading', { level: 2 }) ? 'h2' :
+                                                activeEditor?.isActive('heading', { level: 3 }) ? 'h3' :
+                                                    activeEditor?.isActive('blockquote') ? 'blockquote' : 'p'
+                                    }
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (val === 'p') activeEditor?.chain().focus().setParagraph().run();
+                                        else if (val === 'h1') activeEditor?.chain().focus().toggleHeading({ level: 1 }).run();
+                                        else if (val === 'h2') activeEditor?.chain().focus().toggleHeading({ level: 2 }).run();
+                                        else if (val === 'h3') activeEditor?.chain().focus().toggleHeading({ level: 3 }).run();
+                                        else if (val === 'blockquote') activeEditor?.chain().focus().toggleBlockquote().run();
+                                    }}
+                                >
+                                    <option value="p">Paragraph</option>
+                                    <option value="h1">H1</option>
+                                    <option value="h2">H2</option>
+                                    <option value="h3">H3</option>
+                                    <option value="blockquote">Quote</option>
+                                </select>
+
+                                {/* Text formatting */}
+                                <div className={styles.toolbarGroup}>
+                                    <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('bold') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleBold().run(); }} title="Bold"><strong>B</strong></button>
+                                    <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('italic') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleItalic().run(); }} title="Italic"><em>I</em></button>
+                                    <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('underline') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleUnderline().run(); }} title="Underline"><u>U</u></button>
+                                    <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('strike') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleStrike().run(); }} title="Strikethrough"><s>S</s></button>
+                                    <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('blockquote') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleBlockquote().run(); }} title="Block Quote">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" /><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" /></svg>
+                                    </button>
+                                </div>
+
+                                {/* Alignment */}
+                                <div className={styles.toolbarGroup}>
+                                    <button className={`${styles.toolbarBtn} ${activeEditor?.isActive({ textAlign: 'left' }) ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().setTextAlign('left').run(); }} title="Align Left">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="15" y2="12" /><line x1="3" y1="18" x2="18" y2="18" /></svg>
+                                    </button>
+                                    <button className={`${styles.toolbarBtn} ${activeEditor?.isActive({ textAlign: 'center' }) ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().setTextAlign('center').run(); }} title="Align Center">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="6" y1="12" x2="18" y2="12" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
+                                    </button>
+                                    <button className={`${styles.toolbarBtn} ${activeEditor?.isActive({ textAlign: 'right' }) ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().setTextAlign('right').run(); }} title="Align Right">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="9" y1="12" x2="21" y2="12" /><line x1="6" y1="18" x2="21" y2="18" /></svg>
+                                    </button>
+                                </div>
+
+                                {/* Lists */}
+                                <div className={styles.toolbarGroup}>
+                                    <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('bulletList') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleBulletList().run(); }} title="Bullet List">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="9" y1="6" x2="20" y2="6" /><line x1="9" y1="12" x2="20" y2="12" /><line x1="9" y1="18" x2="20" y2="18" /><circle cx="4" cy="6" r="1.5" fill="currentColor" /><circle cx="4" cy="12" r="1.5" fill="currentColor" /><circle cx="4" cy="18" r="1.5" fill="currentColor" /></svg>
+                                    </button>
+                                    <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('orderedList') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleOrderedList().run(); }} title="Numbered List">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="10" y1="6" x2="21" y2="6" /><line x1="10" y1="12" x2="21" y2="12" /><line x1="10" y1="18" x2="21" y2="18" /><text x="1" y="8" fontSize="6" fill="currentColor" stroke="none">1.</text><text x="1" y="14" fontSize="6" fill="currentColor" stroke="none">2.</text><text x="1" y="20" fontSize="6" fill="currentColor" stroke="none">3.</text></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </>
+            ) : (
+                <>
+                    {/* LEFT — Breadcrumb context */}
+                    <div className={styles.contextBreadcrumb}>
+                        {/* Chapter number (read-only) */}
+                        <span className={styles.breadcrumbNumber}>Chapter {chapterNumber}</span>
+
+                        {/* Chapter custom name — click to edit */}
+                        {editingChapter ? (
+                            <input
+                                className={styles.breadcrumbInput}
+                                value={chapterDraft}
+                                onChange={(e) => setChapterDraft(e.target.value)}
+                                onBlur={saveChapterName}
+                                onKeyDown={(e) => { if (e.key === 'Enter') saveChapterName(); }}
+                                autoFocus
+                                placeholder="Chapter name"
+                            />
+                        ) : hasCustomDocTitle ? (
+                            <span
+                                className={styles.breadcrumbName}
+                                onClick={() => { setChapterDraft(docTitle); setEditingChapter(true); }}
+                                title="Click to rename chapter"
+                            >
+                                : {docTitle}<span className={styles.breadcrumbPencil}>✏</span>
+                            </span>
+                        ) : (
+                            <span
+                                className={styles.breadcrumbNamePlaceholder}
+                                onClick={() => { setChapterDraft(''); setEditingChapter(true); }}
+                                title="Click to add chapter name"
+                            >
+                                + name
+                            </span>
+                        )}
+
+                        {/* Separator */}
+                        <span className={styles.breadcrumbSep}>›</span>
+
+                        {/* Scene number (read-only) */}
+                        <span className={styles.breadcrumbNumber}>Scene {sceneNumber}</span>
+
+                        {/* Scene custom name — click to edit */}
+                        {editingScene ? (
+                            <input
+                                className={styles.breadcrumbInput}
+                                value={sceneDraft}
+                                onChange={(e) => setSceneDraft(e.target.value)}
+                                onBlur={saveSceneName}
+                                onKeyDown={(e) => { if (e.key === 'Enter') saveSceneName(); }}
+                                autoFocus
+                                placeholder="Scene name"
+                            />
+                        ) : hasCustomSceneTitle ? (
+                            <span
+                                className={styles.breadcrumbName}
+                                onClick={() => { setSceneDraft(sceneTitle); setEditingScene(true); }}
+                                title="Click to rename scene"
+                            >
+                                : {sceneTitle}<span className={styles.breadcrumbPencil}>✏</span>
+                            </span>
+                        ) : (
+                            <span
+                                className={styles.breadcrumbNamePlaceholder}
+                                onClick={() => { setSceneDraft(''); setEditingScene(true); }}
+                                title="Click to add scene name"
+                                >
+                                + name
+                            </span>
+                        )}
+
+                        {/* Word count — after scene portion, updates with visibleSceneId */}
+                        <span className={styles.breadcrumbWordCount}>· {visibleWordCount.toLocaleString()} words</span>
+
+                        {/* Autosave indicator */}
+                        {saveState !== 'idle' && (
+                            <span className={styles.breadcrumbSave}>
+                                {saveState === 'saving' ? 'Saving...' : '✓ Saved'}
+                            </span>
+                        )}
                     </div>
 
-                    {/* Lists */}
-                    <div className={styles.toolbarGroup}>
-                        <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('bulletList') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleBulletList().run(); }} title="Bullet List">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="9" y1="6" x2="20" y2="6" /><line x1="9" y1="12" x2="20" y2="12" /><line x1="9" y1="18" x2="20" y2="18" /><circle cx="4" cy="6" r="1.5" fill="currentColor" /><circle cx="4" cy="12" r="1.5" fill="currentColor" /><circle cx="4" cy="18" r="1.5" fill="currentColor" /></svg>
-                        </button>
-                        <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('orderedList') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleOrderedList().run(); }} title="Numbered List">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="10" y1="6" x2="21" y2="6" /><line x1="10" y1="12" x2="21" y2="12" /><line x1="10" y1="18" x2="21" y2="18" /><text x="1" y="8" fontSize="6" fill="currentColor" stroke="none">1.</text><text x="1" y="14" fontSize="6" fill="currentColor" stroke="none">2.</text><text x="1" y="20" fontSize="6" fill="currentColor" stroke="none">3.</text></svg>
-                        </button>
+                    {/* CENTER — Formatting tools (only for non-screenplay modes) */}
+                    {writingMode !== 'screenplay' && (
+                        <div className={styles.contextFormatting}>
+                            {/* Paragraph style dropdown */}
+                            <select
+                                className={styles.toolbarSelect}
+                                value={
+                                    activeEditor?.isActive('heading', { level: 1 }) ? 'h1' :
+                                        activeEditor?.isActive('heading', { level: 2 }) ? 'h2' :
+                                            activeEditor?.isActive('heading', { level: 3 }) ? 'h3' :
+                                                activeEditor?.isActive('blockquote') ? 'blockquote' : 'p'
+                                }
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === 'p') activeEditor?.chain().focus().setParagraph().run();
+                                    else if (val === 'h1') activeEditor?.chain().focus().toggleHeading({ level: 1 }).run();
+                                    else if (val === 'h2') activeEditor?.chain().focus().toggleHeading({ level: 2 }).run();
+                                    else if (val === 'h3') activeEditor?.chain().focus().toggleHeading({ level: 3 }).run();
+                                    else if (val === 'blockquote') activeEditor?.chain().focus().toggleBlockquote().run();
+                                }}
+                            >
+                                <option value="p">Paragraph</option>
+                                <option value="h1">H1</option>
+                                <option value="h2">H2</option>
+                                <option value="h3">H3</option>
+                                <option value="blockquote">Quote</option>
+                            </select>
+
+                            {/* Text formatting */}
+                            <div className={styles.toolbarGroup}>
+                                <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('bold') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleBold().run(); }} title="Bold"><strong>B</strong></button>
+                                <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('italic') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleItalic().run(); }} title="Italic"><em>I</em></button>
+                                <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('underline') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleUnderline().run(); }} title="Underline"><u>U</u></button>
+                                <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('strike') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleStrike().run(); }} title="Strikethrough"><s>S</s></button>
+                                <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('blockquote') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleBlockquote().run(); }} title="Block Quote">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" /><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" /></svg>
+                                </button>
+                            </div>
+
+                            {/* Alignment */}
+                            <div className={styles.toolbarGroup}>
+                                <button className={`${styles.toolbarBtn} ${activeEditor?.isActive({ textAlign: 'left' }) ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().setTextAlign('left').run(); }} title="Align Left">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="15" y2="12" /><line x1="3" y1="18" x2="18" y2="18" /></svg>
+                                </button>
+                                <button className={`${styles.toolbarBtn} ${activeEditor?.isActive({ textAlign: 'center' }) ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().setTextAlign('center').run(); }} title="Align Center">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="6" y1="12" x2="18" y2="12" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
+                                </button>
+                                <button className={`${styles.toolbarBtn} ${activeEditor?.isActive({ textAlign: 'right' }) ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().setTextAlign('right').run(); }} title="Align Right">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="9" y1="12" x2="21" y2="12" /><line x1="6" y1="18" x2="21" y2="18" /></svg>
+                                </button>
+                            </div>
+
+                            {/* Lists */}
+                            <div className={styles.toolbarGroup}>
+                                <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('bulletList') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleBulletList().run(); }} title="Bullet List">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="9" y1="6" x2="20" y2="6" /><line x1="9" y1="12" x2="20" y2="12" /><line x1="9" y1="18" x2="20" y2="18" /><circle cx="4" cy="6" r="1.5" fill="currentColor" /><circle cx="4" cy="12" r="1.5" fill="currentColor" /><circle cx="4" cy="18" r="1.5" fill="currentColor" /></svg>
+                                </button>
+                                <button className={`${styles.toolbarBtn} ${activeEditor?.isActive('orderedList') ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); activeEditor?.chain().focus().toggleOrderedList().run(); }} title="Numbered List">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="10" y1="6" x2="21" y2="6" /><line x1="10" y1="12" x2="21" y2="12" /><line x1="10" y1="18" x2="21" y2="18" /><text x="1" y="8" fontSize="6" fill="currentColor" stroke="none">1.</text><text x="1" y="14" fontSize="6" fill="currentColor" stroke="none">2.</text><text x="1" y="20" fontSize="6" fill="currentColor" stroke="none">3.</text></svg>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* RIGHT — Mode selector, toggles */}
+                    <div className={styles.contextRight}>
+                        <select
+                            className={styles.toolbarSelect}
+                            value={writingMode}
+                            onChange={(e) => {
+                                if (activeProjectId) {
+                                    updateProject(activeProjectId, { writingMode: e.target.value });
+                                }
+                            }}
+                            title="Writing Mode"
+                        >
+                            <option value="novel">📖 Novel</option>
+                            <option value="screenplay">🎬 Screenplay</option>
+                            <option value="markdown">📝 Markdown</option>
+                            <option value="poetry">✍️ Poetry</option>
+                        </select>
+                        <button className={`${styles.toolbarBtn} ${isTypewriterMode ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleTypewriterMode(); }} title="Typewriter Mode (Ctrl+Shift+W)">✍️</button>
+                        <button className={`${styles.toolbarBtn} ${isStandardFormat ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleStandardFormat(); }} title="Standard Format (720px) (Ctrl+Shift+P)">📄</button>
+                        <button className={`${styles.toolbarBtn} ${isFocusMode ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleFocusMode(); }} title="Focus Mode">◎</button>
+                        <button className={`${styles.toolbarBtn} ${isFullscreen ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleFullscreen(); }} title="Fullscreen">⛶</button>
+                        <button className={styles.toolbarBtn} onMouseDown={(e) => { e.preventDefault(); toggleToolbarVisible(); }} title="Hide Toolbar">⊟</button>
                     </div>
-                </div>
+                </>
             )}
-
-            {/* RIGHT — Mode selector, toggles */}
-            <div className={styles.contextRight}>
-                <select
-                    className={styles.toolbarSelect}
-                    value={writingMode}
-                    onChange={(e) => {
-                        if (activeProjectId) {
-                            updateProject(activeProjectId, { writingMode: e.target.value });
-                        }
-                    }}
-                    title="Writing Mode"
-                >
-                    <option value="novel">📖 Novel</option>
-                    <option value="screenplay">🎬 Screenplay</option>
-                    <option value="markdown">📝 Markdown</option>
-                    <option value="poetry">✍️ Poetry</option>
-                </select>
-                <button className={`${styles.toolbarBtn} ${isTypewriterMode ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleTypewriterMode(); }} title="Typewriter Mode">✍️</button>
-                <button className={`${styles.toolbarBtn} ${isFocusMode ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleFocusMode(); }} title="Focus Mode">◎</button>
-                <button className={`${styles.toolbarBtn} ${isFullscreen ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleFullscreen(); }} title="Fullscreen">⛶</button>
-                <button className={styles.toolbarBtn} onMouseDown={(e) => { e.preventDefault(); toggleToolbarVisible(); }} title="Hide Toolbar">⊟</button>
-            </div>
         </div>
     );
 }
@@ -775,6 +960,22 @@ function ContextBar({
  * Renders all scenes in the active chapter.
  */
 export default function WritingEditor() {
+    const editorWrapperRef = useRef<HTMLDivElement>(null);
+    const [isCompact, setIsCompact] = useState(false);
+
+    useEffect(() => {
+        if (!editorWrapperRef.current) return;
+
+        const observer = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                setIsCompact(entry.contentRect.width < 800);
+            }
+        });
+
+        observer.observe(editorWrapperRef.current);
+        return () => observer.disconnect();
+    }, []);
+
     const documents = useWorkspaceStore((state) => state.documents);
     const activeDocumentId = useWorkspaceStore((state) => state.activeDocumentId);
     const activeSceneId = useWorkspaceStore((state) => state.activeSceneId);
@@ -784,6 +985,9 @@ export default function WritingEditor() {
     const addScene = useWorkspaceStore((state) => state.addScene);
 
     const activeDocument = documents.find(d => d.id === activeDocumentId);
+
+    const isStandardFormat = useWorkspaceStore((state) => state.isStandardFormat);
+    const toggleStandardFormat = useWorkspaceStore((state) => state.toggleStandardFormat);
 
     // Sort active scenes by their order, and optionally filter by activeScene
     const activeScenes = React.useMemo(() => {
@@ -928,6 +1132,12 @@ export default function WritingEditor() {
                 setIsReplaceVisible(true);
                 /* eslint-enable react-hooks/set-state-in-effect */
                 setTimeout(() => document.getElementById('mythforge-replace-input')?.focus(), 50);
+            } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'w') {
+                e.preventDefault();
+                toggleTypewriterMode();
+            } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'p') {
+                e.preventDefault();
+                toggleStandardFormat();
             } else if (e.key === 'Escape' && isFindOpen) {
                 // Close find/replace bar and clear search highlights
                 setIsFindOpen(false);
@@ -939,7 +1149,7 @@ export default function WritingEditor() {
         };
         window.addEventListener('keydown', handleFindKeys);
         return () => window.removeEventListener('keydown', handleFindKeys);
-    }, [isFindOpen]);
+    }, [isFindOpen, toggleTypewriterMode, toggleStandardFormat]);
 
     // Dispatch searchTerm to all SceneEditors whenever it changes
     useEffect(() => {
@@ -1015,9 +1225,9 @@ export default function WritingEditor() {
 
     return (
         <div
+            ref={editorWrapperRef}
             className={`${styles.editorWrapper} ${isTypewriterMode ? styles.typewriterActive : ''} ${atmosphereReducedMotion ? styles.reducedMotion : ''}`}
             style={{
-                paddingTop: isTypewriterMode ? '45vh' : undefined,
                 '--editor-width': `${editorWidth}px`,
             } as React.CSSProperties}
         >
@@ -1043,6 +1253,9 @@ export default function WritingEditor() {
                     toggleFullscreen={toggleFullscreen}
                     toggleToolbarVisible={toggleToolbarVisible}
                     saveState={saveState}
+                    isStandardFormat={isStandardFormat}
+                    toggleStandardFormat={toggleStandardFormat}
+                    isCompact={isCompact}
                 />
             )}
             {!isToolbarVisible && (
@@ -1129,98 +1342,104 @@ export default function WritingEditor() {
             )}
 
 
-            {/* RENDER ALL SCENES */}
-            {activeScenes.map((scene, index) => (
-                <React.Fragment key={scene.id}>
-                    {writingMode === 'screenplay' ? (
-                        <ScreenplayEditor scene={scene} />
-                    ) : (
-                        <SceneEditor scene={scene} index={index} onEditorFocus={handleEditorFocus} containerRef={setSceneRef(scene.id)} />
-                    )}
-                    {index < activeScenes.length - 1 && (
-                        <hr className={styles.sceneSeparator} />
-                    )}
-                </React.Fragment>
-            ))}
+            {/* RENDER CONTENT AREA WITH TYPEWRITER PADDING */}
+            <div 
+                className={styles.editorBody}
+                style={{ paddingTop: isTypewriterMode ? '45vh' : undefined }}
+            >
+                {/* RENDER ALL SCENES */}
+                {activeScenes.map((scene, index) => (
+                    <React.Fragment key={scene.id}>
+                        {writingMode === 'screenplay' ? (
+                            <ScreenplayEditor scene={scene} />
+                        ) : (
+                            <SceneEditor scene={scene} index={index} onEditorFocus={handleEditorFocus} containerRef={setSceneRef(scene.id)} />
+                        )}
+                        {index < activeScenes.length - 1 && (
+                            <hr className={styles.sceneSeparator} />
+                        )}
+                    </React.Fragment>
+                ))}
 
-            {(writingGoal.dailyTarget > 0 || writingGoal.sessionTarget > 0) && (
-                <div className={styles.writingGoals}>
-                    {writingGoal.dailyTarget > 0 && (
-                        <div className={styles.goalRow}>
-                            <div className={styles.goalInfo}>
-                                <span>Daily Target</span>
-                                <span>{currentChapterWordCount} / {writingGoal.dailyTarget}</span>
+                {(writingGoal.dailyTarget > 0 || writingGoal.sessionTarget > 0) && (
+                    <div className={styles.writingGoals}>
+                        {writingGoal.dailyTarget > 0 && (
+                            <div className={styles.goalRow}>
+                                <div className={styles.goalInfo}>
+                                    <span>Daily Target</span>
+                                    <span>{currentChapterWordCount} / {writingGoal.dailyTarget}</span>
+                                </div>
+                                <div className={styles.progressBar}>
+                                    <div
+                                        className={`${styles.progressFill} ${currentChapterWordCount >= writingGoal.dailyTarget ? styles.goalMet : ''}`}
+                                        style={{ width: `${Math.min(100, (currentChapterWordCount / writingGoal.dailyTarget) * 100)}%` }}
+                                    />
+                                </div>
                             </div>
-                            <div className={styles.progressBar}>
-                                <div
-                                    className={`${styles.progressFill} ${currentChapterWordCount >= writingGoal.dailyTarget ? styles.goalMet : ''}`}
-                                    style={{ width: `${Math.min(100, (currentChapterWordCount / writingGoal.dailyTarget) * 100)}%` }}
-                                />
+                        )}
+                        {writingGoal.sessionTarget > 0 && (
+                            <div className={styles.goalRow}>
+                                <div className={styles.goalInfo}>
+                                    <span>Session Target</span>
+                                    <span>{sessionWordCount} / {writingGoal.sessionTarget}</span>
+                                </div>
+                                <div className={styles.progressBar}>
+                                    <div
+                                        className={`${styles.progressFill} ${sessionWordCount >= writingGoal.sessionTarget ? styles.goalMet : ''}`}
+                                        style={{ width: `${Math.min(100, (sessionWordCount / writingGoal.sessionTarget) * 100)}%` }}
+                                    />
+                                </div>
                             </div>
-                        </div>
-                    )}
-                    {writingGoal.sessionTarget > 0 && (
-                        <div className={styles.goalRow}>
-                            <div className={styles.goalInfo}>
-                                <span>Session Target</span>
-                                <span>{sessionWordCount} / {writingGoal.sessionTarget}</span>
-                            </div>
-                            <div className={styles.progressBar}>
-                                <div
-                                    className={`${styles.progressFill} ${sessionWordCount >= writingGoal.sessionTarget ? styles.goalMet : ''}`}
-                                    style={{ width: `${Math.min(100, (sessionWordCount / writingGoal.sessionTarget) * 100)}%` }}
-                                />
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
+                        )}
+                    </div>
+                )}
 
-            {showHint && (
-                <div style={{
-                    fontSize: '0.85rem',
-                    color: '#888',
-                    marginTop: '2rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '8px',
-                    backgroundColor: 'rgba(0,0,0,0.02)'
-                }}>
-                    <span>Tip: type [[ to instantly create a world entry without leaving your writing</span>
+                {showHint && (
+                    <div style={{
+                        fontSize: '0.85rem',
+                        color: '#888',
+                        marginTop: '2rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '8px',
+                        backgroundColor: 'rgba(0,0,0,0.02)'
+                    }}>
+                        <span>Tip: type [[ to instantly create a world entry without leaving your writing</span>
+                        <button
+                            onClick={() => {
+                                setShowHint(false);
+                                setStoredValue('mythforge-hint-dismissed', 'true');
+                            }}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: '#888',
+                                cursor: 'pointer',
+                                fontSize: '1.2rem',
+                                lineHeight: 1,
+                                padding: '0 0.5rem'
+                            }}
+                            aria-label="Dismiss hint"
+                            title="Dismiss"
+                        >
+                            ×
+                        </button>
+                    </div>
+                )}
+
+                {/* Task 2: Exit Focus pill — persistent bottom-center button when focus mode is on */}
+                {isFocusMode && (
                     <button
-                        onClick={() => {
-                            setShowHint(false);
-                            setStoredValue('mythforge-hint-dismissed', 'true');
-                        }}
-                        style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#888',
-                            cursor: 'pointer',
-                            fontSize: '1.2rem',
-                            lineHeight: 1,
-                            padding: '0 0.5rem'
-                        }}
-                        aria-label="Dismiss hint"
-                        title="Dismiss"
+                        className={styles.exitFocusPill}
+                        onMouseDown={(e) => { e.preventDefault(); toggleFocusMode(); }}
+                        title="Exit Focus Mode (Esc)"
                     >
-                        ×
+                        Exit Focus
                     </button>
-                </div>
-            )}
-
-            {/* Task 2: Exit Focus pill — persistent bottom-center button when focus mode is on */}
-            {isFocusMode && (
-                <button
-                    className={styles.exitFocusPill}
-                    onMouseDown={(e) => { e.preventDefault(); toggleFocusMode(); }}
-                    title="Exit Focus Mode (Esc)"
-                >
-                    Exit Focus
-                </button>
-            )}
+                )}
+            </div>
         </div>
     );
 }

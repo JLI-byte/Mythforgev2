@@ -9,6 +9,7 @@ import { AtmospherePicker } from '../ui/AtmospherePicker';
 import SettingsModal from '../ui/SettingsModal';
 import { ProjectSwitcher } from '@/components/navigation/ProjectSwitcher';
 import { NewProjectModal } from '../ui/NewProjectModal';
+import { exportAsMarkdown, exportAsDocx, exportWorldBible } from '@/lib/export';
 
 /**
  * NavigationPanel UI Component
@@ -24,6 +25,7 @@ export function NavigationPanel() {
     const scenes = useWorkspaceStore(state => state.scenes);
     const activeDocumentId = useWorkspaceStore(state => state.activeDocumentId);
     const activeSceneId = useWorkspaceStore(state => state.activeSceneId);
+    const entities = useWorkspaceStore(state => state.entities);
 
     const setActiveProject = useWorkspaceStore(state => state.setActiveProject);
 
@@ -116,19 +118,31 @@ export function NavigationPanel() {
     const activeProject = projects.find(p => p.id === activeProjectId);
     const currentIndex = projects.findIndex(p => p.id === activeProjectId);
 
-    const goToPrevProject = () => {
-        if (projects.length < 2) return;
-        const prev = (currentIndex - 1 + projects.length) % projects.length;
-        setActiveProject(projects[prev].id);
-    };
-
-    const goToNextProject = () => {
-        if (projects.length < 2) return;
-        const next = (currentIndex + 1) % projects.length;
-        setActiveProject(projects[next].id);
-    };
-
     // --- Actions ---
+    const handleExportMarkdown = (chapterId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setOpenMenuId(null);
+        const chapterDoc = documents.find(d => d.id === chapterId);
+        if (!chapterDoc) return;
+        const chapterScenes = scenes.filter(s => s.documentId === chapterId);
+        exportAsMarkdown(chapterDoc, chapterScenes);
+    };
+
+    const handleExportDocx = (chapterId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setOpenMenuId(null);
+        const chapterDoc = documents.find(d => d.id === chapterId);
+        if (!chapterDoc) return;
+        const chapterScenes = scenes.filter(s => s.documentId === chapterId);
+        exportAsDocx(chapterDoc, chapterScenes);
+    };
+
+    const handleExportBible = () => {
+        if (!activeProject) return;
+        const projectEntities = entities.filter(e => e.projectId === activeProject.id);
+        exportWorldBible(projectEntities, activeProject.name);
+    };
+
     const handleAddChapter = () => {
         if (!activeProjectId) return;
         const newDocId = crypto.randomUUID();
@@ -286,22 +300,20 @@ export function NavigationPanel() {
         <div className={styles.navigationPanel}>
             {/* Project header — book cover + title + navigation */}
             <div className={styles.projectHeader}>
-                {/* Book cover */}
-                <div
-                    className={styles.projectCover}
-                    style={{ background: activeProject?.coverColor || 'var(--surface)' }}
-                >
-                    <span className={styles.projectCoverInitials}>
-                        {activeProject?.name?.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase() || '?'}
-                    </span>
-                </div>
+                <span className={styles.projectTitle}>{activeProject?.name || 'No Project'}</span>
+                
+                <div className={styles.projectHeaderBody}>
+                    {/* Book cover */}
+                    <div
+                        className={styles.projectCover}
+                        style={{ background: activeProject?.coverColor || 'var(--surface)' }}
+                    >
+                        <span className={styles.projectCoverInitials}>
+                            {activeProject?.name?.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase() || '?'}
+                        </span>
+                    </div>
 
-                {/* Title and controls */}
-                <div className={styles.projectMeta}>
-                    <span className={styles.projectTitle}>{activeProject?.name || 'No Project'}</span>
                     <div className={styles.projectControls}>
-                        <button className={styles.projectNavBtn} onClick={goToPrevProject} title="Previous project" disabled={projects.length < 2}>‹</button>
-                        <button className={styles.projectNavBtn} onClick={goToNextProject} title="Next project" disabled={projects.length < 2}>›</button>
                         <button className={styles.projectGridBtn} onClick={() => setShowSwitcher(true)} title="All projects">⊞</button>
                         <button className={styles.projectNewBtn} onClick={() => setShowNewProject(true)} title="New project">+</button>
                     </div>
@@ -408,6 +420,18 @@ export function NavigationPanel() {
                                                         onClick={(e) => handleStartRename(chapter.id, chapter.title, 'chapter', e)}
                                                     >
                                                         Rename
+                                                    </button>
+                                                    <button
+                                                        className={styles.menuItem}
+                                                        onClick={(e) => handleExportMarkdown(chapter.id, e)}
+                                                    >
+                                                        Export as Markdown
+                                                    </button>
+                                                    <button
+                                                        className={styles.menuItem}
+                                                        onClick={(e) => handleExportDocx(chapter.id, e)}
+                                                    >
+                                                        Export as DOCX
                                                     </button>
                                                     <button
                                                         className={`${styles.menuItem} ${styles.destructive}`}

@@ -1,0 +1,30 @@
+.divider {
+    width: 8px;
+    height: 100%;
+    cursor: col-resize;
+    position: relative;
+    z-index: 100;
+    transition: opacity 150ms ease;
+    margin: 0 -4px; /* Pull it slightly into the adjacent containers so it overlaps their borders */
+    background: transparent;
+    flex-shrink: 0;
+}
+
+.divider:hover .handle,
+.divider:active .handle {
+    opacity: 1;
+    background: var(--accent);
+    width: 3px;
+    left: 2.5px;
+}
+
+.handle {
+    position: absolute;
+    left: 3px;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: var(--border);
+    opacity: 0.3;
+    transition: background 150ms ease, opacity 150ms ease, width 150ms ease, left 150ms ease;
+}

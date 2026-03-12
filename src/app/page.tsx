@@ -16,6 +16,7 @@ import { EntityDetailPanel } from '@/components/world/EntityDetailPanel';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
 import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
+import { ResizeDivider } from '@/components/ui/ResizeDivider';
 
 /**
  * Main Workspace View
@@ -48,6 +49,29 @@ export default function Home() {
   const setTabRailWidth = useWorkspaceStore((state) => state.setTabRailWidth);
   const panelWidth = useWorkspaceStore((state) => state.panelWidth);
   const setPanelWidth = useWorkspaceStore((state) => state.setPanelWidth);
+
+  const editorRef = React.useRef<HTMLDivElement>(null);
+
+  const navPanelWidth = useWorkspaceStore((state) => state.navPanelWidth);
+  const setNavPanelWidth = useWorkspaceStore((state) => state.setNavPanelWidth);
+  const editorMaxWidth = useWorkspaceStore((state) => state.editorMaxWidth);
+  const setEditorMaxWidth = useWorkspaceStore((state) => state.setEditorMaxWidth);
+  const isStandardFormat = useWorkspaceStore((state) => state.isStandardFormat);
+
+  const [isResizing, setIsResizing] = useState(false);
+
+  const handleNavResize = (deltaX: number) => {
+    const newWidth = Math.min(Math.max(navPanelWidth + deltaX, 160), 400);
+    setNavPanelWidth(newWidth);
+  };
+
+  const handleEditorResize = (deltaX: number) => {
+    // Capture actual width if state is currently null (pure flex)
+    const currentMax = editorMaxWidth || (editorRef.current?.offsetWidth || 800);
+    const upperBound = typeof window !== 'undefined' ? window.innerWidth - navPanelWidth - tabRailWidth - 60 : 2000;
+    const newWidth = Math.min(Math.max(currentMax + deltaX, 400), upperBound);
+    setEditorMaxWidth(newWidth);
+  };
   const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   useEffect(() => {
@@ -93,12 +117,34 @@ export default function Home() {
         transition: 'padding-right 280ms ease-in-out',
       }}
     >
-      <div className={styles.navigationPanelContainer}>
+      <div 
+        className={styles.navigationPanelContainer}
+        style={{ 
+          width: navPanelWidth,
+          transition: isResizing ? 'none' : undefined
+        }}
+      >
         <NavigationPanel />
       </div>
+
+      {!isFocusMode && !isFullscreen && (
+        <ResizeDivider 
+          onResize={handleNavResize} 
+          onResizeStart={() => setIsResizing(true)}
+          onResizeEnd={() => setIsResizing(false)}
+          onDoubleClick={() => setNavPanelWidth(220)}
+        />
+      )}
+
       <div
+        ref={editorRef}
         className={styles.editorContainer}
-        style={!atmosphereGlobalOverlay ? atmosphereStyleVars : undefined}
+        style={{
+          ...(!atmosphereGlobalOverlay ? atmosphereStyleVars : undefined),
+          transition: isResizing ? 'none' : undefined,
+          width: isStandardFormat ? 720 : (editorMaxWidth || undefined),
+          flex: (!isStandardFormat && !editorMaxWidth) ? 1 : '0 0 auto'
+        }}
       >
         <div
           className={styles.editorScrollContainer}
@@ -109,6 +155,15 @@ export default function Home() {
           <WritingEditor key={activeDocumentId} />
         </div>
       </div>
+
+      {!isFocusMode && !isFullscreen && (
+        <ResizeDivider 
+          onResize={handleEditorResize}
+          onResizeStart={() => setIsResizing(true)}
+          onResizeEnd={() => setIsResizing(false)}
+          onDoubleClick={() => setEditorMaxWidth(null)}
+        />
+      )}
 
       {/* 
         Right-edge panels & filing cabinet tabs

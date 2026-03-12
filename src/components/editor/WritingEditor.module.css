@@ -1,12 +1,17 @@
 .editorWrapper {
     width: 100%;
-    max-width: var(--editor-width, 800px);
     display: flex;
     flex-direction: column;
     position: relative;
     padding-top: 4rem;
     padding-bottom: 20vh;
     padding-left: 2rem;
+}
+
+.editorBody {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 }
 
 .sceneContainer {
@@ -43,17 +48,45 @@
     min-height: 44px;
     font-family: var(--font-sans);
     box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    transition: min-height 0.3s ease-in-out;
+}
+
+.contextBarCompact {
+    flex-direction: column;
+    min-height: 88px;
+    gap: 0.5rem;
+}
+
+.contextBarRow {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 0.25rem;
+    min-height: 44px;
 }
 
 /* Left — breadcrumb context */
 .contextBreadcrumb {
     display: flex;
     align-items: center;
-    gap: 0;
-    flex-shrink: 0;
+    gap: 0.4rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
     padding-right: 0.75rem;
     margin-right: 0.75rem;
     border-right: 1px solid var(--border);
+}
+
+.breadcrumbName,
+.breadcrumbNumber,
+.breadcrumbWordCount {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .breadcrumbNumber {
@@ -73,6 +106,8 @@
     border-bottom: 1px solid transparent;
     transition: border-color 150ms ease;
     position: relative;
+    max-width: 150px;
+    flex-shrink: 1;
 }
 
 .breadcrumbName:hover {
@@ -145,11 +180,15 @@
 .contextFormatting {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.4rem;
     margin: 0 auto;
-    padding: 0 0.75rem;
-    margin-right: 0.75rem;
-    border-right: 1px solid var(--border);
+}
+
+.contextBarCompact .contextFormatting {
+    width: 100%;
+    justify-content: center;
+    padding-top: 0.25rem;
+    border-top: 1px solid var(--border-subtle);
 }
 
 /* Right — mode selector, toggles */

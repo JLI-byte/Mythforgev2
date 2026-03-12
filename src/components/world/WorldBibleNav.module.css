@@ -74,3 +74,10 @@
 .homeBtn:hover {
     background: rgba(var(--foreground-rgb), 0.06);
 }
+
+/* Container for right-side action buttons */
+.actionGroup {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
