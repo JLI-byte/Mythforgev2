@@ -5,6 +5,8 @@ import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import styles from './WritingEditor.module.css';
 import { useWorkspaceStore, Scene, Document as MFDocument } from '@/store/workspaceStore';
+import ShareModal from '../ui/ShareModal';
+import { ShareCardOptions } from '@/lib/shareCard';
 import { getStoredValue, setStoredValue } from '@/lib/storage';
 import { EntityMark } from '@/lib/EntityMark';
 import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
@@ -191,6 +193,7 @@ function SceneEditor({ scene, index, onEditorFocus, containerRef }: { scene: Sce
     const entities = useWorkspaceStore((state) => state.entities);
     const setHoveredEntity = useWorkspaceStore((state) => state.setHoveredEntity);
     const isTypewriterMode = useWorkspaceStore((state) => state.isTypewriterMode);
+    const baseFontSize = useWorkspaceStore((state) => state.baseFontSize);
 
     // Atmosphere state
     const customAtmospheres = useWorkspaceStore((state) => state.customAtmospheres);
@@ -498,6 +501,7 @@ function SceneEditor({ scene, index, onEditorFocus, containerRef }: { scene: Sce
             data-scene-id={scene.id}
             ref={containerRef}
             style={{
+                '--base-font-size': `${baseFontSize}px`,
                 ...(currentAtmosphere && atmosphereTypographyEnabled ? {
                     '--atmosphere-line-height-shift': currentAtmosphere.lineHeightShift,
                     '--atmosphere-letter-spacing-shift': currentAtmosphere.letterSpacingShift
@@ -535,6 +539,8 @@ function ContextBar({
     saveState,
     isStandardFormat,
     toggleStandardFormat,
+    baseFontSize,
+    setBaseFontSize,
     isCompact,
 }: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -559,6 +565,8 @@ function ContextBar({
     saveState: 'idle' | 'saving' | 'saved';
     isStandardFormat: boolean;
     toggleStandardFormat: () => void;
+    baseFontSize: number;
+    setBaseFontSize: (size: number) => void;
     isCompact?: boolean;
 }) {
     // Inline editing state for chapter and scene names
@@ -716,6 +724,20 @@ function ContextBar({
 
                     <div className={styles.contextBarRow}>
                         {/* CENTER — Formatting tools (only for non-screenplay modes) */}
+                        <div className={styles.contextFormatting}>
+                            <div className={styles.toolbarGroup} style={{ borderRight: 'none' }}>
+                                <select
+                                    className={styles.toolbarSelect}
+                                    value={baseFontSize}
+                                    onChange={(e) => setBaseFontSize(Number(e.target.value))}
+                                    title="Font Size"
+                                >
+                                    {[14, 16, 18, 20, 22, 24, 28, 32, 40].map(size => (
+                                        <option key={size} value={size}>{size}px</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
                         {writingMode !== 'screenplay' && (
                             <div className={styles.contextFormatting}>
                                 {/* Paragraph style dropdown */}
@@ -988,6 +1010,11 @@ export default function WritingEditor() {
 
     const isStandardFormat = useWorkspaceStore((state) => state.isStandardFormat);
     const toggleStandardFormat = useWorkspaceStore((state) => state.toggleStandardFormat);
+    const baseFontSize = useWorkspaceStore((state) => state.baseFontSize);
+    const setBaseFontSize = useWorkspaceStore((state) => state.setBaseFontSize);
+
+    // Sprint 44: Local UI toggle for ContextBar layout
+    const isContextBarCompact = isCompact; // Renamed for clarity in ContextBar props
 
     // Sort active scenes by their order, and optionally filter by activeScene
     const activeScenes = React.useMemo(() => {
@@ -1022,6 +1049,18 @@ export default function WritingEditor() {
     const editorWidth = useWorkspaceStore((state) => state.editorWidth);
     const atmosphereReducedMotion = useWorkspaceStore((state) => state.atmosphereReducedMotion);
     const updateScene = useWorkspaceStore((state) => state.updateScene);
+
+    // Session share milestone state
+    const [sessionMilestoneReached, setSessionMilestoneReached] = useState(false);
+    const [dismissedSessionMilestone, setDismissedSessionMilestone] = useState(false);
+    const [shareData, setShareData] = useState<ShareCardOptions | null>(null);
+
+    // Monitor for 1000 word session milestone
+    useEffect(() => {
+        if (sessionWordCount >= 1000 && !sessionMilestoneReached) {
+            setSessionMilestoneReached(true);
+        }
+    }, [sessionWordCount, sessionMilestoneReached]);
 
     // Sprint 44: Active editor ref — updated when a SceneEditor gains focus
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1229,6 +1268,7 @@ export default function WritingEditor() {
             className={`${styles.editorWrapper} ${isTypewriterMode ? styles.typewriterActive : ''} ${atmosphereReducedMotion ? styles.reducedMotion : ''}`}
             style={{
                 '--editor-width': `${editorWidth}px`,
+                '--base-font-size': `${baseFontSize}px`,
             } as React.CSSProperties}
         >
 
@@ -1255,7 +1295,9 @@ export default function WritingEditor() {
                     saveState={saveState}
                     isStandardFormat={isStandardFormat}
                     toggleStandardFormat={toggleStandardFormat}
-                    isCompact={isCompact}
+                    baseFontSize={baseFontSize}
+                    setBaseFontSize={setBaseFontSize}
+                    isCompact={isContextBarCompact}
                 />
             )}
             {!isToolbarVisible && (
@@ -1439,7 +1481,46 @@ export default function WritingEditor() {
                         Exit Focus
                     </button>
                 )}
+
+                {/* Session Milestone Toast */}
+                {sessionMilestoneReached && !dismissedSessionMilestone && (
+                    <div className={styles.sessionMilestoneToast}>
+                        <span className={styles.sessionMilestoneText}>
+                            Great session! <strong>{sessionWordCount.toLocaleString()} words</strong> written. Share your progress?
+                        </span>
+                        <button 
+                            className={styles.sessionShareBtn}
+                            onClick={() => setShareData({
+                                projectName: activeProject?.name || 'MythForge',
+                                projectCoverColor: activeProject?.coverColor,
+                                milestoneType: 'session',
+                                milestoneValue: sessionWordCount,
+                                milestoneLabel: 'Words written'
+                            })}
+                        >
+                            Share
+                        </button>
+                        <button 
+                            className={styles.sessionCloseBtn}
+                            onClick={() => setDismissedSessionMilestone(true)}
+                        >
+                            ×
+                        </button>
+                    </div>
+                )}
             </div>
+
+            {/* Share Modal */}
+            <ShareModal 
+                isOpen={!!shareData} 
+                onClose={() => setShareData(null)} 
+                shareData={shareData || {
+                    projectName: '',
+                    milestoneType: 'session',
+                    milestoneValue: 0,
+                    milestoneLabel: ''
+                }}
+            />
         </div>
     );
 }

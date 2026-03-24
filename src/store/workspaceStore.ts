@@ -348,6 +348,12 @@ interface WorkspaceState {
      */
     writingMode: 'novel' | 'screenplay' | 'markdown' | 'poetry';
 
+    /**
+     * Base font size for the writing editor in pixels.
+     * Default 20px (approx 1.25rem).
+     */
+    baseFontSize: number;
+
     // --- ACTIONS ---
     addProject: (project: Project) => void;
     updateProject: (id: string, updates: Partial<Omit<Project, 'id' | 'createdAt'>>) => void;
@@ -473,6 +479,9 @@ interface WorkspaceState {
 
     /** Sets the global fallback writing mode */
     setWritingMode: (mode: 'novel' | 'screenplay' | 'markdown' | 'poetry') => void;
+
+    /** Sets the base font size for the editor */
+    setBaseFontSize: (size: number) => void;
 
     /**
      * Submits partial updates to the AI provider configuration.
@@ -661,6 +670,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             atmosphereReducedMotion: false,
             isToolbarVisible: true,
             writingMode: 'novel',
+            baseFontSize: 20,
 
             // Sprint 47A: Goals system initial state
             writingDays: [],
@@ -1001,6 +1011,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             setWritingMode: (mode) =>
                 set(() => ({ writingMode: mode })),
 
+            setBaseFontSize: (size) =>
+                set(() => ({ baseFontSize: size })),
+
             // =============================================
             // Sprint 47A: Goals System Actions
             // =============================================
@@ -1155,6 +1168,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 isToolbarVisible: state.isToolbarVisible,
                 writingMode: state.writingMode,
                 navPanelWidth: state.navPanelWidth,
+                baseFontSize: state.baseFontSize,
                 editorMaxWidth: state.editorMaxWidth,
                 cachedEditorMaxWidth: state.cachedEditorMaxWidth,
                 isStandardFormat: state.isStandardFormat,
@@ -1255,6 +1269,11 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     if (!(state as unknown as Record<string, unknown>).writingDays) state.writingDays = [];
                     if (!(state as unknown as Record<string, unknown>).earnedBadges) state.earnedBadges = [];
                     if (!(state as unknown as Record<string, unknown>).xpEvents) state.xpEvents = [];
+
+                    // Hydration/Migration: Ensure baseFontSize is initialized
+                    if (typeof (state as unknown as Record<string, unknown>).baseFontSize !== 'number') {
+                        state.baseFontSize = 20;
+                    }
 
                     // Recompute streak on rehydration (streakState is never persisted)
                     state.streakState = computeStreakFromDays(state.writingDays ?? []);

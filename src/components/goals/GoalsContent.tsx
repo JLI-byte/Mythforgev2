@@ -15,6 +15,8 @@
 import React, { useState, useMemo } from 'react';
 import styles from './GoalsContent.module.css';
 import { useWorkspaceStore, BADGE_DEFINITIONS } from '@/store/workspaceStore';
+import ShareModal from '../ui/ShareModal';
+import { ShareCardOptions } from '@/lib/shareCard';
 
 // =============================================
 // Helper: get today's date as YYYY-MM-DD
@@ -151,6 +153,9 @@ export default function GoalsContent() {
     const [selectedTarget, setSelectedTarget] = useState(200);
     const targetOptions = [100, 200, 500, 1000];
 
+    // Share Modal state
+    const [shareData, setShareData] = useState<ShareCardOptions | null>(null);
+
     // Today's stats
     const today = getToday();
     const todayDays = writingDays.filter(d => d.date === today);
@@ -267,6 +272,20 @@ export default function GoalsContent() {
                     <div className={styles.streakDisplay}>
                         <span className={styles.streakNumber}>
                             🔥 {streakState.currentStreak}
+                            {streakState.currentStreak >= 7 && (
+                                <button 
+                                    className={styles.streakShare}
+                                    title="Share Streak"
+                                    onClick={() => setShareData({
+                                        projectName: 'MythForge',
+                                        milestoneType: 'streak',
+                                        milestoneValue: streakState.currentStreak,
+                                        milestoneLabel: 'Day Streak'
+                                    })}
+                                >
+                                    ↗
+                                </button>
+                            )}
                         </span>
                         <span className={styles.streakLabel}>day streak</span>
                     </div>
@@ -342,7 +361,31 @@ export default function GoalsContent() {
                         return (
                             <div key={project.id} className={styles.projectCard}>
                                 <div className={styles.projectTop}>
-                                    <span className={styles.projectName}>{project.name}</span>
+                                    <span className={styles.projectName}>
+                                        {project.name}
+                                        {(() => {
+                                            const milestones = [100000, 75000, 50000, 25000, 10000];
+                                            const highest = milestones.find(m => projectWords >= m);
+                                            if (highest) {
+                                                return (
+                                                    <span 
+                                                        className={styles.projectShareIcon} 
+                                                        title="Share Milestone"
+                                                        onClick={() => setShareData({
+                                                            projectName: project.name,
+                                                            projectCoverColor: project.coverColor,
+                                                            milestoneType: 'word_count',
+                                                            milestoneValue: highest,
+                                                            milestoneLabel: 'Words Written'
+                                                        })}
+                                                    >
+                                                        ↗
+                                                    </span>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
+                                    </span>
                                     <span className={styles.projectWords}>
                                         {projectWords.toLocaleString()} words
                                     </span>
@@ -389,6 +432,20 @@ export default function GoalsContent() {
                             {isEarned && (
                                 <span className={styles.badgeCheck}>✓</span>
                             )}
+                            {isEarned && (
+                                <button 
+                                    className={styles.badgeShare}
+                                    title="Share Achievement"
+                                    onClick={() => setShareData({
+                                        projectName: 'MythForge',
+                                        milestoneType: 'badge',
+                                        milestoneValue: badge.name,
+                                        milestoneLabel: 'Achievement Earned'
+                                    })}
+                                >
+                                    ↗
+                                </button>
+                            )}
                             <span className={`${styles.badgeIcon} ${!isEarned ? styles.badgeIconLocked : ''}`}>
                                 {badge.icon}
                             </span>
@@ -400,6 +457,18 @@ export default function GoalsContent() {
                     );
                 })}
             </div>
+
+            {/* Share Modal */}
+            <ShareModal 
+                isOpen={!!shareData} 
+                onClose={() => setShareData(null)} 
+                shareData={shareData || {
+                    projectName: '',
+                    milestoneType: 'word_count',
+                    milestoneValue: 0,
+                    milestoneLabel: ''
+                }}
+            />
         </div>
     );
 }
