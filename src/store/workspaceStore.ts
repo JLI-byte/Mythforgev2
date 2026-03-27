@@ -66,6 +66,35 @@ export interface Scene {
     atmosphereId?: string;
 }
 
+export type BlockType = 'richtext' | 'image' | 'statrow' | 'divider' | 'quote' | 'timeline';
+
+export interface ArticleBlock {
+  id: string;
+  type: BlockType;
+  x: number;
+  y: number;
+  content: { [key: string]: any };
+  /** Sprint 50: optional block dimensions set by resize handle — undefined = full width / auto height */
+  width?: number;
+  height?: number;
+  // Per-type content shapes:
+  // richtext: { html: string }
+  // image: { src: string; caption?: string }
+  // statrow: { label: string; value: string }
+  // divider: {}
+  // quote: { text: string; attribution?: string }
+  // timeline: { events: { date: string; label: string; detail?: string }[] }
+}
+
+export interface ArticleTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  // Block structure only — content is stripped, only type is preserved
+  blocks: Array<{ type: BlockType }>;
+  createdAt: Date;
+}
+
 /**
  * A central mapping for EntityType strings to their human-readable UI labels.
  * This should be used anywhere an entity type is rendered to the user.
@@ -101,6 +130,10 @@ export interface Entity {
     subcategory?: string;
     /** Sprint 46A: flexible key/value pairs for custom metadata */
     customFields?: { label: string; value: string }[];
+    /** Sprint 48A: block-based article content */
+    articleBlocks?: ArticleBlock[];
+    /** Sprint 52: TipTap HTML content for the Document-mode article editor — separate from articleBlocks */
+    articleDoc?: string;
 }
 
 /**
@@ -202,7 +235,8 @@ interface XPEvent {
     earnedAt: Date;
 }
 
-interface WorkspaceState {
+export interface WorkspaceState {
+    workspaceMode: 'writing' | 'document' | 'worldBible';
     // --- STATE FIELDS ---
     projects: Project[];
     documents: Document[];
@@ -354,6 +388,19 @@ interface WorkspaceState {
      */
     baseFontSize: number;
 
+    /**
+     * The ID of the entity whose article is currently focused in the center column.
+     * This is NOT persisted (resets to null on reload).
+     */
+    focusedArticleEntityId: string | null;
+
+    /**
+     * User-saved block layout templates for the Article Canvas.
+     */
+    articleTemplates: ArticleTemplate[];
+
+    setWorkspaceMode: (mode: 'writing' | 'document' | 'worldBible') => void;
+
     // --- ACTIONS ---
     addProject: (project: Project) => void;
     updateProject: (id: string, updates: Partial<Omit<Project, 'id' | 'createdAt'>>) => void;
@@ -460,6 +507,12 @@ interface WorkspaceState {
     /** Sprint 46A: Update an entity's image URL */
     updateEntityImage: (id: string, imageUrl: string) => void;
 
+    /** Sprint 48A: update entity article blocks */
+    updateEntityArticle: (entityId: string, blocks: ArticleBlock[]) => void;
+
+    /** Sprint 52: Save TipTap document HTML for an entity */
+    updateEntityDoc: (entityId: string, html: string) => void;
+
     /**
      * Updates the internal tracking flag verifying persistence load.
      */
@@ -482,6 +535,18 @@ interface WorkspaceState {
 
     /** Sets the base font size for the editor */
     setBaseFontSize: (size: number) => void;
+
+    /** Sets the focused article entity for the center column view */
+    setFocusedArticleEntity: (entityId: string | null) => void;
+
+    /** Save current article blocks as a structural template */
+    saveArticleTemplate: (name: string, description: string | undefined, sourceBlocks: ArticleBlock[]) => void;
+    
+    /** Delete a template from the library */
+    deleteArticleTemplate: (templateId: string) => void;
+    
+    /** Apply a template's structure to an entity's article */
+    applyArticleTemplate: (entityId: string, templateId: string) => void;
 
     /**
      * Submits partial updates to the AI provider configuration.
@@ -671,6 +736,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             isToolbarVisible: true,
             writingMode: 'novel',
             baseFontSize: 20,
+            focusedArticleEntityId: null,
+            articleTemplates: [],
+            workspaceMode: 'writing',
 
             // Sprint 47A: Goals system initial state
             writingDays: [],
@@ -790,6 +858,24 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         ),
                     };
                 }),
+
+            updateEntityArticle: (entityId, blocks) =>
+                set((state) => {
+                    logger.info('Entity article updated:', entityId);
+                    return {
+                        entities: state.entities.map(e =>
+                            e.id === entityId ? { ...e, articleBlocks: blocks, updatedAt: new Date() } : e
+                        ),
+                    };
+                }),
+
+            /** Sprint 52: Save TipTap document HTML for an entity */
+            updateEntityDoc: (entityId, html) =>
+                set((state) => ({
+                    entities: state.entities.map(e =>
+                        e.id === entityId ? { ...e, articleDoc: html, updatedAt: new Date() } : e
+                    ),
+                })),
 
             deleteScene: (id) =>
                 set((state) => {
@@ -1138,6 +1224,54 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     if (newBadges.length === 0) return {};
                     return { earnedBadges: [...state.earnedBadges, ...newBadges] };
                 }),
+
+            setFocusedArticleEntity: (id) =>
+                set(() => ({ focusedArticleEntityId: id })),
+
+            setWorkspaceMode: (mode) => set((state) => ({ 
+                workspaceMode: mode, 
+                // Only clear focused entity when going back to writing mode
+                focusedArticleEntityId: mode === 'writing' ? null : state.focusedArticleEntityId 
+            })),
+
+            saveArticleTemplate: (name, description, sourceBlocks) =>
+                set((state) => {
+                    const strippedBlocks = sourceBlocks.map(block => ({
+                        type: block.type
+                    }));
+
+                    const newTemplate: ArticleTemplate = {
+                        id: crypto.randomUUID(),
+                        name,
+                        description,
+                        blocks: strippedBlocks,
+                        createdAt: new Date()
+                    };
+
+                    return { articleTemplates: [...state.articleTemplates, newTemplate] };
+                }),
+
+            deleteArticleTemplate: (id) =>
+                set((state) => ({
+                    articleTemplates: state.articleTemplates.filter(t => t.id !== id)
+                })),
+
+            applyArticleTemplate: (entityId, templateId) => {
+                const state = get();
+                const template = state.articleTemplates.find(t => t.id === templateId);
+                if (!template) return;
+
+                // Generate fresh blocks from the template structure
+                const freshBlocks: ArticleBlock[] = template.blocks.map((tBlock, idx) => ({
+                    id: crypto.randomUUID(),
+                    type: tBlock.type,
+                    x: 40,
+                    y: 40 + (idx * 220),
+                    content: tBlock.type === 'timeline' ? { events: [] } : {}
+                }));
+
+                state.updateEntityArticle(entityId, freshBlocks);
+            },
         }),
         {
             name: 'mythforge-workspace',
@@ -1177,6 +1311,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 goalConfig: state.goalConfig,
                 earnedBadges: state.earnedBadges,
                 xpEvents: state.xpEvents,
+                // articleTemplates IS persisted, focusedArticleEntityId IS NOT (implicitly omitted here)
+                articleTemplates: state.articleTemplates,
+                workspaceMode: state.workspaceMode,
             }),
 
             // Track hydration phases allowing components to await persistence payload dynamically
@@ -1277,6 +1414,29 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
                     // Recompute streak on rehydration (streakState is never persisted)
                     state.streakState = computeStreakFromDays(state.writingDays ?? []);
+
+                    // Hydration/Migration: Ensure workspaceMode is initialized correctly for Sprint 53
+                    if (!['writing', 'document', 'worldBible'].includes((state as any).workspaceMode)) {
+                        state.workspaceMode = 'writing';
+                    }
+
+                    // Sprint 51: Migrate articleBlocks from order-based to x/y coordinate system
+                    state.entities = state.entities.map(e => {
+                        if (!e.articleBlocks || e.articleBlocks.length === 0) return e;
+                        const needsMigration = e.articleBlocks.some(
+                            (b: any) => typeof b.order === 'number' && typeof b.x !== 'number'
+                        );
+                        if (!needsMigration) return e;
+                        return {
+                            ...e,
+                            articleBlocks: e.articleBlocks.map((b: any, idx: number) => ({
+                                ...b,
+                                x: 40,
+                                y: 40 + (idx * 220),
+                                order: undefined, // remove legacy field
+                            }))
+                        };
+                    });
 
                     state.setHasHydrated(true);
                 }

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import styles from './page.module.css';
 import WritingEditor from '@/components/editor/WritingEditor';
+import ArticleGridEditor from '@/components/world/ArticleGridEditor';
 import { NavigationPanel } from '@/components/editor/NavigationPanel';
 import { WorldBiblePanel } from '@/components/layout/WorldBiblePanel';
 import { ConsistencyPanel } from '@/components/layout/ConsistencyPanel';
@@ -15,6 +16,8 @@ import HoverPreview from '@/components/world/HoverPreview';
 import { EntityDetailPanel } from '@/components/world/EntityDetailPanel';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
+import ModeBar from '@/components/navigation/ModeBar';
+import WorldBibleCenter from '@/components/world/WorldBibleCenter';
 import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 import { ResizeDivider } from '@/components/ui/ResizeDivider';
 
@@ -49,6 +52,7 @@ export default function Home() {
   const setTabRailWidth = useWorkspaceStore((state) => state.setTabRailWidth);
   const panelWidth = useWorkspaceStore((state) => state.panelWidth);
   const setPanelWidth = useWorkspaceStore((state) => state.setPanelWidth);
+  const focusedArticleEntityId = useWorkspaceStore((state) => state.focusedArticleEntityId);
 
   const editorRef = React.useRef<HTMLDivElement>(null);
 
@@ -57,6 +61,7 @@ export default function Home() {
   const editorMaxWidth = useWorkspaceStore((state) => state.editorMaxWidth);
   const setEditorMaxWidth = useWorkspaceStore((state) => state.setEditorMaxWidth);
   const isStandardFormat = useWorkspaceStore((state) => state.isStandardFormat);
+  const workspaceMode = useWorkspaceStore((state) => state.workspaceMode);
 
   const [isResizing, setIsResizing] = useState(false);
 
@@ -97,6 +102,34 @@ export default function Home() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [setCommandPaletteOpen, isFullscreen, toggleFullscreen, isFocusMode, toggleFocusMode]);
 
+  // Sync Zustand theme preference to DOM data-theme attribute — drives CSS variable switching in globals.css
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'system') {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+
+      // Also listen for OS theme changes at runtime
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      const handler = (e: MediaQueryListEvent) => {
+        if (useWorkspaceStore.getState().theme === 'system') {
+          root.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+        }
+      };
+      mq.addEventListener('change', handler);
+      return () => mq.removeEventListener('change', handler);
+    } else {
+      root.setAttribute('data-theme', theme);
+    }
+  }, [theme]);
+
+  // Auto-close the right panel when an article is opened in the center column — prevents the panel from obscuring ArticleReadView
+  useEffect(() => {
+    if (focusedArticleEntityId) {
+      setActivePanel(null);
+    }
+  }, [focusedArticleEntityId]);
+
   const activeScene = scenes.find((s) => s.id === activeSceneId);
   const currentAtmosphere = atmospheresEnabled && activeScene?.atmosphereId
     ? ATMOSPHERE_PRESETS.find(a => a.id === activeScene.atmosphereId) || customAtmospheres.find(a => a.id === activeScene.atmosphereId)
@@ -117,17 +150,19 @@ export default function Home() {
         transition: 'padding-right 280ms ease-in-out',
       }}
     >
-      <div 
-        className={styles.navigationPanelContainer}
-        style={{ 
-          width: navPanelWidth,
-          transition: isResizing ? 'none' : undefined
-        }}
-      >
-        <NavigationPanel />
-      </div>
+      {workspaceMode !== 'document' && (
+        <div 
+          className={styles.navigationPanelContainer}
+          style={{ 
+            width: navPanelWidth,
+            transition: isResizing ? 'none' : undefined
+          }}
+        >
+          <NavigationPanel />
+        </div>
+      )}
 
-      {!isFocusMode && !isFullscreen && (
+      {workspaceMode !== 'document' && !isFocusMode && !isFullscreen && (
         <ResizeDivider 
           onResize={handleNavResize} 
           onResizeStart={() => setIsResizing(true)}
@@ -142,17 +177,23 @@ export default function Home() {
         style={{
           ...(!atmosphereGlobalOverlay ? atmosphereStyleVars : undefined),
           transition: isResizing ? 'none' : undefined,
-          width: isStandardFormat ? 720 : (editorMaxWidth || undefined),
-          flex: (!isStandardFormat && !editorMaxWidth) ? 1 : '0 0 auto'
+          width: workspaceMode === 'document' ? undefined : (isStandardFormat ? 720 : (editorMaxWidth || undefined)),
+          flex: workspaceMode === 'document' ? 1 : ((!isStandardFormat && !editorMaxWidth) ? 1 : '0 0 auto')
         }}
       >
+        <ModeBar />
         <div
           className={styles.editorScrollContainer}
           data-scroll="main"
           style={{ writingMode: 'horizontal-tb' }}
         >
-          {/* Key by document so editor remounts on chapter change, not scene click */}
-          <WritingEditor key={activeDocumentId} />
+          {workspaceMode === 'document' && focusedArticleEntityId ? (
+            <ArticleGridEditor entityId={focusedArticleEntityId} />
+          ) : workspaceMode === 'document' ? (
+            <WorldBibleCenter />
+          ) : (
+            <WritingEditor key={activeDocumentId} />
+          )}
         </div>
       </div>
 

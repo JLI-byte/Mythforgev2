@@ -201,6 +201,7 @@ function SceneEditor({ scene, index, onEditorFocus, containerRef }: { scene: Sce
     const atmosphereTypographyEnabled = useWorkspaceStore((state) => state.atmosphereTypographyEnabled);
 
     const setSessionWordCount = useWorkspaceStore((state) => state.setSessionWordCount);
+    const recordWritingSession = useWorkspaceStore((state) => state.recordWritingSession);
     const projects = useWorkspaceStore((state) => state.projects);
     const activeProject = projects.find(p => p.id === activeProjectId);
     const writingMode = activeProject?.writingMode || 'novel';
@@ -212,6 +213,10 @@ function SceneEditor({ scene, index, onEditorFocus, containerRef }: { scene: Sce
 
     const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     const initialWordCountRef = React.useRef<number | null>(null);
+
+    // Sprint 47C: Track session start time and word baseline for Goals reporting
+    const sessionStartRef = React.useRef<number>(Date.now());
+    const sessionBaselineRef = React.useRef<number | null>(null);
 
     useEffect(() => {
         openInlineCreatorRef.current = openInlineCreator;
@@ -384,6 +389,23 @@ function SceneEditor({ scene, index, onEditorFocus, containerRef }: { scene: Sce
                     updateScene(scene.id, { content: '', wordCount: 0 });
                 } else {
                     updateScene(scene.id, { content: rawContent, wordCount: count });
+                }
+
+                // Sprint 47C: Goals system word count integration
+                // Wire word count into Goals system via recordWritingSession
+                // Initialize baseline on first write within a session
+                if (sessionBaselineRef.current === null) {
+                    sessionBaselineRef.current = initialWordCountRef.current ?? count;
+                    sessionStartRef.current = Date.now();
+                }
+
+                const wordsAddedThisSession = Math.max(count - (sessionBaselineRef.current ?? count), 0);
+                if (wordsAddedThisSession > 0 && activeProjectId) {
+                    const minutesSpent = Math.max(Math.round((Date.now() - sessionStartRef.current) / 60000), 1);
+                    recordWritingSession(activeProjectId, wordsAddedThisSession, minutesSpent);
+                    // Reset baseline so next call captures only the new delta
+                    sessionBaselineRef.current = count;
+                    sessionStartRef.current = Date.now();
                 }
 
                 // Task 1: Dispatch custom event so the autosave indicator in WritingEditor fires

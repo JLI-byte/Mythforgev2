@@ -1,0 +1,274 @@
+.browserContainer {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  background: var(--background);
+}
+
+.browserInner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 32px;
+}
+
+.browserHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.browserTitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.browserCount {
+  font-size: 0.9rem;
+  color: var(--muted, #888);
+}
+
+.browserHint {
+  font-size: 0.8rem;
+  color: var(--muted, #888);
+  margin-left: auto;
+}
+
+/* --- LEVEL 1: Category Grid --- */
+
+.categoryGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.categoryCard {
+  position: relative;
+  height: 160px;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.categoryCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+}
+
+.categoryOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.85) 0%,
+    rgba(0,0,0,0.3) 60%,
+    rgba(0,0,0,0.05) 100%
+  );
+}
+
+.categoryContent {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 20px 24px;
+  gap: 4px;
+}
+
+.categoryIcon {
+  font-size: 1.8rem;
+  margin-bottom: 4px;
+  line-height: 1;
+}
+
+.categoryLabel {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.categoryDescription {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.7);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.categoryCount {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.5);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.addCategoryCard {
+  height: 160px;
+  border-radius: 14px;
+  border: 2px dashed var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: default;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.addCategoryCard:hover {
+  opacity: 0.7;
+}
+
+.addCategoryIcon {
+  font-size: 2rem;
+  color: var(--muted, #888);
+  line-height: 1;
+}
+
+.addCategoryLabel {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--muted, #888);
+}
+
+.addCategoryHint {
+  font-size: 0.8rem;
+  color: var(--muted, #888);
+}
+
+/* --- LEVEL 2: Entity Grid --- */
+
+.backBtn {
+  background: none;
+  border: none;
+  color: var(--muted, #888);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.15s;
+}
+
+.backBtn:hover {
+  color: var(--foreground);
+}
+
+.levelHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.levelIcon {
+  font-size: 1.6rem;
+}
+
+.levelTitle {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.entityGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.entityCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.entityCard:hover {
+  background: var(--background);
+  border-color: var(--accent);
+}
+
+.cardThumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.cardColorBlock {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.cardName {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.articleBadge {
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.noArticleBadge {
+  font-size: 0.75rem;
+  color: var(--muted, #888);
+}
+
+/* --- Shared --- */
+
+.emptyState {
+  text-align: center;
+  padding: 60px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.emptyText {
+  font-size: 1rem;
+  color: var(--foreground);
+  font-weight: 600;
+  margin: 0;
+}
+
+.emptyHint {
+  font-size: 0.85rem;
+  color: var(--muted, #888);
+  margin: 0;
+}

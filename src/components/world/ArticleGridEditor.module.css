@@ -1,0 +1,460 @@
+/* ArticleGridEditor — Sprint 57: Freeform Canvas */
+
+.editorRoot {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: var(--background);
+}
+
+/* ---- Palette ---- */
+.palette {
+  width: 160px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.paletteHeader {
+  padding: 14px 14px 8px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.paletteTitle {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted, #888);
+}
+
+.paletteHint {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--muted, #888);
+  margin-top: 2px;
+}
+
+.paletteList {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.paletteItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--background);
+  cursor: grab;
+  user-select: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.paletteItem:hover { border-color: var(--accent); background: var(--surface); }
+.paletteItem:active { cursor: grabbing; }
+
+.paletteIcon { font-size: 1rem; flex-shrink: 0; }
+.paletteLabel { font-size: 0.83rem; font-weight: 600; color: var(--foreground); }
+
+/* ---- Canvas viewport (scrollable window) ---- */
+.canvasViewport {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+
+.saveIndicator {
+  position: fixed;
+  top: 52px;
+  right: 88px;
+  font-size: 0.75rem;
+  color: var(--muted, #888);
+  pointer-events: none;
+  z-index: 200;
+}
+
+/* ---- Canvas surface (3000x2000 freeform space) ---- */
+.canvasInner {
+  position: relative;
+  width: 3000px;
+  height: 2000px;
+  background-color: var(--background);
+  /* Dim dot grid — always visible */
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.10) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+}
+
+/* Bright dot spotlight near mouse cursor */
+.canvasInner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.65) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+  -webkit-mask-image: radial-gradient(
+    circle 180px at var(--mouse-x, -9999px) var(--mouse-y, -9999px),
+    black 0%, black 40%, transparent 100%
+  );
+  mask-image: radial-gradient(
+    circle 180px at var(--mouse-x, -9999px) var(--mouse-y, -9999px),
+    black 0%, black 40%, transparent 100%
+  );
+}
+
+/* ---- Widget wrapper (absolute positioned) ---- */
+.widgetWrapper {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  z-index: 1;
+}
+
+.widgetWrapper:hover {
+  border-color: rgba(255,255,255,0.15);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+/* Title / drag bar */
+.widgetDragBar {
+  height: 28px;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  cursor: move;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.widgetIcon {
+  font-size: 0.78rem;
+  color: var(--muted, #888);
+}
+
+.widgetDelete {
+  background: none;
+  border: none;
+  color: var(--muted, #888);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: color 0.15s;
+}
+
+.widgetDelete:hover { color: #ff4d4d; }
+
+/* Widget content area */
+.widgetContent {
+  flex: 1;
+  overflow: auto;
+  padding: 12px;
+}
+
+/* ---- Resize handles (8 directions) ---- */
+.resizeHandle {
+  position: absolute;
+  z-index: 10;
+  background: transparent;
+}
+
+/* Edge handles */
+.resize_n  { top: -4px; left: 8px; right: 8px; height: 8px; cursor: ns-resize; }
+.resize_s  { bottom: -4px; left: 8px; right: 8px; height: 8px; cursor: ns-resize; }
+.resize_e  { right: -4px; top: 8px; bottom: 8px; width: 8px; cursor: ew-resize; }
+.resize_w  { left: -4px; top: 8px; bottom: 8px; width: 8px; cursor: ew-resize; }
+
+/* Corner handles */
+.resize_ne { top: -4px; right: -4px; width: 12px; height: 12px; cursor: ne-resize; }
+.resize_nw { top: -4px; left: -4px; width: 12px; height: 12px; cursor: nw-resize; }
+.resize_se { bottom: -4px; right: -4px; width: 12px; height: 12px; cursor: se-resize; }
+.resize_sw { bottom: -4px; left: -4px; width: 12px; height: 12px; cursor: sw-resize; }
+
+/* Show accent color on hover for all handles */
+.resizeHandle:hover { background: var(--accent); opacity: 0.7; border-radius: 2px; }
+
+/* ---- Widget-specific content styles — verbatim from Sprint 55 ---- */
+.textWidget {
+  min-height: 60px;
+  outline: none;
+  color: var(--foreground);
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.textWidget:empty::before {
+  content: attr(data-placeholder);
+  color: var(--muted, #888);
+  font-style: italic;
+  pointer-events: none;
+}
+
+.headingWidget {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.headingLevel {
+  background: var(--background);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.headingText {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--foreground);
+  font-size: 1.4rem;
+  font-weight: 700;
+  outline: none;
+}
+
+.imageWidget {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.imagePreview {
+  width: 100%;
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+  border-radius: 6px;
+  display: block;
+  transition: height 0.05s;
+}
+
+.imageUpload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px;
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--muted, #888);
+  font-size: 0.9rem;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.imageUpload:hover {
+  border-color: var(--accent);
+  color: var(--foreground);
+}
+
+.captionInput {
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted, #888);
+  font-size: 0.82rem;
+  text-align: center;
+  padding: 4px;
+  outline: none;
+  width: 100%;
+}
+
+.dividerWidget {
+  border: none;
+  height: 2px;
+  background: var(--border);
+  margin: 10px 0;
+  border-radius: 2px;
+}
+
+.quoteWidget {
+  border-left: 3px solid var(--accent);
+  padding-left: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quoteText {
+  background: none;
+  border: none;
+  color: var(--foreground);
+  font-size: 1.05rem;
+  font-style: italic;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+  width: 100%;
+  min-height: 60px;
+  font-family: inherit;
+}
+
+.quoteAttribution {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted, #888);
+  font-size: 0.85rem;
+}
+
+.quoteSource {
+  background: none;
+  border: none;
+  color: var(--muted, #888);
+  font-size: 0.85rem;
+  outline: none;
+  flex: 1;
+}
+
+.statBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.statRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statLabel {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted, #888);
+  font-size: 0.85rem;
+  padding: 3px 0;
+  outline: none;
+  text-align: right;
+}
+
+.statValue {
+  flex: 1.5;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--foreground);
+  font-size: 0.85rem;
+  padding: 3px 0;
+  outline: none;
+}
+
+.statDelete {
+  background: none;
+  border: none;
+  color: var(--muted, #888);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 2px;
+  opacity: 0.5;
+}
+
+.statDelete:hover { opacity: 1; color: #ff4d4d; }
+
+.statAdd {
+  background: none;
+  border: 1px dashed var(--border);
+  color: var(--muted, #888);
+  font-size: 0.8rem;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: all 0.15s;
+}
+
+.statAdd:hover {
+  border-color: var(--accent);
+  color: var(--foreground);
+}
+
+.tableWidget {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.table th, .table td {
+  border: 1px solid var(--border);
+  padding: 0;
+}
+
+.table th {
+  background: var(--background);
+}
+
+.tableCell {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 8px 10px;
+  color: var(--foreground);
+  outline: none;
+  font-family: inherit;
+  font-size: 0.88rem;
+}
+
+.table th .tableCell {
+  font-weight: 600;
+}
+
+.tableAddRow {
+  background: none;
+  border: 1px dashed var(--border);
+  color: var(--muted, #888);
+  font-size: 0.8rem;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: all 0.15s;
+}
+
+.tableAddRow:hover {
+  border-color: var(--accent);
+  color: var(--foreground);
+}

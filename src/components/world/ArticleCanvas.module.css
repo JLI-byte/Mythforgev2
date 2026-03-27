@@ -1,0 +1,576 @@
+/* ============================================
+   ArticleCanvas — Sprint 51: Freeform Canvas
+   ============================================ */
+
+/* Full-screen overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background-color: var(--background);
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(1.02); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ---- Header ---- */
+.header {
+  height: 56px;
+  padding: 0 20px;
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.headerLeft {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.entityLabel {
+  color: var(--foreground);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.headerCenter {
+  display: flex;
+  align-items: center;
+}
+
+.headerRight {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Mode toggle */
+.modeToggle {
+  display: flex;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 3px;
+}
+
+.modeBtn {
+  background: none;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 6px;
+  color: var(--muted, #888);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.modeBtn:hover { color: var(--foreground); }
+
+.modeBtnActive {
+  background: var(--surface);
+  color: var(--foreground);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+
+/* Header buttons */
+.templateBtn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: filter 0.2s;
+  white-space: nowrap;
+}
+
+.templateBtn:hover { filter: brightness(1.15); }
+
+.addBlockBtn {
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: filter 0.2s;
+  white-space: nowrap;
+}
+
+.addBlockBtn:hover { filter: brightness(1.1); }
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: var(--muted, #888);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  line-height: 1;
+}
+
+.closeBtn:hover { color: var(--foreground); }
+
+/* Add block popover */
+.popoverWrapper { position: relative; }
+
+.popover {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 170px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  z-index: 1001;
+}
+
+.popover button {
+  background: none;
+  border: none;
+  color: var(--foreground);
+  text-align: left;
+  padding: 9px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.15s;
+}
+
+.popover button:hover { background-color: rgba(255,255,255,0.05); }
+
+/* ---- Body row: tool panel + canvas viewport ---- */
+.bodyRow {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ---- Canvas viewport (scrollable window into the canvas surface) ---- */
+.canvasViewport {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+
+/* ---- Canvas surface: the 2D freeform space ---- */
+.canvasArea {
+  position: relative;
+  width: 3000px;
+  height: 2000px;
+  background-color: var(--background);
+  /* Base dim dot grid — always visible */
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.10) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+}
+
+/* Bright dot layer near mouse — uses same dot grid at higher opacity,
+   masked by a radial-gradient so only dots near cursor show through */
+.canvasArea::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.65) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+  -webkit-mask-image: radial-gradient(
+    circle 180px at var(--mouse-x, -9999px) var(--mouse-y, -9999px),
+    black 0%,
+    black 40%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    circle 180px at var(--mouse-x, -9999px) var(--mouse-y, -9999px),
+    black 0%,
+    black 40%,
+    transparent 100%
+  );
+}
+
+/* ---- Block wrapper: absolute positioned on canvas ---- */
+.blockWrapper {
+  position: absolute;
+  z-index: 1;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.blockWrapper:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Drag bar at top of each block (Builder mode) */
+.blockDragBar {
+  height: 28px;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  border-radius: 10px 10px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  cursor: move;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.blockDragBarIcon {
+  font-size: 0.78rem;
+  color: var(--muted, #888);
+  letter-spacing: 0.05em;
+}
+
+.blockDragBarDelete {
+  background: none;
+  border: none;
+  color: var(--muted, #888);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.blockDragBarDelete:hover {
+  color: #ff4d4d;
+  background-color: rgba(255, 77, 77, 0.1);
+}
+
+/* Block content area */
+.blockContent {
+  padding: 14px;
+  flex: 1;
+  overflow: auto;
+}
+
+/* Resize handle */
+.resizeHandle {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--border);
+  border-radius: 3px;
+  cursor: se-resize;
+  opacity: 0;
+  transition: opacity 0.15s, background-color 0.15s;
+  z-index: 10;
+}
+
+.blockWrapper:hover .resizeHandle { opacity: 1; }
+.resizeHandle:hover { background-color: var(--accent); }
+
+/* Writer mode: no drag chrome */
+.blockWrapperWriter {
+  cursor: default;
+}
+
+/* ---- Rich text block ---- */
+.richtextBlock {
+  min-height: 60px;
+  outline: none;
+  color: var(--foreground);
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.richtextBlock[contentEditable]:empty::before {
+  content: attr(data-placeholder);
+  color: var(--muted, #888);
+  font-style: italic;
+  pointer-events: none;
+}
+
+/* ---- Image block ---- */
+.imageBlock { width: 100%; }
+
+.imagePresenter {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.imagePresenter img {
+  width: 100%;
+  max-height: 50vh;
+  object-fit: contain;
+  border-radius: 5px;
+  background-color: rgba(0,0,0,0.2);
+}
+
+.captionInput {
+  background: none;
+  border: none;
+  border-bottom: 1px solid transparent;
+  color: var(--muted, #888);
+  font-size: 0.88rem;
+  text-align: center;
+  padding: 3px;
+  outline: none;
+}
+
+.captionInput:focus { border-color: var(--accent); }
+
+.uploadPlaceholder {
+  width: 100%;
+  height: 100px;
+  border: 2px dashed var(--border);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted, #888);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.uploadPlaceholder:hover {
+  border-color: var(--accent);
+  color: var(--foreground);
+}
+
+/* ---- Stat row block ---- */
+.statrowBlock {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+}
+
+.statLabel {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--muted, #888);
+  font-weight: 500;
+  text-align: right;
+  outline: none;
+  font-size: 0.9rem;
+}
+
+.statSeparator {
+  width: 1px;
+  height: 20px;
+  background-color: var(--border);
+}
+
+.statValue {
+  flex: 2;
+  background: none;
+  border: none;
+  color: var(--foreground);
+  outline: none;
+  font-size: 0.9rem;
+}
+
+/* ---- Divider block ---- */
+.dividerBlock { padding: 16px 0; }
+
+.dividerBlock hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border), transparent);
+}
+
+/* ---- Quote block ---- */
+.quoteBlock {
+  padding-left: 18px;
+  border-left: 3px solid var(--accent);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quoteText {
+  background: none;
+  border: none;
+  color: var(--foreground);
+  font-size: 1.1rem;
+  font-style: italic;
+  line-height: 1.5;
+  width: 100%;
+  resize: none;
+  outline: none;
+  font-family: inherit;
+  min-height: 60px;
+}
+
+.quoteAttributionLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted, #888);
+}
+
+.emDash { font-size: 0.9rem; }
+
+.quoteSource {
+  background: none;
+  border: none;
+  color: var(--muted, #888);
+  font-size: 0.9rem;
+  outline: none;
+  width: 100%;
+}
+
+/* ---- Timeline block ---- */
+.timelineBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.timelineEvent {
+  display: flex;
+  gap: 16px;
+}
+
+.timelineSidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.timelineDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--accent);
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+
+.timelineLine {
+  width: 2px;
+  flex-grow: 1;
+  background-color: var(--border);
+  opacity: 0.4;
+}
+
+.timelineEvent:last-child .timelineLine { display: none; }
+
+.eventContent {
+  flex-grow: 1;
+  padding-bottom: 24px;
+}
+
+.eventPrimary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.eventDate {
+  background: var(--surface);
+  border: none;
+  padding: 3px 7px;
+  border-radius: 4px;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.85rem;
+  width: 90px;
+}
+
+.eventLabel {
+  flex-grow: 1;
+  background: none;
+  border: none;
+  color: var(--foreground);
+  font-weight: 600;
+  font-size: 1rem;
+  outline: none;
+}
+
+.removeEventBtn {
+  background: none;
+  border: none;
+  color: var(--muted, #888);
+  font-size: 1.1rem;
+  cursor: pointer;
+  opacity: 0.5;
+}
+
+.removeEventBtn:hover { opacity: 1; }
+
+.eventDetail {
+  background: none;
+  border: none;
+  color: var(--muted, #888);
+  width: 100%;
+  resize: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.addEventBtn {
+  width: fit-content;
+  background: none;
+  border: 1px dashed var(--border);
+  color: var(--muted, #888);
+  padding: 6px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.addEventBtn:hover {
+  border-color: var(--accent);
+  color: var(--foreground);
+}

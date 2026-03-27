@@ -288,3 +288,163 @@
     border-color: var(--foreground);
     color: var(--foreground);
 }
+
+/* --- Article Viewer --- */
+.articleViewer {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 1rem 0;
+}
+
+.viewerBlock {
+    width: 100%;
+}
+
+.viewerRichtext {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--foreground);
+}
+
+.viewerRichtext p {
+    margin-bottom: 1rem;
+}
+
+.viewerFigure {
+    margin: 0;
+    width: 100%;
+}
+
+.viewerFigure img {
+    width: 100%;
+    border-radius: 8px;
+    background-color: var(--surface);
+}
+
+.viewerCaption {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 0.5rem;
+    font-style: italic;
+}
+
+.viewerStatRow {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.viewerStatLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    min-width: 100px;
+    text-align: right;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.viewerStatValue {
+    font-size: 0.85rem;
+    color: var(--foreground);
+}
+
+.viewerDivider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+    margin: 1rem 0;
+}
+
+.viewerQuote {
+    padding-left: 1.5rem;
+    border-left: 3px solid var(--accent);
+    margin: 1rem 0;
+}
+
+.viewerQuote p {
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--foreground);
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+.viewerQuote cite {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-style: normal;
+}
+
+/* Viewer Timeline */
+.viewerTimeline {
+    display: flex;
+    flex-direction: column;
+}
+
+.viewerTimelineEvent {
+    display: flex;
+    gap: 1rem;
+}
+
+.viewerTimelineSidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 12px;
+}
+
+.viewerTimelineDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--accent);
+    margin-top: 0.5rem;
+    flex-shrink: 0;
+}
+
+.viewerTimelineLine {
+    width: 2px;
+    flex-grow: 1;
+    background-color: var(--border);
+    opacity: 0.5;
+}
+
+.viewerTimelineEvent:last-child .viewerTimelineLine {
+    display: none;
+}
+
+.viewerEventContent {
+    flex-grow: 1;
+    padding-bottom: 2rem;
+}
+
+.viewerEventHeader {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+.viewerEventDate {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+}
+
+.viewerEventLabel {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.viewerEventDetail {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.6;
+}

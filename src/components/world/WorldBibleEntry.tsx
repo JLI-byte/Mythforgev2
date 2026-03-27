@@ -11,6 +11,7 @@ import React, { useState, useRef } from 'react';
 import styles from './WorldBibleEntry.module.css';
 import { useWorkspaceStore, EntityType } from '@/store/workspaceStore';
 import { WBView, SUBCATEGORY_LABELS, SUBCATEGORY_ICONS } from '@/lib/worldBibleNav';
+import { ArticleViewer } from './ArticleViewerShared';
 
 interface WorldBibleEntryProps {
     entityId: string;
@@ -32,6 +33,7 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
     const updateEntityImage = useWorkspaceStore(state => state.updateEntityImage);
     const updateEntity = useWorkspaceStore(state => state.updateEntity);
     const setSelectedEntity = useWorkspaceStore(state => state.setSelectedEntity);
+    const setFocusedArticleEntity = useWorkspaceStore(state => state.setFocusedArticleEntity);
 
     // Custom field inline form state
     const [addingField, setAddingField] = useState(false);
@@ -137,6 +139,14 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
                     >
                         ✏️
                     </button>
+                    {/* Opens article in the center column — editing happens in ArticleReadView, not inline */}
+                    <button
+                        className={styles.heroBtn}
+                        onClick={() => setFocusedArticleEntity(entity.id)}
+                        title={entity.articleBlocks && entity.articleBlocks.length > 0 ? "Edit article in main view" : "Open article editor in main view"}
+                    >
+                        📄 {entity.articleBlocks && entity.articleBlocks.length > 0 ? "Edit Article" : "Write Article"}
+                    </button>
                 </div>
             </div>
 
@@ -165,16 +175,24 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
                     {typeLabel}
                 </span>
 
-                {/* Description */}
-                {entity.description ? (
-                    <p className={styles.description}>{entity.description}</p>
+                {/* --- Conditional Content: Article vs Summary --- */}
+                {entity.articleBlocks && entity.articleBlocks.length > 0 ? (
+                    <ArticleViewer blocks={entity.articleBlocks} />
                 ) : (
-                    <p className={styles.descriptionEmpty}>No description yet</p>
+                    <>
+                        {/* Description */}
+                        {entity.description ? (
+                            <p className={styles.description}>{entity.description}</p>
+                        ) : (
+                            <p className={styles.descriptionEmpty}>No description yet</p>
+                        )}
+                    </>
                 )}
             </div>
 
-            {/* === Custom fields section === */}
-            <div className={styles.fieldsSection}>
+            {/* --- Custom fields section (only if no article) --- */}
+            {(!entity.articleBlocks || entity.articleBlocks.length === 0) && (
+                <div className={styles.fieldsSection}>
                 <div className={styles.fieldsHeader}>
                     <span className={styles.fieldsTitle}>Details</span>
                     <button
@@ -223,6 +241,7 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
                     </div>
                 )}
             </div>
+            )}
 
             {/* === Metadata footer === */}
             <footer className={styles.metaFooter}>
@@ -231,6 +250,9 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
                     <span>Updated {entity.updatedAt.toLocaleDateString()}</span>
                 )}
             </footer>
+
         </div>
     );
 }
+
+

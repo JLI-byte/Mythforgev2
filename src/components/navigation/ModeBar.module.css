@@ -1,0 +1,41 @@
+.modeBar {
+    width: 100%;
+    height: 40px;
+    background-color: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+.modeBtn {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted, #888);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.15s ease;
+}
+
+.modeBtn:hover {
+    color: var(--text-primary);
+}
+
+.modeBtnActive {
+    color: var(--text-primary);
+    font-weight: 600;
+    border-bottom-color: var(--accent);
+}
+
+.modeBtnDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
