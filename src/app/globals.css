@@ -33,23 +33,35 @@ option {
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #171717;
-    --background-rgb: 23, 23, 23;
-    --surface: #1e1e1e;
-    --foreground: #ededed;
-    --accent: #3a86ff;
-    --border: #333333;
+    --background: #0e0e0e;
+    --background-rgb: 14, 14, 14;
+    --surface: #131313;
+    --surface-mid: #1c1b1b;
+    --surface-high: #201f1f;
+    --foreground: #e5e2e1;
+    --accent: #d0bcff;
+    --accent-dim: #a078ff;
+    --border: rgba(255, 255, 255, 0.08);
+    --muted: #958ea0;
+    --secondary: #4cd7f6;
+    --tertiary: #ffb869;
   }
 }
 
 /* Manual overrides driven by JS toggle */
 :root[data-theme="dark"] {
-  --background: #171717;
-  --background-rgb: 23, 23, 23;
-  --surface: #1e1e1e;
-  --foreground: #ededed;
-  --border: #333333;
-  --accent: #3a86ff;
+  --background: #0e0e0e;
+  --background-rgb: 14, 14, 14;
+  --surface: #131313;
+  --surface-mid: #1c1b1b;
+  --surface-high: #201f1f;
+  --foreground: #e5e2e1;
+  --accent: #d0bcff;
+  --accent-dim: #a078ff;
+  --border: rgba(255, 255, 255, 0.08);
+  --muted: #958ea0;
+  --secondary: #4cd7f6;
+  --tertiary: #ffb869;
 }
 
 :root[data-theme="light"] {
@@ -109,6 +121,22 @@ a:hover {
 }
 [data-scroll="main"]::-webkit-scrollbar-thumb:hover {
     background: var(--accent);
+}
+
+/* ISO-Hub scrollbar style — 4px, near-black track, dark thumb */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #0e0e0e;
+}
+::-webkit-scrollbar-thumb {
+  background: #353534;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
 }
 
 /* FindReplace ProseMirror decorations — applied by custom FindReplace extension */

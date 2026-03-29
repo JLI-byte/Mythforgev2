@@ -1,0 +1,361 @@
+/* NewWorldModal — ISO-Hub design language */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal {
+  background: #131313;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #353534 transparent;
+}
+
+.modal::-webkit-scrollbar { width: 4px; }
+.modal::-webkit-scrollbar-track { background: transparent; }
+.modal::-webkit-scrollbar-thumb { background: #353534; border-radius: 10px; }
+
+/* ─── Header ─── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.stepIndicator {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.stepDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #353534;
+  transition: background 0.2s, width 0.2s;
+}
+
+.stepDotActive {
+  background: #d0bcff;
+  width: 20px;
+  border-radius: 3px;
+}
+
+.stepDotDone {
+  background: #a078ff;
+}
+
+.headerTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #e5e2e1;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: #958ea0;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.closeBtn:hover {
+  color: #e5e2e1;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ─── Step body ─── */
+.stepBody {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabel {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #958ea0;
+}
+
+.optional {
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 0.65rem;
+  color: #353534;
+}
+
+/* ─── Text inputs ─── */
+.textInput {
+  background: #1c1b1b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  color: #e5e2e1;
+  outline: none;
+  width: 100%;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.textInput::placeholder { color: #353534; }
+.textInput:focus { border-color: #d0bcff; }
+
+.textarea {
+  background: #1c1b1b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  color: #e5e2e1;
+  outline: none;
+  width: 100%;
+  font-family: inherit;
+  box-sizing: border-box;
+  resize: none;
+  line-height: 1.5;
+  transition: border-color 0.15s;
+}
+
+.textarea::placeholder { color: #353534; }
+.textarea:focus { border-color: #d0bcff; }
+
+.charCount {
+  font-size: 0.65rem;
+  color: #353534;
+  text-align: right;
+}
+
+/* ─── Genre grid ─── */
+.genreGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.genreCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 10px 10px;
+  background: #1c1b1b;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.genreCard:hover {
+  border-color: rgba(208, 188, 255, 0.3);
+  background: #201f1f;
+}
+
+.genreCardActive {
+  border-color: #d0bcff;
+  background: rgba(208, 188, 255, 0.06);
+}
+
+.genreIcon { font-size: 1.2rem; }
+.genreLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #e5e2e1;
+}
+.genreDesc {
+  font-size: 0.65rem;
+  color: #958ea0;
+  line-height: 1.3;
+}
+
+/* ─── Pill selector ─── */
+.pillRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  flex: 1;
+  min-width: 60px;
+  padding: 7px 10px;
+  background: #1c1b1b;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #958ea0;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.pill:hover {
+  color: #e5e2e1;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.pillActive {
+  background: #a078ff;
+  border-color: #a078ff;
+  color: white;
+}
+
+/* ─── Writing mode grid ─── */
+.modeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.modeCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px;
+  background: #1c1b1b;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.modeCard:hover { border-color: rgba(208, 188, 255, 0.3); }
+.modeCardActive {
+  border-color: #d0bcff;
+  background: rgba(208, 188, 255, 0.06);
+}
+
+.modeIcon { font-size: 1.1rem; }
+.modeLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #e5e2e1;
+}
+.modeDesc {
+  font-size: 0.65rem;
+  color: #958ea0;
+  line-height: 1.3;
+}
+
+/* ─── Cover preview ─── */
+.coverPreview {
+  width: 64px;
+  height: 90px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.coverInitials {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ─── Footer ─── */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.backBtn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #958ea0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.backBtn:hover {
+  color: #e5e2e1;
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.nextBtn {
+  background: #a078ff;
+  border: none;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+
+.nextBtn:hover:not(:disabled) { opacity: 0.85; }
+.nextBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.createBtn {
+  background: #a078ff;
+  border: none;
+  color: white;
+  padding: 8px 24px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+
+.createBtn:hover:not(:disabled) { opacity: 0.85; }
+.createBtn:disabled { opacity: 0.3; cursor: not-allowed; }

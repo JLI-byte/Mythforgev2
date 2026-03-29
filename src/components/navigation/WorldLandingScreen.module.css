@@ -1,0 +1,563 @@
+/* WorldLandingScreen — Sprint 60: ISO-Hub design language */
+
+.screen {
+  position: fixed;
+  inset: 0;
+  background-color: #0e0e0e;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+/* Dot grid background */
+.dotGrid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Subtle lavender radial glow from center */
+.glowOrb {
+  position: absolute;
+  top: 50%;
+  left: 40%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(208, 188, 255, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Main layout — 40/60 split */
+.layout {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- LEFT PANEL ---- */
+.leftPanel {
+  width: 40%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 56px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.wordmarkIcon {
+  width: 36px;
+  height: 36px;
+  background: #a078ff;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: white;
+  letter-spacing: -0.05em;
+  flex-shrink: 0;
+}
+
+.wordmarkTitle {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #d0bcff;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.wordmarkSub {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #958ea0;
+  margin-top: 3px;
+}
+
+.tagline {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  padding: 48px 0;
+}
+
+.taglineHeading {
+  font-size: 3.2rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: #e5e2e1;
+  margin: 0;
+}
+
+.taglineSub {
+  font-size: 0.95rem;
+  color: #958ea0;
+  line-height: 1.65;
+  max-width: 320px;
+  margin: 0;
+}
+
+.ctaGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ctaPrimary {
+  background: #a078ff;
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  font-family: inherit;
+  text-align: left;
+}
+
+.ctaPrimary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.ctaPrimary:active {
+  transform: translateY(0);
+}
+
+.ctaPrimary:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ctaHint {
+  font-size: 0.72rem;
+  color: #958ea0;
+  margin: 0;
+}
+
+.leftFooter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.68rem;
+  color: #353534;
+}
+
+.isoLabel {
+  color: #958ea0;
+  font-weight: 600;
+}
+
+/* ---- RIGHT PANEL ---- */
+.rightPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 48px 56px;
+  overflow-y: auto;
+}
+
+.rightPanel::-webkit-scrollbar { width: 4px; }
+.rightPanel::-webkit-scrollbar-track { background: transparent; }
+.rightPanel::-webkit-scrollbar-thumb { background: #353534; border-radius: 10px; }
+
+.rightHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.rightLabel {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #958ea0;
+}
+
+.rightCount {
+  font-size: 0.68rem;
+  color: #353534;
+  font-weight: 600;
+}
+
+/* World card grid — responsive columns */
+.worldGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+/* Project world card */
+.worldCard {
+  background: #131313;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-left: 4px solid;
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  width: 100%;
+}
+
+.worldCard:hover {
+  background: #201f1f;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.cardCover {
+  width: 40px;
+  height: 56px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.cardInitials {
+  font-size: 1rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.02em;
+}
+
+.cardBody {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cardName {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #e5e2e1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: #958ea0;
+}
+
+.cardDot {
+  color: #353534;
+}
+
+.cardDate {
+  font-size: 0.68rem;
+  color: #353534;
+}
+
+.cardArrow {
+  font-size: 1rem;
+  color: #353534;
+  flex-shrink: 0;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.worldCard:hover .cardArrow {
+  color: #d0bcff;
+  transform: translateX(3px);
+}
+
+/* Add new world card — dashed empty state */
+.addWorldCard {
+  background: rgba(19, 19, 19, 0.3);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 96px;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.addWorldCard:hover {
+  border-color: rgba(208, 188, 255, 0.3);
+}
+
+.addWorldIcon {
+  font-size: 1.5rem;
+  color: #353534;
+  transition: color 0.15s;
+}
+
+.addWorldCard:hover .addWorldIcon {
+  color: #d0bcff;
+}
+
+.addWorldLabel {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #353534;
+  transition: color 0.15s;
+}
+
+.addWorldCard:hover .addWorldLabel {
+  color: #958ea0;
+}
+
+/* ---- World section (collapsible world container) ---- */
+.worldSection {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.worldHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(160, 120, 255, 0.06);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.worldHeader:hover {
+  background: rgba(160, 120, 255, 0.1);
+}
+
+.worldHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.worldChevron {
+  font-size: 0.7rem;
+  color: #958ea0;
+  width: 12px;
+  flex-shrink: 0;
+}
+
+.worldDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #a078ff;
+  flex-shrink: 0;
+}
+
+.worldName {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #d0bcff;
+}
+
+.worldCount {
+  font-size: 0.65rem;
+  color: #353534;
+  font-weight: 600;
+}
+
+.worldBody {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ---- Type group (collapsible project type) ---- */
+.typeGroup {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.typeGroupHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.typeGroupHeader:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.typeChevron {
+  font-size: 0.65rem;
+  color: #353534;
+  width: 10px;
+  flex-shrink: 0;
+}
+
+.typeLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #958ea0;
+  flex: 1;
+  text-align: left;
+}
+
+.typeCount {
+  font-size: 0.65rem;
+  color: #353534;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* Project list inside type group */
+.projectList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 4px 8px 20px;
+}
+
+/* Compact project card inside the tree */
+.worldCard {
+  background: #131313;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-left: 3px solid;
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  width: 100%;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.worldCard:hover {
+  background: #1c1b1b;
+  transform: translateX(2px);
+}
+
+.cardCover {
+  width: 28px;
+  height: 38px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.cardInitials {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.cardBody {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cardName {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #e5e2e1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.68rem;
+  color: #958ea0;
+}
+
+.cardDot {
+  color: #353534;
+}
+
+.cardDate {
+  font-size: 0.65rem;
+  color: #353534;
+}
+
+.cardArrow {
+  font-size: 0.85rem;
+  color: #353534;
+  flex-shrink: 0;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.worldCard:hover .cardArrow {
+  color: #d0bcff;
+  transform: translateX(2px);
+}
+
+.emptyHint {
+  font-size: 0.75rem;
+  color: #353534;
+  padding: 8px 12px;
+  margin: 0;
+}

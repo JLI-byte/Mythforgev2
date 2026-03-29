@@ -1,8 +1,8 @@
 .navigationPanel {
     width: 100%;
     flex-shrink: 0;
-    border-right: 1px solid var(--border);
-    background-color: var(--surface);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: var(--background);
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -44,9 +44,10 @@
 }
 
 .projectTitle {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--foreground);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.02em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -84,16 +85,16 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 0.75rem;
-    border-bottom: 1px solid var(--border);
+    padding: 12px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .title {
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.68rem;
+    font-weight: 700;
     color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.12em;
     margin: 0;
 }
 
@@ -137,7 +138,7 @@
 }
 
 .chapterList::-webkit-scrollbar-thumb {
-    background: var(--border);
+    background: #353534;
     border-radius: 99px;
 }
 
@@ -153,15 +154,15 @@
     cursor: pointer;
     transition: background-color 0.2s;
     position: relative;
-    border-left: 3px solid transparent;
+    border-left: 2px solid transparent;
 }
 
 .chapterItem:hover {
-    background-color: var(--background);
+    background-color: var(--surface-mid, #1c1b1b);
 }
 
 .chapterItem.active {
-    background-color: var(--background);
+    background-color: var(--surface-mid, #1c1b1b);
     border-left-color: var(--accent);
 }
 
@@ -239,11 +240,11 @@
 }
 
 .sceneItem:hover {
-    background-color: var(--background);
+    background-color: var(--surface-mid, #1c1b1b);
 }
 
 .sceneItem.active {
-    background-color: var(--background);
+    background-color: var(--surface-mid, #1c1b1b);
     border-left-color: var(--accent);
 }
 
@@ -450,8 +451,8 @@
 }
 
 .projectCover {
-    width: 80px;
-    height: 112px;
+    width: 60px;
+    height: 84px;
     border-radius: 4px;
     flex-shrink: 0;
     display: flex;
@@ -462,11 +463,102 @@
 }
 
 .projectCoverInitials {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.9);
     letter-spacing: 0.05em;
     pointer-events: none;
+}
+
+/* Home button — returns to world selector */
+.homeButton {
+  background: none;
+  border: none;
+  color: var(--muted, #958ea0);
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 1rem;
+  line-height: 1;
+  transition: color 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.homeButton:hover {
+  color: var(--accent, #d0bcff);
+  background: var(--surface-mid, #1c1b1b);
+}
+
+.footerSpacer {
+  flex: 1;
+}
+
+.panelFooter {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border-top: 1px solid var(--border);
+    gap: 0.5rem;
+    background: var(--background);
+    flex-shrink: 0;
+}
+
+.iconButton {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.iconButton:hover {
+    background-color: var(--surface);
+    color: var(--foreground);
+}
+
+.seedButton, .betaButton {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    height: 28px;
+}
+
+.seedButton {
+    width: 28px;
+    font-size: 16px;
+    color: #aaa;
+}
+
+.seedButton:hover {
+    background: rgba(208, 188, 255, 0.1);
+    border-color: #d0bcff;
+    color: #d0bcff;
+}
+
+.betaButton {
+    padding: 0 8px;
+    font-size: 10px;
+    font-weight: 800;
+    color: #d0bcff;
+    letter-spacing: 0.5px;
+}
+
+.betaButton:hover {
+    background: #d0bcff;
+    color: #000;
+    border-color: #d0bcff;
 }
 
 .projectMeta {
@@ -474,9 +566,10 @@
 }
 
 .projectTitle {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--foreground);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.02em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

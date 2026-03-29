@@ -10,6 +10,7 @@ import SettingsModal from '../ui/SettingsModal';
 import { ProjectSwitcher } from '@/components/navigation/ProjectSwitcher';
 import { NewProjectModal } from '../ui/NewProjectModal';
 import { exportAsMarkdown, exportAsDocx, exportWorldBible } from '@/lib/export';
+import { seedBetaData } from '@/lib/betaSeedData';
 
 /**
  * NavigationPanel UI Component
@@ -28,6 +29,7 @@ export function NavigationPanel() {
     const entities = useWorkspaceStore(state => state.entities);
 
     const setActiveProject = useWorkspaceStore(state => state.setActiveProject);
+    const setActivePanel = useWorkspaceStore(state => state.setActivePanel);
 
     const addDocument = useWorkspaceStore(state => state.addDocument);
     const updateDocument = useWorkspaceStore(state => state.updateDocument);
@@ -141,6 +143,12 @@ export function NavigationPanel() {
         if (!activeProject) return;
         const projectEntities = entities.filter(e => e.projectId === activeProject.id);
         exportWorldBible(projectEntities, activeProject.name);
+    };
+
+    const handleSeed = () => {
+        if (confirm('Inject "The Shattered Realm" example world? (Will not overwrite existing data)')) {
+            seedBetaData(useWorkspaceStore.getState());
+        }
     };
 
     const handleAddChapter = () => {
@@ -608,6 +616,31 @@ export function NavigationPanel() {
             <div style={{ flexShrink: 0, marginTop: 'auto' }}>
                 {/* Panel footer — settings and theme toggle, pinned to bottom of nav */}
                 <div className={styles.panelFooter}>
+                    <button
+                        className={styles.homeButton}
+                        onClick={() => setActiveProject(null)}
+                        title="Back to worlds"
+                    >
+                        ⌂
+                    </button>
+                    <div className={styles.footerSpacer} />
+                    
+                    <button
+                        className={styles.seedButton}
+                        onClick={handleSeed}
+                        title="Seed Beta Data"
+                    >
+                        ⚗
+                    </button>
+
+                    <button
+                        className={styles.betaButton}
+                        onClick={() => setActivePanel('beta')}
+                        title="Submit Feedback"
+                    >
+                        <span>BETA</span>
+                    </button>
+
                     <button
                         className={styles.iconButton}
                         onClick={() => setShowSettings(true)}

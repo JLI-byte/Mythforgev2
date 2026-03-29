@@ -11,7 +11,7 @@ import React, { useState, useRef } from 'react';
 import styles from './WorldBibleEntry.module.css';
 import { useWorkspaceStore, EntityType } from '@/store/workspaceStore';
 import { WBView, SUBCATEGORY_LABELS, SUBCATEGORY_ICONS } from '@/lib/worldBibleNav';
-import { ArticleViewer } from './ArticleViewerShared';
+import { ArticleViewer, ArticleTabViewer } from './ArticleViewerShared';
 
 interface WorldBibleEntryProps {
     entityId: string;
@@ -176,7 +176,9 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
                 </span>
 
                 {/* --- Conditional Content: Article vs Summary --- */}
-                {entity.articleBlocks && entity.articleBlocks.length > 0 ? (
+                {entity.articleDoc ? (
+                    <ArticleTabViewer articleDoc={entity.articleDoc} />
+                ) : entity.articleBlocks && entity.articleBlocks.length > 0 ? (
                     <ArticleViewer blocks={entity.articleBlocks} />
                 ) : (
                     <>

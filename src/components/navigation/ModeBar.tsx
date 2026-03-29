@@ -19,13 +19,13 @@ export default function ModeBar() {
         className={`${styles.modeBtn} ${workspaceMode === 'writing' ? styles.modeBtnActive : ''}`}
         onClick={() => setWorkspaceMode('writing')}
       >
-        ✍️ Writing
+        Writing
       </button>
       <button
         className={`${styles.modeBtn} ${workspaceMode === 'document' ? styles.modeBtnActive : ''}`}
         onClick={() => setWorkspaceMode('document')}
       >
-        🌍 World Bible
+        World Bible
       </button>
     </nav>
   );

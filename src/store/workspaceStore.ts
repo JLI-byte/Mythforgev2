@@ -33,12 +33,41 @@ export interface Atmosphere {
 export type EntityType = 'character' | 'location' | 'faction' | 'artifact' | 'lore';
 export type ThemeMode = 'light' | 'dark' | 'system';
 
+export type WorldGenre =
+  | 'fantasy'
+  | 'sci-fi'
+  | 'real-world'
+  | 'alternate-history'
+  | 'horror'
+  | 'contemporary';
+
+export interface WorldTone {
+  darkness: 'dark' | 'balanced' | 'light';
+  scale: 'grounded' | 'balanced' | 'epic';
+  humor: 'serious' | 'balanced' | 'comedic';
+}
+
+export interface World {
+  id: string;
+  name: string;
+  genre: WorldGenre;
+  tone: WorldTone;
+  logline: string;
+  magicExists: boolean;
+  techLevel: 'primitive' | 'medieval' | 'modern' | 'futuristic' | 'post-apocalyptic';
+  timePeriod: string;
+  coverColor: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
 export interface Project {
     id: string;
     name: string;
-    writingMode: 'novel' | 'screenplay' | 'markdown' | 'poetry';
+    writingMode: 'novel' | 'screenplay' | 'markdown' | 'poetry' | 'real-world';
     coverColor: string;
     coverImageUrl?: string;
+    worldId?: string;
     createdAt: Date;
     updatedAt?: Date;
 }
@@ -238,6 +267,7 @@ interface XPEvent {
 export interface WorkspaceState {
     workspaceMode: 'writing' | 'document' | 'worldBible';
     // --- STATE FIELDS ---
+    worlds: World[];
     projects: Project[];
     documents: Document[];
     scenes: Scene[];
@@ -282,6 +312,12 @@ export interface WorkspaceState {
      * Whether the Global Command Palette is currently active.
      */
     isCommandPaletteOpen: boolean;
+
+    /**
+     * The currently active side panel.
+     * Sprint 62: Centralized for beta feedback and future integrations.
+     */
+    activePanel: 'worldBible' | 'consistency' | 'writingGoals' | 'writingStats' | 'aiChatbot' | 'music' | 'beta' | null;
 
     /**
      * Typewriter mode keeps the active line centered in the viewport.
@@ -402,6 +438,7 @@ export interface WorkspaceState {
     setWorkspaceMode: (mode: 'writing' | 'document' | 'worldBible') => void;
 
     // --- ACTIONS ---
+    addWorld: (world: World) => void;
     addProject: (project: Project) => void;
     updateProject: (id: string, updates: Partial<Omit<Project, 'id' | 'createdAt'>>) => void;
     deleteProject: (id: string) => void;
@@ -469,6 +506,9 @@ export interface WorkspaceState {
      * Toggles Focus mode (hides sidebar and right rail).
      */
     toggleFocusMode: () => void;
+
+    /** Sets the currently active side panel */
+    setActivePanel: (activePanel: 'worldBible' | 'consistency' | 'writingGoals' | 'writingStats' | 'aiChatbot' | 'music' | 'beta' | null) => void;
 
     /** Spotify Controls */
     setSpotifyUrl: (url: string | null) => void;
@@ -693,6 +733,7 @@ function checkBadges(streak: StreakState, earned: EarnedBadge[]): EarnedBadge[] 
 export const useWorkspaceStore = create<WorkspaceState>()(
     persist(
         (set, get) => ({
+            worlds: [],
             projects: [],
             documents: [],
             scenes: [],
@@ -707,6 +748,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             isSidebarOpen: true,
             isCommandPaletteOpen: false,
             isTypewriterMode: false,
+            activePanel: null,
             isFullscreen: false,
             isFocusMode: false,
             spotifyUrl: null,
@@ -759,6 +801,12 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             },
             earnedBadges: [],
             xpEvents: [],
+
+            addWorld: (world) =>
+                set((state) => {
+                    logger.info('World added:', world.name);
+                    return { worlds: [...state.worlds, world] };
+                }),
 
             addProject: (project) =>
                 set((state) => {
@@ -961,6 +1009,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             toggleFullscreen: () =>
                 set((state) => ({ isFullscreen: !state.isFullscreen })),
+
+            setActivePanel: (activePanel) =>
+                set(() => ({ activePanel })),
 
             toggleFocusMode: () =>
                 set((state) => ({ isFocusMode: !state.isFocusMode })),
@@ -1279,6 +1330,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             // Only persist core data — transient UI flags (hover state, open modals, etc.) reset on reload.
             // SECURITY NOTE: apiKey is stored in localStorage. Never log or expose this value.
             partialize: (state) => ({
+                worlds: state.worlds,
                 projects: state.projects,
                 documents: state.documents,
                 scenes: state.scenes,
@@ -1437,6 +1489,11 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                             }))
                         };
                     });
+
+                    // Initialize worlds for existing users
+                    if (!(state as unknown as Record<string, unknown>).worlds) {
+                        state.worlds = [];
+                    }
 
                     state.setHasHydrated(true);
                 }

@@ -28,12 +28,65 @@ export interface GridWidget {
   content: Record<string, any>;
 }
 
+export interface ArticleTab {
+  id: string;
+  name: string;
+  widgets: GridWidget[];
+}
+
+/**
+ * Parse entity.articleDoc into ArticleTab[].
+ * Handles three legacy formats:
+ *   A) ArticleTab[] — already new format, return as-is
+ *   B) GridWidget[] — Sprint 55-58 format, wrap in Main tab
+ *   C) Anything else (HTML string, null, invalid) — return empty Main tab
+ */
+export function parseArticleTabs(raw: string | undefined): ArticleTab[] {
+  const defaultMain = (): ArticleTab[] => [{
+    id: crypto.randomUUID(),
+    name: 'Main',
+    widgets: [],
+  }];
+
+  if (!raw) return defaultMain();
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || parsed.length === 0) return defaultMain();
+
+    // Detect ArticleTab[] — first element has a 'widgets' array and a 'name' string
+    if (
+      typeof parsed[0].name === 'string' &&
+      Array.isArray(parsed[0].widgets)
+    ) {
+      return parsed as ArticleTab[];
+    }
+
+    // Detect GridWidget[] — first element has x, y, width, height
+    if (
+      typeof parsed[0].x === 'number' &&
+      typeof parsed[0].y === 'number'
+    ) {
+      return [{
+        id: crypto.randomUUID(),
+        name: 'Main',
+        widgets: parsed as GridWidget[],
+      }];
+    }
+
+    return defaultMain();
+  } catch {
+    return defaultMain();
+  }
+}
+
 type ResizeDirection = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
 
 const CANVAS_WIDTH = 3000;
 const CANVAS_HEIGHT = 2000;
 const MIN_WIDTH = 120;
 const MIN_HEIGHT = 60;
+const ACTIVE_ZONE_HEIGHT = 1200; // ~1.2x typical panel viewport height at 1080p
 
 /** Default dimensions per widget type */
 const DEFAULT_DIMS: Record<WidgetType, { width: number; height: number }> = {
@@ -73,14 +126,7 @@ function getDefaultContent(type: WidgetType): Record<string, any> {
   }
 }
 
-function parseWidgets(raw: string | undefined): GridWidget[] {
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) return parsed as GridWidget[];
-    return [];
-  } catch { return []; }
-}
+
 
 function updateWidgetContent(widgets: GridWidget[], id: string, content: Record<string, any>): GridWidget[] {
   return widgets.map(w => w.id === id ? { ...w, content: { ...w.content, ...content } } : w);
@@ -95,32 +141,65 @@ function deleteWidgetById(widgets: GridWidget[], id: string): GridWidget[] {
 // ============================================================
 
 export default function ArticleGridEditor({ entityId }: { entityId: string }) {
+  const panelWidth = useWorkspaceStore(state => state.panelWidth);
   const entities = useWorkspaceStore(state => state.entities);
   const updateEntityDoc = useWorkspaceStore(state => state.updateEntityDoc);
   const entity = entities.find(e => e.id === entityId);
 
-  const [widgets, setWidgets] = useState<GridWidget[]>(() => parseWidgets(entity?.articleDoc));
-  const [livePositions, setLivePositions] = useState<Record<string, { x: number; y: number; width: number; height: number }>>({});
+  const [tabs, setTabs] = useState<ArticleTab[]>(() => parseArticleTabs(entity?.articleDoc));
+  const [activeTabId, setActiveTabId] = useState<string>(() => parseArticleTabs(entity?.articleDoc)[0].id);
+  const [renamingTabId, setRenamingTabId] = useState<string | null>(null);
+
+  const activeTab = tabs.find(t => t.id === activeTabId) ?? tabs[0];
+  const widgets = activeTab.widgets;
+
+
   const [saveLabel, setSaveLabel] = useState<'idle' | 'saved'>('idle');
 
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const dragCleanup = useRef<(() => void) | null>(null);
   const resizeCleanup = useRef<(() => void) | null>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const clipboardWidgets = useRef<GridWidget[]>([]);
+  const historyStack = useRef<ArticleTab[][]>([]);
 
-  const save = useCallback((ws: GridWidget[]) => {
+  const [zoom, setZoom] = useState(1);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Active zone position — user can drag to reposition the entire article area
+  const [activeZonePos, setActiveZonePos] = useState<{ x: number; y: number }>({ x: 40, y: 40 });
+
+  const save = useCallback((nextTabs: ArticleTab[]) => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      updateEntityDoc(entityId, JSON.stringify(ws));
+      updateEntityDoc(entityId, JSON.stringify(nextTabs));
       setSaveLabel('saved');
       setTimeout(() => setSaveLabel('idle'), 2000);
     }, 400);
   }, [entityId, updateEntityDoc]);
 
-  const applyChange = useCallback((next: GridWidget[]) => {
-    setWidgets(next);
-    save(next);
-  }, [save]);
+  /**
+   * Apply a widget change to the active tab only, then save all tabs.
+   */
+  const applyTabChange = useCallback((nextWidgets: GridWidget[]) => {
+    const nextTabs = tabs.map(t =>
+      t.id === activeTabId ? { ...t, widgets: nextWidgets } : t
+    );
+    setTabs(nextTabs);
+    save(nextTabs);
+  }, [tabs, activeTabId, save]);
+
+  /**
+   * Push current full tabs snapshot to history, then apply widget change.
+   */
+  const applyTabChangeWithHistory = useCallback((nextWidgets: GridWidget[]) => {
+    historyStack.current = [
+      ...historyStack.current.slice(-19),
+      tabs.map(t => ({ ...t, widgets: [...t.widgets] })),
+    ];
+    applyTabChange(nextWidgets);
+  }, [tabs, applyTabChange]);
 
   useEffect(() => {
     return () => {
@@ -131,8 +210,214 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
   }, []);
 
   useEffect(() => {
-    setWidgets(parseWidgets(entity?.articleDoc));
+    const parsed = parseArticleTabs(entity?.articleDoc);
+    setTabs(parsed);
+    setActiveTabId(parsed[0].id);
   }, [entityId]);
+
+  /**
+   * Ctrl+Scroll to zoom. Must use addEventListener with passive:false
+   * because React's onWheel is passive by default and cannot preventDefault.
+   */
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey) return;
+
+      // Only act if the mouse is over the canvas viewport
+      const rect = el.getBoundingClientRect();
+      const inside =
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom;
+
+      if (!inside) return;
+
+      // Prevent browser zoom AND page scroll
+      e.preventDefault();
+      e.stopPropagation();
+
+      setZoom(prev => {
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        return Math.min(2, Math.max(0.25, parseFloat((prev + delta).toFixed(2))));
+      });
+    };
+
+    // Attach to document (not the element) with passive:false so preventDefault works
+    // The bounds check above ensures it only fires when over the canvas
+    document.addEventListener('wheel', handleWheel, { passive: false });
+    return () => document.removeEventListener('wheel', handleWheel);
+  }, []);
+
+  /**
+   * Global keyboard shortcuts for the canvas.
+   * Guard: skip if a text input or contenteditable is focused.
+   */
+  useEffect(() => {
+    const isInputFocused = () => {
+      const el = document.activeElement;
+      if (!el) return false;
+      const tag = el.tagName;
+      return tag === 'INPUT' || tag === 'TEXTAREA' || (el as HTMLElement).isContentEditable;
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const ctrl = e.ctrlKey || e.metaKey;
+
+      // Zoom shortcuts — always active
+      if (ctrl && e.key === '0') {
+        e.preventDefault();
+        setZoom(1);
+        return;
+      }
+      if (ctrl && (e.key === '=' || e.key === '+')) {
+        e.preventDefault();
+        setZoom(prev => Math.min(2, parseFloat((prev + 0.1).toFixed(2))));
+        return;
+      }
+      if (ctrl && e.key === '-') {
+        e.preventDefault();
+        setZoom(prev => Math.max(0.25, parseFloat((prev - 0.1).toFixed(2))));
+        return;
+      }
+
+      // All other shortcuts: skip if text input focused
+      if (isInputFocused()) return;
+
+      if (ctrl && e.key === 'a') {
+        e.preventDefault();
+        setSelectedIds(new Set(widgets.map(w => w.id)));
+        return;
+      }
+
+      if (ctrl && e.key === 'c') {
+        e.preventDefault();
+        clipboardWidgets.current = widgets
+          .filter(w => selectedIds.has(w.id))
+          .map(w => ({ ...w, content: JSON.parse(JSON.stringify(w.content)) }));
+        return;
+      }
+
+      if (ctrl && e.key === 'v') {
+        e.preventDefault();
+        if (clipboardWidgets.current.length === 0) return;
+        const pasted = clipboardWidgets.current.map(w => ({
+          ...w,
+          id: crypto.randomUUID(),
+          x: w.x + 20,
+          y: w.y + 20,
+          content: JSON.parse(JSON.stringify(w.content)),
+        }));
+        const next = [...widgets, ...pasted];
+        applyTabChangeWithHistory(next);
+        setSelectedIds(new Set(pasted.map(p => p.id)));
+        return;
+      }
+
+      if (ctrl && e.key === 'z') {
+        e.preventDefault();
+        if (historyStack.current.length === 0) return;
+        const prevTabs = historyStack.current.pop()!;
+        setTabs(prevTabs);
+        save(prevTabs);
+        setSelectedIds(new Set());
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        setSelectedIds(new Set());
+        return;
+      }
+
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedIds.size > 0) {
+        e.preventDefault();
+        applyTabChangeWithHistory(widgets.filter(w => !selectedIds.has(w.id)));
+        setSelectedIds(new Set());
+        return;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [widgets, selectedIds, tabs, activeTabId, save, applyTabChangeWithHistory]);
+
+  const addTab = () => {
+    const newTab: ArticleTab = {
+      id: crypto.randomUUID(),
+      name: `Tab ${tabs.length + 1}`,
+      widgets: [],
+    };
+    const nextTabs = [...tabs, newTab];
+    setTabs(nextTabs);
+    setActiveTabId(newTab.id);
+    save(nextTabs);
+  };
+
+  const deleteTab = (tabId: string) => {
+    // Cannot delete Main tab (always index 0) or the only tab
+    if (tabs.length === 1 || tabId === tabs[0].id) return;
+    const nextTabs = tabs.filter(t => t.id !== tabId);
+    setTabs(nextTabs);
+    if (activeTabId === tabId) {
+      setActiveTabId(nextTabs[nextTabs.length - 1].id);
+    }
+    save(nextTabs);
+  };
+
+  const renameTab = (tabId: string, newName: string) => {
+    const trimmed = newName.trim() || 'Tab';
+    const nextTabs = tabs.map(t =>
+      t.id === tabId ? { ...t, name: trimmed } : t
+    );
+    setTabs(nextTabs);
+    setRenamingTabId(null);
+    save(nextTabs);
+  };
+
+  /**
+   * Drag the active zone box by its top title bar.
+   * Moves the entire fixed-size active zone rectangle freely around the canvas.
+   */
+  const handleActiveZoneDragStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startMouseX = e.clientX;
+    const startMouseY = e.clientY;
+    const startX = activeZonePos.x;
+    const startY = activeZonePos.y;
+
+    const onMouseMove = (mv: MouseEvent) => {
+      const newX = Math.max(0, Math.min(CANVAS_WIDTH - (panelWidth || 680), startX + (mv.clientX - startMouseX) / zoom));
+      const newY = Math.max(0, Math.min(CANVAS_HEIGHT - ACTIVE_ZONE_HEIGHT, startY + (mv.clientY - startMouseY) / zoom));
+      // Direct DOM update for smooth drag
+      const zone = canvasRef.current?.querySelector('[data-active-zone]') as HTMLElement;
+      if (zone) {
+        zone.style.left = newX + 'px';
+        zone.style.top = newY + 'px';
+      }
+      const overlay = canvasRef.current?.querySelector('[data-scratch-overlay]') as HTMLElement;
+      if (overlay) {
+        overlay.style.setProperty('--az-x', newX + 'px');
+        overlay.style.setProperty('--az-y', newY + 'px');
+        overlay.style.setProperty('--az-w', (panelWidth || 680) + 'px');
+        overlay.style.setProperty('--az-h', ACTIVE_ZONE_HEIGHT + 'px');
+      }
+    };
+
+    const onMouseUp = (up: MouseEvent) => {
+      const newX = Math.max(0, Math.min(CANVAS_WIDTH - (panelWidth || 680), startX + (up.clientX - startMouseX) / zoom));
+      const newY = Math.max(0, Math.min(CANVAS_HEIGHT - ACTIVE_ZONE_HEIGHT, startY + (up.clientY - startMouseY) / zoom));
+      setActiveZonePos({ x: newX, y: newY });
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
 
   if (!entity) return null;
 
@@ -141,8 +426,12 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
    */
   const handleCanvasMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    e.currentTarget.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
-    e.currentTarget.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
+    // Account for zoom: the canvas is scaled, so mouse offset must be divided by zoom
+    // to get the correct position within the unscaled canvas coordinate space
+    const x = (e.clientX - rect.left) / zoom;
+    const y = (e.clientY - rect.top) / zoom;
+    e.currentTarget.style.setProperty('--mouse-x', x + 'px');
+    e.currentTarget.style.setProperty('--mouse-y', y + 'px');
   };
 
   /**
@@ -165,7 +454,7 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
       height: dims.height,
       content: getDefaultContent(type),
     };
-    applyChange([...widgets, newWidget]);
+    applyTabChangeWithHistory([...widgets, newWidget]);
   };
 
   /**
@@ -175,22 +464,37 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
     e.preventDefault();
     e.stopPropagation();
 
+    setSelectedIds(prev => {
+      if (prev.has(widget.id)) return prev;
+      return new Set([widget.id]);
+    });
+
+    const el = document.querySelector(`[data-widget-id="${widget.id}"]`) as HTMLElement;
+    if (!el) return;
+
     const startMouseX = e.clientX;
     const startMouseY = e.clientY;
     const startX = widget.x;
     const startY = widget.y;
 
+    // Lift widget visually
+    el.style.zIndex = '100';
+    el.style.boxShadow = '0 16px 48px rgba(0,0,0,0.6)';
+
     const onMouseMove = (mv: MouseEvent) => {
-      const newX = Math.max(0, Math.min(CANVAS_WIDTH - widget.width, startX + mv.clientX - startMouseX));
-      const newY = Math.max(0, Math.min(CANVAS_HEIGHT - widget.height, startY + mv.clientY - startMouseY));
-      setLivePositions(prev => ({ ...prev, [widget.id]: { x: newX, y: newY, width: widget.width, height: widget.height } }));
+      const newX = Math.max(0, Math.min(CANVAS_WIDTH - widget.width, startX + (mv.clientX - startMouseX) / zoom));
+      const newY = Math.max(0, Math.min(CANVAS_HEIGHT - widget.height, startY + (mv.clientY - startMouseY) / zoom));
+      el.style.left = newX + 'px';
+      el.style.top = newY + 'px';
     };
 
     const onMouseUp = (up: MouseEvent) => {
-      const newX = Math.max(0, Math.min(CANVAS_WIDTH - widget.width, startX + up.clientX - startMouseX));
-      const newY = Math.max(0, Math.min(CANVAS_HEIGHT - widget.height, startY + up.clientY - startMouseY));
-      applyChange(widgets.map(w => w.id === widget.id ? { ...w, x: newX, y: newY } : w));
-      setLivePositions(prev => { const n = { ...prev }; delete n[widget.id]; return n; });
+      const newX = Math.max(0, Math.min(CANVAS_WIDTH - widget.width, startX + (up.clientX - startMouseX) / zoom));
+      const newY = Math.max(0, Math.min(CANVAS_HEIGHT - widget.height, startY + (up.clientY - startMouseY) / zoom));
+      // Reset inline styles — React will re-render with committed values
+      el.style.zIndex = '';
+      el.style.boxShadow = '';
+      applyTabChangeWithHistory(widgets.map(w => w.id === widget.id ? { ...w, x: newX, y: newY } : w));
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
       dragCleanup.current = null;
@@ -212,13 +516,16 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
     e.preventDefault();
     e.stopPropagation();
 
+    const el = document.querySelector(`[data-widget-id="${widget.id}"]`) as HTMLElement;
+    if (!el) return;
+
     const startMouseX = e.clientX;
     const startMouseY = e.clientY;
     const { x: startX, y: startY, width: startW, height: startH } = widget;
 
     const compute = (mx: number, my: number) => {
-      const dx = mx - startMouseX;
-      const dy = my - startMouseY;
+      const dx = (mx - startMouseX) / zoom;
+      const dy = (my - startMouseY) / zoom;
       let x = startX, y = startY, w = startW, h = startH;
 
       if (dir.includes('e')) w = Math.max(MIN_WIDTH, startW + dx);
@@ -233,19 +540,25 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
         y = startY + startH - newH;
         h = newH;
       }
-
       return { x, y, width: w, height: h };
     };
 
     const onMouseMove = (mv: MouseEvent) => {
       const next = compute(mv.clientX, mv.clientY);
-      setLivePositions(prev => ({ ...prev, [widget.id]: next }));
+      el.style.left = next.x + 'px';
+      el.style.top = next.y + 'px';
+      el.style.width = next.width + 'px';
+      el.style.height = next.height + 'px';
     };
 
     const onMouseUp = (up: MouseEvent) => {
       const next = compute(up.clientX, up.clientY);
-      applyChange(widgets.map(w => w.id === widget.id ? { ...w, ...next } : w));
-      setLivePositions(prev => { const n = { ...prev }; delete n[widget.id]; return n; });
+      // Clear inline overrides before React commits
+      el.style.left = '';
+      el.style.top = '';
+      el.style.width = '';
+      el.style.height = '';
+      applyTabChangeWithHistory(widgets.map(w => w.id === widget.id ? { ...w, ...next } : w));
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
       resizeCleanup.current = null;
@@ -285,71 +598,169 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
         </div>
       </aside>
 
-      {/* ---- Canvas viewport ---- */}
-      <div className={styles.canvasViewport}>
-        <div className={styles.saveIndicator}>{saveLabel === 'saved' ? '✓ Saved' : ''}</div>
+      {/* ---- Right column: tabs above canvas ---- */}
+      <div className={styles.canvasColumn}>
+        {/* ---- Tab bar ---- */}
+        <div className={styles.tabBar}>
+          {tabs.map((tab, idx) => (
+            <div
+              key={tab.id}
+              className={`${styles.tab} ${tab.id === activeTabId ? styles.tabActive : ''}`}
+              onClick={() => setActiveTabId(tab.id)}
+              onDoubleClick={() => setRenamingTabId(tab.id)}
+            >
+              {renamingTabId === tab.id ? (
+                <input
+                  className={styles.tabRenameInput}
+                  defaultValue={tab.name}
+                  autoFocus
+                  onBlur={(e) => renameTab(tab.id, e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') renameTab(tab.id, e.currentTarget.value);
+                    if (e.key === 'Escape') setRenamingTabId(null);
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              ) : (
+                <>
+                  <span className={styles.tabName}>{tab.name}</span>
+                  {idx !== 0 && (
+                    <button
+                      className={styles.tabDelete}
+                      onClick={(e) => { e.stopPropagation(); deleteTab(tab.id); }}
+                      title="Delete tab"
+                    >×</button>
+                  )}
+                </>
+              )}
+            </div>
+          ))}
+          <button className={styles.tabAdd} onClick={addTab} title="Add tab">+ Tab</button>
+        </div>
 
-        {/* Canvas surface */}
-        <div
-          ref={canvasRef}
-          className={styles.canvasInner}
-          onMouseMove={handleCanvasMouseMove}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={handleCanvasDrop}
-        >
-          {widgets.map(widget => {
-            const live = livePositions[widget.id];
-            const pos = live ?? { x: widget.x, y: widget.y, width: widget.width, height: widget.height };
-            const isDragging = !!live;
+        {/* ---- Canvas viewport (scrollable window) ---- */}
+        <div ref={viewportRef} className={styles.canvasViewport}>
+          <div className={styles.saveIndicator}>{saveLabel === 'saved' ? '✓ Saved' : ''}</div>
 
-            return (
+          {/* Canvas surface */}
+          <div
+            ref={canvasRef}
+            className={styles.canvasInner}
+            onMouseMove={handleCanvasMouseMove}
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) setSelectedIds(new Set());
+            }}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleCanvasDrop}
+            style={{
+              transform: `scale(${zoom})`,
+              transformOrigin: 'top left',
+            } as React.CSSProperties}
+          >
+            {/* ---- Active zone box (fixed size, draggable) ---- */}
+            <div
+              data-active-zone
+              className={styles.activeZoneBox}
+              style={{
+                left: activeZonePos.x,
+                top: activeZonePos.y,
+                width: panelWidth || 680,
+                height: ACTIVE_ZONE_HEIGHT,
+              }}
+            >
+              {/* Drag handle — title bar at top */}
               <div
-                key={widget.id}
-                data-widget-id={widget.id}
-                className={styles.widgetWrapper}
-                style={{
-                  left: pos.x,
-                  top: pos.y,
-                  width: pos.width,
-                  height: pos.height,
-                  zIndex: isDragging ? 100 : 1,
-                  boxShadow: isDragging ? '0 16px 48px rgba(0,0,0,0.6)' : undefined,
-                }}
+                className={styles.activeZoneTitleBar}
+                onMouseDown={handleActiveZoneDragStart}
               >
-                {/* Title / drag bar */}
-                <div
-                  className={styles.widgetDragBar}
-                  onMouseDown={(e) => handleDragStart(e, widget)}
-                >
-                  <span className={styles.widgetIcon}>
-                    {PALETTE_ITEMS.find(p => p.type === widget.type)?.icon} {widget.type}
-                  </span>
-                  <button
-                    className={styles.widgetDelete}
-                    onClick={() => applyChange(deleteWidgetById(widgets, widget.id))}
-                    title="Delete widget"
-                  >×</button>
-                </div>
-
-                {/* Widget content */}
-                <div className={styles.widgetContent}>
-                  <WidgetRenderer
-                    widget={widget}
-                    onChange={(content) => applyChange(updateWidgetContent(widgets, widget.id, content))}
-                  />
-                </div>
-
-                {/* 8 resize handles */}
-                {(['n','s','e','w','ne','nw','se','sw'] as ResizeDirection[]).map(dir => (
-                  <div
-                    key={dir}
-                    className={`${styles.resizeHandle} ${styles['resize_' + dir]}`}
-                    onMouseDown={(e) => handleResizeStart(e, widget, dir)}
-                  />
-                ))}
+                <span className={styles.activeZoneTitleText}>
+                  ⠿ ACTIVE ZONE · {panelWidth || 680}px wide
+                </span>
               </div>
-            );
-          })}
+            </div>
+
+            {/* Scratch zone overlay — covers entire canvas EXCEPT the active zone box.
+                Uses CSS clip-path with CSS vars to cut out the active zone rectangle. */}
+            <div
+              data-scratch-overlay
+              className={styles.scratchZoneOverlay}
+              style={{
+                '--az-x': activeZonePos.x + 'px',
+                '--az-y': activeZonePos.y + 'px',
+                '--az-w': (panelWidth || 680) + 'px',
+                '--az-h': ACTIVE_ZONE_HEIGHT + 'px',
+              } as React.CSSProperties}
+              aria-hidden="true"
+            />
+            {widgets.map(widget => {
+              return (
+                <div
+                  key={widget.id}
+                  data-widget-id={widget.id}
+                  className={`${styles.widgetWrapper} ${selectedIds.has(widget.id) ? styles.widgetSelected : ''}`}
+                  style={{
+                    left: widget.x,
+                    top: widget.y,
+                    width: widget.width,
+                    height: widget.height,
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (e.shiftKey) {
+                      setSelectedIds(prev => {
+                        const next = new Set(prev);
+                        if (next.has(widget.id)) next.delete(widget.id);
+                        else next.add(widget.id);
+                        return next;
+                      });
+                    } else {
+                      setSelectedIds(new Set([widget.id]));
+                    }
+                  }}
+                >
+                  {/* Title / drag bar */}
+                  <div
+                    className={styles.widgetDragBar}
+                    onMouseDown={(e) => handleDragStart(e, widget)}
+                  >
+                    <span className={styles.widgetIcon}>
+                      {PALETTE_ITEMS.find(p => p.type === widget.type)?.icon} {widget.type}
+                    </span>
+                    <button
+                      className={styles.widgetDelete}
+                      onClick={() => applyTabChangeWithHistory(deleteWidgetById(widgets, widget.id))}
+                      title="Delete widget"
+                    >×</button>
+                  </div>
+
+                  {/* Widget content */}
+                  <div className={styles.widgetContent}>
+                    <WidgetRenderer
+                      widget={widget}
+                      onChange={(content) => applyTabChange(updateWidgetContent(widgets, widget.id, content))}
+                    />
+                  </div>
+
+                  {/* 8 resize handles */}
+                  {(['n','s','e','w','ne','nw','se','sw'] as ResizeDirection[]).map(dir => (
+                    <div
+                      key={dir}
+                      className={`${styles.resizeHandle} ${styles['resize_' + dir]}`}
+                      onMouseDown={(e) => handleResizeStart(e, widget, dir)}
+                    />
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+
+          <div
+            className={styles.zoomIndicator}
+            onClick={() => setZoom(1)}
+            title="Click to reset zoom"
+          >
+            {Math.round(zoom * 100)}%
+          </div>
         </div>
       </div>
     </div>

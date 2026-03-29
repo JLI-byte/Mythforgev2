@@ -14,10 +14,12 @@ import { MusicPlayerPanel } from '@/components/layout/MusicPlayerPanel';
 import InlineEntryCreator from '@/components/world/InlineEntryCreator';
 import HoverPreview from '@/components/world/HoverPreview';
 import { EntityDetailPanel } from '@/components/world/EntityDetailPanel';
+import { BetaFeedbackPanel } from '@/components/layout/BetaFeedbackPanel';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
 import ModeBar from '@/components/navigation/ModeBar';
 import WorldBibleCenter from '@/components/world/WorldBibleCenter';
+import WorldLandingScreen from '@/components/navigation/WorldLandingScreen';
 import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 import { ResizeDivider } from '@/components/ui/ResizeDivider';
 
@@ -30,9 +32,9 @@ import { ResizeDivider } from '@/components/ui/ResizeDivider';
 // Note: Configured as a Client Component to dynamically bind Zustand layout state natively.
 export default function Home() {
   // One active panel at a time — null means all closed
-  const [activePanel, setActivePanel] = useState<'worldBible' | 'consistency' | 'writingGoals' | 'writingStats' | 'aiChatbot' | 'music' | null>(null);
+  const [activePanel, setActivePanel] = useState<'worldBible' | 'consistency' | 'writingGoals' | 'writingStats' | 'aiChatbot' | 'music' | 'beta' | null>(null);
 
-  const handlePanelToggle = (id: 'worldBible' | 'consistency' | 'writingGoals' | 'writingStats' | 'aiChatbot' | 'music') => {
+  const handlePanelToggle = (id: 'worldBible' | 'consistency' | 'writingGoals' | 'writingStats' | 'aiChatbot' | 'music' | 'beta') => {
     setActivePanel(prev => prev === id ? null : id);
   };
 
@@ -41,6 +43,7 @@ export default function Home() {
   const toggleFullscreen = useWorkspaceStore((state) => state.toggleFullscreen);
   const isFocusMode = useWorkspaceStore((state) => state.isFocusMode);
   const toggleFocusMode = useWorkspaceStore((state) => state.toggleFocusMode);
+  const activeProjectId = useWorkspaceStore((state) => state.activeProjectId);
   const activeDocumentId = useWorkspaceStore((state) => state.activeDocumentId);
   const activeSceneId = useWorkspaceStore((state) => state.activeSceneId);
   const scenes = useWorkspaceStore((state) => state.scenes);
@@ -140,6 +143,11 @@ export default function Home() {
     '--surface': isDark ? currentAtmosphere.darkBackground : currentAtmosphere.lightBackground,
     transition: 'background-color 500ms ease'
   } as React.CSSProperties : undefined;
+
+  // Sprint 60: Show landing screen when no project is active
+  if (!activeProjectId) {
+    return <WorldLandingScreen />;
+  }
 
   return (
     <main
@@ -259,6 +267,15 @@ export default function Home() {
         isOpen={activePanel === 'music'}
         onClose={() => setActivePanel(null)}
         onTabClick={() => handlePanelToggle('music')}
+        tabWidth={tabRailWidth}
+        onTabWidthChange={setTabRailWidth}
+        panelWidth={panelWidth}
+        onPanelWidthChange={setPanelWidth}
+      />
+      <BetaFeedbackPanel
+        isOpen={activePanel === 'beta'}
+        onClose={() => setActivePanel(null)}
+        onTabClick={() => handlePanelToggle('beta')}
         tabWidth={tabRailWidth}
         onTabWidthChange={setTabRailWidth}
         panelWidth={panelWidth}

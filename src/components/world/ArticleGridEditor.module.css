@@ -73,6 +73,15 @@
   flex: 1;
   overflow: auto;
   position: relative;
+  padding: 24px 0 0 24px;
+}
+
+/* Column wrapper: tab bar stacked above canvas viewport */
+.canvasColumn {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
 }
 
 .saveIndicator {
@@ -91,13 +100,72 @@
   width: 3000px;
   height: 2000px;
   background-color: var(--background);
-  /* Dim dot grid — always visible */
-  background-image: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.10) 1px,
-    transparent 1px
-  );
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.28) 1px, transparent 1px);
   background-size: 24px 24px;
+}
+
+.scratchZoneOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.3);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 6px,
+    rgba(255, 255, 255, 0.04) 6px,
+    rgba(255, 255, 255, 0.04) 7px
+  );
+  /* Punch hole for the active zone using clip-path evenodd rule */
+  clip-path: polygon(
+    evenodd,
+    0% 0%, 100% 0%, 100% 100%, 0% 100%,
+    var(--az-x, 40px) var(--az-y, 40px),
+    calc(var(--az-x, 40px) + var(--az-w, 680px)) var(--az-y, 40px),
+    calc(var(--az-x, 40px) + var(--az-w, 680px)) calc(var(--az-y, 40px) + var(--az-h, 1800px)),
+    var(--az-x, 40px) calc(var(--az-y, 40px) + var(--az-h, 1800px))
+  );
+}
+
+.activeZoneBox {
+  position: absolute;
+  z-index: 2;
+  border: 2px solid rgba(99, 102, 241, 0.6);
+  border-radius: 4px;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 1px rgba(99, 102, 241, 0.2),
+    inset 0 0 60px rgba(99, 102, 241, 0.03);
+}
+
+.activeZoneTitleBar {
+  position: absolute;
+  top: -32px;
+  left: -2px;
+  right: -2px;
+  height: 30px;
+  background: rgba(99, 102, 241, 0.85);
+  border-radius: 4px 4px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: move;
+  pointer-events: all;
+  user-select: none;
+  transition: background 0.15s;
+}
+
+.activeZoneTitleBar:hover {
+  background: rgba(99, 102, 241, 1);
+}
+
+.activeZoneTitleText {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: white;
 }
 
 /* Bright dot spotlight near mouse cursor */
@@ -123,6 +191,10 @@
   );
 }
 
+
+
+
+
 /* ---- Widget wrapper (absolute positioned) ---- */
 .widgetWrapper {
   position: absolute;
@@ -139,6 +211,11 @@
 .widgetWrapper:hover {
   border-color: rgba(255,255,255,0.15);
   box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.widgetSelected {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px var(--accent), 0 4px 20px rgba(0,0,0,0.4) !important;
 }
 
 /* Title / drag bar */
@@ -457,4 +534,133 @@
 .tableAddRow:hover {
   border-color: var(--accent);
   color: var(--foreground);
+}
+
+.zoomIndicator {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted, #888);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  user-select: none;
+  z-index: 50;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.zoomIndicator:hover {
+  color: var(--foreground);
+  border-color: var(--accent);
+}
+
+/* ---- Tab Bar ---- */
+.tabBar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabBar::-webkit-scrollbar { display: none; }
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 6px 6px 0 0;
+  border: 1px solid transparent;
+  border-bottom: none;
+  background: none;
+  color: var(--muted, #888);
+  font-size: 0.82rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, background 0.15s;
+  position: relative;
+  user-select: none;
+}
+
+.tab:hover {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+.tabActive {
+  color: var(--foreground);
+  background: var(--background);
+  border-color: var(--border);
+  border-bottom-color: var(--background);
+}
+
+.tabActive::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px 2px 0 0;
+}
+
+.tabName {
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.tabDelete {
+  background: none;
+  border: none;
+  color: var(--muted, #888);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0 2px;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+  border-radius: 3px;
+}
+
+.tab:hover .tabDelete { opacity: 1; }
+.tabDelete:hover { color: #ff4d4d; }
+
+.tabRenameInput {
+  background: var(--background);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--foreground);
+  font-size: 0.82rem;
+  padding: 2px 6px;
+  outline: none;
+  width: 100px;
+}
+
+.tabAdd {
+  background: none;
+  border: none;
+  color: var(--muted, #888);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.tabAdd:hover {
+  color: var(--foreground);
+  background: var(--background);
 }

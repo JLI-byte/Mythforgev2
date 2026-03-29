@@ -66,7 +66,8 @@ async function createWindow() {
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
-            preload: path.join(__dirname, 'preload.js')
+            preload: path.join(__dirname, 'preload.js'),
+            zoomFactor: 1.0
         }
     });
 
@@ -87,6 +88,14 @@ async function createWindow() {
     } else {
         mainWindow.loadURL(url);
     }
+
+    // Disable Electron's built-in pinch-to-zoom and Ctrl+Scroll zoom.
+    // These fire at the native level before web JS can intercept them.
+    // MythForge implements its own canvas zoom via Ctrl+Scroll in the app.
+    mainWindow.webContents.on('did-finish-load', () => {
+        mainWindow.webContents.setZoomFactor(1);
+        mainWindow.webContents.setVisualZoomLevelLimits(1, 1);
+    });
 
     mainWindow.on('closed', () => {
         mainWindow = null;
