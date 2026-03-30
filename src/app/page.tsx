@@ -20,7 +20,6 @@ import { CommandPalette } from '@/components/navigation/CommandPalette';
 import ModeBar from '@/components/navigation/ModeBar';
 import WorldBibleCenter from '@/components/world/WorldBibleCenter';
 import WorldLandingScreen from '@/components/navigation/WorldLandingScreen';
-import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 import { ResizeDivider } from '@/components/ui/ResizeDivider';
 
 /**
@@ -47,9 +46,6 @@ export default function Home() {
   const activeDocumentId = useWorkspaceStore((state) => state.activeDocumentId);
   const activeSceneId = useWorkspaceStore((state) => state.activeSceneId);
   const scenes = useWorkspaceStore((state) => state.scenes);
-  const customAtmospheres = useWorkspaceStore((state) => state.customAtmospheres);
-  const atmospheresEnabled = useWorkspaceStore((state) => state.atmospheresEnabled);
-  const atmosphereGlobalOverlay = useWorkspaceStore((state) => state.atmosphereGlobalOverlay);
   const theme = useWorkspaceStore((state) => state.theme);
   const tabRailWidth = useWorkspaceStore((state) => state.tabRailWidth);
   const setTabRailWidth = useWorkspaceStore((state) => state.setTabRailWidth);
@@ -67,6 +63,14 @@ export default function Home() {
   const workspaceMode = useWorkspaceStore((state) => state.workspaceMode);
 
   const [isResizing, setIsResizing] = useState(false);
+
+  // Clamp panelWidth to a safe maximum based on current viewport.
+  // Prevents persisted wide-screen values from overflowing on narrow screens.
+  // MIN_EDITOR_WIDTH = 280px ensures the editor is never fully obscured.
+  const MIN_EDITOR_WIDTH = 280;
+  const effectivePanelWidth = typeof window !== 'undefined'
+    ? Math.min(panelWidth, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH)
+    : panelWidth;
 
   const handleNavResize = (deltaX: number) => {
     const newWidth = Math.min(Math.max(navPanelWidth + deltaX, 160), 400);
@@ -126,23 +130,12 @@ export default function Home() {
     }
   }, [theme]);
 
-  // Auto-close the right panel when an article is opened in the center column — prevents the panel from obscuring ArticleReadView
+  // Auto-close the right panel when an article is opened
   useEffect(() => {
     if (focusedArticleEntityId) {
       setActivePanel(null);
     }
   }, [focusedArticleEntityId]);
-
-  const activeScene = scenes.find((s) => s.id === activeSceneId);
-  const currentAtmosphere = atmospheresEnabled && activeScene?.atmosphereId
-    ? ATMOSPHERE_PRESETS.find(a => a.id === activeScene.atmosphereId) || customAtmospheres.find(a => a.id === activeScene.atmosphereId)
-    : undefined;
-
-  const atmosphereStyleVars = currentAtmosphere ? {
-    '--background': isDark ? currentAtmosphere.darkBackground : currentAtmosphere.lightBackground,
-    '--surface': isDark ? currentAtmosphere.darkBackground : currentAtmosphere.lightBackground,
-    transition: 'background-color 500ms ease'
-  } as React.CSSProperties : undefined;
 
   // Sprint 60: Show landing screen when no project is active
   if (!activeProjectId) {
@@ -153,8 +146,7 @@ export default function Home() {
     <main
       className={`${styles.workspace} ${isFullscreen ? styles.fullscreenMode : ''} ${isFocusMode ? styles.focusMode : ''}`}
       style={{
-        ...(atmosphereGlobalOverlay ? atmosphereStyleVars : undefined),
-        paddingRight: activePanel ? panelWidth + tabRailWidth + 8 : tabRailWidth + 8,
+        paddingRight: activePanel ? effectivePanelWidth + tabRailWidth + 8 : tabRailWidth + 8,
         transition: 'padding-right 280ms ease-in-out',
       }}
     >
@@ -183,7 +175,6 @@ export default function Home() {
         ref={editorRef}
         className={styles.editorContainer}
         style={{
-          ...(!atmosphereGlobalOverlay ? atmosphereStyleVars : undefined),
           transition: isResizing ? 'none' : undefined,
           width: workspaceMode === 'document' ? undefined : (isStandardFormat ? 720 : (editorMaxWidth || undefined)),
           flex: workspaceMode === 'document' ? 1 : ((!isStandardFormat && !editorMaxWidth) ? 1 : '0 0 auto')
@@ -224,8 +215,8 @@ export default function Home() {
         onTabClick={() => handlePanelToggle('worldBible')}
         tabWidth={tabRailWidth}
         onTabWidthChange={setTabRailWidth}
-        panelWidth={panelWidth}
-        onPanelWidthChange={setPanelWidth}
+        panelWidth={effectivePanelWidth}
+        onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
       />
       <ConsistencyPanel
         isOpen={activePanel === 'consistency'}
@@ -233,8 +224,8 @@ export default function Home() {
         onTabClick={() => handlePanelToggle('consistency')}
         tabWidth={tabRailWidth}
         onTabWidthChange={setTabRailWidth}
-        panelWidth={panelWidth}
-        onPanelWidthChange={setPanelWidth}
+        panelWidth={effectivePanelWidth}
+        onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
       />
       <WritingGoalsPanel
         isOpen={activePanel === 'writingGoals'}
@@ -242,8 +233,8 @@ export default function Home() {
         onTabClick={() => handlePanelToggle('writingGoals')}
         tabWidth={tabRailWidth}
         onTabWidthChange={setTabRailWidth}
-        panelWidth={panelWidth}
-        onPanelWidthChange={setPanelWidth}
+        panelWidth={effectivePanelWidth}
+        onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
       />
       <WritingStatsPanel
         isOpen={activePanel === 'writingStats'}
@@ -251,8 +242,8 @@ export default function Home() {
         onTabClick={() => handlePanelToggle('writingStats')}
         tabWidth={tabRailWidth}
         onTabWidthChange={setTabRailWidth}
-        panelWidth={panelWidth}
-        onPanelWidthChange={setPanelWidth}
+        panelWidth={effectivePanelWidth}
+        onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
       />
       <AIChatbotPanel
         isOpen={activePanel === 'aiChatbot'}
@@ -260,8 +251,8 @@ export default function Home() {
         onTabClick={() => handlePanelToggle('aiChatbot')}
         tabWidth={tabRailWidth}
         onTabWidthChange={setTabRailWidth}
-        panelWidth={panelWidth}
-        onPanelWidthChange={setPanelWidth}
+        panelWidth={effectivePanelWidth}
+        onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
       />
       <MusicPlayerPanel
         isOpen={activePanel === 'music'}
@@ -269,8 +260,8 @@ export default function Home() {
         onTabClick={() => handlePanelToggle('music')}
         tabWidth={tabRailWidth}
         onTabWidthChange={setTabRailWidth}
-        panelWidth={panelWidth}
-        onPanelWidthChange={setPanelWidth}
+        panelWidth={effectivePanelWidth}
+        onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
       />
       <BetaFeedbackPanel
         isOpen={activePanel === 'beta'}
@@ -278,8 +269,8 @@ export default function Home() {
         onTabClick={() => handlePanelToggle('beta')}
         tabWidth={tabRailWidth}
         onTabWidthChange={setTabRailWidth}
-        panelWidth={panelWidth}
-        onPanelWidthChange={setPanelWidth}
+        panelWidth={effectivePanelWidth}
+        onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
       />
 
       {/* Global modal overlays */}

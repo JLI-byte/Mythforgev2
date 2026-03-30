@@ -536,10 +536,18 @@
   color: var(--foreground);
 }
 
-.zoomIndicator {
+/* Zoom control row — indicator + fit button */
+.zoomControls {
   position: absolute;
   bottom: 16px;
   left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 50;
+}
+
+.zoomIndicator {
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--muted, #888);
@@ -549,13 +557,37 @@
   border-radius: 20px;
   cursor: pointer;
   user-select: none;
-  z-index: 50;
   transition: color 0.15s, border-color 0.15s;
 }
 
 .zoomIndicator:hover {
   color: var(--foreground);
   border-color: var(--accent);
+}
+
+.fitButton {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted, #888);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.fitButton:hover {
+  color: var(--foreground);
+  border-color: var(--accent);
+}
+
+.fitButtonActive {
+  background: rgba(208, 188, 255, 0.1);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* ---- Tab Bar ---- */

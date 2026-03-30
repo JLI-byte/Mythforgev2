@@ -22,14 +22,6 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
     const editorWidth = useWorkspaceStore((state) => state.editorWidth);
     const setEditorWidth = useWorkspaceStore((state) => state.setEditorWidth);
 
-    const atmospheresEnabled = useWorkspaceStore((state) => state.atmospheresEnabled);
-    const setAtmospheresEnabled = useWorkspaceStore((state) => state.setAtmospheresEnabled);
-    const atmosphereGlobalOverlay = useWorkspaceStore((state) => state.atmosphereGlobalOverlay);
-    const setAtmosphereGlobalOverlay = useWorkspaceStore((state) => state.setAtmosphereGlobalOverlay);
-    const atmosphereTypographyEnabled = useWorkspaceStore((state) => state.atmosphereTypographyEnabled);
-    const setAtmosphereTypographyEnabled = useWorkspaceStore((state) => state.setAtmosphereTypographyEnabled);
-    const atmosphereReducedMotion = useWorkspaceStore((state) => state.atmosphereReducedMotion);
-    const setAtmosphereReducedMotion = useWorkspaceStore((state) => state.setAtmosphereReducedMotion);
 
     const [inputKey, setInputKey] = useState(aiConfig.apiKey);
     const [showKey, setShowKey] = useState(false);
@@ -41,11 +33,6 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
 
     const [localWidth, setLocalWidth] = useState(editorWidth);
 
-    // Atmosphere settings
-    const [localAtmospheresEnabled, setLocalAtmospheresEnabled] = useState(atmospheresEnabled);
-    const [localAtmosphereGlobalOverlay, setLocalAtmosphereGlobalOverlay] = useState(atmosphereGlobalOverlay);
-    const [localAtmosphereTypographyEnabled, setLocalAtmosphereTypographyEnabled] = useState(atmosphereTypographyEnabled);
-    const [localAtmosphereReducedMotion, setLocalAtmosphereReducedMotion] = useState(atmosphereReducedMotion);
 
     // Auto-detect provider based on key format immediately
     const detectedProvider: AIProvider = detectProvider(inputKey);
@@ -62,10 +49,6 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
             sessionTarget: sessionTarget || 0
         });
         setEditorWidth(localWidth);
-        setAtmospheresEnabled(localAtmospheresEnabled);
-        setAtmosphereGlobalOverlay(localAtmosphereGlobalOverlay);
-        setAtmosphereTypographyEnabled(localAtmosphereTypographyEnabled);
-        setAtmosphereReducedMotion(localAtmosphereReducedMotion);
         onClose();
     };
 
@@ -76,9 +59,6 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
         setDailyTarget(0);
         setSessionTarget(0);
         setLocalWidth(800);
-        setLocalAtmospheresEnabled(true);
-        setLocalAtmosphereTypographyEnabled(true);
-        setLocalAtmosphereReducedMotion(false);
     };
 
     return (
@@ -221,63 +201,6 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                         </div>
                     </section>
 
-                    <section className={styles.section} style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
-                        <div className={styles.providerHeader}>
-                            <h3>Scene Atmospheres</h3>
-                        </div>
-
-                        <div className={styles.inputGroup} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <div>
-                                <label className={styles.label} style={{ marginBottom: '0.2rem' }}>Enable Atmospheres</label>
-                                <p style={{ fontSize: '0.75rem', color: 'var(--muted)', margin: 0 }}>Show atmosphere colors and icons in the editor and outline.</p>
-                            </div>
-                            <input
-                                type="checkbox"
-                                checked={localAtmospheresEnabled}
-                                onChange={(e) => setLocalAtmospheresEnabled(e.target.checked)}
-                                style={{ margin: 0, transform: 'scale(1.2)', cursor: 'pointer' }}
-                            />
-                        </div>
-
-                        <div className={styles.inputGroup} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', opacity: localAtmospheresEnabled ? 1 : 0.5, pointerEvents: localAtmospheresEnabled ? 'auto' : 'none' }}>
-                            <div>
-                                <label className={styles.label} style={{ marginBottom: '0.2rem' }}>Global Overlay</label>
-                                <p style={{ fontSize: '0.75rem', color: 'var(--muted)', margin: 0 }}>Apply atmosphere tint to the whole screen (Global) vs Editor Area only.</p>
-                            </div>
-                            <input
-                                type="checkbox"
-                                checked={localAtmosphereGlobalOverlay}
-                                onChange={(e) => setLocalAtmosphereGlobalOverlay(e.target.checked)}
-                                style={{ margin: 0, transform: 'scale(1.2)', cursor: 'pointer' }}
-                            />
-                        </div>
-
-                        <div className={styles.inputGroup} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', opacity: localAtmospheresEnabled ? 1 : 0.5, pointerEvents: localAtmospheresEnabled ? 'auto' : 'none' }}>
-                            <div>
-                                <label className={styles.label} style={{ marginBottom: '0.2rem' }}>Atmosphere Typography</label>
-                                <p style={{ fontSize: '0.75rem', color: 'var(--muted)', margin: 0 }}>Allow atmospheres to slightly adjust line-height and letter-spacing to fit the mood.</p>
-                            </div>
-                            <input
-                                type="checkbox"
-                                checked={localAtmosphereTypographyEnabled}
-                                onChange={(e) => setLocalAtmosphereTypographyEnabled(e.target.checked)}
-                                style={{ margin: 0, transform: 'scale(1.2)', cursor: 'pointer' }}
-                            />
-                        </div>
-
-                        <div className={styles.inputGroup} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', opacity: localAtmospheresEnabled ? 1 : 0.5, pointerEvents: localAtmospheresEnabled ? 'auto' : 'none' }}>
-                            <div>
-                                <label className={styles.label} style={{ marginBottom: '0.2rem' }}>Reduce Motion</label>
-                                <p style={{ fontSize: '0.75rem', color: 'var(--muted)', margin: 0 }}>Disable CSS transitions for atmosphere changes.</p>
-                            </div>
-                            <input
-                                type="checkbox"
-                                checked={localAtmosphereReducedMotion}
-                                onChange={(e) => setLocalAtmosphereReducedMotion(e.target.checked)}
-                                style={{ margin: 0, transform: 'scale(1.2)', cursor: 'pointer' }}
-                            />
-                        </div>
-                    </section>
                 </div>
 
                 <div className={styles.footer}>

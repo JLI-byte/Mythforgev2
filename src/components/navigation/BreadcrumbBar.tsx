@@ -1,51 +1,21 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from './BreadcrumbBar.module.css';
-import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
-import { AtmospherePicker } from '../ui/AtmospherePicker';
 
 export function BreadcrumbBar() {
     const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
     const activeDocumentId = useWorkspaceStore(state => state.activeDocumentId);
-    const activeSceneId = useWorkspaceStore(state => state.activeSceneId);
     const projects = useWorkspaceStore(state => state.projects);
     const documents = useWorkspaceStore(state => state.documents);
-    const scenes = useWorkspaceStore(state => state.scenes);
-    const customAtmospheres = useWorkspaceStore(state => state.customAtmospheres);
-    const atmospheresEnabled = useWorkspaceStore(state => state.atmospheresEnabled);
-
-    const [isPickerOpen, setIsPickerOpen] = useState(false);
-    const [pickerPosition, setPickerPosition] = useState<{ top: number; left: number } | null>(null);
-    const pickerRef = useRef<HTMLDivElement>(null);
 
     const activeProject = projects.find(p => p.id === activeProjectId);
     const activeDocument = documents.find(d => d.id === activeDocumentId);
-    const activeScene = scenes.find(s => s.id === activeSceneId);
-
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
-                setIsPickerOpen(false);
-            }
-        };
-        if (isPickerOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [isPickerOpen]);
 
     if (!activeProject) {
         return null;
     }
-
-    const currentAtmosphere = atmospheresEnabled && activeScene?.atmosphereId
-        ? ATMOSPHERE_PRESETS.find(a => a.id === activeScene.atmosphereId) || customAtmospheres.find(a => a.id === activeScene.atmosphereId)
-        : null;
 
     return (
         <div className={styles.breadcrumbBar}>
@@ -58,66 +28,6 @@ export function BreadcrumbBar() {
                     {activeDocument ? activeDocument.title || 'Untitled Chapter' : 'No Chapter Selected'}
                 </span>
             </div>
-
-            {atmospheresEnabled && activeScene && (
-                <div className={styles.atmosphereSection} ref={pickerRef}>
-                    <button
-                        className={`${styles.atmospherePill} ${!currentAtmosphere ? styles.muted : ''}`}
-                        onClick={(e) => {
-                            if (isPickerOpen) {
-                                setIsPickerOpen(false);
-                                setPickerPosition(null);
-                            } else {
-                                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                                const pickerWidth = 280;
-                                const pickerHeight = 420;
-
-                                let left = rect.right - pickerWidth;
-                                let top = rect.bottom + 8;
-
-                                // Flip up if not enough space below
-                                if (window.innerHeight - rect.bottom < pickerHeight + 8) {
-                                    top = rect.top - pickerHeight - 8;
-                                }
-
-                                // Clamp to viewport
-                                left = Math.max(8, Math.min(left, window.innerWidth - pickerWidth - 8));
-                                top = Math.max(8, top);
-
-                                setIsPickerOpen(true);
-                                setPickerPosition({ top, left });
-                            }
-                        }}
-                    >
-                        {currentAtmosphere ? (
-                            <>
-                                <span>{currentAtmosphere.icon}</span>
-                                <span>{currentAtmosphere.name}</span>
-                            </>
-                        ) : (
-                            <>
-                                <span>✦</span>
-                                <span>Set atmosphere</span>
-                            </>
-                        )}
-                    </button>
-
-                    {isPickerOpen && pickerPosition && typeof document !== 'undefined' && createPortal(
-                        <div
-                            ref={pickerRef}
-                            style={{ position: 'fixed', top: pickerPosition.top, left: pickerPosition.left, zIndex: 9999 }}
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <AtmospherePicker
-                                sceneId={activeScene.id}
-                                currentAtmosphereId={activeScene.atmosphereId}
-                                onClose={() => { setIsPickerOpen(false); setPickerPosition(null); }}
-                            />
-                        </div>,
-                        document.body
-                    )}
-                </div>
-            )}
         </div>
     );
 }

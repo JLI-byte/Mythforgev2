@@ -15,20 +15,6 @@ export interface WritingGoal {
     sessionTarget: number;
 }
 
-export interface Atmosphere {
-    id: string;
-    name: string;
-    icon: string;                    // emoji string
-    lightBackground: string;         // hex color for light mode
-    darkBackground: string;          // hex color for dark mode
-    soundType: 'silence' | 'brown-noise' | 'white-noise' | 'pink-noise' | 'dark-ambient' | 'warm-loop' | 'energetic-loop' | 'cafe-ambient';
-    soundVolume: number;             // 0–1, default 0.35, reserved for Sprint 23
-    lineHeightShift: number;         // e.g. 0.15 means add 0.15 to base line-height. 0 = no change
-    letterSpacingShift: number;      // e.g. 0.02 means add 0.02em. 0 = no change
-    isPreset: boolean;
-    projectId: string | null;        // null = global preset available to all projects
-    createdAt: Date;
-}
 
 export type EntityType = 'character' | 'location' | 'faction' | 'artifact' | 'lore';
 export type ThemeMode = 'light' | 'dark' | 'system';
@@ -92,7 +78,6 @@ export interface Scene {
     createdAt: Date;
     updatedAt?: Date;
     wordCount?: number;
-    atmosphereId?: string;
 }
 
 export type BlockType = 'richtext' | 'image' | 'statrow' | 'divider' | 'quote' | 'timeline';
@@ -357,6 +342,9 @@ export interface WorkspaceState {
     /** Width of the slide-out panels in pixels. User-adjustable. */
     panelWidth: number;
 
+    /** Width of the article active zone in pixels. Independent of UI panel width. */
+    articleZoneWidth: number;
+
     /**
      * The currently selected entity for the detail panel view.
      * This is intentionally not persisted (resets to null on refresh).
@@ -393,21 +381,6 @@ export interface WorkspaceState {
      * Words added during this specific browser session.
      */
     sessionWordCount: number;
-
-    /** User-defined custom scene atmospheres */
-    customAtmospheres: Atmosphere[];
-
-    /** Master toggle for scene visual atmospheres */
-    atmospheresEnabled: boolean;
-
-    /** Toggle for whether atmosphere tint applies to the full window or just the editor */
-    atmosphereGlobalOverlay: boolean;
-
-    /** Toggle for typography shifts when atmosphere is active */
-    atmosphereTypographyEnabled: boolean;
-
-    /** Toggle for reduced motion (disables smooth transitions for atmospheres) */
-    atmosphereReducedMotion: boolean;
 
     /** Toggle for persistent rich text toolbar visibility */
     isToolbarVisible: boolean;
@@ -521,6 +494,7 @@ export interface WorkspaceState {
 
     setTabRailWidth: (width: number) => void;
     setPanelWidth: (width: number) => void;
+    setArticleZoneWidth: (width: number) => void;
 
     setNavPanelWidth: (width: number) => void;
     setEditorMaxWidth: (width: number | null) => void;
@@ -557,15 +531,6 @@ export interface WorkspaceState {
      * Updates the internal tracking flag verifying persistence load.
      */
     setHasHydrated: (state: boolean) => void;
-
-    // --- ATMOSPHERE ACTIONS ---
-    addCustomAtmosphere: (atmosphere: Atmosphere) => void;
-    updateCustomAtmosphere: (id: string, updates: Partial<Omit<Atmosphere, 'id' | 'createdAt'>>) => void;
-    deleteCustomAtmosphere: (id: string) => void;
-    setAtmospheresEnabled: (enabled: boolean) => void;
-    setAtmosphereGlobalOverlay: (enabled: boolean) => void;
-    setAtmosphereTypographyEnabled: (enabled: boolean) => void;
-    setAtmosphereReducedMotion: (enabled: boolean) => void;
 
     /** Toggles the rich text toolbar visibility */
     toggleToolbarVisible: () => void;
@@ -760,6 +725,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             isStandardFormat: false,
             tabRailWidth: 72,
             panelWidth: 480,
+            articleZoneWidth: 680,
             selectedEntityId: null,
             _hasHydrated: false,
             aiConfig: {
@@ -770,11 +736,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             },
             writingGoal: { dailyTarget: 0, sessionTarget: 0 },
             sessionWordCount: 0,
-            customAtmospheres: [],
-            atmospheresEnabled: true,
-            atmosphereGlobalOverlay: false,
-            atmosphereTypographyEnabled: true,
-            atmosphereReducedMotion: false,
             isToolbarVisible: true,
             writingMode: 'novel',
             baseFontSize: 20,
@@ -1031,6 +992,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             setPanelWidth: (width) =>
                 set(() => ({ panelWidth: width })),
 
+            setArticleZoneWidth: (width) =>
+                set(() => ({ articleZoneWidth: width })),
+
             setNavPanelWidth: (width) =>
                 set(() => ({ navPanelWidth: width })),
 
@@ -1101,46 +1065,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             setSessionWordCount: (count) =>
                 set(() => ({ sessionWordCount: count })),
-
-            addCustomAtmosphere: (atmosphere) =>
-                set((state) => {
-                    logger.info('Custom atmosphere added:', atmosphere.name);
-                    return { customAtmospheres: [...state.customAtmospheres, atmosphere] };
-                }),
-
-            updateCustomAtmosphere: (id, updates) =>
-                set((state) => {
-                    logger.info('Custom atmosphere updated:', id);
-                    return {
-                        customAtmospheres: state.customAtmospheres.map(a =>
-                            a.id === id ? { ...a, ...updates } : a
-                        )
-                    };
-                }),
-
-            deleteCustomAtmosphere: (id) =>
-                set((state) => {
-                    logger.info('Custom atmosphere deleted:', id);
-                    return {
-                        customAtmospheres: state.customAtmospheres.filter(a => a.id !== id),
-                        // Also clear atmosphereId from any scenes that used this atmosphere
-                        scenes: state.scenes.map(s =>
-                            s.atmosphereId === id ? { ...s, atmosphereId: undefined, updatedAt: new Date() } : s
-                        )
-                    };
-                }),
-
-            setAtmospheresEnabled: (enabled) =>
-                set(() => ({ atmospheresEnabled: enabled })),
-
-            setAtmosphereGlobalOverlay: (enabled) =>
-                set(() => ({ atmosphereGlobalOverlay: enabled })),
-
-            setAtmosphereTypographyEnabled: (enabled) =>
-                set(() => ({ atmosphereTypographyEnabled: enabled })),
-
-            setAtmosphereReducedMotion: (enabled) =>
-                set(() => ({ atmosphereReducedMotion: enabled })),
 
             toggleToolbarVisible: () =>
                 set((state) => ({ isToolbarVisible: !state.isToolbarVisible })),
@@ -1345,12 +1269,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 editorWidth: state.editorWidth,
                 tabRailWidth: state.tabRailWidth,
                 panelWidth: state.panelWidth,
+                articleZoneWidth: state.articleZoneWidth,
                 aiConfig: state.aiConfig,
                 writingGoal: state.writingGoal,
-                customAtmospheres: state.customAtmospheres,
-                atmospheresEnabled: state.atmospheresEnabled,
-                atmosphereTypographyEnabled: state.atmosphereTypographyEnabled,
-                atmosphereReducedMotion: state.atmosphereReducedMotion,
                 isToolbarVisible: state.isToolbarVisible,
                 writingMode: state.writingMode,
                 navPanelWidth: state.navPanelWidth,
@@ -1495,6 +1416,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         state.worlds = [];
                     }
 
+                    if (typeof (state as unknown as Record<string, unknown>).articleZoneWidth !== 'number') {
+                        state.articleZoneWidth = 680;
+                    }
                     state.setHasHydrated(true);
                 }
             },

@@ -1,0 +1,34 @@
+
+E:\AI_Projects\MythforgeV2\Program\src\components\editor\WritingEditor.tsx
+   213:50  error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\AI_Projects\MythforgeV2\Program\src\components\editor\WritingEditor.tsx:213:50
+  211 |
+  212 |     // Sprint 47C: Track session start time and word baseline for Goals reporting
+> 213 |     const sessionStartRef = React.useRef<number>(Date.now());
+      |                                                  ^^^^^^^^^^ Cannot call impure function
+  214 |     const sessionBaselineRef = React.useRef<number | null>(null);
+  215 |
+  216 |     useEffect(() => {                                                            react-hooks/purity
+  1127:9   warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+  1143:13  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+  1168:17  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+  1175:17  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+  1283:35  error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+E:\AI_Projects\MythforgeV2\Program\src\components\editor\WritingEditor.tsx:1283:35
+  1281 |             {isToolbarVisible && (
+  1282 |                 <ContextBar
+> 1283 |                     activeEditor={activeEditorRef.current}
+       |                                   ^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  1284 |                     visibleSceneId={visibleSceneId}
+  1285 |                     documents={documents}
+  1286 |                     scenes={scenes}  react-hooks/refs
+
+Γ£û 6 problems (2 errors, 4 warnings)
+  0 errors and 4 warnings potentially fixable with the `--fix` option.
+

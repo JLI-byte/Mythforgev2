@@ -1,11 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import styles from './NavigationPanel.module.css';
-import { useWorkspaceStore, Atmosphere } from '@/store/workspaceStore';
-import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
-import { AtmospherePicker } from '../ui/AtmospherePicker';
+import { useWorkspaceStore } from '@/store/workspaceStore';
 import SettingsModal from '../ui/SettingsModal';
 import { ProjectSwitcher } from '@/components/navigation/ProjectSwitcher';
 import { NewProjectModal } from '../ui/NewProjectModal';
@@ -29,7 +26,6 @@ export function NavigationPanel() {
     const entities = useWorkspaceStore(state => state.entities);
 
     const setActiveProject = useWorkspaceStore(state => state.setActiveProject);
-    const setActivePanel = useWorkspaceStore(state => state.setActivePanel);
 
     const addDocument = useWorkspaceStore(state => state.addDocument);
     const updateDocument = useWorkspaceStore(state => state.updateDocument);
@@ -47,16 +43,12 @@ export function NavigationPanel() {
     const [editType, setEditType] = useState<'chapter' | 'scene' | null>(null);
     const [editModeName, setEditModeName] = useState('');
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-    const [openPickerId, setOpenPickerId] = useState<string | null>(null);
-    const [pickerPosition, setPickerPosition] = useState<{ top: number; left: number } | null>(null);
     const [showSettings, setShowSettings] = useState(false);
     const [showSwitcher, setShowSwitcher] = useState(false);
     const [showNewProject, setShowNewProject] = useState(false);
 
     const theme = useWorkspaceStore(state => state.theme);
     const setTheme = useWorkspaceStore(state => state.setTheme);
-    const customAtmospheres = useWorkspaceStore(state => state.customAtmospheres);
-    const atmospheresEnabled = useWorkspaceStore(state => state.atmospheresEnabled);
     const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
     // Drag State for scenes
@@ -83,20 +75,19 @@ export function NavigationPanel() {
     const menuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        if (!openMenuId) return;
+
         const handleClickOutside = (event: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
                 setOpenMenuId(null);
-                setOpenPickerId(null);
             }
         };
 
-        if (openMenuId || openPickerId) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
+        document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [openMenuId, openPickerId]);
+    }, [openMenuId]);
 
     useEffect(() => {
         if (editingId && editInputRef.current) {
@@ -118,7 +109,6 @@ export function NavigationPanel() {
         .sort((a, b) => a.order - b.order);
 
     const activeProject = projects.find(p => p.id === activeProjectId);
-    const currentIndex = projects.findIndex(p => p.id === activeProjectId);
 
     // --- Actions ---
     const handleExportMarkdown = (chapterId: string, e: React.MouseEvent) => {
@@ -146,9 +136,7 @@ export function NavigationPanel() {
     };
 
     const handleSeed = () => {
-        if (confirm('Inject "The Shattered Realm" example world? (Will not overwrite existing data)')) {
-            seedBetaData(useWorkspaceStore.getState());
-        }
+        seedBetaData(useWorkspaceStore.getState());
     };
 
     const handleAddChapter = () => {
@@ -223,11 +211,6 @@ export function NavigationPanel() {
             setEditingId(null);
             setEditType(null);
         }
-    };
-
-    const getAtmosphere = (id?: string | null): Atmosphere | undefined => {
-        if (!id) return undefined;
-        return ATMOSPHERE_PRESETS.find(p => p.id === id) || customAtmospheres.find(a => a.id === id);
     };
 
     const handleDeleteChapter = (id: string, e: React.MouseEvent) => {
@@ -345,7 +328,7 @@ export function NavigationPanel() {
                             <p>No outline yet</p>
                             <button className={styles.emptyStateButton} onClick={handleAddChapter}>
                                 Create chapter
-                            </button>
+                              </button>
                         </div>
                     ) : (
                         <div className={styles.chapterList}>
@@ -359,15 +342,12 @@ export function NavigationPanel() {
                                         <div
                                             className={`${styles.chapterItem} ${isActive && !activeSceneId ? styles.active : ''}`}
                                             onClick={() => {
-                                                // Single click now just activates the chapter, it doesn't toggle collapse
                                                 if (!isActive) {
                                                     setActiveDocument(chapter.id);
                                                 }
-                                                // Clear active scene to show the whole chapter
                                                 setActiveScene(null);
                                             }}
                                             onDoubleClick={() => {
-                                                // Double click toggles the expanded state AND activates
                                                 if (!isActive) setActiveDocument(chapter.id);
                                                 setActiveScene(null);
                                                 toggleChapterExpanded(chapter.id);
@@ -379,7 +359,7 @@ export function NavigationPanel() {
                                                         <span
                                                             className={styles.chevron}
                                                             onClick={(e) => {
-                                                                e.stopPropagation(); // prevent triggering the chapter onClick
+                                                                e.stopPropagation();
                                                                 toggleChapterExpanded(chapter.id);
                                                             }}
                                                         >
@@ -453,13 +433,9 @@ export function NavigationPanel() {
                                             )}
                                         </div>
 
-                                        {/* Expanded Scenes Rendering */}
                                         {isExpanded && (
                                             <div className={styles.sceneList}>
                                                 {chapterScenes.map((scene) => {
-                                                    const atmosphere = atmospheresEnabled ? getAtmosphere(scene.atmosphereId) : undefined;
-                                                    const customBorder = atmosphere ? { borderLeftColor: isDark ? atmosphere.darkBackground : atmosphere.lightBackground } : {};
-
                                                     return (
                                                         <div
                                                             key={scene.id}
@@ -475,7 +451,6 @@ export function NavigationPanel() {
                                                             ${draggedSceneId === scene.id ? styles.dragging : ''}
                                                             ${dragOverSceneId === scene.id ? styles.dragOver : ''}
                                                         `}
-                                                            style={customBorder}
                                                             onClick={() => {
                                                                 if (!isActive) {
                                                                     setActiveDocument(scene.documentId);
@@ -496,7 +471,6 @@ export function NavigationPanel() {
                                                                     />
                                                                 ) : (
                                                                     <span className={styles.sceneTitle}>
-                                                                        {atmosphere && <span style={{ marginRight: '0.4rem', fontSize: '0.9rem' }}>{atmosphere.icon}</span>}
                                                                         {scene.title}
                                                                     </span>
                                                                 )}
@@ -504,63 +478,19 @@ export function NavigationPanel() {
                                                             </div>
 
                                                             {(!editingId || editType !== 'scene' || editingId !== scene.id) && (
-                                                                <div style={{ display: 'flex', gap: '0.2rem', alignItems: 'center' }}>
-                                                                    <button
-                                                                        className={`${styles.optionsButton} ${!scene.atmosphereId ? styles.atmosphereAffordance : ''}`}
-                                                                        style={{ fontSize: '0.9rem', padding: '0.1rem 0.2rem' }}
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            if (openPickerId === scene.id) {
-                                                                                setOpenPickerId(null);
-                                                                                setPickerPosition(null);
-                                                                            } else {
-                                                                                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                                                                                const pickerWidth = 280;
-                                                                                const pickerHeight = 420;
-                                                                                const spaceRight = window.innerWidth - rect.right;
-                                                                                const spaceBelow = window.innerHeight - rect.bottom;
-
-                                                                                let left = rect.right + 8;
-                                                                                let top = rect.top;
-
-                                                                                // Flip left if not enough space on right
-                                                                                if (spaceRight < pickerWidth + 8) {
-                                                                                    left = rect.left - pickerWidth - 8;
-                                                                                }
-
-                                                                                // Flip up if not enough space below
-                                                                                if (spaceBelow < pickerHeight) {
-                                                                                    top = Math.max(8, rect.bottom - pickerHeight);
-                                                                                }
-
-                                                                                // Clamp to viewport
-                                                                                left = Math.max(8, Math.min(left, window.innerWidth - pickerWidth - 8));
-                                                                                top = Math.max(8, Math.min(top, window.innerHeight - pickerHeight - 8));
-
-                                                                                setOpenPickerId(scene.id);
-                                                                                setPickerPosition({ top, left });
-                                                                                setOpenMenuId(null);
-                                                                            }
-                                                                        }}
-                                                                        title="Set Atmosphere"
-                                                                    >
-                                                                        🎨
-                                                                    </button>
-                                                                    <button
-                                                                        className={styles.optionsButton}
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            setOpenPickerId(null);
-                                                                            setOpenMenuId(openMenuId === scene.id ? null : scene.id);
-                                                                        }}
-                                                                    >
-                                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                                            <circle cx="12" cy="12" r="1.5"></circle>
-                                                                            <circle cx="19" cy="12" r="1.5"></circle>
-                                                                            <circle cx="5" cy="12" r="1.5"></circle>
-                                                                        </svg>
-                                                                    </button>
-                                                                </div>
+                                                                <button
+                                                                    className={styles.optionsButton}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setOpenMenuId(openMenuId === scene.id ? null : scene.id);
+                                                                    }}
+                                                                >
+                                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                        <circle cx="12" cy="12" r="1.5"></circle>
+                                                                        <circle cx="19" cy="12" r="1.5"></circle>
+                                                                        <circle cx="5" cy="12" r="1.5"></circle>
+                                                                    </svg>
+                                                                </button>
                                                             )}
 
                                                             {openMenuId === scene.id && (
@@ -581,21 +511,6 @@ export function NavigationPanel() {
                                                                     </button>
                                                                 </div>
                                                             )}
-
-                                                            {openPickerId === scene.id && pickerPosition && typeof document !== 'undefined' && createPortal(
-                                                                <div
-                                                                    ref={menuRef}
-                                                                    style={{ position: 'fixed', top: pickerPosition.top, left: pickerPosition.left, zIndex: 9999 }}
-                                                                    onClick={e => e.stopPropagation()}
-                                                                >
-                                                                    <AtmospherePicker
-                                                                        sceneId={scene.id}
-                                                                        currentAtmosphereId={scene.atmosphereId}
-                                                                        onClose={() => { setOpenPickerId(null); setPickerPosition(null); }}
-                                                                    />
-                                                                </div>,
-                                                                document.body
-                                                            )}
                                                         </div>
                                                     )
                                                 })}
@@ -614,7 +529,6 @@ export function NavigationPanel() {
             ) : null}
 
             <div style={{ flexShrink: 0, marginTop: 'auto' }}>
-                {/* Panel footer — settings and theme toggle, pinned to bottom of nav */}
                 <div className={styles.panelFooter}>
                     <button
                         className={styles.homeButton}
@@ -633,13 +547,6 @@ export function NavigationPanel() {
                         ⚗
                     </button>
 
-                    <button
-                        className={styles.betaButton}
-                        onClick={() => setActivePanel('beta')}
-                        title="Submit Feedback"
-                    >
-                        <span>BETA</span>
-                    </button>
 
                     <button
                         className={styles.iconButton}

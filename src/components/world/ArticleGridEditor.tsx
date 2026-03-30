@@ -141,7 +141,7 @@ function deleteWidgetById(widgets: GridWidget[], id: string): GridWidget[] {
 // ============================================================
 
 export default function ArticleGridEditor({ entityId }: { entityId: string }) {
-  const panelWidth = useWorkspaceStore(state => state.panelWidth);
+  const articleZoneWidth = useWorkspaceStore(state => state.articleZoneWidth);
   const entities = useWorkspaceStore(state => state.entities);
   const updateEntityDoc = useWorkspaceStore(state => state.updateEntityDoc);
   const entity = entities.find(e => e.id === entityId);
@@ -149,9 +149,13 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
   const [tabs, setTabs] = useState<ArticleTab[]>(() => parseArticleTabs(entity?.articleDoc));
   const [activeTabId, setActiveTabId] = useState<string>(() => parseArticleTabs(entity?.articleDoc)[0].id);
   const [renamingTabId, setRenamingTabId] = useState<string | null>(null);
+  // Always-current reference to active tab widgets — used by drag handlers
+  // to avoid stale closure commits on mouseup.
+  const widgetsRef = useRef<GridWidget[]>([]);
 
   const activeTab = tabs.find(t => t.id === activeTabId) ?? tabs[0];
   const widgets = activeTab.widgets;
+  widgetsRef.current = widgets;
 
 
   const [saveLabel, setSaveLabel] = useState<'idle' | 'saved'>('idle');
@@ -253,6 +257,19 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
   }, []);
 
   /**
+   * Fit to view — zoom canvas so active zone fills the viewport width exactly.
+   * Keyboard shortcut: Ctrl+Shift+0
+   */
+  const handleFitToView = useCallback(() => {
+    if (!viewportRef.current) return;
+    const viewportWidth = viewportRef.current.clientWidth;
+    const nextZoom = Math.min(2, Math.max(0.25,
+      parseFloat((viewportWidth / articleZoneWidth).toFixed(2))
+    ));
+    setZoom(nextZoom);
+  }, [articleZoneWidth]);
+
+  /**
    * Global keyboard shortcuts for the canvas.
    * Guard: skip if a text input or contenteditable is focused.
    */
@@ -268,6 +285,11 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
       const ctrl = e.ctrlKey || e.metaKey;
 
       // Zoom shortcuts — always active
+      if (ctrl && e.shiftKey && e.key === '0') {
+        e.preventDefault();
+        handleFitToView();
+        return;
+      }
       if (ctrl && e.key === '0') {
         e.preventDefault();
         setZoom(1);
@@ -342,7 +364,8 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [widgets, selectedIds, tabs, activeTabId, save, applyTabChangeWithHistory]);
+  }, [widgets, selectedIds, tabs, activeTabId, save, applyTabChangeWithHistory, handleFitToView]);
+
 
   const addTab = () => {
     const newTab: ArticleTab = {
@@ -390,7 +413,7 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
     const startY = activeZonePos.y;
 
     const onMouseMove = (mv: MouseEvent) => {
-      const newX = Math.max(0, Math.min(CANVAS_WIDTH - (panelWidth || 680), startX + (mv.clientX - startMouseX) / zoom));
+      const newX = Math.max(0, Math.min(CANVAS_WIDTH - articleZoneWidth, startX + (mv.clientX - startMouseX) / zoom));
       const newY = Math.max(0, Math.min(CANVAS_HEIGHT - ACTIVE_ZONE_HEIGHT, startY + (mv.clientY - startMouseY) / zoom));
       // Direct DOM update for smooth drag
       const zone = canvasRef.current?.querySelector('[data-active-zone]') as HTMLElement;
@@ -402,13 +425,13 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
       if (overlay) {
         overlay.style.setProperty('--az-x', newX + 'px');
         overlay.style.setProperty('--az-y', newY + 'px');
-        overlay.style.setProperty('--az-w', (panelWidth || 680) + 'px');
+        overlay.style.setProperty('--az-w', articleZoneWidth + 'px');
         overlay.style.setProperty('--az-h', ACTIVE_ZONE_HEIGHT + 'px');
       }
     };
 
     const onMouseUp = (up: MouseEvent) => {
-      const newX = Math.max(0, Math.min(CANVAS_WIDTH - (panelWidth || 680), startX + (up.clientX - startMouseX) / zoom));
+      const newX = Math.max(0, Math.min(CANVAS_WIDTH - articleZoneWidth, startX + (up.clientX - startMouseX) / zoom));
       const newY = Math.max(0, Math.min(CANVAS_HEIGHT - ACTIVE_ZONE_HEIGHT, startY + (up.clientY - startMouseY) / zoom));
       setActiveZonePos({ x: newX, y: newY });
       document.removeEventListener('mousemove', onMouseMove);
@@ -418,6 +441,10 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
   };
+
+  const isFit = viewportRef.current
+    ? Math.abs(zoom - viewportRef.current.clientWidth / articleZoneWidth) < 0.02
+    : false;
 
   if (!entity) return null;
 
@@ -443,8 +470,8 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
     if (!type) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const dims = DEFAULT_DIMS[type];
-    const x = Math.max(0, Math.min(CANVAS_WIDTH - dims.width, e.clientX - rect.left - dims.width / 2));
-    const y = Math.max(0, Math.min(CANVAS_HEIGHT - dims.height, e.clientY - rect.top - dims.height / 2));
+    const x = Math.max(0, Math.min(CANVAS_WIDTH - dims.width, (e.clientX - rect.left) / zoom - dims.width / 2));
+    const y = Math.max(0, Math.min(CANVAS_HEIGHT - dims.height, (e.clientY - rect.top) / zoom - dims.height / 2));
     const newWidget: GridWidget = {
       id: crypto.randomUUID(),
       type,
@@ -494,7 +521,7 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
       // Reset inline styles — React will re-render with committed values
       el.style.zIndex = '';
       el.style.boxShadow = '';
-      applyTabChangeWithHistory(widgets.map(w => w.id === widget.id ? { ...w, x: newX, y: newY } : w));
+      applyTabChangeWithHistory(widgetsRef.current.map(w => w.id === widget.id ? { ...w, x: newX, y: newY } : w));
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
       dragCleanup.current = null;
@@ -558,7 +585,7 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
       el.style.top = '';
       el.style.width = '';
       el.style.height = '';
-      applyTabChangeWithHistory(widgets.map(w => w.id === widget.id ? { ...w, ...next } : w));
+      applyTabChangeWithHistory(widgetsRef.current.map(w => w.id === widget.id ? { ...w, ...next } : w));
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
       resizeCleanup.current = null;
@@ -664,7 +691,7 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
               style={{
                 left: activeZonePos.x,
                 top: activeZonePos.y,
-                width: panelWidth || 680,
+                width: articleZoneWidth,
                 height: ACTIVE_ZONE_HEIGHT,
               }}
             >
@@ -674,7 +701,7 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
                 onMouseDown={handleActiveZoneDragStart}
               >
                 <span className={styles.activeZoneTitleText}>
-                  ⠿ ACTIVE ZONE · {panelWidth || 680}px wide
+                  ⠿ ACTIVE ZONE · {articleZoneWidth}px wide
                 </span>
               </div>
             </div>
@@ -687,7 +714,7 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
               style={{
                 '--az-x': activeZonePos.x + 'px',
                 '--az-y': activeZonePos.y + 'px',
-                '--az-w': (panelWidth || 680) + 'px',
+                '--az-w': articleZoneWidth + 'px',
                 '--az-h': ACTIVE_ZONE_HEIGHT + 'px',
               } as React.CSSProperties}
               aria-hidden="true"
@@ -754,12 +781,21 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
             })}
           </div>
 
-          <div
-            className={styles.zoomIndicator}
-            onClick={() => setZoom(1)}
-            title="Click to reset zoom"
-          >
-            {Math.round(zoom * 100)}%
+          <div className={styles.zoomControls}>
+            <div
+              className={styles.zoomIndicator}
+              onClick={() => setZoom(1)}
+              title="Click to reset zoom to 100%"
+            >
+              {Math.round(zoom * 100)}%{isFit ? ' · FIT' : ''}
+            </div>
+            <div
+              className={`${styles.fitButton} ${isFit ? styles.fitButtonActive : ''}`}
+              onClick={handleFitToView}
+              title="Fit active zone to viewport (Ctrl+Shift+0)"
+            >
+              FIT
+            </div>
           </div>
         </div>
       </div>

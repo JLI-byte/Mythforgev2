@@ -9,7 +9,6 @@ import ShareModal from '../ui/ShareModal';
 import { ShareCardOptions } from '@/lib/shareCard';
 import { getStoredValue, setStoredValue } from '@/lib/storage';
 import { EntityMark } from '@/lib/EntityMark';
-import { ATMOSPHERE_PRESETS } from '@/lib/atmospherePresets';
 import ScreenplayEditor from './ScreenplayEditor';
 import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
@@ -195,10 +194,6 @@ function SceneEditor({ scene, index, onEditorFocus, containerRef }: { scene: Sce
     const isTypewriterMode = useWorkspaceStore((state) => state.isTypewriterMode);
     const baseFontSize = useWorkspaceStore((state) => state.baseFontSize);
 
-    // Atmosphere state
-    const customAtmospheres = useWorkspaceStore((state) => state.customAtmospheres);
-    const atmospheresEnabled = useWorkspaceStore((state) => state.atmospheresEnabled);
-    const atmosphereTypographyEnabled = useWorkspaceStore((state) => state.atmosphereTypographyEnabled);
 
     const setSessionWordCount = useWorkspaceStore((state) => state.setSessionWordCount);
     const recordWritingSession = useWorkspaceStore((state) => state.recordWritingSession);
@@ -510,12 +505,6 @@ function SceneEditor({ scene, index, onEditorFocus, containerRef }: { scene: Sce
         };
     }, [editor]);
 
-    const getAtmosphere = (id?: string) => {
-        if (!id) return undefined;
-        return ATMOSPHERE_PRESETS.find(p => p.id === id) || customAtmospheres.find(a => a.id === id);
-    };
-
-    const currentAtmosphere = atmospheresEnabled ? getAtmosphere(scene.atmosphereId) : undefined;
 
     return (
         <div
@@ -523,11 +512,7 @@ function SceneEditor({ scene, index, onEditorFocus, containerRef }: { scene: Sce
             data-scene-id={scene.id}
             ref={containerRef}
             style={{
-                '--base-font-size': `${baseFontSize}px`,
-                ...(currentAtmosphere && atmosphereTypographyEnabled ? {
-                    '--atmosphere-line-height-shift': currentAtmosphere.lineHeightShift,
-                    '--atmosphere-letter-spacing-shift': currentAtmosphere.letterSpacingShift
-                } : {})
+                '--base-font-size': `${baseFontSize}px`
             } as React.CSSProperties}
         >
             <EditorContent editor={editor} />
@@ -1069,7 +1054,6 @@ export default function WritingEditor() {
     const isToolbarVisible = useWorkspaceStore((state) => state.isToolbarVisible);
     const toggleToolbarVisible = useWorkspaceStore((state) => state.toggleToolbarVisible);
     const editorWidth = useWorkspaceStore((state) => state.editorWidth);
-    const atmosphereReducedMotion = useWorkspaceStore((state) => state.atmosphereReducedMotion);
     const updateScene = useWorkspaceStore((state) => state.updateScene);
 
     // Session share milestone state
@@ -1287,7 +1271,7 @@ export default function WritingEditor() {
     return (
         <div
             ref={editorWrapperRef}
-            className={`${styles.editorWrapper} ${isTypewriterMode ? styles.typewriterActive : ''} ${atmosphereReducedMotion ? styles.reducedMotion : ''}`}
+            className={`${styles.editorWrapper} ${isTypewriterMode ? styles.typewriterActive : ''}`}
             style={{
                 '--editor-width': `${editorWidth}px`,
                 '--base-font-size': `${baseFontSize}px`,
