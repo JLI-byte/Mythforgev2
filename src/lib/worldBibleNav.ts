@@ -9,7 +9,7 @@
 import { EntityType } from '@/store/workspaceStore';
 
 /** The three top-level groupings in the World Bible */
-export type RootCategory = 'people' | 'places' | 'things';
+export type RootCategory = 'people' | 'places' | 'things' | 'world';
 
 /** Discriminated union describing every possible World Bible view */
 export type WBView =
@@ -20,9 +20,10 @@ export type WBView =
 
 /** Maps root categories to the EntityTypes they contain */
 export const ROOT_CATEGORY_TYPES: Record<RootCategory, EntityType[]> = {
-    people: ['character', 'faction'],
+    people: ['character', 'faction', 'species'],
     places: ['location'],
     things: ['artifact', 'lore'],
+    world: ['magic', 'religion'],
 };
 
 /** Human readable labels for root categories */
@@ -30,6 +31,7 @@ export const ROOT_CATEGORY_LABELS: Record<RootCategory, string> = {
     people: 'People',
     places: 'Places',
     things: 'Things',
+    world: 'World Systems',
 };
 
 /** Emoji icons for root categories */
@@ -37,6 +39,7 @@ export const ROOT_CATEGORY_ICONS: Record<RootCategory, string> = {
     people: '👤',
     places: '📍',
     things: '📦',
+    world: '🌍',
 };
 
 /** Human readable labels per EntityType (subcategory level) */
@@ -46,6 +49,9 @@ export const SUBCATEGORY_LABELS: Record<EntityType, string> = {
     location: 'Locations',
     artifact: 'Artifacts',
     lore: 'Lore',
+    magic: 'Magic Systems',
+    religion: 'Religions & Deities',
+    species: 'Species & Races',
 };
 
 /** Emoji icons per EntityType (subcategory level) */
@@ -55,4 +61,7 @@ export const SUBCATEGORY_ICONS: Record<EntityType, string> = {
     location: '🗺️',
     artifact: '💎',
     lore: '📜',
+    magic: '✨',
+    religion: '🙏',
+    species: '🧬',
 };

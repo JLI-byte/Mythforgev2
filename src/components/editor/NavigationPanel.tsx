@@ -7,7 +7,7 @@ import SettingsModal from '../ui/SettingsModal';
 import { ProjectSwitcher } from '@/components/navigation/ProjectSwitcher';
 import { NewProjectModal } from '../ui/NewProjectModal';
 import { exportAsMarkdown, exportAsDocx, exportWorldBible } from '@/lib/export';
-import { seedBetaData } from '@/lib/betaSeedData';
+import { seedBetaData, removeBetaData } from '@/lib/betaSeedData';
 
 /**
  * NavigationPanel UI Component
@@ -26,6 +26,7 @@ export function NavigationPanel() {
     const entities = useWorkspaceStore(state => state.entities);
 
     const setActiveProject = useWorkspaceStore(state => state.setActiveProject);
+    const worlds = useWorkspaceStore(state => state.worlds);
 
     const addDocument = useWorkspaceStore(state => state.addDocument);
     const updateDocument = useWorkspaceStore(state => state.updateDocument);
@@ -135,8 +136,14 @@ export function NavigationPanel() {
         exportWorldBible(projectEntities, activeProject.name);
     };
 
+    const isSeedLoaded = worlds.some(w => w.name === 'The Shattered Realm');
+
     const handleSeed = () => {
-        seedBetaData(useWorkspaceStore.getState());
+        if (isSeedLoaded) {
+            removeBetaData(useWorkspaceStore.getState());
+        } else {
+            seedBetaData(useWorkspaceStore.getState());
+        }
     };
 
     const handleAddChapter = () => {
@@ -540,9 +547,9 @@ export function NavigationPanel() {
                     <div className={styles.footerSpacer} />
                     
                     <button
-                        className={styles.seedButton}
+                        className={`${styles.seedButton} ${isSeedLoaded ? styles.seedButtonActive : ''}`}
                         onClick={handleSeed}
-                        title="Seed Beta Data"
+                        title={isSeedLoaded ? 'Remove beta example world' : 'Load beta example world'}
                     >
                         ⚗
                     </button>

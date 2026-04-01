@@ -538,6 +538,16 @@
     color: #d0bcff;
 }
 
+.seedButtonActive {
+  color: var(--tertiary, #ffb869);
+  background: rgba(255, 184, 105, 0.12);
+}
+
+.seedButtonActive:hover {
+  color: var(--foreground);
+  background: var(--surface-mid, #1c1b1b);
+}
+
 .betaButton {
     padding: 0 8px;
     font-size: 10px;

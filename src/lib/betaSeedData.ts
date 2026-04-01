@@ -674,4 +674,140 @@ export function seedBetaData(store: WorkspaceState): void {
       ]),
     ]),
   });
+
+  // Magic System
+  store.addEntity({
+    id: uuid(),
+    projectId: proj1Id,
+    name: 'Shard Resonance',
+    type: 'magic',
+    description: 'The system by which fragments of the destroyed god Vel-Arath grant abilities to those who survive prolonged exposure. Classified and controlled by the Conclave.',
+    isFavorite: false,
+    subcategory: 'Divine Fragment Magic',
+    customFields: [
+      { label: 'Source', value: 'Fragments of the god Vel-Arath' },
+      { label: 'Activation', value: 'Prolonged physical exposure to a Shard fragment' },
+      { label: 'Cost', value: 'Physical and psychological transformation; risk of Conclave suppression' },
+      { label: 'Known Tiers', value: 'Tier 1 (minor) through Tier 5 (classified)' },
+    ],
+    createdAt: new Date('2024-01-30'),
+    articleDoc: makeArticleDoc([
+      mainTab([
+        heading('Shard Resonance', 2, 40, 40),
+        textBlock('<p>Resonance is not a skill. It is not learned or trained. It emerges — usually over weeks or months following sustained contact with a Shard fragment — as the divine essence gradually rewrites something fundamental in the host. The Conclave classifies this as a medical condition. Most resonance users describe it differently.</p>', 40, 140),
+        divider(40, 340),
+        statblock([
+          { label: 'Source', value: 'Shard fragments (divine essence of Vel-Arath)' },
+          { label: 'Trigger', value: 'Prolonged exposure — weeks to months' },
+          { label: 'Reversible', value: 'No known reversal documented' },
+          { label: 'Conclave Classification', value: 'Medical anomaly (official); strategic asset (actual)' },
+        ], 40, 380),
+      ]),
+      tab('Known Resonance Types', [
+        heading('Documented Ability Categories', 2, 40, 40),
+        tableWidget(
+          ['Type', 'Description', 'Frequency'],
+          [
+            ['Memory', 'Perfect recall of sensory experience', 'Uncommon'],
+            ['Kinetic', 'Enhanced physical force or speed', 'Uncommon'],
+            ['Perception', 'Expanded sensory range — sight, hearing, or other', 'Common'],
+            ['Empathic', 'Emotional state reading of nearby individuals', 'Rare'],
+            ['Unknown / Tier 5', 'Classified — outcomes not publicly documented', 'Extremely rare'],
+          ],
+          40, 120
+        ),
+      ]),
+    ]),
+  });
+
+  // Religion
+  store.addEntity({
+    id: uuid(),
+    projectId: proj1Id,
+    name: 'The Vel-Arath Orthodoxy',
+    type: 'religion',
+    description: 'The surviving theological tradition around the destroyed god Vel-Arath. Officially suppressed by the Conclave, practiced quietly in the Ashen Quarter. Believers hold that the Sundering was not a victory but a catastrophe.',
+    isFavorite: false,
+    subcategory: 'Suppressed Faith',
+    customFields: [
+      { label: 'Status', value: 'Illegal — Conclave-prohibited' },
+      { label: 'Primary Text', value: 'The Scattered Word (fragments; no complete copy exists)' },
+      { label: 'Core Belief', value: 'Vel-Arath was not destroyed — merely fragmented. The god sleeps in the Shards.' },
+    ],
+    createdAt: new Date('2024-01-31'),
+    articleDoc: makeArticleDoc([
+      mainTab([
+        heading('The Vel-Arath Orthodoxy', 2, 40, 40),
+        textBlock('<p>Before the Sundering, Vel-Arath was not merely a god — it was the organizing principle of the world. The Orthodoxy holds that the mortal coalition did not destroy it. They shattered it. And the shattered god is still present, distributed across every fragment, waiting. Resonance users, in the Orthodoxy\'s framework, are not anomalies. They are vessels.</p>', 40, 140),
+        quote('The god did not die. The god became everything we were afraid to touch.', 'The Scattered Word, Fragment 7', 40, 360),
+      ]),
+    ]),
+  });
+
+  // Species
+  store.addEntity({
+    id: uuid(),
+    projectId: proj1Id,
+    name: 'The Resonance-Born',
+    type: 'species',
+    description: 'Individuals in whom Shard exposure has caused heritable biological changes across generations. Extremely rare. The Conclave does not officially acknowledge their existence.',
+    isFavorite: false,
+    subcategory: 'Transformed Human',
+    customFields: [
+      { label: 'Origin', value: 'Descendants of high-tier resonance users (Tier 4+)' },
+      { label: 'Distinguishing Traits', value: 'Mild bioluminescence in extremities under stress; accelerated resonance development' },
+      { label: 'Population', value: 'Unknown — Conclave suppression makes census impossible' },
+      { label: 'Conclave Status', value: 'Officially nonexistent; actually Tier 5 classification targets' },
+    ],
+    createdAt: new Date('2024-02-01'),
+    articleDoc: makeArticleDoc([
+      mainTab([
+        heading('The Resonance-Born', 2, 40, 40),
+        textBlock('<p>Three generations of sustained Shard exposure produces something the Conclave\'s classification system was not designed to categorize: a person for whom resonance is not an acquired condition but a birthright. The Resonance-Born do not develop abilities through exposure — they are born with latent resonance already present, activated by the smallest contact with any Shard fragment.</p>', 40, 140),
+      ]),
+    ]),
+  });
+}
+
+/**
+ * removeBetaData — removes all seed data from the store.
+ * Finds "The Shattered Realm" world and cascades deletes across
+ * projects, documents, scenes, and entities.
+ * Safe to call when seed data does not exist — no-op.
+ */
+export function removeBetaData(store: WorkspaceState): void {
+  const seedWorld = store.worlds.find(w => w.name === 'The Shattered Realm');
+  if (!seedWorld) return;
+
+  // Collect IDs for cascade
+  const seedProjectIds = new Set(
+    store.projects
+      .filter(p => p.worldId === seedWorld.id)
+      .map(p => p.id)
+  );
+
+  const seedDocIds = new Set(
+    store.documents
+      .filter(d => seedProjectIds.has(d.projectId))
+      .map(d => d.id)
+  );
+
+  // Delete entities
+  [...store.entities]
+    .filter(e => seedProjectIds.has(e.projectId))
+    .forEach(e => store.deleteEntity(e.id));
+
+  // Delete scenes
+  [...store.scenes]
+    .filter(s => seedDocIds.has(s.documentId))
+    .forEach(s => store.deleteScene(s.id));
+
+  // Delete documents
+  [...seedDocIds].forEach(id => store.deleteDocument(id));
+
+  // Delete projects (handles activeProjectId reset)
+  [...seedProjectIds].forEach(id => store.deleteProject(id));
+
+  // Delete world
+  store.deleteWorld(seedWorld.id);
 }

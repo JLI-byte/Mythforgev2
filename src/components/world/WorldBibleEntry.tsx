@@ -25,6 +25,9 @@ const ENTITY_TYPE_COLORS: Record<EntityType, string> = {
     location: '#2E8B57',
     artifact: '#C0392B',
     lore: '#D46A1A',
+    magic: '#9B59B6',
+    religion: '#F1C40F',
+    species: '#27AE60',
 };
 
 export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntryProps) {

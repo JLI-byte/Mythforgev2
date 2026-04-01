@@ -16,7 +16,7 @@ import styles from './ArticleGridEditor.module.css';
 // DATA MODEL
 // ============================================================
 
-export type WidgetType = 'text' | 'heading' | 'image' | 'divider' | 'quote' | 'statblock' | 'table';
+export type WidgetType = 'text' | 'heading' | 'image' | 'divider' | 'quote' | 'statblock' | 'table' | 'gallery';
 
 export interface GridWidget {
   id: string;
@@ -97,6 +97,7 @@ const DEFAULT_DIMS: Record<WidgetType, { width: number; height: number }> = {
   quote:     { width: 380, height: 160 },
   statblock: { width: 260, height: 200 },
   table:     { width: 520, height: 220 },
+  gallery:   { width: 580, height: 340 },
 };
 
 const PALETTE_ITEMS: { type: WidgetType; icon: string; label: string }[] = [
@@ -107,6 +108,7 @@ const PALETTE_ITEMS: { type: WidgetType; icon: string; label: string }[] = [
   { type: 'divider',   icon: '➖', label: 'Divider' },
   { type: 'statblock', icon: '📊', label: 'Stat Block' },
   { type: 'table',     icon: '📋', label: 'Table' },
+  { type: 'gallery',   icon: '🖼️', label: 'Gallery' },
 ];
 
 // ============================================================
@@ -122,6 +124,7 @@ function getDefaultContent(type: WidgetType): Record<string, any> {
     case 'quote':     return { text: '', attribution: '' };
     case 'statblock': return { rows: [{ label: '', value: '' }] };
     case 'table':     return { headers: ['Column 1', 'Column 2'], rows: [['', ''], ['', '']] };
+    case 'gallery':   return { images: [] };
     default:          return {};
   }
 }
@@ -580,11 +583,9 @@ export default function ArticleGridEditor({ entityId }: { entityId: string }) {
 
     const onMouseUp = (up: MouseEvent) => {
       const next = compute(up.clientX, up.clientY);
-      // Clear inline overrides before React commits
-      el.style.left = '';
-      el.style.top = '';
-      el.style.width = '';
-      el.style.height = '';
+      // Do NOT clear inline styles here — clearing before React re-renders
+      // causes a one-frame snap back to the old position. React will overwrite
+      // the inline styles on the next render with committed values.
       applyTabChangeWithHistory(widgetsRef.current.map(w => w.id === widget.id ? { ...w, ...next } : w));
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
@@ -816,6 +817,7 @@ function WidgetRenderer({ widget, onChange }: { widget: GridWidget; onChange: (c
     case 'quote':     return <QuoteWidget content={widget.content} onChange={onChange} />;
     case 'statblock': return <StatBlockWidget content={widget.content} onChange={onChange} />;
     case 'table':     return <TableWidget content={widget.content} onChange={onChange} />;
+    case 'gallery':   return <GalleryWidget content={widget.content} onChange={onChange} />;
     default:          return null;
   }
 }
@@ -1022,6 +1024,84 @@ function TableWidget({ content, onChange }: { content: any; onChange: (c: any) =
         className={styles.tableAddRow}
         onClick={() => onChange({ ...content, rows: [...rows, headers.map(() => '')] })}
       >+ Add Row</button>
+    </div>
+  );
+}
+
+/**
+ * GalleryWidget — multiple images with captions, for reference sheets.
+ * content shape: { images: Array<{ id: string; src: string; caption: string }> }
+ */
+function GalleryWidget({ content, onChange }: { content: any; onChange: (c: any) => void }) {
+  const images: { id: string; src: string; caption: string }[] = content.images || [];
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    const newImages: { id: string; src: string; caption: string }[] = [];
+    let loaded = 0;
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        newImages.push({
+          id: crypto.randomUUID(),
+          src: typeof reader.result === 'string' ? reader.result : '',
+          caption: '',
+        });
+        loaded++;
+        if (loaded === files.length) {
+          onChange({ ...content, images: [...images, ...newImages] });
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+    // Reset input so the same file can be re-selected
+    e.target.value = '';
+  };
+
+  const updateCaption = (id: string, caption: string) => {
+    onChange({ ...content, images: images.map(img => img.id === id ? { ...img, caption } : img) });
+  };
+
+  const removeImage = (id: string) => {
+    onChange({ ...content, images: images.filter(img => img.id !== id) });
+  };
+
+  return (
+    <div className={styles.galleryWidget}>
+      <div className={styles.galleryGrid}>
+        {images.map(img => (
+          <div key={img.id} className={styles.galleryCell}>
+            <div className={styles.galleryCellImageWrap}>
+              <img src={img.src} alt={img.caption} className={styles.galleryCellImage} />
+              <button
+                className={styles.galleryCellRemove}
+                onClick={() => removeImage(img.id)}
+                title="Remove image"
+              >×</button>
+            </div>
+            <input
+              className={styles.galleryCellCaption}
+              type="text"
+              placeholder="Caption..."
+              value={img.caption}
+              onChange={e => updateCaption(img.id, e.target.value)}
+            />
+          </div>
+        ))}
+      </div>
+      <button className={styles.galleryAddBtn} onClick={() => fileRef.current?.click()}>
+        + Add Images
+      </button>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        multiple
+        style={{ display: 'none' }}
+        onChange={handleFiles}
+      />
     </div>
   );
 }

@@ -27,8 +27,8 @@ const BUCKETS: CategoryBucket[] = [
         label: 'People',
         icon: '👤',
         color: '#4A6FA5',
-        description: 'Characters, heroes, villains, and everyone in between',
-        types: ['character'],
+        description: 'Characters, factions, and species',
+        types: ['character', 'faction', 'species'],
     },
     {
         id: 'places',
@@ -41,29 +41,39 @@ const BUCKETS: CategoryBucket[] = [
     {
         id: 'things',
         label: 'Things',
-        icon: '✨',
+        icon: '📦',
+        color: '#C0392B',
+        description: 'Artifacts, lore, and historical events',
+        types: ['artifact', 'lore'],
+    },
+    {
+        id: 'world',
+        label: 'World Systems',
+        icon: '🌍',
         color: '#6B4C9A',
-        description: 'Factions, artifacts, lore, and history',
-        types: ['faction', 'artifact', 'lore'],
+        description: 'Magic systems, religions, and deities',
+        types: ['magic', 'religion'],
     },
 ];
 
 export default function WorldBibleCenter() {
-    const { 
-        entities, 
-        activeProjectId, 
-        focusedArticleEntityId, 
-        setFocusedArticleEntity 
-    } = useWorkspaceStore();
+    const entities = useWorkspaceStore(state => state.entities);
+    const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
 
     const [selectedBucket, setSelectedBucket] = useState<CategoryBucket | null>(null);
+    const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
 
     // Filter entities for active project
     const projectEntities = entities.filter(e => e.projectId === activeProjectId);
 
     // Level 3 — Article View (highest priority)
-    if (focusedArticleEntityId) {
-        return <ArticleReadView entityId={focusedArticleEntityId} />;
+    if (selectedEntityId) {
+        return (
+            <ArticleReadView
+                entityId={selectedEntityId}
+                onBack={() => setSelectedEntityId(null)}
+            />
+        );
     }
 
     // Level 2 — Entity Grid (when a bucket is selected)
@@ -99,7 +109,7 @@ export default function WorldBibleCenter() {
                             <div 
                                 key={entity.id} 
                                 className={styles.entityCard} 
-                                onClick={() => setFocusedArticleEntity(entity.id)}
+                                onClick={() => setSelectedEntityId(entity.id)}
                             >
                                 {entity.imageUrl ? (
                                     <img src={entity.imageUrl} alt={entity.name} className={styles.cardThumb} />
@@ -108,7 +118,7 @@ export default function WorldBibleCenter() {
                                 )}
                                 <div className={styles.cardContent}>
                                     <span className={styles.cardName}>{entity.name}</span>
-                                    {entity.articleBlocks && entity.articleBlocks.length > 0
+                                    {(entity.articleDoc || (entity.articleBlocks && entity.articleBlocks.length > 0))
                                         ? <span className={styles.articleBadge}>📄 Article</span>
                                         : <span className={styles.noArticleBadge}>No article</span>
                                     }

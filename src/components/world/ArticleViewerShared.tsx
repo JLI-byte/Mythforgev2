@@ -162,6 +162,45 @@ function GridWidgetReadRenderer({ widget }: { widget: GridWidget }) {
           </tbody>
         </table>
       );
+    case 'gallery': {
+      const images: { id: string; src: string; caption: string }[] =
+        content.images || [];
+      if (images.length === 0) return null;
+      return (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: 8,
+        }}>
+          {images.map((img) => (
+            <figure key={img.id} style={{ margin: 0 }}>
+              <img
+                src={img.src}
+                alt={img.caption}
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  borderRadius: 6,
+                  display: 'block',
+                  objectFit: 'cover',
+                  aspectRatio: '4/3',
+                }}
+              />
+              {img.caption && (
+                <figcaption style={{
+                  fontSize: '0.75rem',
+                  color: 'var(--muted)',
+                  textAlign: 'center',
+                  marginTop: 4,
+                }}>
+                  {img.caption}
+                </figcaption>
+              )}
+            </figure>
+          ))}
+        </div>
+      );
+    }
     default:
       return null;
   }
@@ -177,10 +216,25 @@ export function ArticleTabViewer({ articleDoc }: { articleDoc: string | undefine
 
   const activeTab = tabs.find(t => t.id === activeTabId) ?? tabs[0];
 
-  // Sort widgets by y then x for read-order rendering
+  // Sort all widgets by y then x for read-order
   const sortedWidgets = [...(activeTab?.widgets ?? [])].sort((a, b) =>
     a.y !== b.y ? a.y - b.y : a.x - b.x
   );
+
+  // Group into rows: widgets within ROW_THRESHOLD px of each other vertically
+  // share a row and will render side-by-side.
+  const ROW_THRESHOLD = 60;
+  const rowGroups: typeof sortedWidgets[] = [];
+  for (const widget of sortedWidgets) {
+    const lastGroup = rowGroups[rowGroups.length - 1];
+    if (lastGroup && Math.abs(widget.y - lastGroup[0].y) <= ROW_THRESHOLD) {
+      lastGroup.push(widget);
+    } else {
+      rowGroups.push([widget]);
+    }
+  }
+  // Sort each row left-to-right by x
+  rowGroups.forEach(group => group.sort((a, b) => a.x - b.x));
 
   return (
     <div>
@@ -217,16 +271,39 @@ export function ArticleTabViewer({ articleDoc }: { articleDoc: string | undefine
         </div>
       )}
 
-      {/* Widget content */}
+      {/* Widget content — row groups preserve side-by-side layout from canvas */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {sortedWidgets.length === 0 ? (
           <p style={{ color: 'var(--muted)', fontSize: '0.85rem', margin: 0 }}>No content yet.</p>
         ) : (
-          sortedWidgets.map(widget => (
-            <div key={widget.id}>
-              <GridWidgetReadRenderer widget={widget} />
-            </div>
-          ))
+          rowGroups.map((group, groupIdx) =>
+            group.length === 1 ? (
+              // Single widget in row — full width
+              <div key={group[0].id}>
+                <GridWidgetReadRenderer widget={group[0]} />
+              </div>
+            ) : (
+              // Multiple widgets at same Y — render as flex row
+              // Width is proportional to each widget's canvas width
+              <div
+                key={groupIdx}
+                style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}
+              >
+                {group.map(widget => {
+                  const totalWidth = group.reduce((sum, w) => sum + w.width, 0);
+                  const flexRatio = widget.width / totalWidth;
+                  return (
+                    <div
+                      key={widget.id}
+                      style={{ flex: `${flexRatio} 1 0`, minWidth: 0 }}
+                    >
+                      <GridWidgetReadRenderer widget={widget} />
+                    </div>
+                  );
+                })}
+              </div>
+            )
+          )
         )}
       </div>
     </div>

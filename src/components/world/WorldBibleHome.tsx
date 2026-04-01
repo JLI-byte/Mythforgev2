@@ -27,7 +27,7 @@ interface WorldBibleHomeProps {
 }
 
 /** Root categories in display order */
-const ROOT_CATEGORIES: RootCategory[] = ['people', 'places', 'things'];
+const ROOT_CATEGORIES: RootCategory[] = ['people', 'places', 'things', 'world'];
 
 /** Background colors for entity type icons in favorite cards (when no image) */
 const ENTITY_TYPE_COLORS: Record<EntityType, string> = {
@@ -36,6 +36,9 @@ const ENTITY_TYPE_COLORS: Record<EntityType, string> = {
     location: '#2E8B57',
     artifact: '#C0392B',
     lore: '#D46A1A',
+    magic: '#9B59B6',
+    religion: '#F1C40F',
+    species: '#27AE60',
 };
 
 /** Background colors for category card left icons */
@@ -43,6 +46,7 @@ const CATEGORY_COLORS: Record<RootCategory, string> = {
     people: '#1a2a3a',
     places: '#1a2e1a',
     things: '#2a1a2a',
+    world: '#2c1a3c',
 };
 
 /** Entity type icon mapping for favorite card fallback */
@@ -52,6 +56,9 @@ const ENTITY_TYPE_ICONS: Record<EntityType, string> = {
     location: '🗺️',
     artifact: '💎',
     lore: '📜',
+    magic: '✨',
+    religion: '🙏',
+    species: '🧬',
 };
 
 export default function WorldBibleHome({ onNavigate }: WorldBibleHomeProps) {

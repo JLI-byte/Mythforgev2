@@ -16,7 +16,7 @@ export interface WritingGoal {
 }
 
 
-export type EntityType = 'character' | 'location' | 'faction' | 'artifact' | 'lore';
+export type EntityType = 'character' | 'location' | 'faction' | 'artifact' | 'lore' | 'magic' | 'religion' | 'species';
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 export type WorldGenre =
@@ -118,7 +118,10 @@ export const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
     location: "Location",
     faction: "Faction",
     artifact: "Artifact",
-    lore: "Lore / Event"
+    lore: "Lore / Event",
+    magic: "Magic System",
+    religion: "Religion / Deity",
+    species: "Species / Race",
 };
 
 export interface Entity {
@@ -250,7 +253,7 @@ interface XPEvent {
 }
 
 export interface WorkspaceState {
-    workspaceMode: 'writing' | 'document' | 'worldBible';
+    workspaceMode: 'writing' | 'worldBible' | 'template';
     // --- STATE FIELDS ---
     worlds: World[];
     projects: Project[];
@@ -408,10 +411,11 @@ export interface WorkspaceState {
      */
     articleTemplates: ArticleTemplate[];
 
-    setWorkspaceMode: (mode: 'writing' | 'document' | 'worldBible') => void;
+    setWorkspaceMode: (mode: 'writing' | 'worldBible' | 'template') => void;
 
     // --- ACTIONS ---
     addWorld: (world: World) => void;
+    deleteWorld: (id: string) => void;
     addProject: (project: Project) => void;
     updateProject: (id: string, updates: Partial<Omit<Project, 'id' | 'createdAt'>>) => void;
     deleteProject: (id: string) => void;
@@ -767,6 +771,12 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 set((state) => {
                     logger.info('World added:', world.name);
                     return { worlds: [...state.worlds, world] };
+                }),
+
+            deleteWorld: (id) =>
+                set((state) => {
+                    logger.info('World deleted:', id);
+                    return { worlds: state.worlds.filter(w => w.id !== id) };
                 }),
 
             addProject: (project) =>
@@ -1205,8 +1215,10 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             setWorkspaceMode: (mode) => set((state) => ({ 
                 workspaceMode: mode, 
-                // Only clear focused entity when going back to writing mode
-                focusedArticleEntityId: mode === 'writing' ? null : state.focusedArticleEntityId 
+                // Clear focused entity when going back to writing or browsing worldBible
+                focusedArticleEntityId: (mode === 'writing' || mode === 'worldBible') 
+                  ? null 
+                  : state.focusedArticleEntityId 
             })),
 
             saveArticleTemplate: (name, description, sourceBlocks) =>
@@ -1388,8 +1400,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     // Recompute streak on rehydration (streakState is never persisted)
                     state.streakState = computeStreakFromDays(state.writingDays ?? []);
 
-                    // Hydration/Migration: Ensure workspaceMode is initialized correctly for Sprint 53
-                    if (!['writing', 'document', 'worldBible'].includes((state as any).workspaceMode)) {
+                    // Hydration/Migration: Ensure workspaceMode is initialized correctly for Sprint 63A
+                    if (!['writing', 'worldBible', 'template'].includes((state as any).workspaceMode)) {
                         state.workspaceMode = 'writing';
                     }
 

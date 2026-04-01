@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import styles from './page.module.css';
 import WritingEditor from '@/components/editor/WritingEditor';
-import ArticleGridEditor from '@/components/world/ArticleGridEditor';
+import TemplateDesigner from '@/components/world/TemplateDesigner';
 import { NavigationPanel } from '@/components/editor/NavigationPanel';
 import { WorldBiblePanel } from '@/components/layout/WorldBiblePanel';
 import { ConsistencyPanel } from '@/components/layout/ConsistencyPanel';
@@ -150,7 +150,7 @@ export default function Home() {
         transition: 'padding-right 280ms ease-in-out',
       }}
     >
-      {workspaceMode !== 'document' && (
+      {workspaceMode === 'writing' && (
         <div 
           className={styles.navigationPanelContainer}
           style={{ 
@@ -162,7 +162,7 @@ export default function Home() {
         </div>
       )}
 
-      {workspaceMode !== 'document' && !isFocusMode && !isFullscreen && (
+      {workspaceMode === 'writing' && !isFocusMode && !isFullscreen && (
         <ResizeDivider 
           onResize={handleNavResize} 
           onResizeStart={() => setIsResizing(true)}
@@ -176,8 +176,8 @@ export default function Home() {
         className={styles.editorContainer}
         style={{
           transition: isResizing ? 'none' : undefined,
-          width: workspaceMode === 'document' ? undefined : (isStandardFormat ? 720 : (editorMaxWidth || undefined)),
-          flex: workspaceMode === 'document' ? 1 : ((!isStandardFormat && !editorMaxWidth) ? 1 : '0 0 auto')
+          width: workspaceMode !== 'writing' ? undefined : (isStandardFormat ? 720 : (editorMaxWidth || undefined)),
+          flex: workspaceMode !== 'writing' ? 1 : ((!isStandardFormat && !editorMaxWidth) ? 1 : '0 0 auto')
         }}
       >
         <ModeBar />
@@ -186,10 +186,10 @@ export default function Home() {
           data-scroll="main"
           style={{ writingMode: 'horizontal-tb' }}
         >
-          {workspaceMode === 'document' && focusedArticleEntityId ? (
-            <ArticleGridEditor entityId={focusedArticleEntityId} />
-          ) : workspaceMode === 'document' ? (
+          {workspaceMode === 'worldBible' ? (
             <WorldBibleCenter />
+          ) : workspaceMode === 'template' ? (
+            <TemplateDesigner />
           ) : (
             <WritingEditor key={activeDocumentId} />
           )}
@@ -289,3 +289,4 @@ export default function Home() {
     </main>
   );
 }
+
