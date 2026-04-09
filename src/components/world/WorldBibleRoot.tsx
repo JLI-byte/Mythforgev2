@@ -11,37 +11,39 @@ import styles from './WorldBibleRoot.module.css';
 import { useWorkspaceStore, EntityType } from '@/store/workspaceStore';
 import {
     WBView,
-    RootCategory,
-    ROOT_CATEGORY_TYPES,
-    ROOT_CATEGORY_LABELS,
+    getProjectLayout,
     SUBCATEGORY_LABELS,
     SUBCATEGORY_ICONS,
 } from '@/lib/worldBibleNav';
 
 interface WorldBibleRootProps {
-    root: RootCategory;
+    root: string;
     onNavigate: (view: WBView) => void;
 }
 
 export default function WorldBibleRoot({ root, onNavigate }: WorldBibleRootProps) {
     const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
     const entities = useWorkspaceStore(state => state.entities);
+    const projects = useWorkspaceStore(state => state.projects);
+    const activeProject = projects.find(p => p.id === activeProjectId);
+    const layout = getProjectLayout(activeProject);
+    const category = layout.roots.find(r => r.id === root);
 
     // Filter entities to current project
     const projectEntities = entities.filter(e => e.projectId === activeProjectId);
 
     // The EntityTypes belonging to this root category
-    const subcategoryTypes = ROOT_CATEGORY_TYPES[root];
+    const subcategoryTypes = category?.entityTypes ?? [];
 
     return (
         <div className={styles.rootContainer}>
             {/* Section header */}
-            <h3 className={styles.rootHeader}>{ROOT_CATEGORY_LABELS[root]}</h3>
+            <h3 className={styles.rootHeader}>{category?.label ?? 'Unknown Category'}</h3>
 
             {/* Subcategory cards */}
             <div className={styles.subcategoryGrid}>
                 {subcategoryTypes.map((entityType: EntityType) => {
-                    const count = projectEntities.filter(e => e.type === entityType).length;
+                    const count = projectEntities.filter((e: any) => e.type === entityType).length;
                     return (
                         <button
                             key={entityType}

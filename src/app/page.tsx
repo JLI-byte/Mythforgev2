@@ -2,25 +2,25 @@
 
 import React, { useEffect, useState } from 'react';
 import styles from './page.module.css';
-import WritingEditor from '@/components/editor/WritingEditor';
-import TemplateDesigner from '@/components/world/TemplateDesigner';
-import { NavigationPanel } from '@/components/editor/NavigationPanel';
+import Designer from '@/components/world/Designer';
 import { WorldBiblePanel } from '@/components/layout/WorldBiblePanel';
 import { ConsistencyPanel } from '@/components/layout/ConsistencyPanel';
 import { WritingGoalsPanel } from '@/components/layout/WritingGoalsPanel';
-import { WritingStatsPanel } from '@/components/layout/WritingStatsPanel';
+import { SocialMediaPanel } from '@/components/layout/SocialMediaPanel';
 import { AIChatbotPanel } from '@/components/layout/AIChatbotPanel';
 import { MusicPlayerPanel } from '@/components/layout/MusicPlayerPanel';
 import InlineEntryCreator from '@/components/world/InlineEntryCreator';
 import HoverPreview from '@/components/world/HoverPreview';
 import { EntityDetailPanel } from '@/components/world/EntityDetailPanel';
+import HierarchyCanvas from '@/components/world/HierarchyCanvas';
 import { BetaFeedbackPanel } from '@/components/layout/BetaFeedbackPanel';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
 import ModeBar from '@/components/navigation/ModeBar';
 import WorldBibleCenter from '@/components/world/WorldBibleCenter';
 import WorldLandingScreen from '@/components/navigation/WorldLandingScreen';
-import { ResizeDivider } from '@/components/ui/ResizeDivider';
+import WritingDesk from '@/components/editor/WritingDesk';
+import { Bookshelf } from '@/components/management/Bookshelf';
 
 /**
  * Main Workspace View
@@ -31,9 +31,10 @@ import { ResizeDivider } from '@/components/ui/ResizeDivider';
 // Note: Configured as a Client Component to dynamically bind Zustand layout state natively.
 export default function Home() {
   // One active panel at a time — null means all closed
-  const [activePanel, setActivePanel] = useState<'worldBible' | 'consistency' | 'writingGoals' | 'writingStats' | 'aiChatbot' | 'music' | 'beta' | null>(null);
+  const [activePanel, setActivePanel] = useState<'worldBible' | 'consistency' | 'writingGoals' | 'socialMedia' | 'aiChatbot' | 'music' | 'beta' | null>(null);
+  
 
-  const handlePanelToggle = (id: 'worldBible' | 'consistency' | 'writingGoals' | 'writingStats' | 'aiChatbot' | 'music' | 'beta') => {
+  const handlePanelToggle = (id: 'worldBible' | 'consistency' | 'writingGoals' | 'socialMedia' | 'aiChatbot' | 'music' | 'beta') => {
     setActivePanel(prev => prev === id ? null : id);
   };
 
@@ -43,9 +44,6 @@ export default function Home() {
   const isFocusMode = useWorkspaceStore((state) => state.isFocusMode);
   const toggleFocusMode = useWorkspaceStore((state) => state.toggleFocusMode);
   const activeProjectId = useWorkspaceStore((state) => state.activeProjectId);
-  const activeDocumentId = useWorkspaceStore((state) => state.activeDocumentId);
-  const activeSceneId = useWorkspaceStore((state) => state.activeSceneId);
-  const scenes = useWorkspaceStore((state) => state.scenes);
   const theme = useWorkspaceStore((state) => state.theme);
   const tabRailWidth = useWorkspaceStore((state) => state.tabRailWidth);
   const setTabRailWidth = useWorkspaceStore((state) => state.setTabRailWidth);
@@ -53,16 +51,8 @@ export default function Home() {
   const setPanelWidth = useWorkspaceStore((state) => state.setPanelWidth);
   const focusedArticleEntityId = useWorkspaceStore((state) => state.focusedArticleEntityId);
 
-  const editorRef = React.useRef<HTMLDivElement>(null);
-
-  const navPanelWidth = useWorkspaceStore((state) => state.navPanelWidth);
-  const setNavPanelWidth = useWorkspaceStore((state) => state.setNavPanelWidth);
-  const editorMaxWidth = useWorkspaceStore((state) => state.editorMaxWidth);
-  const setEditorMaxWidth = useWorkspaceStore((state) => state.setEditorMaxWidth);
-  const isStandardFormat = useWorkspaceStore((state) => state.isStandardFormat);
   const workspaceMode = useWorkspaceStore((state) => state.workspaceMode);
 
-  const [isResizing, setIsResizing] = useState(false);
 
   // Clamp panelWidth to a safe maximum based on current viewport.
   // Prevents persisted wide-screen values from overflowing on narrow screens.
@@ -72,19 +62,6 @@ export default function Home() {
     ? Math.min(panelWidth, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH)
     : panelWidth;
 
-  const handleNavResize = (deltaX: number) => {
-    const newWidth = Math.min(Math.max(navPanelWidth + deltaX, 160), 400);
-    setNavPanelWidth(newWidth);
-  };
-
-  const handleEditorResize = (deltaX: number) => {
-    // Capture actual width if state is currently null (pure flex)
-    const currentMax = editorMaxWidth || (editorRef.current?.offsetWidth || 800);
-    const upperBound = typeof window !== 'undefined' ? window.innerWidth - navPanelWidth - tabRailWidth - 60 : 2000;
-    const newWidth = Math.min(Math.max(currentMax + deltaX, 400), upperBound);
-    setEditorMaxWidth(newWidth);
-  };
-  const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -137,155 +114,121 @@ export default function Home() {
     }
   }, [focusedArticleEntityId]);
 
-  // Sprint 60: Show landing screen when no project is active
-  if (!activeProjectId) {
-    return <WorldLandingScreen />;
-  }
 
   return (
     <main
       className={`${styles.workspace} ${isFullscreen ? styles.fullscreenMode : ''} ${isFocusMode ? styles.focusMode : ''}`}
-      style={{
-        paddingRight: activePanel ? effectivePanelWidth + tabRailWidth + 8 : tabRailWidth + 8,
-        transition: 'padding-right 280ms ease-in-out',
-      }}
     >
-      {workspaceMode === 'writing' && (
-        <div 
-          className={styles.navigationPanelContainer}
-          style={{ 
-            width: navPanelWidth,
-            transition: isResizing ? 'none' : undefined
+      <ModeBar onHome={() => { useWorkspaceStore.getState().setActiveProject(null); }} />
+      <div className={styles.workspaceRow}>
+        <div
+          className={styles.editorContainer}
+          style={{
+            paddingRight: tabRailWidth + 8,
+            transition: 'padding-right 280ms ease-in-out',
           }}
         >
-          <NavigationPanel />
+          <div
+            className={styles.editorScrollContainer}
+            data-scroll="main"
+            style={{ writingMode: 'horizontal-tb' }}
+          >
+            {workspaceMode === 'worldBible' ? (
+              <WorldBibleCenter />
+            ) : workspaceMode === 'template' ? (
+              <Designer />
+            ) : workspaceMode === 'hierarchy' ? (
+              <HierarchyCanvas />
+            ) : workspaceMode === 'bookshelf' ? (
+              <Bookshelf />
+            ) : (
+              <WritingDesk />
+            )}
+          </div>
         </div>
-      )}
 
-      {workspaceMode === 'writing' && !isFocusMode && !isFullscreen && (
-        <ResizeDivider 
-          onResize={handleNavResize} 
-          onResizeStart={() => setIsResizing(true)}
-          onResizeEnd={() => setIsResizing(false)}
-          onDoubleClick={() => setNavPanelWidth(220)}
+        {/* 
+          Right-edge panels & filing cabinet tabs
+          Fixed to the right edge. Does not shift the editor.
+        */}
+        <WorldBiblePanel
+          isOpen={activePanel === 'worldBible'}
+          onClose={() => setActivePanel(null)}
+          onTabClick={() => handlePanelToggle('worldBible')}
+          tabWidth={tabRailWidth}
+          onTabWidthChange={setTabRailWidth}
+          panelWidth={effectivePanelWidth}
+          onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
         />
-      )}
+        <ConsistencyPanel
+          isOpen={activePanel === 'consistency'}
+          onClose={() => setActivePanel(null)}
+          onTabClick={() => handlePanelToggle('consistency')}
+          tabWidth={tabRailWidth}
+          onTabWidthChange={setTabRailWidth}
+          panelWidth={effectivePanelWidth}
+          onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
+        />
+        <WritingGoalsPanel
+          isOpen={activePanel === 'writingGoals'}
+          onClose={() => setActivePanel(null)}
+          onTabClick={() => handlePanelToggle('writingGoals')}
+          tabWidth={tabRailWidth}
+          onTabWidthChange={setTabRailWidth}
+          panelWidth={effectivePanelWidth}
+          onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
+        />
+        <SocialMediaPanel
+          isOpen={activePanel === 'socialMedia'}
+          onClose={() => setActivePanel(null)}
+          onTabClick={() => handlePanelToggle('socialMedia')}
+          tabWidth={tabRailWidth}
+          onTabWidthChange={setTabRailWidth}
+          panelWidth={effectivePanelWidth}
+          onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
+        />
+        <AIChatbotPanel
+          isOpen={activePanel === 'aiChatbot'}
+          onClose={() => setActivePanel(null)}
+          onTabClick={() => handlePanelToggle('aiChatbot')}
+          tabWidth={tabRailWidth}
+          onTabWidthChange={setTabRailWidth}
+          panelWidth={effectivePanelWidth}
+          onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
+        />
+        <MusicPlayerPanel
+          isOpen={activePanel === 'music'}
+          onClose={() => setActivePanel(null)}
+          onTabClick={() => handlePanelToggle('music')}
+          tabWidth={tabRailWidth}
+          onTabWidthChange={setTabRailWidth}
+          panelWidth={effectivePanelWidth}
+          onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
+        />
+        <BetaFeedbackPanel
+          isOpen={activePanel === 'beta'}
+          onClose={() => setActivePanel(null)}
+          onTabClick={() => handlePanelToggle('beta')}
+          tabWidth={tabRailWidth}
+          onTabWidthChange={setTabRailWidth}
+          panelWidth={effectivePanelWidth}
+          onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
+        />
 
-      <div
-        ref={editorRef}
-        className={styles.editorContainer}
-        style={{
-          transition: isResizing ? 'none' : undefined,
-          width: workspaceMode !== 'writing' ? undefined : (isStandardFormat ? 720 : (editorMaxWidth || undefined)),
-          flex: workspaceMode !== 'writing' ? 1 : ((!isStandardFormat && !editorMaxWidth) ? 1 : '0 0 auto')
-        }}
-      >
-        <ModeBar />
-        <div
-          className={styles.editorScrollContainer}
-          data-scroll="main"
-          style={{ writingMode: 'horizontal-tb' }}
-        >
-          {workspaceMode === 'worldBible' ? (
-            <WorldBibleCenter />
-          ) : workspaceMode === 'template' ? (
-            <TemplateDesigner />
-          ) : (
-            <WritingEditor key={activeDocumentId} />
-          )}
-        </div>
+        {/* Global modal overlays */}
+        <InlineEntryCreator />
+        <EntityDetailPanel />
+        <CommandPalette />
+
+        {/* 
+          TEMPORARY POSITIONING:
+          HoverPreview is currently mounted at the root and statically styled to float 
+          left of the sidebar. When Editor-level hover support is added, this component 
+          will need its positioning coordinates driven dynamically by the anchor element 
+          rect bounding boxes.
+        */}
+        <HoverPreview />
       </div>
-
-      {!isFocusMode && !isFullscreen && (
-        <ResizeDivider 
-          onResize={handleEditorResize}
-          onResizeStart={() => setIsResizing(true)}
-          onResizeEnd={() => setIsResizing(false)}
-          onDoubleClick={() => setEditorMaxWidth(null)}
-        />
-      )}
-
-      {/* 
-        Right-edge panels & filing cabinet tabs
-        Fixed to the right edge. Does not shift the editor.
-      */}
-      <WorldBiblePanel
-        isOpen={activePanel === 'worldBible'}
-        onClose={() => setActivePanel(null)}
-        onTabClick={() => handlePanelToggle('worldBible')}
-        tabWidth={tabRailWidth}
-        onTabWidthChange={setTabRailWidth}
-        panelWidth={effectivePanelWidth}
-        onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
-      />
-      <ConsistencyPanel
-        isOpen={activePanel === 'consistency'}
-        onClose={() => setActivePanel(null)}
-        onTabClick={() => handlePanelToggle('consistency')}
-        tabWidth={tabRailWidth}
-        onTabWidthChange={setTabRailWidth}
-        panelWidth={effectivePanelWidth}
-        onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
-      />
-      <WritingGoalsPanel
-        isOpen={activePanel === 'writingGoals'}
-        onClose={() => setActivePanel(null)}
-        onTabClick={() => handlePanelToggle('writingGoals')}
-        tabWidth={tabRailWidth}
-        onTabWidthChange={setTabRailWidth}
-        panelWidth={effectivePanelWidth}
-        onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
-      />
-      <WritingStatsPanel
-        isOpen={activePanel === 'writingStats'}
-        onClose={() => setActivePanel(null)}
-        onTabClick={() => handlePanelToggle('writingStats')}
-        tabWidth={tabRailWidth}
-        onTabWidthChange={setTabRailWidth}
-        panelWidth={effectivePanelWidth}
-        onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
-      />
-      <AIChatbotPanel
-        isOpen={activePanel === 'aiChatbot'}
-        onClose={() => setActivePanel(null)}
-        onTabClick={() => handlePanelToggle('aiChatbot')}
-        tabWidth={tabRailWidth}
-        onTabWidthChange={setTabRailWidth}
-        panelWidth={effectivePanelWidth}
-        onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
-      />
-      <MusicPlayerPanel
-        isOpen={activePanel === 'music'}
-        onClose={() => setActivePanel(null)}
-        onTabClick={() => handlePanelToggle('music')}
-        tabWidth={tabRailWidth}
-        onTabWidthChange={setTabRailWidth}
-        panelWidth={effectivePanelWidth}
-        onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
-      />
-      <BetaFeedbackPanel
-        isOpen={activePanel === 'beta'}
-        onClose={() => setActivePanel(null)}
-        onTabClick={() => handlePanelToggle('beta')}
-        tabWidth={tabRailWidth}
-        onTabWidthChange={setTabRailWidth}
-        panelWidth={effectivePanelWidth}
-        onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
-      />
-
-      {/* Global modal overlays */}
-      <InlineEntryCreator />
-      <EntityDetailPanel />
-      <CommandPalette />
-
-      {/* 
-        TEMPORARY POSITIONING:
-        HoverPreview is currently mounted at the root and statically styled to float 
-        left of the sidebar. When Editor-level hover support is added, this component 
-        will need its positioning coordinates driven dynamically by the anchor element 
-        rect bounding boxes.
-      */}
-      <HoverPreview />
     </main>
   );
 }

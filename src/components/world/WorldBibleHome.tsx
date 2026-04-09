@@ -11,13 +11,11 @@
 
 import React, { useState } from 'react';
 import styles from './WorldBibleHome.module.css';
-import { useWorkspaceStore, EntityType } from '@/store/workspaceStore';
+import { useWorkspaceStore, EntityType, WorldBibleRootConfig, WorldBibleLayout } from '@/store/workspaceStore';
 import {
     WBView,
-    RootCategory,
-    ROOT_CATEGORY_TYPES,
-    ROOT_CATEGORY_LABELS,
-    ROOT_CATEGORY_ICONS,
+    getProjectLayout,
+    DEFAULT_WORLD_BIBLE_LAYOUT,
     SUBCATEGORY_LABELS,
     SUBCATEGORY_ICONS,
 } from '@/lib/worldBibleNav';
@@ -26,28 +24,6 @@ interface WorldBibleHomeProps {
     onNavigate: (view: WBView) => void;
 }
 
-/** Root categories in display order */
-const ROOT_CATEGORIES: RootCategory[] = ['people', 'places', 'things', 'world'];
-
-/** Background colors for entity type icons in favorite cards (when no image) */
-const ENTITY_TYPE_COLORS: Record<EntityType, string> = {
-    character: '#4A6FA5',
-    faction: '#6B4C9A',
-    location: '#2E8B57',
-    artifact: '#C0392B',
-    lore: '#D46A1A',
-    magic: '#9B59B6',
-    religion: '#F1C40F',
-    species: '#27AE60',
-};
-
-/** Background colors for category card left icons */
-const CATEGORY_COLORS: Record<RootCategory, string> = {
-    people: '#1a2a3a',
-    places: '#1a2e1a',
-    things: '#2a1a2a',
-    world: '#2c1a3c',
-};
 
 /** Entity type icon mapping for favorite card fallback */
 const ENTITY_TYPE_ICONS: Record<EntityType, string> = {
@@ -63,8 +39,14 @@ const ENTITY_TYPE_ICONS: Record<EntityType, string> = {
 
 export default function WorldBibleHome({ onNavigate }: WorldBibleHomeProps) {
     const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
+    const projects = useWorkspaceStore(state => state.projects);
+    const updateProject = useWorkspaceStore(state => state.updateProject);
+    const activeProject = projects.find(p => p.id === activeProjectId);
+
     const entities = useWorkspaceStore(state => state.entities);
     const openInlineCreator = useWorkspaceStore(state => state.openInlineCreator);
+
+    const layout = getProjectLayout(activeProject);
 
     // Local search state
     const [searchTerm, setSearchTerm] = useState('');
@@ -79,12 +61,6 @@ export default function WorldBibleHome({ onNavigate }: WorldBibleHomeProps) {
 
     // Favorites — entities pinned by the user
     const favorites = projectEntities.filter(e => e.isFavorite);
-
-    /** Count entities belonging to a given root category */
-    const countForRoot = (root: RootCategory): number => {
-        const types = ROOT_CATEGORY_TYPES[root];
-        return filteredEntities.filter(e => types.includes(e.type)).length;
-    };
 
     /** Count entities of a specific type */
     const countForType = (type: EntityType): number => {
@@ -130,7 +106,7 @@ export default function WorldBibleHome({ onNavigate }: WorldBibleHomeProps) {
                                         backgroundSize: 'cover',
                                         backgroundPosition: 'center',
                                     }
-                                    : { backgroundColor: ENTITY_TYPE_COLORS[entity.type] }
+                                    : { backgroundColor: '#333' }
                                 }
                             >
                                 {/* Show type icon if no image */}
@@ -155,45 +131,33 @@ export default function WorldBibleHome({ onNavigate }: WorldBibleHomeProps) {
 
             {/* === Section 3: Category cards === */}
             <div className={styles.categoryStack}>
-                {ROOT_CATEGORIES.map(root => {
-                    const count = countForRoot(root);
-                    const subcategoryTypes = ROOT_CATEGORY_TYPES[root];
-
+                {layout.roots.map(root => {
+                    const count = root.entityTypes.reduce((sum, type) =>
+                        sum + filteredEntities.filter(e => e.type === type).length, 0
+                    );
                     return (
                         <button
-                            key={root}
+                            key={root.id}
                             className={styles.categoryCard}
-                            onClick={() => onNavigate({ level: 'root', root })}
+                            onClick={() => onNavigate({ level: 'root', root: root.id as any })}
                         >
-                            {/* Left: large icon with colored background */}
-                            <div
-                                className={styles.categoryIconWrap}
-                                style={{ backgroundColor: CATEGORY_COLORS[root] }}
-                            >
-                                <span className={styles.categoryIcon}>
-                                    {ROOT_CATEGORY_ICONS[root]}
-                                </span>
+                            <div className={styles.categoryIconWrap}>
+                                <span className={styles.categoryIcon}>{root.icon}</span>
                             </div>
-
-                            {/* Center: label + count + subcategory pills */}
                             <div className={styles.categoryCenter}>
-                                <span className={styles.categoryLabel}>
-                                    {ROOT_CATEGORY_LABELS[root]}
-                                </span>
+                                <span className={styles.categoryLabel}>{root.label}</span>
                                 <span className={styles.categoryCount}>
                                     {count > 0 ? `${count} ${count === 1 ? 'entry' : 'entries'}` : 'No entries yet'}
                                 </span>
-                                {/* Subcategory pills */}
                                 <div className={styles.subcategoryPills}>
-                                    {subcategoryTypes.map(type => (
+                                    {root.entityTypes.map(type => (
                                         <span key={type} className={styles.subcategoryPill}>
-                                            {SUBCATEGORY_ICONS[type]} {SUBCATEGORY_LABELS[type]} ({countForType(type)})
+                                            {SUBCATEGORY_ICONS[type]} {SUBCATEGORY_LABELS[type]} (
+                                            {filteredEntities.filter(e => e.type === type).length})
                                         </span>
                                     ))}
                                 </div>
                             </div>
-
-                            {/* Right: chevron */}
                             <div className={styles.categoryChevron}>›</div>
                         </button>
                     );

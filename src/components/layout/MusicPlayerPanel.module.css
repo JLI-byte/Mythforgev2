@@ -5,23 +5,65 @@
     height: calc(100vh - 48px);
     width: 480px;
     transform: translateX(100%);
-    transition: transform 280ms ease-in-out;
+    transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 55;
     background-color: var(--surface);
     border-left: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: -3px 2px 10px rgba(0, 0, 0, 0.10);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
 }
 
 .panel.open {
     transform: translateX(0);
 }
 
+.panelInner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    background: linear-gradient(to bottom, var(--surface), var(--background));
+}
+
+.title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--foreground);
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 1.2rem;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+    color: var(--foreground);
+    background: rgba(128,128,128,0.1);
+}
+
 .sideTab {
     position: fixed;
-    top: 638px;
+    top: 698px;
+    height: 130px;
+    box-sizing: border-box;
     padding: 16px 10px;
     display: flex;
     flex-direction: column;
@@ -34,41 +76,51 @@
     border-radius: 8px 0 0 8px;
     cursor: pointer;
     color: var(--muted);
-    transition: color 150ms ease, background-color 150ms ease;
-    box-shadow: -3px 2px 10px rgba(0, 0, 0, 0.10);
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     z-index: 9999;
 }
 
 .sideTab:hover {
-    color: var(--foreground);
-    background: var(--background);
+    transform: translateX(-6px);
 }
 
-/* Active state — tab appears connected to the open panel */
 .sideTabActive {
     background: var(--surface);
     color: var(--foreground);
-    border-right: none;
-    box-shadow: -3px 2px 10px rgba(0, 0, 0, 0.10);
-    /* Extend tab right edge into the panel so it looks flush */
-    padding-right: 16px;
-    border-right: 2px solid var(--surface);
 }
 
-.tabLabel {
-    font-size: 1.2rem;
-    line-height: 1;
-}
-
+.tabIcon { font-size: 1.2rem; }
 .tabText {
     writing-mode: vertical-rl;
     text-orientation: mixed;
     transform: rotate(180deg);
     font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.04em;
+    font-weight: 700;
     text-transform: uppercase;
-    white-space: nowrap;
+}
+
+.ghostTab {
+  position: fixed;
+  z-index: 9998;
+  background: rgba(255, 255, 255, 0.03);
+  border: none;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  border-radius: 8px 0 0 8px;
+}
+
+.ghostTab:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.ghostTabArrow {
+  color: var(--muted);
+  font-size: 0.7rem;
+  opacity: 0.5;
 }
 
 .dragHandle {
@@ -86,105 +138,300 @@
     background: rgba(128, 128, 128, 0.2);
 }
 
-.header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
+.panelResizeHandle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: transparent;
+    transition: background 0.2s ease;
+    cursor: ew-resize;
 }
 
-.title {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--foreground);
-    margin: 0;
-}
-
-.closeBtn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--muted);
-    font-size: 1.2rem;
-    line-height: 1;
-    padding: 0.2rem 0.4rem;
-    border-radius: 4px;
-}
-
-.closeBtn:hover {
-    color: var(--foreground);
-    background: var(--background);
-}
-
-/* Full-height iframe fills the panel */
-.embed {
-    width: 100%;
-    flex: 1;
-    border: none;
-    display: block;
-    min-height: 0;
-}
-
-.panelInner {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
-}
-
-.urlInputState {
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.urlInput {
-    width: 100%;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--background);
-    color: var(--foreground);
-    font-size: 0.85rem;
-    font-family: var(--font-sans);
-}
-
-.loadBtn {
-    padding: 0.4rem 1rem;
+.panelResizeHandle:hover {
     background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    align-self: flex-start;
 }
 
-.hint {
-    font-size: 0.8rem;
-    color: var(--foreground);
-    opacity: 0.6;
-    line-height: 1.5;
+/* ── Nav tabs ──────────────────────────────────────── */
+
+.navTabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
-.supportedServices {
-    font-size: 0.75rem;
-    color: var(--foreground);
-    opacity: 0.4;
+.navTab {
+  flex: 1;
+  padding: 8px 4px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: -1px;
 }
 
-.editBtn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--foreground);
-    opacity: 0.5;
-    font-size: 1rem;
-    padding: 0.2rem 0.4rem;
-    margin-left: auto;
+.navTab:hover { color: var(--foreground); }
+
+.navTabActive {
+  color: var(--foreground);
+  border-bottom-color: var(--accent);
 }
 
-.editBtn:hover { opacity: 1; }
+/* ── Toast ─────────────────────────────────────────── */
+
+.toast {
+  margin: 8px 12px 0;
+  padding: 7px 12px;
+  background: rgba(208, 188, 255, 0.12);
+  border: 1px solid rgba(208, 188, 255, 0.25);
+  border-radius: 6px;
+  color: var(--accent);
+  font-size: 0.75rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* ── Content area ──────────────────────────────────── */
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+/* ── List view (library + curated) ─────────────────── */
+
+.listView {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 8px;
+}
+
+.curatedHint {
+  font-size: 0.72rem;
+  color: var(--muted);
+  padding: 4px 4px 8px;
+  margin: 0;
+  font-style: italic;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.emptyIcon { font-size: 2rem; opacity: 0.3; }
+
+.emptyState p {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.emptyAction {
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.emptyAction:hover { border-color: var(--accent); color: var(--foreground); }
+
+.emptyOr {
+  font-size: 0.7rem;
+  color: var(--muted);
+  opacity: 0.5;
+}
+
+.playlistRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 6px;
+  border-radius: 6px;
+  transition: background 0.1s;
+}
+
+.playlistRow:hover { background: var(--surface); }
+
+.playlistEmoji {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+
+.playlistInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.playlistName {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.playlistService {
+  font-size: 0.7rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.playBtn {
+  background: var(--accent);
+  border: none;
+  border-radius: 4px;
+  color: var(--background);
+  font-size: 0.7rem;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s;
+}
+
+.playBtn:hover { opacity: 0.85; }
+
+.addBtn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.addBtn:hover { border-color: var(--accent); color: var(--accent); }
+
+.deleteBtn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 1rem;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: 0.4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s;
+}
+
+.deleteBtn:hover { opacity: 1; color: #ff4d4d; }
+
+/* ── Add view ──────────────────────────────────────── */
+
+.addView {
+  padding: 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.addHint {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin: 0 0 8px 0;
+  line-height: 1.5;
+}
+
+.addLabel {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+}
+
+.addInput {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--foreground);
+  font-size: 0.82rem;
+  padding: 7px 10px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s;
+  font-family: inherit;
+}
+
+.addInput:focus { border-color: var(--accent); }
+
+.detectedService {
+  font-size: 0.72rem;
+  color: var(--accent);
+  margin: 0;
+}
+
+.addActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.saveBtn {
+  flex: 1;
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  color: var(--background);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 8px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.saveBtn:hover { opacity: 0.85; }
+
+.openNowBtn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  padding: 8px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.openNowBtn:hover { border-color: var(--accent); color: var(--foreground); }

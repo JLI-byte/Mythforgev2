@@ -2,11 +2,17 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './NavigationPanel.module.css';
-import { useWorkspaceStore } from '@/store/workspaceStore';
-import SettingsModal from '../ui/SettingsModal';
+import { useWorkspaceStore, createManualBackup } from '@/store/workspaceStore';
 import { ProjectSwitcher } from '@/components/navigation/ProjectSwitcher';
 import { NewProjectModal } from '../ui/NewProjectModal';
-import { exportAsMarkdown, exportAsDocx, exportWorldBible } from '@/lib/export';
+import { 
+    exportAsMarkdown, 
+    exportAsDocx, 
+    exportWorldBible, 
+    buildMarkdownContent,
+    sanitizeImportedHtml,
+    markdownToBasicHtml
+} from '@/lib/export';
 import { seedBetaData, removeBetaData } from '@/lib/betaSeedData';
 
 /**
@@ -38,23 +44,31 @@ export function NavigationPanel() {
     const deleteScene = useWorkspaceStore(state => state.deleteScene);
     const setActiveScene = useWorkspaceStore(state => state.setActiveScene);
     const reorderScenes = useWorkspaceStore(state => state.reorderScenes);
+    const updateProject = useWorkspaceStore(state => state.updateProject);
 
     // Editing State
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editType, setEditType] = useState<'chapter' | 'scene' | null>(null);
     const [editModeName, setEditModeName] = useState('');
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-    const [showSettings, setShowSettings] = useState(false);
     const [showSwitcher, setShowSwitcher] = useState(false);
     const [showNewProject, setShowNewProject] = useState(false);
-
-    const theme = useWorkspaceStore(state => state.theme);
-    const setTheme = useWorkspaceStore(state => state.setTheme);
-    const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
     // Drag State for scenes
     const [draggedSceneId, setDraggedSceneId] = useState<string | null>(null);
     const [dragOverSceneId, setDragOverSceneId] = useState<string | null>(null);
+    const [backupFeedback, setBackupFeedback] = useState(false);
+    
+    // Task: Google Drive and Import
+    const [driveUploadState, setDriveUploadState] = useState<{
+        blob: Blob;
+        filename: string;
+        mimeType: string;
+    } | null>(null);
+    const [driveUploadResult, setDriveUploadResult] = useState<'uploading' | 'done' | 'error' | null>(null);
+    
+    const importFileRef = useRef<HTMLInputElement>(null);
+    const [importTargetChapterId, setImportTargetChapterId] = useState<string | null>(null);
 
     // Expanded Chapters State
     // Default to expanding the active document's chapter on initial load
@@ -118,16 +132,87 @@ export function NavigationPanel() {
         const chapterDoc = documents.find(d => d.id === chapterId);
         if (!chapterDoc) return;
         const chapterScenes = scenes.filter(s => s.documentId === chapterId);
+        
+        // Export and download
         exportAsMarkdown(chapterDoc, chapterScenes);
+
+        // Prepare for optional Drive upload
+        const mdContent = buildMarkdownContent(chapterDoc, chapterScenes);
+        const blob = new Blob([mdContent], { type: 'text/markdown' });
+        setDriveUploadState({ 
+            blob, 
+            filename: `${chapterDoc.title || 'Untitled'}.md`, 
+            mimeType: 'text/markdown' 
+        });
+        setDriveUploadResult(null);
     };
 
-    const handleExportDocx = (chapterId: string, e: React.MouseEvent) => {
+    const handleExportDocx = async (chapterId: string, e: React.MouseEvent) => {
         e.stopPropagation();
         setOpenMenuId(null);
         const chapterDoc = documents.find(d => d.id === chapterId);
         if (!chapterDoc) return;
         const chapterScenes = scenes.filter(s => s.documentId === chapterId);
-        exportAsDocx(chapterDoc, chapterScenes);
+
+        // exportAsDocx now returns the blob
+        const blob = await exportAsDocx(chapterDoc, chapterScenes);
+
+        // Offer Drive upload
+        setDriveUploadState({
+            blob,
+            filename: `${chapterDoc.title || 'Untitled'}.docx`,
+            mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        });
+        setDriveUploadResult(null);
+    };
+
+    const handleImportFile = (chapterId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setOpenMenuId(null);
+        setImportTargetChapterId(chapterId);
+        importFileRef.current?.click();
+    };
+
+    const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !importTargetChapterId || !activeProjectId) return;
+        e.target.value = ''; // reset
+
+        const text = await file.text();
+        let html = '';
+
+        if (file.name.endsWith('.html') || file.name.endsWith('.htm')) {
+            html = sanitizeImportedHtml(text);
+        } else if (file.name.endsWith('.md')) {
+            html = markdownToBasicHtml(text);
+        } else {
+            // Plain text
+            html = text.split('\n')
+                .map(line => line.trim() ? `<p>${line}</p>` : '')
+                .join('');
+        }
+
+        const chapterScenes = scenes.filter(s => s.documentId === importTargetChapterId);
+        const newSceneId = crypto.randomUUID();
+        const newScene = {
+            id: newSceneId,
+            documentId: importTargetChapterId,
+            projectId: activeProjectId,
+            title: file.name.replace(/\.[^.]+$/, '').slice(0, 60) || 'Imported Scene',
+            content: html,
+            order: chapterScenes.length,
+            createdAt: new Date(),
+        };
+        
+        addScene(newScene);
+        setActiveDocument(importTargetChapterId);
+        setActiveScene(newSceneId);
+        setImportTargetChapterId(null);
+
+        // Expand chapter if needed
+        if (!expandedChapters.has(importTargetChapterId)) {
+            toggleChapterExpanded(importTargetChapterId);
+        }
     };
 
     const handleExportBible = () => {
@@ -282,17 +367,15 @@ export function NavigationPanel() {
         setDragOverSceneId(null);
     };
 
-    const handleThemeToggle = () => {
-        if (theme === 'light') setTheme('dark');
-        else if (theme === 'dark') setTheme('system');
-        else setTheme('light');
+
+    const handleManualBackup = () => {
+        const key = createManualBackup();
+        if (key) {
+            setBackupFeedback(true);
+            setTimeout(() => setBackupFeedback(false), 2000);
+        }
     };
 
-    const renderThemeIcon = () => {
-        if (theme === 'light') return '☀️';
-        if (theme === 'dark') return '🌙';
-        return '🖥️';
-    };
 
     return (
         <div className={styles.navigationPanel}>
@@ -317,6 +400,30 @@ export function NavigationPanel() {
                     </div>
                 </div>
             </div>
+
+            {/* Task 2: Attribution picker */}
+            {activeProjectId && (
+                <div className={styles.attributionRow}>
+                    <span className={styles.attributionLabel}>By:</span>
+                    <select
+                        className={styles.attributionSelect}
+                        value={activeProject?.attributedEntityId || ''}
+                        onChange={e => {
+                            if (activeProjectId) {
+                                updateProject(activeProjectId, { attributedEntityId: e.target.value || undefined });
+                            }
+                        }}
+                    >
+                        <option value="">None (Author)</option>
+                        {entities
+                            .filter(e => e.projectId === activeProjectId && (e as any).type === 'character')
+                            .map(entity => (
+                                <option key={entity.id} value={entity.id}>{entity.name}</option>
+                            ))
+                        }
+                    </select>
+                </div>
+            )}
 
             {activeProjectId ? (
                 <>
@@ -383,7 +490,15 @@ export function NavigationPanel() {
                                                                 onClick={(e) => e.stopPropagation()}
                                                             />
                                                         ) : (
-                                                            <span className={styles.chapterTitle}>{chapter.title}</span>
+                                                            <span
+                                                                className={styles.chapterTitle}
+                                                                onDoubleClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleStartRename(chapter.id, chapter.title, 'chapter', e);
+                                                                }}
+                                                            >
+                                                                {chapter.title}
+                                                            </span>
                                                         )}
                                                     </div>
                                                     {!isExpanded && (
@@ -427,6 +542,12 @@ export function NavigationPanel() {
                                                         onClick={(e) => handleExportDocx(chapter.id, e)}
                                                     >
                                                         Export as DOCX
+                                                    </button>
+                                                    <button
+                                                        className={styles.menuItem}
+                                                        onClick={(e) => handleImportFile(chapter.id, e)}
+                                                    >
+                                                        Import from file...
                                                     </button>
                                                     <button
                                                         className={`${styles.menuItem} ${styles.destructive}`}
@@ -477,7 +598,13 @@ export function NavigationPanel() {
                                                                         onClick={(e) => e.stopPropagation()}
                                                                     />
                                                                 ) : (
-                                                                    <span className={styles.sceneTitle}>
+                                                                    <span
+                                                                        className={styles.sceneTitle}
+                                                                        onDoubleClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            handleStartRename(scene.id, scene.title, 'scene', e);
+                                                                        }}
+                                                                    >
                                                                         {scene.title}
                                                                     </span>
                                                                 )}
@@ -536,14 +663,47 @@ export function NavigationPanel() {
             ) : null}
 
             <div style={{ flexShrink: 0, marginTop: 'auto' }}>
+                {/* Drive upload toast — anchored above footer */}
+                {driveUploadState && (
+                    <div className={styles.driveToast}>
+                        <span className={styles.driveToastText}>
+                            {driveUploadResult === 'uploading' ? '⏳ Uploading...'
+                                : driveUploadResult === 'done' ? '✅ Saved to Drive'
+                                    : driveUploadResult === 'error' ? '❌ Upload failed'
+                                        : '☁️ Also save to Google Drive?'}
+                        </span>
+                        {!driveUploadResult && (
+                            <div className={styles.driveToastBtns}>
+                                <button
+                                    className={styles.driveToastConfirm}
+                                    onClick={async () => {
+                                        setDriveUploadResult('uploading');
+                                        const { uploadToGoogleDrive } = await import('@/lib/export');
+                                        const link = await uploadToGoogleDrive(
+                                            driveUploadState.blob,
+                                            driveUploadState.filename,
+                                            driveUploadState.mimeType
+                                        );
+                                        setDriveUploadResult(link ? 'done' : 'error');
+                                        setTimeout(() => {
+                                            setDriveUploadState(null);
+                                            setDriveUploadResult(null);
+                                        }, 3000);
+                                    }}
+                                >
+                                    Save
+                                </button>
+                                <button
+                                    className={styles.driveToastDismiss}
+                                    onClick={() => { setDriveUploadState(null); setDriveUploadResult(null); }}
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
                 <div className={styles.panelFooter}>
-                    <button
-                        className={styles.homeButton}
-                        onClick={() => setActiveProject(null)}
-                        title="Back to worlds"
-                    >
-                        ⌂
-                    </button>
                     <div className={styles.footerSpacer} />
                     
                     <button
@@ -554,25 +714,28 @@ export function NavigationPanel() {
                         ⚗
                     </button>
 
+                    <button
+                        className={styles.seedButton}
+                        onClick={handleManualBackup}
+                        title="Create a manual backup snapshot"
+                    >
+                        {backupFeedback ? '✓ Saved' : '💾 Backup'}
+                    </button>
 
-                    <button
-                        className={styles.iconButton}
-                        onClick={() => setShowSettings(true)}
-                        title="Settings"
-                    >
-                        ⚙️
-                    </button>
-                    <button
-                        className={styles.iconButton}
-                        onClick={handleThemeToggle}
-                        title={`Theme: ${theme}`}
-                    >
-                        {renderThemeIcon()}
-                    </button>
+
                 </div>
             </div>
 
-            {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+
+            {/* Hidden Input for Imports */}
+            <input
+                ref={importFileRef}
+                type="file"
+                accept=".html,.htm,.txt,.md"
+                style={{ display: 'none' }}
+                onChange={handleFileSelected}
+            />
+
 
             {showSwitcher && (
                 <ProjectSwitcher onClose={() => setShowSwitcher(false)} />

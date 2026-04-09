@@ -436,6 +436,8 @@ const InputArea = ({
 
 export function AIChatbotPanel({ isOpen, onClose, onTabClick, tabWidth, onTabWidthChange, panelWidth, onPanelWidthChange }: AIChatbotPanelProps) {
     const [mounted, setMounted] = useState(false);
+    const tabRef = React.useRef<HTMLButtonElement>(null);
+    const [tabHeight, setTabHeight] = useState(0);
     
     // AI Chat Hook
     const {
@@ -554,7 +556,8 @@ export function AIChatbotPanel({ isOpen, onClose, onTabClick, tabWidth, onTabWid
                     style={{
                         width: tabWidth,
                         right: isOpen ? panelWidth : 0,
-                        transition: 'right 280ms ease-in-out'
+                        top: 568,
+                        transition: 'right 280ms ease-in-out',
                     }}
                     onClick={onTabClick}
                     title="AI Assistant"
@@ -587,6 +590,23 @@ export function AIChatbotPanel({ isOpen, onClose, onTabClick, tabWidth, onTabWid
                 document.body
             )}
 
+            {mounted && isOpen && createPortal(
+                <button
+                    className={styles.ghostTab}
+                    style={{ 
+                        width: tabWidth, 
+                        height: 130, // matches standardized sideTab height
+                        top: 568, // matches .sideTab { top: 568px } in AIChatbotPanel.module.css
+                        right: 0, // stays static at the screen edge
+                    }}
+                    onClick={onClose}
+                    title="Close Chat"
+                >
+                    <span className={styles.ghostTabArrow}>▸</span>
+                </button>,
+                document.body
+            )}
+
             <div
                 className={`${styles.panel} ${isOpen ? styles.open : ''}`}
                 style={{ width: panelWidth }}
@@ -614,7 +634,7 @@ export function AIChatbotPanel({ isOpen, onClose, onTabClick, tabWidth, onTabWid
                     />
                     
                     {/* Header */}
-                    <div className={styles.header}>
+                    <div className={styles.header} style={{ paddingRight: tabWidth }}>
                         <h2 className={styles.title}>AI Assistant</h2>
                         <button
                             className={styles.closeButton}

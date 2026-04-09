@@ -14,7 +14,7 @@ const MODE_LABELS: Record<string, string> = {
   'novel':       'Novels',
   'screenplay':  'Screenplays',
   'markdown':    'Markdown / Notes',
-  'poetry':      'Poetry',
+  'poetry':      'Poetry & Music',
   'real-world':  'Real World / Non-Fiction',
 };
 
@@ -24,14 +24,17 @@ const MODE_ORDER = ['novel', 'screenplay', 'real-world', 'poetry', 'markdown'];
 // RIPPLE CANVAS — Interactive water-surface dot grid
 // ============================================================
 
-const DOT_SPACING = 28;       // pixels between dots (matches old CSS grid)
-const RIPPLE_RADIUS = 120;    // mouse influence radius in pixels
-const RIPPLE_STRENGTH = 18;   // displacement magnitude on mouse move
-const DECAY = 0.97;           // wave energy decay per frame (0-1, higher = longer waves)
-const PROPAGATION = 0.18;     // how fast energy spreads to neighbors
-const DOT_RADIUS = 1.5;       // dot render radius in px
-const DOT_COLOR = 'rgba(255, 255, 255, 0.28)'; // base dot color
-const DOT_LIT_COLOR = 'rgba(208, 188, 255, 0.75)'; // lavender when near crest
+const DOT_SPACING = 28;
+const RIPPLE_RADIUS = 120;
+const RIPPLE_STRENGTH = 18;
+const DECAY = 0.97;
+const PROPAGATION = 0.18;
+const DOT_RADIUS = 1.5;
+const DOT_COLOR = 'rgba(255, 255, 255, 0.28)';
+const DOT_LIT_COLOR = 'rgba(208, 188, 255, 0.75)';
+// Minimum energy magnitude — values below this snap to zero to prevent
+// dots getting frozen in a lit state due to floating-point accumulation.
+const ENERGY_FLOOR = 0.05;
 
 function RippleCanvas({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -108,8 +111,25 @@ function RippleCanvas({ containerRef }: { containerRef: React.RefObject<HTMLDivE
             a[r * C + (c + 1)] +
             a[(r - 1) * C + c] +
             a[(r + 1) * C + c];
-          b[i] = (neighbors * PROPAGATION + a[i] * (1 - PROPAGATION * 4)) * DECAY;
+          const val = (neighbors * PROPAGATION + a[i] * (1 - PROPAGATION * 4)) * DECAY;
+          // Snap near-zero values to exactly zero so dots stop glowing
+          b[i] = Math.abs(val) < ENERGY_FLOOR ? 0 : val;
         }
+      }
+
+      // Explicitly decay boundary cells (ignored by propagation loop)
+      // to ensure energy bleeds out and dots don't freeze lit at the edges.
+      for (let c = 0; c < C; c++) {
+        b[0 * C + c] = a[0 * C + c] * DECAY;
+        b[(R - 1) * C + c] = a[(R - 1) * C + c] * DECAY;
+        if (Math.abs(b[0 * C + c]) < ENERGY_FLOOR) b[0 * C + c] = 0;
+        if (Math.abs(b[(R - 1) * C + c]) < ENERGY_FLOOR) b[(R - 1) * C + c] = 0;
+      }
+      for (let r = 1; r < R - 1; r++) {
+        b[r * C + 0] = a[r * C + 0] * DECAY;
+        b[r * C + (C - 1)] = a[r * C + (C - 1)] * DECAY;
+        if (Math.abs(b[r * C + 0]) < ENERGY_FLOOR) b[r * C + 0] = 0;
+        if (Math.abs(b[r * C + (C - 1)]) < ENERGY_FLOOR) b[r * C + (C - 1)] = 0;
       }
 
       const tmp = bufA.current;
@@ -134,14 +154,12 @@ function RippleCanvas({ containerRef }: { containerRef: React.RefObject<HTMLDivE
       frameRef.current = requestAnimationFrame(tick);
     };
 
-    // Attach mouse listeners to the container (covers full screen, above canvas z-index)
     container.addEventListener('mousemove', onMouseMove);
     container.addEventListener('mouseleave', onMouseLeave);
 
     const ro = new ResizeObserver(resize);
     ro.observe(container);
 
-    // Defer first render until after browser paint
     requestAnimationFrame(() => {
       resize();
       frameRef.current = requestAnimationFrame(tick);
@@ -171,8 +189,19 @@ function RippleCanvas({ containerRef }: { containerRef: React.RefObject<HTMLDivE
 }
 
 
-export default function WorldLandingScreen() {
+interface WorldLandingScreenProps {
+  onEnter?: () => void;
+}
+
+import { NewProjectModal } from '@/components/ui/NewProjectModal';
+import { ImportModal } from '@/components/ui/ImportModal';
+import ExportModal from '@/components/ui/ExportModal';
+
+export default function WorldLandingScreen({ onEnter }: WorldLandingScreenProps) {
   const [showNewWorld, setShowNewWorld] = useState(false);
+  const [showNewProject, setShowNewProject] = useState(false);
+  const [showImport, setShowImport] = useState(false);
+  const [showExport, setShowExport] = useState(false);
   const screenRef = useRef<HTMLDivElement>(null);
   const worlds = useWorkspaceStore(state => state.worlds);
   const projects = useWorkspaceStore(state => state.projects);
@@ -183,18 +212,17 @@ export default function WorldLandingScreen() {
   const setActiveDocument = useWorkspaceStore(state => state.setActiveDocument);
   const setWorkspaceMode = useWorkspaceStore(state => state.setWorkspaceMode);
 
-  // World collapsed state
-  const [collapsedWorlds, setCollapsedWorlds] = useState<Set<string>>(new Set());
-  
+  const [expandedWorlds, setExpandedWorlds] = useState<Set<string>>(new Set());
+
   const toggleWorld = (worldId: string) => {
-    setCollapsedWorlds(prev => {
+    setExpandedWorlds(prev => {
       const next = new Set(prev);
       if (next.has(worldId)) next.delete(worldId);
       else next.add(worldId);
       return next;
     });
   };
-  // Type group collapsed state — all collapsed by default
+
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     new Set(MODE_ORDER)
   );
@@ -208,24 +236,24 @@ export default function WorldLandingScreen() {
     });
   };
 
-  /** Select a project and enter the writing workspace */
   const handleSelectProject = (projectId: string) => {
     setActiveProject(projectId);
     const projectDocs = documents
       .filter(d => d.projectId === projectId)
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     if (projectDocs.length > 0) setActiveDocument(projectDocs[0].id);
-    setWorkspaceMode('writing');
+    setWorkspaceMode('desk');
+    onEnter?.();
   };
 
-  /** Jump to most recently updated project */
-  const handleStartWriting = () => {
+  const handleResumeWriting = () => {
     if (projects.length === 0) return;
     const recent = [...projects].sort((a, b) =>
       new Date(b.updatedAt ?? b.createdAt).getTime() -
       new Date(a.updatedAt ?? a.createdAt).getTime()
     );
     handleSelectProject(recent[0].id);
+    onEnter?.();
   };
 
   const getProjectStats = (projectId: string) => {
@@ -251,7 +279,6 @@ export default function WorldLandingScreen() {
 
   const worldList = [
     ...worlds,
-    // Add virtual world for uncategorized projects if any exist
     ...(projects.some(p => !p.worldId) ? [{ id: 'uncategorized', name: 'Uncategorized World' }] : [])
   ];
 
@@ -281,11 +308,32 @@ export default function WorldLandingScreen() {
           <div className={styles.ctaGroup}>
             <button
               className={styles.ctaPrimary}
-              onClick={handleStartWriting}
+              onClick={() => setShowNewProject(true)}
+            >
+              → START NEW WRITING
+            </button>
+            <button
+              className={styles.ctaSecondary}
+              onClick={handleResumeWriting}
               disabled={projects.length === 0}
             >
-              → START WRITING
+              ↺ RESUME WRITING
             </button>
+            <div className={styles.ctaSubGroup}>
+              <button
+                className={styles.ctaSecondary}
+                onClick={() => setShowImport(true)}
+              >
+                📥 IMPORT
+              </button>
+              <button
+                className={styles.ctaSecondary}
+                onClick={() => setShowExport(true)}
+                disabled={projects.length === 0}
+              >
+                📤 EXPORT
+              </button>
+            </div>
             <p className={styles.ctaHint}>
               {projects.length > 0
                 ? `${projects.length} ${projects.length === 1 ? 'project' : 'projects'} across ${worlds.length} ${worlds.length === 1 ? 'world' : 'worlds'}`
@@ -306,90 +354,82 @@ export default function WorldLandingScreen() {
             <span className={styles.rightCount}>{projects.length} total</span>
           </div>
 
-          {/* ---- WORLD HIERARCHY ---- */}
           <div className={styles.worldHierarchy}>
             {worldList.map(world => {
-              const worldProjects = projects.filter(p => 
+              const worldProjects = projects.filter(p =>
                 world.id === 'uncategorized' ? !p.worldId : p.worldId === world.id
               );
-              const isWorldCollapsed = collapsedWorlds.has(world.id);
-              const grouped = getGroupedProjects(worldProjects);
+              const isExpanded = expandedWorlds.has(world.id);
+              
+              const totalWords = worldProjects.reduce((sum, p) => sum + getProjectStats(p.id).wordCount, 0);
 
               return (
-                <div key={world.id} className={styles.worldGroup}>
-                  <button
-                    className={styles.worldHeader}
+                <div 
+                  key={world.id} 
+                  className={`${styles.worldCardRow} ${isExpanded ? styles.worldCardRowExpanded : ''}`}
+                  style={{ '--world-accent': (world as any).coverColor || '#a078ff' } as React.CSSProperties}
+                >
+                  <button 
+                    className={styles.worldCardHeader} 
                     onClick={() => toggleWorld(world.id)}
                   >
-                    <div className={styles.worldHeaderLeft}>
-                      <span className={styles.worldChevron}>
-                        {isWorldCollapsed ? '▸' : '▾'}
-                      </span>
-                      <div className={styles.worldDot} />
-                      <span className={styles.worldName}>{world.name}</span>
+                    <div className={styles.worldCardHeaderLeft}>
+                      <div className={styles.worldIndicator} />
+                      <div className={styles.worldCardInfo}>
+                        <div className={styles.worldCardName}>{world.name}</div>
+                        <div className={styles.worldCardMeta}>
+                          {(world as any).genre || 'General'} • {worldProjects.length} projects • {totalWords.toLocaleString()} words
+                        </div>
+                      </div>
                     </div>
-                    <span className={styles.worldCount}>{worldProjects.length} projects</span>
+                    <div className={styles.worldCardHeaderRight}>
+                      {(world as any).logline && (
+                        <div className={styles.worldLogline}>{(world as any).logline}</div>
+                      )}
+                      <span className={styles.worldExpandIcon}>{isExpanded ? '−' : '+'}</span>
+                    </div>
                   </button>
 
-                  {!isWorldCollapsed && (
-                    <div className={styles.worldBody}>
+                  <div className={styles.worldCardBody}>
+                    <div className={styles.projectGrid}>
                       {worldProjects.length === 0 && (
-                        <p className={styles.emptyHint}>No projects in this world.</p>
+                        <p className={styles.emptyHint}>No projects in this world yet.</p>
                       )}
-                      {grouped.map(({ mode, label, projects: groupProjects }) => {
-                        if (groupProjects.length === 0) return null;
-                        const isCollapsed = collapsedGroups.has(mode);
+                      {worldProjects.map(project => {
+                        const { wordCount } = getProjectStats(project.id);
                         return (
-                          <div key={mode} className={styles.typeGroup}>
-                            <button
-                              className={styles.typeGroupHeader}
-                              onClick={() => toggleGroup(mode)}
-                            >
-                              <span className={styles.typeChevron}>
-                                {isCollapsed ? '▸' : '▾'}
+                          <button
+                            key={project.id}
+                            className={styles.projectItem}
+                            onClick={() => handleSelectProject(project.id)}
+                          >
+                            <div className={styles.projectCover} style={{ background: project.coverColor }}>
+                              <span className={styles.projectInitials}>
+                                {project.name.slice(0, 1).toUpperCase()}
                               </span>
-                              <span className={styles.typeLabel}>{label}</span>
-                              <span className={styles.typeCount}>{groupProjects.length}</span>
-                            </button>
-
-                            {!isCollapsed && (
-                              <div className={styles.projectList}>
-                                {groupProjects.map(project => {
-                                  const { wordCount, entityCount } = getProjectStats(project.id);
-                                  return (
-                                    <button
-                                      key={project.id}
-                                      className={styles.worldCard}
-                                      onClick={() => handleSelectProject(project.id)}
-                                      style={{ borderLeftColor: project.coverColor }}
-                                    >
-                                      <div
-                                        className={styles.cardCover}
-                                        style={{ background: project.coverColor }}
-                                      >
-                                        <span className={styles.cardInitials}>
-                                          {project.name.slice(0, 1).toUpperCase()}
-                                        </span>
-                                      </div>
-                                      <div className={styles.cardInfo}>
-                                        <div className={styles.cardTitle}>{project.name}</div>
-                                        <div className={styles.cardMeta}>
-                                          {wordCount.toLocaleString()} words • {entityCount} entities
-                                        </div>
-                                      </div>
-                                    </button>
-                                  );
-                                })}
+                            </div>
+                            <div className={styles.projectInfo}>
+                              <div className={styles.projectTitle}>{project.name}</div>
+                              <div className={styles.projectStats}>
+                                {wordCount.toLocaleString()} words
                               </div>
-                            )}
-                          </div>
+                            </div>
+                          </button>
                         );
                       })}
                     </div>
-                  )}
+                  </div>
                 </div>
               );
             })}
+
+            <button 
+              className={styles.addWorldCard}
+              onClick={() => setShowNewWorld(true)}
+            >
+              <span className={styles.addWorldIcon}>+</span>
+              <span className={styles.addWorldLabel}>Create New World</span>
+            </button>
           </div>
         </div>
       </div>
@@ -398,6 +438,22 @@ export default function WorldLandingScreen() {
         isOpen={showNewWorld}
         onClose={() => setShowNewWorld(false)}
       />
+
+      <NewProjectModal
+        isOpen={showNewProject}
+        onClose={() => setShowNewProject(false)}
+      />
+
+      <ImportModal
+        isOpen={showImport}
+        onClose={() => setShowImport(false)}
+      />
+
+      {showExport && (
+        <ExportModal
+          onClose={() => setShowExport(false)}
+        />
+      )}
     </div>
   );
 }

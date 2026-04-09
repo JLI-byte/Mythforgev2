@@ -25,7 +25,10 @@ const TargetIcon = () => (
 
 export function WritingGoalsPanel({ isOpen, onClose, onTabClick, tabWidth, onTabWidthChange, panelWidth, onPanelWidthChange }: WritingGoalsPanelProps) {
     const [mounted, setMounted] = useState(false);
+
     useEffect(() => { setMounted(true); }, []);
+
+
 
     return (
         <>
@@ -35,7 +38,8 @@ export function WritingGoalsPanel({ isOpen, onClose, onTabClick, tabWidth, onTab
                     style={{
                         width: tabWidth,
                         right: isOpen ? panelWidth : 0,
-                        transition: 'right 280ms ease-in-out'
+                        top: 308,
+                        transition: 'right 280ms ease-in-out',
                     }}
                     onClick={onTabClick}
                     title="Writing Goals"
@@ -68,6 +72,23 @@ export function WritingGoalsPanel({ isOpen, onClose, onTabClick, tabWidth, onTab
                 document.body
             )}
 
+            {mounted && isOpen && createPortal(
+                <button
+                    className={styles.ghostTab}
+                    style={{ 
+                        width: tabWidth, 
+                        height: 130, // matches standardized sideTab height
+                        top: 308, // matches .sideTab { top: 308px } in WritingGoalsPanel.module.css
+                        right: 0, // stays static at the screen edge
+                    }}
+                    onClick={onClose}
+                    title="Close Goals"
+                >
+                    <span className={styles.ghostTabArrow}>▸</span>
+                </button>,
+                document.body
+            )}
+
             <div
                 className={`${styles.panel} ${isOpen ? styles.open : ''}`}
                 style={{ width: panelWidth }}
@@ -93,7 +114,7 @@ export function WritingGoalsPanel({ isOpen, onClose, onTabClick, tabWidth, onTab
                     }}
                     title="Drag to resize panel"
                 />
-                <div className={styles.header}>
+                <div className={styles.header} style={{ paddingRight: tabWidth }}>
                     <h2 className={styles.title}>Writing Goals</h2>
                     <button
                         className={styles.closeButton}

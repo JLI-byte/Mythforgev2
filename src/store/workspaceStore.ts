@@ -47,6 +47,24 @@ export interface World {
   updatedAt?: Date;
 }
 
+/** A single root category in the World Bible hierarchy */
+export interface WorldBibleRootConfig {
+  id: string;            // stable UUID — used as React key
+  label: string;         // display name e.g. "People", "Mortals"
+  icon: string;          // emoji e.g. "👤"
+  entityTypes: EntityType[]; // which entity types live here
+  parentId?: string;     // Sprint 66: optional parent for nesting
+  x?: number;            // Sprint 65: spatial canvas position
+  y?: number;
+  width?: number;        // Sprint 67: resizable active area
+  height?: number;
+}
+
+/** Per-project World Bible layout customization */
+export interface WorldBibleLayout {
+  roots: WorldBibleRootConfig[];
+}
+
 export interface Project {
     id: string;
     name: string;
@@ -56,6 +74,11 @@ export interface Project {
     worldId?: string;
     createdAt: Date;
     updatedAt?: Date;
+    /** Optional character entity this project is attributed to — shown on their article */
+    attributedEntityId?: string;
+    description?: string;
+    authorName?: string;
+    worldBibleLayout?: WorldBibleLayout;
 }
 
 export interface Document {
@@ -109,6 +132,14 @@ export interface ArticleTemplate {
   createdAt: Date;
 }
 
+export interface HierarchyTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  layout: WorldBibleLayout;
+  createdAt: Date;
+}
+
 /**
  * A central mapping for EntityType strings to their human-readable UI labels.
  * This should be used anywhere an entity type is rendered to the user.
@@ -151,6 +182,53 @@ export interface Entity {
     articleBlocks?: ArticleBlock[];
     /** Sprint 52: TipTap HTML content for the Document-mode article editor — separate from articleBlocks */
     articleDoc?: string;
+}
+
+// =============================================
+// Writing Desk System Interfaces
+// =============================================
+
+export type DeskWidgetType = 'writingZone' | 'sticky' | 'reference' | 'image' | 'biblePinit' | 'sceneControl' | 'characterState' | 'continuity' | 'structure' | 'research' | 'progress' | 'relMap' | 'draftNav' | 'untyped';
+
+export interface DeskWidget {
+  id: string;
+  type: DeskWidgetType;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  content: Record<string, any>;
+  dock?: 'center' | 'left' | 'right' | null;
+  /** Linked scope for visibility logic */
+  scope?: 'scene' | 'chapter' | 'project' | 'global';
+  scopeId?: string;
+}
+
+export interface DeskState {
+  widgets: DeskWidget[];
+  zoom: number;
+  canvasOffset: { x: number; y: number };
+}
+
+export interface SceneSnapshot {
+  id: string;
+  sceneId: string;
+  projectId: string;
+  label: string;          // "Auto — 2:34 PM" or user-typed name
+  content: string;        // full HTML content at snapshot time
+  wordCount: number;
+  createdAt: Date;
+  isAuto: boolean;
+}
+
+export interface EntitySnapshot {
+  id: string;
+  entityId: string;
+  projectId: string;
+  label: string;
+  articleDoc: string;     // full TipTap HTML at snapshot time
+  createdAt: Date;
+  isAuto: boolean;
 }
 
 /**
@@ -252,8 +330,17 @@ interface XPEvent {
     earnedAt: Date;
 }
 
+export interface SocialPost {
+    id: string;
+    platform: string;
+    content: string;
+    timestamp: string;
+}
+
+export type WorkspaceMode = 'worldBible' | 'template' | 'desk' | 'hierarchy' | 'bookshelf';
+
 export interface WorkspaceState {
-    workspaceMode: 'writing' | 'worldBible' | 'template';
+    workspaceMode: WorkspaceMode;
     // --- STATE FIELDS ---
     worlds: World[];
     projects: Project[];
@@ -262,6 +349,8 @@ export interface WorkspaceState {
     activeProjectId: string | null;
     activeDocumentId: string | null;
     activeSceneId: string | null;
+    sceneSnapshots: SceneSnapshot[];
+    entitySnapshots: EntitySnapshot[];
 
     /**
      * Global core data structure: The list of established world entities.
@@ -305,7 +394,7 @@ export interface WorkspaceState {
      * The currently active side panel.
      * Sprint 62: Centralized for beta feedback and future integrations.
      */
-    activePanel: 'worldBible' | 'consistency' | 'writingGoals' | 'writingStats' | 'aiChatbot' | 'music' | 'beta' | null;
+    activePanel: 'worldBible' | 'consistency' | 'writingGoals' | 'socialMedia' | 'aiChatbot' | 'music' | 'beta' | 'versionHistory' | null;
 
     /**
      * Typewriter mode keeps the active line centered in the viewport.
@@ -353,6 +442,11 @@ export interface WorkspaceState {
      * This is intentionally not persisted (resets to null on refresh).
      */
     selectedEntityId: string | null;
+    
+    /** Whether the World Bible Hierarchy Designer modal is open */
+    isHierarchyModalOpen: boolean;
+    /** Whether the designer should start in scratch mode */
+    isHierarchyScratchMode: boolean;
 
     /**
      * INTERNAL: Flags whether the async local storage hydration has completed.
@@ -411,7 +505,28 @@ export interface WorkspaceState {
      */
     articleTemplates: ArticleTemplate[];
 
-    setWorkspaceMode: (mode: 'writing' | 'worldBible' | 'template') => void;
+    /**
+     * User-saved hierarchy layout templates for the World Bible.
+     */
+    hierarchyTemplates: HierarchyTemplate[];
+
+    /**
+     * TEMPORARY hierarchy layout used while designing in the Draft Table.
+     * Prevents live projects from being updated automatically.
+     */
+    draftHierarchyLayout: WorldBibleLayout | null;
+
+    /**
+     * Desk widgets that are globally available across all projects.
+     */
+    globalWidgets: DeskWidget[];
+
+    /**
+     * Writing Desk states per project.
+     */
+    deskStates: Record<string, DeskState>;
+
+    setWorkspaceMode: (mode: WorkspaceMode) => void;
 
     // --- ACTIONS ---
     addWorld: (world: World) => void;
@@ -421,6 +536,7 @@ export interface WorkspaceState {
     deleteProject: (id: string) => void;
 
     addDocument: (document: Document) => void;
+    updateGlobalWidgets: (widgets: DeskWidget[]) => void;
     updateDocument: (id: string, updates: Partial<Omit<Document, 'id' | 'projectId' | 'createdAt'>>) => void;
     deleteDocument: (id: string) => void;
 
@@ -485,7 +601,7 @@ export interface WorkspaceState {
     toggleFocusMode: () => void;
 
     /** Sets the currently active side panel */
-    setActivePanel: (activePanel: 'worldBible' | 'consistency' | 'writingGoals' | 'writingStats' | 'aiChatbot' | 'music' | 'beta' | null) => void;
+    setActivePanel: (activePanel: 'worldBible' | 'consistency' | 'writingGoals' | 'socialMedia' | 'aiChatbot' | 'music' | 'beta' | 'versionHistory' | null) => void;
 
     /** Spotify Controls */
     setSpotifyUrl: (url: string | null) => void;
@@ -504,20 +620,29 @@ export interface WorkspaceState {
     setEditorMaxWidth: (width: number | null) => void;
     toggleStandardFormat: () => void;
 
-    /**
-     * Sets the currently selected entity for the detail view.
-     */
+    /** Sets the currently selected entity for the detail view. */
     setSelectedEntity: (id: string | null) => void;
 
-    /**
-     * Updates an existing entity.
-     */
+    /** Hierarchy Canvas Management */
+    addWorldBibleRoot: (root: WorldBibleRootConfig, isDraft?: boolean) => void;
+    updateWorldBibleRoot: (id: string, updates: Partial<Omit<WorldBibleRootConfig, 'id'>>, isDraft?: boolean) => void;
+    deleteWorldBibleRoot: (id: string, isDraft?: boolean) => void;
+    moveWorldBibleType: (type: EntityType, fromRootId: string, toRootId: string, isDraft?: boolean) => void;
+
+    /** Designer / Draft Table State */
+    setDraftHierarchyLayout: (layout: WorldBibleLayout | null) => void;
+    applyDraftHierarchyToProject: () => void;
+
+    /** Updates an existing entity. */
     updateEntity: (id: string, updates: Partial<Omit<Entity, 'id' | 'createdAt'>>) => void;
 
     /**
      * Deletes an entity by ID.
      */
     deleteEntity: (id: string) => void;
+
+    /** Controls the global Hierarchy Designer modal */
+    setHierarchyModal: (open: boolean, scratch?: boolean) => void;
 
     /** Sprint 46A: Toggle an entity's favorite status */
     toggleEntityFavorite: (id: string) => void;
@@ -557,6 +682,10 @@ export interface WorkspaceState {
     /** Apply a template's structure to an entity's article */
     applyArticleTemplate: (entityId: string, templateId: string) => void;
 
+    /** Writing Desk Actions */
+    updateDeskState: (projectId: string, updates: Partial<DeskState>) => void;
+    pinEntityToDesk: (projectId: string, entityId: string) => void;
+
     /**
      * Submits partial updates to the AI provider configuration.
      */
@@ -579,6 +708,10 @@ export interface WorkspaceState {
     earnedBadges: EarnedBadge[];
     xpEvents: XPEvent[];
 
+    socialHistory: SocialPost[];
+    addSocialPost: (post: Omit<SocialPost, 'id' | 'timestamp'>) => void;
+    deleteSocialPost: (id: string) => void;
+
     /** Record a writing session — called by editor autosave flow */
     recordWritingSession: (projectId: string, wordsAdded: number, minutesSpent: number) => void;
     /** Update goal configuration — sets goalConfigured: true */
@@ -589,6 +722,17 @@ export interface WorkspaceState {
     computeStreakState: () => StreakState;
     /** Check milestones and award badges that haven't been earned yet */
     checkAndAwardBadges: () => void;
+
+    saveSceneSnapshot: (sceneId: string, label: string, isAuto: boolean) => void;
+    saveEntitySnapshot: (entityId: string, label: string, isAuto: boolean) => void;
+    restoreSceneSnapshot: (snapshotId: string) => void;
+    restoreEntitySnapshot: (snapshotId: string) => void;
+    deleteSnapshot: (snapshotId: string, type: 'scene' | 'entity') => void;
+
+    /** World Bible Hierarchy Templates */
+    saveHierarchyTemplate: (name: string, description: string | undefined, layout: WorldBibleLayout) => void;
+    deleteHierarchyTemplate: (templateId: string) => void;
+    applyHierarchyTemplate: (projectId: string, templateId: string) => void;
 }
 
 /**
@@ -709,6 +853,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             activeProjectId: null,
             activeDocumentId: null,
             activeSceneId: null,
+            sceneSnapshots: [],
+            entitySnapshots: [],
             entities: [],
             hoveredEntityId: null,
             isInlineCreatorOpen: false,
@@ -727,11 +873,15 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             editorMaxWidth: null,
             cachedEditorMaxWidth: null,
             isStandardFormat: false,
+            globalWidgets: [],
             tabRailWidth: 72,
             panelWidth: 480,
             articleZoneWidth: 680,
             selectedEntityId: null,
+            isHierarchyModalOpen: false,
+            isHierarchyScratchMode: false,
             _hasHydrated: false,
+            deskStates: {},
             aiConfig: {
                 provider: 'anthropic',
                 apiKey: '',
@@ -745,7 +895,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             baseFontSize: 20,
             focusedArticleEntityId: null,
             articleTemplates: [],
-            workspaceMode: 'writing',
+            hierarchyTemplates: [],
+            draftHierarchyLayout: null,
+            workspaceMode: 'desk',
 
             // Sprint 47A: Goals system initial state
             writingDays: [],
@@ -766,6 +918,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             },
             earnedBadges: [],
             xpEvents: [],
+            socialHistory: [],
 
             addWorld: (world) =>
                 set((state) => {
@@ -825,6 +978,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         ),
                     };
                 }),
+
+            updateGlobalWidgets: (widgets) =>
+                set(() => ({ globalWidgets: widgets })),
 
             deleteDocument: (id) =>
                 set((state) => {
@@ -984,6 +1140,19 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             setActivePanel: (activePanel) =>
                 set(() => ({ activePanel })),
 
+            addSocialPost: (post) =>
+                set((state) => ({
+                    socialHistory: [
+                        { ...post, id: crypto.randomUUID(), timestamp: new Date().toISOString() },
+                        ...state.socialHistory
+                    ]
+                })),
+
+            deleteSocialPost: (id) =>
+                set((state) => ({
+                    socialHistory: state.socialHistory.filter(p => p.id !== id)
+                })),
+
             toggleFocusMode: () =>
                 set((state) => ({ isFocusMode: !state.isFocusMode })),
 
@@ -1031,6 +1200,12 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             setSelectedEntity: (id) =>
                 set(() => ({ selectedEntityId: id })),
+
+            setHierarchyModal: (open, scratch = false) =>
+                set(() => ({ 
+                    isHierarchyModalOpen: open, 
+                    isHierarchyScratchMode: scratch 
+                })),
 
             updateEntity: (id, updates) =>
                 set((state) => {
@@ -1215,50 +1390,373 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             setWorkspaceMode: (mode) => set((state) => ({ 
                 workspaceMode: mode, 
-                // Clear focused entity when going back to writing or browsing worldBible
-                focusedArticleEntityId: (mode === 'writing' || mode === 'worldBible') 
+                // Clear focused entity when browsing worldBible or hierarchy
+                focusedArticleEntityId: (mode === 'worldBible' || mode === 'hierarchy')
                   ? null 
                   : state.focusedArticleEntityId 
             })),
 
-            saveArticleTemplate: (name, description, sourceBlocks) =>
+            addWorldBibleRoot: (root, isDraft) =>
                 set((state) => {
-                    const strippedBlocks = sourceBlocks.map(block => ({
-                        type: block.type
-                    }));
+                    if (isDraft) {
+                        const layout = state.draftHierarchyLayout || { roots: [] };
+                        return { draftHierarchyLayout: { ...layout, roots: [...layout.roots, root] } };
+                    }
+                    const activeProjectId = state.activeProjectId;
+                    if (!activeProjectId) return state;
+                    return {
+                        projects: state.projects.map(p => {
+                            if (p.id !== activeProjectId) return p;
+                            const layout = p.worldBibleLayout || { roots: [] };
+                            return {
+                                ...p,
+                                worldBibleLayout: { ...layout, roots: [...layout.roots, root] }
+                            };
+                        })
+                    };
+                }),
 
-                    const newTemplate: ArticleTemplate = {
+            updateWorldBibleRoot: (id, updates, isDraft) =>
+                set((state) => {
+                    if (isDraft) {
+                        const layout = state.draftHierarchyLayout;
+                        if (!layout) return state;
+                        return {
+                            draftHierarchyLayout: {
+                                ...layout,
+                                roots: layout.roots.map(r => r.id === id ? { ...r, ...updates } : r)
+                            }
+                        };
+                    }
+                    const activeProjectId = state.activeProjectId;
+                    if (!activeProjectId) return state;
+                    return {
+                        projects: state.projects.map(p => {
+                            if (p.id !== activeProjectId) return p;
+                            const layout = p.worldBibleLayout;
+                            if (!layout) return p;
+                            return {
+                                ...p,
+                                worldBibleLayout: {
+                                    ...layout,
+                                    roots: layout.roots.map(r => r.id === id ? { ...r, ...updates } : r)
+                                }
+                            };
+                        })
+                    };
+                }),
+
+            deleteWorldBibleRoot: (id, isDraft) =>
+                set((state) => {
+                    const activeProjectId = state.activeProjectId;
+                    const layout = isDraft ? state.draftHierarchyLayout : state.projects.find(p => p.id === activeProjectId)?.worldBibleLayout;
+                    if (!layout) return state;
+                    
+                    // Find all nested IDs to remove (recursive cascade)
+                    const findChildren = (parentId: string): string[] => {
+                        const direct = layout.roots.filter(r => r.parentId === parentId).map(r => r.id);
+                        return [...direct, ...direct.flatMap(findChildren)];
+                    };
+                    const idsToRemove = [id, ...findChildren(id)];
+                    
+                    // Collect all entity types that were in these removed folders
+                    const freed = layout.roots
+                        .filter(r => idsToRemove.includes(r.id))
+                        .flatMap(r => r.entityTypes);
+
+                    const remaining = layout.roots.filter(r => !idsToRemove.includes(r.id));
+                    
+                    // Reassign types to first remaining if available
+                    if (remaining.length > 0 && freed.length > 0) {
+                        remaining[0] = { 
+                            ...remaining[0], 
+                            entityTypes: [...new Set([...remaining[0].entityTypes, ...freed])] 
+                        };
+                    }
+
+                    const nextLayout = { ...layout, roots: remaining };
+
+                    if (isDraft) {
+                        return { draftHierarchyLayout: nextLayout };
+                    }
+
+                    return {
+                        projects: state.projects.map(p => {
+                            if (p.id !== activeProjectId) return p;
+                            return { ...p, worldBibleLayout: nextLayout };
+                        })
+                    };
+                }),
+
+            moveWorldBibleType: (type, fromRootId, toRootId, isDraft) =>
+                set((state) => {
+                    if (isDraft) {
+                        const layout = state.draftHierarchyLayout;
+                        if (!layout) return state;
+                        return {
+                            draftHierarchyLayout: {
+                                ...layout,
+                                roots: layout.roots.map(r => {
+                                    if (r.id === fromRootId) return { ...r, entityTypes: r.entityTypes.filter(t => t !== type) };
+                                    if (r.id === toRootId) return { ...r, entityTypes: [...new Set([...r.entityTypes, type])] };
+                                    return r;
+                                })
+                            }
+                        };
+                    }
+                    const activeProjectId = state.activeProjectId;
+                    if (!activeProjectId) return state;
+                    return {
+                        projects: state.projects.map(p => {
+                            if (p.id !== activeProjectId) return p;
+                            const layout = p.worldBibleLayout;
+                            if (!layout) return p;
+                            return {
+                                ...p,
+                                worldBibleLayout: {
+                                    ...layout,
+                                    roots: layout.roots.map(r => {
+                                        if (r.id === fromRootId) return { ...r, entityTypes: r.entityTypes.filter(t => t !== type) };
+                                        if (r.id === toRootId) return { ...r, entityTypes: [...new Set([...r.entityTypes, type])] };
+                                        return r;
+                                    })
+                                }
+                            };
+                        })
+                    };
+                }),
+
+            setDraftHierarchyLayout: (layout) => set({ draftHierarchyLayout: layout }),
+
+            applyDraftHierarchyToProject: () =>
+                set((state) => {
+                    const activeProjectId = state.activeProjectId;
+                    if (!activeProjectId || !state.draftHierarchyLayout) return state;
+                    return {
+                        projects: state.projects.map(p => 
+                            p.id === activeProjectId 
+                                ? { ...p, worldBibleLayout: state.draftHierarchyLayout } 
+                                : p
+                        )
+                    };
+                }),
+
+            saveArticleTemplate: (name, description, sourceBlocks) =>
+                set((state) => ({
+                    articleTemplates: [
+                        ...state.articleTemplates,
+                        {
+                            id: crypto.randomUUID(),
+                            name,
+                            description,
+                            blocks: sourceBlocks.map(b => ({ type: b.type })),
+                            createdAt: new Date(),
+                        }
+                    ]
+                })),
+
+            deleteArticleTemplate: (templateId) =>
+                set((state) => ({
+                    articleTemplates: state.articleTemplates.filter(t => t.id !== templateId)
+                })),
+
+            applyArticleTemplate: (entityId, templateId) => set(state => {
+                const template = state.articleTemplates.find(t => t.id === templateId);
+                if (!template) return state;
+
+                const newBlocks: ArticleBlock[] = template.blocks.map(b => ({
+                    id: crypto.randomUUID(),
+                    type: b.type,
+                    x: 0, 
+                    y: 0,
+                    content: {},
+                }));
+
+                const entities = state.entities.map(e =>
+                    e.id === entityId ? { ...e, articleBlocks: newBlocks } : e
+                );
+                return { entities };
+            }),
+
+            saveHierarchyTemplate: (name, description, layout) => set(state => ({
+                hierarchyTemplates: [
+                    ...state.hierarchyTemplates,
+                    {
                         id: crypto.randomUUID(),
                         name,
                         description,
-                        blocks: strippedBlocks,
-                        createdAt: new Date()
-                    };
+                        layout: JSON.parse(JSON.stringify(layout)), // deep copy
+                        createdAt: new Date(),
+                    }
+                ]
+            })),
 
-                    return { articleTemplates: [...state.articleTemplates, newTemplate] };
+            deleteHierarchyTemplate: (templateId) => set(state => ({
+                hierarchyTemplates: state.hierarchyTemplates.filter(t => t.id !== templateId)
+            })),
+
+            applyHierarchyTemplate: (projectId, templateId) => set(state => {
+                const template = state.hierarchyTemplates.find(t => t.id === templateId);
+                if (!template) return state;
+
+                const projects = state.projects.map(p =>
+                    p.id === projectId ? { ...p, worldBibleLayout: JSON.parse(JSON.stringify(template.layout)) } : p
+                );
+                return { projects };
+            }),
+
+            saveSceneSnapshot: (sceneId, label, isAuto) =>
+                set((state) => {
+                    const scene = state.scenes.find(s => s.id === sceneId);
+                    if (!scene) return {};
+                    const snapshot: SceneSnapshot = {
+                        id: crypto.randomUUID(),
+                        sceneId,
+                        projectId: scene.projectId,
+                        label,
+                        content: scene.content,
+                        wordCount: scene.wordCount ?? 0,
+                        createdAt: new Date(),
+                        isAuto,
+                    };
+                    // Keep max 50 per scene, prune oldest auto-snapshots first
+                    const existing = state.sceneSnapshots.filter(s => s.sceneId === sceneId);
+                    let pruned = [...existing, snapshot];
+                    if (pruned.length > 50) {
+                        // Remove oldest auto snapshot first, then oldest manual
+                        const oldestAuto = pruned.find(s => s.isAuto);
+                        if (oldestAuto) pruned = pruned.filter(s => s.id !== oldestAuto.id);
+                        else pruned = pruned.slice(1);
+                    }
+                    return {
+                        sceneSnapshots: [
+                            ...state.sceneSnapshots.filter(s => s.sceneId !== sceneId),
+                            ...pruned,
+                        ],
+                    };
                 }),
 
-            deleteArticleTemplate: (id) =>
-                set((state) => ({
-                    articleTemplates: state.articleTemplates.filter(t => t.id !== id)
-                })),
+            saveEntitySnapshot: (entityId, label, isAuto) =>
+                set((state) => {
+                    const entity = state.entities.find(e => e.id === entityId);
+                    if (!entity || !entity.articleDoc) return {};
+                    const snapshot: EntitySnapshot = {
+                        id: crypto.randomUUID(),
+                        entityId,
+                        projectId: entity.projectId,
+                        label,
+                        articleDoc: entity.articleDoc,
+                        createdAt: new Date(),
+                        isAuto,
+                    };
+                    const existing = state.entitySnapshots.filter(s => s.entityId === entityId);
+                    let pruned = [...existing, snapshot];
+                    if (pruned.length > 20) {
+                        const oldestAuto = pruned.find(s => s.isAuto);
+                        if (oldestAuto) pruned = pruned.filter(s => s.id !== oldestAuto.id);
+                        else pruned = pruned.slice(1);
+                    }
+                    return {
+                        entitySnapshots: [
+                            ...state.entitySnapshots.filter(s => s.entityId !== entityId),
+                            ...pruned,
+                        ],
+                    };
+                }),
 
-            applyArticleTemplate: (entityId, templateId) => {
-                const state = get();
-                const template = state.articleTemplates.find(t => t.id === templateId);
-                if (!template) return;
+            restoreSceneSnapshot: (snapshotId) =>
+                set((state) => {
+                    const snapshot = state.sceneSnapshots.find(s => s.id === snapshotId);
+                    if (!snapshot) return {};
+                    // Save current state as a snapshot before restoring
+                    const scene = state.scenes.find(s => s.id === snapshot.sceneId);
+                    if (!scene) return {};
+                    const autoBackup: SceneSnapshot = {
+                        id: crypto.randomUUID(),
+                        sceneId: scene.id,
+                        projectId: scene.projectId,
+                        label: `Before restore — ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                        content: scene.content,
+                        wordCount: scene.wordCount ?? 0,
+                        createdAt: new Date(),
+                        isAuto: true,
+                    };
+                    return {
+                        scenes: state.scenes.map(s =>
+                            s.id === snapshot.sceneId
+                                ? { ...s, content: snapshot.content, wordCount: snapshot.wordCount, updatedAt: new Date() }
+                                : s
+                        ),
+                        sceneSnapshots: [...state.sceneSnapshots.filter(s => s.id !== autoBackup.id), autoBackup],
+                    };
+                }),
 
-                // Generate fresh blocks from the template structure
-                const freshBlocks: ArticleBlock[] = template.blocks.map((tBlock, idx) => ({
-                    id: crypto.randomUUID(),
-                    type: tBlock.type,
-                    x: 40,
-                    y: 40 + (idx * 220),
-                    content: tBlock.type === 'timeline' ? { events: [] } : {}
-                }));
+            restoreEntitySnapshot: (snapshotId) =>
+                set((state) => {
+                    const snapshot = state.entitySnapshots.find(s => s.id === snapshotId);
+                    if (!snapshot) return {};
+                    const entity = state.entities.find(e => e.id === snapshot.entityId);
+                    if (!entity) return {};
+                    const autoBackup: EntitySnapshot = {
+                        id: crypto.randomUUID(),
+                        entityId: entity.id,
+                        projectId: entity.projectId,
+                        label: `Before restore — ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                        articleDoc: entity.articleDoc ?? '',
+                        createdAt: new Date(),
+                        isAuto: true,
+                    };
+                    return {
+                        entities: state.entities.map(e =>
+                            e.id === snapshot.entityId
+                                ? { ...e, articleDoc: snapshot.articleDoc, updatedAt: new Date() }
+                                : e
+                        ),
+                        entitySnapshots: [...state.entitySnapshots.filter(s => s.id !== autoBackup.id), autoBackup],
+                    };
+                }),
 
-                state.updateEntityArticle(entityId, freshBlocks);
-            },
+            deleteSnapshot: (snapshotId, type) =>
+                set((state) => {
+                    if (type === 'scene') {
+                        return { sceneSnapshots: state.sceneSnapshots.filter(s => s.id !== snapshotId) };
+                    }
+                    return { entitySnapshots: state.entitySnapshots.filter(s => s.id !== snapshotId) };
+                }),
+
+            updateDeskState: (projectId, updates) =>
+                set((state) => {
+                    const current = state.deskStates[projectId] || { widgets: [], zoom: 1, canvasOffset: { x: 0, y: 0 } };
+                    return {
+                        deskStates: {
+                            ...state.deskStates,
+                            [projectId]: { ...current, ...updates }
+                        }
+                    };
+                }),
+
+            pinEntityToDesk: (projectId, entityId) =>
+                set((state) => {
+                    const current = state.deskStates[projectId] || { widgets: [], zoom: 1, canvasOffset: { x: 0, y: 0 } };
+                    const newWidget: DeskWidget = {
+                        id: crypto.randomUUID(),
+                        type: 'biblePinit',
+                        x: 100, // Default position
+                        y: 100,
+                        width: 280,
+                        height: 380,
+                        content: { entityId, lastUpdatedAt: new Date().toISOString() }
+                    };
+                    return {
+                        deskStates: {
+                            ...state.deskStates,
+                            [projectId]: {
+                                ...current,
+                                widgets: [...current.widgets, newWidget]
+                            }
+                        }
+                    };
+                }),
         }),
         {
             name: 'mythforge-workspace',
@@ -1295,10 +1793,13 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 writingDays: state.writingDays,
                 goalConfig: state.goalConfig,
                 earnedBadges: state.earnedBadges,
-                xpEvents: state.xpEvents,
-                // articleTemplates IS persisted, focusedArticleEntityId IS NOT (implicitly omitted here)
+                socialHistory: state.socialHistory,
                 articleTemplates: state.articleTemplates,
                 workspaceMode: state.workspaceMode,
+                sceneSnapshots: state.sceneSnapshots,
+                entitySnapshots: state.entitySnapshots,
+                hierarchyTemplates: state.hierarchyTemplates,
+                deskStates: state.deskStates,
             }),
 
             // Track hydration phases allowing components to await persistence payload dynamically
@@ -1307,7 +1808,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     // WORKAROUND(migration): Migrate legacy root-level localStorage data to the new Project architecture.
                     // Root cause: Pre-Sprint 13, documents did not exist natively inside the Zustand workspace structure.
                     // Remove when: After sufficient cycles (e.g. 2 months), assuming all clients have synced.
-                    if (state.projects.length === 0) {
+                    if (state.projects.length === 0 && state.scenes.length === 0 && state.entities.length === 0) {
                         logger.info('Migrating legacy data to new Project architecture.');
                         const defaultProject: Project = {
                             id: crypto.randomUUID(),
@@ -1391,6 +1892,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     if (!(state as unknown as Record<string, unknown>).writingDays) state.writingDays = [];
                     if (!(state as unknown as Record<string, unknown>).earnedBadges) state.earnedBadges = [];
                     if (!(state as unknown as Record<string, unknown>).xpEvents) state.xpEvents = [];
+                    if (!(state as unknown as Record<string, unknown>).socialHistory) {
+                        state.socialHistory = [];
+                    }
 
                     // Hydration/Migration: Ensure baseFontSize is initialized
                     if (typeof (state as unknown as Record<string, unknown>).baseFontSize !== 'number') {
@@ -1400,9 +1904,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     // Recompute streak on rehydration (streakState is never persisted)
                     state.streakState = computeStreakFromDays(state.writingDays ?? []);
 
-                    // Hydration/Migration: Ensure workspaceMode is initialized correctly for Sprint 63A
-                    if (!['writing', 'worldBible', 'template'].includes((state as any).workspaceMode)) {
-                        state.workspaceMode = 'writing';
+                    // Hydration/Migration: Ensure workspaceMode is initialized correctly for Sprint 99
+                    if (!['worldBible', 'template', 'desk'].includes((state as any).workspaceMode)) {
+                        state.workspaceMode = 'desk';
                     }
 
                     // Sprint 51: Migrate articleBlocks from order-based to x/y coordinate system
@@ -1422,7 +1926,11 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                             }))
                         };
                     });
-
+ 
+                    // Initialize snapshots for existing users
+                    if (!(state as unknown as Record<string, unknown>).sceneSnapshots) state.sceneSnapshots = [];
+                    if (!(state as unknown as Record<string, unknown>).entitySnapshots) state.entitySnapshots = [];
+ 
                     // Initialize worlds for existing users
                     if (!(state as unknown as Record<string, unknown>).worlds) {
                         state.worlds = [];
@@ -1438,19 +1946,115 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             // Intercept JSON deserialization to properly reconstruct native JavaScript `Date` objects
             storage: createJSONStorage(() => localStorage, {
                 reviver: (key, value) => {
-                    // Handles `entities`, `projects`, `documents`, and `scenes` — all have `createdAt` Date stamps
-                    if (Array.isArray(value)) {
-                        return value.map((item: Record<string, unknown>) => ({
-                            ...item,
-                            ...(item.createdAt ? { createdAt: new Date(item.createdAt as string) } : {}),
-                            ...(item.updatedAt ? { updatedAt: new Date(item.updatedAt as string) } : {})
-                        }));
+                    // Only apply Date reconstruction to arrays that contain objects
+                    // with createdAt/updatedAt. Non-entity arrays (writingDays,
+                    // earnedBadges, xpEvents) are returned as-is to avoid corruption.
+                    const DATE_ARRAY_KEYS = [
+                        'worlds', 'projects', 'documents', 'scenes',
+                        'entities', 'articleTemplates', 'earnedBadges',
+                        'sceneSnapshots', 'entitySnapshots',
+                    ];
+                    if (DATE_ARRAY_KEYS.includes(key) && Array.isArray(value)) {
+                        return value.map((item: Record<string, unknown>) => {
+                            if (typeof item !== 'object' || item === null) return item;
+                            return {
+                                ...item,
+                                ...(item.createdAt ? { createdAt: new Date(item.createdAt as string) } : {}),
+                                ...(item.updatedAt ? { updatedAt: new Date(item.updatedAt as string) } : {}),
+                                ...(item.earnedAt  ? { earnedAt:  new Date(item.earnedAt  as string) } : {}),
+                            };
+                        });
                     }
                     return value;
                 },
             }),
+            /**
+             * Schema Versioning and Migration logic (Sprint 68)
+             * version: 2 — Introduced targeted reviver and automatic backups.
+             */
+            version: 2,
+            migrate: (persistedState: any, fromVersion: number) => {
+                // Take an automatic backup BEFORE any migration
+                try {
+                    const backupKey = `mythforge-backup-v${fromVersion}-${Date.now()}`;
+                    const backupData = { ...persistedState };
+                    if (backupData.aiConfig) {
+                      backupData.aiConfig = { ...backupData.aiConfig, apiKey: '' };
+                    }
+                    localStorage.setItem(backupKey, JSON.stringify(backupData));
+                    // Keep only the 5 most recent backups — prune older ones
+                    const backupKeys = Object.keys(localStorage)
+                        .filter(k => k.startsWith('mythforge-backup-'))
+                        .sort();
+                    if (backupKeys.length > 5) {
+                        backupKeys.slice(0, backupKeys.length - 5).forEach(k => localStorage.removeItem(k));
+                    }
+                } catch (e) {
+                    // localStorage may be full — ignore backup failure, proceed with migration
+                    console.warn('MythForge: backup failed, proceeding with migration', e);
+                }
+
+                // Return the persisted state as-is — all field migrations already
+                // happen in onRehydrateStorage. migrate() just needs to return
+                // a valid object so Zustand doesn't discard the stored data.
+                return persistedState ?? {};
+            },
         }
     )
 );
+
+/**
+ * Returns a list of available backup snapshots in localStorage,
+ * sorted newest-first. Each entry has a key and a timestamp.
+ */
+export function listDataBackups(): { key: string; timestamp: number; version: number }[] {
+    const backups: { key: string; timestamp: number; version: number }[] = [];
+    if (typeof localStorage === 'undefined') return [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k?.startsWith('mythforge-backup-')) continue;
+        // Key format: mythforge-backup-v{version}-{timestamp}
+        const parts = k.replace('mythforge-backup-', '').split('-');
+        const versionStr = parts[0].replace('v', '');
+        const version = parseInt(versionStr) || 0;
+        const timestamp = parseInt(parts[1]) || 0;
+        backups.push({ key: k, timestamp, version });
+    }
+    return backups.sort((a, b) => b.timestamp - a.timestamp);
+}
+
+/**
+ * Restores a specific backup by key, replacing the current workspace data.
+ * Returns true on success, false on failure.
+ * After calling this, the page must be reloaded for changes to take effect.
+ */
+export function restoreDataBackup(backupKey: string): boolean {
+    try {
+        const raw = localStorage.getItem(backupKey);
+        if (!raw) return false;
+        localStorage.setItem('mythforge-workspace', raw);
+        return true;
+    } catch (e) {
+        console.error('MythForge: restore failed', e);
+        return false;
+    }
+}
+
+/**
+ * Creates a manual backup of the current workspace data.
+ * Returns the backup key on success, null on failure.
+ */
+export function createManualBackup(): string | null {
+    try {
+        const current = localStorage.getItem('mythforge-workspace');
+        if (!current) return null;
+        const key = `mythforge-backup-v2-${Date.now()}`;
+        localStorage.setItem(key, current);
+        return key;
+    } catch (e) {
+        console.error('MythForge: manual backup failed', e);
+        return null;
+    }
+}
 
 

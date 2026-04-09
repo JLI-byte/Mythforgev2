@@ -12,13 +12,12 @@ import styles from './WorldBibleSubcategory.module.css';
 import { useWorkspaceStore, EntityType } from '@/store/workspaceStore';
 import {
     WBView,
-    RootCategory,
     SUBCATEGORY_LABELS,
     SUBCATEGORY_ICONS,
 } from '@/lib/worldBibleNav';
 
 interface WorldBibleSubcategoryProps {
-    root: RootCategory;
+    root: string;
     entityType: EntityType;
     onNavigate: (view: WBView) => void;
 }

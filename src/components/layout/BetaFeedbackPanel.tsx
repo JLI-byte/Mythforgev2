@@ -105,7 +105,8 @@ export function BetaFeedbackPanel({
 
   // Tab offset — position below the other tabs
   // The Beta tab sits at the bottom of the tab rail with a visual gap
-  const TAB_TOP_OFFSET = 'calc(100vh - 200px)';
+  // The Beta tab is separated at the bottom edge.
+  const TAB_BOTTOM_OFFSET = 0;
 
   return (
     <>
@@ -115,7 +116,8 @@ export function BetaFeedbackPanel({
           style={{
             width: tabWidth,
             right: isOpen ? panelWidth : 0,
-            top: TAB_TOP_OFFSET,
+            bottom: TAB_BOTTOM_OFFSET,
+            top: 'auto',
             transition: 'right 280ms ease-in-out',
           }}
           onClick={onTabClick}
@@ -146,6 +148,24 @@ export function BetaFeedbackPanel({
         document.body
       )}
 
+      {mounted && isOpen && createPortal(
+        <button
+          className={styles.ghostTab}
+          style={{ 
+            width: tabWidth, 
+            height: 130, // matches standardized sideTab height
+            bottom: TAB_BOTTOM_OFFSET, 
+            top: 'auto',
+            right: 0, // stays static at the screen edge
+          }}
+          onClick={onClose}
+          title="Close Feedback"
+        >
+          <span className={styles.ghostTabArrow}>▸</span>
+        </button>,
+        document.body
+      )}
+
       <div
         className={`${styles.panel} ${isOpen ? styles.open : ''}`}
         style={{ width: panelWidth }}
@@ -171,7 +191,7 @@ export function BetaFeedbackPanel({
           />
 
           {/* Header */}
-          <div className={styles.header}>
+          <div className={styles.header} style={{ paddingRight: tabWidth }}>
             <div>
               <div className={styles.headerTop}>
                 <span className={styles.betaBadge}>BETA</span>
@@ -182,7 +202,7 @@ export function BetaFeedbackPanel({
             <button className={styles.closeBtn} onClick={onClose}>✕</button>
           </div>
 
-          <div className={styles.content}>
+          <div className={styles.content} style={{ paddingRight: tabWidth }}>
             {/* Type selector */}
             <div className={styles.typeCol}>
               {(['bug', 'feature', 'general'] as FeedbackType[]).map(t => (

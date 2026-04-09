@@ -24,7 +24,7 @@ interface ProjectSwitcherProps {
 const TYPE_SECTIONS: { mode: Project['writingMode']; icon: string; label: string }[] = [
     { mode: 'novel', icon: '📖', label: 'Novels' },
     { mode: 'screenplay', icon: '🎬', label: 'Screenplays' },
-    { mode: 'poetry', icon: '✍️', label: 'Poetry' },
+    { mode: 'poetry', icon: '✍️', label: 'Poetry & Music' },
     { mode: 'markdown', icon: '📝', label: 'Markdown' },
 ];
 

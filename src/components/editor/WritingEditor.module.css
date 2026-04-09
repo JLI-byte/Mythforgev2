@@ -538,4 +538,71 @@
         opacity: 1;
         transform: translateX(-50%) translateY(0);
     }
-}
+}
+
+/* ── Paste Conversion Banner ─────────────────── */
+
+.pasteConvertBanner {
+    position: sticky;
+    top: 3.5rem; /* Just below ContextBar */
+    z-index: 99;
+    background: #1c1b1b;
+    border: 1px solid var(--accent);
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0.5rem 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    animation: fadeInDown 0.3s ease-out;
+}
+
+@keyframes fadeInDown {
+    from { transform: translateY(-10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.pasteConvertText {
+    font-size: 0.85rem;
+    color: var(--foreground);
+    font-weight: 500;
+}
+
+.pasteConvertBtns {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.pasteConvertConfirm {
+    background: var(--accent);
+    color: var(--background);
+    border: none;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.pasteConvertConfirm:hover {
+    opacity: 0.85;
+}
+
+.pasteConvertDismiss {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 4px;
+    font-size: 0.8rem;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.pasteConvertDismiss:hover {
+    color: var(--foreground);
+    border-color: var(--muted);
+}

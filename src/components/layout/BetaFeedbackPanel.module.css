@@ -41,6 +41,8 @@
 /* Side tab — positioned at bottom of rail */
 .sideTab {
   position: fixed;
+  height: 130px;
+  box-sizing: border-box;
   padding: 16px 10px;
   display: flex;
   flex-direction: column;
@@ -53,17 +55,41 @@
   border-radius: 8px 0 0 8px;
   cursor: pointer;
   color: var(--muted);
-  transition: color 150ms, background-color 150ms;
+  transition: color 150ms, background-color 150ms, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   z-index: 9999;
 }
 
-.sideTab:hover { color: var(--foreground); background: var(--background); }
+.sideTab:hover { color: var(--foreground); background: var(--background); transform: translateX(-6px); }
 .sideTabActive {
   background: var(--surface);
   color: var(--accent);
   border-right: none;
   padding-right: 16px;
   border-right: 2px solid var(--surface);
+}
+
+.ghostTab {
+  position: fixed;
+  z-index: 9998;
+  background: rgba(255, 255, 255, 0.03);
+  border: none;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  border-radius: 8px 0 0 8px;
+}
+
+.ghostTab:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.ghostTabArrow {
+  color: var(--muted);
+  font-size: 0.7rem;
+  opacity: 0.5;
 }
 
 .sideTabLabel {

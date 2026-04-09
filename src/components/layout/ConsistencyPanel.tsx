@@ -25,6 +25,7 @@ const CheckIcon = () => (
 // ConsistencyPanel — slide-out panel for AI consistency checker, fixed right edge
 export function ConsistencyPanel({ isOpen, onClose, onTabClick, tabWidth, onTabWidthChange, panelWidth, onPanelWidthChange }: ConsistencyPanelProps) {
     const [mounted, setMounted] = useState(false);
+
     useEffect(() => { setMounted(true); }, []);
 
     return (
@@ -35,7 +36,8 @@ export function ConsistencyPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
                     style={{
                         width: tabWidth,
                         right: isOpen ? panelWidth : 0,
-                        transition: 'right 280ms ease-in-out'
+                        top: 178,
+                        transition: 'right 280ms ease-in-out',
                     }}
                     onClick={onTabClick}
                     title="Consistency Report"
@@ -69,6 +71,23 @@ export function ConsistencyPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
                 document.body
             )}
 
+            {mounted && isOpen && createPortal(
+                <button
+                    className={styles.ghostTab}
+                    style={{ 
+                        width: tabWidth, 
+                        height: 130, // matches standardized sideTab height
+                        top: 178, // matches .sideTab { top: 178px } in ConsistencyPanel.module.css
+                        right: 0, // stays static at the screen edge
+                    }}
+                    onClick={onClose}
+                    title="Close Checker"
+                >
+                    <span className={styles.ghostTabArrow}>▸</span>
+                </button>,
+                document.body
+            )}
+
             <div
                 className={`${styles.panel} ${isOpen ? styles.open : ''}`}
                 style={{ width: panelWidth }}
@@ -95,7 +114,7 @@ export function ConsistencyPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
                     }}
                     title="Drag to resize panel"
                 />
-                <div className={styles.header}>
+                <div className={styles.header} style={{ paddingRight: tabWidth }}>
                     <h2 className={styles.title}>Consistency Report</h2>
                     <button
                         className={styles.closeButton}

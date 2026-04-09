@@ -5,6 +5,7 @@ import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import styles from './WritingEditor.module.css';
 import { useWorkspaceStore, Scene, Document as MFDocument } from '@/store/workspaceStore';
+import { useShallow } from 'zustand/react/shallow';
 import ShareModal from '../ui/ShareModal';
 import { ShareCardOptions } from '@/lib/shareCard';
 import { getStoredValue, setStoredValue } from '@/lib/storage';
@@ -13,6 +14,9 @@ import ScreenplayEditor from './ScreenplayEditor';
 import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { Decoration, DecorationSet } from '@tiptap/pm/view';
+import { EntitySuggest } from '@/lib/EntitySuggest';
+import EntitySuggestDropdown from './EntitySuggestDropdown';
+import { sanitizeImportedHtml } from '@/lib/export';
 
 /**
  * Custom FindReplace TipTap extension — ProseMirror-based, no npm packages.
@@ -163,6 +167,45 @@ const FindReplace = Extension.create<Record<string, never>, FindReplaceStorage>(
     },
 });
 
+/**
+ * PasteDetector — intercepts paste events to detect HTML content
+ * and dispatch a custom event for the outer component to show a banner.
+ */
+const PasteDetector = Extension.create({
+    name: 'pasteDetector',
+    addProseMirrorPlugins() {
+        return [
+            new Plugin({
+                key: new PluginKey('pasteDetector'),
+                props: {
+                    handlePaste(view, event) {
+                        const clipData = event.clipboardData;
+                        if (!clipData) return false;
+                        const hasHtml = clipData.types.includes('text/html');
+                        if (!hasHtml) return false;
+                        const rawHtml = clipData.getData('text/html');
+                        // Only intercept if it looks like rich external content
+                        const hasRichContent = /<(p|h[1-6]|div|ul|ol|li|table|blockquote)/i.test(rawHtml);
+                        if (!hasRichContent) return false;
+
+                        // Get the scene ID from the editor DOM
+                        const editorDom = view.dom;
+                        const sceneContainer = editorDom.closest('[data-scene-id]');
+                        const sceneId = sceneContainer?.getAttribute('data-scene-id') ?? '';
+
+                        // Dispatch event with raw HTML
+                        window.dispatchEvent(new CustomEvent('mythforge:htmlPaste', {
+                            detail: { rawHtml, sceneId }
+                        }));
+
+                        return false; // let TipTap paste normally first
+                    }
+                }
+            })
+        ];
+    }
+});
+
 const EDITOR_PLACEHOLDER = '<p>Start writing your story here...</p>';
 
 /**
@@ -185,9 +228,10 @@ function toTitleCase(str: string): string {
         .join(' ');
 }
 
-function SceneEditor({ scene, index, onEditorFocus, containerRef }: { scene: Scene, index: number, onEditorFocus: (editor: ReturnType<typeof useEditor>) => void, containerRef: (el: HTMLDivElement | null) => void }) {
+const SceneEditor = React.memo(function SceneEditor({ scene, index, onEditorFocus, containerRef }: { scene: Scene, index: number, onEditorFocus: (editor: ReturnType<typeof useEditor>) => void, containerRef: (el: HTMLDivElement | null) => void }) {
     const activeProjectId = useWorkspaceStore((state) => state.activeProjectId);
     const updateScene = useWorkspaceStore((state) => state.updateScene);
+    const saveSceneSnapshot = useWorkspaceStore((state) => state.saveSceneSnapshot);
     const openInlineCreator = useWorkspaceStore((state) => state.openInlineCreator);
     const entities = useWorkspaceStore((state) => state.entities);
     const setHoveredEntity = useWorkspaceStore((state) => state.setHoveredEntity);
@@ -205,6 +249,12 @@ function SceneEditor({ scene, index, onEditorFocus, containerRef }: { scene: Sce
     const entitiesRef = React.useRef(entities.filter(e => e.projectId === activeProjectId));
     const setHoveredEntityRef = React.useRef(setHoveredEntity);
     const isTypewriterModeRef = React.useRef(isTypewriterMode);
+    
+    const lastScannedContentRef = React.useRef<string>(scene.content || '');
+    
+    useEffect(() => {
+        lastScannedContentRef.current = scene.content || '';
+    }, [scene.id]);
 
     const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     const initialWordCountRef = React.useRef<number | null>(null);
@@ -212,6 +262,7 @@ function SceneEditor({ scene, index, onEditorFocus, containerRef }: { scene: Sce
     // Sprint 47C: Track session start time and word baseline for Goals reporting
     const sessionStartRef = React.useRef<number>(Date.now());
     const sessionBaselineRef = React.useRef<number | null>(null);
+    const lastAutoSnapshotRef = React.useRef<Record<string, number>>({});
 
     useEffect(() => {
         openInlineCreatorRef.current = openInlineCreator;
@@ -227,6 +278,8 @@ function SceneEditor({ scene, index, onEditorFocus, containerRef }: { scene: Sce
             Underline,
             TextAlign.configure({ types: ['heading', 'paragraph'] }),
             FindReplace,
+            EntitySuggest,
+            PasteDetector,
         ],
         content: scene.content || '',
         // Only autofocus the very first scene if it's not a rehydration flash
@@ -301,89 +354,101 @@ function SceneEditor({ scene, index, onEditorFocus, containerRef }: { scene: Sce
             debounceTimerRef.current = setTimeout(() => {
                 if (editor.isDestroyed) return;
 
-                const currentEntities = entitiesRef.current;
-                const pmState = editor.state;
-                const pmTr = pmState.tr;
-                let marksChanged = false;
-                const desiredMarks: { start: number, end: number, id: string }[] = [];
+                const currentHtml = editor.getHTML();
 
-                pmState.doc.descendants((node, pos) => {
-                    if (node.isText && node.text) {
-                        const text = node.text;
-                        const textLower = text.toLowerCase();
+                const normalize = (html: string) => html.replace(/\s+/g, ' ').trim();
+                const contentChanged = normalize(currentHtml) !== normalize(lastScannedContentRef.current);
+                lastScannedContentRef.current = currentHtml;
 
-                        currentEntities.forEach(entity => {
-                            const matchStr = entity.name.toLowerCase();
-                            if (!matchStr.trim()) return;
+                // CACHE PROSEMIRROR FLOW — only write if content actually changed
+                if (contentChanged) {
+                    const currentEntities = entitiesRef.current;
+                    const pmState = editor.state;
+                    const pmTr = pmState.tr;
+                    let marksChanged = false;
+                    const desiredMarks: { start: number, end: number, id: string }[] = [];
 
-                            let startIndex = 0;
-                            let idx;
-                            while ((idx = textLower.indexOf(matchStr, startIndex)) > -1) {
-                                desiredMarks.push({
-                                    start: pos + idx,
-                                    end: pos + idx + entity.name.length,
-                                    id: entity.id
-                                });
-                                startIndex = idx + matchStr.length;
-                            }
-                        });
-                    }
-                });
+                    pmState.doc.descendants((node, pos) => {
+                        if (node.isText && node.text) {
+                            const text = node.text;
+                            const textLower = text.toLowerCase();
 
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const existingMarks: { start: number, end: number, id: string, type: any }[] = [];
-                pmState.doc.descendants((node, pos) => {
-                    if (node.isText) {
-                        const mark = node.marks.find(m => m.type.name === 'entityMark');
-                        if (mark) {
-                            existingMarks.push({
-                                start: pos,
-                                end: pos + node.nodeSize,
-                                id: mark.attrs.entityId,
-                                type: mark.type
+                            currentEntities.forEach(entity => {
+                                const matchStr = entity.name.toLowerCase();
+                                if (!matchStr.trim()) return;
+
+                                let startIndex = 0;
+                                let idx;
+                                while ((idx = textLower.indexOf(matchStr, startIndex)) > -1) {
+                                    desiredMarks.push({
+                                        start: pos + idx,
+                                        end: pos + idx + entity.name.length,
+                                        id: entity.id
+                                    });
+                                    startIndex = idx + matchStr.length;
+                                }
                             });
                         }
-                    }
-                });
+                    });
 
-                // 1. Remove invalid/stale marks
-                existingMarks.forEach(em => {
-                    const isValid = desiredMarks.some(dm => dm.id === em.id && dm.start <= em.start && dm.end >= em.end);
-                    if (!isValid) {
-                        pmTr.removeMark(em.start, em.end, em.type);
-                        marksChanged = true;
-                    }
-                });
-
-                // 2. Add missing marks
-                desiredMarks.forEach(dm => {
-                    let missing = false;
-                    pmState.doc.nodesBetween(dm.start, dm.end, (node) => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const existingMarks: { start: number, end: number, id: string, type: any }[] = [];
+                    pmState.doc.descendants((node, pos) => {
                         if (node.isText) {
-                            if (!node.marks.find(m => m.type.name === 'entityMark' && m.attrs.entityId === dm.id)) {
-                                missing = true;
+                            const mark = node.marks.find(m => m.type.name === 'entityMark');
+                            if (mark) {
+                                existingMarks.push({
+                                    start: pos,
+                                    end: pos + node.nodeSize,
+                                    id: mark.attrs.entityId,
+                                    type: mark.type
+                                });
                             }
                         }
                     });
 
-                    if (missing) {
-                        pmTr.addMark(dm.start, dm.end, pmState.schema.marks.entityMark.create({ entityId: dm.id }));
-                        marksChanged = true;
+                    // 1. Remove invalid/stale marks
+                    existingMarks.forEach(em => {
+                        const isValid = desiredMarks.some(dm => dm.id === em.id && dm.start <= em.start && dm.end >= em.end);
+                        if (!isValid) {
+                            pmTr.removeMark(em.start, em.end, em.type);
+                            marksChanged = true;
+                        }
+                    });
+
+                    // 2. Add missing marks
+                    desiredMarks.forEach(dm => {
+                        let missing = false;
+                        pmState.doc.nodesBetween(dm.start, dm.end, (node) => {
+                            if (node.isText) {
+                                if (!node.marks.find(m => m.type.name === 'entityMark' && m.attrs.entityId === dm.id)) {
+                                    missing = true;
+                                }
+                            }
+                        });
+
+                        if (missing) {
+                            pmTr.addMark(dm.start, dm.end, pmState.schema.marks.entityMark.create({ entityId: dm.id }));
+                            marksChanged = true;
+                        }
+                    });
+
+                    if (marksChanged) {
+                        editor.view.dispatch(pmTr);
+                        // Update ref to post-mark HTML so the onUpdate triggered
+                        // by this dispatch doesn't register as a content change
+                        lastScannedContentRef.current = editor.getHTML();
                     }
-                });
 
-                if (marksChanged) {
-                    editor.view.dispatch(pmTr);
-                }
+                    const rawContent = editor.getHTML();
+                    if (rawContent === '<p></p>' || rawContent === EDITOR_PLACEHOLDER) {
+                        updateScene(scene.id, { content: '', wordCount: 0 });
+                    } else {
+                        updateScene(scene.id, { content: rawContent, wordCount: count });
+                    }
 
-                // CACHE PROSEMIRROR FLOW
-                const rawContent = editor.getHTML();
-
-                // If it's just the empty paragraph tag, save as empty string so placeholder works
-                if (rawContent === '<p></p>' || rawContent === EDITOR_PLACEHOLDER) {
-                    updateScene(scene.id, { content: '', wordCount: 0 });
-                } else {
-                    updateScene(scene.id, { content: rawContent, wordCount: count });
+                    // Task 1: Dispatch custom event so the autosave indicator in WritingEditor fires
+                    window.dispatchEvent(new CustomEvent('mythforge:contentSaved'));
                 }
 
                 // Sprint 47C: Goals system word count integration
@@ -403,10 +468,17 @@ function SceneEditor({ scene, index, onEditorFocus, containerRef }: { scene: Sce
                     sessionStartRef.current = Date.now();
                 }
 
-                // Task 1: Dispatch custom event so the autosave indicator in WritingEditor fires
-                window.dispatchEvent(new CustomEvent('mythforge:contentSaved'));
 
-            }, 300);
+                // Version History: Auto-snapshot every 5 minutes
+                const now = Date.now();
+                const lastAuto = lastAutoSnapshotRef.current[scene.id] || 0;
+                if (now - lastAuto > 5 * 60 * 1000 && count > 0) {
+                    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    saveSceneSnapshot(scene.id, `Auto — ${timeStr}`, true);
+                    lastAutoSnapshotRef.current[scene.id] = now;
+                }
+
+            }, 600);
         },
     }, [scene.id]); // Re-init if scene ID changes entirely
 
@@ -419,6 +491,19 @@ function SceneEditor({ scene, index, onEditorFocus, containerRef }: { scene: Sce
         window.addEventListener('mythforge:returnFocusToEditor', handleFocusReturn);
         return () => window.removeEventListener('mythforge:returnFocusToEditor', handleFocusReturn);
     }, []);
+
+    useEffect(() => {
+        if (!editor) return;
+        const handleReplace = (e: Event) => {
+            const { sceneId, html } = (e as CustomEvent).detail;
+            if (sceneId !== scene.id) return;
+            editor.commands.setContent(html);
+            const content = editor.getHTML();
+            updateScene(scene.id, { content });
+        };
+        window.addEventListener('mythforge:replaceSceneContent', handleReplace);
+        return () => window.removeEventListener('mythforge:replaceSceneContent', handleReplace);
+    }, [editor, scene.id, updateScene]);
 
     // DOM EVENT DELEGATION for entities
     useEffect(() => {
@@ -518,7 +603,15 @@ function SceneEditor({ scene, index, onEditorFocus, containerRef }: { scene: Sce
             <EditorContent editor={editor} />
         </div>
     );
-}
+}, (prev, next) => {
+    // Only re-render if id, content, or wordCount changed
+    return (
+        prev.scene.id === next.scene.id &&
+        prev.scene.content === next.scene.content &&
+        prev.scene.wordCount === next.scene.wordCount &&
+        prev.index === next.index
+    );
+});
 
 /**
  * Sprint 44: ContextBar — sticky bar with breadcrumb + formatting + controls.
@@ -719,7 +812,7 @@ function ContextBar({
                                 <option value="novel">📖 Novel</option>
                                 <option value="screenplay">🎬 Screenplay</option>
                                 <option value="markdown">📝 Markdown</option>
-                                <option value="poetry">✍️ Poetry</option>
+                                <option value="poetry">✍️ Poetry & Music</option>
                             </select>
                             <button className={`${styles.toolbarBtn} ${isTypewriterMode ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleTypewriterMode(); }} title="Typewriter Mode (Ctrl+Shift+W)">✍️</button>
                             <button className={`${styles.toolbarBtn} ${isStandardFormat ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleStandardFormat(); }} title="Standard Format (720px) (Ctrl+Shift+P)">📄</button>
@@ -970,7 +1063,7 @@ function ContextBar({
                             <option value="novel">📖 Novel</option>
                             <option value="screenplay">🎬 Screenplay</option>
                             <option value="markdown">📝 Markdown</option>
-                            <option value="poetry">✍️ Poetry</option>
+                            <option value="poetry">✍️ Poetry & Music</option>
                         </select>
                         <button className={`${styles.toolbarBtn} ${isTypewriterMode ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleTypewriterMode(); }} title="Typewriter Mode (Ctrl+Shift+W)">✍️</button>
                         <button className={`${styles.toolbarBtn} ${isStandardFormat ? styles.toolbarBtnActive : ''}`} onMouseDown={(e) => { e.preventDefault(); toggleStandardFormat(); }} title="Standard Format (720px) (Ctrl+Shift+P)">📄</button>
@@ -991,6 +1084,19 @@ function ContextBar({
 export default function WritingEditor() {
     const editorWrapperRef = useRef<HTMLDivElement>(null);
     const [isCompact, setIsCompact] = useState(false);
+    const [pasteConvertBanner, setPasteConvertBanner] = useState<{
+        raw: string;
+        sceneId: string;
+    } | null>(null);
+
+    useEffect(() => {
+        const handleHtmlPaste = (e: Event) => {
+            const { rawHtml, sceneId } = (e as CustomEvent).detail;
+            setPasteConvertBanner({ raw: rawHtml, sceneId });
+        };
+        window.addEventListener('mythforge:htmlPaste', handleHtmlPaste);
+        return () => window.removeEventListener('mythforge:htmlPaste', handleHtmlPaste);
+    }, []);
 
     useEffect(() => {
         if (!editorWrapperRef.current) return;
@@ -1010,10 +1116,19 @@ export default function WritingEditor() {
     const activeSceneId = useWorkspaceStore((state) => state.activeSceneId);
     const updateDocument = useWorkspaceStore((state) => state.updateDocument);
 
-    const scenes = useWorkspaceStore((state) => state.scenes);
-    const addScene = useWorkspaceStore((state) => state.addScene);
-
     const activeDocument = documents.find(d => d.id === activeDocumentId);
+
+    const activeScenes = useWorkspaceStore(
+        useShallow((state) => 
+            state.scenes
+                .filter(s => s.documentId === activeDocumentId)
+                .sort((a, b) => a.order - b.order)
+        )
+    );
+
+    const activeScenesStable = activeScenes;
+
+    const addScene = useWorkspaceStore((state) => state.addScene);
 
     const isStandardFormat = useWorkspaceStore((state) => state.isStandardFormat);
     const toggleStandardFormat = useWorkspaceStore((state) => state.toggleStandardFormat);
@@ -1024,16 +1139,12 @@ export default function WritingEditor() {
     const isContextBarCompact = isCompact; // Renamed for clarity in ContextBar props
 
     // Sort active scenes by their order, and optionally filter by activeScene
-    const activeScenes = React.useMemo(() => {
-        const docScenes = scenes
-            .filter(s => s.documentId === activeDocumentId)
-            .sort((a, b) => a.order - b.order);
-
+    const visibleScenes = React.useMemo(() => {
         if (activeSceneId) {
-            return docScenes.filter(s => s.id === activeSceneId);
+            return activeScenesStable.filter(s => s.id === activeSceneId);
         }
-        return docScenes;
-    }, [scenes, activeDocumentId, activeSceneId]);
+        return activeScenesStable;
+    }, [activeScenesStable, activeSceneId]);
 
     const [showHint, setShowHint] = useState(() => getStoredValue('mythforge-hint-dismissed') !== 'true');
 
@@ -1283,7 +1394,7 @@ export default function WritingEditor() {
                     activeEditor={activeEditorRef.current}
                     visibleSceneId={visibleSceneId}
                     documents={documents}
-                    scenes={scenes}
+                    scenes={activeScenesStable}
                     activeProjectId={activeProjectId}
                     activeDocumentId={activeDocumentId}
                     activeDocument={activeDocument}
@@ -1306,6 +1417,35 @@ export default function WritingEditor() {
                     isCompact={isContextBarCompact}
                 />
             )}
+
+            {pasteConvertBanner && (
+                <div className={styles.pasteConvertBanner}>
+                    <span className={styles.pasteConvertText}>
+                        📋 Rich content detected. Convert pasted HTML to formatted text?
+                    </span>
+                    <div className={styles.pasteConvertBtns}>
+                        <button
+                            className={styles.pasteConvertConfirm}
+                            onClick={() => {
+                                const clean = sanitizeImportedHtml(pasteConvertBanner.raw);
+                                window.dispatchEvent(new CustomEvent('mythforge:replaceSceneContent', {
+                                    detail: { sceneId: pasteConvertBanner.sceneId, html: clean }
+                                }));
+                                setPasteConvertBanner(null);
+                            }}
+                        >
+                            Convert
+                        </button>
+                        <button
+                            className={styles.pasteConvertDismiss}
+                            onClick={() => setPasteConvertBanner(null)}
+                        >
+                            Keep as-is
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {!isToolbarVisible && (
                 <button className={styles.toolbarShowBtn} onMouseDown={(e) => { e.preventDefault(); toggleToolbarVisible(); }} title="Show Toolbar">⊞</button>
             )}
@@ -1396,10 +1536,10 @@ export default function WritingEditor() {
                 style={{ paddingTop: isTypewriterMode ? '45vh' : undefined }}
             >
                 {/* RENDER ALL SCENES */}
-                {activeScenes.map((scene, index) => (
+                {visibleScenes.map((scene, index) => (
                     <React.Fragment key={scene.id}>
                         {writingMode === 'screenplay' ? (
-                            <ScreenplayEditor scene={scene} />
+                            <ScreenplayEditor scene={scene} onEditorFocus={handleEditorFocus} />
                         ) : (
                             <SceneEditor scene={scene} index={index} onEditorFocus={handleEditorFocus} containerRef={setSceneRef(scene.id)} />
                         )}
@@ -1527,6 +1667,9 @@ export default function WritingEditor() {
                     milestoneLabel: ''
                 }}
             />
+
+            {/* Entity Lookup Dropdown */}
+            <EntitySuggestDropdown editorRef={activeEditorRef} />
         </div>
     );
 }

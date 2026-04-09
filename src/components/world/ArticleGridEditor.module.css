@@ -1,87 +1,27 @@
-/* ArticleGridEditor — Sprint 57: Freeform Canvas */
-
 .editorRoot {
   display: flex;
   flex-direction: row;
   height: 100%;
   width: 100%;
   overflow: hidden;
-  background: var(--background);
+  background: transparent;
 }
 
-/* ---- Palette ---- */
-.palette {
-  width: 160px;
-  flex-shrink: 0;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-}
-
-.paletteHeader {
-  padding: 14px 14px 8px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-.paletteTitle {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted, #888);
-}
-
-.paletteHint {
-  display: block;
-  font-size: 0.7rem;
-  color: var(--muted, #888);
-  margin-top: 2px;
-}
-
-.paletteList {
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.paletteItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--background);
-  cursor: grab;
-  user-select: none;
-  transition: border-color 0.15s, background 0.15s;
-}
-
-.paletteItem:hover { border-color: var(--accent); background: var(--surface); }
-.paletteItem:active { cursor: grabbing; }
-
-.paletteIcon { font-size: 1rem; flex-shrink: 0; }
-.paletteLabel { font-size: 0.83rem; font-weight: 600; color: var(--foreground); }
-
-/* ---- Canvas viewport (scrollable window) ---- */
-.canvasViewport {
-  flex: 1;
-  overflow: auto;
-  position: relative;
-  padding: 24px 0 0 24px;
-}
-
-/* Column wrapper: tab bar stacked above canvas viewport */
+/* ---- Column wrapper ---- */
 .canvasColumn {
   display: flex;
   flex-direction: column;
   flex: 1;
   overflow: hidden;
+}
+
+/* ---- Canvas viewport ---- */
+.canvasViewport {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  background: transparent;
 }
 
 .saveIndicator {
@@ -97,103 +37,142 @@
 /* ---- Canvas surface (3000x2000 freeform space) ---- */
 .canvasInner {
   position: relative;
-  width: 3000px;
-  height: 2000px;
-  background-color: var(--background);
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.28) 1px, transparent 1px);
-  background-size: 24px 24px;
+  width: 100%;
+  height: min-content;
+  min-height: 100%;
+  background: transparent;
 }
 
-.scratchZoneOverlay {
+/* ---- Active zone sheet (Full height column) ---- */
+.activeZoneSheet {
   position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  background-color: rgba(0, 0, 0, 0.3);
-  background-image: repeating-linear-gradient(
-    -45deg,
-    transparent,
-    transparent 6px,
-    rgba(255, 255, 255, 0.04) 6px,
-    rgba(255, 255, 255, 0.04) 7px
-  );
-  /* Punch hole for the active zone using clip-path evenodd rule */
-  clip-path: polygon(
-    evenodd,
-    0% 0%, 100% 0%, 100% 100%, 0% 100%,
-    var(--az-x, 40px) var(--az-y, 40px),
-    calc(var(--az-x, 40px) + var(--az-w, 680px)) var(--az-y, 40px),
-    calc(var(--az-x, 40px) + var(--az-w, 680px)) calc(var(--az-y, 40px) + var(--az-h, 1800px)),
-    var(--az-x, 40px) calc(var(--az-y, 40px) + var(--az-h, 1800px))
-  );
+  top: 0;
+  bottom: 0;
+  height: 100vh;
+  z-index: 5;
+  background: var(--surface);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
 }
 
-.activeZoneBox {
-  position: absolute;
-  z-index: 2;
-  border: 2px solid rgba(99, 102, 241, 0.6);
-  border-radius: 4px;
-  pointer-events: none;
-  box-shadow:
-    0 0 0 1px rgba(99, 102, 241, 0.2),
-    inset 0 0 60px rgba(99, 102, 241, 0.03);
-}
-
-.activeZoneTitleBar {
-  position: absolute;
-  top: -32px;
-  left: -2px;
-  right: -2px;
-  height: 30px;
-  background: rgba(99, 102, 241, 0.85);
-  border-radius: 4px 4px 0 0;
+.sheetHeader {
+  height: 64px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: move;
-  pointer-events: all;
+  justify-content: space-between;
+  padding: 0 16px;
+  cursor: grab;
   user-select: none;
-  transition: background 0.15s;
+  flex-shrink: 0;
 }
 
-.activeZoneTitleBar:hover {
-  background: rgba(99, 102, 241, 1);
+.sheetHeader:active {
+  cursor: grabbing;
 }
 
-.activeZoneTitleText {
-  font-size: 0.7rem;
+/* ---- Width Display ---- */
+.widthDisplayCompact {
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: white;
+  color: rgba(255, 255, 255, 0.4);
+  font-family: var(--font-mono);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 10px;
+  border-radius: 6px;
+  user-select: none;
 }
 
-/* Bright dot spotlight near mouse cursor */
-.canvasInner::before {
-  content: '';
+/* ---- Edge Handles ---- */
+.edgeHandleLeft, .edgeHandleRight {
   position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background-image: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.65) 1px,
-    transparent 1px
-  );
-  background-size: 24px 24px;
-  -webkit-mask-image: radial-gradient(
-    circle 180px at var(--mouse-x, -9999px) var(--mouse-y, -9999px),
-    black 0%, black 40%, transparent 100%
-  );
-  mask-image: radial-gradient(
-    circle 180px at var(--mouse-x, -9999px) var(--mouse-y, -9999px),
-    black 0%, black 40%, transparent 100%
-  );
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  cursor: ew-resize;
+  z-index: 100;
 }
 
+.edgeHandleLeft {
+  left: -5px;
+}
 
+.edgeHandleRight {
+  right: -5px;
+}
 
+.edgeHandleLeft:hover, .edgeHandleRight:hover {
+  background: rgba(201, 168, 76, 0.05);
+}
 
+.tabBarSmall {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  margin-left: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabBarSmall::-webkit-scrollbar { display: none; }
+
+.tabSmall {
+  padding: 6px 14px;
+  background: transparent;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.tabSmall:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.tabActiveSmall {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-weight: 600;
+}
+
+.tabNameSmall {
+  pointer-events: none;
+}
+
+.tabAddSmall {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 10px;
+  transition: color 0.2s;
+}
+
+.tabAddSmall:hover {
+  color: var(--accent);
+}
+
+.tabRenameInputSmall {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 12px;
+  padding: 2px 6px;
+  width: 80px;
+  outline: none;
+}
 
 /* ---- Widget wrapper (absolute positioned) ---- */
 .widgetWrapper {
@@ -205,7 +184,7 @@
   border-radius: 10px;
   overflow: hidden;
   transition: border-color 0.15s, box-shadow 0.15s;
-  z-index: 1;
+  z-index: 10;
 }
 
 .widgetWrapper:hover {
@@ -218,7 +197,6 @@
   box-shadow: 0 0 0 2px var(--accent), 0 4px 20px rgba(0,0,0,0.4) !important;
 }
 
-/* Title / drag bar */
 .widgetDragBar {
   height: 28px;
   background: var(--background);
@@ -232,10 +210,7 @@
   flex-shrink: 0;
 }
 
-.widgetIcon {
-  font-size: 0.78rem;
-  color: var(--muted, #888);
-}
+.widgetIcon { font-size: 0.78rem; color: var(--muted, #888); }
 
 .widgetDelete {
   background: none;
@@ -251,292 +226,58 @@
 
 .widgetDelete:hover { color: #ff4d4d; }
 
-/* Widget content area */
 .widgetContent {
   flex: 1;
   overflow: auto;
   padding: 12px;
 }
 
-/* ---- Resize handles (8 directions) ---- */
-.resizeHandle {
-  position: absolute;
-  z-index: 10;
-  background: transparent;
-}
-
-/* Edge handles */
+/* ---- Resize handles ---- */
+.resizeHandle { position: absolute; z-index: 10; background: transparent; }
 .resize_n  { top: -4px; left: 8px; right: 8px; height: 8px; cursor: ns-resize; }
 .resize_s  { bottom: -4px; left: 8px; right: 8px; height: 8px; cursor: ns-resize; }
 .resize_e  { right: -4px; top: 8px; bottom: 8px; width: 8px; cursor: ew-resize; }
 .resize_w  { left: -4px; top: 8px; bottom: 8px; width: 8px; cursor: ew-resize; }
-
-/* Corner handles */
 .resize_ne { top: -4px; right: -4px; width: 12px; height: 12px; cursor: ne-resize; }
 .resize_nw { top: -4px; left: -4px; width: 12px; height: 12px; cursor: nw-resize; }
 .resize_se { bottom: -4px; right: -4px; width: 12px; height: 12px; cursor: se-resize; }
 .resize_sw { bottom: -4px; left: -4px; width: 12px; height: 12px; cursor: sw-resize; }
-
-/* Show accent color on hover for all handles */
 .resizeHandle:hover { background: var(--accent); opacity: 0.7; border-radius: 2px; }
 
-/* ---- Widget-specific content styles — verbatim from Sprint 55 ---- */
-.textWidget {
-  min-height: 60px;
-  outline: none;
-  color: var(--foreground);
-  font-size: 0.95rem;
-  line-height: 1.65;
-}
-
-.textWidget:empty::before {
-  content: attr(data-placeholder);
-  color: var(--muted, #888);
-  font-style: italic;
-  pointer-events: none;
-}
-
-.headingWidget {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.headingLevel {
-  background: var(--background);
-  border: 1px solid var(--border);
-  color: var(--foreground);
-  border-radius: 4px;
-  padding: 4px 6px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.headingText {
-  flex: 1;
-  background: none;
-  border: none;
-  color: var(--foreground);
-  font-size: 1.4rem;
-  font-weight: 700;
-  outline: none;
-}
-
-.imageWidget {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.imagePreview {
-  width: 100%;
-  height: auto;
-  max-height: none;
-  object-fit: contain;
-  border-radius: 6px;
-  display: block;
-  transition: height 0.05s;
-}
-
-.imageUpload {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 40px;
-  border: 2px dashed var(--border);
-  border-radius: 8px;
-  cursor: pointer;
-  color: var(--muted, #888);
-  font-size: 0.9rem;
-  transition: border-color 0.15s, color 0.15s;
-}
-
-.imageUpload:hover {
-  border-color: var(--accent);
-  color: var(--foreground);
-}
-
-.captionInput {
-  background: none;
-  border: none;
-  border-bottom: 1px solid var(--border);
-  color: var(--muted, #888);
-  font-size: 0.82rem;
-  text-align: center;
-  padding: 4px;
-  outline: none;
-  width: 100%;
-}
-
-.dividerWidget {
-  border: none;
-  height: 2px;
-  background: var(--border);
-  margin: 10px 0;
-  border-radius: 2px;
-}
-
-.quoteWidget {
-  border-left: 3px solid var(--accent);
-  padding-left: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.quoteText {
-  background: none;
-  border: none;
-  color: var(--foreground);
-  font-size: 1.05rem;
-  font-style: italic;
-  line-height: 1.6;
-  resize: none;
-  outline: none;
-  width: 100%;
-  min-height: 60px;
-  font-family: inherit;
-}
-
-.quoteAttribution {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--muted, #888);
-  font-size: 0.85rem;
-}
-
-.quoteSource {
-  background: none;
-  border: none;
-  color: var(--muted, #888);
-  font-size: 0.85rem;
-  outline: none;
-  flex: 1;
-}
-
-.statBlock {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.statRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.statLabel {
-  flex: 1;
-  background: none;
-  border: none;
-  border-bottom: 1px solid var(--border);
-  color: var(--muted, #888);
-  font-size: 0.85rem;
-  padding: 3px 0;
-  outline: none;
-  text-align: right;
-}
-
-.statValue {
-  flex: 1.5;
-  background: none;
-  border: none;
-  border-bottom: 1px solid var(--border);
-  color: var(--foreground);
-  font-size: 0.85rem;
-  padding: 3px 0;
-  outline: none;
-}
-
-.statDelete {
-  background: none;
-  border: none;
-  color: var(--muted, #888);
-  cursor: pointer;
-  font-size: 0.9rem;
-  padding: 2px;
-  opacity: 0.5;
-}
-
+/* ---- Widget content styles ---- */
+.textWidget { min-height: 60px; outline: none; color: var(--foreground); font-size: 0.95rem; line-height: 1.65; }
+.textWidget:empty::before { content: attr(data-placeholder); color: var(--muted, #888); font-style: italic; pointer-events: none; }
+.headingWidget { display: flex; align-items: center; gap: 8px; }
+.headingLevel { background: var(--background); border: 1px solid var(--border); color: var(--foreground); border-radius: 4px; padding: 4px 6px; font-size: 0.8rem; cursor: pointer; flex-shrink: 0; }
+.headingText { flex: 1; background: none; border: none; color: var(--foreground); font-size: 1.4rem; font-weight: 700; outline: none; }
+.imageWidget { display: flex; flex-direction: column; gap: 8px; }
+.imagePreview { width: 100%; height: auto; object-fit: contain; border-radius: 6px; display: block; }
+.imageUpload { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 40px; border: 2px dashed var(--border); border-radius: 8px; cursor: pointer; color: var(--muted, #888); font-size: 0.9rem; transition: border-color 0.15s, color 0.15s; }
+.imageUpload:hover { border-color: var(--accent); color: var(--foreground); }
+.captionInput { background: none; border: none; border-bottom: 1px solid var(--border); color: var(--muted, #888); font-size: 0.82rem; text-align: center; padding: 4px; outline: none; width: 100%; }
+.dividerWidget { border: none; height: 2px; background: var(--border); margin: 10px 0; border-radius: 2px; }
+.quoteWidget { border-left: 3px solid var(--accent); padding-left: 14px; display: flex; flex-direction: column; gap: 8px; }
+.quoteText { background: none; border: none; color: var(--foreground); font-size: 1.05rem; font-style: italic; line-height: 1.6; resize: none; outline: none; width: 100%; min-height: 60px; font-family: inherit; }
+.quoteAttribution { display: flex; align-items: center; gap: 6px; color: var(--muted, #888); font-size: 0.85rem; }
+.quoteSource { background: none; border: none; color: var(--muted, #888); font-size: 0.85rem; outline: none; flex: 1; }
+.statBlock { display: flex; flex-direction: column; gap: 6px; }
+.statRow { display: flex; align-items: center; gap: 8px; }
+.statLabel { flex: 1; background: none; border: none; border-bottom: 1px solid var(--border); color: var(--muted, #888); font-size: 0.85rem; padding: 3px 0; outline: none; text-align: right; }
+.statValue { flex: 1.5; background: none; border: none; border-bottom: 1px solid var(--border); color: var(--foreground); font-size: 0.85rem; padding: 3px 0; outline: none; }
+.statDelete { background: none; border: none; color: var(--muted, #888); cursor: pointer; font-size: 0.9rem; padding: 2px; opacity: 0.5; }
 .statDelete:hover { opacity: 1; color: #ff4d4d; }
+.statAdd { background: none; border: 1px dashed var(--border); color: var(--muted, #888); font-size: 0.8rem; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 4px; transition: all 0.15s; }
+.statAdd:hover { border-color: var(--accent); color: var(--foreground); }
+.tableWidget { display: flex; flex-direction: column; gap: 8px; overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.table th, .table td { border: 1px solid var(--border); padding: 0; }
+.table th { background: var(--background); }
+.tableCell { width: 100%; background: none; border: none; padding: 8px 10px; color: var(--foreground); outline: none; font-family: inherit; font-size: 0.88rem; }
+.table th .tableCell { font-weight: 600; }
+.tableAddRow { background: none; border: 1px dashed var(--border); color: var(--muted, #888); font-size: 0.8rem; padding: 5px 10px; border-radius: 4px; cursor: pointer; align-self: flex-start; transition: all 0.15s; }
+.tableAddRow:hover { border-color: var(--accent); color: var(--foreground); }
 
-.statAdd {
-  background: none;
-  border: 1px dashed var(--border);
-  color: var(--muted, #888);
-  font-size: 0.8rem;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 4px;
-  transition: all 0.15s;
-}
-
-.statAdd:hover {
-  border-color: var(--accent);
-  color: var(--foreground);
-}
-
-.tableWidget {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  overflow-x: auto;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.88rem;
-}
-
-.table th, .table td {
-  border: 1px solid var(--border);
-  padding: 0;
-}
-
-.table th {
-  background: var(--background);
-}
-
-.tableCell {
-  width: 100%;
-  background: none;
-  border: none;
-  padding: 8px 10px;
-  color: var(--foreground);
-  outline: none;
-  font-family: inherit;
-  font-size: 0.88rem;
-}
-
-.table th .tableCell {
-  font-weight: 600;
-}
-
-.tableAddRow {
-  background: none;
-  border: 1px dashed var(--border);
-  color: var(--muted, #888);
-  font-size: 0.8rem;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  align-self: flex-start;
-  transition: all 0.15s;
-}
-
-.tableAddRow:hover {
-  border-color: var(--accent);
-  color: var(--foreground);
-}
-
-/* Zoom control row — indicator + fit button */
+/* ---- Zoom controls ---- */
 .zoomControls {
   position: absolute;
   bottom: 16px;
@@ -560,10 +301,7 @@
   transition: color 0.15s, border-color 0.15s;
 }
 
-.zoomIndicator:hover {
-  color: var(--foreground);
-  border-color: var(--accent);
-}
+.zoomIndicator:hover { color: var(--foreground); border-color: var(--accent); }
 
 .fitButton {
   background: var(--surface);
@@ -579,16 +317,8 @@
   transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 
-.fitButton:hover {
-  color: var(--foreground);
-  border-color: var(--accent);
-}
-
-.fitButtonActive {
-  background: rgba(208, 188, 255, 0.1);
-  border-color: var(--accent);
-  color: var(--accent);
-}
+.fitButton:hover { color: var(--foreground); border-color: var(--accent); }
+.fitButtonActive { background: rgba(208, 188, 255, 0.1); border-color: var(--accent); color: var(--accent); }
 
 /* ---- Tab Bar ---- */
 .tabBar {
@@ -624,174 +354,1733 @@
   user-select: none;
 }
 
-.tab:hover {
-  color: var(--foreground);
-  background: var(--background);
-}
-
-.tabActive {
-  color: var(--foreground);
-  background: var(--background);
-  border-color: var(--border);
-  border-bottom-color: var(--background);
-}
-
-.tabActive::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--accent);
-  border-radius: 2px 2px 0 0;
-}
-
-.tabName {
-  font-size: 0.82rem;
-  font-weight: 500;
-}
-
-.tabDelete {
-  background: none;
-  border: none;
-  color: var(--muted, #888);
-  cursor: pointer;
-  font-size: 0.9rem;
-  line-height: 1;
-  padding: 0 2px;
-  opacity: 0;
-  transition: opacity 0.15s, color 0.15s;
-  border-radius: 3px;
-}
-
+.tab:hover { color: var(--foreground); background: var(--background); }
+.tabActive { color: var(--foreground); background: var(--background); border-color: var(--border); border-bottom-color: var(--background); }
+.tabActive::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--accent); border-radius: 2px 2px 0 0; }
+.tabName { font-size: 0.82rem; font-weight: 500; }
+.tabDelete { background: none; border: none; color: var(--muted, #888); cursor: pointer; font-size: 0.9rem; line-height: 1; padding: 0 2px; opacity: 0; transition: opacity 0.15s, color 0.15s; border-radius: 3px; }
 .tab:hover .tabDelete { opacity: 1; }
 .tabDelete:hover { color: #ff4d4d; }
+.tabRenameInput { background: var(--background); border: 1px solid var(--accent); border-radius: 4px; color: var(--foreground); font-size: 0.82rem; padding: 2px 6px; outline: none; width: 100px; }
+.tabAdd { background: none; border: none; color: var(--muted, #888); cursor: pointer; font-size: 0.8rem; padding: 6px 10px; border-radius: 6px; white-space: nowrap; transition: color 0.15s, background 0.15s; flex-shrink: 0; }
+.tabAdd:hover { color: var(--foreground); background: var(--background); }
 
-.tabRenameInput {
-  background: var(--background);
-  border: 1px solid var(--accent);
-  border-radius: 4px;
-  color: var(--foreground);
-  font-size: 0.82rem;
-  padding: 2px 6px;
-  outline: none;
-  width: 100px;
+/* ── Width Preset Toolbar ───────────────────────────────── */
+
+.widthToolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  min-height: 36px;
 }
 
-.tabAdd {
-  background: none;
-  border: none;
+.widthToolbarLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
   color: var(--muted, #888);
-  cursor: pointer;
-  font-size: 0.8rem;
-  padding: 6px 10px;
-  border-radius: 6px;
-  white-space: nowrap;
-  transition: color 0.15s, background 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-right: 2px;
   flex-shrink: 0;
 }
 
-.tabAdd:hover {
-  color: var(--foreground);
+.widthPresetBtn {
+  padding: 3px 10px;
   background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--muted, #888);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.widthPresetBtn:hover { color: var(--foreground); border-color: var(--foreground); }
+
+.widthPresetBtnActive {
+  background: rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.7);
+  color: var(--accent);
+}
+
+.widthCurrentLabel {
+  margin-left: 4px;
+  font-size: 0.72rem;
+  color: var(--muted, #888);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── Gallery Widget ─────────────────────────────────────── */
 
-.galleryWidget {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-}
+.galleryWidget { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+.galleryGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; flex: 1; overflow-y: auto; padding: 8px; }
+.galleryCell { display: flex; flex-direction: column; gap: 4px; background: var(--surface-mid, #1c1b1b); border-radius: 6px; overflow: hidden; border: 1px solid var(--border, #2a2929); }
+.galleryCellImageWrap { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--surface, #141313); }
+.galleryCellImage { width: 100%; height: 100%; object-fit: cover; display: block; }
+.galleryCellRemove { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,0.6); border: none; color: var(--foreground, #e8e6e3); font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.15s; }
+.galleryCellImageWrap:hover .galleryCellRemove { opacity: 1; }
+.galleryCellCaption { padding: 4px 8px 6px; background: transparent; border: none; outline: none; color: var(--muted, #888); font-size: 0.75rem; text-align: center; width: 100%; }
+.galleryCellCaption::placeholder { color: var(--muted, #888); opacity: 0.5; }
+.galleryAddBtn { margin: 4px 8px 8px; padding: 6px; background: var(--surface-mid, #1c1b1b); border: 1px dashed var(--border, #2a2929); border-radius: 6px; color: var(--muted, #888); font-size: 0.8rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; text-align: center; }
+.galleryAddBtn:hover { border-color: var(--accent, #c9a84c); color: var(--foreground, #e8e6e3); }
 
-.galleryGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px;
-}
+/* ── Draw Ghost ─────────────────────────────────────────── */
 
-.galleryCell {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  background: var(--surface-mid, #1c1b1b);
-  border-radius: 6px;
-  overflow: hidden;
-  border: 1px solid var(--border, #2a2929);
-}
-
-.galleryCellImageWrap {
-  position: relative;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  background: var(--surface, #141313);
-}
-
-.galleryCellImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.galleryCellRemove {
+.drawGhost {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: rgba(0,0,0,0.6);
-  border: none;
-  color: var(--foreground, #e8e6e3);
-  font-size: 0.8rem;
+  display: none;
+  border: 2px dashed rgba(208, 188, 255, 0.7);
+  background: rgba(208, 188, 255, 0.06);
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* ── Type Picker ─────────────────────────────────────────── */
+
+.typePicker {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  min-width: 260px;
+}
+
+.typePickerTitle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.typePickerGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.typePickerBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 8px;
   cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.typePickerBtn:hover {
+  border-color: var(--accent);
+  background: var(--surface);
+}
+
+.typePickerIcon { font-size: 1.1rem; }
+
+.typePickerLabel {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: center;
+}
+
+.typePickerCancel {
+  width: 100%;
+  padding: 6px;
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.typePickerCancel:hover {
+  border-color: #ff4d4d;
+  color: #ff4d4d;
+}
+
+/* ── Untyped Widget ──────────────────────────────────── */
+
+.untypedWidget {
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  transition: opacity 0.15s;
+  height: 100%;
+  border: 2px dashed var(--border);
+  border-radius: 6px;
 }
 
-.galleryCellImageWrap:hover .galleryCellRemove {
-  opacity: 1;
-}
-
-.galleryCellCaption {
-  padding: 4px 8px 6px;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--muted, #888);
-  font-size: 0.75rem;
+.untypedHint {
+  font-size: 0.78rem;
+  color: var(--muted);
   text-align: center;
+  padding: 12px;
+}
+
+.chooseTypeBtn {
+  background: var(--accent);
+  border: none;
+  border-radius: 4px;
+  color: var(--background);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.chooseTypeBtn:hover { opacity: 0.85; }
+
+.widgetDragBarLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.widgetDragBarRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Alignment Guides ───────────────────────────────── */
+
+.guideX {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 80, 80, 0.85);
+  pointer-events: none;
+  z-index: 200;
+  /* Extend line across full canvas height */
+  height: 100%;
+}
+
+.guideY {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 80, 80, 0.85);
+  pointer-events: none;
+  z-index: 200;
+  /* Extend line across full canvas width */
   width: 100%;
 }
 
-.galleryCellCaption::placeholder {
-  color: var(--muted, #888);
+/* ── Timeline Widget ─────────────────────────────────── */
+
+.timelineWidget {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.timelineControls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.timelineOrientBtn {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.timelineOrientBtn:hover {
+  color: var(--foreground);
+  border-color: var(--accent);
+}
+
+.timelineAddBtn {
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.timelineAddBtn:hover {
+  border-color: var(--accent);
+  color: var(--foreground);
+}
+
+.timelineEmpty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-style: italic;
+  border: 2px dashed var(--border);
+  border-radius: 6px;
+}
+
+/* ── Shared inputs ── */
+
+.timelineDateInput {
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  outline: none;
+  width: 100%;
+  padding: 2px 0;
+  margin-bottom: 4px;
+}
+
+.timelineLabelInput {
+  background: none;
+  border: none;
+  color: var(--foreground);
+  font-size: 0.85rem;
+  font-weight: 600;
+  outline: none;
+  width: 100%;
+  padding: 2px 0;
+  margin-bottom: 4px;
+}
+
+.timelineDescInput {
+  background: none;
+  border: none;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  outline: none;
+  width: 100%;
+  resize: none;
+  font-family: inherit;
+  padding: 4px 0;
+  margin-bottom: 4px;
+}
+
+.timelineEntitySelect {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  padding: 2px 6px;
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+}
+
+.timelineEventDelete {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0 4px;
+  opacity: 0.5;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.timelineEventDelete:hover {
+  opacity: 1;
+  color: #ff4d4d;
+}
+
+/* ── Horizontal mode ── */
+
+.timelineHoriz {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: relative;
+  padding: 16px 0;
+}
+
+.timelineSpine {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--border);
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+.timelineHorizTrack {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: max-content;
+  position: relative;
+  z-index: 1;
+}
+
+.timelineHorizEvent {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 160px;
+  max-width: 200px;
+}
+
+.timelineDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--accent);
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.timelineHorizCard {
+  position: absolute;
+  width: 150px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.timelineCardAbove {
+  bottom: calc(100% + 14px);
+}
+
+.timelineCardBelow {
+  top: calc(100% + 14px);
+}
+
+/* ── Vertical mode ── */
+
+.timelineVert {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-right: 4px;
+}
+
+.timelineVertEvent {
+  display: flex;
+  gap: 12px;
+  min-height: 80px;
+}
+
+.timelineVertLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.timelineVertDate {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: center;
+  letter-spacing: 0.03em;
+  margin-bottom: 6px;
+  word-break: break-word;
+}
+
+.timelineVertDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--accent);
+  flex-shrink: 0;
+}
+
+.timelineVertSpine {
+  width: 2px;
+  flex: 1;
+  background: var(--border);
+  margin-top: 4px;
+}
+
+.timelineVertCard {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.timelineVertCardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.timelineVertCardHeader .timelineLabelInput {
+  flex: 1;
+}
+
+/* ── Relationship Graph Widget ───────────────────────── */
+
+.relationshipWidget {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 0;
+  overflow: hidden;
+}
+
+.relationshipToolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.relationshipToggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.relationshipToggle input {
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.relationshipStats {
+  flex: 1;
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.relationshipAddBtn {
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.relationshipAddBtn:hover {
+  border-color: var(--accent);
+  color: var(--foreground);
+}
+
+.relationshipAddForm {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.relationshipSelect {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--foreground);
+  font-size: 0.78rem;
+  padding: 4px 6px;
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+}
+
+.relationshipLabelInput {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--foreground);
+  font-size: 0.78rem;
+  padding: 4px 8px;
+  outline: none;
+  width: 100%;
+}
+
+.relationshipAddFormBtns {
+  display: flex;
+  gap: 6px;
+}
+
+.relationshipConfirmBtn {
+  flex: 1;
+  background: var(--accent);
+  border: none;
+  border-radius: 4px;
+  color: var(--background);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.relationshipConfirmBtn:hover { opacity: 0.85; }
+
+.relationshipCancelBtn {
+  flex: 1;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  padding: 5px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.relationshipCancelBtn:hover { color: var(--foreground); }
+
+.manualEdgeList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid var(--border);
+  padding-top: 6px;
+}
+
+.manualEdgeItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--muted);
+  background: var(--background);
+  border-radius: 4px;
+  padding: 3px 6px;
+}
+
+.manualEdgeDelete {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  opacity: 0.5;
+  padding: 0 2px;
+}
+
+.manualEdgeDelete:hover { opacity: 1; color: #ff4d4d; }
+
+.relationshipCanvas {
+  flex: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.relationshipCanvas:active { cursor: grabbing; }
+
+.relationshipEmpty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+
+/* ── Family Tree Widget ──────────────────────────────── */
+
+.familyTreeWidget {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.familyTreeToolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.familyTreeBtn {
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.familyTreeBtn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--foreground);
+}
+
+.familyTreeBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.familyTreeDeleteBtn {
+  background: none;
+  border: 1px solid rgba(255, 77, 77, 0.4);
+  border-radius: 4px;
+  color: #ff4d4d;
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.familyTreeDeleteBtn:hover {
+  background: rgba(255, 77, 77, 0.1);
+}
+
+.familyTreeStats {
+  flex: 1;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-align: right;
+}
+
+.familyTreeForm {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.familyTreeSelect {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--foreground);
+  font-size: 0.78rem;
+  padding: 4px 6px;
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+}
+
+.familyTreeInput {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--foreground);
+  font-size: 0.78rem;
+  padding: 4px 8px;
+  outline: none;
+  width: 100%;
+}
+
+.familyTreeFormBtns {
+  display: flex;
+  gap: 6px;
+}
+
+.familyTreeConfirmBtn {
+  flex: 1;
+  background: var(--accent);
+  border: none;
+  border-radius: 4px;
+  color: var(--background);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.familyTreeConfirmBtn:hover { opacity: 0.85; }
+
+.familyTreeCancelBtn {
+  flex: 1;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  padding: 5px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.familyTreeCancelBtn:hover { color: var(--foreground); }
+
+.familyTreeCanvas {
+  flex: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* ── Character Arc Widget ────────────────────────────── */
+
+.arcWidget {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  gap: 0;
+}
+
+.arcToolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.arcSelect {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--foreground);
+  font-size: 0.75rem;
+  padding: 3px 6px;
+  outline: none;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+}
+
+.arcModeToggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.arcModeBtn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.arcModeBtn:hover { color: var(--foreground); }
+
+.arcModeBtnActive {
+  background: rgba(208, 188, 255, 0.15);
+  color: var(--accent);
+}
+
+.arcAddBtn {
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.arcAddBtn:hover { border-color: var(--accent); color: var(--foreground); }
+
+.arcStagesRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.arcStagesLabel {
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.arcStagesInput {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--foreground);
+  font-size: 0.75rem;
+  outline: none;
+  padding: 2px 0;
+}
+
+.arcBeatForm {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.arcInput {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--foreground);
+  font-size: 0.78rem;
+  padding: 4px 8px;
+  outline: none;
+  width: 100%;
+}
+
+.arcSliderRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.arcSliderLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent);
+  width: 28px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.arcSlider {
+  flex: 1;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.arcSliderTick {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.arcBeatFormBtns {
+  display: flex;
+  gap: 6px;
+}
+
+.arcConfirmBtn {
+  flex: 1;
+  background: var(--accent);
+  border: none;
+  border-radius: 4px;
+  color: var(--background);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.arcConfirmBtn:hover { opacity: 0.85; }
+
+.arcCancelBtn {
+  flex: 1;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  padding: 5px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.arcCancelBtn:hover { color: var(--foreground); }
+
+.arcBeatList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  max-height: 60px;
+  overflow-y: auto;
+}
+
+.arcBeatChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 0.7rem;
+  color: var(--muted);
+  padding: 2px 6px 2px 8px;
+  white-space: nowrap;
+}
+
+.arcBeatChipHovered {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.arcBeatChipDelete {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 0;
+  line-height: 1;
   opacity: 0.5;
 }
 
-.galleryAddBtn {
-  margin: 4px 8px 8px;
-  padding: 6px;
-  background: var(--surface-mid, #1c1b1b);
-  border: 1px dashed var(--border, #2a2929);
-  border-radius: 6px;
-  color: var(--muted, #888);
-  font-size: 0.8rem;
+.arcBeatChipDelete:hover { opacity: 1; color: #ff4d4d; }
+
+.arcCanvas {
+  flex: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Org Chart Widget ────────────────────────────────── */
+
+.orgChartWidget {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.orgChartToolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.orgChartBtn {
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  padding: 3px 8px;
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  transition: all 0.15s;
+}
+
+.orgChartBtn:hover:not(:disabled) { border-color: var(--accent); color: var(--foreground); }
+.orgChartBtn:disabled { opacity: 0.35; cursor: default; }
+
+.orgChartDeleteBtn {
+  background: none;
+  border: 1px solid rgba(255,77,77,0.4);
+  border-radius: 4px;
+  color: #ff4d4d;
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.orgChartDeleteBtn:hover { background: rgba(255,77,77,0.1); }
+
+.orgChartStats {
+  flex: 1;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-align: right;
+}
+
+.orgChartForm {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.orgChartSelect {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--foreground);
+  font-size: 0.78rem;
+  padding: 4px 6px;
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+}
+
+.orgChartInput {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--foreground);
+  font-size: 0.78rem;
+  padding: 4px 8px;
+  outline: none;
+  width: 100%;
+}
+
+.orgChartColorRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.orgChartColorLabel {
+  font-size: 0.72rem;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.orgChartColorSwatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.orgChartColorSwatchActive {
+  border-color: white;
+}
+
+.orgChartFormBtns {
+  display: flex;
+  gap: 6px;
+}
+
+.orgChartConfirmBtn {
+  flex: 1;
+  background: var(--accent);
+  border: none;
+  border-radius: 4px;
+  color: var(--background);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.orgChartConfirmBtn:hover { opacity: 0.85; }
+
+.orgChartCancelBtn {
+  flex: 1;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  padding: 5px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.orgChartCancelBtn:hover { color: var(--foreground); }
+
+.orgChartCanvas {
+  flex: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* ── Pronunciation Guide Widget ──────────────────────── */
+
+.pronWidget {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.pronToolbar {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.pronTitle {
+  flex: 1;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.pronAddBtn {
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.pronAddBtn:hover { border-color: var(--accent); color: var(--foreground); }
+
+.pronForm {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.pronSelect {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--foreground);
+  font-size: 0.78rem;
+  padding: 4px 6px;
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+}
+
+.pronInput {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--foreground);
+  font-size: 0.78rem;
+  padding: 4px 8px;
+  outline: none;
+  width: 100%;
+}
+
+.pronFormBtns { display: flex; gap: 6px; }
+
+.pronConfirmBtn {
+  flex: 1;
+  background: var(--accent);
+  border: none;
+  border-radius: 4px;
+  color: var(--background);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.pronConfirmBtn:hover { opacity: 0.85; }
+
+.pronCancelBtn {
+  flex: 1;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  padding: 5px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.pronCancelBtn:hover { color: var(--foreground); }
+
+.pronEmpty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+
+.pronList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pronEntry {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pronEntryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pronEntryName {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--foreground);
+  cursor: text;
+}
+
+.pronEntryNameInput {
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--accent);
+  color: var(--foreground);
+  font-size: 0.92rem;
+  font-weight: 700;
+  outline: none;
+  flex: 1;
+}
+
+.pronEntryDelete {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  opacity: 0.5;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.pronEntryDelete:hover { opacity: 1; color: #ff4d4d; }
+
+.pronEntryPhonetic {
+  font-size: 0.88rem;
+  color: var(--accent);
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.03em;
+}
+
+.pronEntrySyllables {
+  font-size: 0.8rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+.pronEntryNotes {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* ── Syllable Counter Widget ─────────────────────────── */
+
+.syllableWidget {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  gap: 0;
+}
+
+.syllableToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.syllableStats {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.syllableToggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.syllableToggle input { accent-color: var(--accent); cursor: pointer; }
+
+.syllableTextarea {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--foreground);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  outline: none;
+  resize: none;
+  padding: 10px;
+  font-family: inherit;
+  min-height: 80px;
+}
+
+.syllableBreakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px 8px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.syllableWord {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 5px;
+}
+
+.syllableWordText {
+  font-size: 0.78rem;
+  color: var(--foreground);
+}
+
+.syllableWordCount {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 12px;
   text-align: center;
 }
 
-.galleryAddBtn:hover {
-  border-color: var(--accent, #c9a84c);
-  color: var(--foreground, #e8e6e3);
+/* ── Verse / Lyric Widget ────────────────────────────── */
+
+.lyricWidget {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
+
+.lyricToolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.lyricToggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.lyricToggle input { accent-color: var(--accent); cursor: pointer; }
+
+.lyricAddStanzaBtn {
+  margin-left: auto;
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.lyricAddStanzaBtn:hover { border-color: var(--accent); color: var(--foreground); }
+
+.lyricBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.lyricStanza {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lyricStanzaDivider {
+  height: 16px;
+}
+
+.lyricLine {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lyricRhymeLabel {
+  width: 16px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: center;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.lyricLineInput {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 1px solid transparent;
+  color: var(--foreground);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  outline: none;
+  padding: 2px 4px;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+
+.lyricLineInput:focus { border-bottom-color: var(--border); }
+.lyricLineInput::placeholder { color: var(--muted); opacity: 0.4; font-style: italic; }
+
+.lyricSylCount {
+  width: 24px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: right;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.lyricAddLineBtn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.7rem;
+  padding: 2px 4px;
+  cursor: pointer;
+  opacity: 0.4;
+  text-align: left;
+  transition: opacity 0.15s;
+  align-self: flex-start;
+  margin-left: 20px;
+}
+
+.lyricAddLineBtn:hover { opacity: 1; }
+
+/* ── Scene Card Widget ───────────────────────────────── */
+
+.sceneCardWidget {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border-top: 3px solid var(--accent);
+}
+
+.sceneCardHeader {
+  padding: 8px 10px 6px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.sceneCardTitle {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--foreground);
+  font-size: 1rem;
+  font-weight: 700;
+  outline: none;
+  margin-bottom: 6px;
+  font-family: inherit;
+}
+
+.sceneCardTitle::placeholder { color: var(--muted); font-style: italic; }
+
+.sceneCardColorRow {
+  display: flex;
+  gap: 5px;
+}
+
+.sceneCardColorDot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.sceneCardColorDotActive { border-color: white; }
+
+.sceneCardBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sceneCardRow {
+  display: flex;
+  gap: 8px;
+}
+
+.sceneCardRow .sceneCardField { flex: 1; }
+
+.sceneCardField {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sceneCardLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+}
+
+.sceneCardInput {
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--foreground);
+  font-size: 0.82rem;
+  outline: none;
+  padding: 2px 0;
+  width: 100%;
+  font-family: inherit;
+}
+
+.sceneCardInput::placeholder { color: var(--muted); opacity: 0.5; }
+
+.sceneCardTextarea {
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--foreground);
+  font-size: 0.82rem;
+  outline: none;
+  resize: none;
+  width: 100%;
+  font-family: inherit;
+  line-height: 1.5;
+  padding: 2px 0;
+}
+
+.sceneCardTextarea::placeholder { color: var(--muted); opacity: 0.5; }

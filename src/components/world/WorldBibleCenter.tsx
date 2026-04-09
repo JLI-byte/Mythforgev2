@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useWorkspaceStore, EntityType } from '@/store/workspaceStore';
+import { useWorkspaceStore, EntityType, WorldBibleRootConfig } from '@/store/workspaceStore';
+import { getProjectLayout } from '@/lib/worldBibleNav';
 import ArticleReadView from './ArticleReadView';
 import styles from './WorldBibleCenter.module.css';
 
@@ -12,55 +13,17 @@ import styles from './WorldBibleCenter.module.css';
  * Navigation via three buckets (People, Places, Things) + custom category placeholder.
  */
 
-type CategoryBucket = {
-    id: string;
-    label: string;
-    icon: string;
-    color: string;
-    description: string;
-    types: EntityType[]; // which entity types belong to this bucket
-};
-
-const BUCKETS: CategoryBucket[] = [
-    {
-        id: 'people',
-        label: 'People',
-        icon: '👤',
-        color: '#4A6FA5',
-        description: 'Characters, factions, and species',
-        types: ['character', 'faction', 'species'],
-    },
-    {
-        id: 'places',
-        label: 'Places',
-        icon: '🗺️',
-        color: '#2E8B57',
-        description: 'Locations, realms, cities, and regions',
-        types: ['location'],
-    },
-    {
-        id: 'things',
-        label: 'Things',
-        icon: '📦',
-        color: '#C0392B',
-        description: 'Artifacts, lore, and historical events',
-        types: ['artifact', 'lore'],
-    },
-    {
-        id: 'world',
-        label: 'World Systems',
-        icon: '🌍',
-        color: '#6B4C9A',
-        description: 'Magic systems, religions, and deities',
-        types: ['magic', 'religion'],
-    },
-];
 
 export default function WorldBibleCenter() {
     const entities = useWorkspaceStore(state => state.entities);
     const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
+    const projects = useWorkspaceStore(state => state.projects);
+    const activeProject = projects.find(p => p.id === activeProjectId);
 
-    const [selectedBucket, setSelectedBucket] = useState<CategoryBucket | null>(null);
+    const layout = getProjectLayout(activeProject);
+
+    const [selectedBucketId, setSelectedBucketId] = useState<string | null>(null);
+    const selectedBucket = layout.roots.find(r => r.id === selectedBucketId);
     const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
 
     // Filter entities for active project
@@ -77,14 +40,14 @@ export default function WorldBibleCenter() {
     }
 
     // Level 2 — Entity Grid (when a bucket is selected)
-    if (selectedBucket !== null) {
-        const bucketEntities = projectEntities.filter(e => selectedBucket.types.includes(e.type));
+    if (selectedBucket) {
+        const bucketEntities = projectEntities.filter(e => selectedBucket.entityTypes.includes(e.type));
 
         return (
             <div className={styles.browserContainer}>
                 <div className={styles.browserInner}>
                     {/* Back button */}
-                    <button className={styles.backBtn} onClick={() => setSelectedBucket(null)}>
+                    <button className={styles.backBtn} onClick={() => setSelectedBucketId(null)}>
                         ← All Categories
                     </button>
 
@@ -114,7 +77,10 @@ export default function WorldBibleCenter() {
                                 {entity.imageUrl ? (
                                     <img src={entity.imageUrl} alt={entity.name} className={styles.cardThumb} />
                                 ) : (
-                                    <div className={styles.cardColorBlock} style={{ backgroundColor: selectedBucket.color }} />
+                                    <div 
+                                        className={styles.cardColorBlock} 
+                                        style={{ backgroundColor: (selectedBucket.id === 'people' ? '#4A6FA5' : selectedBucket.id === 'places' ? '#2E8B57' : selectedBucket.id === 'things' ? '#C0392B' : selectedBucket.id === 'world' ? '#6B4C9A' : '#333') }} 
+                                    />
                                 )}
                                 <div className={styles.cardContent}>
                                     <span className={styles.cardName}>{entity.name}</span>
@@ -144,25 +110,30 @@ export default function WorldBibleCenter() {
 
                 {/* Category grid */}
                 <div className={styles.categoryGrid}>
-                    {/* Three default buckets */}
-                    {BUCKETS.map(bucket => {
-                        const count = projectEntities.filter(e => bucket.types.includes(e.type)).length;
-                        const heroEntity = projectEntities.find(e => bucket.types.includes(e.type) && e.imageUrl);
+                    {layout.roots.map(root => {
+                        const count = projectEntities.filter(e => root.entityTypes.includes(e.type)).length;
+                        const heroEntity = projectEntities.find(e => root.entityTypes.includes(e.type) && e.imageUrl);
+                        
+                        // Derived metadata for rendering
+                        const color = root.id === 'people' ? '#4A6FA5' : 
+                                      root.id === 'places' ? '#2E8B57' : 
+                                      root.id === 'things' ? '#C0392B' : 
+                                      root.id === 'world' ? '#6B4C9A' : '#333';
+                        
                         return (
                             <div
-                                key={bucket.id}
+                                key={root.id}
                                 className={styles.categoryCard}
                                 style={{
                                     backgroundImage: heroEntity ? `url(${heroEntity.imageUrl})` : 'none',
-                                    backgroundColor: bucket.color,
+                                    backgroundColor: color,
                                 } as React.CSSProperties}
-                                onClick={() => setSelectedBucket(bucket)}
+                                onClick={() => setSelectedBucketId(root.id)}
                             >
                                 <div className={styles.categoryOverlay} />
                                 <div className={styles.categoryContent}>
-                                    <span className={styles.categoryIcon}>{bucket.icon}</span>
-                                    <h3 className={styles.categoryLabel}>{bucket.label}</h3>
-                                    <p className={styles.categoryDescription}>{bucket.description}</p>
+                                    <span className={styles.categoryIcon}>{root.icon}</span>
+                                    <h3 className={styles.categoryLabel}>{root.label}</h3>
                                     <span className={styles.categoryCount}>
                                         {count} {count === 1 ? 'entry' : 'entries'}
                                     </span>

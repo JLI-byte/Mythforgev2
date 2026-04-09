@@ -149,3 +149,10 @@ a:hover {
     border-radius: 2px;
     outline: 1px solid rgba(255, 140, 0, 0.7);
 }
+
+/* @Entity suggest — highlight the @query text while typing */
+.entity-suggest-query {
+  background: rgba(208, 188, 255, 0.15);
+  border-radius: 3px;
+  color: var(--accent);
+}

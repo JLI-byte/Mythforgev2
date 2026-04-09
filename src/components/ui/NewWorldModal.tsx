@@ -33,7 +33,7 @@ const WRITING_MODES: {
   { id: 'novel',      icon: '📖', label: 'Novel',          desc: 'Chapters, scenes, long-form fiction' },
   { id: 'screenplay', icon: '🎬', label: 'Screenplay',     desc: 'Script format with scenes and elements' },
   { id: 'real-world', icon: '📰', label: 'Non-Fiction',    desc: 'Essays, memoir, journalism, research' },
-  { id: 'poetry',     icon: '✍️', label: 'Poetry',         desc: 'Verse, stanzas, lyric writing' },
+  { id: 'poetry',     icon: '✍️', label: 'Poetry & Music', desc: 'Verse, stanzas, lyric writing' },
   { id: 'markdown',   icon: '📝', label: 'Notes / Lore',   desc: 'Reference, worldbuilding, lore docs' },
 ];
 

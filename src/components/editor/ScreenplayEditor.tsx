@@ -11,8 +11,11 @@ import { ScreenplayNodes } from '@/lib/screenplay/ScreenplayNodes';
 import { ScreenplayKeymap } from '@/lib/screenplay/ScreenplayKeymap';
 import styles from './ScreenplayEditor.module.css';
 import { useWorkspaceStore, Scene } from '@/store/workspaceStore';
+import { EntityMark } from '@/lib/EntityMark';
+import { EntitySuggest } from '@/lib/EntitySuggest';
+import EntitySuggestDropdown from './EntitySuggestDropdown';
 
-export default function ScreenplayEditor({ scene }: { scene: Scene }) {
+export default function ScreenplayEditor({ scene, onEditorFocus }: { scene: Scene, onEditorFocus?: (editor: any) => void }) {
     const updateScene = useWorkspaceStore((state) => state.updateScene);
 
     const [currentType, setCurrentType] = useState<string>('sceneHeading');
@@ -24,7 +27,9 @@ export default function ScreenplayEditor({ scene }: { scene: Scene }) {
         extensions: [
             StarterKit.configure({}),
             ...ScreenplayNodes,
-            ScreenplayKeymap
+            ScreenplayKeymap,
+            EntityMark,
+            EntitySuggest,
         ],
         content: scene.content || '<div data-screenplay-type="sceneHeading"></div>',
         onSelectionUpdate: ({ editor }) => {
@@ -45,6 +50,9 @@ export default function ScreenplayEditor({ scene }: { scene: Scene }) {
                 updateScene(scene.id, { content: rawContent, wordCount });
             }, 300);
         },
+        onFocus: ({ editor: focusedEditor }) => {
+            if (onEditorFocus) onEditorFocus(focusedEditor as any);
+        },
         editorProps: {
             handleTextInput(view, from, to, text) {
                 const { state } = view;
@@ -59,6 +67,10 @@ export default function ScreenplayEditor({ scene }: { scene: Scene }) {
             }
         }
     }, [scene.id]);
+    const editorRef = useRef<any>(editor);
+    useEffect(() => {
+        editorRef.current = editor;
+    }, [editor]);
 
     useEffect(() => {
         return () => {

@@ -150,6 +150,17 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
                     >
                         📄 {entity.articleBlocks && entity.articleBlocks.length > 0 ? "Edit Article" : "Write Article"}
                     </button>
+                    <button
+                        className={styles.heroBtn}
+                        onClick={() => {
+                            if (useWorkspaceStore.getState().activeProjectId) {
+                                useWorkspaceStore.getState().pinEntityToDesk(useWorkspaceStore.getState().activeProjectId!, entity.id);
+                            }
+                        }}
+                        title="Pin to Writing Desk"
+                    >
+                        📌 Pin to Desk
+                    </button>
                 </div>
             </div>
 

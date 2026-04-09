@@ -170,3 +170,226 @@
   margin: 0;
   text-align: center;
 }
+
+/* ── Tab bar ──────────────────────────────────────────── */
+
+.tabBar {
+  display: flex;
+  gap: 2px;
+  padding: 0 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.tabBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+
+.tabBtn:hover {
+  color: var(--foreground);
+}
+
+.tabBtnActive {
+  color: var(--foreground);
+  border-bottom-color: var(--accent);
+}
+
+.tabCount {
+  background: var(--accent);
+  color: var(--background);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+/* ── Mentions panel ──────────────────────────────────── */
+
+.mentionsPanel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.mentionsEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 12px;
+  text-align: center;
+}
+
+.mentionsEmptyIcon {
+  font-size: 2rem;
+  opacity: 0.4;
+}
+
+.mentionsEmptyText {
+  font-size: 0.95rem;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.mentionsEmptyHint {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.mentionsCount {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+.mentionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mentionCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+  width: 100%;
+}
+
+.mentionCard:hover {
+  border-color: var(--accent);
+  background: var(--surface);
+}
+
+.mentionCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mentionDocTitle {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.mentionSep {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.mentionSceneTitle {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.mentionExcerpt {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0;
+  font-style: italic;
+}
+
+.mentionHighlight {
+  background: rgba(208, 188, 255, 0.25);
+  color: var(--accent);
+  font-style: normal;
+  font-weight: 600;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+/* ── Works section ───────────────────────────────────── */
+
+.worksSection {
+  padding: 16px 20px 20px;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+
+.worksSectionTitle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  margin: 0 0 10px 0;
+}
+
+.worksList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.workCard {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+
+.workCard:hover {
+  border-color: var(--accent);
+}
+
+.workCardStripe {
+  width: 4px;
+  align-self: stretch;
+  flex-shrink: 0;
+}
+
+.workCardInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.workCardName {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workCardMode {
+  font-size: 0.72rem;
+  color: var(--muted);
+}

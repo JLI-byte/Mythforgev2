@@ -97,7 +97,7 @@ export function exportAsMarkdown(document: MFDocument, scenes: Scene[]): void {
  * @param {string} projectName - The name of the project context.
  * @returns {Promise<void>} 
  */
-export async function exportAsDocx(document: MFDocument, scenes: Scene[]): Promise<void> {
+export async function exportAsDocx(document: MFDocument, scenes: Scene[]): Promise<Blob> {
     const title = document.title || 'Untitled Document';
     const parser = new DOMParser();
 
@@ -222,7 +222,9 @@ export async function exportAsDocx(document: MFDocument, scenes: Scene[]): Promi
     a.click();
     window.document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    return blob;
 }
+
 
 /**
  * Aggregates all world entities within a project into a single Markdown encyclopedia.
@@ -262,4 +264,209 @@ export function exportWorldBible(entities: Entity[], projectName: string): void 
     });
 
     downloadFile(output, `${slugify(safeProjectName)}-world-bible.md`, 'text/markdown');
+}
+
+/**
+ * Builds the Markdown content for a document and its scenes without triggering a download.
+ */
+export function buildMarkdownContent(document: MFDocument, scenes: Scene[]): string {
+  const title = document.title || 'Untitled Document';
+  let finalMarkdown = `# ${title}\n\n`;
+  const orderedScenes = [...scenes].sort((a, b) => a.order - b.order);
+  orderedScenes.forEach((scene) => {
+    finalMarkdown += `## ${scene.title}\n\n`;
+    finalMarkdown += `${htmlToMarkdown(scene.content)}\n\n`;
+  });
+  return finalMarkdown;
+}
+
+/**
+ * Google Drive OAuth client ID.
+ * Users must configure this in .env.local: NEXT_PUBLIC_GDRIVE_CLIENT_ID
+ * Scope: https://www.googleapis.com/auth/drive.file
+ */
+const GDRIVE_CLIENT_ID = process.env.NEXT_PUBLIC_GDRIVE_CLIENT_ID || '';
+
+/**
+ * Request a Google Drive OAuth token using the implicit flow.
+ */
+async function getGDriveToken(): Promise<string | null> {
+  if (!GDRIVE_CLIENT_ID) return null;
+
+  return new Promise((resolve) => {
+    const initTokenClient = () => {
+      // @ts-ignore — google is loaded from CDN
+      const client = window.google.accounts.oauth2.initTokenClient({
+        client_id: GDRIVE_CLIENT_ID,
+        scope: 'https://www.googleapis.com/auth/drive.file',
+        callback: (response: { access_token?: string; error?: string }) => {
+          if (response.access_token) {
+            resolve(response.access_token);
+          } else {
+            resolve(null);
+          }
+        },
+      });
+      client.requestAccessToken();
+    };
+
+    if (typeof window !== 'undefined' && (window as any).google?.accounts?.oauth2) {
+      initTokenClient();
+    } else {
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.onload = initTokenClient;
+      script.onerror = () => resolve(null);
+      document.head.appendChild(script);
+    }
+  });
+}
+
+/**
+ * Upload a file blob to Google Drive using the multipart upload API.
+ */
+export async function uploadToGoogleDrive(
+  blob: Blob,
+  filename: string,
+  mimeType: string
+): Promise<string | null> {
+  const token = await getGDriveToken();
+  if (!token) return null;
+
+  const metadata = { name: filename, mimeType };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+  form.append('file', blob);
+
+  try {
+    const res = await fetch(
+      'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=webViewLink',
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.webViewLink ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fetch a file's content from Google Drive given its file ID.
+ */
+export async function fetchGDriveFileContent(fileId: string): Promise<string | null> {
+  const token = await getGDriveToken();
+  if (!token) return null;
+
+  try {
+    const res = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    if (!res.ok) return null;
+    return await res.text();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Parses a Final Draft (.fdx) XML string into MythForge-compatible screenplay HTML.
+ */
+export function parseFdxToHtml(xmlString: string): string {
+  if (typeof window === 'undefined') return '';
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+  const paragraphs = xmlDoc.getElementsByTagName('Paragraph');
+  
+  let html = '';
+
+  const typeMap: Record<string, string> = {
+    'Scene Heading': 'sceneHeading',
+    'Action': 'action',
+    'Character': 'character',
+    'Dialogue': 'dialogue',
+    'Parenthetical': 'parenthetical',
+    'Transition': 'transition',
+    'Shot': 'sceneHeading', // Shots often behave like scene headings
+  };
+
+  for (let i = 0; i < paragraphs.length; i++) {
+    const p = paragraphs[i];
+    const fdxType = p.getAttribute('Type') || 'Action';
+    const mfType = typeMap[fdxType] || 'action';
+
+    // Extract text from Text nodes within the Paragraph
+    const texts = p.getElementsByTagName('Text');
+    let pContent = '';
+    
+    for (let j = 0; j < texts.length; j++) {
+      const textNode = texts[j];
+      let innerText = textNode.textContent || '';
+      
+      // Preserve bold/italic if markers exist (simplified for v1)
+      // Final Draft uses <Style> elements for bold/italic/underline
+      const style = textNode.getAttribute('Style');
+      if (style?.includes('Bold')) innerText = `<strong>${innerText}</strong>`;
+      if (style?.includes('Italic')) innerText = `<em>${innerText}</em>`;
+      if (style?.includes('Underline')) innerText = `<u>${innerText}</u>`;
+      
+      pContent += innerText;
+    }
+
+    if (pContent.trim() || i === 0) {
+      html += `<div data-screenplay-type="${mfType}">${pContent}</div>`;
+    }
+  }
+
+  return html || '<div data-screenplay-type="sceneHeading"></div>';
+}
+
+/**
+ * Sanitizes raw HTML from an imported file into safe TipTap-compatible HTML.
+ */
+export function sanitizeImportedHtml(raw: string): string {
+  if (typeof window === 'undefined') return raw;
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(raw, 'text/html');
+
+  // Remove scripts, styles, iframes, forms
+  ['script', 'style', 'iframe', 'form', 'input', 'button', 'nav', 'header', 'footer'].forEach(tag => {
+    doc.querySelectorAll(tag).forEach(el => el.remove());
+  });
+
+  const body = doc.body;
+
+  // Strip all attributes except allowed ones
+  body.querySelectorAll('*').forEach(el => {
+    const allowed = ['href', 'src', 'alt'];
+    Array.from(el.attributes).forEach(attr => {
+      if (!allowed.includes(attr.name)) el.removeAttribute(attr.name);
+    });
+  });
+
+  return body.innerHTML;
+}
+
+/**
+ * Converts basic Markdown to simple HTML suitable for TipTap import.
+ */
+export function markdownToBasicHtml(md: string): string {
+  const lines = md.split('\n');
+  return lines.map(line => {
+    if (line.startsWith('# ')) return `<h1>${line.slice(2)}</h1>`;
+    if (line.startsWith('## ')) return `<h2>${line.slice(3)}</h2>`;
+    if (line.startsWith('### ')) return `<h3>${line.slice(4)}</h3>`;
+    if (!line.trim()) return '';
+    let html = line
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>');
+    return `<p>${html}</p>`;
+  }).join('');
 }

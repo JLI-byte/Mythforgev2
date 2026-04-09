@@ -1,0 +1,408 @@
+.panel {
+    position: fixed;
+    top: 48px;
+    right: 0;
+    height: calc(100vh - 48px);
+    width: 480px;
+    transform: translateX(100%);
+    transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 55;
+    background-color: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
+}
+
+.panel.open {
+    transform: translateX(0);
+}
+
+.panelInner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    background: linear-gradient(to bottom, var(--surface), var(--background));
+}
+
+.title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--foreground);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 1.5rem;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+    color: var(--foreground);
+    background: rgba(128,128,128,0.1);
+}
+
+.serviceBar {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border);
+    background: var(--background);
+    scrollbar-width: none;
+}
+
+.serviceBar::-webkit-scrollbar { display: none; }
+
+.serviceTab {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.serviceTab:hover {
+    border-color: var(--accent);
+    color: var(--foreground);
+}
+
+.serviceTabActive {
+    background: var(--accent);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.serviceIcon {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--background);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.composeArea {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.composeHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.composeTitle {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+}
+
+.charCount {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.charCount.warning { color: #f59e0b; }
+.charCount.error { color: #ef4444; }
+
+.textArea {
+    width: 100%;
+    min-height: 120px;
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    color: var(--foreground);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.textArea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.1);
+}
+
+.templateBar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.templateBtn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: var(--background);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.templateBtn:hover {
+    color: var(--foreground);
+    border-color: var(--muted);
+}
+
+.actionRow {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.primaryAction {
+    flex: 1;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.primaryAction:hover { opacity: 0.9; }
+
+.secondaryAction {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--foreground);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.secondaryAction:hover {
+    background: rgba(128,128,128,0.05);
+}
+
+.loginBridge {
+    background: var(--surface);
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 1px dashed var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+    text-align: center;
+}
+
+.bridgeHint {
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.historySection {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.historyTitle {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+}
+
+.historyItem {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.historyHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.historyPlatform {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.historyDate {
+    font-size: 0.7rem;
+    color: var(--muted);
+}
+
+.historyContent {
+    font-size: 0.85rem;
+    color: var(--foreground);
+    line-height: 1.4;
+    white-space: pre-wrap;
+}
+
+.sideTab {
+    position: fixed;
+    top: 438px;
+    height: 130px;
+    box-sizing: border-box;
+    padding: 16px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-right: none;
+    margin-right: -1px;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 150ms ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 9999;
+}
+
+.sideTab:hover {
+    transform: translateX(-6px);
+}
+
+.ghostTab {
+  position: fixed;
+  z-index: 9998;
+  background: rgba(255, 255, 255, 0.03);
+  border: none;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  border-radius: 8px 0 0 8px;
+}
+
+.ghostTab:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.ghostTabArrow {
+  color: var(--muted);
+  font-size: 0.7rem;
+  opacity: 0.5;
+}
+
+.sideTabActive {
+    background: var(--surface);
+    color: var(--foreground);
+}
+
+.dragHandle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    cursor: ew-resize;
+    background: transparent;
+}
+
+.sideTabLabel {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.panelResizeHandle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: transparent;
+    cursor: ew-resize;
+    transition: background 0.2s ease;
+}
+
+.panelResizeHandle:hover {
+    background: var(--accent);
+}
+
+.toast {
+  background: rgba(208, 188, 255, 0.15);
+  border: 1px solid rgba(208, 188, 255, 0.3);
+  border-radius: 6px;
+  color: var(--accent);
+  font-size: 0.78rem;
+  padding: 8px 12px;
+  margin: 0 0 8px 0;
+  text-align: center;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}

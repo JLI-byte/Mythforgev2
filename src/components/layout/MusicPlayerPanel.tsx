@@ -14,63 +14,105 @@ interface MusicPlayerPanelProps {
     onPanelWidthChange: (width: number) => void;
 }
 
-function processUrl(url: string): string {
-    // Spotify playlist/album/track
-    // https://open.spotify.com/playlist/xxx → https://open.spotify.com/embed/playlist/xxx
-    if (url.includes('open.spotify.com')) {
-        return url.replace('open.spotify.com/', 'open.spotify.com/embed/');
-    }
-    // YouTube playlist or video
-    // https://www.youtube.com/watch?v=xxx → https://www.youtube.com/embed/xxx
-    // https://www.youtube.com/playlist?list=xxx → https://www.youtube.com/embed/videoseries?list=xxx
-    if (url.includes('youtube.com/watch')) {
-        // safely parse
-        try {
-            const videoId = new URL(url).searchParams.get('v');
-            if (videoId) return `https://www.youtube.com/embed/${videoId}`;
-        } catch { }
-    }
-    if (url.includes('youtube.com/playlist')) {
-        try {
-            const listId = new URL(url).searchParams.get('list');
-            if (listId) return `https://www.youtube.com/embed/videoseries?list=${listId}`;
-        } catch { }
-    }
-    // SoundCloud — use oEmbed iframe approach
-    if (url.includes('soundcloud.com')) {
-        return `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=true`;
-    }
-    // Fallback — return as-is and let the iframe try
-    return url;
+interface SavedPlaylist {
+    id: string;
+    name: string;
+    url: string;
+    service: string;
+    createdAt: number;
 }
 
-export function MusicPlayerPanel({ isOpen, onClose, onTabClick, tabWidth, onTabWidthChange, panelWidth, onPanelWidthChange }: MusicPlayerPanelProps) {
+const CURATED: { name: string; url: string; service: string; description: string }[] = [
+    { name: 'Lo-Fi Hip Hop', url: 'https://www.youtube.com/watch?v=jfKfPfyJRdk', service: 'YouTube', description: 'Beats to study/write to' },
+    { name: 'Ambient Writing', url: 'https://open.spotify.com/playlist/37i9dQZF1DWZeKCadgRdKQ', service: 'Spotify', description: 'Calm focus music' },
+    { name: 'Cinematic Epic', url: 'https://open.spotify.com/playlist/37i9dQZF1DX7EF8wVxBWW0', service: 'Spotify', description: 'Film scores for worldbuilding' },
+    { name: 'Dark Ambient', url: 'https://open.spotify.com/playlist/37i9dQZF1DX5trt9i14X7j', service: 'Spotify', description: 'For dark fiction and horror' },
+    { name: 'Coffee Shop Noise', url: 'https://www.youtube.com/watch?v=h2zkV-l_TbY', service: 'YouTube', description: 'Background café ambience' },
+    { name: 'Medieval Fantasy', url: 'https://open.spotify.com/playlist/37i9dQZF1DX1s9knjP51Oa', service: 'Spotify', description: 'For fantasy worldbuilding' },
+    { name: 'Focus Flow', url: 'https://open.spotify.com/playlist/37i9dQZF1DWZZbwlv3Vmtr', service: 'Spotify', description: 'Deep concentration' },
+    { name: 'Rain Sounds', url: 'https://www.youtube.com/watch?v=mPZkdNFkNps', service: 'YouTube', description: 'Rainfall for writing sessions' },
+];
+
+function detectService(url: string): string {
+    if (url.includes('spotify.com')) return 'Spotify';
+    if (url.includes('apple.com')) return 'Apple Music';
+    if (url.includes('youtube.com') || url.includes('youtu.be')) return 'YouTube';
+    if (url.includes('soundcloud.com')) return 'SoundCloud';
+    if (url.includes('pandora.com')) return 'Pandora';
+    if (url.includes('tidal.com')) return 'Tidal';
+    if (url.includes('deezer.com')) return 'Deezer';
+    return 'Music';
+}
+
+const SERVICE_EMOJI: Record<string, string> = {
+    Spotify: '🟢',
+    'Apple Music': '🍎',
+    YouTube: '▶️',
+    SoundCloud: '☁️',
+    Pandora: '🎵',
+    Tidal: '🌊',
+    Deezer: '🎶',
+    Music: '🎵',
+};
+
+export function MusicPlayerPanel({
+    isOpen, onClose, onTabClick,
+    tabWidth, onTabWidthChange,
+    panelWidth, onPanelWidthChange
+}: MusicPlayerPanelProps) {
     const [mounted, setMounted] = useState(false);
+    const tabRef = React.useRef<HTMLButtonElement>(null);
+
+
+    const [library, setLibrary] = useState<SavedPlaylist[]>([]);
+    const [view, setView] = useState<'library' | 'curated' | 'add'>('library');
+    const [newUrl, setNewUrl] = useState('');
+    const [newName, setNewName] = useState('');
+    const [toast, setToast] = useState('');
+
     useEffect(() => { setMounted(true); }, []);
 
-    const [embedUrl, setEmbedUrl] = useState('');
-    const [inputUrl, setInputUrl] = useState('');
-    const [isEditing, setIsEditing] = useState(false);
-
     useEffect(() => {
-        // Run asynchronously to avoid Next.js "setState synchronously within effect" warning
-        Promise.resolve().then(() => {
-            const savedUrl = localStorage.getItem('mythforge-music-url');
-            if (savedUrl) {
-                setEmbedUrl(savedUrl);
-            } else {
-                setIsEditing(true);
-            }
-        });
+        try {
+            const saved = localStorage.getItem('mythforge-music-library-v2');
+            if (saved) setLibrary(JSON.parse(saved));
+        } catch { setLibrary([]); }
     }, []);
 
-    const handleLoad = () => {
-        if (inputUrl.trim()) {
-            const processed = processUrl(inputUrl.trim());
-            setEmbedUrl(processed);
-            localStorage.setItem('mythforge-music-url', processed);
-            setIsEditing(false);
-        }
+    const saveLibrary = (next: SavedPlaylist[]) => {
+        setLibrary(next);
+        localStorage.setItem('mythforge-music-library-v2', JSON.stringify(next));
+    };
+
+    const showToast = (msg: string) => {
+        setToast(msg);
+        setTimeout(() => setToast(''), 2500);
+    };
+
+    const openUrl = (url: string, name: string) => {
+        window.open(url, '_blank');
+        showToast(`Opening ${name}...`);
+    };
+
+    const addToLibrary = () => {
+        if (!newUrl.trim()) return;
+        const service = detectService(newUrl);
+        const entry: SavedPlaylist = {
+            id: crypto.randomUUID(),
+            name: newName.trim() || service + ' Playlist',
+            url: newUrl.trim(),
+            service,
+            createdAt: Date.now(),
+        };
+        saveLibrary([entry, ...library]);
+        setNewUrl('');
+        setNewName('');
+        setView('library');
+        showToast('Saved to library!');
+    };
+
+    const removeFromLibrary = (id: string) => {
+        saveLibrary(library.filter(p => p.id !== id));
     };
 
     return (
@@ -81,107 +123,255 @@ export function MusicPlayerPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
                     style={{
                         width: tabWidth,
                         right: isOpen ? panelWidth : 0,
-                        transition: 'right 280ms ease-in-out'
+                        top: 698,
+                        transition: 'right 280ms ease-in-out',
                     }}
                     onClick={onTabClick}
-                    title="Music Player"
-                    aria-label="Toggle Music Player"
+                    title="Music"
                 >
-                    <div 
-                        className={styles.dragHandle} 
+                    <div
+                        className={styles.dragHandle}
                         onMouseDown={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
                             const startX = e.clientX;
                             const startWidth = tabWidth;
-                            const onMouseMove = (moveEvent: MouseEvent) => {
-                                const delta = startX - moveEvent.clientX;
-                                const newWidth = Math.min(120, Math.max(44, startWidth + delta));
-                                onTabWidthChange(newWidth);
+                            const onMove = (me: MouseEvent) => {
+                                onTabWidthChange(Math.min(120, Math.max(44, startWidth + (startX - me.clientX))));
                             };
-                            const onMouseUp = () => {
-                                document.removeEventListener('mousemove', onMouseMove);
-                                document.removeEventListener('mouseup', onMouseUp);
+                            const onUp = () => {
+                                document.removeEventListener('mousemove', onMove);
+                                document.removeEventListener('mouseup', onUp);
                             };
-                            document.addEventListener('mousemove', onMouseMove);
-                            document.addEventListener('mouseup', onMouseUp);
+                            document.addEventListener('mousemove', onMove);
+                            document.addEventListener('mouseup', onUp);
                         }}
                     />
-                    <span className={styles.tabLabel}>♪</span>
+                    <span className={styles.tabIcon}>♪</span>
                     <span className={styles.tabText}>Music</span>
                 </button>,
                 document.body
             )}
 
-            <div className={`${styles.panel} ${isOpen ? styles.open : ''}`} style={{ width: panelWidth }}>
-                {/* Panel content */}
-            <div className={styles.panelInner} style={{ paddingRight: tabWidth }}>
-                <header className={styles.header}>
-                    <span className={styles.title}>Music Player</span>
-                    <button className={styles.editBtn} onClick={() => setIsEditing(!isEditing)} title="Change source">
-                        {isEditing ? '✕' : '✎'}
-                    </button>
-                    <button className={styles.closeBtn} onClick={onClose}>×</button>
-                </header>
+            {mounted && isOpen && createPortal(
+                <button
+                    className={styles.ghostTab}
+                    style={{ 
+                        width: tabWidth, 
+                        height: 130,
+                        top: 698,
+                        right: 0, // stays static at the screen edge
+                    }}
+                    onClick={onClose}
+                    title="Close Music"
+                >
+                    <span className={styles.ghostTabArrow}>▸</span>
+                </button>,
+                document.body
+            )}
 
-                {isEditing || !embedUrl ? (
-                    /* URL input state */
-                    <div className={styles.urlInputState}>
-                        <p className={styles.hint}>Paste a link from Spotify, YouTube, SoundCloud, or any music service</p>
-                        <input
-                            type="text"
-                            className={styles.urlInput}
-                            value={inputUrl}
-                            onChange={e => setInputUrl(e.target.value)}
-                            placeholder="https://open.spotify.com/playlist/..."
-                            onKeyDown={e => {
-                                if (e.key === 'Enter' && inputUrl.trim()) {
-                                    handleLoad();
-                                }
-                            }}
-                        />
-                        <button
-                            className={styles.loadBtn}
-                            onClick={handleLoad}
-                        >Load</button>
-                        <p className={styles.supportedServices}>
-                            Works with Spotify, YouTube, SoundCloud, and more
-                        </p>
-                    </div>
-                ) : (
-                    /* Embed state */
-                    <iframe
-                        src={embedUrl}
-                        className={styles.embed}
-                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                        loading="lazy"
-                        title="Music Player"
+            <div
+                className={`${styles.panel} ${isOpen ? styles.open : ''}`}
+                style={{ width: panelWidth }}
+            >
+                <div className={styles.panelInner} style={{ paddingRight: tabWidth }}>
+                    {/* Resize handle */}
+                    <div
+                        className={styles.panelResizeHandle}
+                        onMouseDown={(e) => {
+                            e.preventDefault();
+                            const startX = e.clientX;
+                            const startW = panelWidth;
+                            const onMove = (me: MouseEvent) => {
+                                onPanelWidthChange(Math.max(280, Math.min(800, startW + (startX - me.clientX))));
+                            };
+                            const onUp = () => {
+                                document.removeEventListener('mousemove', onMove);
+                                document.removeEventListener('mouseup', onUp);
+                            };
+                            document.addEventListener('mousemove', onMove);
+                            document.addEventListener('mouseup', onUp);
+                        }}
                     />
-                )}
+
+                    {/* Header */}
+                    <div className={styles.header} style={{ paddingRight: tabWidth }}>
+                        <h2 className={styles.title}>Music & Soundscapes</h2>
+                        <button className={styles.closeBtn} onClick={onClose}>×</button>
+                    </div>
+
+                    {/* Nav tabs */}
+                    <div className={styles.navTabs} style={{ paddingRight: tabWidth }}>
+                        <button
+                            className={`${styles.navTab} ${view === 'library' ? styles.navTabActive : ''}`}
+                            onClick={() => setView('library')}
+                        >
+                            My Library
+                        </button>
+                        <button
+                            className={`${styles.navTab} ${view === 'curated' ? styles.navTabActive : ''}`}
+                            onClick={() => setView('curated')}
+                        >
+                            ✨ Curated
+                        </button>
+                        <button
+                            className={`${styles.navTab} ${view === 'add' ? styles.navTabActive : ''}`}
+                            onClick={() => setView('add')}
+                        >
+                            + Add
+                        </button>
+                    </div>
+
+                    {/* Toast */}
+                    {toast && <div className={styles.toast}>{toast}</div>}
+
+                    {/* Content */}
+                    <div className={styles.content} style={{ paddingRight: tabWidth }}>
+
+                        {/* ── MY LIBRARY ── */}
+                        {view === 'library' && (
+                            <div className={styles.listView}>
+                                {library.length === 0 ? (
+                                    <div className={styles.emptyState}>
+                                        <span className={styles.emptyIcon}>🎵</span>
+                                        <p>No playlists saved yet.</p>
+                                        <button
+                                            className={styles.emptyAction}
+                                            onClick={() => setView('add')}
+                                        >
+                                            Add your first playlist
+                                        </button>
+                                        <span className={styles.emptyOr}>or browse</span>
+                                        <button
+                                            className={styles.emptyAction}
+                                            onClick={() => setView('curated')}
+                                        >
+                                            Curated writing playlists
+                                        </button>
+                                    </div>
+                                ) : (
+                                    library.map(p => (
+                                        <div key={p.id} className={styles.playlistRow}>
+                                            <span className={styles.playlistEmoji}>
+                                                {SERVICE_EMOJI[p.service] ?? '🎵'}
+                                            </span>
+                                            <div className={styles.playlistInfo}>
+                                                <span className={styles.playlistName}>{p.name}</span>
+                                                <span className={styles.playlistService}>{p.service}</span>
+                                            </div>
+                                            <button
+                                                className={styles.playBtn}
+                                                onClick={() => openUrl(p.url, p.name)}
+                                                title="Open in browser"
+                                            >
+                                                ▶
+                                            </button>
+                                            <button
+                                                className={styles.deleteBtn}
+                                                onClick={() => removeFromLibrary(p.id)}
+                                                title="Remove"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
+
+                        {/* ── CURATED ── */}
+                        {view === 'curated' && (
+                            <div className={styles.listView}>
+                                <p className={styles.curatedHint}>
+                                    Writer-picked playlists. Click ▶ to open, or + to save to your library.
+                                </p>
+                                {CURATED.map((p, i) => (
+                                    <div key={i} className={styles.playlistRow}>
+                                        <span className={styles.playlistEmoji}>
+                                            {SERVICE_EMOJI[p.service] ?? '🎵'}
+                                        </span>
+                                        <div className={styles.playlistInfo}>
+                                            <span className={styles.playlistName}>{p.name}</span>
+                                            <span className={styles.playlistService}>{p.description}</span>
+                                        </div>
+                                        <button
+                                            className={styles.playBtn}
+                                            onClick={() => openUrl(p.url, p.name)}
+                                            title="Open in browser"
+                                        >
+                                            ▶
+                                        </button>
+                                        <button
+                                            className={styles.addBtn}
+                                            onClick={() => {
+                                                const entry: SavedPlaylist = {
+                                                    id: crypto.randomUUID(),
+                                                    name: p.name,
+                                                    url: p.url,
+                                                    service: p.service,
+                                                    createdAt: Date.now(),
+                                                };
+                                                saveLibrary([entry, ...library]);
+                                                showToast(`"${p.name}" saved to library!`);
+                                            }}
+                                            title="Save to library"
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* ── ADD ── */}
+                        {view === 'add' && (
+                            <div className={styles.addView}>
+                                <p className={styles.addHint}>
+                                    Paste any playlist, album, or track link from Spotify,
+                                    YouTube, Apple Music, SoundCloud, or anywhere else.
+                                    It opens in your music app — no restrictions.
+                                </p>
+                                <label className={styles.addLabel}>URL</label>
+                                <input
+                                    className={styles.addInput}
+                                    type="text"
+                                    placeholder="https://open.spotify.com/playlist/..."
+                                    value={newUrl}
+                                    onChange={e => setNewUrl(e.target.value)}
+                                    onKeyDown={e => { if (e.key === 'Enter') addToLibrary(); }}
+                                />
+                                <label className={styles.addLabel}>Name (optional)</label>
+                                <input
+                                    className={styles.addInput}
+                                    type="text"
+                                    placeholder="My writing playlist"
+                                    value={newName}
+                                    onChange={e => setNewName(e.target.value)}
+                                    onKeyDown={e => { if (e.key === 'Enter') addToLibrary(); }}
+                                />
+                                {newUrl && (
+                                    <p className={styles.detectedService}>
+                                        Detected: {detectService(newUrl)}
+                                    </p>
+                                )}
+                                <div className={styles.addActions}>
+                                    <button className={styles.saveBtn} onClick={addToLibrary}>
+                                        Save to Library
+                                    </button>
+                                    {newUrl && (
+                                        <button
+                                            className={styles.openNowBtn}
+                                            onClick={() => openUrl(newUrl, newName || 'playlist')}
+                                        >
+                                            Open Now ↗
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
-            {/* Optional resize handle for the panel itself */}
-            <div 
-                className={styles.panelResizeHandle} 
-                style={{ cursor: 'ew-resize' }}
-                onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const startX = e.clientX;
-                    const startWidth = panelWidth;
-                    const onMouseMove = (moveEvent: MouseEvent) => {
-                        const delta = startX - moveEvent.clientX;
-                        const newWidth = Math.max(300, Math.min(800, startWidth + delta));
-                        onPanelWidthChange(newWidth);
-                    };
-                    const onMouseUp = () => {
-                        document.removeEventListener('mousemove', onMouseMove);
-                        document.removeEventListener('mouseup', onMouseUp);
-                    };
-                    document.addEventListener('mousemove', onMouseMove);
-                    document.addEventListener('mouseup', onMouseUp);
-                }}
-            />
-        </div>
         </>
     );
 }

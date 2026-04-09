@@ -25,7 +25,10 @@ const BookIcon = () => (
 // WorldBiblePanel — slide-out reference panel, fixed right edge
 export function WorldBiblePanel({ isOpen, onClose, onTabClick, tabWidth, onTabWidthChange, panelWidth, onPanelWidthChange }: WorldBiblePanelProps) {
     const [mounted, setMounted] = useState(false);
+
     useEffect(() => { setMounted(true); }, []);
+
+
 
     return (
         <>
@@ -35,7 +38,8 @@ export function WorldBiblePanel({ isOpen, onClose, onTabClick, tabWidth, onTabWi
                     style={{
                         width: tabWidth,
                         right: isOpen ? panelWidth : 0,
-                        transition: 'right 280ms ease-in-out'
+                        top: 48,
+                        transition: 'right 280ms ease-in-out',
                     }}
                     onClick={onTabClick}
                     title="World Bible"
@@ -69,6 +73,23 @@ export function WorldBiblePanel({ isOpen, onClose, onTabClick, tabWidth, onTabWi
                 document.body
             )}
 
+            {mounted && isOpen && createPortal(
+                <button
+                    className={styles.ghostTab}
+                    style={{ 
+                        width: tabWidth, 
+                        height: 130, // matches standardized sideTab height
+                        top: 48, // stays static at the original top position
+                        right: 0, // stays static at the screen edge
+                    }}
+                    onClick={onClose}
+                    title="Close Reference"
+                >
+                    <span className={styles.ghostTabArrow}>▸</span>
+                </button>,
+                document.body
+            )}
+
             <div
                 className={`${styles.panel} ${isOpen ? styles.open : ''}`}
                 style={{ width: panelWidth }}
@@ -95,7 +116,7 @@ export function WorldBiblePanel({ isOpen, onClose, onTabClick, tabWidth, onTabWi
                     }}
                     title="Drag to resize panel"
                 />
-                <div className={styles.header}>
+                <div className={styles.header} style={{ paddingRight: tabWidth }}>
                     <h2 className={styles.title}>World Bible</h2>
                     <button
                         className={styles.closeButton}

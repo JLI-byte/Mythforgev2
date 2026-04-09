@@ -11,9 +11,8 @@ import styles from './WorldBibleNav.module.css';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import {
     WBView,
-    ROOT_CATEGORY_LABELS,
+    getProjectLayout,
     SUBCATEGORY_LABELS,
-    RootCategory,
 } from '@/lib/worldBibleNav';
 import { exportWorldBible } from '@/lib/export';
 
@@ -46,31 +45,38 @@ export default function WorldBibleNav({
         exportWorldBible(projectEntities, activeProject.name);
     };
 
+    const activeProject = projects.find(p => p.id === activeProjectId);
+    const layout = getProjectLayout(activeProject);
+
     /** Build the breadcrumb text based on the current view */
     const renderBreadcrumb = () => {
         switch (currentView.level) {
             case 'home':
                 return <span>World Bible</span>;
 
-            case 'root':
+            case 'root': {
+                const rootLabel = layout.roots.find(r => r.id === currentView.root)?.label ?? 'Unknown';
                 return (
                     <>
                         <span className={styles.crumbMuted}>World Bible</span>
                         <span className={styles.crumbSep}>›</span>
-                        <span>{ROOT_CATEGORY_LABELS[currentView.root]}</span>
+                        <span>{rootLabel}</span>
                     </>
                 );
+            }
 
-            case 'subcategory':
+            case 'subcategory': {
+                const rootLabel = layout.roots.find(r => r.id === currentView.root)?.label ?? 'Unknown';
                 return (
                     <>
                         <span className={styles.crumbMuted}>
-                            {ROOT_CATEGORY_LABELS[currentView.root]}
+                            {rootLabel}
                         </span>
                         <span className={styles.crumbSep}>›</span>
                         <span>{SUBCATEGORY_LABELS[currentView.entityType]}</span>
                     </>
                 );
+            }
 
             case 'entry': {
                 // Derive entity name and type for breadcrumb display
