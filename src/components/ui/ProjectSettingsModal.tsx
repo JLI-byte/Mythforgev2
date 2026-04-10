@@ -61,6 +61,7 @@ export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSett
 
     // Filter characters from the selected world for attribution
     const worldCharacters = entities.filter(e => 
+        // @ts-ignore
         e.worldId === worldId && 
         e.type === 'character'
     );
@@ -90,7 +91,7 @@ export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSett
                         className={styles.titleInput}
                         placeholder="Pen name..."
                         value={authorName}
-                        onChange={setAuthorName}
+                        onChange={(e) => setAuthorName(e.target.value)}
                     />
                 </div>
 

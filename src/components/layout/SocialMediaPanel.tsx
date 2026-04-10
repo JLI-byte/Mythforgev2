@@ -135,7 +135,7 @@ export function SocialMediaPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
                     style={{
                         width: tabWidth,
                         right: isOpen ? panelWidth : 0,
-                        top: 438,
+                        top: 308,
                         transition: 'right 280ms cubic-bezier(0.4, 0, 0.2, 1)',
                     }}
                     onClick={onTabClick}
@@ -172,7 +172,7 @@ export function SocialMediaPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
                     style={{ 
                         width: tabWidth, 
                         height: 130,
-                        top: 438,
+                        top: 308,
                         right: 0,
                     }}
                     onClick={onClose}

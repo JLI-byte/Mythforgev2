@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: "Creation happens at the point of inspiration. The tool never pulls the writer out of their flow.",
 };
 
+import { SupabaseSyncProvider } from "@/components/providers/SupabaseSyncProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -18,7 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${merriweather.variable}`}>
-        {children}
+        <SupabaseSyncProvider>
+          {children}
+        </SupabaseSyncProvider>
       </body>
     </html>
   );

@@ -38,7 +38,7 @@ export function WritingGoalsPanel({ isOpen, onClose, onTabClick, tabWidth, onTab
                     style={{
                         width: tabWidth,
                         right: isOpen ? panelWidth : 0,
-                        top: 308,
+                        top: 178,
                         transition: 'right 280ms ease-in-out',
                     }}
                     onClick={onTabClick}
@@ -78,7 +78,7 @@ export function WritingGoalsPanel({ isOpen, onClose, onTabClick, tabWidth, onTab
                     style={{ 
                         width: tabWidth, 
                         height: 130, // matches standardized sideTab height
-                        top: 308, // matches .sideTab { top: 308px } in WritingGoalsPanel.module.css
+                        top: 178, // matches .sideTab { top: 178px } in WritingGoalsPanel.module.css
                         right: 0, // stays static at the screen edge
                     }}
                     onClick={onClose}

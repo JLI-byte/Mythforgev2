@@ -6,6 +6,86 @@ import styles from './ModeBar.module.css';
 import SettingsModal from '../ui/SettingsModal';
 import { NewProjectModal } from '../ui/NewProjectModal';
 import { ProjectLibraryModal } from '../ui/ProjectLibraryModal';
+import LoginModal from '../ui/LoginModal';
+import { createClient } from '@/lib/supabase/client';
+
+// ── User Profile Component ─────────────────────────────
+
+function UserProfilePill({ onShowLogin }: { onShowLogin: () => void }) {
+  const [user, setUser] = useState<any>(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function getUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    }
+    getUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
+
+  if (!user) {
+    return (
+      <button className={styles.signInBtn} onClick={onShowLogin}>
+        🔑 Log In
+      </button>
+    );
+  }
+
+  const email = user.email;
+  const name = user.user_metadata?.full_name || email?.split('@')[0] || "Author";
+  const avatar = user.user_metadata?.avatar_url;
+  const initials = name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/login';
+  };
+
+  return (
+    <div className={styles.profilePillWrapper}>
+      <div 
+        className={styles.profilePill} 
+        onClick={() => setShowDropdown(!showDropdown)}
+        onMouseEnter={() => setShowDropdown(true)}
+      >
+        {avatar ? (
+          <img src={avatar} className={styles.profileAvatar} alt={name} />
+        ) : (
+          <div className={styles.profileAvatarPlaceholder}>{initials}</div>
+        )}
+        <div className={styles.profileInfo}>
+          <span className={styles.profileName}>{name}</span>
+          <span className={styles.profileStatus}>Pro Account</span>
+        </div>
+      </div>
+
+      {showDropdown && (
+        <div className={styles.profileDropdown} onMouseLeave={() => setShowDropdown(false)}>
+          <div className={styles.dropdownHeader}>
+            <div className={styles.profileName}>{name}</div>
+            <div className={styles.dropdownEmail}>{email}</div>
+          </div>
+          <button className={styles.dropdownItem} onClick={() => window.location.href = '/settings'}>
+            <span>⚙️</span> Manage Account
+          </button>
+          <button className={styles.dropdownItem} onClick={() => window.location.href = '/billing'}>
+            <span>💳</span> Billing & Plan
+          </button>
+          <button className={`${styles.dropdownItem} ${styles.dropdownItemSignOut}`} onClick={handleSignOut}>
+            <span>🚪</span> Sign Out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ── Search result types ───────────────────────────────
 
@@ -151,6 +231,7 @@ export default function ModeBar({ onHome }: ModeBarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showLoad, setShowLoad] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -283,84 +364,49 @@ export default function ModeBar({ onHome }: ModeBarProps) {
 
   return (
     <nav className={styles.modeBar}>
-      {/* Home button */}
-      {onHome && (
+      <div className={styles.leftGroup}>
         <button
-          className={styles.homeBtn}
-          onClick={onHome}
-          title="Back to projects"
+          className={`${styles.modeBtn} ${workspaceMode === 'bookshelf' ? styles.modeBtnActive : ''}`}
+          onClick={() => setWorkspaceMode('bookshelf')}
         >
-          ⌂
+          📚 Bookshelf
         </button>
-      )}
 
-      {/* New Project button */}
-      <button
-        className={styles.homeBtn}
-        onClick={() => setShowNew(true)}
-        title="Start a new story"
-        style={{ color: 'var(--accent)' }}
-      >
-        ✨
-      </button>
-
-      <button
-        className={styles.homeBtn}
-        onClick={() => setShowLoad(true)}
-        title="Open project library"
-        style={{ color: 'var(--accent)' }}
-      >
-        📂
-      </button>
-
-      {/* Separator */}
-      <div className={styles.modeSep} />
-
-      <button
-        className={`${styles.modeBtn} ${workspaceMode === 'desk' ? styles.modeBtnActive : ''}`}
-        onClick={() => setWorkspaceMode('desk')}
-      >
-        🗂️ Writing Desk
-      </button>
-
-      <button
-        className={`${styles.modeBtn} ${workspaceMode === 'bookshelf' ? styles.modeBtnActive : ''}`}
-        onClick={() => setWorkspaceMode('bookshelf')}
-      >
-        📚 Bookshelf
-      </button>
-
-
-      <div className={styles.modeBtnGroup}>
         <button
-          className={`${styles.modeBtn} ${workspaceMode === 'worldBible' ? styles.modeBtnActive : ''}`}
-          onClick={() => setWorkspaceMode('worldBible')}
+          className={`${styles.modeBtn} ${workspaceMode === 'desk' ? styles.modeBtnActive : ''}`}
+          onClick={() => setWorkspaceMode('desk')}
         >
-          📖 World Bible
+          🗂️ Writing Desk
         </button>
+
+        <div className={styles.modeBtnGroup}>
+          <button
+            className={`${styles.modeBtn} ${workspaceMode === 'worldBible' ? styles.modeBtnActive : ''}`}
+            onClick={() => setWorkspaceMode('worldBible')}
+          >
+            📖 World Bible
+          </button>
+          <button
+            className={styles.tabActionBtn}
+            onClick={(e) => {
+              e.stopPropagation();
+              setWorkspaceMode('hierarchy');
+            }}
+            title="Design hierarchy"
+          >
+            🛠️
+          </button>
+        </div>
+
         <button
-          className={styles.tabActionBtn}
-          onClick={(e) => {
-            e.stopPropagation();
-            setWorkspaceMode('hierarchy');
-          }}
-          title="Design hierarchy"
+          className={`${styles.modeBtn} ${workspaceMode === 'template' ? styles.modeBtnActive : ''}`}
+          onClick={() => setWorkspaceMode('template')}
         >
-          🛠️
+          🎨 Draft Table
         </button>
       </div>
 
-      <button
-        className={`${styles.modeBtn} ${workspaceMode === 'template' ? styles.modeBtnActive : ''}`}
-        onClick={() => setWorkspaceMode('template')}
-      >
-        🎨 Draft Table
-      </button>
-
-      {/* Spacer */}
-      <div className={styles.modeBarSpacer} />
-
-      {/* Right — global search */}
+      {/* Center — global search */}
       <div className={styles.searchWrapper}>
         <div className={styles.searchInputWrapper}>
           <span className={styles.searchIcon}>🔍</span>
@@ -426,6 +472,8 @@ export default function ModeBar({ onHome }: ModeBarProps) {
       </div>
 
       <div className={styles.topBarActions}>
+        <UserProfilePill onShowLogin={() => setShowLoginModal(true)} />
+
         <button
           className={styles.iconBtn}
           onClick={() => setShowSettings(true)}
@@ -433,6 +481,7 @@ export default function ModeBar({ onHome }: ModeBarProps) {
         >
           ⚙️
         </button>
+
         <button
           className={styles.iconBtn}
           onClick={handleThemeToggle}
@@ -443,6 +492,7 @@ export default function ModeBar({ onHome }: ModeBarProps) {
       </div>
 
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+      {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
       <NewProjectModal isOpen={showNew} onClose={() => setShowNew(false)} />
       <ProjectLibraryModal isOpen={showLoad} onClose={() => setShowLoad(false)} />
     </nav>

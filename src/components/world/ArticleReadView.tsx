@@ -275,7 +275,7 @@ export default function ArticleReadView({ entityId, onBack }: ArticleReadViewPro
                     className={styles.workCard}
                     onClick={() => {
                       setActiveProject(work.id);
-                      setWorkspaceMode('writing');
+                      setWorkspaceMode('desk');
                     }}
                   >
                     <div
@@ -324,7 +324,7 @@ export default function ArticleReadView({ entityId, onBack }: ArticleReadViewPro
                     // Navigate to this scene in the writing editor
                     setActiveDocument(mention.documentId);
                     setActiveScene(mention.sceneId);
-                    setWorkspaceMode('writing');
+                    setWorkspaceMode('desk');
                   }}
                 >
                   <div className={styles.mentionCardHeader}>

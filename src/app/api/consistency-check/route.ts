@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { ConsistencyIssue } from '@/types';
+import { createClient } from '@/lib/supabase/server';
 
 // Strip HTML tags from a string to send clean text to the AI
 function stripHtml(html: string): string {
@@ -135,6 +136,17 @@ async function callAIProvider(
  * - entities: array of entity objects (must include name, type, and description)
  */
 export async function POST(req: Request) {
+    // --- 0. Hardened Session Verification ---
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+        return NextResponse.json(
+            { error: 'Unauthorized: You must be signed in to use MythForge AI.' },
+            { status: 401 }
+        );
+    }
+
     try {
         // Resolve headers
         const providerHeader = req.headers.get('x-ai-provider') || 'anthropic';

@@ -123,7 +123,7 @@ export function MusicPlayerPanel({
                     style={{
                         width: tabWidth,
                         right: isOpen ? panelWidth : 0,
-                        top: 698,
+                        top: 438,
                         transition: 'right 280ms ease-in-out',
                     }}
                     onClick={onTabClick}
@@ -159,7 +159,7 @@ export function MusicPlayerPanel({
                     style={{ 
                         width: tabWidth, 
                         height: 130,
-                        top: 698,
+                        top: 438,
                         right: 0, // stays static at the screen edge
                     }}
                     onClick={onClose}

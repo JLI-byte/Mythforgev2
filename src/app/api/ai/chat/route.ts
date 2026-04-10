@@ -10,6 +10,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { createClient } from '@/lib/supabase/server';
 
 // --- Types ---
 
@@ -37,6 +38,17 @@ interface ChatRequestBody {
  *   - 500: JSON error for missing API key or upstream failure
  */
 export async function POST(req: Request) {
+    // --- 0. Hardened Session Verification ---
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+        return new Response(
+            JSON.stringify({ error: 'Unauthorized: You must be signed in to use MythForge AI.' }),
+            { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+    }
+
     // --- 1. Validate API key ---
     const apiKey = process.env.ANTHROPIC_API_KEY;
 

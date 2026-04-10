@@ -4,10 +4,8 @@ import React, { useEffect, useState } from 'react';
 import styles from './page.module.css';
 import Designer from '@/components/world/Designer';
 import { WorldBiblePanel } from '@/components/layout/WorldBiblePanel';
-import { ConsistencyPanel } from '@/components/layout/ConsistencyPanel';
 import { WritingGoalsPanel } from '@/components/layout/WritingGoalsPanel';
 import { SocialMediaPanel } from '@/components/layout/SocialMediaPanel';
-import { AIChatbotPanel } from '@/components/layout/AIChatbotPanel';
 import { MusicPlayerPanel } from '@/components/layout/MusicPlayerPanel';
 import InlineEntryCreator from '@/components/world/InlineEntryCreator';
 import HoverPreview from '@/components/world/HoverPreview';
@@ -31,10 +29,10 @@ import { Bookshelf } from '@/components/management/Bookshelf';
 // Note: Configured as a Client Component to dynamically bind Zustand layout state natively.
 export default function Home() {
   // One active panel at a time — null means all closed
-  const [activePanel, setActivePanel] = useState<'worldBible' | 'consistency' | 'writingGoals' | 'socialMedia' | 'aiChatbot' | 'music' | 'beta' | null>(null);
+  const [activePanel, setActivePanel] = useState<'worldBible' | 'writingGoals' | 'socialMedia' | 'music' | 'beta' | null>(null);
   
 
-  const handlePanelToggle = (id: 'worldBible' | 'consistency' | 'writingGoals' | 'socialMedia' | 'aiChatbot' | 'music' | 'beta') => {
+  const handlePanelToggle = (id: 'worldBible' | 'writingGoals' | 'socialMedia' | 'music' | 'beta') => {
     setActivePanel(prev => prev === id ? null : id);
   };
 
@@ -160,15 +158,6 @@ export default function Home() {
           panelWidth={effectivePanelWidth}
           onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
         />
-        <ConsistencyPanel
-          isOpen={activePanel === 'consistency'}
-          onClose={() => setActivePanel(null)}
-          onTabClick={() => handlePanelToggle('consistency')}
-          tabWidth={tabRailWidth}
-          onTabWidthChange={setTabRailWidth}
-          panelWidth={effectivePanelWidth}
-          onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
-        />
         <WritingGoalsPanel
           isOpen={activePanel === 'writingGoals'}
           onClose={() => setActivePanel(null)}
@@ -182,15 +171,6 @@ export default function Home() {
           isOpen={activePanel === 'socialMedia'}
           onClose={() => setActivePanel(null)}
           onTabClick={() => handlePanelToggle('socialMedia')}
-          tabWidth={tabRailWidth}
-          onTabWidthChange={setTabRailWidth}
-          panelWidth={effectivePanelWidth}
-          onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
-        />
-        <AIChatbotPanel
-          isOpen={activePanel === 'aiChatbot'}
-          onClose={() => setActivePanel(null)}
-          onTabClick={() => handlePanelToggle('aiChatbot')}
           tabWidth={tabRailWidth}
           onTabWidthChange={setTabRailWidth}
           panelWidth={effectivePanelWidth}

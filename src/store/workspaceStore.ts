@@ -897,7 +897,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             articleTemplates: [],
             hierarchyTemplates: [],
             draftHierarchyLayout: null,
-            workspaceMode: 'desk',
+            workspaceMode: 'bookshelf',
 
             // Sprint 47A: Goals system initial state
             writingDays: [],
@@ -1535,7 +1535,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     return {
                         projects: state.projects.map(p => 
                             p.id === activeProjectId 
-                                ? { ...p, worldBibleLayout: state.draftHierarchyLayout } 
+                                ? { ...p, worldBibleLayout: state.draftHierarchyLayout ?? undefined } 
                                 : p
                         )
                     };
@@ -1905,8 +1905,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     state.streakState = computeStreakFromDays(state.writingDays ?? []);
 
                     // Hydration/Migration: Ensure workspaceMode is initialized correctly for Sprint 99
-                    if (!['worldBible', 'template', 'desk'].includes((state as any).workspaceMode)) {
-                        state.workspaceMode = 'desk';
+                    if (!['worldBible', 'template', 'desk', 'bookshelf'].includes((state as any).workspaceMode)) {
+                        state.workspaceMode = 'bookshelf';
                     }
 
                     // Sprint 51: Migrate articleBlocks from order-based to x/y coordinate system

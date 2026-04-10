@@ -81,6 +81,10 @@
   letter-spacing: 0.06em;
   color: var(--muted);
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .deskDeleteBtn {
@@ -92,6 +96,8 @@
   align-items: center;
   gap: 4px;
   margin-left: auto;
+  flex-shrink: 0;
+  z-index: 10;
 }
 
 .deskHeaderBtn {
@@ -108,6 +114,12 @@
   border-radius: 4px;
   transition: all 0.2s;
   opacity: 0.5;
+}
+
+.deskHeaderBtnActive {
+  opacity: 1 !important;
+  color: var(--accent) !important;
+  background: rgba(var(--accent-rgb), 0.1);
 }
 
 .deskHeaderBtn:hover {
@@ -462,9 +474,8 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  align-items: center;
-  padding: 10px;
-  gap: 10px;
+  position: relative;
+  overflow: hidden;
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -489,22 +500,56 @@
   color: var(--foreground);
 }
 
+.imagePinImgWrap {
+  flex: 1;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  background-color: #000;
+}
+
 .imagePinImg {
-  max-width: 100%;
-  max-height: calc(100% - 70px);
-  object-fit: contain;
-  border-radius: 2px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  image-rendering: high-quality;
+  image-rendering: -webkit-optimize-contrast;
+  transition: opacity 0.3s ease;
+}
+
+.imagePinControls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  padding: 12px 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+
+.imagePin:hover .imagePinControls {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .imagePinLabel {
   width: 100%;
   background: transparent;
   border: none;
-  color: var(--muted);
+  color: #fff;
   font-size: 0.75rem;
+  font-weight: 500;
   text-align: center;
   outline: none;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
 }
 
 .imagePinRotateRow {
@@ -4222,5 +4267,167 @@
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* =============================================
+   PREMIUM MANUSCRIPT & SPINE STYLES
+   ============================================= */
+
+.spineCoverContainer {
+  position: relative;
+  width: calc(100% - 16px);
+  margin: 0 8px 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.spineSaveBtn {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(15, 15, 15, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+  font-size: 0.9rem;
+}
+
+.spineSaveBtn:hover {
+  background: rgba(var(--accent-rgb), 0.3);
+  border-color: var(--accent);
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.4);
+}
+
+.spineSaveBtn[data-status="saving"] {
+  animation: pulse-save 1.5s infinite;
+  background: rgba(var(--accent-rgb), 0.5);
+}
+
+.spineSaveBtn[data-status="saved"] {
+  background: #22c55e;
+  border-color: transparent;
+  color: #052e16;
+}
+
+@keyframes pulse-save {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.4); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(var(--accent-rgb), 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0); }
+}
+
+.spineBookModeHeader {
+  display: flex;
+  align-items: center;
+  width: calc(100% - 16px);
+  margin: 0 8px 12px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.spineBookModeHeader:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(var(--accent-rgb), 0.3);
+  transform: translateY(-1px);
+}
+
+.spineBookModeHeaderActive {
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.15), rgba(var(--accent-rgb), 0.05));
+  border-color: var(--accent);
+  box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.15);
+}
+
+.spineBookModeIcon {
+  font-size: 1.1rem;
+  filter: drop-shadow(0 0 5px rgba(var(--accent-rgb), 0.3));
+}
+
+.spineBookModeLabel {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  text-transform: uppercase;
+  flex: 1;
+  text-align: left;
+}
+
+.spineBookModeHeaderActive .spineBookModeLabel {
+  color: var(--foreground);
+}
+
+.spineBookModeStatus {
+  font-size: 0.55rem;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--muted);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.spineBookModeHeaderActive .spineBookModeStatus {
+  background: var(--accent);
+  color: #121212;
+  border-color: transparent;
+}
+
+.bookViewChapterSeparator {
+  margin: 60px 0 30px;
+  position: relative;
+}
+
+.bookViewSceneSeparator {
+  margin: 30px 0;
+  position: relative;
+}
+
+.bookViewSeparatorLine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  opacity: 0.7;
+  user-select: none;
+}
+
+.bookViewSeparatorInput {
+  background: transparent;
+  border: none;
+  color: var(--foreground);
+  font-weight: 700;
+  text-transform: uppercase;
+  text-align: center;
+  min-width: 100px;
+  outline: none;
+  font-family: inherit;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.bookViewSeparatorInput:focus {
+  border-bottom-color: var(--accent);
+  opacity: 1;
 }
 

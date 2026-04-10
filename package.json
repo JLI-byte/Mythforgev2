@@ -51,6 +51,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
+    "@supabase/ssr": "^0.10.2",
+    "@supabase/supabase-js": "^2.103.0",
     "@tiptap/extension-color": "^3.22.2",
     "@tiptap/extension-font-family": "^3.22.2",
     "@tiptap/extension-highlight": "^3.22.2",

@@ -7,12 +7,20 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   padding: 0 20px;
   gap: 4px;
   flex-shrink: 0;
-  z-index: 10;
+  z-index: 100;
+}
+
+.leftGroup {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: 4px;
 }
 
 .modeBtn {
@@ -294,8 +302,8 @@
 .topBarActions {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-left: 16px;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 .iconBtn {
@@ -315,4 +323,154 @@
 .iconBtn:hover {
   background: rgba(255, 255, 255, 0.06);
   color: var(--foreground);
+}
+
+/* ── User Profile Pill ─────────────────────────────── */
+
+.profilePillWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.profilePill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px 4px 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profilePill:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.profileAvatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--accent);
+}
+
+.profileAvatarPlaceholder {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #6b4c9a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 0.7rem;
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.profileName {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--foreground);
+  line-height: 1;
+}
+
+.profileStatus {
+  font-size: 0.55rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 1px;
+}
+
+.profileDropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 200px;
+  background: rgba(20, 20, 20, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  z-index: 1001;
+  animation: slideIn 0.2s cubic-bezier(0, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdownHeader {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dropdownEmail {
+  font-size: 0.65rem;
+  color: var(--muted);
+  word-break: break-all;
+  margin-top: 2px;
+}
+
+.dropdownItem {
+  width: 100%;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  color: var(--foreground);
+  font-size: 0.72rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.dropdownItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dropdownItemSignOut {
+  color: #ff3b30;
+  border-top: 1px solid rgba(255, 59, 48, 0.1);
+}
+
+.dropdownItemSignOut:hover {
+  background: rgba(255, 59, 48, 0.08);
+}
+
+.signInBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(var(--accent-rgb), 0.1);
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
+  border-radius: 20px;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.signInBtn:hover {
+  background: rgba(var(--accent-rgb), 0.2);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.2);
 }

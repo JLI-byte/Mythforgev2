@@ -1,13 +1,17 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useWorkspaceStore, Project, World } from '@/store/workspaceStore';
+import { useWorkspaceStore, Project, World, COVER_COLORS } from '@/store/workspaceStore';
 import styles from './Bookshelf.module.css';
 
 export function Bookshelf() {
     const projects = useWorkspaceStore(s => s.projects);
     const worlds = useWorkspaceStore(s => s.worlds);
     const updateProject = useWorkspaceStore(s => s.updateProject);
+    const addWorld = useWorkspaceStore(s => s.addWorld);
+    const addProject = useWorkspaceStore(s => s.addProject);
+    const addDocument = useWorkspaceStore(s => s.addDocument);
+    const addScene = useWorkspaceStore(s => s.addScene);
     const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
     const setActiveProject = useWorkspaceStore(s => s.setActiveProject);
     const setWorkspaceMode = useWorkspaceStore(s => s.setWorkspaceMode);
@@ -63,6 +67,69 @@ export function Bookshelf() {
         setWorkspaceMode('desk');
     };
 
+    const handleCreateWorld = () => {
+        const name = prompt("Enter shelf (world) name:");
+        if (!name) return;
+
+        const newWorld: World = {
+            id: crypto.randomUUID(),
+            name,
+            genre: 'fantasy',
+            tone: { darkness: 'balanced', scale: 'balanced', humor: 'balanced' },
+            logline: '',
+            magicExists: false,
+            techLevel: 'medieval',
+            timePeriod: '',
+            coverColor: COVER_COLORS[Math.floor(Math.random() * COVER_COLORS.length)],
+            createdAt: new Date()
+        };
+
+        addWorld(newWorld);
+    };
+
+    const handleCreateStory = (worldId?: string) => {
+        const name = prompt("Enter story name:");
+        if (!name) return;
+
+        const projectId = crypto.randomUUID();
+        const docId = crypto.randomUUID();
+        const sceneId = crypto.randomUUID();
+
+        // 1. Create Project
+        const newProject: Project = {
+            id: projectId,
+            name,
+            writingMode: 'novel',
+            coverColor: COVER_COLORS[Math.floor(Math.random() * COVER_COLORS.length)],
+            worldId,
+            createdAt: new Date()
+        };
+        addProject(newProject);
+
+        // 2. Add initial Chapter
+        addDocument({
+            id: docId,
+            projectId,
+            title: 'Chapter 1',
+            content: '',
+            createdAt: new Date()
+        });
+
+        // 3. Add initial Scene
+        addScene({
+            id: sceneId,
+            documentId: docId,
+            projectId,
+            title: 'Scene 1',
+            content: '',
+            order: 0,
+            createdAt: new Date()
+        });
+
+        // Optionally immediately enter the story? 
+        // handleSelectProject(projectId);
+    };
+
     const renderProjectCard = (p: Project) => (
         <div 
             key={p.id}
@@ -103,6 +170,12 @@ export function Bookshelf() {
             <div className={styles.shelfHeader}>
                 <span className={styles.shelfLabel}>{title}</span>
                 <span className={styles.shelfCount}>{projects.length}</span>
+                <button 
+                    className={styles.addStoryBtn} 
+                    onClick={() => handleCreateStory(worldId === 'standalone' ? undefined : worldId)}
+                >
+                    + Add Story
+                </button>
             </div>
             <div className={styles.grid}>
                 {projects.length > 0 ? (
@@ -120,6 +193,9 @@ export function Bookshelf() {
         <div className={styles.container}>
             <div className={styles.header}>
                 <h1 className={styles.title}>Your Bookshelf</h1>
+                <button className={styles.actionBtn} onClick={handleCreateWorld}>
+                    <span>+ New Shelf</span>
+                </button>
             </div>
 
             {/* Render Standalone Shelf first or last? User said "saved under the world its tied to or in the uncategorized section" */}

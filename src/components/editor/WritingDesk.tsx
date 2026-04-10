@@ -19,6 +19,9 @@ import { NewProjectModal } from '@/components/ui/NewProjectModal';
 import { ImportModal } from '@/components/ui/ImportModal';
 import { ProjectSettingsModal } from '@/components/ui/ProjectSettingsModal';
 
+type BinderMode = 'shown' | 'hidden' | 'smart';
+
+
 // ============================================================
 // CUSTOM TIPTAP EXTENSIONS
 // ============================================================
@@ -58,6 +61,230 @@ const FontSize = Extension.create({
     } as any;
   },
 });
+
+import { Node as TiptapNode, mergeAttributes } from '@tiptap/core';
+import { ReactNodeViewRenderer, NodeViewWrapper } from '@tiptap/react';
+
+const ChapterSeparator = TiptapNode.create({
+  name: 'chapterSeparator',
+  group: 'block',
+  selectable: true,
+  draggable: true,
+  atom: true,
+  addAttributes() {
+    return {
+      id: { default: null },
+      title: { default: 'New Chapter' },
+    };
+  },
+  parseHTML() {
+    return [{ tag: 'div[data-type="chapter-separator"]' }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'chapter-separator', class: 'chapter-separator' })];
+  },
+});
+
+const SceneSeparator = TiptapNode.create({
+  name: 'sceneSeparator',
+  group: 'block',
+  selectable: true,
+  draggable: true,
+  atom: true,
+  addAttributes() {
+    return {
+      id: { default: null },
+      title: { default: 'New Scene' },
+    };
+  },
+  parseHTML() {
+    return [{ tag: 'div[data-type="scene-separator"]' }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'scene-separator', class: 'scene-separator' })];
+  },
+});
+
+const ChapterTitleNodeView = (props: any) => {
+  const updateProject = useWorkspaceStore(s => s.updateProject);
+  const updateDocument = useWorkspaceStore(s => s.updateDocument);
+  const { node, updateAttributes } = props;
+
+  return (
+    <NodeViewWrapper className={styles.bookViewChapterSeparator}>
+      <div className={styles.bookViewSeparatorLine} onMouseDown={e => e.stopPropagation()}>
+        <span>--- CHAPTER: </span>
+        <input 
+          className={styles.bookViewSeparatorInput}
+          value={node.attrs.title}
+          onMouseDown={e => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
+          onChange={e => {
+            const val = e.target.value;
+            updateAttributes({ title: val });
+            if (node.attrs.id) {
+              updateDocument(node.attrs.id, { title: val });
+            }
+          }}
+        />
+        <span> ---</span>
+      </div>
+    </NodeViewWrapper>
+  );
+};
+
+const SceneTitleNodeView = (props: any) => {
+  const updateScene = useWorkspaceStore(s => s.updateScene);
+  const { node, updateAttributes } = props;
+
+  return (
+    <NodeViewWrapper className={styles.bookViewSceneSeparator}>
+      <div className={styles.bookViewSeparatorLine} onMouseDown={e => e.stopPropagation()}>
+        <span>--- Scene: </span>
+        <input 
+          className={styles.bookViewSeparatorInput}
+          value={node.attrs.title}
+          onMouseDown={e => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
+          onChange={e => {
+            const val = e.target.value;
+            updateAttributes({ title: val });
+            if (node.attrs.id) {
+              updateScene(node.attrs.id, { title: val });
+            }
+          }}
+        />
+        <span> ---</span>
+      </div>
+    </NodeViewWrapper>
+  );
+};
+
+function BookViewEditor({ activeSceneId }: { activeSceneId?: string }) {
+  const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
+  const projectDocs = useWorkspaceStore(useShallow(s => s.documents.filter(d => d.projectId === activeProjectId).sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())));
+  const allScenes = useWorkspaceStore(useShallow(s => s.scenes.filter(sc => sc.projectId === activeProjectId)));
+  const updateScene = useWorkspaceStore(s => s.updateScene);
+  const updateDocument = useWorkspaceStore(s => s.updateDocument);
+  const addDocument = useWorkspaceStore(s => s.addDocument);
+  const addScene = useWorkspaceStore(s => s.addScene);
+
+  const assembleHTML = useCallback(() => {
+    let html = '';
+    projectDocs.forEach(doc => {
+      html += `<div data-type="chapter-separator" id="${doc.id}" title="${doc.title.replace(/"/g, '&quot;')}"></div>`;
+      if (doc.content) html += doc.content;
+      
+      const scenes = allScenes.filter(s => s.documentId === doc.id).sort((a,b) => a.order - b.order);
+      scenes.forEach(s => {
+        html += `<div data-type="scene-separator" id="${s.id}" title="${s.title.replace(/"/g, '&quot;')}"></div>`;
+        html += s.content;
+      });
+    });
+    return html;
+  }, [projectDocs, allScenes]);
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Underline,
+      TextStyle,
+      FontFamily,
+      Highlight.configure({ multicolor: true }),
+      Color,
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      ChapterSeparator.extend({
+        addNodeView() { return ReactNodeViewRenderer(ChapterTitleNodeView); }
+      }),
+      SceneSeparator.extend({
+        addNodeView() { return ReactNodeViewRenderer(SceneTitleNodeView); }
+      }),
+    ],
+    content: assembleHTML(),
+    immediatelyRender: false,
+    editorProps: {
+      attributes: { class: styles.deskEditorContent }
+    },
+    onUpdate: ({ editor }) => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        const html = editor.getHTML();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const children = Array.from(doc.body.children);
+
+        let currentSectionId: string | null = null;
+        let currentSectionType: 'chapter' | 'scene' | null = null;
+        let currentBuffer: string[] = [];
+        const updates: { id: string, type: 'chapter' | 'scene', content: string }[] = [];
+
+        children.forEach(child => {
+          const type = child.getAttribute('data-type');
+          if (type === 'chapter-separator' || type === 'scene-separator') {
+            if (currentSectionId) {
+              updates.push({ id: currentSectionId, type: currentSectionType!, content: currentBuffer.join('') });
+            }
+            currentSectionId = child.getAttribute('id');
+            currentSectionType = type === 'chapter-separator' ? 'chapter' : 'scene';
+            currentBuffer = [];
+          } else {
+            currentBuffer.push(child.outerHTML);
+          }
+        });
+
+        if (currentSectionId) {
+          updates.push({ id: currentSectionId, type: currentSectionType!, content: currentBuffer.join('') });
+        }
+
+        updates.forEach(u => {
+          if (u.type === 'chapter') {
+            const existing = projectDocs.find(d => d.id === u.id);
+            if (existing && existing.content !== u.content) {
+              updateDocument(u.id, { content: u.content });
+            }
+          } else {
+            const existing = allScenes.find(s => s.id === u.id);
+            if (existing && existing.content !== u.content) {
+              const words = parser.parseFromString(u.content, 'text/html').body.textContent?.split(/\s+/).filter(w => w.length > 0).length || 0;
+              updateScene(u.id, { content: u.content, wordCount: words });
+            }
+          }
+        });
+      }, 500);
+    }
+  });
+
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current); }, []);
+
+  useEffect(() => {
+    if (!editor || !activeSceneId) return;
+    const el = editor.options.element as HTMLElement;
+    const target = el?.querySelector?.(`[id="${activeSceneId}"]`);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [editor, activeSceneId]);
+
+  if (!editor) return null;
+
+  return (
+    <div className={styles.deskEditorWrapper}>
+      <div className={styles.deskEditorToolbar}>
+        <div className={styles.deskToolbarGroup}>
+          <button className={styles.deskFmtBtn} onClick={() => editor.chain().focus().toggleBold().run()}>B</button>
+          <button className={styles.deskFmtBtn} onClick={() => editor.chain().focus().toggleItalic().run()}>I</button>
+        </div>
+      </div>
+      <div className={styles.deskEditorBody}>
+        <div className={styles.deskEditorContent}>
+          <EditorContent editor={editor} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 // =============================================
 // TYPES & CONSTANTS
@@ -497,6 +724,7 @@ function BookCoverEditor({ projectId }: { projectId: string }) {
   };
 
   const worldCharacters = entities.filter(e => 
+// @ts-ignore
     e.worldId === worldId && 
     e.type === 'character'
   );
@@ -702,8 +930,29 @@ function WritingZoneRenderer({ content, onChange, onChangeImmediate, widget, onD
     (onChangeImmediate ?? onChange)({ ...content, documentId: id, sceneId: firstScene?.id || '' });
   };
 
-  const activeSceneId = content.sceneId || '';
-  const setActiveSceneId = (id: string) => (onChangeImmediate ?? onChange)({ ...content, sceneId: id });
+  const isBookMode = content.viewType === 'book';
+  const activeSceneId = content.sceneId || 'all';
+
+  const setActiveSceneId = (id: string) => {
+    // If book mode is active, clicking a scene scrolls instead of switching view
+    if (isBookMode && id !== 'book' && id !== 'cover') {
+      (onChangeImmediate ?? onChange)({ ...content, sceneId: id });
+    } else {
+      (onChangeImmediate ?? onChange)({ ...content, sceneId: id, viewType: id === 'book' ? 'book' : 'standard' });
+    }
+  };
+
+  const showManuscriptView = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const nextMode = !isBookMode;
+    // Fix: If transitioning from cover to manuscript, ensure we ground on a valid scene
+    const targetSceneId = (activeSceneId === 'cover' && nextMode) ? (projectScenes[0]?.id || 'all') : activeSceneId;
+    (onChangeImmediate ?? onChange)({ 
+      ...content, 
+      viewType: nextMode ? 'book' : 'standard',
+      sceneId: targetSceneId
+    });
+  };
 
   const docScenes = projectScenes.filter(s => s.documentId === activeDocId).sort((a, b) => a.order - b.order);
   const activeScene = activeSceneId === 'all' ? null : (projectScenes.find(s => s.id === activeSceneId) || docScenes[0]);
@@ -759,64 +1008,10 @@ function WritingZoneRenderer({ content, onChange, onChangeImmediate, widget, onD
 
   const editorSlot = activeSceneId === 'cover' ? (
     <BookCoverEditor projectId={activeProjectId || ''} />
-  ) : activeSceneId === 'book' ? (
-    <div className={styles.binderAllScenesContainer} onMouseDown={e => e.stopPropagation()}>
-      {projectDocs.map(doc => {
-        const scenesInBook = projectScenes.filter(s => s.documentId === doc.id).sort((a,b) => a.order - b.order);
-        if (scenesInBook.length === 0) return null;
-        return (
-          <React.Fragment key={doc.id}>
-            {editingNode?.type === 'chapter' && editingNode.id === doc.id ? (
-              <input 
-                className={styles.binderFullBookChapterHeaderInput}
-                ref={renameInputRef}
-                value={editingNode.text}
-                onChange={e => setEditingNode({ ...editingNode, text: e.target.value })}
-                onKeyDown={e => { 
-                  if (e.key === 'Enter') { updateDocument(doc.id, { title: editingNode.text }); setEditingNode(null); }
-                  else if (e.key === 'Escape') setEditingNode(null);
-                }}
-              />
-            ) : (
-              <div 
-                className={styles.binderFullBookChapterHeader}
-                onClick={(e) => { e.stopPropagation(); handleRenameClick('chapter', doc.id, doc.title); }}
-                title="Click twice to rename"
-              >
-                {doc.title}
-              </div>
-            )}
-            
-            {scenesInBook.map(s => (
-              <div key={s.id} className={styles.binderAllScenesItem}>
-                {editingNode?.type === 'scene' && editingNode.id === s.id ? (
-                  <input 
-                    className={styles.binderAllScenesHeaderInput}
-                    ref={renameInputRef}
-                    value={editingNode.text}
-                    onChange={e => setEditingNode({ ...editingNode, text: e.target.value })}
-                    onKeyDown={e => { 
-                      if (e.key === 'Enter') { updateScene(s.id, { title: editingNode.text }); setEditingNode(null); }
-                      else if (e.key === 'Escape') setEditingNode(null);
-                    }}
-                  />
-                ) : (
-                  <div 
-                    className={styles.binderAllScenesHeader}
-                    onClick={(e) => { e.stopPropagation(); handleRenameClick('scene', s.id, s.title); }}
-                    title="Click twice to rename"
-                  >
-                    {s.title}
-                  </div>
-                )}
-                <DeskTipTapEditor key={s.id} sceneId={s.id} content={s.content} onUpdate={(html, count) => updateScene(s.id, { content: html, wordCount: count })} onFocus={noopFocus} />
-              </div>
-            ))}
-          </React.Fragment>
-        );
-      })}
-    </div>
+  ) : isBookMode ? (
+    <BookViewEditor activeSceneId={activeSceneId} />
   ) : activeSceneId === 'all' ? (() => {
+
     const activeDoc = projectDocs.find(d => d.id === activeDocId);
     return (
       <div className={styles.binderAllScenesContainer} onMouseDown={e => e.stopPropagation()}>
@@ -911,34 +1106,51 @@ function WritingZoneRenderer({ content, onChange, onChangeImmediate, widget, onD
           {isFocusMode && <button className={styles.focusExitPill} onClick={() => setIsFocusMode(false)}>✕ Exit Focus</button>}
 
           <div className={styles.binderSpine} onMouseDown={e => widget.dock === null ? onDragStart(e, widget) : undefined}>
-
-            {activeProject?.coverImageUrl ? (
-              <img 
-                src={activeProject.coverImageUrl} 
-                className={styles.spineCoverImg} 
-                onClick={() => setActiveSceneId('cover')}
-                title="Book Information"
-              />
-            ) : (
-              <div 
-                className={styles.spineCoverPlaceholder} 
-                style={{ background: activeProject?.coverColor || 'var(--surface)' }}
-                onClick={() => setActiveSceneId('cover')}
-                title="Book Information"
+            <div className={styles.spineCoverContainer}>
+              {activeProject?.coverImageUrl ? (
+                <img 
+                  src={activeProject.coverImageUrl} 
+                  className={styles.spineCoverImg} 
+                  onClick={() => setActiveSceneId('cover')}
+                  title="Book Information"
+                />
+              ) : (
+                <div 
+                  className={styles.spineCoverPlaceholder} 
+                  style={{ background: activeProject?.coverColor || 'var(--surface)' }}
+                  onClick={() => setActiveSceneId('cover')}
+                  title="Book Information"
+                >
+                  <span className={styles.spineCoverInitials}>{activeProject?.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?'}</span>
+                </div>
+              )}
+              
+              <button 
+                className={styles.spineSaveBtn}
+                data-status={content.saveStatus}
+                onClick={() => {
+                  (onChangeImmediate ?? onChange)({ ...content, saveStatus: 'saving' });
+                  onManualSave?.();
+                  setTimeout(() => {
+                    (onChangeImmediate ?? onChange)({ ...content, saveStatus: 'saved' });
+                    setTimeout(() => (onChangeImmediate ?? onChange)({ ...content, saveStatus: null }), 2000);
+                  }, 500);
+                }}
               >
-                <span className={styles.spineCoverInitials}>{activeProject?.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?'}</span>
-              </div>
-            )}
-
-            <button 
-              className={`${styles.spineFullViewBtn} ${activeSceneId === 'book' ? styles.spineFullViewBtnActive : ''}`} 
-              onClick={() => setActiveSceneId('book')}
-            >
-              <span className={styles.spineFullViewIcon}>📖</span>
-              <span>Full View</span>
-            </button>
+                {content.saveStatus === 'saved' ? '✔️' : '💾'}
+              </button>
+            </div>
 
             <div className={styles.spineChaptersAccordion}>
+              <button 
+                className={`${styles.spineBookModeHeader} ${isBookMode ? styles.spineBookModeHeaderActive : ''}`}
+                onClick={showManuscriptView}
+              >
+                <span className={styles.spineBookModeIcon}>📜</span>
+                <span className={styles.spineBookModeLabel}>MANUSCRIPT VIEW</span>
+                <span className={styles.spineBookModeStatus}>{isBookMode ? 'ON' : 'OFF'}</span>
+              </button>
+
               {projectDocs.map((doc, idx) => {
                 const isDocActive = doc.id === activeDocId;
                 const scenes = projectScenes.filter(s => s.documentId === doc.id).sort((a, b) => a.order - b.order);
@@ -1049,6 +1261,8 @@ function WritingZoneRenderer({ content, onChange, onChangeImmediate, widget, onD
       )}
     </div>
   );
+
+
 
   return (
     <>
@@ -1165,32 +1379,36 @@ function ImagePinRenderer({ content, onChange, onChangeImmediate }: { content: a
     <div className={styles.imagePin} style={{ transform: `rotate(${localRotation}deg)` }}>
       {content.src ? (
         <>
-          <img src={content.src} className={styles.imagePinImg} />
-          <input
-            className={styles.imagePinLabel}
-            placeholder="Caption..."
-            value={localLabel}
-            onChange={e => {
-              const val = e.target.value;
-              setLocalLabel(val);
-              lastPropLabel.current = val;
-              if (labelDebounceRef.current) clearTimeout(labelDebounceRef.current);
-              labelDebounceRef.current = setTimeout(() => onChange({ ...content, label: val }), 600);
-            }}
-          />
-          <div className={styles.imagePinRotateRow}>
+          <div className={styles.imagePinImgWrap} onMouseDown={e => e.stopPropagation()}>
+            <img src={content.src} className={styles.imagePinImg} />
+          </div>
+          <div className={styles.imagePinControls} onMouseDown={e => e.stopPropagation()}>
             <input
-              type="range" min={-15} max={15} step={1}
-              value={localRotation}
-              className={styles.imagePinRotateSlider}
+              className={styles.imagePinLabel}
+              placeholder="Caption..."
+              value={localLabel}
               onChange={e => {
-                const val = parseInt(e.target.value);
-                setLocalRotation(val);
-                lastPropRotation.current = val;
+                const val = e.target.value;
+                setLocalLabel(val);
+                lastPropLabel.current = val;
                 if (labelDebounceRef.current) clearTimeout(labelDebounceRef.current);
-                labelDebounceRef.current = setTimeout(() => onChange({ ...content, rotation: val }), 300);
+                labelDebounceRef.current = setTimeout(() => onChange({ ...content, label: val }), 600);
               }}
             />
+            <div className={styles.imagePinRotateRow}>
+              <input
+                type="range" min={-15} max={15} step={1}
+                value={localRotation}
+                className={styles.imagePinRotateSlider}
+                onChange={e => {
+                  const val = parseInt(e.target.value);
+                  setLocalRotation(val);
+                  lastPropRotation.current = val;
+                  if (labelDebounceRef.current) clearTimeout(labelDebounceRef.current);
+                  labelDebounceRef.current = setTimeout(() => onChange({ ...content, rotation: val }), 300);
+                }}
+              />
+            </div>
           </div>
         </>
       ) : <div className={styles.imagePinUpload} onClick={() => fileRef.current?.click()}><span>🖼️</span><span>Click to pin image</span></div>}
@@ -2705,6 +2923,7 @@ const WidgetRenderer = React.memo(function WidgetRenderer({
 // MAIN COMPONENT
 // ============================================================
 
+
 export default function WritingDesk() {
   const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
   const activeDocumentId = useWorkspaceStore(s => s.activeDocumentId);
@@ -2752,30 +2971,40 @@ export default function WritingDesk() {
 
   const viewportRef = useRef<HTMLDivElement>(null);
 
+  const updateWidgets = useCallback((next: DeskWidget[], silentUI: boolean = true) => {
+    if (!activeProjectId) return;
+    widgetsRef.current = next;
+    updateDeskState(activeProjectId, { widgets: next });
+    if (!silentUI) {
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 2000);
+    }
+  }, [activeProjectId, updateDeskState]);
+
   const updateDock = useCallback((id: string, dock: DeskWidget['dock']) => {
     const all = [...widgetsRef.current, ...globalWidgets];
     const w = all.find(x => x.id === id);
     if (!w) return;
 
     let nx = w.x;
+    let ny = w.y;
+
     if (dock && viewportRef.current) {
       const vw = viewportRef.current.clientWidth;
-      if (dock === 'left') nx = 0;
-      else if (dock === 'center') nx = (vw - w.width) / 2;
+      if (dock === 'center') nx = (vw - w.width) / 2;
+      else if (dock === 'left') nx = 0;
       else if (dock === 'right') nx = vw - w.width;
+      // When docking to center, we usually anchor to top 0 in CSS, 
+      // but let's keep ny sane.
+      ny = 0;
     }
 
-    const updated = { ...w, dock, x: nx };
-    const nextProj = widgetsRef.current.map(x => x.id === id ? updated : x);
-    const nextGlob = globalWidgets.map(x => x.id === id ? updated : x);
-
-    if (w.scope === 'global') {
-      updateGlobalWidgets(nextGlob);
-    } else {
-      updateDeskState(activeProjectId!, { widgets: nextProj });
-      widgetsRef.current = nextProj;
-    }
-  }, [activeProjectId, globalWidgets, updateGlobalWidgets, updateDeskState]);
+    const updated = { ...w, dock, x: nx, y: ny };
+    const nextArr = widgetsRef.current.map(x => x.id === id ? updated : x);
+    
+    // Use the primary updateWidgets flow for consistency and re-render triggers
+    updateWidgets(nextArr);
+  }, [activeProjectId, globalWidgets, updateWidgets]);
 
   const activeWidgets = useMemo(() => {
     const all = [...widgets, ...globalWidgets];
@@ -2830,28 +3059,13 @@ export default function WritingDesk() {
     // Persistence is handled by the store
   }, []);
 
-  const updateWidgets = useCallback((next: DeskWidget[], silentUI: boolean = true) => {
-    if (!activeProjectId) return;
-    widgetsRef.current = next;
-    updateDeskState(activeProjectId, { widgets: next });
-    if (!silentUI) {
-      setIsSaved(true);
-      setTimeout(() => setIsSaved(false), 2000);
-    }
-  }, [activeProjectId, updateDeskState]);
 
-  // Always ensure a Writing Zone widget is present and docked when a project is active.
   useEffect(() => {
     if (!activeProjectId) return;
     const projectWidgets = deskState?.widgets || [];
     const wz = projectWidgets.find(w => w.type === 'writingZone');
-    
-    // If it exists but isn't docked, force it to dock (user request: "always be docked")
-    if (wz && !wz.dock) {
-      updateWidgets(projectWidgets.map(w => w.id === wz.id ? { ...w, dock: 'center' } : w));
-      return;
-    }
 
+    // Seeding: Always ensure a Writing Zone widget is present when a project is active.
     if (wz) return;
 
     const dw = DEFAULT_DIMS.writingZone.w;
@@ -3039,13 +3253,96 @@ export default function WritingDesk() {
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault(); const type = e.dataTransfer.getData('desk-widget-type') as DeskWidgetType;
-    if (!type || !canvasRef.current) return;
-    const rect = canvasRef.current.getBoundingClientRect(), dims = DEFAULT_DIMS[type];
-    const x = (e.clientX - rect.left) / zoomRef.current - dims.w / 2, y = (e.clientY - rect.top) / zoomRef.current - dims.h / 2;
-    const nw: DeskWidget = { id: crypto.randomUUID(), type, x, y, width: dims.w, height: dims.h, content: {}, dock: type === 'writingZone' ? 'center' : null };
-    updateWidgets([...widgetsRef.current, nw]); setSelectedId(nw.id);
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const dropX = (e.clientX - rect.left) / zoomRef.current;
+    const dropY = (e.clientY - rect.top) / zoomRef.current;
+
+    // Internal widget drag from palette/library
+    const type = e.dataTransfer.getData('desk-widget-type') as DeskWidgetType;
+    if (type) {
+      const dims = DEFAULT_DIMS[type];
+      const nw: DeskWidget = { 
+        id: crypto.randomUUID(), 
+        type, 
+        x: dropX - dims.w / 2, 
+        y: (e.clientY - rect.top) / zoomRef.current - dims.h / 2, 
+        width: dims.w, 
+        height: dims.h, 
+        content: {}, 
+        dock: type === 'writingZone' ? 'center' : null 
+      };
+      updateWidgets([...widgetsRef.current, nw]);
+      setSelectedId(nw.id);
+      return;
+    }
+
+    // External Files (Local Drop)
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      const imageFiles = files.filter(f => f.type.startsWith('image/'));
+      let offset = 0;
+      
+      for (const file of imageFiles) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const src = event.target?.result as string;
+          const dims = DEFAULT_DIMS.image;
+          const nw: DeskWidget = {
+            id: crypto.randomUUID(),
+            type: 'image',
+            x: dropX - dims.w / 2 + offset,
+            y: (e.clientY - rect.top) / zoomRef.current - dims.h / 2 + offset,
+            width: dims.w,
+            height: dims.h,
+            content: { src, label: file.name },
+            dock: null
+          };
+          updateWidgets([...widgetsRef.current, nw]);
+          setSelectedId(nw.id);
+          offset += 20; // Stagger multiple drops
+        };
+        reader.readAsDataURL(file);
+      }
+      if (imageFiles.length > 0) return;
+    }
+
+    // External Browser Images (URL/HTML Drop)
+    const html = e.dataTransfer.getData('text/html');
+    const uriList = e.dataTransfer.getData('text/uri-list');
+    let imgSrc = '';
+
+    if (html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const img = doc.querySelector('img');
+      if (img && img.src) imgSrc = img.src;
+    }
+
+    if (!imgSrc && uriList) {
+      const lines = uriList.split('\n').filter(l => l && !l.startsWith('#'));
+      if (lines[0]) imgSrc = lines[0];
+    }
+
+    if (imgSrc) {
+      const dims = DEFAULT_DIMS.image;
+      const nw: DeskWidget = {
+        id: crypto.randomUUID(),
+        type: 'image',
+        x: dropX - dims.w / 2,
+        y: (e.clientY - rect.top) / zoomRef.current - dims.h / 2,
+        width: dims.w,
+        height: dims.h,
+        content: { src: imgSrc },
+        dock: null
+      };
+      updateWidgets([...widgetsRef.current, nw]);
+      setSelectedId(nw.id);
+    }
   };
 
   const addAtCenter = (type: DeskWidgetType) => {
@@ -3143,9 +3440,10 @@ export default function WritingDesk() {
                   <div className={styles.deskTitleBarIcon}>{PALETTE_MAP[w.type]?.icon || '❓'}</div>
                   <div className={styles.deskTitleBarLabel}>
                     {w.type === 'writingZone' ? (
-                      <div className={styles.headerToolbar} onMouseDown={e => e.stopPropagation()}>
+                      <div className={styles.headerToolbar}>
                         <button 
                           className={`${styles.headerToolBtn} ${w.content.saveStatus === 'saved' ? styles.headerToolBtnActive : ''}`}
+                          onMouseDown={e => e.stopPropagation()}
                           onClick={() => {
                             updateContentImmediate(w.id, { ...w.content, saveStatus: 'saving' });
                             triggerSave();
@@ -3165,6 +3463,7 @@ export default function WritingDesk() {
 
                         <button 
                           className={styles.headerToolBtn}
+                          onMouseDown={e => e.stopPropagation()}
                           onClick={() => updateContentImmediate(w.id, { ...w.content, showSettings: true })}
                           title="Project Settings"
                         >
@@ -3173,6 +3472,7 @@ export default function WritingDesk() {
 
                         <button 
                           className={`${styles.headerToolBtn} ${w.content.binderMode !== 'shown' ? styles.headerToolBtnActive : ''}`}
+                          onMouseDown={e => e.stopPropagation()}
                           onClick={() => {
                             const modes: BinderMode[] = ['shown', 'smart'];
                             const next = modes[(modes.indexOf(w.content.binderMode || 'shown') + 1) % modes.length];
@@ -3201,12 +3501,12 @@ export default function WritingDesk() {
                     )}
 
                     <button 
-                      className={styles.deskHeaderBtn} 
-                      title="Dock to Center" 
+                      className={`${styles.deskHeaderBtn} ${w.dock ? styles.deskHeaderBtnActive : ''}`} 
+                      title={w.dock ? "Unlock & Move Freely" : "Dock to Center"} 
                       onMouseDown={e => e.stopPropagation()}
-                      onClick={() => updateDock(w.id, 'center')}
+                      onClick={() => updateDock(w.id, w.dock ? null : 'center')}
                     >
-                      🔓
+                      ⚓
                     </button>
                     <button 
                       className={styles.deskHeaderBtn} 
@@ -3258,47 +3558,15 @@ export default function WritingDesk() {
             >
               <div className={styles.dockedWidgetHandle} onMouseDown={e => handleDragStart(e, w)}>
                 <div className={styles.dockedHandleLabel}>
-                  <span style={{ marginRight: '6px' }}>{PALETTE_MAP[w.type]?.icon}</span>
+                  <span style={{ marginRight: '6px' }}>
+                    {w.type !== 'writingZone' && PALETTE_MAP[w.type]?.icon}
+                  </span>
                   {w.type === 'writingZone' ? (
-                      <div className={styles.headerToolbar} onMouseDown={e => e.stopPropagation()}>
-                        <button 
-                          className={`${styles.headerToolBtn} ${w.content.saveStatus === 'saved' ? styles.headerToolBtnActive : ''}`}
-                          onClick={() => {
-                            updateContentImmediate(w.id, { ...w.content, saveStatus: 'saving' });
-                            triggerSave();
-                            setTimeout(() => {
-                              updateContentImmediate(w.id, { ...w.content, saveStatus: 'saved' });
-                              setTimeout(() => updateContentImmediate(w.id, { ...w.content, saveStatus: null }), 2000);
-                            }, 500);
-                          }}
-                          data-status={w.content.saveStatus}
-                        >
-                          <span className={styles.headerToolBtnSave} data-status={w.content.saveStatus}>
-                            {w.content.saveStatus === 'saved' ? '✔️' : '💾'}
-                          </span>
-                        </button>
-
-                        <button 
-                          className={styles.headerToolBtn}
-                          onClick={() => updateContentImmediate(w.id, { ...w.content, showSettings: true })}
-                        >
-                          ⚙️
-                        </button>
-
-                        <button 
-                          className={`${styles.headerToolBtn} ${w.content.binderMode !== 'shown' ? styles.headerToolBtnActive : ''}`}
-                          onClick={() => {
-                            const modes: BinderMode[] = ['shown', 'smart'];
-                            const next = modes[(modes.indexOf(w.content.binderMode || 'shown') + 1) % modes.length];
-                            updateContentImmediate(w.id, { ...w.content, binderMode: next });
-                          }}
-                        >
-                          <span style={{ fontSize: '0.65rem' }}>
-                            {(w.content.binderMode || 'shown').charAt(0).toUpperCase().slice(0, 2)}
-                          </span>
-                        </button>
+                      <div className={styles.headerToolbar}>
+                        {/* Cleanup: Settings, Visibility, and Focus icons removed for a cleaner experience */}
                       </div>
                   ) : (
+
                     <>
                       {PALETTE_MAP[w.type]?.label}
                       {w.content.isCollapsed && <span className={styles.headerStateBadge}>Min</span>}
@@ -3310,10 +3578,10 @@ export default function WritingDesk() {
 
                 <div className={styles.deskHeaderControls}>
                   <button 
-                    className={styles.deskHeaderBtn} 
-                    title="Unlock & Move Freely" 
+                    className={`${styles.deskHeaderBtn} ${w.dock ? styles.deskHeaderBtnActive : ''}`} 
+                    title={w.dock ? "Unlock & Move Freely" : "Dock to Center"} 
                     onMouseDown={e => e.stopPropagation()}
-                    onClick={() => updateDock(w.id, null)}
+                    onClick={() => updateDock(w.id, w.dock ? null : 'center')}
                   >
                     ⚓
                   </button>
