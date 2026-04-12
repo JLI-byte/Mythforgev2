@@ -33,7 +33,7 @@ function UserProfilePill({ onShowLogin }: { onShowLogin: () => void }) {
   if (!user) {
     return (
       <button className={styles.signInBtn} onClick={onShowLogin}>
-        🔑 Log In
+        Log In
       </button>
     );
   }
@@ -369,40 +369,28 @@ export default function ModeBar({ onHome }: ModeBarProps) {
           className={`${styles.modeBtn} ${workspaceMode === 'bookshelf' ? styles.modeBtnActive : ''}`}
           onClick={() => setWorkspaceMode('bookshelf')}
         >
-          📚 Bookshelf
+          Bookshelf
         </button>
 
         <button
           className={`${styles.modeBtn} ${workspaceMode === 'desk' ? styles.modeBtnActive : ''}`}
           onClick={() => setWorkspaceMode('desk')}
         >
-          🗂️ Writing Desk
+          Writing Desk
         </button>
 
-        <div className={styles.modeBtnGroup}>
-          <button
-            className={`${styles.modeBtn} ${workspaceMode === 'worldBible' ? styles.modeBtnActive : ''}`}
-            onClick={() => setWorkspaceMode('worldBible')}
-          >
-            📖 World Bible
-          </button>
-          <button
-            className={styles.tabActionBtn}
-            onClick={(e) => {
-              e.stopPropagation();
-              setWorkspaceMode('hierarchy');
-            }}
-            title="Design hierarchy"
-          >
-            🛠️
-          </button>
-        </div>
+        <button
+          className={`${styles.modeBtn} ${workspaceMode === 'worldBible' ? styles.modeBtnActive : ''}`}
+          onClick={() => setWorkspaceMode('worldBible')}
+        >
+          World Bible
+        </button>
 
         <button
           className={`${styles.modeBtn} ${workspaceMode === 'template' ? styles.modeBtnActive : ''}`}
           onClick={() => setWorkspaceMode('template')}
         >
-          🎨 Draft Table
+          Draft Table
         </button>
       </div>
 

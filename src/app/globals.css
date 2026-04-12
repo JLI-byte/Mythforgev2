@@ -17,6 +17,12 @@
 
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-serif: 'Merriweather', 'Georgia', serif;
+
+  /* Glassmorphism Defaults */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-blur: 20px;
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
 }
 
 input,
@@ -45,6 +51,12 @@ option {
     --muted: #958ea0;
     --secondary: #4cd7f6;
     --tertiary: #ffb869;
+
+    /* Glassmorphism Dark Mode */
+    --glass-bg: rgba(18, 18, 18, 0.75);
+    --glass-blur: 24px;
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
   }
 }
 
@@ -62,6 +74,12 @@ option {
   --muted: #958ea0;
   --secondary: #4cd7f6;
   --tertiary: #ffb869;
+
+  /* Glassmorphism Dark Mode */
+  --glass-bg: rgba(18, 18, 18, 0.75);
+  --glass-blur: 24px;
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
 }
 
 :root[data-theme="light"] {
@@ -71,6 +89,11 @@ option {
   --foreground: #171717;
   --border: #e2e8f0;
   --accent: #005bb5;
+
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-blur: 24px;
+  --glass-border: rgba(0, 0, 0, 0.05);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
 }
 
 * {

@@ -3,8 +3,9 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   z-index: 2000;
   display: flex;
   align-items: center;
@@ -13,12 +14,15 @@
 }
 
 .modal {
-  background: #131313;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
   border-radius: 12px;
   width: 100%;
   max-width: 560px;
   max-height: 90vh;
+  box-shadow: var(--glass-shadow);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -303,7 +307,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.05);
   flex-shrink: 0;
 }
 

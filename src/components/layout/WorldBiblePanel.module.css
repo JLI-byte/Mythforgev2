@@ -1,5 +1,6 @@
 /* WorldBiblePanel — slide-out reference panel, fixed right edge */
 /* Closed: translates right keeping 44px tab visible. Open: fully visible. */
+/* Glassmorphism — Sprint 98 */
 .panel {
     position: fixed;
     top: 48px;
@@ -9,12 +10,14 @@
     transform: translateX(100%);
     transition: transform 280ms ease-in-out;
     z-index: 60;
-    background-color: var(--surface);
-    border-left: 1px solid var(--border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-left: 1px solid var(--glass-border);
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: -3px 2px 10px rgba(0, 0, 0, 0.10);
+    box-shadow: var(--glass-shadow);
 }
 
 .panel.open {
@@ -32,6 +35,7 @@
 }
 
 /* Tab attached to left edge of panel — slides out with the drawer */
+/* Glassmorphism — Sprint 98 */
 .sideTab {
     position: fixed;
     top: 48px;
@@ -42,8 +46,10 @@
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    background: var(--surface);
-    border: 1px solid var(--border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-right: none;
     margin-right: -1px;
     border-radius: 8px 0 0 8px;
@@ -53,21 +59,23 @@
     z-index: 9999;
 }
 
+/* Glassmorphism — Sprint 98 */
 .sideTab:hover {
     color: var(--foreground);
-    background: var(--background);
+    background: rgba(255, 255, 255, 0.08);
     transform: translateX(-6px);
 }
 
 /* Active state — tab appears connected to the open panel */
+/* Glassmorphism — Sprint 98 */
 .sideTabActive {
-    background: var(--surface);
+    background: var(--glass-bg);
     color: var(--foreground);
     border-right: none;
     box-shadow: -3px 2px 10px rgba(0, 0, 0, 0.10);
     /* Extend tab right edge into the panel so it looks flush */
     padding-right: 16px;
-    border-right: 2px solid var(--surface);
+    border-right: 2px solid var(--glass-border);
 }
 
 .ghostTab {
@@ -106,12 +114,13 @@
     color: inherit;
 }
 
+/* Glassmorphism — Sprint 98 */
 .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 1rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--glass-border);
     flex-shrink: 0;
 }
 

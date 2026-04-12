@@ -2,21 +2,24 @@
     position: fixed;
     inset: 0;
     z-index: 500;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.4);
     display: flex;
     align-items: flex-start;
     justify-content: center;
     padding-top: 15vh;
-    backdrop-filter: blur(3px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .modal {
     width: 600px;
     max-width: 90vw;
-    background: var(--surface);
-    border-radius: 8px;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-radius: 12px;
+    box-shadow: var(--glass-shadow);
+    border: 1px solid var(--glass-border);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -25,7 +28,7 @@
 
 .searchHeader {
     padding: 1rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--glass-border);
 }
 
 .searchInput {

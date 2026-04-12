@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { logger } from '@/lib/logger';
 import { getStoredValue } from '@/lib/storage';
-import { AIProviderConfig } from '@/types';
 
 // Cover colors auto-assigned to new projects in rotation
 export const COVER_COLORS = [
@@ -464,10 +463,6 @@ export interface WorkspaceState {
      */
     isSpotifyOpen: boolean;
 
-    /**
-     * The multi-provider configuration used for the AI Consistency Checker.
-     */
-    aiConfig: AIProviderConfig;
 
     /**
      * User's established targets for words per day/session.
@@ -530,6 +525,9 @@ export interface WorkspaceState {
 
     // --- ACTIONS ---
     addWorld: (world: World) => void;
+    /** Update an existing world's metadata */
+    updateWorld: (id: string, updates: Partial<Omit<World, 'id' | 'createdAt'>>) => void;
+    /** Delete a world and reassign its projects to Uncategorized */
     deleteWorld: (id: string) => void;
     addProject: (project: Project) => void;
     updateProject: (id: string, updates: Partial<Omit<Project, 'id' | 'createdAt'>>) => void;
@@ -601,7 +599,7 @@ export interface WorkspaceState {
     toggleFocusMode: () => void;
 
     /** Sets the currently active side panel */
-    setActivePanel: (activePanel: 'worldBible' | 'consistency' | 'writingGoals' | 'socialMedia' | 'aiChatbot' | 'music' | 'beta' | 'versionHistory' | null) => void;
+    setActivePanel: (activePanel: 'worldBible' | 'writingGoals' | 'socialMedia' | 'music' | 'beta' | 'versionHistory' | null) => void;
 
     /** Spotify Controls */
     setSpotifyUrl: (url: string | null) => void;
@@ -686,10 +684,6 @@ export interface WorkspaceState {
     updateDeskState: (projectId: string, updates: Partial<DeskState>) => void;
     pinEntityToDesk: (projectId: string, entityId: string) => void;
 
-    /**
-     * Submits partial updates to the AI provider configuration.
-     */
-    setAIConfig: (config: Partial<AIProviderConfig>) => void;
 
     /**
      * Updates the user's daily/session writing target targets.
@@ -882,12 +876,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             isHierarchyScratchMode: false,
             _hasHydrated: false,
             deskStates: {},
-            aiConfig: {
-                provider: 'anthropic',
-                apiKey: '',
-                ollamaEndpoint: 'http://localhost:11434',
-                ollamaModel: 'llama3'
-            },
             writingGoal: { dailyTarget: 0, sessionTarget: 0 },
             sessionWordCount: 0,
             isToolbarVisible: true,
@@ -926,10 +914,26 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     return { worlds: [...state.worlds, world] };
                 }),
 
+            updateWorld: (id, updates) =>
+                set((state) => {
+                    logger.info('World updated:', id);
+                    return {
+                        worlds: state.worlds.map(w =>
+                            w.id === id ? { ...w, ...updates, updatedAt: new Date() } : w
+                        ),
+                    };
+                }),
+
             deleteWorld: (id) =>
                 set((state) => {
-                    logger.info('World deleted:', id);
-                    return { worlds: state.worlds.filter(w => w.id !== id) };
+                    logger.info('World deleted (reassigning orphans):', id);
+                    return {
+                        worlds: state.worlds.filter(w => w.id !== id),
+                        // Sprint 66: Projects tied to this world move to Uncategorized (standalone)
+                        projects: state.projects.map(p =>
+                            p.worldId === id ? { ...p, worldId: undefined, updatedAt: new Date() } : p
+                        ),
+                    };
                 }),
 
             addProject: (project) =>
@@ -1242,8 +1246,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             setHasHydrated: (state) =>
                 set(() => ({ _hasHydrated: state })),
 
-            setAIConfig: (config) =>
-                set((state) => ({ aiConfig: { ...state.aiConfig, ...config } })),
 
             setWritingGoal: (goal) =>
                 set((state) => ({ writingGoal: { ...state.writingGoal, ...goal } })),
@@ -1780,7 +1782,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 tabRailWidth: state.tabRailWidth,
                 panelWidth: state.panelWidth,
                 articleZoneWidth: state.articleZoneWidth,
-                aiConfig: state.aiConfig,
                 writingGoal: state.writingGoal,
                 isToolbarVisible: state.isToolbarVisible,
                 writingMode: state.writingMode,
@@ -1978,9 +1979,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 try {
                     const backupKey = `mythforge-backup-v${fromVersion}-${Date.now()}`;
                     const backupData = { ...persistedState };
-                    if (backupData.aiConfig) {
-                      backupData.aiConfig = { ...backupData.aiConfig, apiKey: '' };
-                    }
                     localStorage.setItem(backupKey, JSON.stringify(backupData));
                     // Keep only the 5 most recent backups — prune older ones
                     const backupKeys = Object.keys(localStorage)

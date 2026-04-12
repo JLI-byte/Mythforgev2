@@ -1,8 +1,11 @@
+/* Glassmorphism — Sprint 98 */
 .navigationPanel {
     width: 100%;
     flex-shrink: 0;
     border-right: 1px solid rgba(255, 255, 255, 0.08);
-    background-color: var(--background);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -427,14 +430,17 @@
     color: var(--foreground);
 }
 
+/* Glassmorphism — Sprint 98 */
 .optionsMenu {
     position: absolute;
     right: 0.5rem;
     top: 2rem;
-    background-color: var(--surface);
-    border: 1px solid var(--border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--glass-shadow);
     display: flex;
     flex-direction: column;
     z-index: 10;
@@ -597,13 +603,16 @@
   flex: 1;
 }
 
+/* Glassmorphism — Sprint 98 */
 .panelFooter {
     display: flex;
     align-items: center;
     padding: 0.75rem;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--glass-border);
     gap: 0.5rem;
-    background: var(--background);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
     flex-shrink: 0;
 }
 
