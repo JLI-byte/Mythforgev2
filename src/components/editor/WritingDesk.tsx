@@ -3526,6 +3526,7 @@ export default function WritingDesk() {
                     </button>
                   </div>
                 </div>
+              {!w.content.isCollapsed && (
               <div className={`${styles.deskWidgetContent} ${w.type === 'writingZone' ? styles.deskWidgetContentFull : ''}`}>
                 <WidgetRenderer
                   widget={w}
@@ -3541,6 +3542,7 @@ export default function WritingDesk() {
                   onDockChange={(dock) => updateDock(w.id, dock)}
                 />
               </div>
+              )}
               {(['n','s','e','w','ne','nw','se','sw'] as ResizeDir[]).map(dir => <div key={dir} className={`${styles.deskResizeHandle} ${styles[`deskResize${dir.toUpperCase()}` as keyof typeof styles]}`} onMouseDown={e => handleResizeStart(e, w, dir)} />)}
             </div>
           ))}
@@ -3552,7 +3554,7 @@ export default function WritingDesk() {
             <div
               key={w.id}
               id={`widget-${w.id}`}
-              className={`${styles.deskWidget} ${styles.dockedWidget} ${styles[`docked${w.dock?.charAt(0).toUpperCase()}${w.dock?.slice(1)}` as keyof typeof styles]} ${selectedId === w.id ? styles.deskWidgetSelected : ''}`}
+              className={`${styles.deskWidget} ${styles.dockedWidget} ${styles[`docked${w.dock?.charAt(0).toUpperCase()}${w.dock?.slice(1)}` as keyof typeof styles]} ${selectedId === w.id ? styles.deskWidgetSelected : ''} ${w.content.isCollapsed ? styles.dockedWidgetCollapsed : ''}`}
               style={{ width: w.width, left: w.x, zIndex: selectedId === w.id ? 50 : 5 }}
               onMouseDown={e => { e.stopPropagation(); setSelectedId(w.id); }}
             >
@@ -3603,6 +3605,7 @@ export default function WritingDesk() {
                   </button>
                 </div>
               </div>
+              {!w.content.isCollapsed && (
               <div className={`${styles.deskWidgetContent} ${w.type === 'writingZone' ? styles.deskWidgetContentFull : ''}`}>
                 <WidgetRenderer
                   widget={w}
@@ -3618,6 +3621,7 @@ export default function WritingDesk() {
                   onDockChange={(dock) => updateDock(w.id, dock)}
                 />
               </div>
+              )}
               <div className={`${styles.deskResizeHandle} ${styles.deskResizeE}`} onMouseDown={e => handleResizeStart(e, w, 'e')} />
               <div className={`${styles.deskResizeHandle} ${styles.deskResizeW}`} onMouseDown={e => handleResizeStart(e, w, 'w')} />
             </div>

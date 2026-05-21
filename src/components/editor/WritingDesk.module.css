@@ -800,6 +800,11 @@
   border-right: 1px solid var(--border);
 }
 
+.dockedWidgetCollapsed {
+  height: auto !important;
+  bottom: auto !important;
+}
+
 .dockedWidgetHandle {
   height: 28px;
   background: rgba(255, 255, 255, 0.05);
