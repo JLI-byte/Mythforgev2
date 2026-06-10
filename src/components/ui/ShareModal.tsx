@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './ShareModal.module.css';
 import { ShareCardOptions, generateShareCard } from '@/lib/shareCard';
+import { logger } from '@/lib/logger';
 
 interface ShareModalProps {
     isOpen: boolean;
@@ -55,7 +56,7 @@ export default function ShareModal({ isOpen, onClose, shareData }: ShareModalPro
                 const url = URL.createObjectURL(blob);
                 setImageUrl(url);
             } catch (err) {
-                console.error('Error generating share card:', err);
+                logger.error('Error generating share card:', err);
             } finally {
                 setIsGenerating(false);
             }

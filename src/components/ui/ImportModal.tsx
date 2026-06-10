@@ -4,6 +4,7 @@ import styles from './ImportModal.module.css';
 import { useWorkspaceStore, COVER_COLORS } from '@/store/workspaceStore';
 import { sanitizeImportedHtml, markdownToBasicHtml, fetchGDriveFileContent, parseFdxToHtml } from '@/lib/export';
 import { parseCSV, flattenJSON } from '@/lib/importUtils';
+import { logger } from '@/lib/logger';
 // mammoth (~1MB) is loaded on demand in the DOCX handlers below so it stays out
 // of the main app bundle — most sessions never import a Word file.
 
@@ -108,7 +109,7 @@ export function ImportModal({ isOpen, onClose }: ImportModalProps) {
                 reader.readAsText(file);
             }
         } catch (error) {
-            console.error("Import failed:", error);
+            logger.error("Import failed:", error);
             alert("Could not import file.");
         } finally {
             setIsLoading(false);
@@ -166,7 +167,7 @@ export function ImportModal({ isOpen, onClose }: ImportModalProps) {
             if (allFdx) setSelectedMode('screenplay');
             setStep('metadata');
         } catch (err) {
-            console.error("Folder import error:", err);
+            logger.error("Folder import error:", err);
         } finally {
             setIsLoading(false);
         }
@@ -203,7 +204,7 @@ export function ImportModal({ isOpen, onClose }: ImportModalProps) {
             setTitle(file.name.replace(/\.[^/.]+$/, ""));
             setStep('mapping');
         } catch (err) {
-            console.error("Entity import fail:", err);
+            logger.error("Entity import fail:", err);
             alert("Could not parse entity file.");
         } finally {
             setIsLoading(false);

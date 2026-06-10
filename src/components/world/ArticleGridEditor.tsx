@@ -1444,6 +1444,13 @@ function RelationshipWidget({ content, onChange }: { content: any; onChange: (c:
       species: '#27AE60',
     };
 
+    // Once the layout settles we stop running the O(n²) spring physics every
+    // frame (a node drag or hover re-runs the effect / un-settles it). The RAF
+    // keeps rendering so highlights still draw, but the CPU-heavy simulation
+    // doesn't burn a core indefinitely after the graph has converged.
+    let settled = false;
+    const SETTLE_ENERGY = 0.05;
+
     const tick = () => {
       const W = canvas.width;
       const H = canvas.height;
@@ -1454,57 +1461,64 @@ function RelationshipWidget({ content, onChange }: { content: any; onChange: (c:
         return;
       }
 
-      // --- SPRING SIMULATION ---
-      const REPULSION = 4000;
-      const SPRING_LEN = 120;
-      const SPRING_K = 0.05;
-      const DAMPING = 0.85;
-      const CENTER_PULL = 0.005;
+      const nodeMap = new Map(nodes.map(n => [n.id, n]));
+      const isDragging = !!dragRef.current;
+      if (!settled || isDragging) {
+        // --- SPRING SIMULATION ---
+        const REPULSION = 4000;
+        const SPRING_LEN = 120;
+        const SPRING_K = 0.05;
+        const DAMPING = 0.85;
+        const CENTER_PULL = 0.005;
 
-      // Repulsion between all node pairs
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const dx = nodes[j].x - nodes[i].x;
-          const dy = nodes[j].y - nodes[i].y;
+        // Repulsion between all node pairs
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            const dx = nodes[j].x - nodes[i].x;
+            const dy = nodes[j].y - nodes[i].y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const force = REPULSION / (dist * dist);
+            const fx = (dx / dist) * force;
+            const fy = (dy / dist) * force;
+            nodes[i].vx -= fx;
+            nodes[i].vy -= fy;
+            nodes[j].vx += fx;
+            nodes[j].vy += fy;
+          }
+        }
+
+        // Spring attraction along edges
+        for (const edge of allEdges) {
+          const a = nodeMap.get(edge.sourceId);
+          const b = nodeMap.get(edge.targetId);
+          if (!a || !b) continue;
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
           const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          const force = REPULSION / (dist * dist);
+          const force = (dist - SPRING_LEN) * SPRING_K;
           const fx = (dx / dist) * force;
           const fy = (dy / dist) * force;
-          nodes[i].vx -= fx;
-          nodes[i].vy -= fy;
-          nodes[j].vx += fx;
-          nodes[j].vy += fy;
+          a.vx += fx; a.vy += fy;
+          b.vx -= fx; b.vy -= fy;
         }
-      }
 
-      // Spring attraction along edges
-      const nodeMap = new Map(nodes.map(n => [n.id, n]));
-      for (const edge of allEdges) {
-        const a = nodeMap.get(edge.sourceId);
-        const b = nodeMap.get(edge.targetId);
-        if (!a || !b) continue;
-        const dx = b.x - a.x;
-        const dy = b.y - a.y;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const force = (dist - SPRING_LEN) * SPRING_K;
-        const fx = (dx / dist) * force;
-        const fy = (dy / dist) * force;
-        a.vx += fx; a.vy += fy;
-        b.vx -= fx; b.vy -= fy;
-      }
-
-      // Pull toward center + apply damping + integrate
-      for (const node of nodes) {
-        if (dragRef.current?.nodeId === node.id) continue;
-        node.vx += (W / 2 - node.x) * CENTER_PULL;
-        node.vy += (H / 2 - node.y) * CENTER_PULL;
-        node.vx *= DAMPING;
-        node.vy *= DAMPING;
-        node.x += node.vx;
-        node.y += node.vy;
-        // Clamp to canvas bounds with padding
-        node.x = Math.max(24, Math.min(W - 24, node.x));
-        node.y = Math.max(24, Math.min(H - 24, node.y));
+        // Pull toward center + apply damping + integrate
+        let energy = 0;
+        for (const node of nodes) {
+          if (dragRef.current?.nodeId === node.id) continue;
+          node.vx += (W / 2 - node.x) * CENTER_PULL;
+          node.vy += (H / 2 - node.y) * CENTER_PULL;
+          node.vx *= DAMPING;
+          node.vy *= DAMPING;
+          node.x += node.vx;
+          node.y += node.vy;
+          energy += node.vx * node.vx + node.vy * node.vy;
+          // Clamp to canvas bounds with padding
+          node.x = Math.max(24, Math.min(W - 24, node.x));
+          node.y = Math.max(24, Math.min(H - 24, node.y));
+        }
+        // Settle once motion is negligible (and the user isn't dragging).
+        settled = !isDragging && energy < SETTLE_ENERGY;
       }
 
       // --- RENDER ---

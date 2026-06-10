@@ -2035,7 +2035,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     }
                 } catch (e) {
                     // localStorage may be full — ignore backup failure, proceed with migration
-                    console.warn('MythForge: backup failed, proceeding with migration', e);
+                    logger.warn('MythForge: backup failed, proceeding with migration', e);
                 }
 
                 // Return the persisted state as-is — all field migrations already
@@ -2079,7 +2079,7 @@ export function restoreDataBackup(backupKey: string): boolean {
         localStorage.setItem('mythforge-workspace', raw);
         return true;
     } catch (e) {
-        console.error('MythForge: restore failed', e);
+        logger.error('MythForge: restore failed', e);
         return false;
     }
 }
@@ -2096,7 +2096,7 @@ export function createManualBackup(): string | null {
         localStorage.setItem(key, current);
         return key;
     } catch (e) {
-        console.error('MythForge: manual backup failed', e);
+        logger.error('MythForge: manual backup failed', e);
         return null;
     }
 }
