@@ -36,7 +36,7 @@
 /* Glassmorphism — Sprint 98 */
 .sideTab {
     position: fixed;
-    top: 475px; /* Positioned below Goals (308px) */
+    top: 568px; /* Rail slots are 130px tall: WB 48, Goals 178, Social 308, Music 438, History 568 */
     height: 130px;
     box-sizing: border-box;
     padding: 16px 10px;
