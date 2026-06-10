@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useWorkspaceStore, partializeWorkspace, type WorkspaceState } from '@/store/workspaceStore';
 import { loadWorkspace, saveWorkspace } from './workspaceSync';
 import { logger } from '@/lib/logger';
 
@@ -102,7 +102,8 @@ export function useSupabaseSync(userId: string) {
 
     const unsubscribe = useWorkspaceStore.subscribe((state) => {
       if (isInitialLoadRef.current) return;
-      latestStateRef.current = state as Record<string, any>;
+      // Sync only the persisted subset — same shape the local persist layer uses.
+      latestStateRef.current = partializeWorkspace(state as WorkspaceState) as Record<string, any>;
 
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       setStatus('syncing');

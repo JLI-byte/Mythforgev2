@@ -2,10 +2,22 @@
 
 import React, { useState } from 'react';
 import styles from './SettingsModal.module.css';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import {
+    useWorkspaceStore,
+    listDataBackups,
+    restoreDataBackup,
+    createManualBackup,
+} from '@/store/workspaceStore';
 
 interface SettingsModalProps {
     onClose: () => void;
+}
+
+function formatBackupTime(ts: number): string {
+    if (!ts) return 'Unknown date';
+    return new Date(ts).toLocaleString([], {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+    });
 }
 
 /**
@@ -15,8 +27,11 @@ interface SettingsModalProps {
 export default function SettingsModal({ onClose }: SettingsModalProps) {
     const writingGoal = useWorkspaceStore((state) => state.writingGoal);
     const setWritingGoal = useWorkspaceStore((state) => state.setWritingGoal);
+    const updateGoalConfig = useWorkspaceStore((state) => state.updateGoalConfig);
     const editorWidth = useWorkspaceStore((state) => state.editorWidth);
     const setEditorWidth = useWorkspaceStore((state) => state.setEditorWidth);
+    const isSpellcheckEnabled = useWorkspaceStore((state) => state.isSpellcheckEnabled);
+    const setSpellcheckEnabled = useWorkspaceStore((state) => state.setSpellcheckEnabled);
 
 
     const [dailyTarget, setDailyTarget] = useState(writingGoal.dailyTarget);
@@ -24,13 +39,54 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
 
     const [localWidth, setLocalWidth] = useState(editorWidth);
 
+    const [backups, setBackups] = useState(() => listDataBackups());
+    const [backupMsg, setBackupMsg] = useState('');
 
+    const handleCreateBackup = () => {
+        const key = createManualBackup();
+        setBackups(listDataBackups());
+        setBackupMsg(key ? 'Backup created.' : 'Nothing to back up yet.');
+        setTimeout(() => setBackupMsg(''), 3000);
+    };
+
+    const handleRestore = (key: string) => {
+        const ok = window.confirm(
+            'Restore this backup? Your current workspace will be replaced and the app will reload.'
+        );
+        if (!ok) return;
+        if (restoreDataBackup(key)) {
+            window.location.reload();
+        } else {
+            setBackupMsg('Restore failed.');
+        }
+    };
+
+    const handleDownloadBackup = () => {
+        const raw = typeof localStorage !== 'undefined'
+            ? localStorage.getItem('mythforge-workspace')
+            : null;
+        if (!raw) { setBackupMsg('Nothing to export yet.'); return; }
+        const blob = new Blob([raw], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `mythforge-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
 
     const handleSave = () => {
         setWritingGoal({
             dailyTarget: dailyTarget || 0,
             sessionTarget: sessionTarget || 0
         });
+        // Keep the Goals panel's config in lockstep — it reads goalConfig, not
+        // writingGoal, and the two previously drifted apart silently.
+        if (dailyTarget > 0) {
+            updateGoalConfig({ dailyWordTarget: dailyTarget, goalConfigured: true });
+        }
         setEditorWidth(localWidth);
         onClose();
     };
@@ -101,6 +157,49 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                                 <button type="button" onClick={() => setLocalWidth(1200)} className={styles.presetBtn}>Full (1200px)</button>
                             </div>
                         </div>
+                    </section>
+
+                    <section className={styles.section} style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
+                        <div className={styles.providerHeader}>
+                            <h3>Editor Behavior</h3>
+                        </div>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem', cursor: 'pointer' }}>
+                            <input
+                                type="checkbox"
+                                checked={isSpellcheckEnabled}
+                                onChange={(e) => setSpellcheckEnabled(e.target.checked)}
+                            />
+                            Browser spellcheck (turn off to stop red squiggles under fantasy names)
+                        </label>
+                    </section>
+
+                    <section className={styles.section} style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
+                        <div className={styles.providerHeader}>
+                            <h3>Backup &amp; Restore</h3>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <button type="button" onClick={handleCreateBackup} className={styles.presetBtn}>
+                                Create backup now
+                            </button>
+                            <button type="button" onClick={handleDownloadBackup} className={styles.presetBtn}>
+                                Download backup (.json)
+                            </button>
+                        </div>
+                        {backupMsg && (
+                            <p style={{ fontSize: '0.8rem', opacity: 0.75, margin: '0.5rem 0 0' }}>{backupMsg}</p>
+                        )}
+                        {backups.length > 0 && (
+                            <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                                {backups.map(b => (
+                                    <div key={b.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', fontSize: '0.82rem' }}>
+                                        <span style={{ opacity: 0.8 }}>{formatBackupTime(b.timestamp)}</span>
+                                        <button type="button" onClick={() => handleRestore(b.key)} className={styles.presetBtn}>
+                                            Restore
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </section>
 
                 </div>

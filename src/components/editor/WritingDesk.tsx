@@ -435,6 +435,7 @@ function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedContentRef = useRef<string>(content || '');
   const trackSession = useWritingSession();
+  const isSpellcheckEnabled = useWorkspaceStore(s => s.isSpellcheckEnabled);
 
   const editor = useEditor({
     extensions: [
@@ -450,7 +451,7 @@ function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
     content: content || '',
     immediatelyRender: false,
     editorProps: {
-      attributes: { class: styles.deskEditorContent }
+      attributes: { class: styles.deskEditorContent, spellcheck: String(isSpellcheckEnabled) }
     },
     onUpdate: ({ editor }) => {
       // Atomic guard: Only process updates if the user is actively focused in this editor
@@ -471,7 +472,7 @@ function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
       }, 300);
     },
     onFocus: ({ editor }) => onFocus(editor),
-  }, [sceneId]);
+  }, [sceneId, isSpellcheckEnabled]);
 
   useEffect(() => {
     return () => {

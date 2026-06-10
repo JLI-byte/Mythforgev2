@@ -390,6 +390,8 @@ export interface WorkspaceState {
     isCommandPaletteOpen: boolean;
     /** Whether the Export modal overlay is currently open. */
     isExportOpen: boolean;
+    /** Browser spellcheck in editors — off by default fights fantasy names less. */
+    isSpellcheckEnabled: boolean;
 
     /**
      * The currently active side panel.
@@ -585,6 +587,7 @@ export interface WorkspaceState {
      */
     setCommandPaletteOpen: (open: boolean) => void;
     setExportOpen: (open: boolean) => void;
+    setSpellcheckEnabled: (on: boolean) => void;
 
     /**
      * Toggles Typewriter layout mode.
@@ -877,6 +880,53 @@ if (typeof window !== 'undefined') {
     });
 }
 
+/**
+ * The persisted/synced subset of workspace state. Shared by the local persist
+ * middleware AND the Supabase cloud sync so both layers always agree on the
+ * payload — previously the cloud save shipped the full state (including
+ * transient UI), which the local layer then disagreed with on rehydrate.
+ */
+export function partializeWorkspace(state: WorkspaceState) {
+    return {
+        worlds: state.worlds,
+        projects: state.projects,
+        documents: state.documents,
+        scenes: state.scenes,
+        activeProjectId: state.activeProjectId,
+        activeDocumentId: state.activeDocumentId,
+        activeSceneId: state.activeSceneId,
+        entities: state.entities,
+        theme: state.theme,
+        isSidebarOpen: state.isSidebarOpen,
+        isTypewriterMode: state.isTypewriterMode,
+        isFocusMode: state.isFocusMode,
+        editorWidth: state.editorWidth,
+        tabRailWidth: state.tabRailWidth,
+        panelWidth: state.panelWidth,
+        articleZoneWidth: state.articleZoneWidth,
+        writingGoal: state.writingGoal,
+        isToolbarVisible: state.isToolbarVisible,
+        writingMode: state.writingMode,
+        navPanelWidth: state.navPanelWidth,
+        baseFontSize: state.baseFontSize,
+        editorMaxWidth: state.editorMaxWidth,
+        cachedEditorMaxWidth: state.cachedEditorMaxWidth,
+        isStandardFormat: state.isStandardFormat,
+        isSpellcheckEnabled: state.isSpellcheckEnabled,
+        // Sprint 47A: persist goals data (streakState is derived, not persisted)
+        writingDays: state.writingDays,
+        goalConfig: state.goalConfig,
+        earnedBadges: state.earnedBadges,
+        socialHistory: state.socialHistory,
+        articleTemplates: state.articleTemplates,
+        workspaceMode: state.workspaceMode,
+        sceneSnapshots: state.sceneSnapshots,
+        entitySnapshots: state.entitySnapshots,
+        hierarchyTemplates: state.hierarchyTemplates,
+        deskStates: state.deskStates,
+    };
+}
+
 export const useWorkspaceStore = create<WorkspaceState>()(
     persist(
         (set, get) => ({
@@ -897,6 +947,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             isSidebarOpen: true,
             isCommandPaletteOpen: false,
             isExportOpen: false,
+            isSpellcheckEnabled: true,
             isTypewriterMode: false,
             activePanel: null,
             isFullscreen: false,
@@ -1178,6 +1229,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             setExportOpen: (open) =>
                 set(() => ({ isExportOpen: open })),
+
+            setSpellcheckEnabled: (on) =>
+                set(() => ({ isSpellcheckEnabled: on })),
 
             toggleTypewriterMode: () =>
                 set((state) => ({ isTypewriterMode: !state.isTypewriterMode })),
@@ -1809,43 +1863,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             // Only persist core data — transient UI flags (hover state, open modals, etc.) reset on reload.
             // SECURITY NOTE: apiKey is stored in localStorage. Never log or expose this value.
-            partialize: (state) => ({
-                worlds: state.worlds,
-                projects: state.projects,
-                documents: state.documents,
-                scenes: state.scenes,
-                activeProjectId: state.activeProjectId,
-                activeDocumentId: state.activeDocumentId,
-                activeSceneId: state.activeSceneId,
-                entities: state.entities,
-                theme: state.theme,
-                isSidebarOpen: state.isSidebarOpen,
-                isTypewriterMode: state.isTypewriterMode,
-                isFocusMode: state.isFocusMode,
-                editorWidth: state.editorWidth,
-                tabRailWidth: state.tabRailWidth,
-                panelWidth: state.panelWidth,
-                articleZoneWidth: state.articleZoneWidth,
-                writingGoal: state.writingGoal,
-                isToolbarVisible: state.isToolbarVisible,
-                writingMode: state.writingMode,
-                navPanelWidth: state.navPanelWidth,
-                baseFontSize: state.baseFontSize,
-                editorMaxWidth: state.editorMaxWidth,
-                cachedEditorMaxWidth: state.cachedEditorMaxWidth,
-                isStandardFormat: state.isStandardFormat,
-                // Sprint 47A: persist goals data (streakState is derived, not persisted)
-                writingDays: state.writingDays,
-                goalConfig: state.goalConfig,
-                earnedBadges: state.earnedBadges,
-                socialHistory: state.socialHistory,
-                articleTemplates: state.articleTemplates,
-                workspaceMode: state.workspaceMode,
-                sceneSnapshots: state.sceneSnapshots,
-                entitySnapshots: state.entitySnapshots,
-                hierarchyTemplates: state.hierarchyTemplates,
-                deskStates: state.deskStates,
-            }),
+            partialize: partializeWorkspace,
 
             // Track hydration phases allowing components to await persistence payload dynamically
             onRehydrateStorage: () => (state) => {
