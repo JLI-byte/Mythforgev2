@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import styles from './ExportModal.module.css';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { exportAsMarkdown, exportAsDocx, exportWorldBible } from '@/lib/export';
+import { exportAsEpub } from '@/lib/epub';
 
 /**
  * ExportModal UI Component
@@ -49,6 +50,22 @@ export default function ExportModal({ onClose }: ExportModalProps) {
             await exportAsDocx(activeDocument, documentScenes);
         } catch (err: unknown) {
             setExportError(err instanceof Error ? err.message : 'Unknown error during Docx export');
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+    const handleDocumentEpub = async () => {
+        if (!activeDocument || !activeProject) return;
+        setExportError(null);
+        setIsExporting(true);
+        try {
+            await exportAsEpub(activeDocument, documentScenes, {
+                title: activeDocument.title || activeProject.name,
+                author: activeProject.authorName || undefined,
+            });
+        } catch (err: unknown) {
+            setExportError(err instanceof Error ? err.message : 'Unknown error during EPUB export');
         } finally {
             setIsExporting(false);
         }
@@ -103,6 +120,21 @@ export default function ExportModal({ onClose }: ExportModalProps) {
                                     <>
                                         <span className={styles.icon}>↓</span>
                                         Download Word (.docx)
+                                    </>
+                                )}
+                            </button>
+
+                            <button
+                                className={styles.exportBtn}
+                                onClick={handleDocumentEpub}
+                                disabled={!activeDocument || isExporting}
+                            >
+                                {isExporting ? (
+                                    <span className={styles.spinner}></span>
+                                ) : (
+                                    <>
+                                        <span className={styles.icon}>↓</span>
+                                        Download EPUB (.epub)
                                     </>
                                 )}
                             </button>
