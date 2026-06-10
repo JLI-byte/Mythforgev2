@@ -12,6 +12,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from './ArticleGridEditor.module.css';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 // ============================================================
 // DATA MODEL
@@ -1013,7 +1014,7 @@ function UntypedWidget() {
 
 function TextWidget({ content, onChange }: { content: any; onChange: (c: any) => void }) {
   const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => { if (ref.current && ref.current.innerHTML !== (content.html || '')) ref.current.innerHTML = content.html || ''; }, []);
+  useEffect(() => { if (ref.current) { const clean = sanitizeHtml(content.html || ''); if (ref.current.innerHTML !== clean) ref.current.innerHTML = clean; } }, []);
   return <div ref={ref} className={styles.textWidget} contentEditable suppressContentEditableWarning onBlur={() => { if (ref.current) onChange({ html: ref.current.innerHTML }); }} data-placeholder="Start writing..." />;
 }
 

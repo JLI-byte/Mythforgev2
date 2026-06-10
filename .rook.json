@@ -1,0 +1,7 @@
+{
+  "launch": {
+    "command": "npm run dev",
+    "port": 3000,
+    "framework": "Next.js"
+  }
+}

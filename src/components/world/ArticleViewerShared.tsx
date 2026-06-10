@@ -5,6 +5,7 @@ import React from 'react';
 import { ArticleBlock } from '@/store/workspaceStore';
 import styles from './WorldBibleEntry.module.css';
 import { GridWidget, ArticleTab, parseArticleTabs } from './ArticleGridEditor';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 /**
  * ArticleViewer — Read-only renderer for article blocks.
@@ -30,9 +31,9 @@ export function ViewerBlockRenderer({ block }: { block: ArticleBlock }) {
     switch (type) {
         case 'richtext':
             return (
-                <div 
+                <div
                     className={styles.viewerRichtext}
-                    dangerouslySetInnerHTML={{ __html: content.html || '' }} 
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.html || '') }}
                 />
             );
         case 'image':
@@ -93,7 +94,7 @@ function GridWidgetReadRenderer({ widget }: { widget: GridWidget }) {
       return (
         <div
           style={{ fontSize: '0.9rem', lineHeight: 1.65, color: 'var(--foreground)' }}
-          dangerouslySetInnerHTML={{ __html: content.html || '' }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.html || '') }}
         />
       );
     case 'heading': {

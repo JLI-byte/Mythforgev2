@@ -12,8 +12,12 @@ import { createClient } from '@/lib/supabase/server';
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  // if "next" is in param, use it as the redirect URL
-  const next = searchParams.get('next') ?? '/';
+  // if "next" is in param, use it as the redirect URL.
+  // SECURITY: only accept same-site relative paths. A value like
+  // "https://evil.com" or "//evil.com" would otherwise be an open redirect
+  // that lands an authenticated user on an attacker-controlled page.
+  const rawNext = searchParams.get('next') ?? '/';
+  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/';
 
   if (code) {
     const supabase = await createClient();

@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, shell } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const http = require('http');
@@ -37,8 +37,13 @@ async function createWindow() {
         // In production, use the bundled node.exe in extraResources
         const nodeBinaryPath = path.join(process.resourcesPath, 'node.exe');
         
-        // Standalone dir is in resources/app/.next/standalone
-        const standaloneDir = path.join(__dirname, '..', '.next', 'standalone');
+        // Standalone dir is in resources/app/.next/standalone.
+        // With asar enabled the Next server is asarUnpack'd, so the externally
+        // spawned node.exe must read it from app.asar.unpacked, not app.asar
+        // (a separate process has no Electron asar fs shim).
+        const standaloneDir = path
+            .join(__dirname, '..', '.next', 'standalone')
+            .replace('app.asar', 'app.asar.unpacked');
         const serverPath = path.join(standaloneDir, 'server.js');
         
         console.log(`Starting server with binary: ${nodeBinaryPath}`);
@@ -66,12 +71,32 @@ async function createWindow() {
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
+            sandbox: true,
+            webSecurity: true,
             preload: path.join(__dirname, 'preload.js'),
             zoomFactor: 1.0
         }
     });
 
-    const url = isDev ? 'http://localhost:3000' : `http://localhost:${port}`;
+    const url = isDev ? 'http://localhost:4000' : `http://localhost:${port}`;
+
+    // SECURITY: confine in-app navigation to our own origin. Any attempt to
+    // navigate elsewhere (e.g. an injected file:// or external URL) is blocked.
+    const allowedOrigin = isDev ? 'http://localhost:4000' : `http://localhost:${port}`;
+    mainWindow.webContents.on('will-navigate', (event, navigationUrl) => {
+        if (!navigationUrl.startsWith(allowedOrigin)) {
+            event.preventDefault();
+        }
+    });
+
+    // SECURITY: never let the renderer spawn new Electron windows. External
+    // http(s) links open in the user's real browser; everything else is denied.
+    mainWindow.webContents.setWindowOpenHandler(({ url: targetUrl }) => {
+        if (targetUrl.startsWith('https://') || targetUrl.startsWith('http://')) {
+            shell.openExternal(targetUrl);
+        }
+        return { action: 'deny' };
+    });
 
     // Wait for server to be ready in production
     if (!isDev) {

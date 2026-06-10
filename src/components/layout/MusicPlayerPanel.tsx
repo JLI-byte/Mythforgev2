@@ -90,7 +90,21 @@ export function MusicPlayerPanel({
     };
 
     const openUrl = (url: string, name: string) => {
-        window.open(url, '_blank');
+        // SECURITY: only open http(s) links. User-saved entries are untrusted,
+        // so reject javascript:/file:/data: schemes that could run code or read
+        // local files (especially inside the Electron shell). noopener prevents
+        // the opened tab from reaching back through window.opener.
+        try {
+            const parsed = new URL(url);
+            if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+                showToast('Only http(s) links can be opened');
+                return;
+            }
+        } catch {
+            showToast('That doesn’t look like a valid link');
+            return;
+        }
+        window.open(url, '_blank', 'noopener,noreferrer');
         showToast(`Opening ${name}...`);
     };
 

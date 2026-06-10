@@ -11,6 +11,7 @@ import styles from './ArticleCanvas.module.css';
 import { useWorkspaceStore, ArticleBlock, BlockType } from '@/store/workspaceStore';
 import TemplatePanel from './TemplatePanel';
 import BlockToolPanel from './BlockToolPanel';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 /** Default block dimensions on the canvas */
 const DEFAULT_BLOCK_WIDTH = 340;
@@ -365,7 +366,7 @@ function RichTextBlock({ content, onChange }: {
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (ref.current) ref.current.innerHTML = (content.html as string) || '';
+    if (ref.current) ref.current.innerHTML = sanitizeHtml((content.html as string) || '');
   }, []);
   return (
     <div
