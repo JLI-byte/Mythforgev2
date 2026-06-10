@@ -118,7 +118,7 @@ export function VersionHistoryPanel({
                     style={{
                         width: tabWidth,
                         right: isOpen ? panelWidth : 0,
-                        top: 475,
+                        top: 568, // rail slots are 130px: WB 48, Goals 178, Social 308, Music 438, History 568
                         transition: 'right 280ms ease-in-out',
                     }}
                     onClick={onTabClick}
@@ -155,10 +155,10 @@ export function VersionHistoryPanel({
             {mounted && isOpen && createPortal(
                 <button
                     className={styles.ghostTab}
-                    style={{ 
-                        width: tabWidth, 
+                    style={{
+                        width: tabWidth,
                         height: 130,
-                        top: 475,
+                        top: 568,
                         right: 0,
                     }}
                     onClick={onClose}

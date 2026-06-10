@@ -62,9 +62,18 @@ export default function Home() {
   // Clamp panelWidth to a safe maximum based on current viewport.
   // Prevents persisted wide-screen values from overflowing on narrow screens.
   // MIN_EDITOR_WIDTH = 280px ensures the editor is never fully obscured.
+  // Clamping happens AFTER mount: reading window during render makes the
+  // first client render differ from the server HTML (hydration mismatch).
   const MIN_EDITOR_WIDTH = 280;
-  const effectivePanelWidth = typeof window !== 'undefined'
-    ? Math.min(panelWidth, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH)
+  const [maxPanelWidth, setMaxPanelWidth] = useState<number | null>(null);
+  useEffect(() => {
+    const update = () => setMaxPanelWidth(window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [tabRailWidth]);
+  const effectivePanelWidth = maxPanelWidth !== null
+    ? Math.min(panelWidth, maxPanelWidth)
     : panelWidth;
 
 
