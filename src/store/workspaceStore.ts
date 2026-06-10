@@ -388,6 +388,8 @@ export interface WorkspaceState {
      * Whether the Global Command Palette is currently active.
      */
     isCommandPaletteOpen: boolean;
+    /** Whether the Export modal overlay is currently open. */
+    isExportOpen: boolean;
 
     /**
      * The currently active side panel.
@@ -582,6 +584,7 @@ export interface WorkspaceState {
      * Toggles the command palette.
      */
     setCommandPaletteOpen: (open: boolean) => void;
+    setExportOpen: (open: boolean) => void;
 
     /**
      * Toggles Typewriter layout mode.
@@ -856,6 +859,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             theme: 'system',
             isSidebarOpen: true,
             isCommandPaletteOpen: false,
+            isExportOpen: false,
             isTypewriterMode: false,
             activePanel: null,
             isFullscreen: false,
@@ -1134,6 +1138,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             setCommandPaletteOpen: (open) =>
                 set(() => ({ isCommandPaletteOpen: open })),
+
+            setExportOpen: (open) =>
+                set(() => ({ isExportOpen: open })),
 
             toggleTypewriterMode: () =>
                 set((state) => ({ isTypewriterMode: !state.isTypewriterMode })),

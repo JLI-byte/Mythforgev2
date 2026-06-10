@@ -62,7 +62,7 @@ function UserProfilePill({ onShowLogin }: { onShowLogin: () => void }) {
         )}
         <div className={styles.profileInfo}>
           <span className={styles.profileName}>{name}</span>
-          <span className={styles.profileStatus}>Pro Account</span>
+          <span className={styles.profileStatus}>Signed in</span>
         </div>
       </div>
 
@@ -72,12 +72,6 @@ function UserProfilePill({ onShowLogin }: { onShowLogin: () => void }) {
             <div className={styles.profileName}>{name}</div>
             <div className={styles.dropdownEmail}>{email}</div>
           </div>
-          <button className={styles.dropdownItem} onClick={() => window.location.href = '/settings'}>
-            <span>⚙️</span> Manage Account
-          </button>
-          <button className={styles.dropdownItem} onClick={() => window.location.href = '/billing'}>
-            <span>💳</span> Billing & Plan
-          </button>
           <button className={`${styles.dropdownItem} ${styles.dropdownItemSignOut}`} onClick={handleSignOut}>
             <span>🚪</span> Sign Out
           </button>
@@ -225,6 +219,7 @@ export default function ModeBar({ onHome }: ModeBarProps) {
   const setFocusedArticleEntity = useWorkspaceStore(state => state.setFocusedArticleEntity);
   const theme = useWorkspaceStore(state => state.theme);
   const setTheme = useWorkspaceStore(state => state.setTheme);
+  const setExportOpen = useWorkspaceStore(state => state.setExportOpen);
 
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -461,6 +456,14 @@ export default function ModeBar({ onHome }: ModeBarProps) {
 
       <div className={styles.topBarActions}>
         <UserProfilePill onShowLogin={() => setShowLoginModal(true)} />
+
+        <button
+          className={styles.iconBtn}
+          onClick={() => setExportOpen(true)}
+          title="Export (Ctrl+E)"
+        >
+          ↓
+        </button>
 
         <button
           className={styles.iconBtn}

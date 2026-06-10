@@ -14,9 +14,11 @@ import { useWorkspaceStore, Scene } from '@/store/workspaceStore';
 import { EntityMark } from '@/lib/EntityMark';
 import { EntitySuggest } from '@/lib/EntitySuggest';
 import EntitySuggestDropdown from './EntitySuggestDropdown';
+import { useWritingSession } from '@/lib/useWritingSession';
 
 export default function ScreenplayEditor({ scene, onEditorFocus }: { scene: Scene, onEditorFocus?: (editor: any) => void }) {
     const updateScene = useWorkspaceStore((state) => state.updateScene);
+    const trackSession = useWritingSession();
 
     const [currentType, setCurrentType] = useState<string>('sceneHeading');
     const [estimatedPages, setEstimatedPages] = useState<number>(1);
@@ -48,6 +50,8 @@ export default function ScreenplayEditor({ scene, onEditorFocus }: { scene: Scen
             debounceTimerRef.current = setTimeout(() => {
                 const rawContent = editor.getHTML();
                 updateScene(scene.id, { content: rawContent, wordCount });
+                // Feed the Goals system + Version History auto-snapshots.
+                trackSession(scene.id, wordCount, Date.now());
             }, 300);
         },
         onFocus: ({ editor: focusedEditor }) => {

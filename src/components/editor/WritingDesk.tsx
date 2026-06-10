@@ -18,6 +18,8 @@ import styles from './WritingDesk.module.css';
 import { NewProjectModal } from '@/components/ui/NewProjectModal';
 import { ImportModal } from '@/components/ui/ImportModal';
 import { ProjectSettingsModal } from '@/components/ui/ProjectSettingsModal';
+import ScreenplayEditor from '@/components/editor/ScreenplayEditor';
+import { useWritingSession } from '@/lib/useWritingSession';
 
 type BinderMode = 'shown' | 'hidden' | 'smart';
 
@@ -432,10 +434,11 @@ function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
 }) {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedContentRef = useRef<string>(content || '');
+  const trackSession = useWritingSession();
 
   const editor = useEditor({
     extensions: [
-      StarterKit, 
+      StarterKit,
       Underline,
       TextStyle,
       FontFamily,
@@ -459,10 +462,12 @@ function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
         const html = editor.getHTML();
         const normalize = (h: string) => h.replace(/\s+/g, ' ').trim();
         if (normalize(html) === normalize(lastSavedContentRef.current)) return;
-        
+
         lastSavedContentRef.current = html;
         const words = editor.getText().split(/\s+/).filter(w => w.length > 0).length;
         onUpdate(html, words);
+        // Feed the Goals system (streaks/badges) + Version History auto-snapshots.
+        trackSession(sceneId, words, Date.now());
       }, 300);
     },
     onFocus: ({ editor }) => onFocus(editor),
@@ -1060,7 +1065,9 @@ function WritingZoneRenderer({ content, onChange, onChangeImmediate, widget, onD
               {s.title}
             </div>
           )}
-          <DeskTipTapEditor key={s.id} sceneId={s.id} content={s.content} onUpdate={(html, count) => updateScene(s.id, { content: html, wordCount: count })} onFocus={noopFocus} />
+          {activeProject?.writingMode === 'screenplay'
+            ? <ScreenplayEditor key={s.id} scene={s} />
+            : <DeskTipTapEditor key={s.id} sceneId={s.id} content={s.content} onUpdate={(html, count) => updateScene(s.id, { content: html, wordCount: count })} onFocus={noopFocus} />}
         </div>
       ))}
       <button className={styles.binderAddSceneBtn} onClick={handleAddScene}>+ Add Another Scene</button>
@@ -1089,7 +1096,9 @@ function WritingZoneRenderer({ content, onChange, onChangeImmediate, widget, onD
             {activeScene.title}
           </div>
         )}
-        <DeskTipTapEditor key={activeScene.id} sceneId={activeScene.id} content={activeScene.content} onUpdate={(html, count) => updateScene(activeScene.id, { content: html, wordCount: count })} onFocus={noopFocus} />
+        {activeProject?.writingMode === 'screenplay'
+          ? <ScreenplayEditor key={activeScene.id} scene={activeScene} />
+          : <DeskTipTapEditor key={activeScene.id} sceneId={activeScene.id} content={activeScene.content} onUpdate={(html, count) => updateScene(activeScene.id, { content: html, wordCount: count })} onFocus={noopFocus} />}
       </div>
     </div>
   ) : (
@@ -2812,10 +2821,29 @@ function EmptyDeskWelcome() {
 
   const handleResume = () => {
     if (projects.length === 0) return;
-    const sorted = [...projects].sort((a,b) => 
+    const sorted = [...projects].sort((a,b) =>
       new Date(b.updatedAt ?? b.createdAt).getTime() - new Date(a.updatedAt ?? a.createdAt).getTime()
     );
     handleSelect(sorted[0].id);
+  };
+
+  const [isSeeding, setIsSeeding] = useState(false);
+  const handleLoadExample = async () => {
+    setIsSeeding(true);
+    try {
+      // Dynamically imported so the 50KB example world stays out of the main bundle.
+      const { seedBetaData } = await import('@/lib/betaSeedData');
+      seedBetaData(useWorkspaceStore.getState());
+      const seeded = useWorkspaceStore.getState().projects;
+      if (seeded.length > 0) {
+        const newest = [...seeded].sort((a, b) =>
+          new Date(b.updatedAt ?? b.createdAt).getTime() - new Date(a.updatedAt ?? a.createdAt).getTime()
+        )[0];
+        handleSelect(newest.id);
+      }
+    } finally {
+      setIsSeeding(false);
+    }
   };
 
   return (
@@ -2848,6 +2876,10 @@ function EmptyDeskWelcome() {
             <button className={styles.welcomeActionBtnSecondary} onClick={() => setShowImport(true)}>
               <span className={styles.welcomeActionIcon}>📥</span>
               <span className={styles.welcomeActionLabel}>Import</span>
+            </button>
+            <button className={styles.welcomeActionBtnSecondary} onClick={handleLoadExample} disabled={isSeeding}>
+              <span className={styles.welcomeActionIcon}>🌍</span>
+              <span className={styles.welcomeActionLabel}>{isSeeding ? 'Loading…' : 'Example World'}</span>
             </button>
           </div>
         </div>

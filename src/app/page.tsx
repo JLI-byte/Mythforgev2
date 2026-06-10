@@ -12,6 +12,8 @@ import HoverPreview from '@/components/world/HoverPreview';
 import { EntityDetailPanel } from '@/components/world/EntityDetailPanel';
 import HierarchyCanvas from '@/components/world/HierarchyCanvas';
 import { BetaFeedbackPanel } from '@/components/layout/BetaFeedbackPanel';
+import { VersionHistoryPanel } from '@/components/layout/VersionHistoryPanel';
+import ExportModal from '@/components/ui/ExportModal';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
 import ModeBar from '@/components/navigation/ModeBar';
@@ -29,14 +31,16 @@ import { Bookshelf } from '@/components/management/Bookshelf';
 // Note: Configured as a Client Component to dynamically bind Zustand layout state natively.
 export default function Home() {
   // One active panel at a time — null means all closed
-  const [activePanel, setActivePanel] = useState<'worldBible' | 'writingGoals' | 'socialMedia' | 'music' | 'beta' | null>(null);
-  
+  const [activePanel, setActivePanel] = useState<'worldBible' | 'writingGoals' | 'socialMedia' | 'music' | 'beta' | 'versionHistory' | null>(null);
 
-  const handlePanelToggle = (id: 'worldBible' | 'writingGoals' | 'socialMedia' | 'music' | 'beta') => {
+
+  const handlePanelToggle = (id: 'worldBible' | 'writingGoals' | 'socialMedia' | 'music' | 'beta' | 'versionHistory') => {
     setActivePanel(prev => prev === id ? null : id);
   };
 
   const setCommandPaletteOpen = useWorkspaceStore((state) => state.setCommandPaletteOpen);
+  const isExportOpen = useWorkspaceStore((state) => state.isExportOpen);
+  const setExportOpen = useWorkspaceStore((state) => state.setExportOpen);
   const isFullscreen = useWorkspaceStore((state) => state.isFullscreen);
   const toggleFullscreen = useWorkspaceStore((state) => state.toggleFullscreen);
   const isFocusMode = useWorkspaceStore((state) => state.isFocusMode);
@@ -67,6 +71,9 @@ export default function Home() {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setCommandPaletteOpen(true);
+      } else if ((e.metaKey || e.ctrlKey) && e.key === 'e') {
+        e.preventDefault();
+        setExportOpen(true);
       } else if (e.key === 'F11') {
         e.preventDefault();
         toggleFullscreen();
@@ -82,7 +89,7 @@ export default function Home() {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [setCommandPaletteOpen, isFullscreen, toggleFullscreen, isFocusMode, toggleFocusMode]);
+  }, [setCommandPaletteOpen, setExportOpen, isFullscreen, toggleFullscreen, isFocusMode, toggleFocusMode]);
 
   // Sync Zustand theme preference to DOM data-theme attribute — drives CSS variable switching in globals.css
   useEffect(() => {
@@ -194,8 +201,18 @@ export default function Home() {
           panelWidth={effectivePanelWidth}
           onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
         />
+        <VersionHistoryPanel
+          isOpen={activePanel === 'versionHistory'}
+          onClose={() => setActivePanel(null)}
+          onTabClick={() => handlePanelToggle('versionHistory')}
+          tabWidth={tabRailWidth}
+          onTabWidthChange={setTabRailWidth}
+          panelWidth={effectivePanelWidth}
+          onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
+        />
 
         {/* Global modal overlays */}
+        {isExportOpen && <ExportModal onClose={() => setExportOpen(false)} />}
         <InlineEntryCreator />
         <EntityDetailPanel />
         <CommandPalette />
