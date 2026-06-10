@@ -4,7 +4,8 @@ import styles from './ImportModal.module.css';
 import { useWorkspaceStore, COVER_COLORS } from '@/store/workspaceStore';
 import { sanitizeImportedHtml, markdownToBasicHtml, fetchGDriveFileContent, parseFdxToHtml } from '@/lib/export';
 import { parseCSV, flattenJSON } from '@/lib/importUtils';
-import * as mammoth from 'mammoth';
+// mammoth (~1MB) is loaded on demand in the DOCX handlers below so it stays out
+// of the main app bundle — most sessions never import a Word file.
 
 interface ImportModalProps {
     isOpen: boolean;
@@ -79,6 +80,7 @@ export function ImportModal({ isOpen, onClose }: ImportModalProps) {
 
         try {
             if (ext === 'docx') {
+                const mammoth = await import('mammoth');
                 const arrayBuffer = await file.arrayBuffer();
                 const result = await (mammoth as any).convertToHtml({ arrayBuffer });
                 const content = sanitizeImportedHtml(result.value);
@@ -139,6 +141,7 @@ export function ImportModal({ isOpen, onClose }: ImportModalProps) {
 
                 let content = "";
                 if (ext === 'docx') {
+                    const mammoth = await import('mammoth');
                     const arrayBuffer = await file.arrayBuffer();
                     const result = await (mammoth as any).convertToHtml({ arrayBuffer });
                     content = sanitizeImportedHtml(result.value);

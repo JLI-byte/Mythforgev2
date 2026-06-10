@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import styles from './page.module.css';
-import Designer from '@/components/world/Designer';
 import { WorldBiblePanel } from '@/components/layout/WorldBiblePanel';
 import { WritingGoalsPanel } from '@/components/layout/WritingGoalsPanel';
 import { SocialMediaPanel } from '@/components/layout/SocialMediaPanel';
@@ -10,17 +9,21 @@ import { MusicPlayerPanel } from '@/components/layout/MusicPlayerPanel';
 import InlineEntryCreator from '@/components/world/InlineEntryCreator';
 import HoverPreview from '@/components/world/HoverPreview';
 import { EntityDetailPanel } from '@/components/world/EntityDetailPanel';
-import HierarchyCanvas from '@/components/world/HierarchyCanvas';
 import { BetaFeedbackPanel } from '@/components/layout/BetaFeedbackPanel';
 import { VersionHistoryPanel } from '@/components/layout/VersionHistoryPanel';
+import { ErrorBoundary } from '@/components/layout/ErrorBoundary';
 import ExportModal from '@/components/ui/ExportModal';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
 import ModeBar from '@/components/navigation/ModeBar';
-import WorldBibleCenter from '@/components/world/WorldBibleCenter';
-import WorldLandingScreen from '@/components/navigation/WorldLandingScreen';
-import WritingDesk from '@/components/editor/WritingDesk';
-import { Bookshelf } from '@/components/management/Bookshelf';
+
+// Center-column modes are code-split: only the active one is downloaded/parsed,
+// instead of bundling all five (WritingDesk, ArticleGrid, etc.) into first paint.
+const Designer = lazy(() => import('@/components/world/Designer'));
+const HierarchyCanvas = lazy(() => import('@/components/world/HierarchyCanvas'));
+const WorldBibleCenter = lazy(() => import('@/components/world/WorldBibleCenter'));
+const WritingDesk = lazy(() => import('@/components/editor/WritingDesk'));
+const Bookshelf = lazy(() => import('@/components/management/Bookshelf').then(m => ({ default: m.Bookshelf })));
 
 /**
  * Main Workspace View
@@ -138,17 +141,21 @@ export default function Home() {
             data-scroll="main"
             style={{ writingMode: 'horizontal-tb' }}
           >
-            {workspaceMode === 'worldBible' ? (
-              <WorldBibleCenter />
-            ) : workspaceMode === 'template' ? (
-              <Designer />
-            ) : workspaceMode === 'hierarchy' ? (
-              <HierarchyCanvas />
-            ) : workspaceMode === 'bookshelf' ? (
-              <Bookshelf />
-            ) : (
-              <WritingDesk />
-            )}
+            <ErrorBoundary label="this workspace">
+              <Suspense fallback={<div style={{ flex: 1, minHeight: '60vh' }} />}>
+                {workspaceMode === 'worldBible' ? (
+                  <WorldBibleCenter />
+                ) : workspaceMode === 'template' ? (
+                  <Designer />
+                ) : workspaceMode === 'hierarchy' ? (
+                  <HierarchyCanvas />
+                ) : workspaceMode === 'bookshelf' ? (
+                  <Bookshelf />
+                ) : (
+                  <WritingDesk />
+                )}
+              </Suspense>
+            </ErrorBoundary>
           </div>
         </div>
 

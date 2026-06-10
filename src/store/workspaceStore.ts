@@ -840,6 +840,43 @@ function checkBadges(streak: StreakState, earned: EarnedBadge[]): EarnedBadge[] 
     return newBadges;
 }
 
+/**
+ * Debounced localStorage adapter.
+ *
+ * Zustand's persist middleware writes synchronously on every `set()`. With the
+ * full workspace (scenes + entity articles) that is a multi-MB JSON.stringify on
+ * every keystroke. This coalesces writes to once per idle window, and flushes on
+ * tab hide / unload so the final edit is never lost.
+ */
+const PERSIST_DEBOUNCE_MS = 1200;
+let persistTimer: ReturnType<typeof setTimeout> | null = null;
+let pendingWrite: { name: string; value: string } | null = null;
+
+function flushPersist() {
+    if (persistTimer) { clearTimeout(persistTimer); persistTimer = null; }
+    if (pendingWrite) {
+        try { localStorage.setItem(pendingWrite.name, pendingWrite.value); } catch { /* quota */ }
+        pendingWrite = null;
+    }
+}
+
+const debouncedLocalStorage = {
+    getItem: (name: string): string | null => localStorage.getItem(name),
+    setItem: (name: string, value: string): void => {
+        pendingWrite = { name, value };
+        if (persistTimer) clearTimeout(persistTimer);
+        persistTimer = setTimeout(flushPersist, PERSIST_DEBOUNCE_MS);
+    },
+    removeItem: (name: string): void => localStorage.removeItem(name),
+};
+
+if (typeof window !== 'undefined') {
+    window.addEventListener('pagehide', flushPersist);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') flushPersist();
+    });
+}
+
 export const useWorkspaceStore = create<WorkspaceState>()(
     persist(
         (set, get) => ({
@@ -1951,8 +1988,10 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 }
             },
 
-            // Intercept JSON deserialization to properly reconstruct native JavaScript `Date` objects
-            storage: createJSONStorage(() => localStorage, {
+            // Intercept JSON deserialization to properly reconstruct native JavaScript `Date` objects.
+            // Writes go through a debounced adapter so editing doesn't serialize the
+            // full workspace on every keystroke (flushes on tab hide / unload).
+            storage: createJSONStorage(() => debouncedLocalStorage, {
                 reviver: (key, value) => {
                     // Only apply Date reconstruction to arrays that contain objects
                     // with createdAt/updatedAt. Non-entity arrays (writingDays,

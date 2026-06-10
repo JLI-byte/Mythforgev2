@@ -7,7 +7,7 @@
  */
 
 import { Document as MFDocument, Entity, Scene } from '@/store/workspaceStore';
-import { Document as DocxDocument, Paragraph, TextRun, Packer } from 'docx';
+import type * as Docx from 'docx';
 import { escapeHtml, sanitizeHtml } from '@/lib/sanitize';
 
 /**
@@ -99,10 +99,12 @@ export function exportAsMarkdown(document: MFDocument, scenes: Scene[]): void {
  * @returns {Promise<void>} 
  */
 export async function exportAsDocx(document: MFDocument, scenes: Scene[]): Promise<Blob> {
+    // Loaded on demand — keeps the ~500KB docx library out of the main app bundle.
+    const { Document: DocxDocument, Paragraph, TextRun, Packer } = await import('docx');
     const title = document.title || 'Untitled Document';
     const parser = new DOMParser();
 
-    const docxParagraphs: Paragraph[] = [
+    const docxParagraphs: Docx.Paragraph[] = [
         new Paragraph({
             text: title,
             heading: "Heading1",
@@ -128,7 +130,7 @@ export async function exportAsDocx(document: MFDocument, scenes: Scene[]): Promi
                 return;
             }
 
-            const runs: TextRun[] = [];
+            const runs: Docx.TextRun[] = [];
             pNode.childNodes.forEach(child => {
                 if (child.nodeType === Node.TEXT_NODE) {
                     if (child.textContent) {
