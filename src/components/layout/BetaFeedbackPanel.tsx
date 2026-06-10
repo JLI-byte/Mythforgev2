@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './BetaFeedbackPanel.module.css';
+import { createClient } from '@/lib/supabase/client';
+import { logger } from '@/lib/logger';
 
 interface BetaFeedbackPanelProps {
   isOpen: boolean;
@@ -76,6 +78,24 @@ export function BetaFeedbackPanel({
     setBody('');
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 3000);
+
+    // Also deliver to the developer via Supabase (fire-and-forget — the local
+    // copy above is the fallback if the table is missing or the user is offline).
+    void (async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { error } = await supabase.from('beta_feedback').insert({
+          user_id: user.id,
+          type: entry.type,
+          message: `${entry.title}\n\n${entry.body}`.trim(),
+        });
+        if (error) logger.warn('Beta feedback cloud delivery failed:', error.message);
+      } catch (err) {
+        logger.warn('Beta feedback cloud delivery failed:', err);
+      }
+    })();
   };
 
   const handleExport = () => {

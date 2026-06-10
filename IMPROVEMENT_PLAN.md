@@ -2,6 +2,19 @@
 
 Branch: `sprint/full-improvement-pass`. Decisions: reconnect screenplay, remove fake account bits, do all refactors.
 
+## STATUS: COMPLETE (see git log for the 9 commits)
+Done: security fixes, reconnection (export/goals/version-history/screenplay/example-world),
+data safety (conflict-safe sync, error boundary, flush-on-exit), performance (debounced persist,
+dynamic imports, lazy modes, physics convergence), tests (29), EPUB export, backup/restore UI,
+spellcheck toggle, goal unification, dead-code removal (~4,300 lines), mega-file splits (39 modules),
+custom WB categories, beta feedback → Supabase (migration in supabase/migrations/, project paused).
+
+Deliberately NOT done:
+- Full store split into 3 Zustand stores (touches every component; sync payload bug fixed via shared partialize instead)
+- prompt()/confirm() replacement (works in Electron; cosmetic)
+- Per-chapter word targets, first-run tour (feature work for a future sprint)
+- Migrations still in onRehydrateStorage (cloud path now validated, but moving to migrate() remains TODO)
+
 ## Phase 0 — Safety net & cleanup
 - [ ] Vitest + happy-dom test infra, `test` script
 - [ ] Unit tests for store pure helpers (streak/badge/word-count) — protects refactors

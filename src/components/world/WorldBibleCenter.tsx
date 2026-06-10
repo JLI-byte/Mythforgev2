@@ -18,7 +18,22 @@ export default function WorldBibleCenter() {
     const entities = useWorkspaceStore(state => state.entities);
     const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
     const projects = useWorkspaceStore(state => state.projects);
+    const addWorldBibleRoot = useWorkspaceStore(state => state.addWorldBibleRoot);
+    const setWorkspaceMode = useWorkspaceStore(state => state.setWorkspaceMode);
     const activeProject = projects.find(p => p.id === activeProjectId);
+
+    // Creates a custom category and jumps to the hierarchy canvas to name/arrange it.
+    const handleAddCategory = () => {
+        addWorldBibleRoot({
+            id: crypto.randomUUID(),
+            label: 'New Category',
+            icon: '📂',
+            entityTypes: [],
+            x: 120,
+            y: 120,
+        });
+        setWorkspaceMode('hierarchy');
+    };
 
     const layout = getProjectLayout(activeProject);
 
@@ -143,10 +158,17 @@ export default function WorldBibleCenter() {
                     })}
 
                     {/* Static "Add Category" card — non-functional placeholder, Sprint 50 */}
-                    <div className={styles.addCategoryCard}>
+                    <div
+                        className={styles.addCategoryCard}
+                        role="button"
+                        tabIndex={0}
+                        onClick={handleAddCategory}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleAddCategory(); }}
+                        style={{ cursor: 'pointer' }}
+                    >
                         <span className={styles.addCategoryIcon}>＋</span>
                         <span className={styles.addCategoryLabel}>Add Category</span>
-                        <span className={styles.addCategoryHint}>Coming soon</span>
+                        <span className={styles.addCategoryHint}>Opens the hierarchy canvas</span>
                     </div>
                 </div>
             </div>

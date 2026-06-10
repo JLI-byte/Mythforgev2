@@ -25,6 +25,8 @@ export default function WorldBibleRoot({ root, onNavigate }: WorldBibleRootProps
     const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
     const entities = useWorkspaceStore(state => state.entities);
     const projects = useWorkspaceStore(state => state.projects);
+    const addWorldBibleRoot = useWorkspaceStore(state => state.addWorldBibleRoot);
+    const setWorkspaceMode = useWorkspaceStore(state => state.setWorkspaceMode);
     const activeProject = projects.find(p => p.id === activeProjectId);
     const layout = getProjectLayout(activeProject);
     const category = layout.roots.find(r => r.id === root);
@@ -64,11 +66,22 @@ export default function WorldBibleRoot({ root, onNavigate }: WorldBibleRootProps
                 })}
             </div>
 
-            {/* Custom subcategory button — future sprint */}
+            {/* Creates a nested custom category and opens the hierarchy canvas to arrange it */}
             <button
                 className={styles.addCustomBtn}
-                disabled
-                title="Coming soon"
+                title="Create a custom category (opens the hierarchy canvas)"
+                onClick={() => {
+                    addWorldBibleRoot({
+                        id: crypto.randomUUID(),
+                        label: 'New Category',
+                        icon: '📂',
+                        entityTypes: [],
+                        parentId: root,
+                        x: 120,
+                        y: 120,
+                    });
+                    setWorkspaceMode('hierarchy');
+                }}
             >
                 + Custom Category
             </button>
