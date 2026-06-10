@@ -252,7 +252,7 @@ export function isCharacterEntity(entity: Entity): entity is CharacterEntity {
 // =============================================
 
 /** One entry per project per calendar day — auto-tracked from editor */
-interface WritingDay {
+export interface WritingDay {
     id: string;
     projectId: string;
     date: string;             // YYYY-MM-DD format
@@ -272,7 +272,7 @@ interface GoalConfig {
 }
 
 /** Cached streak state — derived from WritingDay history */
-interface StreakState {
+export interface StreakState {
     currentStreak: number;         // consecutive writing days
     longestStreak: number;         // all-time longest streak
     lastWritingDate: string;       // YYYY-MM-DD
@@ -755,7 +755,7 @@ export interface WorkspaceState {
  * Compute streak state from a list of WritingDay entries.
  * Pure function — no store dependency.
  */
-function computeStreakFromDays(days: WritingDay[]): StreakState {
+export function computeStreakFromDays(days: WritingDay[]): StreakState {
     // Get unique dates where goal was met (across all projects)
     const metDates = [...new Set(
         days.filter(d => d.goalMet).map(d => d.date)
