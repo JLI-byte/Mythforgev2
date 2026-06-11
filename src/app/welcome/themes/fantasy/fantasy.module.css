@@ -362,27 +362,6 @@
     text-align: center;
 }
 
-/* Wraps the panel so the route can run down its side */
-.letterScrollTarget {
-    position: relative;
-    width: 100%;
-    max-width: 36rem;
-    display: flex;
-    justify-content: center;
-    padding: 3rem 2.75rem;
-}
-
-/* The route's final descent beside the letter, ending in an X */
-.letterSideRoute {
-    position: absolute;
-    left: -1rem;
-    top: -2.5rem;
-    width: 80px;
-    height: 80%;
-    pointer-events: none;
-    color: var(--vermilion);
-}
-
 .letterPanel {
     width: 100%;
     max-width: 30rem;
