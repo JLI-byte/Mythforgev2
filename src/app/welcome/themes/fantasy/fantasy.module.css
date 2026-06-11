@@ -1,0 +1,524 @@
+/*
+ * Fantasy Storybook theme — "The Cartographer's Desk".
+ * Layout, typography, chrome. Scroll-driven + draw-in animation lives in
+ * fantasy-scroll.css (global, scoped to html[data-lc-landing='fantasy']).
+ */
+
+.page {
+    --parchment: #f3e8cf;
+    --parchment-deep: #e9dcba;
+    --sepia: #3b2c15;
+    --sepia-soft: #75603f;
+    --vermilion: #c8401f;
+    --vermilion-deep: #a32d12;
+    --verdigris: #3d7068;
+    --gold-leaf: #b08d2f;
+    --line-faint: rgba(59, 44, 21, 0.22);
+    --inline-pad: clamp(1.5rem, 6vw, 5rem);
+
+    min-height: 100vh;
+    background-color: var(--parchment);
+    background-image:
+        radial-gradient(ellipse 120% 90% at 50% 20%, transparent 55%, rgba(59, 44, 21, 0.10)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.23 0 0 0 0 0.17 0 0 0 0 0.08 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
+    color: var(--sepia);
+    font-family: var(--font-garamond), Georgia, serif;
+    font-size: 1.06rem;
+    overflow-x: clip;
+}
+
+/* ---------- Nav ---------- */
+
+.nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem var(--inline-pad);
+}
+
+.navBrand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-fell), serif;
+    font-size: 1.25rem;
+    color: var(--sepia);
+    letter-spacing: 0.02em;
+}
+
+.navSignIn {
+    font-family: var(--font-garamond), serif;
+    font-style: italic;
+    color: var(--verdigris);
+    text-decoration: none;
+    font-size: 1rem;
+    border-bottom: 1px solid transparent;
+    transition: border-color 180ms ease;
+}
+
+.navSignIn:is(:hover, :focus-visible) {
+    border-bottom-color: var(--verdigris);
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1.6rem;
+    padding: 6rem var(--inline-pad) 4rem;
+}
+
+.heroMap {
+    position: absolute;
+    inset: 0;
+    color: var(--sepia-soft);
+    opacity: 0.85;
+    pointer-events: none;
+}
+
+.heroMap :global(svg.mapHeroSvg) {
+    width: 100%;
+    height: 100%;
+}
+
+.hero > :not(.heroMap) {
+    position: relative;
+    z-index: 1;
+}
+
+.heroBadge {
+    font-family: var(--font-garamond), serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--verdigris);
+    border: 1px solid var(--verdigris);
+    padding: 0.35rem 0.9rem;
+    border-radius: 2px;
+}
+
+.heroTitle {
+    font-family: var(--font-fell), serif;
+    font-weight: 400;
+    font-size: clamp(2.6rem, 7.5vw, 6.4rem);
+    line-height: 1.02;
+    letter-spacing: -0.01em;
+    margin: 0;
+    max-width: 14ch;
+    text-wrap: balance;
+}
+
+.heroTitle em {
+    font-style: italic;
+    color: var(--vermilion);
+}
+
+.heroSub {
+    max-width: 36rem;
+    margin: 0;
+    font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+    line-height: 1.65;
+    color: var(--sepia-soft);
+}
+
+.heroCtas {
+    display: flex;
+    gap: 1.25rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.ctaPrimary {
+    font-family: var(--font-garamond), serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+    text-decoration: none;
+    color: #f6ddd2;
+    background: var(--vermilion);
+    border: 1px solid var(--vermilion-deep);
+    border-radius: 3px;
+    padding: 0.85rem 1.8rem;
+    box-shadow: 2px 3px 0 rgba(59, 44, 21, 0.25);
+    transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.ctaPrimary:is(:hover, :focus-visible) {
+    transform: translate(-1px, -2px);
+    box-shadow: 4px 6px 0 rgba(59, 44, 21, 0.22);
+}
+
+.ctaPrimary:active {
+    transform: translate(1px, 2px);
+    box-shadow: 0 0 0 rgba(59, 44, 21, 0.2);
+}
+
+.ctaSecondary {
+    font-family: var(--font-garamond), serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--verdigris);
+    text-decoration: none;
+    border-bottom: 1px solid var(--verdigris);
+    padding-bottom: 2px;
+    transition: color 160ms ease;
+}
+
+.ctaSecondary:is(:hover, :focus-visible) {
+    color: var(--sepia);
+    border-bottom-color: var(--sepia);
+}
+
+.heroScrollHint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-garamond), serif;
+    font-style: italic;
+    font-size: 0.92rem;
+    color: var(--sepia-soft);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+/* ---------- Journey ---------- */
+
+.journey {
+    position: relative;
+    max-width: 70rem;
+    margin: 0 auto;
+    padding: 8rem var(--inline-pad) 4rem;
+}
+
+.journeyKicker {
+    text-align: center;
+    font-size: 0.85rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--sepia-soft);
+    margin: 0 0 0.8rem;
+}
+
+.journeyTitle {
+    text-align: center;
+    font-family: var(--font-fell), serif;
+    font-weight: 400;
+    font-size: clamp(1.9rem, 4vw, 3rem);
+    margin: 0 0 5rem;
+}
+
+.routeWrap {
+    position: absolute;
+    top: 16rem;
+    bottom: 4rem;
+    left: 50%;
+    width: 160px;
+    transform: translateX(-50%);
+    color: var(--vermilion);
+    pointer-events: none;
+}
+
+.routeWrap svg {
+    width: 100%;
+    height: 100%;
+}
+
+.stops {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(5rem, 12vh, 9rem);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.stop {
+    width: min(26rem, 42%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stop:nth-child(even) {
+    align-self: flex-end;
+    text-align: right;
+}
+
+.stop:nth-child(even) .stopIcon {
+    margin-left: auto;
+}
+
+.stopIcon {
+    color: var(--sepia);
+    width: 48px;
+    height: 48px;
+}
+
+.stopName {
+    font-family: var(--font-fell), serif;
+    font-weight: 400;
+    font-size: 1.7rem;
+    margin: 0;
+}
+
+.stopFeature {
+    font-size: 0.82rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--verdigris);
+    margin: 0;
+}
+
+.stopBody {
+    margin: 0;
+    line-height: 1.65;
+    color: var(--sepia-soft);
+}
+
+.marginalia {
+    position: relative;
+    max-width: 70rem;
+    margin: 0 auto;
+    padding: 0 var(--inline-pad) 6rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.marginaliaInner {
+    color: var(--sepia-soft);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    transform: rotate(-2deg);
+}
+
+.marginaliaNote {
+    font-family: var(--font-fell), serif;
+    font-style: italic;
+    font-size: 0.95rem;
+}
+
+/* ---------- The Letter ---------- */
+
+.letter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.5rem;
+    padding: 5rem var(--inline-pad) 7rem;
+}
+
+.letterHeading {
+    font-family: var(--font-fell), serif;
+    font-weight: 400;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    margin: 0;
+    text-align: center;
+}
+
+.letterPanel {
+    width: 100%;
+    max-width: 30rem;
+    background: #f9f2e0;
+    border: 1px solid var(--line-faint);
+    border-radius: 2px;
+    padding: 2.4rem 2.2rem;
+    transform: rotate(-0.6deg);
+    box-shadow: 3px 5px 0 rgba(59, 44, 21, 0.12);
+    position: relative;
+}
+
+.letterPanel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-style: solid;
+    border-width: 0 26px 26px 0;
+    border-color: transparent var(--parchment) transparent transparent;
+    filter: drop-shadow(-2px 2px 1px rgba(59, 44, 21, 0.12));
+}
+
+.letterSalutation {
+    font-family: var(--font-fell), serif;
+    font-size: 1.25rem;
+    margin: 0 0 0.4rem;
+}
+
+.letterIntro {
+    margin: 0 0 1.6rem;
+    line-height: 1.65;
+    color: var(--sepia-soft);
+}
+
+.field {
+    margin-bottom: 1.2rem;
+}
+
+.fieldLabel {
+    display: block;
+    font-style: italic;
+    font-size: 0.98rem;
+    color: var(--sepia-soft);
+    margin-bottom: 0.35rem;
+}
+
+.fieldInput,
+.fieldTextarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line-faint);
+    border-radius: 0;
+    color: var(--sepia);
+    font-family: var(--font-garamond), serif;
+    font-size: 1.08rem;
+    padding: 0.35rem 0.1rem;
+    transition: border-color 160ms ease;
+}
+
+.fieldTextarea {
+    min-height: 4.5rem;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.fieldInput::placeholder,
+.fieldTextarea::placeholder {
+    color: rgba(59, 44, 21, 0.35);
+    font-style: italic;
+}
+
+.fieldInput:focus-visible,
+.fieldTextarea:focus-visible {
+    outline: none;
+    border-bottom-color: var(--vermilion);
+}
+
+.sealRow {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.8rem;
+}
+
+.sealButton {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: var(--font-garamond), serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--sepia);
+}
+
+.sealButton svg {
+    transition: transform 180ms ease;
+}
+
+.sealButton:is(:hover, :focus-visible):not(:disabled) svg {
+    transform: scale(1.06) rotate(-4deg);
+}
+
+.sealButton:active:not(:disabled) svg {
+    transform: scale(0.94);
+}
+
+.sealButton:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.letterNote {
+    margin-top: 1.2rem;
+    font-style: italic;
+    color: var(--verdigris);
+}
+
+.letterError {
+    margin-top: 1.2rem;
+    font-style: italic;
+    color: var(--vermilion-deep);
+}
+
+.letterSuccess {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+}
+
+.letterSuccessTitle {
+    font-family: var(--font-fell), serif;
+    font-weight: 400;
+    font-size: 1.6rem;
+    margin: 0;
+}
+
+/* ---------- Footer ---------- */
+
+.footer {
+    padding: 2.5rem var(--inline-pad);
+    text-align: center;
+    font-style: italic;
+    color: var(--sepia-soft);
+    font-size: 0.95rem;
+}
+
+.footerLink {
+    color: var(--verdigris);
+}
+
+/* ---------- Utilities & responsive ---------- */
+
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+@media (max-width: 720px) {
+    .routeWrap {
+        left: 1.4rem;
+        width: 60px;
+        transform: none;
+    }
+
+    .stop,
+    .stop:nth-child(even) {
+        width: auto;
+        margin-left: 4rem;
+        align-self: stretch;
+        text-align: left;
+    }
+
+    .stop:nth-child(even) .stopIcon {
+        margin-left: 0;
+    }
+}

@@ -1,0 +1,99 @@
+/*
+ * Motion for the fantasy landing theme. Global file (not a module) because
+ * draw-in classes are referenced from SVG components and the scroll timeline
+ * needs plain selectors. Scoped to html[data-lc-landing='fantasy'], set by
+ * FantasyLanding on mount and removed on unmount.
+ */
+
+html[data-lc-landing='fantasy'] {
+    scroll-behavior: smooth;
+}
+
+html[data-lc-landing='fantasy'] .inkPath {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: lc-ink-draw 1.7s cubic-bezier(0.45, 0, 0.3, 1) forwards;
+    animation-delay: var(--d, 0s);
+}
+
+@keyframes lc-ink-draw {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+html[data-lc-landing='fantasy'] .heroReveal {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translateY(10px);
+    animation: lc-ink-fade 0.9s ease forwards;
+    animation-delay: var(--d, 0s);
+}
+
+@keyframes lc-ink-fade {
+    to {
+        opacity: 1;
+        filter: blur(0);
+        transform: translateY(0);
+    }
+}
+
+html[data-lc-landing='fantasy'] .scrollHintArrow {
+    animation: lc-hint-bob 2.2s ease-in-out infinite;
+}
+
+@keyframes lc-hint-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(5px); }
+}
+
+@supports (animation-timeline: view()) {
+    html[data-lc-landing='fantasy'] .routeDraw {
+        stroke-dasharray: 1;
+        stroke-dashoffset: 1;
+        animation: lc-ink-draw 1s linear both;
+        animation-timeline: view();
+        animation-range: entry 30% exit 70%;
+    }
+
+    html[data-lc-landing='fantasy'] .stopReveal {
+        opacity: 0.1;
+        filter: blur(2px);
+        transform: translateY(26px);
+        animation: lc-stop-in 1s ease both;
+        animation-timeline: view();
+        animation-range: entry 15% entry 55%;
+    }
+
+    @keyframes lc-stop-in {
+        to {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateY(0);
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html[data-lc-landing='fantasy'] .inkPath,
+    html[data-lc-landing='fantasy'] .routeDraw {
+        animation: none;
+        stroke-dashoffset: 0;
+    }
+
+    html[data-lc-landing='fantasy'] .heroReveal,
+    html[data-lc-landing='fantasy'] .stopReveal {
+        animation: none;
+        opacity: 1;
+        filter: none;
+        transform: none;
+    }
+
+    html[data-lc-landing='fantasy'] .scrollHintArrow {
+        animation: none;
+    }
+
+    html[data-lc-landing='fantasy'] {
+        scroll-behavior: auto;
+    }
+}
