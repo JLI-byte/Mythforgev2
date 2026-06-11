@@ -126,10 +126,12 @@ export default function FantasyLanding() {
                     <ol className={styles.stops}>
                         {STOPS.map(({ name, feature, body, Icon }) => (
                             <li key={name} className={`${styles.stop} stopReveal`}>
-                                <span className={styles.stopIcon}><Icon /></span>
-                                <p className={styles.stopFeature}>{feature}</p>
-                                <h3 className={styles.stopName}>{name}</h3>
-                                <p className={styles.stopBody}>{body}</p>
+                                <div className={styles.stopText}>
+                                    <p className={styles.stopFeature}>{feature}</p>
+                                    <h3 className={styles.stopName}>{name}</h3>
+                                    <p className={styles.stopBody}>{body}</p>
+                                </div>
+                                <div className={styles.stopScene}><Icon /></div>
                             </li>
                         ))}
                     </ol>

@@ -94,18 +94,46 @@ html[data-lc-landing='fantasy'] .scrollHintArrow {
         animation-range: entry 50% entry 100%;
     }
 
-    /* The Vault's lid cracks open as you scroll past, hinged at its left edge */
+    html[data-lc-landing='fantasy'] .sceneInk--4 {
+        animation-range: entry 70% cover 45%;
+    }
+
+    html[data-lc-landing='fantasy'] .sceneInk--5 {
+        animation-range: cover 30% cover 60%;
+    }
+
+    /* The Vault's lid swings open as you scroll past, hinged at its left edge */
     html[data-lc-landing='fantasy'] .lidOpen {
         transform-box: fill-box;
         transform-origin: 0% 100%;
         animation: lc-lid-open linear both;
         animation-timeline: view();
-        animation-range: entry 70% cover 50%;
+        animation-range: entry 60% cover 55%;
     }
 
     @keyframes lc-lid-open {
         to {
-            transform: rotate(-9deg);
+            transform: rotate(-18deg);
+        }
+    }
+
+    /* Gold light fans out of the vault in sync with the lid */
+    html[data-lc-landing='fantasy'] .rayReveal {
+        transform-box: fill-box;
+        transform-origin: 50% 100%;
+        animation: lc-ray-fan linear both;
+        animation-timeline: view();
+        animation-range: entry 70% cover 60%;
+    }
+
+    @keyframes lc-ray-fan {
+        from {
+            opacity: 0;
+            transform: scaleY(0.25);
+        }
+        to {
+            opacity: 1;
+            transform: scaleY(1);
         }
     }
 }
@@ -131,6 +159,16 @@ html[data-lc-landing='fantasy'] .flameFlicker {
     animation: lc-flicker 1.7s ease-in-out infinite;
 }
 
+html[data-lc-landing='fantasy'] .flameFlicker--b {
+    animation-duration: 2s;
+    animation-delay: 0.4s;
+}
+
+html[data-lc-landing='fantasy'] .flameFlicker--c {
+    animation-duration: 1.4s;
+    animation-delay: 0.8s;
+}
+
 @keyframes lc-flicker {
     0%, 100% { transform: scale(1, 1); }
     30% { transform: scale(1.06, 0.93) skewX(-2deg); }
@@ -144,6 +182,70 @@ html[data-lc-landing='fantasy'] .sparkRise {
 
 html[data-lc-landing='fantasy'] .sparkRise--b {
     animation-delay: 1.1s;
+}
+
+html[data-lc-landing='fantasy'] .sparkRise--c {
+    animation-delay: 1.7s;
+}
+
+html[data-lc-landing='fantasy'] .glowPulse {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: lc-glow 2.6s ease-in-out infinite;
+}
+
+@keyframes lc-glow {
+    0%, 100% { opacity: 0.16; transform: scale(1); }
+    50% { opacity: 0.34; transform: scale(1.1); }
+}
+
+html[data-lc-landing='fantasy'] .smokeDrift {
+    animation: lc-smoke 4.5s ease-in-out infinite;
+}
+
+@keyframes lc-smoke {
+    0% { opacity: 0; transform: translateY(4px); }
+    35% { opacity: 0.45; }
+    100% { opacity: 0; transform: translateY(-14px); }
+}
+
+html[data-lc-landing='fantasy'] .moteFloat {
+    animation: lc-mote 7s ease-in-out infinite;
+}
+
+html[data-lc-landing='fantasy'] .moteFloat--b {
+    animation-duration: 9s;
+    animation-delay: 2s;
+}
+
+@keyframes lc-mote {
+    0%, 100% { transform: translate(0, 0); opacity: 0.35; }
+    50% { transform: translate(5px, -9px); opacity: 0.8; }
+}
+
+html[data-lc-landing='fantasy'] .pageFly {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: lc-page 5.5s ease-in-out infinite;
+}
+
+html[data-lc-landing='fantasy'] .pageFly--b {
+    animation-duration: 6.5s;
+    animation-delay: 1.6s;
+}
+
+@keyframes lc-page {
+    0% { opacity: 0; transform: translateY(8px) rotate(0deg); }
+    30% { opacity: 0.9; }
+    100% { opacity: 0; transform: translateY(-26px) rotate(9deg); }
+}
+
+html[data-lc-landing='fantasy'] .sparkle--b {
+    animation-delay: 1s;
+}
+
+html[data-lc-landing='fantasy'] .sparkle--c {
+    animation-delay: 2s;
 }
 
 @keyframes lc-spark {
@@ -185,7 +287,12 @@ html[data-lc-landing='fantasy'] .sparkle {
     html[data-lc-landing='fantasy'] .flameFlicker,
     html[data-lc-landing='fantasy'] .lidOpen,
     html[data-lc-landing='fantasy'] .sparkRise,
-    html[data-lc-landing='fantasy'] .sparkle {
+    html[data-lc-landing='fantasy'] .sparkle,
+    html[data-lc-landing='fantasy'] .glowPulse,
+    html[data-lc-landing='fantasy'] .smokeDrift,
+    html[data-lc-landing='fantasy'] .moteFloat,
+    html[data-lc-landing='fantasy'] .pageFly,
+    html[data-lc-landing='fantasy'] .rayReveal {
         animation: none;
     }
 
