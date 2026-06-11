@@ -1,45 +1,77 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 /**
- * Login Page
- * 
- * Provides a minimalist interface for Magic Link authentication.
- * Styled to match the MythForge dark aesthetic.
- * 
- * Creator: Antigravity
+ * Login Page — beta testers only.
+ *
+ * Magic-link authentication with shouldCreateUser disabled: only emails the
+ * developer has invited (Supabase dashboard → Auth → Invite) can sign in.
+ * Everyone else is pointed at /welcome to request access.
+ *
+ * In development builds a one-click "Sign in as developer" button hits
+ * /api/dev-login (password from .env.local, never shipped to production).
  */
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isDevLoading, setIsDevLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [notInvited, setNotInvited] = useState(false);
+  const router = useRouter();
 
   const supabase = createClient();
+  const isDev = process.env.NODE_ENV === 'development';
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setMessage(null);
     setError(null);
+    setNotInvited(false);
 
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        // Redirection to the current origin's auth callback
+        // Invite-only beta: never create accounts from the login form
+        shouldCreateUser: false,
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 
     if (error) {
-      setError(error.message);
+      // GoTrue surfaces unknown emails as a signup-disallowed error
+      if (/signup|not allowed|not found/i.test(error.message)) {
+        setNotInvited(true);
+      } else {
+        setError(error.message);
+      }
     } else {
       setMessage('Check your email for a magic link.');
     }
-    
+
     setIsLoading(false);
+  };
+
+  const handleDevLogin = async () => {
+    setIsDevLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/dev-login', { method: 'POST' });
+      const body = await res.json();
+      if (!res.ok) {
+        setError(body.error || 'Dev login failed');
+      } else {
+        router.replace('/');
+        router.refresh();
+      }
+    } catch {
+      setError('Dev login failed — is the dev server running?');
+    }
+    setIsDevLoading(false);
   };
 
   return (
@@ -50,7 +82,7 @@ export default function LoginPage() {
             📖
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">MythForge</h1>
-          <p className="text-zinc-500 text-sm mt-2">Sign in to your story</p>
+          <p className="text-zinc-500 text-sm mt-2">Beta tester sign in</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
@@ -84,10 +116,37 @@ export default function LoginPage() {
           </div>
         )}
 
+        {notInvited && (
+          <div className="mt-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-300 text-sm text-center">
+            This email isn&apos;t on the beta list yet.{' '}
+            <a href="/welcome#request" className="underline text-amber-200 hover:text-white">
+              Request access here
+            </a>
+            .
+          </div>
+        )}
+
         {error && (
           <div className="mt-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm text-center">
             {error}
           </div>
+        )}
+
+        <p className="mt-8 text-center text-sm text-zinc-500">
+          Not a tester yet?{' '}
+          <a href="/welcome" className="text-emerald-400 hover:text-emerald-300 underline">
+            Request beta access
+          </a>
+        </p>
+
+        {isDev && (
+          <button
+            onClick={handleDevLogin}
+            disabled={isDevLoading}
+            className="mt-6 w-full border border-dashed border-purple-500/40 text-purple-300 hover:bg-purple-500/10 disabled:opacity-50 text-sm font-medium py-2.5 rounded-lg transition-colors"
+          >
+            {isDevLoading ? 'Signing in…' : '⚡ Sign in as developer (dev only)'}
+          </button>
         )}
       </div>
     </div>

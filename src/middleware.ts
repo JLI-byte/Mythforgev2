@@ -42,20 +42,25 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   // Route protection logic
-  const isLoginPage = request.nextUrl.pathname.startsWith('/login');
-  const isAuthCallback = request.nextUrl.pathname.startsWith('/auth/callback');
-  const isStaticAsset = request.nextUrl.pathname.match(/\.(ico|png|jpg|jpeg|svg|css|js|webp)$/);
-  const isInternal = request.nextUrl.pathname.startsWith('/_next');
+  const pathname = request.nextUrl.pathname;
+  const isLoginPage = pathname.startsWith('/login');
+  const isWelcomePage = pathname.startsWith('/welcome');
+  const isAuthCallback = pathname.startsWith('/auth/callback');
+  const isDevLogin = pathname.startsWith('/api/dev-login');
+  const isStaticAsset = pathname.match(/\.(ico|png|jpg|jpeg|svg|css|js|webp)$/);
+  const isInternal = pathname.startsWith('/_next');
 
-  if (!user && !isLoginPage && !isAuthCallback && !isStaticAsset && !isInternal) {
-    // If unauthenticated and trying to access a restricted page, redirect to login
+  const isPublic = isLoginPage || isWelcomePage || isAuthCallback || isDevLogin || isStaticAsset || isInternal;
+
+  if (!user && !isPublic) {
+    // Unauthenticated visitors land on the public beta landing page
     const url = request.nextUrl.clone();
-    url.pathname = '/login';
+    url.pathname = '/welcome';
     return NextResponse.redirect(url);
   }
 
-  // Redirect authenticated users away from the login page
-  if (user && isLoginPage) {
+  // Redirect authenticated users away from the login/landing pages
+  if (user && (isLoginPage || isWelcomePage)) {
     const url = request.nextUrl.clone();
     url.pathname = '/';
     return NextResponse.redirect(url);
