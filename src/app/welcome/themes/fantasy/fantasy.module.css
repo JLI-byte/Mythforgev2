@@ -362,7 +362,7 @@
     text-align: center;
 }
 
-/* Wraps the panel so the circling route flourish can hug its edges */
+/* Wraps the panel so the route can run down its side */
 .letterScrollTarget {
     position: relative;
     width: 100%;
@@ -370,17 +370,17 @@
     display: flex;
     justify-content: center;
     padding: 3rem 2.75rem;
-    color: var(--vermilion);
 }
 
-/* Sits ABOVE the panel — a hand-drawn red-ink circling on the page */
-.letterLoop {
+/* The route's final descent beside the letter, ending in an X */
+.letterSideRoute {
     position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+    left: -1rem;
+    top: -2.5rem;
+    width: 80px;
+    height: 80%;
     pointer-events: none;
-    z-index: 2;
+    color: var(--vermilion);
 }
 
 .letterPanel {

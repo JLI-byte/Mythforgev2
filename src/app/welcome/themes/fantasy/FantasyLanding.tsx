@@ -148,25 +148,31 @@ export default function FantasyLanding() {
                     <h2 className={styles.letterHeading}>A letter to the Cartographer</h2>
                     <div className={styles.letterScrollTarget}>
                         <svg
-                            className={styles.letterLoop}
-                            viewBox="0 0 600 800"
+                            className={styles.letterSideRoute}
+                            viewBox="0 0 80 480"
                             preserveAspectRatio="none"
                             fill="none"
                             aria-hidden="true"
                         >
-                            <mask id="lc-loop-mask">
+                            <mask id="lc-letter-route-mask">
                                 <path
                                     className="loopDraw"
-                                    d="M300 16 C 268 54 332 82 302 112 C 470 116 566 240 562 408 C 556 600 458 728 298 736 C 138 728 36 590 36 400 C 36 232 140 120 286 114 C 306 113 320 120 334 132"
-                                    stroke="#fff" strokeWidth="16" pathLength={1}
+                                    d="M40 0 C 60 64 20 128 40 192 C 58 256 26 320 40 384 C 44 404 42 416 40 428"
+                                    stroke="#fff" strokeWidth="12" pathLength={1}
                                     strokeLinecap="round" fill="none"
                                 />
                             </mask>
                             <path
-                                d="M300 16 C 268 54 332 82 302 112 C 470 116 566 240 562 408 C 556 600 458 728 298 736 C 138 728 36 590 36 400 C 36 232 140 120 286 114 C 306 113 320 120 334 132"
+                                d="M40 0 C 60 64 20 128 40 192 C 58 256 26 320 40 384 C 44 404 42 416 40 428"
                                 stroke="currentColor" strokeWidth="2.5"
-                                strokeDasharray="10 9" strokeLinecap="round"
-                                mask="url(#lc-loop-mask)"
+                                strokeDasharray="9 8" strokeLinecap="round"
+                                mask="url(#lc-letter-route-mask)"
+                            />
+                            <path
+                                className="xDraw"
+                                pathLength={1}
+                                d="M26 444 L54 470 M54 444 L26 470"
+                                stroke="currentColor" strokeWidth="3.5" strokeLinecap="round"
                             />
                         </svg>
                         <div className={styles.letterPanel}>
