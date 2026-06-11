@@ -6,10 +6,39 @@ import './fantasy-scroll.css';
 import { imFell, ebGaramond } from './fonts';
 import MapHero from './art/MapHero';
 import QuillMark from './art/QuillMark';
+import { DeskIcon, ArchiveIcon, HearthIcon, VaultIcon } from './art/LandmarkIcons';
+import SeaSerpent from './art/SeaSerpent';
 
 function reveal(delay: number) {
     return { '--d': `${delay}s` } as React.CSSProperties;
 }
+
+const STOPS = [
+    {
+        name: 'The Desk',
+        feature: 'The Writing Desk',
+        body: 'An infinite canvas around your manuscript. Pin research, sticky notes, character sheets, and story beats right beside the words.',
+        Icon: DeskIcon,
+    },
+    {
+        name: 'The Archive',
+        feature: 'World Bible',
+        body: 'Characters, places, factions, and lore in linked articles. Type [[ while writing to bind an entity to the page without breaking stride.',
+        Icon: ArchiveIcon,
+    },
+    {
+        name: 'The Hearth',
+        feature: 'Goals & Streaks',
+        body: 'Daily word targets, a writing heatmap, and streaks that survive your busiest weeks. Keep the fire lit.',
+        Icon: HearthIcon,
+    },
+    {
+        name: 'The Vault',
+        feature: 'Export & Backups',
+        body: 'Markdown, Word, and EPUB export, plus local backups and version history. Your words leave with you — no lock-in, ever.',
+        Icon: VaultIcon,
+    },
+] as const;
 
 export default function FantasyLanding() {
     useEffect(() => {
@@ -53,6 +82,49 @@ export default function FantasyLanding() {
                     </svg>
                 </div>
             </header>
+
+            <main>
+                <section className={styles.journey} aria-label="Features">
+                    <p className={styles.journeyKicker}>The journey ahead</p>
+                    <h2 className={styles.journeyTitle}>Four landmarks on the road to a finished tale</h2>
+
+                    <div className={styles.routeWrap} aria-hidden="true">
+                        <svg viewBox="0 0 160 1200" preserveAspectRatio="none" fill="none">
+                            <mask id="lc-journey-mask">
+                                <path
+                                    className="routeDraw"
+                                    d="M80 0 C140 150 20 280 80 420 C140 560 20 700 80 840 C130 960 50 1080 80 1200"
+                                    stroke="#fff" strokeWidth="12" pathLength={1} strokeLinecap="round"
+                                />
+                            </mask>
+                            <path
+                                d="M80 0 C140 150 20 280 80 420 C140 560 20 700 80 840 C130 960 50 1080 80 1200"
+                                stroke="currentColor" strokeWidth="2.5"
+                                strokeDasharray="10 9" strokeLinecap="round"
+                                mask="url(#lc-journey-mask)"
+                            />
+                        </svg>
+                    </div>
+
+                    <ol className={styles.stops}>
+                        {STOPS.map(({ name, feature, body, Icon }) => (
+                            <li key={name} className={`${styles.stop} stopReveal`}>
+                                <span className={styles.stopIcon}><Icon /></span>
+                                <p className={styles.stopFeature}>{feature}</p>
+                                <h3 className={styles.stopName}>{name}</h3>
+                                <p className={styles.stopBody}>{body}</p>
+                            </li>
+                        ))}
+                    </ol>
+                </section>
+
+                <aside className={styles.marginalia} aria-hidden="true">
+                    <div className={styles.marginaliaInner}>
+                        <SeaSerpent />
+                        <span className={styles.marginaliaNote}>here be dragons</span>
+                    </div>
+                </aside>
+            </main>
 
             <footer className={styles.footer}>
                 Charted with care · LoreCanvas © {new Date().getFullYear()} ·{' '}
