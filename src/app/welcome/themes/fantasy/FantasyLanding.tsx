@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './fantasy.module.css';
 import './fantasy-scroll.css';
 import { imFell, ebGaramond } from './fonts';
+import { submitBetaRequest, type BetaRequestResult } from '../../shared/betaRequest';
 import MapHero from './art/MapHero';
 import QuillMark from './art/QuillMark';
 import { DeskIcon, ArchiveIcon, HearthIcon, VaultIcon } from './art/LandmarkIcons';
 import SeaSerpent from './art/SeaSerpent';
+import WaxSeal from './art/WaxSeal';
 
 function reveal(delay: number) {
     return { '--d': `${delay}s` } as React.CSSProperties;
@@ -41,12 +43,27 @@ const STOPS = [
 ] as const;
 
 export default function FantasyLanding() {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [reason, setReason] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [result, setResult] = useState<BetaRequestResult | null>(null);
+
     useEffect(() => {
         document.documentElement.dataset.lcLanding = 'fantasy';
         return () => {
             delete document.documentElement.dataset.lcLanding;
         };
     }, []);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setResult(null);
+        const outcome = await submitBetaRequest({ name, email, reason });
+        setResult(outcome);
+        setIsSubmitting(false);
+    };
 
     return (
         <div className={`${styles.page} ${imFell.variable} ${ebGaramond.variable}`}>
@@ -124,6 +141,94 @@ export default function FantasyLanding() {
                         <span className={styles.marginaliaNote}>here be dragons</span>
                     </div>
                 </aside>
+
+                <section id="letter" className={styles.letter} aria-label="Request beta access">
+                    <h2 className={styles.letterHeading}>A letter to the Cartographer</h2>
+                    <div className={styles.letterPanel}>
+                        {result === 'done' ? (
+                            <div className={styles.letterSuccess}>
+                                <WaxSeal size={64} />
+                                <h3 className={styles.letterSuccessTitle}>Your letter is sealed.</h3>
+                                <p className={styles.letterIntro}>
+                                    Watch the skies for a raven — if you&apos;re chosen for the
+                                    beta, your invitation will arrive by post (well, email).
+                                </p>
+                            </div>
+                        ) : (
+                            <>
+                                <p className={styles.letterSalutation}>Dear Cartographer,</p>
+                                <p className={styles.letterIntro}>
+                                    The beta is invite-only while we chart these waters.
+                                    Send word of your tale and we&apos;ll dispatch a raven.
+                                </p>
+                                <form onSubmit={handleSubmit}>
+                                    <div className={styles.field}>
+                                        <label htmlFor="lname" className={styles.fieldLabel}>
+                                            Your name, traveler
+                                        </label>
+                                        <input
+                                            id="lname"
+                                            className={styles.fieldInput}
+                                            type="text"
+                                            maxLength={120}
+                                            placeholder="optional, but politer"
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className={styles.field}>
+                                        <label htmlFor="lemail" className={styles.fieldLabel}>
+                                            Where ravens may find you
+                                        </label>
+                                        <input
+                                            id="lemail"
+                                            className={styles.fieldInput}
+                                            type="email"
+                                            required
+                                            placeholder="name@example.com"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className={styles.field}>
+                                        <label htmlFor="lreason" className={styles.fieldLabel}>
+                                            What tale are you charting?
+                                        </label>
+                                        <textarea
+                                            id="lreason"
+                                            className={styles.fieldTextarea}
+                                            maxLength={2000}
+                                            placeholder="A fantasy trilogy, a screenplay, a sprawling sci-fi universe…"
+                                            value={reason}
+                                            onChange={(e) => setReason(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className={styles.sealRow}>
+                                        <button
+                                            type="submit"
+                                            className={styles.sealButton}
+                                            disabled={isSubmitting || !email.trim()}
+                                        >
+                                            <WaxSeal />
+                                            {isSubmitting ? 'Sealing…' : 'Seal & send'}
+                                        </button>
+                                    </div>
+                                </form>
+                                {result === 'duplicate' && (
+                                    <p className={styles.letterNote}>
+                                        This address is already in the Cartographer&apos;s ledger —
+                                        you&apos;re on the list.
+                                    </p>
+                                )}
+                                {result === 'error' && (
+                                    <p className={styles.letterError}>
+                                        The raven was lost to a storm — please try again in a minute.
+                                    </p>
+                                )}
+                            </>
+                        )}
+                    </div>
+                </section>
             </main>
 
             <footer className={styles.footer}>
