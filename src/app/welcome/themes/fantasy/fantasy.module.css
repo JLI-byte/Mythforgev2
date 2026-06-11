@@ -240,7 +240,8 @@
 .routeWrap {
     position: absolute;
     top: 16rem;
-    bottom: 4rem;
+    /* Extends past the journey, through the marginalia, toward the letter */
+    bottom: -16rem;
     left: 50%;
     width: 160px;
     transform: translateX(-50%);
@@ -359,6 +360,27 @@
     font-size: clamp(2rem, 5vw, 3.4rem);
     margin: 0;
     text-align: center;
+}
+
+/* Wraps the panel so the circling route flourish can hug its edges */
+.letterScrollTarget {
+    position: relative;
+    width: 100%;
+    max-width: 36rem;
+    display: flex;
+    justify-content: center;
+    padding: 3rem 2.75rem;
+    color: var(--vermilion);
+}
+
+/* Sits ABOVE the panel — a hand-drawn red-ink circling on the page */
+.letterLoop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
 }
 
 .letterPanel {

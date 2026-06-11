@@ -146,7 +146,30 @@ export default function FantasyLanding() {
 
                 <section id="letter" className={styles.letter} aria-label="Request beta access">
                     <h2 className={styles.letterHeading}>A letter to the Cartographer</h2>
-                    <div className={styles.letterPanel}>
+                    <div className={styles.letterScrollTarget}>
+                        <svg
+                            className={styles.letterLoop}
+                            viewBox="0 0 600 800"
+                            preserveAspectRatio="none"
+                            fill="none"
+                            aria-hidden="true"
+                        >
+                            <mask id="lc-loop-mask">
+                                <path
+                                    className="loopDraw"
+                                    d="M300 16 C 268 54 332 82 302 112 C 470 116 566 240 562 408 C 556 600 458 728 298 736 C 138 728 36 590 36 400 C 36 232 140 120 286 114 C 306 113 320 120 334 132"
+                                    stroke="#fff" strokeWidth="16" pathLength={1}
+                                    strokeLinecap="round" fill="none"
+                                />
+                            </mask>
+                            <path
+                                d="M300 16 C 268 54 332 82 302 112 C 470 116 566 240 562 408 C 556 600 458 728 298 736 C 138 728 36 590 36 400 C 36 232 140 120 286 114 C 306 113 320 120 334 132"
+                                stroke="currentColor" strokeWidth="2.5"
+                                strokeDasharray="10 9" strokeLinecap="round"
+                                mask="url(#lc-loop-mask)"
+                            />
+                        </svg>
+                        <div className={styles.letterPanel}>
                         {result === 'done' ? (
                             <div className={styles.letterSuccess}>
                                 <WaxSeal size={64} />
@@ -229,6 +252,7 @@ export default function FantasyLanding() {
                                 )}
                             </>
                         )}
+                        </div>
                     </div>
                 </section>
             </main>
