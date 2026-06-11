@@ -61,7 +61,7 @@ export function EmptyDeskWelcome() {
         <div className={styles.emptyWelcomeHeader}>
           <div className={styles.emptyWelcomeIcon}>M</div>
           <div>
-            <div className={styles.emptyWelcomeTitle}>MythForge</div>
+            <div className={styles.emptyWelcomeTitle}>LoreCanvas</div>
             <div className={styles.emptyWelcomeSub}>BUILD WORLDS • WRITE STORIES</div>
           </div>
         </div>

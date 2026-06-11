@@ -47,8 +47,8 @@ function run() {
     const packagerOptions = {
         dir: rootDir,
         out: 'dist',
-        name: 'MythForge BETA 1.1',
-        executableName: 'MythForge-BETA-1.1',
+        name: 'LoreCanvas BETA 1.1',
+        executableName: 'LoreCanvas-BETA-1.1',
         platform: 'win32',
         arch: 'x64',
         overwrite: true,

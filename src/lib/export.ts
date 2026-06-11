@@ -1,7 +1,7 @@
 /**
  * Export Utility Library
  * 
- * Provides pure functions to serialize MythForge internal data structures 
+ * Provides pure functions to serialize LoreCanvas internal data structures 
  * (Documents and Entities) into standard, portable file formats (Markdown, DOCX).
  * Handles the browser Blob bridging to trigger direct file downloads natively.
  */
@@ -74,7 +74,7 @@ function slugify(text: string): string {
 /**
  * Exports a single Document as a .md file.
  * 
- * @param {MFDocument} document - The MythForge document to serialize.
+ * @param {MFDocument} document - The LoreCanvas document to serialize.
  * @param {string} projectName - The name of the project context, usually unused in markdown but required for standard signature.
  */
 export function exportAsMarkdown(document: MFDocument, scenes: Scene[]): void {
@@ -94,7 +94,7 @@ export function exportAsMarkdown(document: MFDocument, scenes: Scene[]): void {
 /**
  * Exports a single Document as a rich .docx file formatted to standard manuscript requirements.
  * 
- * @param {MFDocument} document - The MythForge document to serialize.
+ * @param {MFDocument} document - The LoreCanvas document to serialize.
  * @param {string} projectName - The name of the project context.
  * @returns {Promise<void>} 
  */
@@ -236,7 +236,7 @@ export async function exportAsDocx(document: MFDocument, scenes: Scene[]): Promi
  * @param {string} projectName - Used for dynamic title generation.
  */
 export function exportWorldBible(entities: Entity[], projectName: string): void {
-    const safeProjectName = projectName || 'MythForge Project';
+    const safeProjectName = projectName || 'LoreCanvas Project';
     let output = `# ${safeProjectName} — World Bible\n\n`;
 
     const typeOrder = ['character', 'location', 'faction', 'artifact', 'lore'];
@@ -380,7 +380,7 @@ export async function fetchGDriveFileContent(fileId: string): Promise<string | n
 }
 
 /**
- * Parses a Final Draft (.fdx) XML string into MythForge-compatible screenplay HTML.
+ * Parses a Final Draft (.fdx) XML string into LoreCanvas-compatible screenplay HTML.
  */
 export function parseFdxToHtml(xmlString: string): string {
   if (typeof window === 'undefined') return '';

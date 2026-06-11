@@ -44,7 +44,7 @@ export default function InlineEntryCreator() {
     const closeAndReturnFocus = () => {
         closeInlineCreator();
         // Dispatch custom event right after state updates
-        window.dispatchEvent(new CustomEvent('mythforge:returnFocusToEditor'));
+        window.dispatchEvent(new CustomEvent('lorecanvas:returnFocusToEditor'));
     };
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

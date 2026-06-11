@@ -328,7 +328,7 @@ export function ImportModal({ isOpen, onClose }: ImportModalProps) {
                     </div>
                 ) : step === 'mapping' ? (
                     <div className={styles.mappingWizard}>
-                        <p className={styles.mappingHint}>Map your file columns to MythForge entity fields.</p>
+                        <p className={styles.mappingHint}>Map your file columns to LoreCanvas entity fields.</p>
                         <div className={styles.mappingGrid}>
                             <div className={styles.mappingRow}>
                                 <label>Name (Req)</label>

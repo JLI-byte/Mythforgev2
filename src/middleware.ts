@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 /**
- * MythForge Global Auth Middleware
+ * LoreCanvas Global Auth Middleware
  * 
  * Manages session refreshing and access control.
  * Unauthenticated users are redirected to /login for all restricted routes.

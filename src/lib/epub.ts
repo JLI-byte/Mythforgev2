@@ -55,7 +55,7 @@ export async function buildEpubZip(
 ): Promise<JSZip> {
     const zip = new JSZip();
     const identifier = opts.identifier
-        || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'mythforge-export');
+        || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'lorecanvas-export');
     const title = opts.title || document.title || 'Untitled';
     const author = opts.author || 'Unknown Author';
 

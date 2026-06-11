@@ -47,11 +47,11 @@ export async function generateShareCard(options: ShareCardOptions): Promise<Blob
     ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
     ctx.font = '24px Inter, -apple-system, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Made with MythForge', width / 2, height - 70);
+    ctx.fillText('Made with LoreCanvas', width / 2, height - 70);
     
     ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
     ctx.font = '20px Inter, -apple-system, sans-serif';
-    ctx.fillText('https://mythforge.app', width / 2, height - 40);
+    ctx.fillText('https://lorecanvas.app', width / 2, height - 40);
 
     // 4. Project Name (Top)
     ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';

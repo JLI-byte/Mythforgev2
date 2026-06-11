@@ -74,14 +74,14 @@ export function MusicPlayerPanel({
 
     useEffect(() => {
         try {
-            const saved = localStorage.getItem('mythforge-music-library-v2');
+            const saved = localStorage.getItem('lorecanvas-music-library-v2');
             if (saved) setLibrary(JSON.parse(saved));
         } catch { setLibrary([]); }
     }, []);
 
     const saveLibrary = (next: SavedPlaylist[]) => {
         setLibrary(next);
-        localStorage.setItem('mythforge-music-library-v2', JSON.stringify(next));
+        localStorage.setItem('lorecanvas-music-library-v2', JSON.stringify(next));
     };
 
     const showToast = (msg: string) => {

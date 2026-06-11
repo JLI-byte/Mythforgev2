@@ -745,7 +745,7 @@ export interface WorkspaceState {
  *
  * PERSISTENCE ARCHITECTURE:
  * We use Zustand's persist middleware configured cleanly via `localStorage` natively
- * supporting the mythforge offline standalone nature.
+ * supporting the lorecanvas offline standalone nature.
  * `partialize` explicitly omits standard transient UI variables (`hoveredEntityId`, etc)
  * so refreshing never caches a stuck hover box overlay.
  */
@@ -926,6 +926,43 @@ export function partializeWorkspace(state: WorkspaceState) {
         deskStates: state.deskStates,
     };
 }
+
+/**
+ * One-time rename migration (MythForge -> LoreCanvas, June 2026).
+ * Copies data from the old "mythforge-*" localStorage keys to the new
+ * "lorecanvas-*" keys so existing users keep their work. Old keys are left
+ * in place as a safety net. Must run BEFORE the store is created below,
+ * because the persist middleware reads its key at creation time.
+ */
+function migrateRenamedStorageKeys() {
+    if (typeof window === 'undefined') return;
+    try {
+        const RENAMES: Array<[string, string]> = [
+            ['mythforge-workspace', 'lorecanvas-workspace'],
+            ['mythforge-beta-feedback', 'lorecanvas-beta-feedback'],
+            ['mythforge-music-library-v2', 'lorecanvas-music-library-v2'],
+        ];
+        for (const [oldKey, newKey] of RENAMES) {
+            const oldVal = localStorage.getItem(oldKey);
+            if (oldVal !== null && localStorage.getItem(newKey) === null) {
+                localStorage.setItem(newKey, oldVal);
+            }
+        }
+        // Backup ring: copy old-prefix backups to the new prefix once.
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (!k?.startsWith('mythforge-backup-')) continue;
+            const newKey = k.replace('mythforge-backup-', 'lorecanvas-backup-');
+            if (localStorage.getItem(newKey) === null) {
+                const v = localStorage.getItem(k);
+                if (v !== null) localStorage.setItem(newKey, v);
+            }
+        }
+    } catch {
+        // localStorage unavailable or full — the app still works from defaults.
+    }
+}
+migrateRenamedStorageKeys();
 
 export const useWorkspaceStore = create<WorkspaceState>()(
     persist(
@@ -1365,7 +1402,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             // =============================================
 
             // This action is called by the writing editor via
-            // window.dispatchEvent(new CustomEvent('mythforge:sessionUpdate',
+            // window.dispatchEvent(new CustomEvent('lorecanvas:sessionUpdate',
             // { detail: { projectId, wordsAdded, minutesSpent } }))
             // The Goals panel listens for this event.
             // Do NOT call this directly from the store — it is
@@ -1859,7 +1896,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 }),
         }),
         {
-            name: 'mythforge-workspace',
+            name: 'lorecanvas-workspace',
 
             // Only persist core data — transient UI flags (hover state, open modals, etc.) reset on reload.
             // SECURITY NOTE: apiKey is stored in localStorage. Never log or expose this value.
@@ -1883,6 +1920,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         const defaultDocument: Document = {
                             id: crypto.randomUUID(),
                             projectId: defaultProject.id,
+                            // Legacy pre-Sprint-13 keys — written under the old app name, never renamed
                             title: getStoredValue('mythforge-document-title') || 'Untitled Chapter',
                             content: getStoredValue('mythforge-document-content') || '',
                             createdAt: new Date()
@@ -2041,19 +2079,19 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             migrate: (persistedState: any, fromVersion: number) => {
                 // Take an automatic backup BEFORE any migration
                 try {
-                    const backupKey = `mythforge-backup-v${fromVersion}-${Date.now()}`;
+                    const backupKey = `lorecanvas-backup-v${fromVersion}-${Date.now()}`;
                     const backupData = { ...persistedState };
                     localStorage.setItem(backupKey, JSON.stringify(backupData));
                     // Keep only the 5 most recent backups — prune older ones
                     const backupKeys = Object.keys(localStorage)
-                        .filter(k => k.startsWith('mythforge-backup-'))
+                        .filter(k => k.startsWith('lorecanvas-backup-'))
                         .sort();
                     if (backupKeys.length > 5) {
                         backupKeys.slice(0, backupKeys.length - 5).forEach(k => localStorage.removeItem(k));
                     }
                 } catch (e) {
                     // localStorage may be full — ignore backup failure, proceed with migration
-                    logger.warn('MythForge: backup failed, proceeding with migration', e);
+                    logger.warn('LoreCanvas: backup failed, proceeding with migration', e);
                 }
 
                 // Return the persisted state as-is — all field migrations already
@@ -2074,9 +2112,9 @@ export function listDataBackups(): { key: string; timestamp: number; version: nu
     if (typeof localStorage === 'undefined') return [];
     for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (!k?.startsWith('mythforge-backup-')) continue;
-        // Key format: mythforge-backup-v{version}-{timestamp}
-        const parts = k.replace('mythforge-backup-', '').split('-');
+        if (!k?.startsWith('lorecanvas-backup-')) continue;
+        // Key format: lorecanvas-backup-v{version}-{timestamp}
+        const parts = k.replace('lorecanvas-backup-', '').split('-');
         const versionStr = parts[0].replace('v', '');
         const version = parseInt(versionStr) || 0;
         const timestamp = parseInt(parts[1]) || 0;
@@ -2094,10 +2132,10 @@ export function restoreDataBackup(backupKey: string): boolean {
     try {
         const raw = localStorage.getItem(backupKey);
         if (!raw) return false;
-        localStorage.setItem('mythforge-workspace', raw);
+        localStorage.setItem('lorecanvas-workspace', raw);
         return true;
     } catch (e) {
-        logger.error('MythForge: restore failed', e);
+        logger.error('LoreCanvas: restore failed', e);
         return false;
     }
 }
@@ -2108,13 +2146,13 @@ export function restoreDataBackup(backupKey: string): boolean {
  */
 export function createManualBackup(): string | null {
     try {
-        const current = localStorage.getItem('mythforge-workspace');
+        const current = localStorage.getItem('lorecanvas-workspace');
         if (!current) return null;
-        const key = `mythforge-backup-v2-${Date.now()}`;
+        const key = `lorecanvas-backup-v2-${Date.now()}`;
         localStorage.setItem(key, current);
         return key;
     } catch (e) {
-        logger.error('MythForge: manual backup failed', e);
+        logger.error('LoreCanvas: manual backup failed', e);
         return null;
     }
 }

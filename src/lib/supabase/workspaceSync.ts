@@ -31,7 +31,7 @@ export async function loadWorkspace(userId: string): Promise<LoadedWorkspace | n
 
     if (error) {
       if (error.code !== 'PGRST116') { // Ignore "no rows found" error
-        logger.error('MythForge Sync: Error loading workspace:', error.message);
+        logger.error('LoreCanvas Sync: Error loading workspace:', error.message);
       }
       return null;
     }
@@ -40,7 +40,7 @@ export async function loadWorkspace(userId: string): Promise<LoadedWorkspace | n
     const updatedAt = data.updated_at ? new Date(data.updated_at).getTime() : 0;
     return { data: data.data, updatedAt };
   } catch (err) {
-    logger.error('MythForge Sync: Unexpected error loading workspace:', err);
+    logger.error('LoreCanvas Sync: Unexpected error loading workspace:', err);
     return null;
   }
 }
@@ -65,12 +65,12 @@ export async function saveWorkspace(userId: string, data: Record<string, any>): 
       );
 
     if (error) {
-      logger.error('MythForge Sync: Error saving workspace:', error.message);
+      logger.error('LoreCanvas Sync: Error saving workspace:', error.message);
       return false;
     }
     return true;
   } catch (err) {
-    logger.error('MythForge Sync: Unexpected error saving workspace:', err);
+    logger.error('LoreCanvas Sync: Unexpected error saving workspace:', err);
     return false;
   }
 }

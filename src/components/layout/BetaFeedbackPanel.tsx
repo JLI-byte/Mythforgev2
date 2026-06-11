@@ -26,7 +26,7 @@ interface FeedbackEntry {
   submittedAt: string;
 }
 
-const STORAGE_KEY = 'mythforge-beta-feedback';
+const STORAGE_KEY = 'lorecanvas-beta-feedback';
 
 function loadFeedback(): FeedbackEntry[] {
   if (typeof window === 'undefined') return [];
@@ -106,7 +106,7 @@ export function BetaFeedbackPanel({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `mythforge-beta-feedback-${Date.now()}.txt`;
+    a.download = `lorecanvas-beta-feedback-${Date.now()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -217,7 +217,7 @@ export function BetaFeedbackPanel({
                 <span className={styles.betaBadge}>BETA</span>
                 <h3 className={styles.title}>Feedback</h3>
               </div>
-              <p className={styles.subtitle}>Your feedback shapes MythForge.</p>
+              <p className={styles.subtitle}>Your feedback shapes LoreCanvas.</p>
             </div>
             <button className={styles.closeBtn} onClick={onClose}>✕</button>
           </div>

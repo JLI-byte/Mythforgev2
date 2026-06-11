@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 const merriweather = Merriweather({ subsets: ['latin'], weight: ['300', '400', '700'], variable: '--font-serif' });
 
 export const metadata: Metadata = {
-  title: "MythForge",
+  title: "LoreCanvas",
   description: "Creation happens at the point of inspiration. The tool never pulls the writer out of their flow.",
 };
 

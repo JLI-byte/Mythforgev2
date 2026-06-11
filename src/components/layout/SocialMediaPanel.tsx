@@ -88,7 +88,7 @@ export function SocialMediaPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
         const projectName = activeProject?.name || "my project";
         
         if (type === 'milestone') {
-            text = `Milestone reached! Just hit ${streakState.totalWordsAllTime.toLocaleString()} words in ${projectName}! 🚀 #MythForge #Writing`;
+            text = `Milestone reached! Just hit ${streakState.totalWordsAllTime.toLocaleString()} words in ${projectName}! 🚀 #LoreCanvas #Writing`;
         } else if (type === 'streak') {
             text = `Writing streak: ${streakState.currentStreak} days! 🔥 Keeping the momentum going in ${projectName}. #WritingCommunity`;
         } else if (type === 'session') {
@@ -122,7 +122,7 @@ export function SocialMediaPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
     };
 
     const copyMarkdown = () => {
-        const markdown = `### Project Update: ${activeProject?.name || 'MythForge Project'}\n\n${draftText}\n\n*Sent via MythForge*`;
+        const markdown = `### Project Update: ${activeProject?.name || 'LoreCanvas Project'}\n\n${draftText}\n\n*Sent via LoreCanvas*`;
         navigator.clipboard.writeText(markdown);
         showToast("Markdown update copied!");
     };

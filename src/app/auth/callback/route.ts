@@ -29,7 +29,7 @@ export async function GET(request: Request) {
       
       const redirectBase = isLocalEnv 
         ? 'http://localhost:3000' 
-        : 'https://mythforge.isomeric.studio';
+        : 'https://lorecanvas.isomeric.studio';
 
       return NextResponse.redirect(`${redirectBase}${next}`);
     }

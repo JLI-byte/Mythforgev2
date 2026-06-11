@@ -67,7 +67,7 @@ export default function LoginModal({ onClose }: LoginModalProps) {
 
         <div className={styles.header}>
           <div className={styles.logo}>📖</div>
-          <h1 className={styles.title}>MythForge</h1>
+          <h1 className={styles.title}>LoreCanvas</h1>
           <p className={styles.subtitle}>Sign in to your story</p>
         </div>
 

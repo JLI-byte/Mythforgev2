@@ -277,7 +277,7 @@ export default function GoalsContent() {
                                     className={styles.streakShare}
                                     title="Share Streak"
                                     onClick={() => setShareData({
-                                        projectName: 'MythForge',
+                                        projectName: 'LoreCanvas',
                                         milestoneType: 'streak',
                                         milestoneValue: streakState.currentStreak,
                                         milestoneLabel: 'Day Streak'
@@ -437,7 +437,7 @@ export default function GoalsContent() {
                                     className={styles.badgeShare}
                                     title="Share Achievement"
                                     onClick={() => setShareData({
-                                        projectName: 'MythForge',
+                                        projectName: 'LoreCanvas',
                                         milestoneType: 'badge',
                                         milestoneValue: badge.name,
                                         milestoneLabel: 'Achievement Earned'

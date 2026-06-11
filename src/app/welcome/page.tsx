@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import styles from './welcome.module.css';
 
 /**
- * MythForge public beta landing page.
+ * LoreCanvas public beta landing page.
  *
  * Unauthenticated visitors land here (see middleware.ts). Sells the product,
  * collects beta access requests into public.beta_requests (write-only for
@@ -77,7 +77,7 @@ export default function WelcomePage() {
             <nav className={styles.nav}>
                 <div className={styles.navBrand}>
                     <span className={styles.navBrandMark}>📖</span>
-                    MythForge
+                    LoreCanvas
                 </div>
                 <a href="/login" className={styles.navSignIn}>Beta tester sign in</a>
             </nav>
@@ -89,7 +89,7 @@ export default function WelcomePage() {
                     <span className={styles.heroTitleAccent}>Write legends.</span>
                 </h1>
                 <p className={styles.heroSub}>
-                    MythForge is a writing studio for fiction authors and worldbuilders —
+                    LoreCanvas is a writing studio for fiction authors and worldbuilders —
                     manuscript, lore, and momentum in one beautiful desk.
                 </p>
                 <div className={styles.heroCtas}>
@@ -184,7 +184,7 @@ export default function WelcomePage() {
             </section>
 
             <footer className={styles.footer}>
-                MythForge © {new Date().getFullYear()} ·{' '}
+                LoreCanvas © {new Date().getFullYear()} ·{' '}
                 <a href="/login" className={styles.footerLink}>Beta tester sign in</a>
             </footer>
         </div>

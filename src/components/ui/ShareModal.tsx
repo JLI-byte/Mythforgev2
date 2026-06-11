@@ -22,7 +22,7 @@ export default function ShareModal({ isOpen, onClose, shareData }: ShareModalPro
     // 1. Generate the initial caption based on milestone type
     useEffect(() => {
         let initialCaption = '';
-        const url = 'https://mythforge.app';
+        const url = 'https://lorecanvas.app';
 
         switch (shareData.milestoneType) {
             case 'badge':
@@ -38,7 +38,7 @@ export default function ShareModal({ isOpen, onClose, shareData }: ShareModalPro
                 initialCaption = `Just wrote ${Number(shareData.milestoneValue).toLocaleString()} words in one session! #writing #amwriting`;
                 break;
             default:
-                initialCaption = `Tracking my writing progress on MythForge! #writing #amwriting`;
+                initialCaption = `Tracking my writing progress on LoreCanvas! #writing #amwriting`;
         }
 
         setCaption(initialCaption + '\n' + url);
@@ -74,7 +74,7 @@ export default function ShareModal({ isOpen, onClose, shareData }: ShareModalPro
     const handleDownload = () => {
         if (!imageUrl) return;
         const link = document.createElement('a');
-        const filename = `mythforge-${shareData.milestoneType}-${shareData.milestoneValue}.png`.toLowerCase().replace(/\s+/g, '-');
+        const filename = `lorecanvas-${shareData.milestoneType}-${shareData.milestoneValue}.png`.toLowerCase().replace(/\s+/g, '-');
         link.href = imageUrl;
         link.download = filename;
         document.body.appendChild(link);
@@ -93,7 +93,7 @@ export default function ShareModal({ isOpen, onClose, shareData }: ShareModalPro
     };
 
     const handleCopyLink = () => {
-        navigator.clipboard.writeText('https://mythforge.app').then(() => {
+        navigator.clipboard.writeText('https://lorecanvas.app').then(() => {
             setCopySuccess(true);
             if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
             feedbackTimerRef.current = setTimeout(() => setCopySuccess(false), 2000);

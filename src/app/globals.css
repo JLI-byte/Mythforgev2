@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* 
- * Global Styles for MythForge
+ * Global Styles for LoreCanvas
  * Adheres to "Procreate, not Photoshop" - clean, minimal, distraction-free.
  */
 
@@ -163,11 +163,11 @@ a:hover {
 }
 
 /* FindReplace ProseMirror decorations — applied by custom FindReplace extension */
-.mythforge-search-match {
+.lorecanvas-search-match {
     background-color: rgba(255, 215, 0, 0.35);
     border-radius: 2px;
 }
-.mythforge-search-current {
+.lorecanvas-search-current {
     background-color: rgba(255, 140, 0, 0.55);
     border-radius: 2px;
     outline: 1px solid rgba(255, 140, 0, 0.7);

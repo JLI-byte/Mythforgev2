@@ -66,7 +66,7 @@ async function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1280,
         height: 800,
-        title: "MythForge",
+        title: "LoreCanvas",
         icon: path.join(__dirname, '..', 'public', 'favicon.ico'),
         webPreferences: {
             nodeIntegration: false,
@@ -116,7 +116,7 @@ async function createWindow() {
 
     // Disable Electron's built-in pinch-to-zoom and Ctrl+Scroll zoom.
     // These fire at the native level before web JS can intercept them.
-    // MythForge implements its own canvas zoom via Ctrl+Scroll in the app.
+    // LoreCanvas implements its own canvas zoom via Ctrl+Scroll in the app.
     mainWindow.webContents.on('did-finish-load', () => {
         mainWindow.webContents.setZoomFactor(1);
         mainWindow.webContents.setVisualZoomLevelLimits(1, 1);
@@ -129,7 +129,7 @@ async function createWindow() {
 
 // Ensure data persistence is in a clear location
 app.setAppLogsPath(); // Enable logging
-// app.setPath('userData', path.join(app.getPath('appData'), 'MythForge'));
+// app.setPath('userData', path.join(app.getPath('appData'), 'LoreCanvas'));
 
 app.whenReady().then(() => {
     createWindow();

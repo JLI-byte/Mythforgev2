@@ -1,4 +1,4 @@
-# MythForge / LoreCanvas — Full Improvement Sprint
+# LoreCanvas (formerly MythForge) — Full Improvement Sprint
 
 Branch: `sprint/full-improvement-pass`. Decisions: reconnect screenplay, remove fake account bits, do all refactors.
 

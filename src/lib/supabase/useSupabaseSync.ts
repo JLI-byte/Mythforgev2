@@ -75,10 +75,10 @@ export function useSupabaseSync(userId: string) {
         if (!localHasContent || cloudNewest > localNewest) {
           useWorkspaceStore.setState(cloud.data);
         } else {
-          logger.info('MythForge Sync: local copy is newer — keeping local, skipping cloud overwrite');
+          logger.info('LoreCanvas Sync: local copy is newer — keeping local, skipping cloud overwrite');
         }
       } else if (cloud) {
-        logger.error('MythForge Sync: cloud workspace failed validation — ignoring');
+        logger.error('LoreCanvas Sync: cloud workspace failed validation — ignoring');
       }
 
       setHasHydrated(true);

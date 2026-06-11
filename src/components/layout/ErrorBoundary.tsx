@@ -34,7 +34,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     }
 
     componentDidCatch(error: Error, info: React.ErrorInfo) {
-        logger.error('MythForge ErrorBoundary caught:', error, info?.componentStack);
+        logger.error('LoreCanvas ErrorBoundary caught:', error, info?.componentStack);
     }
 
     reset = () => this.setState({ error: null });

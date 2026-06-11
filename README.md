@@ -1,11 +1,11 @@
-# MythForge
+# LoreCanvas
 
 A local-first creative writing and worldbuilding tool for novelists, 
 storytellers, and worldbuilders.
 
 ## What It Does
 
-MythForge keeps your world bible inside your writing, not beside it. 
+LoreCanvas keeps your world bible inside your writing, not beside it. 
 Type `[[` anywhere in your document to instantly create a world entry 
 without leaving your writing flow. Characters, locations, factions, 
 artifacts, and lore all live alongside your manuscript.
