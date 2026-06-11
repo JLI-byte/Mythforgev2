@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useSyncExternalStore } from 'react';
 import dynamic from 'next/dynamic';
 import { getTheme, DEFAULT_THEME_ID, THEME_STORAGE_KEY } from './themes/registry';
 import ThemeSwitcher from './shared/ThemeSwitcher';
@@ -17,18 +17,28 @@ const THEME_COMPONENTS: Record<string, React.ComponentType> = {
     fantasy: dynamic(() => import('./themes/fantasy/FantasyLanding')),
 };
 
-export default function WelcomePage() {
-    const [themeId, setThemeId] = useState(DEFAULT_THEME_ID);
+const THEME_CHANGE_EVENT = 'lc-theme-change';
 
-    useEffect(() => {
-        const saved = localStorage.getItem(THEME_STORAGE_KEY);
-        if (saved) setThemeId(getTheme(saved).id);
-    }, []);
+function subscribe(callback: () => void) {
+    window.addEventListener(THEME_CHANGE_EVENT, callback);
+    window.addEventListener('storage', callback);
+    return () => {
+        window.removeEventListener(THEME_CHANGE_EVENT, callback);
+        window.removeEventListener('storage', callback);
+    };
+}
+
+function getStoredThemeId() {
+    return localStorage.getItem(THEME_STORAGE_KEY) ?? DEFAULT_THEME_ID;
+}
+
+export default function WelcomePage() {
+    const stored = useSyncExternalStore(subscribe, getStoredThemeId, () => DEFAULT_THEME_ID);
+    const themeId = getTheme(stored).id;
 
     const handleSelect = (id: string) => {
-        const resolved = getTheme(id).id;
-        setThemeId(resolved);
-        localStorage.setItem(THEME_STORAGE_KEY, resolved);
+        localStorage.setItem(THEME_STORAGE_KEY, getTheme(id).id);
+        window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
     };
 
     const ActiveTheme = THEME_COMPONENTS[themeId] ?? THEME_COMPONENTS[DEFAULT_THEME_ID];

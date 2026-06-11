@@ -504,6 +504,10 @@
 }
 
 @media (max-width: 720px) {
+    .heroScrollHint {
+        display: none;
+    }
+
     .routeWrap {
         left: 1.4rem;
         width: 60px;
