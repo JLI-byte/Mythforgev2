@@ -238,10 +238,18 @@ void main() {
             }
             dirty = false;
 
-            // Candle sits low and tight; sun high and broad (fractions of width).
-            let z = (isDark ? 0.052 : 0.3) * W;
-            let intensity = isDark ? 1.15 : 1.25;
-            if (isDark && !reducedMotion) {
+            // Light mode has no lighting effect (yet) — output nothing so the
+            // multiply is a no-op and the plain wood shows. Only dark mode lights.
+            if (!isDark) {
+                gl.clearColor(0, 0, 0, 0);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+                return;
+            }
+
+            // Candle sits low and tight (fractions of width).
+            let z = 0.052 * W;
+            let intensity = 1.15;
+            if (!reducedMotion) {
                 const f =
                     Math.sin(t * 0.55) * 0.5 +
                     Math.sin(t * 0.91 + 1) * 0.3 +
@@ -257,13 +265,8 @@ void main() {
                 z,
             );
             gl.uniform1f(uIntensity, intensity);
-            if (isDark) {
-                gl.uniform3f(uColor, 1.0, 0.573, 0.204); // #ff9234 candle
-                gl.uniform3f(uAmbient, 0.34, 0.29, 0.23); // warm ember floor
-            } else {
-                gl.uniform3f(uColor, 1.0, 0.945, 0.769); // #fff1c4 sun
-                gl.uniform3f(uAmbient, 0.2, 0.19, 0.17); // soft daylight floor
-            }
+            gl.uniform3f(uColor, 1.0, 0.573, 0.204); // #ff9234 candle
+            gl.uniform3f(uAmbient, 0.34, 0.29, 0.23); // warm ember floor
             gl.drawArrays(gl.TRIANGLES, 0, 3);
         };
         raf = requestAnimationFrame(draw);
