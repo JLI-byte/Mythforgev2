@@ -50,6 +50,7 @@ export default function Home() {
   const toggleFocusMode = useWorkspaceStore((state) => state.toggleFocusMode);
   const activeProjectId = useWorkspaceStore((state) => state.activeProjectId);
   const theme = useWorkspaceStore((state) => state.theme);
+  const themeFamily = useWorkspaceStore((state) => state.themeFamily);
   const tabRailWidth = useWorkspaceStore((state) => state.tabRailWidth);
   const setTabRailWidth = useWorkspaceStore((state) => state.setTabRailWidth);
   const panelWidth = useWorkspaceStore((state) => state.panelWidth);
@@ -123,6 +124,12 @@ export default function Home() {
       root.setAttribute('data-theme', theme);
     }
   }, [theme]);
+
+  // Sync theme family to the DOM — globals.css selects the active palette by
+  // [data-theme-family] × [data-theme].
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme-family', themeFamily);
+  }, [themeFamily]);
 
   // Auto-close the right panel when an article is opened
   useEffect(() => {

@@ -17,6 +17,10 @@ export interface WritingGoal {
 
 export type EntityType = 'character' | 'location' | 'faction' | 'artifact' | 'lore' | 'magic' | 'religion' | 'species';
 export type ThemeMode = 'light' | 'dark' | 'system';
+// Theme family is orthogonal to light/dark mode: each family supplies its own
+// light and dark palettes. 'default' is the original Procreate-clean look;
+// 'fantasy' is the parchment cartographer look (see globals.css).
+export type ThemeFamily = 'default' | 'fantasy';
 
 export type WorldGenre =
   | 'fantasy'
@@ -380,6 +384,12 @@ export interface WorkspaceState {
     theme: ThemeMode;
 
     /**
+     * The current theme family (visual style). Combines with `theme` mode to
+     * pick the active palette: family × {light, dark}.
+     */
+    themeFamily: ThemeFamily;
+
+    /**
      * Whether the World Bible sidebar is currently visible.
      */
     isSidebarOpen: boolean;
@@ -576,6 +586,11 @@ export interface WorkspaceState {
      * Sets the current theme mode.
      */
     setTheme: (theme: ThemeMode) => void;
+
+    /**
+     * Sets the current theme family (visual style).
+     */
+    setThemeFamily: (family: ThemeFamily) => void;
 
     /**
      * Toggles the visibility of the World Bible sidebar.
@@ -897,6 +912,7 @@ export function partializeWorkspace(state: WorkspaceState) {
         activeSceneId: state.activeSceneId,
         entities: state.entities,
         theme: state.theme,
+        themeFamily: state.themeFamily,
         isSidebarOpen: state.isSidebarOpen,
         isTypewriterMode: state.isTypewriterMode,
         isFocusMode: state.isFocusMode,
@@ -981,6 +997,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             isInlineCreatorOpen: false,
             pendingEntityName: null,
             theme: 'system',
+            themeFamily: 'default',
             isSidebarOpen: true,
             isCommandPaletteOpen: false,
             isExportOpen: false,
@@ -1257,6 +1274,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             setTheme: (theme) =>
                 set(() => ({ theme })),
+
+            setThemeFamily: (themeFamily) =>
+                set(() => ({ themeFamily })),
 
             toggleSidebar: () =>
                 set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),

@@ -32,6 +32,8 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
     const setEditorWidth = useWorkspaceStore((state) => state.setEditorWidth);
     const isSpellcheckEnabled = useWorkspaceStore((state) => state.isSpellcheckEnabled);
     const setSpellcheckEnabled = useWorkspaceStore((state) => state.setSpellcheckEnabled);
+    const themeFamily = useWorkspaceStore((state) => state.themeFamily);
+    const setThemeFamily = useWorkspaceStore((state) => state.setThemeFamily);
 
 
     const [dailyTarget, setDailyTarget] = useState(writingGoal.dailyTarget);
@@ -106,6 +108,50 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                 </div>
 
                 <div className={styles.content}>
+
+                    <section className={styles.section}>
+                        <div className={styles.providerHeader}>
+                            <h3>Appearance</h3>
+                        </div>
+                        <label className={styles.label} style={{ marginBottom: '0.6rem', display: 'block' }}>
+                            Theme
+                        </label>
+                        <div style={{ display: 'flex', gap: '0.6rem' }}>
+                            {([
+                                { id: 'default', label: 'Default', hint: 'Clean & minimal' },
+                                { id: 'fantasy', label: 'Fantasy', hint: 'Parchment & ink' },
+                            ] as const).map((opt) => {
+                                const active = themeFamily === opt.id;
+                                return (
+                                    <button
+                                        key={opt.id}
+                                        type="button"
+                                        onClick={() => setThemeFamily(opt.id)}
+                                        style={{
+                                            flex: 1,
+                                            textAlign: 'left',
+                                            padding: '0.7rem 0.8rem',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            background: active ? 'rgba(var(--accent-rgb, 0 91 181), 0.10)' : 'var(--surface)',
+                                            border: active
+                                                ? '2px solid var(--accent)'
+                                                : '1px solid var(--border)',
+                                            color: 'var(--foreground)',
+                                        }}
+                                    >
+                                        <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{opt.label}</div>
+                                        <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: '2px' }}>
+                                            {opt.hint}
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <p style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: '0.6rem' }}>
+                            Light and dark mode toggle lives in the top bar.
+                        </p>
+                    </section>
 
                     <section className={styles.section} style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
                         <div className={styles.providerHeader}>
