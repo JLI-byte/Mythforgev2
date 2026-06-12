@@ -181,10 +181,10 @@
     align-items: center;
     gap: 8px;
     padding: 10px 18px;
-    background: linear-gradient(135deg, #d0bcff 0%, #aa88ff 100%);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dim, #aa88ff) 100%);
     border: none;
     border-radius: 20px;
-    color: var(--surface-mid);
+    color: var(--background);
     font-size: 0.85rem;
     font-weight: 700;
     cursor: pointer;
