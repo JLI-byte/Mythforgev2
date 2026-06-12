@@ -25,10 +25,13 @@ import { useWorkspaceStore } from "@/store/workspaceStore";
  */
 export default function DeskLighting() {
     const themeFamily = useWorkspaceStore((s) => s.themeFamily);
+    const workspaceMode = useWorkspaceStore((s) => s.workspaceMode);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    // The wood desk + candle belongs to the Writing Desk ('desk') only.
+    const active = themeFamily === "fantasy" && workspaceMode === "desk";
 
     useEffect(() => {
-        if (themeFamily !== "fantasy") return;
+        if (!active) return;
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -285,9 +288,9 @@ void main() {
             canvas.removeEventListener("webglcontextlost", onContextLost);
             themeObserver.disconnect();
         };
-    }, [themeFamily]);
+    }, [active]);
 
-    if (themeFamily !== "fantasy") return null;
+    if (!active) return null;
 
     return (
         <canvas

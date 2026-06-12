@@ -132,6 +132,12 @@ export default function Home() {
     document.documentElement.setAttribute('data-theme-family', themeFamily);
   }, [themeFamily]);
 
+  // Reflect the active workspace mode so the fantasy wood desk + candle light
+  // can be scoped to the Writing Desk ('desk') only.
+  useEffect(() => {
+    document.documentElement.setAttribute('data-workspace-mode', workspaceMode);
+  }, [workspaceMode]);
+
   // Auto-close the right panel when an article is opened
   useEffect(() => {
     if (focusedArticleEntityId) {

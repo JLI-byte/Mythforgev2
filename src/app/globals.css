@@ -182,11 +182,14 @@ option {
    Light and dark each get their own plank photo. */
 :root[data-theme-family="fantasy"] body {
   position: relative;
-  /* Transparent so the fixed wood ::before (z-index:-1) is actually visible.
-     Without this, body's opaque --background cream paints over the desk. */
+  /* Solid themed background everywhere EXCEPT the Writing Desk. */
+  background-color: var(--background);
+}
+/* On the Writing Desk only, go transparent so the fixed wood ::before shows. */
+:root[data-theme-family="fantasy"][data-workspace-mode="desk"] body {
   background-color: transparent;
 }
-:root[data-theme-family="fantasy"] body::before {
+:root[data-theme-family="fantasy"][data-workspace-mode="desk"] body::before {
   content: '';
   position: fixed;
   inset: 0;
@@ -199,7 +202,7 @@ option {
     #6b4f30 url('/textures/desk.webp') center / cover no-repeat;
   opacity: 1;
 }
-:root[data-theme-family="fantasy"][data-theme="dark"] body::before {
+:root[data-theme-family="fantasy"][data-workspace-mode="desk"][data-theme="dark"] body::before {
   /* DARK: a duskier base so the unlit desk reads as night; the SVG candle adds
      the warm pool on top via multiply. */
   background:

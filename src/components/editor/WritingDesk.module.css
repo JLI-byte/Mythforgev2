@@ -16,6 +16,13 @@
   cursor: default;
 }
 
+/* Fantasy: let the candlelit wood desk (body::before + DeskLighting canvas)
+   show through. The widget cards stay opaque and float on the desk. */
+:global(:root[data-theme-family="fantasy"]) .deskRoot,
+:global(:root[data-theme-family="fantasy"]) .deskViewport {
+  background-color: transparent;
+}
+
 .deskViewport:active {
   cursor: default;
 }
