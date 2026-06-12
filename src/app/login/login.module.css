@@ -1,0 +1,262 @@
+/*
+ * Login page — matches the fantasy landing ("The Cartographer's Desk").
+ * Parchment background, ink serif type, a letter-style sign-in card sealed
+ * with wax. Reuses the fantasy theme's fonts and SVG art.
+ */
+
+.page {
+    --parchment: #f3e8cf;
+    --sepia: #3b2c15;
+    --sepia-soft: #75603f;
+    --vermilion: #c8401f;
+    --vermilion-deep: #a32d12;
+    --verdigris: #3d7068;
+    --gold-leaf: #b08d2f;
+    --line-faint: rgba(59, 44, 21, 0.22);
+
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(1.5rem, 6vw, 4rem);
+    background-color: var(--parchment);
+    color: var(--sepia);
+    font-family: var(--font-garamond), Georgia, serif;
+    font-size: 1.06rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Parchment photo texture + vignette, same motif as the landing */
+.page::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+        radial-gradient(ellipse 120% 90% at 50% 20%, transparent 55%, rgba(59, 44, 21, 0.10)),
+        var(--parchment) url('/textures/parchment.webp') center / cover no-repeat;
+    pointer-events: none;
+}
+
+/* Faint grid-line backdrop with a diagonal mask fade, like the hero */
+.page::after {
+    --size: 45px;
+    --line: color-mix(in hsl, var(--sepia), transparent 80%);
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+        linear-gradient(90deg, var(--line) 1px, transparent 1px var(--size)) 50% 50% / var(--size) var(--size),
+        linear-gradient(var(--line) 1px, transparent 1px var(--size)) 50% 50% / var(--size) var(--size);
+    mask: linear-gradient(-20deg, transparent 55%, white);
+    pointer-events: none;
+}
+
+/* ---------- Card ---------- */
+
+.panel {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 27rem;
+    background: #f9f2e0;
+    border: 1px solid var(--line-faint);
+    border-radius: 3px;
+    padding: clamp(2rem, 5vw, 2.75rem);
+    transform: rotate(-0.5deg);
+    box-shadow: 3px 6px 0 rgba(59, 44, 21, 0.12);
+}
+
+/* Folded corner, like the landing's letter panel */
+.panel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-style: solid;
+    border-width: 0 28px 28px 0;
+    border-color: transparent var(--parchment) transparent transparent;
+    filter: drop-shadow(-2px 2px 1px rgba(59, 44, 21, 0.12));
+}
+
+.brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.4rem;
+    margin-bottom: 2rem;
+}
+
+.brandMark {
+    color: var(--sepia);
+    margin-bottom: 0.4rem;
+}
+
+.brandName {
+    font-family: var(--font-fell), serif;
+    font-weight: 400;
+    font-size: 2rem;
+    letter-spacing: 0.01em;
+    margin: 0;
+}
+
+.brandSub {
+    font-style: italic;
+    color: var(--sepia-soft);
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* ---------- Form ---------- */
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.fieldLabel {
+    display: block;
+    font-style: italic;
+    font-size: 0.98rem;
+    color: var(--sepia-soft);
+    margin-bottom: 0.35rem;
+}
+
+.fieldInput {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line-faint);
+    border-radius: 0;
+    color: var(--sepia);
+    font-family: var(--font-garamond), serif;
+    font-size: 1.08rem;
+    padding: 0.4rem 0.1rem;
+    transition: border-color 160ms ease;
+}
+
+.fieldInput::placeholder {
+    color: rgba(59, 44, 21, 0.35);
+    font-style: italic;
+}
+
+.fieldInput:focus-visible {
+    outline: none;
+    border-bottom-color: var(--vermilion);
+}
+
+.submit {
+    margin-top: 0.4rem;
+    width: 100%;
+    background: var(--vermilion);
+    color: #f6ddd2;
+    border: 1px solid var(--vermilion-deep);
+    border-radius: 3px;
+    font-family: var(--font-garamond), serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+    padding: 0.85rem;
+    cursor: pointer;
+    box-shadow: 2px 3px 0 rgba(59, 44, 21, 0.25);
+    transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+}
+
+.submit:is(:hover, :focus-visible):not(:disabled) {
+    transform: translate(-1px, -2px);
+    box-shadow: 4px 6px 0 rgba(59, 44, 21, 0.22);
+}
+
+.submit:active:not(:disabled) {
+    transform: translate(1px, 2px);
+    box-shadow: 0 0 0 rgba(59, 44, 21, 0.2);
+}
+
+.submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ---------- Notices ---------- */
+
+.notice {
+    margin-top: 1.4rem;
+    padding: 0.9rem 1rem;
+    border-radius: 3px;
+    font-size: 0.95rem;
+    text-align: center;
+    line-height: 1.5;
+    border: 1px solid var(--line-faint);
+}
+
+.noticeSuccess {
+    color: var(--verdigris);
+    border-color: color-mix(in oklch, var(--verdigris), transparent 60%);
+    background: color-mix(in oklch, var(--verdigris), transparent 92%);
+}
+
+.noticeInvite {
+    color: var(--vermilion-deep);
+    border-color: color-mix(in oklch, var(--vermilion), transparent 60%);
+    background: color-mix(in oklch, var(--vermilion), transparent 92%);
+}
+
+.noticeError {
+    color: var(--vermilion-deep);
+    border-color: color-mix(in oklch, var(--vermilion), transparent 55%);
+    background: color-mix(in oklch, var(--vermilion), transparent 90%);
+}
+
+.noticeLink {
+    color: inherit;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.footnote {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--sepia-soft);
+}
+
+.footnoteLink {
+    color: var(--verdigris);
+    font-style: italic;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 160ms ease;
+}
+
+.footnoteLink:is(:hover, :focus-visible) {
+    border-bottom-color: var(--verdigris);
+}
+
+/* ---------- Dev-only button ---------- */
+
+.devButton {
+    margin-top: 1.5rem;
+    width: 100%;
+    background: none;
+    border: 1px dashed color-mix(in oklch, var(--verdigris), transparent 40%);
+    color: var(--verdigris);
+    border-radius: 3px;
+    font-family: var(--font-garamond), serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    padding: 0.7rem;
+    cursor: pointer;
+    transition: background 160ms ease;
+}
+
+.devButton:is(:hover, :focus-visible):not(:disabled) {
+    background: color-mix(in oklch, var(--verdigris), transparent 92%);
+}
+
+.devButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
