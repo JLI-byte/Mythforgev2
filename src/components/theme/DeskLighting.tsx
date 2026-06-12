@@ -47,6 +47,9 @@ export default function DeskLighting() {
         // Half-resolution render target — the light is soft, so the compositor
         // upscale is invisible and the fill cost drops 4x.
         const RES = 0.5;
+        // Wood tile size in CSS px — MUST match globals.css background-size so the
+        // light's grain highlights line up with the visible (CSS-tiled) wood.
+        const TILE_CSS_PX = 820;
 
         const VERT = `
 attribute vec2 aPos;
@@ -62,8 +65,7 @@ void main() {
 precision mediump float;
 varying vec2 vUv;
 uniform sampler2D uWood;
-uniform vec2 uUvScale;
-uniform vec2 uUvOffset;
+uniform vec2 uTileUv;
 uniform vec2 uTexel;
 uniform vec3 uLight;
 uniform vec2 uCanvas;
@@ -78,7 +80,8 @@ float lum(vec2 uv) {
 }
 
 void main() {
-  vec2 uv = vUv * uUvScale + uUvOffset;
+  // Tiled UVs (texture wrap is REPEAT) — matches the CSS-tiled wood scale.
+  vec2 uv = vUv * uTileUv;
   vec2 st = uTexel * 3.0;
   float hl = lum(uv - vec2(st.x, 0.0));
   float hr = lum(uv + vec2(st.x, 0.0));
@@ -127,8 +130,7 @@ void main() {
         gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
         const U = (name: string) => gl.getUniformLocation(prog, name);
-        const uUvScale = U("uUvScale");
-        const uUvOffset = U("uUvOffset");
+        const uTileUv = U("uTileUv");
         const uTexel = U("uTexel");
         const uLight = U("uLight");
         const uCanvas = U("uCanvas");
@@ -157,12 +159,10 @@ void main() {
             canvas.width = W;
             canvas.height = H;
             gl.viewport(0, 0, W, H);
-            // background-size: cover mapping (must match the CSS wood layer)
-            const s = Math.max(W / texW, H / texH);
-            const visW = W / s / texW;
-            const visH = H / s / texH;
-            gl.uniform2f(uUvScale, visW, visH);
-            gl.uniform2f(uUvOffset, (1 - visW) / 2, (1 - visH) / 2);
+            // Tiled mapping (must match CSS background-size). Tile in canvas px
+            // = TILE_CSS_PX * RES; tiles-across = canvas / tilePx.
+            const tilePx = TILE_CSS_PX * RES;
+            gl.uniform2f(uTileUv, W / tilePx, H / tilePx);
             gl.uniform2f(uTexel, 1 / texW, 1 / texH);
             gl.uniform2f(uCanvas, W, H);
             dirty = true;
@@ -171,8 +171,9 @@ void main() {
         // Wood texture (NPOT: clamp + linear, no mips)
         const tex = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        // REPEAT wrap for tiling (desk.webp is 1024² power-of-two, WebGL1-safe).
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         const img = new Image();
