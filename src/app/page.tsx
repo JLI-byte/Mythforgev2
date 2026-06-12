@@ -16,6 +16,7 @@ import ExportModal from '@/components/ui/ExportModal';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
 import ModeBar from '@/components/navigation/ModeBar';
+import DeskLighting from '@/components/theme/DeskLighting';
 
 // Center-column modes are code-split: only the active one is downloaded/parsed,
 // instead of bundling all five (WritingDesk, ArticleGrid, etc.) into first paint.
@@ -143,6 +144,7 @@ export default function Home() {
     <main
       className={`${styles.workspace} ${isFullscreen ? styles.fullscreenMode : ''} ${isFocusMode ? styles.focusMode : ''}`}
     >
+      <DeskLighting />
       <ModeBar onHome={() => { useWorkspaceStore.getState().setActiveProject(null); }} />
       <div className={styles.workspaceRow}>
         <div

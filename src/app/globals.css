@@ -190,7 +190,7 @@ option {
   content: '';
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: -2; /* fallback desk behind the SVG lighting shader (DeskLighting) */
   pointer-events: none;
   /* Same ancient desk in both modes — lighting does the day/night work.
      LIGHT: gentle edge vignette, wood left bright. */
@@ -209,6 +209,7 @@ option {
     #1a1108 url('/textures/desk.webp') center / cover no-repeat;
   opacity: 1;
 }
+
 
 /* Headings across the app pick up the display serif in the fantasy family */
 :root[data-theme-family="fantasy"] h1,
