@@ -6,11 +6,15 @@ import { createClient } from '@/lib/supabase/server';
  *
  * Signs in with DEV_LOGIN_EMAIL / DEV_LOGIN_PASSWORD from .env.local so the
  * developer doesn't need a magic-link email on every session. The route is a
- * hard 404 outside development; the env vars are server-only (not NEXT_PUBLIC),
- * so they never reach client bundles or production builds.
+ * hard 404 outside development unless ALLOW_DEV_LOGIN=1 is explicitly set
+ * (for testing local production builds); the env vars are server-only (not
+ * NEXT_PUBLIC), so they never reach client bundles.
  */
 export async function POST() {
-    if (process.env.NODE_ENV !== 'development') {
+    const allowed =
+        process.env.NODE_ENV === 'development' ||
+        process.env.ALLOW_DEV_LOGIN === '1';
+    if (!allowed) {
         return new NextResponse(null, { status: 404 });
     }
 

@@ -29,7 +29,12 @@ export default function LoginPage() {
   const router = useRouter();
 
   const supabase = createClient();
-  const isDev = process.env.NODE_ENV === 'development';
+  // Dev login also shows in local production builds when explicitly opted in
+  // at build time (NEXT_PUBLIC_ALLOW_DEV_LOGIN=1) — the API route still 404s
+  // unless the server is started with ALLOW_DEV_LOGIN=1.
+  const isDev =
+    process.env.NODE_ENV === 'development' ||
+    process.env.NEXT_PUBLIC_ALLOW_DEV_LOGIN === '1';
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
