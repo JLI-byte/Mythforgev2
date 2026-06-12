@@ -54,3 +54,6 @@ lint-out2.json
 git_log.txt
 lint-nav.txt
 my_lint.txt
+
+# ComfyUI generated images
+outputs/
