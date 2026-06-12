@@ -20,9 +20,6 @@ export default function DeskLighting() {
 
     const lightRef = useRef<SVGFEPointLightElement>(null);
     const diffuseRef = useRef<SVGFEDiffuseLightingElement>(null);
-    // Normalised 0..1 light position (target = where it wants to be, pos = eased).
-    const target = useRef({ x: 0.5, y: 0.3 });
-    const pos = useRef({ x: 0.5, y: 0.3 });
 
     // viewBox units the filter computes in.
     const VB_W = 1000;
@@ -31,16 +28,33 @@ export default function DeskLighting() {
     useEffect(() => {
         if (themeFamily !== "fantasy") return;
 
-        const onMove = (e: MouseEvent) => {
-            target.current.x = e.clientX / window.innerWidth;
-            target.current.y = e.clientY / window.innerHeight;
+        // Map a viewport pixel to filter user-space, inverting the SVG's
+        // "xMidYMid slice" so the light sits exactly under the cursor.
+        const setLightPos = (clientX: number, clientY: number) => {
+            if (!lightRef.current) return;
+            const W = window.innerWidth;
+            const H = window.innerHeight;
+            const scale = Math.max(W / VB_W, H / VB_H);
+            const ux = (clientX - (W - VB_W * scale) / 2) / scale;
+            const uy = (clientY - (H - VB_H * scale) / 2) / scale;
+            lightRef.current.setAttribute("x", ux.toFixed(1));
+            lightRef.current.setAttribute("y", uy.toFixed(1));
         };
+
+        // Position is event-driven for instant 1:1 tracking — no easing, no throttle.
+        const onMove = (e: MouseEvent) => setLightPos(e.clientX, e.clientY);
         window.addEventListener("mousemove", onMove, { passive: true });
 
+        // The rAF loop ONLY drives the candle flicker (z + intensity + colour).
+        // It writes attributes only when they change, so light mode stays idle
+        // (no needless full-screen filter recompute) until the cursor moves.
         let raf = 0;
         let t = 0;
         let last = 0;
-        const FRAME_MS = 1000 / 30; // throttle the filter recompute to ~30fps
+        let prevZ = "";
+        let prevI = "";
+        let prevColor = "";
+        const FRAME_MS = 1000 / 40;
 
         const loop = (now: number) => {
             raf = requestAnimationFrame(loop);
@@ -51,18 +65,8 @@ export default function DeskLighting() {
             const isDark =
                 document.documentElement.getAttribute("data-theme") === "dark";
 
-            // Ease the light toward the cursor.
-            pos.current.x += (target.current.x - pos.current.x) * 0.06;
-            pos.current.y += (target.current.y - pos.current.y) * 0.06;
-
-            // Slow autonomous drift so it feels alive even when the mouse is still.
-            const driftX = Math.sin(t * 0.012) * 0.035;
-            const driftY = Math.cos(t * 0.0094) * 0.028;
-
-            // Mode-specific light: candle sits low & tight, sun sits high & broad.
-            let z = isDark ? 52 : 115;
-            let intensity = isDark ? 1.2 : 0.98;
-
+            let z = isDark ? 50 : 120;
+            let intensity = isDark ? 1.2 : 1.0;
             if (isDark) {
                 // Layered sines = irregular candle flicker.
                 const f =
@@ -71,27 +75,22 @@ export default function DeskLighting() {
                     Math.sin(t * 1.9 + 2) * 0.2;
                 z += f * 7;
                 intensity += f * 0.14;
-            } else {
-                intensity += Math.sin(t * 0.03) * 0.05; // gentle sun breathe
             }
 
-            const lx = (pos.current.x + driftX) * VB_W;
-            const ly = (pos.current.y + driftY) * VB_H;
-
-            if (lightRef.current) {
-                lightRef.current.setAttribute("x", lx.toFixed(1));
-                lightRef.current.setAttribute("y", ly.toFixed(1));
-                lightRef.current.setAttribute("z", z.toFixed(1));
+            const zStr = z.toFixed(1);
+            const iStr = intensity.toFixed(3);
+            const color = isDark ? "#ff9234" : "#fff1c4";
+            if (lightRef.current && zStr !== prevZ) {
+                lightRef.current.setAttribute("z", zStr);
+                prevZ = zStr;
             }
-            if (diffuseRef.current) {
-                diffuseRef.current.setAttribute(
-                    "diffuseConstant",
-                    intensity.toFixed(3),
-                );
-                diffuseRef.current.setAttribute(
-                    "lighting-color",
-                    isDark ? "#ff9234" : "#fff1c4",
-                );
+            if (diffuseRef.current && iStr !== prevI) {
+                diffuseRef.current.setAttribute("diffuseConstant", iStr);
+                prevI = iStr;
+            }
+            if (diffuseRef.current && color !== prevColor) {
+                diffuseRef.current.setAttribute("lighting-color", color);
+                prevColor = color;
             }
         };
         raf = requestAnimationFrame(loop);
