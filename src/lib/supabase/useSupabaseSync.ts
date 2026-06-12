@@ -6,6 +6,10 @@ import { loadWorkspace, saveWorkspace } from './workspaceSync';
 import { logger } from '@/lib/logger';
 
 const SAVE_DEBOUNCE_MS = 800;
+// After repeated save failures, stop hammering the endpoint (each attempt
+// serialises the whole workspace on the main thread — visible as UI stutter).
+const BACKOFF_BASE_MS = 5_000;
+const BACKOFF_MAX_MS = 5 * 60_000;
 
 export type SyncStatus = 'idle' | 'syncing' | 'saved' | 'error';
 
@@ -54,6 +58,8 @@ export function useSupabaseSync(userId: string) {
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialLoadRef = useRef(true);
   const latestStateRef = useRef<Record<string, any> | null>(null);
+  const failureCountRef = useRef(0);
+  const backoffUntilRef = useRef(0);
 
   const setHasHydrated = useWorkspaceStore(s => s.setHasHydrated);
 
@@ -96,6 +102,20 @@ export function useSupabaseSync(userId: string) {
       const state = latestStateRef.current;
       if (!state) return false;
       const ok = await saveWorkspace(userId, state);
+      if (ok) {
+        failureCountRef.current = 0;
+        backoffUntilRef.current = 0;
+      } else {
+        failureCountRef.current += 1;
+        const wait = Math.min(
+          BACKOFF_MAX_MS,
+          BACKOFF_BASE_MS * 2 ** (failureCountRef.current - 1),
+        );
+        backoffUntilRef.current = Date.now() + wait;
+        if (failureCountRef.current === 3) {
+          logger.error('LoreCanvas Sync: repeated save failures — backing off retries');
+        }
+      }
       setStatus(ok ? 'saved' : 'error');
       return ok;
     };
@@ -104,6 +124,10 @@ export function useSupabaseSync(userId: string) {
       if (isInitialLoadRef.current) return;
       // Sync only the persisted subset — same shape the local persist layer uses.
       latestStateRef.current = partializeWorkspace(state as WorkspaceState) as Record<string, any>;
+
+      // During failure backoff, keep tracking the latest state (the exit flush
+      // still uses it) but don't schedule another doomed save attempt.
+      if (Date.now() < backoffUntilRef.current) return;
 
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       setStatus('syncing');
