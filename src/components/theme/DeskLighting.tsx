@@ -65,6 +65,7 @@ uniform vec2 uTexel;
 uniform vec3 uLight;
 uniform vec2 uCanvas;
 uniform vec3 uColor;
+uniform vec3 uAmbient;
 uniform float uIntensity;
 uniform float uBump;
 
@@ -83,7 +84,9 @@ void main() {
   vec3 n = normalize(vec3((hl - hr) * uBump, (hd - hu) * uBump, 1.0));
   vec3 L = normalize(uLight - vec3(vUv * uCanvas, 0.0));
   float diff = max(dot(n, L), 0.0);
-  gl_FragColor = vec4(min(uColor * diff * uIntensity, vec3(1.0)), 1.0);
+  // Ambient floor keeps the desk readable away from the light — without it,
+  // dark mode multiplies to near-black whenever the cursor is idle/off-window.
+  gl_FragColor = vec4(min(uAmbient + uColor * diff * uIntensity, vec3(1.0)), 1.0);
 }`;
 
         const compile = (type: number, src: string) => {
@@ -127,6 +130,7 @@ void main() {
         const uLight = U("uLight");
         const uCanvas = U("uCanvas");
         const uColor = U("uColor");
+        const uAmbient = U("uAmbient");
         const uIntensity = U("uIntensity");
         const uBump = U("uBump");
 
@@ -252,8 +256,10 @@ void main() {
             gl.uniform1f(uIntensity, intensity);
             if (isDark) {
                 gl.uniform3f(uColor, 1.0, 0.573, 0.204); // #ff9234 candle
+                gl.uniform3f(uAmbient, 0.34, 0.29, 0.23); // warm ember floor
             } else {
                 gl.uniform3f(uColor, 1.0, 0.945, 0.769); // #fff1c4 sun
+                gl.uniform3f(uAmbient, 0.2, 0.19, 0.17); // soft daylight floor
             }
             gl.drawArrays(gl.TRIANGLES, 0, 3);
         };
