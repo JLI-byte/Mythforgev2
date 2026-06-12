@@ -4,57 +4,64 @@ import { useEffect, useRef } from "react";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 
 /**
- * DeskLighting — an SVG lighting shader over the fantasy wood desk.
+ * DeskLighting — an SVG lighting shader that multiplies over the wood desk.
  *
- * Technique (after alvov's "SVG lighting shader"): blur the wood image, convert
- * its luminance to an alpha height-field (bump map), light that bump map with a
- * movable point light via feDiffuseLighting, then multiply the lit result back
- * over the wood. The grain physically catches the light.
+ * Technique (after alvov's "SVG lighting shader"): blur the wood, convert its
+ * luminance to an alpha height-field (bump map), and light that bump map with a
+ * movable point light via feDiffuseLighting. The result is the *light only*; it
+ * is then `mix-blend-mode: multiply`-ed over the sharp wood that globals.css
+ * paints behind it, so the grain catches the light without the filter ever
+ * touching the (full-res) wood pixels.
  *
- * The point light eases toward the cursor with a slow idle drift. The light
- * COLOUR and reach switch by mode: a tight warm candle (dark) vs a broad golden
- * sun (light). Only renders for the fantasy theme family.
+ * Performance: the filter is the expensive part, so the SVG is laid out tiny
+ * (~1/5 viewport) and scaled up by the compositor — the filter rasterises at a
+ * fraction of the pixels (the reference used a ~450px texture too) and the soft
+ * light upscales invisibly. The point light tracks the cursor 1:1 via the SVG's
+ * own CTM; only the candle flicker runs on a rAF loop. Fantasy theme only.
  */
 export default function DeskLighting() {
     const themeFamily = useWorkspaceStore((s) => s.themeFamily);
 
+    const svgRef = useRef<SVGSVGElement>(null);
     const lightRef = useRef<SVGFEPointLightElement>(null);
     const diffuseRef = useRef<SVGFEDiffuseLightingElement>(null);
 
-    // viewBox units the filter computes in.
-    const VB_W = 1000;
-    const VB_H = 640;
+    // Low-res filter space (keeps the lighting computation cheap).
+    const VB_W = 500;
+    const VB_H = 340;
 
     useEffect(() => {
         if (themeFamily !== "fantasy") return;
 
-        // Map a viewport pixel to filter user-space, inverting the SVG's
-        // "xMidYMid slice" so the light sits exactly under the cursor.
+        // Map a viewport pixel straight into filter user-space via the SVG's own
+        // CTM — exact regardless of the CSS scale / viewBox / slice.
         const setLightPos = (clientX: number, clientY: number) => {
-            if (!lightRef.current) return;
-            const W = window.innerWidth;
-            const H = window.innerHeight;
-            const scale = Math.max(W / VB_W, H / VB_H);
-            const ux = (clientX - (W - VB_W * scale) / 2) / scale;
-            const uy = (clientY - (H - VB_H * scale) / 2) / scale;
-            lightRef.current.setAttribute("x", ux.toFixed(1));
-            lightRef.current.setAttribute("y", uy.toFixed(1));
+            const svg = svgRef.current;
+            const light = lightRef.current;
+            if (!svg || !light) return;
+            const ctm = svg.getScreenCTM();
+            if (!ctm) return;
+            const p = svg.createSVGPoint();
+            p.x = clientX;
+            p.y = clientY;
+            const u = p.matrixTransform(ctm.inverse());
+            light.setAttribute("x", u.x.toFixed(1));
+            light.setAttribute("y", u.y.toFixed(1));
         };
 
-        // Position is event-driven for instant 1:1 tracking — no easing, no throttle.
+        // Position is event-driven for instant 1:1 tracking — no easing/throttle.
         const onMove = (e: MouseEvent) => setLightPos(e.clientX, e.clientY);
         window.addEventListener("mousemove", onMove, { passive: true });
 
-        // The rAF loop ONLY drives the candle flicker (z + intensity + colour).
-        // It writes attributes only when they change, so light mode stays idle
-        // (no needless full-screen filter recompute) until the cursor moves.
+        // rAF loop ONLY drives candle flicker (z + intensity), written on change
+        // so light mode stays idle when the cursor is still.
         let raf = 0;
         let t = 0;
         let last = 0;
         let prevZ = "";
         let prevI = "";
         let prevColor = "";
-        const FRAME_MS = 1000 / 40;
+        const FRAME_MS = 1000 / 30;
 
         const loop = (now: number) => {
             raf = requestAnimationFrame(loop);
@@ -65,15 +72,15 @@ export default function DeskLighting() {
             const isDark =
                 document.documentElement.getAttribute("data-theme") === "dark";
 
-            let z = isDark ? 50 : 120;
-            let intensity = isDark ? 1.2 : 1.0;
+            // Candle sits low & tight; sun sits higher & broad (viewBox units).
+            let z = isDark ? 26 : 64;
+            let intensity = isDark ? 1.15 : 1.0;
             if (isDark) {
-                // Layered sines = irregular candle flicker.
                 const f =
                     Math.sin(t * 0.55) * 0.5 +
                     Math.sin(t * 0.91 + 1) * 0.3 +
                     Math.sin(t * 1.9 + 2) * 0.2;
-                z += f * 7;
+                z += f * 4;
                 intensity += f * 0.14;
             }
 
@@ -105,16 +112,21 @@ export default function DeskLighting() {
 
     return (
         <svg
+            ref={svgRef}
             aria-hidden="true"
-            width="100%"
-            height="100%"
             viewBox={`0 0 ${VB_W} ${VB_H}`}
             preserveAspectRatio="xMidYMid slice"
             style={{
                 position: "fixed",
-                inset: 0,
+                top: 0,
+                left: 0,
+                width: "20vw",
+                height: "20vh",
+                transform: "scale(5)",
+                transformOrigin: "top left",
                 zIndex: -1,
                 pointerEvents: "none",
+                mixBlendMode: "multiply",
             }}
         >
             <defs>
@@ -131,6 +143,8 @@ export default function DeskLighting() {
                         preserveAspectRatio="xMidYMid slice"
                     />
                 </pattern>
+                {/* Output is the LIGHT only (no composite with the wood) — the
+                    wood comes from the CSS layer below via multiply blend. */}
                 <filter
                     id="deskLightFilter"
                     x="0"
@@ -140,7 +154,7 @@ export default function DeskLighting() {
                 >
                     <feGaussianBlur
                         in="SourceGraphic"
-                        stdDeviation="1.4"
+                        stdDeviation="0.8"
                         result="blurred"
                     />
                     <feColorMatrix
@@ -151,22 +165,12 @@ export default function DeskLighting() {
                     <feDiffuseLighting
                         ref={diffuseRef}
                         in="bumpMap"
-                        surfaceScale="3.2"
+                        surfaceScale="2.2"
                         diffuseConstant="1.1"
                         lightingColor="#ff9234"
-                        result="light"
                     >
-                        <fePointLight ref={lightRef} x="500" y="190" z="52" />
+                        <fePointLight ref={lightRef} x="250" y="110" z="26" />
                     </feDiffuseLighting>
-                    <feComposite
-                        in="light"
-                        in2="SourceGraphic"
-                        operator="arithmetic"
-                        k1="1"
-                        k2="0"
-                        k3="0"
-                        k4="0"
-                    />
                 </filter>
             </defs>
             <rect

@@ -190,22 +190,20 @@ option {
   content: '';
   position: fixed;
   inset: 0;
-  z-index: -2; /* fallback desk behind the SVG lighting shader (DeskLighting) */
+  z-index: -2; /* sharp wood; DeskLighting multiplies the moving light over it */
   pointer-events: none;
-  /* Same ancient desk in both modes — lighting does the day/night work.
-     LIGHT: gentle edge vignette, wood left bright. */
+  /* The sharp wood layer — the directional pooling lives in the SVG, not here.
+     LIGHT: bright wood with a faint edge vignette. */
   background:
-    radial-gradient(ellipse 130% 95% at 50% 18%, transparent 54%, rgba(40, 26, 10, 0.30)),
+    radial-gradient(ellipse 135% 100% at 50% 32%, transparent 62%, rgba(40, 26, 10, 0.16)),
     #6b4f30 url('/textures/desk.webp') center / cover no-repeat;
   opacity: 1;
 }
 :root[data-theme-family="fantasy"][data-theme="dark"] body::before {
-  /* DARK: same desk image, but lit for night — warm candlelight pool up top,
-     an overall darkening wash, and deep corners. */
+  /* DARK: a duskier base so the unlit desk reads as night; the SVG candle adds
+     the warm pool on top via multiply. */
   background:
-    radial-gradient(ellipse 120% 90% at 50% 4%, rgba(160, 100, 40, 0.28), transparent 52%),
-    linear-gradient(180deg, rgba(16, 10, 4, 0.50), rgba(10, 6, 2, 0.62)),
-    radial-gradient(ellipse 140% 110% at 50% 50%, transparent 26%, rgba(5, 3, 1, 0.58)),
+    linear-gradient(180deg, rgba(14, 9, 4, 0.34), rgba(12, 7, 2, 0.42)),
     #1a1108 url('/textures/desk.webp') center / cover no-repeat;
   opacity: 1;
 }
