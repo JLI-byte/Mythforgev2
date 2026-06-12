@@ -893,6 +893,41 @@
   border: 1px solid var(--border);
 }
 
+/* Fantasy: the manuscript page is a parchment SHEET — light cream (light) /
+   tan (dark). Inner cream layers go transparent so the texture reads across the
+   whole page. (Dark-mode ink contrast is handled in globals.css.) */
+:global(:root[data-theme-family="fantasy"]) .writingZoneBinder {
+  background-color: #f3e8cf;
+  background-image: url('/textures/paper-light.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+:global(:root[data-theme-family="fantasy"][data-theme="dark"]) .writingZoneBinder {
+  background-color: #d8c298;
+  background-image: url('/textures/paper-dark.webp');
+  /* Light parchment island: the page is a tan sheet even at night, so flip the
+     LOCAL tokens to ink-on-paper. Every descendant that reads --foreground /
+     --surface / --muted etc. then renders correctly on the parchment. */
+  --foreground: #2c2113;
+  --foreground-rgb: 44, 33, 19;
+  --muted: #6f5a36;
+  --background: transparent;
+  --surface: transparent;
+  --surface-mid: rgba(59, 44, 21, 0.06);
+  --surface-high: rgba(59, 44, 21, 0.10);
+  --border: rgba(59, 44, 21, 0.22);
+  --overlay-rgb: 59, 44, 21;
+  /* Deeper vermilion accent reads better than the ember on the tan sheet. */
+  --accent: #c8401f;
+  --accent-dim: #a32d12;
+  --accent-rgb: 200, 64, 31;
+}
+:global(:root[data-theme-family="fantasy"]) .binderChapterActive,
+:global(:root[data-theme-family="fantasy"]) .binderAllScenesContainer {
+  background-color: transparent;
+}
+
 .writingZoneBinderFocus {
   position: fixed !important;
   inset: 0 !important;

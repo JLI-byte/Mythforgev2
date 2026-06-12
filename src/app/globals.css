@@ -231,7 +231,8 @@ option {
   font-size: 1.18rem;
   line-height: 1.75;
 }
-:root[data-theme-family="fantasy"][data-theme="light"] .ProseMirror {
+:root[data-theme-family="fantasy"] .ProseMirror {
+  /* Dark ink in both modes — the manuscript page is a parchment sheet either way. */
   color: #2c2113;
 }
 
