@@ -12,7 +12,7 @@
 
 .modal {
     background: #121212;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(var(--overlay-rgb), 0.1);
     border-radius: 16px;
     width: 100%;
     max-width: 520px;
@@ -56,8 +56,8 @@
 }
 
 .sourceCard {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(var(--overlay-rgb), 0.03);
+    border: 1px solid rgba(var(--overlay-rgb), 0.05);
     border-radius: 12px;
     padding: 2rem 1rem;
     display: flex;
@@ -72,7 +72,7 @@
 }
 
 .sourceCard:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(var(--overlay-rgb), 0.06);
     border-color: #a078ff;
     transform: translateY(-2px);
 }
@@ -112,8 +112,8 @@
 }
 
 .mappingGrid {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(var(--overlay-rgb), 0.03);
+    border: 1px solid rgba(var(--overlay-rgb), 0.05);
     border-radius: 12px;
     padding: 1.5rem;
     display: flex;
@@ -138,7 +138,7 @@
 
 .mappingRow select {
     background: #1a1a1a;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(var(--overlay-rgb), 0.1);
     border-radius: 8px;
     padding: 0.75rem 1rem;
     color: #e5e2e1;
@@ -168,7 +168,7 @@
 
 .input {
     background: #1a1a1a;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(var(--overlay-rgb), 0.1);
     border-radius: 8px;
     padding: 0.75rem 1rem;
     color: #e5e2e1;
@@ -184,7 +184,7 @@
 
 .select {
     background: #1a1a1a;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(var(--overlay-rgb), 0.1);
     border-radius: 8px;
     padding: 0.75rem 1rem;
     color: #e5e2e1;
@@ -202,7 +202,7 @@
 
 .modeItem {
     background: #1a1a1a;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(var(--overlay-rgb), 0.05);
     border-radius: 8px;
     padding: 0.75rem;
     display: flex;

@@ -63,7 +63,7 @@
 /* Glassmorphism — Sprint 98 */
 .sideTab:hover {
     color: var(--foreground);
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(var(--overlay-rgb), 0.08);
     transform: translateX(-6px);
 }
 
@@ -82,7 +82,7 @@
 .ghostTab {
   position: fixed;
   z-index: 9998;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--overlay-rgb), 0.03);
   border: none;
   border-right: 1px solid var(--border);
   cursor: pointer;
@@ -94,7 +94,7 @@
 }
 
 .ghostTab:hover {
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(var(--overlay-rgb), 0.07);
 }
 
 .ghostTabArrow {

@@ -12,7 +12,7 @@
   flex: 1;
   position: relative;
   overflow: hidden;
-  background-color: #0d0d0d;
+  background-color: var(--background);
   cursor: default;
 }
 
@@ -55,7 +55,7 @@
 
 .deskTitleBar {
   height: 28px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -124,7 +124,7 @@
 
 .deskHeaderBtn:hover {
   opacity: 1;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(var(--overlay-rgb), 0.08);
   color: var(--foreground);
 }
 
@@ -223,7 +223,7 @@
 
 .writingZoneSelectInline {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(var(--overlay-rgb), 0.1);
   border-radius: 4px;
   color: var(--foreground);
   padding: 2px 4px;
@@ -258,7 +258,7 @@
   align-items: center;
   padding: 4px 8px;
   gap: 4px;
-  background: #1a1a1a;
+  background: var(--surface-mid);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
@@ -270,7 +270,7 @@
 }
 
 .deskToolbarDropdown {
-  background: #0f0f0f;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 4px;
   color: var(--foreground);
@@ -303,7 +303,7 @@
 }
 
 .deskFmtBtn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(var(--overlay-rgb), 0.08);
   color: var(--foreground);
 }
 
@@ -335,7 +335,7 @@
   flex: 1;
   overflow-y: auto;
   padding: 24px;
-  background: #141414;
+  background: var(--surface-mid);
   user-select: text !important;
   display: flex;
   flex-direction: column;
@@ -433,7 +433,7 @@
   font-family: inherit;
   font-size: 0.9rem;
   line-height: 1.4;
-  color: #1a1a1a; /* Dark text on light stickies */
+  color: var(--surface-mid); /* Dark text on light stickies */
   padding: 0;
 }
 
@@ -449,7 +449,7 @@
 .referenceTitle {
   background: transparent;
   border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(var(--overlay-rgb), 0.1);
   color: var(--foreground);
   font-weight: 700;
   font-size: 0.85rem;
@@ -487,15 +487,15 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border: 1px dashed rgba(var(--overlay-rgb), 0.1);
   border-radius: 6px;
   color: var(--muted);
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(var(--overlay-rgb), 0.02);
 }
 
 .imagePinUpload:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
   border-color: var(--accent);
   color: var(--foreground);
 }
@@ -505,7 +505,7 @@
   width: 100%;
   position: relative;
   overflow: hidden;
-  background-color: #000;
+  background-color: var(--background);
 }
 
 .imagePinImg {
@@ -563,7 +563,7 @@
   width: 100%;
   height: 4px;
   appearance: none;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(var(--overlay-rgb), 0.1);
   border-radius: 2px;
   outline: none;
 }
@@ -588,7 +588,7 @@
   align-items: center;
   background: rgba(20, 20, 20, 0.85);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(var(--overlay-rgb), 0.1);
   border-radius: 12px;
   padding: 4px;
   gap: 4px;
@@ -612,7 +612,7 @@
 }
 
 .zoomBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(var(--overlay-rgb), 0.1);
 }
 
 .zoomValue {
@@ -633,8 +633,8 @@
 .zoomInput {
   width: 48px;
   height: 24px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(var(--overlay-rgb), 0.05);
+  border: 1px solid rgba(var(--overlay-rgb), 0.1);
   border-radius: 4px;
   color: var(--foreground);
   font-size: 0.75rem;
@@ -659,7 +659,7 @@
   width: 80px;
   height: 4px;
   appearance: none;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(var(--overlay-rgb), 0.1);
   border-radius: 2px;
   outline: none;
   margin: 0 8px;
@@ -688,7 +688,7 @@
   align-items: center;
   justify-content: center;
   background: var(--accent);
-  color: #121212;
+  color: var(--surface);
   border: none;
   border-radius: 6px;
   font-size: 0.7rem;
@@ -782,7 +782,7 @@
   right: 0;
   height: 40px;
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), transparent);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(var(--overlay-rgb), 0.05);
   pointer-events: none;
   z-index: 40;
 }
@@ -807,7 +807,7 @@
 
 .dockedWidgetHandle {
   height: 28px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -921,9 +921,9 @@
   right: 14px;
   z-index: 10;
   background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255,255,255,0.15);
+  border: 1px solid rgba(var(--overlay-rgb),0.15);
   border-radius: 20px;
-  color: rgba(255,255,255,0.8);
+  color: rgba(var(--overlay-rgb),0.8);
   font-size: 0.72rem;
   padding: 4px 12px;
   cursor: pointer;
@@ -1014,7 +1014,7 @@
   left: 50%;
   transform: translateX(-50%);
   background: var(--accent);
-  color: #121212;
+  color: var(--surface);
   font-size: 0.65rem;
   padding: 3px 8px;
   border-radius: 4px;
@@ -1036,7 +1036,7 @@
 .spineCoverInitials {
   font-size: 0.75rem;
   font-weight: 800;
-  color: rgba(255,255,255,0.8);
+  color: rgba(var(--overlay-rgb),0.8);
 }
 
 /* --- Draw to Create --- */
@@ -1081,7 +1081,7 @@
 }
 
 .scopeSelector option {
-  background: #1a1a1a;
+  background: var(--surface-mid);
   color: var(--foreground);
   font-size: 0.75rem;
   text-transform: none;
@@ -1090,7 +1090,7 @@
 
 .typePicker {
   position: fixed;
-  background: #1a1a1a;
+  background: var(--surface-mid);
   border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
@@ -1128,8 +1128,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(var(--overlay-rgb), 0.03);
+  border: 1px solid rgba(var(--overlay-rgb), 0.08);
   border-radius: 8px;
   padding: 12px;
   cursor: pointer;
@@ -1156,7 +1156,7 @@
 .typePickerCancel {
   width: 100%;
   background: none;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(var(--overlay-rgb), 0.1);
   color: var(--muted);
   font-size: 0.7rem;
   padding: 6px;
@@ -1166,7 +1166,7 @@
 }
 
 .typePickerCancel:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
   color: var(--foreground);
 }
 
@@ -1206,7 +1206,7 @@
 }
 
 .headerToolBtn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(var(--overlay-rgb), 0.08);
   color: var(--foreground);
 }
 
@@ -1269,7 +1269,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--overlay-rgb), 0.03);
   border: 1px solid var(--border);
   color: var(--foreground);
   font-size: 0.75rem;
@@ -1387,7 +1387,7 @@
 .spineAddChapterBtn {
   margin: 16px;
   padding: 8px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--overlay-rgb), 0.03);
   border: 1px dashed var(--border);
   border-radius: 6px;
   color: var(--muted);
@@ -1432,7 +1432,7 @@
   padding: 12px 16px;
   background: none;
   border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(var(--overlay-rgb), 0.05);
   color: var(--muted);
   cursor: pointer;
   transition: color 0.15s, background 0.15s;
@@ -1457,7 +1457,7 @@
 }
 
 .spineSceneListArrowContainer:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(var(--overlay-rgb), 0.1);
   color: var(--foreground);
 }
 
@@ -1514,7 +1514,7 @@
 }
 
 .spineSceneListHeader:hover .spineSceneListHeaderSub {
-  color: rgba(255,255,255,0.7);
+  color: rgba(var(--overlay-rgb),0.7);
 }
 
 .spineSceneListHeaderActive .spineSceneListHeaderSub {
@@ -1545,7 +1545,7 @@
 }
 
 .binderSpineSceneTab:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--overlay-rgb), 0.03);
   color: var(--foreground);
 }
 
@@ -1589,7 +1589,7 @@
 .binderSpineChapterTab:hover {
   opacity: 1;
   color: var(--foreground);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
 }
 
 .binderSpineChapterTabActive {
@@ -1602,7 +1602,7 @@
 .binderAddSceneBtn {
   margin: 12px 16px 12px 28px;
   padding: 6px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--overlay-rgb), 0.03);
   border: 1px dashed var(--border);
   border-radius: 6px;
   color: var(--muted);
@@ -1851,7 +1851,7 @@
   left: 0;
   top: calc(100% + 8px);
   width: 280px;
-  background: #1a1a1a;
+  background: var(--surface-mid);
   border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
@@ -1870,7 +1870,7 @@
 
 .historyDropdownHeader {
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--overlay-rgb), 0.03);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -1922,11 +1922,11 @@
   align-items: center;
   gap: 12px;
   transition: background 0.15s;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(var(--overlay-rgb), 0.03);
 }
 
 .historyItem:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--overlay-rgb), 0.03);
 }
 
 .historyItemMain {
@@ -1951,7 +1951,7 @@
   font-size: 0.6rem;
   font-weight: 700;
   text-transform: uppercase;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(var(--overlay-rgb), 0.08);
   color: var(--muted);
   padding: 1px 4px;
   border-radius: 3px;
@@ -1975,8 +1975,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(var(--overlay-rgb), 0.05);
+  border: 1px solid rgba(var(--overlay-rgb), 0.08);
   border-radius: 6px;
   color: var(--muted);
   font-size: 0.9rem;
@@ -1999,7 +1999,7 @@
 /* --- Binder Vertical Toolbar --- */
 .binderVerticalToolbar {
   width: 52px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--overlay-rgb), 0.03);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -2033,7 +2033,7 @@
   left: calc(100% + 8px);
   top: 0;
   width: 180px;
-  background: #1a1a1a;
+  background: var(--surface-mid);
   border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
@@ -2052,7 +2052,7 @@
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(var(--overlay-rgb), 0.05);
   margin-bottom: 4px;
 }
 
@@ -2073,7 +2073,7 @@
 }
 
 .modeOption:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
   color: var(--foreground);
 }
 
@@ -2102,7 +2102,7 @@
   gap: 8px;
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(var(--overlay-rgb), 0.02);
 }
 
 .biblePinThumb {
@@ -2137,7 +2137,7 @@
 
 .biblePinBadge {
   font-size: 0.6rem;
-  background: var(--accent-subtle, rgba(255,255,255,0.08));
+  background: var(--accent-subtle, rgba(var(--overlay-rgb),0.08));
   color: var(--muted);
   padding: 2px 6px;
   border-radius: 999px;
@@ -2148,7 +2148,7 @@
   font-size: 0.7rem;
   color: var(--muted);
   padding: 4px 12px;
-  background: rgba(255, 255, 255, 0.01);
+  background: rgba(var(--overlay-rgb), 0.01);
 }
 
 .biblePinBody {
@@ -2170,7 +2170,7 @@
   gap: 6px;
   font-size: 0.72rem;
   padding: 3px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(var(--overlay-rgb), 0.03);
 }
 
 .biblePinFieldLabel {
@@ -2191,7 +2191,7 @@
   border-top: 1px solid var(--border);
   font-size: 0.65rem;
   color: var(--muted);
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(var(--overlay-rgb), 0.02);
 }
 
 .biblePinChangeBtn {
@@ -2206,19 +2206,19 @@
 }
 
 .biblePinChangeBtn:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
   color: var(--foreground);
 }
 
 .biblePinSearchWrap {
   padding: 12px;
   border-bottom: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(var(--overlay-rgb), 0.02);
 }
 
 .biblePinSearch {
   width: 100%;
-  background: var(--input-bg, #0a0a0a);
+  background: var(--input-bg, var(--background));
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 8px 10px;
@@ -2244,14 +2244,14 @@
   padding: 10px 12px;
   background: transparent;
   border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(var(--overlay-rgb), 0.03);
   cursor: pointer;
   text-align: left;
   transition: background 0.2s;
 }
 
 .biblePinResultItem:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
 }
 
 .biblePinResultName {
@@ -2297,7 +2297,7 @@
 }
 
 .sceneControlStatus {
-  background: rgba(255,255,255,0.05);
+  background: rgba(var(--overlay-rgb),0.05);
   border: 1px solid var(--border);
   border-radius: 4px;
   color: var(--foreground);
@@ -2339,11 +2339,11 @@
   background: transparent;
 }
 .sceneControlScroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
   border-radius: 3px;
 }
 .sceneControlScroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(var(--overlay-rgb), 0.1);
 }
 
 .sceneControlSection {
@@ -2443,7 +2443,7 @@
 
 .sceneCheckAdd {
   margin-top: 4px;
-  background: rgba(255,255,255,0.03);
+  background: rgba(var(--overlay-rgb),0.03);
   border: 1px dashed var(--border);
   border-radius: 4px;
   color: var(--muted);
@@ -2487,7 +2487,7 @@
   width: 100%;
   height: 4px;
   appearance: none;
-  background: rgba(255,255,255,0.1);
+  background: rgba(var(--overlay-rgb),0.1);
   border-radius: 2px;
   outline: none;
   cursor: pointer;
@@ -2526,7 +2526,7 @@
 .sceneControlTensionBar {
   flex: 1;
   height: 6px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(var(--overlay-rgb),0.05);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -2558,7 +2558,7 @@
 
 .charStateSelect {
   flex: 1;
-  background: rgba(255,255,255,0.05);
+  background: rgba(var(--overlay-rgb),0.05);
   border: 1px solid var(--border);
   border-radius: 4px;
   color: var(--foreground);
@@ -2587,7 +2587,7 @@
   background: transparent;
 }
 .charStateScroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
   border-radius: 3px;
 }
 
@@ -2596,8 +2596,8 @@
   align-items: center;
   gap: 12px;
   padding: 8px;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.05);
+  background: rgba(var(--overlay-rgb),0.02);
+  border: 1px solid rgba(var(--overlay-rgb),0.05);
   border-radius: 12px;
 }
 
@@ -2635,7 +2635,7 @@
 .charStateEmotionInput {
   background: transparent;
   border: none;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(var(--overlay-rgb),0.05);
   color: var(--accent);
   font-size: 0.7rem;
   font-weight: 600;
@@ -2688,9 +2688,9 @@
   align-items: center;
   gap: 8px;
   padding: 4px 8px;
-  background: rgba(255,255,255,0.02);
+  background: rgba(var(--overlay-rgb),0.02);
   border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.03);
+  border: 1px solid rgba(var(--overlay-rgb),0.03);
 }
 
 .charRelName {
@@ -2707,7 +2707,7 @@
   flex: 1;
   background: transparent;
   border: none;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(var(--overlay-rgb),0.03);
   color: var(--muted);
   font-size: 0.65rem;
   outline: none;
@@ -2715,7 +2715,7 @@
 }
 
 .charRelAddSelect {
-  background: rgba(255,255,255,0.02);
+  background: rgba(var(--overlay-rgb),0.02);
   border: 1px dashed var(--border);
   border-radius: 6px;
   color: var(--muted);
@@ -2808,7 +2808,7 @@
   background: transparent;
 }
 .continuityScroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
   border-radius: 3px;
 }
 
@@ -2820,7 +2820,7 @@
   padding: 12px;
   background: rgba(0,0,0,0.15);
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(var(--overlay-rgb),0.05);
 }
 
 .timelineItem {
@@ -2849,7 +2849,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.2);
+  border: 1px solid rgba(var(--overlay-rgb),0.2);
   background: var(--surface);
   z-index: 1;
   flex-shrink: 0;
@@ -2986,7 +2986,7 @@
 
 .continuityTimelineMini {
   height: 4px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(var(--overlay-rgb),0.05);
   border-radius: 2px;
   width: 100%;
   overflow: hidden;
@@ -3057,7 +3057,7 @@
   background: transparent;
 }
 .structureScroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
   border-radius: 3px;
 }
 
@@ -3068,7 +3068,7 @@
 }
 
 .beatCard {
-  background: rgba(255,255,255,0.02);
+  background: rgba(var(--overlay-rgb),0.02);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 12px;
@@ -3145,7 +3145,7 @@
 
 .pacingBarContainer {
   height: 4px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(var(--overlay-rgb),0.05);
   border-radius: 2px;
   width: 100%;
   overflow: hidden;
@@ -3162,7 +3162,7 @@
   width: 20px;
   height: 20px;
   border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(var(--overlay-rgb),0.1);
   cursor: pointer;
   padding: 0;
   overflow: hidden;
@@ -3214,7 +3214,7 @@
 
 .actSparkSeg {
   flex: 1;
-  background: rgba(255,255,255,0.05);
+  background: rgba(var(--overlay-rgb),0.05);
   border-radius: 2px;
   min-width: 4px;
   transition: all 0.3s;
@@ -3253,7 +3253,7 @@
   background: transparent;
 }
 .researchScroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
   border-radius: 3px;
 }
 
@@ -3265,7 +3265,7 @@
 }
 
 .researchCard {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--overlay-rgb), 0.03);
   border: 1px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
@@ -3286,7 +3286,7 @@
   width: 100%;
   height: 100px;
   object-fit: cover;
-  background: #111;
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
 
@@ -3312,7 +3312,7 @@
   padding: 6px 8px;
   background: rgba(0,0,0,0.15);
   border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.03);
+  border: 1px solid rgba(var(--overlay-rgb),0.03);
 }
 
 .researchSensoryIcon {
@@ -3332,7 +3332,7 @@
   flex-wrap: wrap;
   gap: 4px;
   padding: 8px 10px;
-  border-top: 1px solid rgba(255,255,255,0.03);
+  border-top: 1px solid rgba(var(--overlay-rgb),0.03);
 }
 
 .researchTagPill {
@@ -3355,7 +3355,7 @@
   border-radius: 6px;
   background: rgba(0,0,0,0.6);
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(var(--overlay-rgb),0.1);
   font-size: 10px;
   cursor: pointer;
   display: flex;
@@ -3442,11 +3442,11 @@
 .progressBarContainer {
   width: 100%;
   height: 10px;
-  background: rgba(255,255,255,0.04);
+  background: rgba(var(--overlay-rgb),0.04);
   border-radius: 5px;
   overflow: hidden;
   position: relative;
-  border: 1px solid rgba(255,255,255,0.02);
+  border: 1px solid rgba(var(--overlay-rgb),0.02);
 }
 
 .progressBarFill {
@@ -3467,14 +3467,14 @@
 
 .timer {
   background: rgba(0,0,0,0.25);
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(var(--overlay-rgb),0.05);
   border-radius: 16px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  box-shadow: inset 0 1px 1px rgba(255,255,255,0.02);
+  box-shadow: inset 0 1px 1px rgba(var(--overlay-rgb),0.02);
 }
 
 .timerLabel {
@@ -3503,8 +3503,8 @@
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(var(--overlay-rgb),0.1);
+  background: rgba(var(--overlay-rgb),0.03);
   color: var(--foreground);
   display: flex;
   align-items: center;
@@ -3514,8 +3514,8 @@
 }
 
 .timerBtn:hover {
-  background: rgba(255,255,255,0.08);
-  border-color: rgba(255,255,255,0.2);
+  background: rgba(var(--overlay-rgb),0.08);
+  border-color: rgba(var(--overlay-rgb),0.2);
   transform: translateY(-2px);
 }
 
@@ -3539,7 +3539,7 @@
   color: var(--accent);
   text-align: center;
   padding: 12px;
-  border-top: 1px solid rgba(255,255,255,0.04);
+  border-top: 1px solid rgba(var(--overlay-rgb),0.04);
   margin-top: auto;
   font-weight: 500;
   letter-spacing: 0.01em;
@@ -3600,7 +3600,7 @@
 .mapCanvas {
   flex: 1;
   position: relative;
-  background: radial-gradient(circle at 12px 12px, rgba(255,255,255,0.03) 1px, transparent 0);
+  background: radial-gradient(circle at 12px 12px, rgba(var(--overlay-rgb),0.03) 1px, transparent 0);
   background-size: 24px 24px;
   overflow: hidden;
   cursor: crosshair;
@@ -3612,7 +3612,7 @@
   height: 44px;
   border-radius: 50%;
   border: 2px solid var(--accent);
-  background: #111;
+  background: var(--surface);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3692,8 +3692,8 @@
 
 .relMapInput {
   flex: 1;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(var(--overlay-rgb),0.05);
+  border: 1px solid rgba(var(--overlay-rgb),0.08);
   border-radius: 6px;
   padding: 4px 8px;
   font-size: 0.72rem;
@@ -3757,9 +3757,9 @@
 }
 
 .sceneNavItem:hover {
-  background: rgba(255,255,255,0.04);
+  background: rgba(var(--overlay-rgb),0.04);
   transform: translateX(4px);
-  border-color: rgba(255,255,255,0.03);
+  border-color: rgba(var(--overlay-rgb),0.03);
 }
 
 .sceneNavItemActive {
@@ -3792,7 +3792,7 @@
   font-size: 0.6rem;
   color: var(--muted);
   font-family: var(--font-mono, monospace);
-  background: rgba(255,255,255,0.05);
+  background: rgba(var(--overlay-rgb),0.05);
   padding: 2px 8px;
   border-radius: 12px;
   font-weight: 700;
@@ -3898,14 +3898,14 @@
 .miniScenePill {
   width: 24px;
   height: 6px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(var(--overlay-rgb),0.05);
   border-radius: 3px;
   cursor: pointer;
   transition: all 0.3s;
 }
 
 .miniScenePill:hover {
-  background: rgba(255,255,255,0.15);
+  background: rgba(var(--overlay-rgb),0.15);
 }
 
 .miniScenePillActive {
@@ -3916,7 +3916,7 @@
 
 .modeDropdownScroll {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  scrollbar-color: rgba(var(--overlay-rgb), 0.1) transparent;
 }
 
 .modeDropdownScroll::-webkit-scrollbar {
@@ -3924,7 +3924,7 @@
 }
 
 .modeDropdownScroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(var(--overlay-rgb), 0.1);
   border-radius: 2px;
 }
 
@@ -3942,7 +3942,7 @@
   width: 420px;
   background: rgba(18, 18, 18, 0.85);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(var(--overlay-rgb), 0.1);
   border-radius: 24px;
   padding: 40px;
   display: flex;
@@ -3974,7 +3974,7 @@
   justify-content: center;
   font-size: 1.8rem;
   font-weight: 800;
-  color: #121212;
+  color: var(--surface);
   box-shadow: 0 8px 16px rgba(var(--accent-rgb), 0.3);
 }
 
@@ -4006,8 +4006,8 @@
   align-items: center;
   gap: 16px;
   padding: 0 24px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(var(--overlay-rgb), 0.04);
+  border: 1px solid rgba(var(--overlay-rgb), 0.08);
   border-radius: 14px;
   color: var(--foreground);
   cursor: pointer;
@@ -4049,8 +4049,8 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.02);
+  border: 1px solid rgba(var(--overlay-rgb), 0.05);
   border-radius: 12px;
   color: var(--muted);
   cursor: pointer;
@@ -4058,9 +4058,9 @@
 }
 
 .welcomeActionBtnSecondary:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(var(--overlay-rgb), 0.06);
   color: var(--foreground);
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(var(--overlay-rgb), 0.15);
 }
 
 .welcomeProjectList {
@@ -4072,7 +4072,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(var(--overlay-rgb), 0.05);
   animation: listDown 0.3s ease;
 }
 
@@ -4098,7 +4098,7 @@
 }
 
 .welcomeProjectItem:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
   color: var(--foreground);
 }
 
@@ -4173,7 +4173,7 @@
   justify-content: center;
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(var(--overlay-rgb), 0.1);
 }
 
 .coverEditorPreviewInitials {
@@ -4243,7 +4243,7 @@
 .coverEditorField input,
 .coverEditorField select,
 .coverEditorField textarea {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--overlay-rgb), 0.03);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 12px 16px;
@@ -4258,7 +4258,7 @@
 .coverEditorField select:focus,
 .coverEditorField textarea:focus {
   border-color: var(--accent);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
   box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.1);
 }
 
@@ -4296,7 +4296,7 @@
   border-radius: 50%;
   background: rgba(15, 15, 15, 0.6);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(var(--overlay-rgb), 0.1);
   color: white;
   display: flex;
   align-items: center;
@@ -4337,9 +4337,9 @@
   width: calc(100% - 16px);
   margin: 0 8px 12px;
   padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--overlay-rgb), 0.03);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(var(--overlay-rgb), 0.08);
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -4348,7 +4348,7 @@
 }
 
 .spineBookModeHeader:hover {
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(var(--overlay-rgb), 0.07);
   border-color: rgba(var(--accent-rgb), 0.3);
   transform: translateY(-1px);
 }
@@ -4385,12 +4385,12 @@
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.3);
   color: var(--muted);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(var(--overlay-rgb), 0.05);
 }
 
 .spineBookModeHeaderActive .spineBookModeStatus {
   background: var(--accent);
-  color: #121212;
+  color: var(--surface);
   border-color: transparent;
 }
 

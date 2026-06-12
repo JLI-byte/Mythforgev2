@@ -75,8 +75,8 @@
 .searchInputWrapper {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(var(--overlay-rgb), 0.06);
+  border: 1px solid rgba(var(--overlay-rgb), 0.1);
   border-radius: 8px;
   padding: 0 10px;
   gap: 6px;
@@ -86,7 +86,7 @@
 }
 
 .searchInputWrapper:focus-within {
-  background: rgba(255, 255, 255, 0.09);
+  background: rgba(var(--overlay-rgb), 0.09);
   border-color: var(--accent);
   width: 320px;
 }
@@ -261,7 +261,7 @@
 .modeSep {
   width: 1px;
   height: 20px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(var(--overlay-rgb), 0.1);
   flex-shrink: 0;
   margin: 0 4px;
 }
@@ -288,7 +288,7 @@
 }
 
 .iconBtn:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(var(--overlay-rgb), 0.06);
   color: var(--foreground);
 }
 
@@ -305,16 +305,16 @@
   align-items: center;
   gap: 10px;
   padding: 4px 10px 4px 4px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(var(--overlay-rgb), 0.03);
+  border: 1px solid rgba(var(--overlay-rgb), 0.08);
   border-radius: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .profilePill:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(var(--overlay-rgb), 0.06);
+  border-color: rgba(var(--overlay-rgb), 0.15);
 }
 
 .profileAvatar {
@@ -329,7 +329,7 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), #6b4c9a);
+  background: linear-gradient(135deg, var(--accent), var(--accent-dim, #6b4c9a));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -381,7 +381,7 @@
 
 .dropdownHeader {
   padding: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(var(--overlay-rgb), 0.05);
 }
 
 .dropdownEmail {
@@ -407,7 +407,7 @@
 }
 
 .dropdownItem:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
 }
 
 .dropdownItemSignOut {

@@ -53,7 +53,7 @@
   background-size: cover;
   background-position: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(var(--overlay-rgb),0.06);
 }
 
 .categoryCard:hover {
@@ -98,14 +98,14 @@
 
 .categoryDescription {
   font-size: 0.85rem;
-  color: rgba(255,255,255,0.7);
+  color: rgba(var(--overlay-rgb),0.7);
   margin: 0;
   line-height: 1.4;
 }
 
 .categoryCount {
   font-size: 0.78rem;
-  color: rgba(255,255,255,0.5);
+  color: rgba(var(--overlay-rgb),0.5);
   font-weight: 500;
   margin-top: 2px;
 }

@@ -66,7 +66,7 @@
 }
 
 /* Glassmorphism — Sprint 98 */
-.sideTab:hover { color: var(--foreground); background: rgba(255, 255, 255, 0.08); transform: translateX(-6px); }
+.sideTab:hover { color: var(--foreground); background: rgba(var(--overlay-rgb), 0.08); transform: translateX(-6px); }
 /* Glassmorphism — Sprint 98 */
 .sideTabActive {
   background: var(--glass-bg);
@@ -79,7 +79,7 @@
 .ghostTab {
   position: fixed;
   z-index: 9998;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--overlay-rgb), 0.03);
   border: none;
   border-right: 1px solid var(--border);
   cursor: pointer;
@@ -91,7 +91,7 @@
 }
 
 .ghostTab:hover {
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(var(--overlay-rgb), 0.07);
 }
 
 .ghostTabArrow {
@@ -200,7 +200,7 @@
 }
 
 .typeBtn {
-  background: var(--surface-mid, #1c1b1b);
+  background: var(--surface-mid, var(--surface-mid));
   border: 1px solid var(--border);
   color: var(--muted);
   padding: 7px 12px;
@@ -212,7 +212,7 @@
   font-family: inherit;
   transition: all 0.15s;
 }
-.typeBtn:hover { color: var(--foreground); border-color: rgba(255,255,255,0.15); }
+.typeBtn:hover { color: var(--foreground); border-color: rgba(var(--overlay-rgb),0.15); }
 .typeBtnActive {
   background: rgba(160,120,255,0.1);
   border-color: var(--accent);
@@ -238,7 +238,7 @@
 }
 
 .input {
-  background: var(--surface-mid, #1c1b1b);
+  background: var(--surface-mid, var(--surface-mid));
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 8px 10px;
@@ -254,7 +254,7 @@
 .input:focus { border-color: var(--accent); }
 
 .textarea {
-  background: var(--surface-mid, #1c1b1b);
+  background: var(--surface-mid, var(--surface-mid));
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 8px 10px;
@@ -330,13 +330,13 @@
   white-space: nowrap;
   transition: all 0.15s;
 }
-.exportBtn:hover { color: var(--foreground); border-color: rgba(255,255,255,0.2); }
+.exportBtn:hover { color: var(--foreground); border-color: rgba(var(--overlay-rgb),0.2); }
 
 .historyList { display: flex; flex-direction: column; gap: 7px; }
 .emptyHistory { font-size: 0.75rem; color: #353534; margin: 0; text-align: center; padding: 10px 0; }
 
 .historyEntry {
-  background: var(--surface-mid, #1c1b1b);
+  background: var(--surface-mid, var(--surface-mid));
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 9px 11px;

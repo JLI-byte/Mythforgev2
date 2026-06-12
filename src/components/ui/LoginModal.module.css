@@ -46,7 +46,7 @@
   right: 20px;
   width: 32px;
   height: 32px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
   border: none;
   border-radius: 50%;
   color: white;
@@ -59,7 +59,7 @@
 }
 
 .closeBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(var(--overlay-rgb), 0.1);
   transform: rotate(90deg);
 }
 
@@ -110,7 +110,7 @@
 
 .googleBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 20px rgba(var(--overlay-rgb), 0.2);
 }
 
 .divider {
@@ -118,7 +118,7 @@
   align-items: center;
   gap: 12px;
   margin: 24px 0;
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(var(--overlay-rgb), 0.2);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -129,7 +129,7 @@
   content: "";
   flex: 1;
   height: 1px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(var(--overlay-rgb), 0.1);
 }
 
 .formGroup {
@@ -150,7 +150,7 @@
   width: 100%;
   padding: 14px;
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(var(--overlay-rgb), 0.1);
   border-radius: 12px;
   color: white;
   font-size: 0.9rem;

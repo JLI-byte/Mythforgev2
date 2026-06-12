@@ -41,7 +41,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(var(--overlay-rgb), 0.06);
   flex-shrink: 0;
 }
 
@@ -89,7 +89,7 @@
 
 .closeBtn:hover {
   color: #e5e2e1;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(var(--overlay-rgb), 0.06);
 }
 
 /* ─── Step body ─── */
@@ -125,7 +125,7 @@
 /* ─── Text inputs ─── */
 .textInput {
   background: #1c1b1b;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(var(--overlay-rgb), 0.08);
   border-radius: 6px;
   padding: 10px 12px;
   font-size: 0.9rem;
@@ -142,7 +142,7 @@
 
 .textarea {
   background: #1c1b1b;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(var(--overlay-rgb), 0.08);
   border-radius: 6px;
   padding: 10px 12px;
   font-size: 0.88rem;
@@ -179,7 +179,7 @@
   gap: 3px;
   padding: 10px 10px;
   background: #1c1b1b;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(var(--overlay-rgb), 0.06);
   border-radius: 8px;
   cursor: pointer;
   text-align: left;
@@ -221,7 +221,7 @@
   min-width: 60px;
   padding: 7px 10px;
   background: #1c1b1b;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(var(--overlay-rgb), 0.06);
   border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -234,7 +234,7 @@
 
 .pill:hover {
   color: #e5e2e1;
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(var(--overlay-rgb), 0.12);
 }
 
 .pillActive {
@@ -257,7 +257,7 @@
   gap: 2px;
   padding: 10px;
   background: #1c1b1b;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(var(--overlay-rgb), 0.06);
   border-radius: 8px;
   cursor: pointer;
   text-align: left;
@@ -298,7 +298,7 @@
 .coverInitials {
   font-size: 1.4rem;
   font-weight: 800;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(var(--overlay-rgb), 0.9);
 }
 
 /* ─── Footer ─── */
@@ -308,13 +308,13 @@
   justify-content: space-between;
   padding: 16px 24px 20px;
   border-top: 1px solid var(--glass-border);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--overlay-rgb), 0.05);
   flex-shrink: 0;
 }
 
 .backBtn {
   background: none;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(var(--overlay-rgb), 0.08);
   color: #958ea0;
   padding: 8px 16px;
   border-radius: 6px;
@@ -327,7 +327,7 @@
 
 .backBtn:hover {
   color: #e5e2e1;
-  border-color: rgba(255, 255, 255, 0.16);
+  border-color: rgba(var(--overlay-rgb), 0.16);
 }
 
 .nextBtn {
