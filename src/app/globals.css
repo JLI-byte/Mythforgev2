@@ -195,28 +195,19 @@ option {
   inset: 0;
   z-index: -2; /* sharp wood; DeskLighting multiplies the moving light over it */
   pointer-events: none;
-  /* Seamless wood TILED at native size — sharp at any width (ultrawide-safe),
-     never upscaled. Horizontal planks just continue across the repeat. A faint
-     vignette covers the whole viewport on top. LIGHT mode. */
-  background-color: #6b4f30;
-  background-image:
+  /* The sharp wood layer — the directional pooling lives in the SVG, not here.
+     LIGHT: bright wood with a faint edge vignette. */
+  background:
     radial-gradient(ellipse 135% 100% at 50% 32%, transparent 62%, rgba(40, 26, 10, 0.16)),
-    url('/textures/desk.webp');
-  background-repeat: no-repeat, repeat;
-  background-position: center, top left;
-  background-size: cover, 820px 820px;
+    #6b4f30 url('/textures/desk.webp') center / cover no-repeat;
   opacity: 1;
 }
 :root[data-theme-family="fantasy"][data-workspace-mode="desk"][data-theme="dark"] body::before {
   /* DARK: a duskier base so the unlit desk reads as night; the SVG candle adds
      the warm pool on top via multiply. */
-  background-color: #1a1108;
-  background-image:
+  background:
     linear-gradient(180deg, rgba(14, 9, 4, 0.34), rgba(12, 7, 2, 0.42)),
-    url('/textures/desk.webp');
-  background-repeat: no-repeat, repeat;
-  background-position: center, top left;
-  background-size: cover, 820px 820px;
+    #1a1108 url('/textures/desk.webp') center / cover no-repeat;
   opacity: 1;
 }
 
