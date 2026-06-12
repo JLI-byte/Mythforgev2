@@ -4,7 +4,9 @@
     height: 100vh;
     width: 100vw;
     overflow: hidden;
-    background: var(--background);
+    /* Falls back to --background for default themes (unchanged). Fantasy sets
+       --app-bg: transparent so the fixed wood desk ::before shows through. */
+    background: var(--app-bg, var(--background));
 }
 
 .workspaceRow {

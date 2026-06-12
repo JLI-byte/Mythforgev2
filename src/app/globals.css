@@ -18,6 +18,16 @@
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-serif: 'Merriweather', 'Georgia', serif;
 
+  /* RGB used for subtle hover/surface overlays (rgba(var(--overlay-rgb), a)).
+     White by default to preserve the original glass-on-dark look; the fantasy
+     family overrides it with ink (light) / warm cream (dark). */
+  --overlay-rgb: 255, 255, 255;
+
+  /* Wash painted over the main content area (e.g. Bookshelf container). Dark by
+     default so default themes are unchanged; fantasy goes faint so the wood
+     desk shows through. */
+  --content-wash: rgba(13, 13, 13, 0.4);
+
   /* Glassmorphism Defaults */
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-blur: 20px;
@@ -122,6 +132,11 @@ option {
   --muted: #75603f;
   --secondary: #3d7068;
   --tertiary: #b08d2f;
+  --overlay-rgb: 59, 44, 21;
+  /* Faint ink wash — lets the light wood desk show warm through the content area. */
+  --content-wash: rgba(59, 44, 21, 0.05);
+  /* Transparent app shell so the wood desk ::before is visible. */
+  --app-bg: transparent;
 
   --font-serif: var(--font-garamond), 'Merriweather', Georgia, serif;
 
@@ -147,6 +162,11 @@ option {
   --muted: #b09a72;
   --secondary: #5a9b8f;
   --tertiary: #d8b15a;
+  --overlay-rgb: 236, 224, 196;
+  /* Soft dark wash deepens the planks slightly for surface contrast. */
+  --content-wash: rgba(8, 5, 2, 0.34);
+  /* Transparent app shell so the wood desk ::before is visible. */
+  --app-bg: transparent;
 
   --font-serif: var(--font-garamond), 'Merriweather', Georgia, serif;
 
@@ -156,10 +176,15 @@ option {
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.55);
 }
 
-/* Parchment photo texture behind the whole app (light family only — the dark
-   family uses a warm gradient instead, so the texture doesn't muddy). */
+/* Cartographer's-desk wood photo behind the whole app. The parchment surfaces
+   (editor, panels, cards) float on top via their own --surface tokens, so the
+   wood reads as the desk the map sits on. cover = scaled, never tiled/stretched.
+   Light and dark each get their own plank photo. */
 :root[data-theme-family="fantasy"] body {
   position: relative;
+  /* Transparent so the fixed wood ::before (z-index:-1) is actually visible.
+     Without this, body's opaque --background cream paints over the desk. */
+  background-color: transparent;
 }
 :root[data-theme-family="fantasy"] body::before {
   content: '';
@@ -167,15 +192,18 @@ option {
   inset: 0;
   z-index: -1;
   pointer-events: none;
+  /* Soft vignette darkens the desk edges so the parchment surfaces pop. */
   background:
-    radial-gradient(ellipse 120% 90% at 50% 12%, transparent 58%, rgba(59, 44, 21, 0.10)),
-    var(--background) url('/textures/parchment.webp') center / cover no-repeat;
-  opacity: 0.85;
+    radial-gradient(ellipse 130% 95% at 50% 18%, transparent 54%, rgba(40, 26, 10, 0.30)),
+    #6b4f30 url('/textures/desk-light.webp') center / cover no-repeat;
+  opacity: 1;
 }
 :root[data-theme-family="fantasy"][data-theme="dark"] body::before {
+  /* Warm candlelight pool up top + darkened corners on the dark planks. */
   background:
-    radial-gradient(ellipse 130% 100% at 50% 0%, rgba(120, 78, 30, 0.18), transparent 60%),
-    linear-gradient(180deg, #20170c, #160f07);
+    radial-gradient(ellipse 120% 90% at 50% 6%, rgba(150, 95, 38, 0.22), transparent 55%),
+    radial-gradient(ellipse 140% 105% at 50% 55%, transparent 38%, rgba(8, 5, 2, 0.50)),
+    #2c1d0e url('/textures/desk-dark.webp') center / cover no-repeat;
   opacity: 1;
 }
 
