@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useCallback } from 'react';
 import styles from '../WritingDesk.module.css';
+import { useWorkspaceStore } from '@/store/workspaceStore';
 
 // ============================================================
 // SURFACE CANVAS (Static grid, synced to pan/zoom)
@@ -17,6 +18,8 @@ export const SurfaceCanvas = React.forwardRef<{ redraw: (off: { x: number; y: nu
   offset: { x: number; y: number };
 }>(({ containerRef, zoom, offset }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  // The fantasy theme uses the wood desk surface, so the grid dots are hidden.
+  const isFantasy = useWorkspaceStore((s) => s.themeFamily === 'fantasy');
 
   const draw = useCallback((currentOffset: { x: number; y: number }, currentZoom: number) => {
     const canvas = canvasRef.current;
@@ -28,6 +31,8 @@ export const SurfaceCanvas = React.forwardRef<{ redraw: (off: { x: number; y: nu
     const vw = canvas.width;
     const vh = canvas.height;
     ctx.clearRect(0, 0, vw, vh);
+
+    if (isFantasy) return; // no dot grid on the wood desk
 
     const scaledSpacing = DOT_SPACING * currentZoom;
     const colStart = Math.floor(-currentOffset.x / scaledSpacing) - 1;
@@ -48,7 +53,7 @@ export const SurfaceCanvas = React.forwardRef<{ redraw: (off: { x: number; y: nu
         ctx.fill();
       }
     }
-  }, [containerRef]);
+  }, [containerRef, isFantasy]);
 
   React.useImperativeHandle(ref, () => ({
     redraw: (off, z) => draw(off, z),
