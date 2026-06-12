@@ -4,181 +4,298 @@ import { useEffect, useRef } from "react";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 
 /**
- * DeskLighting — an SVG lighting shader that multiplies over the wood desk.
+ * DeskLighting — a WebGL point-light shader multiplied over the wood desk.
  *
- * Technique (after alvov's "SVG lighting shader"): blur the wood, convert its
- * luminance to an alpha height-field (bump map), and light that bump map with a
- * movable point light via feDiffuseLighting. The result is the *light only*; it
- * is then `mix-blend-mode: multiply`-ed over the sharp wood that globals.css
- * paints behind it, so the grain catches the light without the filter ever
- * touching the (full-res) wood pixels.
+ * Same lighting model as SVG feDiffuseLighting (the CodePen reference), but on
+ * the GPU: the fragment shader derives a bump normal from the wood's luminance
+ * gradient and lights it with a point light at the cursor. The canvas outputs
+ * the LIGHT only and is `mix-blend-mode: multiply`-ed over the sharp CSS wood
+ * layer, so the grain catches the light.
  *
- * Performance: the filter is the expensive part, so the SVG is laid out tiny
- * (~1/5 viewport) and scaled up by the compositor — the filter rasterises at a
- * fraction of the pixels (the reference used a ~450px texture too) and the soft
- * light upscales invisibly. The point light tracks the cursor 1:1 via the SVG's
- * own CTM; only the candle flicker runs on a rAF loop. Fantasy theme only.
+ * Why WebGL: Chromium rasterises SVG filters on the CPU at final screen scale,
+ * so the previous version re-ran a ~2.5M-pixel feDiffuseLighting on every mouse
+ * move — the source of the periodic stutter. This shader is trivial for any
+ * GPU (integrated included). The canvas renders at half resolution (soft light
+ * upscales invisibly) and draws only when something changed: cursor moves, the
+ * candle flickers (dark mode, ~30fps), or theme/resize. Light mode with a still
+ * cursor draws nothing.
+ *
+ * Fallbacks: no WebGL → transparent canvas, the static CSS wood still shows.
+ * prefers-reduced-motion → no flicker. Hidden tab → loop paused.
  */
 export default function DeskLighting() {
     const themeFamily = useWorkspaceStore((s) => s.themeFamily);
-
-    const svgRef = useRef<SVGSVGElement>(null);
-    const lightRef = useRef<SVGFEPointLightElement>(null);
-    const diffuseRef = useRef<SVGFEDiffuseLightingElement>(null);
-
-    // Low-res filter space (keeps the lighting computation cheap).
-    const VB_W = 500;
-    const VB_H = 340;
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
         if (themeFamily !== "fantasy") return;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
 
-        // Map a viewport pixel straight into filter user-space via the SVG's own
-        // CTM — exact regardless of the CSS scale / viewBox / slice.
-        const setLightPos = (clientX: number, clientY: number) => {
-            const svg = svgRef.current;
-            const light = lightRef.current;
-            if (!svg || !light) return;
-            const ctm = svg.getScreenCTM();
-            if (!ctm) return;
-            const p = svg.createSVGPoint();
-            p.x = clientX;
-            p.y = clientY;
-            const u = p.matrixTransform(ctm.inverse());
-            light.setAttribute("x", u.x.toFixed(1));
-            light.setAttribute("y", u.y.toFixed(1));
+        const gl = canvas.getContext("webgl", {
+            alpha: true,
+            antialias: false,
+            depth: false,
+            stencil: false,
+            powerPreference: "low-power",
+        });
+        if (!gl) return; // CSS wood remains as the static fallback
+
+        // Half-resolution render target — the light is soft, so the compositor
+        // upscale is invisible and the fill cost drops 4x.
+        const RES = 0.5;
+
+        const VERT = `
+attribute vec2 aPos;
+varying vec2 vUv;
+void main() {
+  vUv = aPos * 0.5 + 0.5;
+  gl_Position = vec4(aPos, 0.0, 1.0);
+}`;
+
+        // Mirrors feDiffuseLighting: N from the height-field gradient,
+        // out = lightColor * diffuseConstant * max(N.L, 0).
+        const FRAG = `
+precision mediump float;
+varying vec2 vUv;
+uniform sampler2D uWood;
+uniform vec2 uUvScale;
+uniform vec2 uUvOffset;
+uniform vec2 uTexel;
+uniform vec3 uLight;
+uniform vec2 uCanvas;
+uniform vec3 uColor;
+uniform float uIntensity;
+uniform float uBump;
+
+float lum(vec2 uv) {
+  vec3 c = texture2D(uWood, uv).rgb;
+  return dot(c, vec3(0.299, 0.587, 0.114));
+}
+
+void main() {
+  vec2 uv = vUv * uUvScale + uUvOffset;
+  vec2 st = uTexel * 3.0;
+  float hl = lum(uv - vec2(st.x, 0.0));
+  float hr = lum(uv + vec2(st.x, 0.0));
+  float hd = lum(uv - vec2(0.0, st.y));
+  float hu = lum(uv + vec2(0.0, st.y));
+  vec3 n = normalize(vec3((hl - hr) * uBump, (hd - hu) * uBump, 1.0));
+  vec3 L = normalize(uLight - vec3(vUv * uCanvas, 0.0));
+  float diff = max(dot(n, L), 0.0);
+  gl_FragColor = vec4(min(uColor * diff * uIntensity, vec3(1.0)), 1.0);
+}`;
+
+        const compile = (type: number, src: string) => {
+            const sh = gl.createShader(type);
+            if (!sh) return null;
+            gl.shaderSource(sh, src);
+            gl.compileShader(sh);
+            if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+                gl.deleteShader(sh);
+                return null;
+            }
+            return sh;
+        };
+        const vs = compile(gl.VERTEX_SHADER, VERT);
+        const fs = compile(gl.FRAGMENT_SHADER, FRAG);
+        if (!vs || !fs) return;
+        const prog = gl.createProgram();
+        if (!prog) return;
+        gl.attachShader(prog, vs);
+        gl.attachShader(prog, fs);
+        gl.linkProgram(prog);
+        if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+        gl.useProgram(prog);
+
+        // Fullscreen triangle pair
+        const buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.bufferData(
+            gl.ARRAY_BUFFER,
+            new Float32Array([-1, -1, 3, -1, -1, 3]),
+            gl.STATIC_DRAW,
+        );
+        const aPos = gl.getAttribLocation(prog, "aPos");
+        gl.enableVertexAttribArray(aPos);
+        gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+        const U = (name: string) => gl.getUniformLocation(prog, name);
+        const uUvScale = U("uUvScale");
+        const uUvOffset = U("uUvOffset");
+        const uTexel = U("uTexel");
+        const uLight = U("uLight");
+        const uCanvas = U("uCanvas");
+        const uColor = U("uColor");
+        const uIntensity = U("uIntensity");
+        const uBump = U("uBump");
+
+        // ---- mutable render state -------------------------------------------
+        let texReady = false;
+        let texW = 1536;
+        let texH = 1024;
+        let W = 1;
+        let H = 1; // canvas pixel size
+        let dirty = true;
+        let isDark =
+            document.documentElement.getAttribute("data-theme") === "dark";
+        const mouse = { x: 0.5, y: 0.35 }; // viewport fraction
+        const reducedMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)",
+        ).matches;
+
+        const resize = () => {
+            W = Math.max(1, Math.floor(window.innerWidth * RES));
+            H = Math.max(1, Math.floor(window.innerHeight * RES));
+            canvas.width = W;
+            canvas.height = H;
+            gl.viewport(0, 0, W, H);
+            // background-size: cover mapping (must match the CSS wood layer)
+            const s = Math.max(W / texW, H / texH);
+            const visW = W / s / texW;
+            const visH = H / s / texH;
+            gl.uniform2f(uUvScale, visW, visH);
+            gl.uniform2f(uUvOffset, (1 - visW) / 2, (1 - visH) / 2);
+            gl.uniform2f(uTexel, 1 / texW, 1 / texH);
+            gl.uniform2f(uCanvas, W, H);
+            dirty = true;
         };
 
-        // Position is event-driven for instant 1:1 tracking — no easing/throttle.
-        const onMove = (e: MouseEvent) => setLightPos(e.clientX, e.clientY);
-        window.addEventListener("mousemove", onMove, { passive: true });
+        // Wood texture (NPOT: clamp + linear, no mips)
+        const tex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        const img = new Image();
+        img.src = "/textures/desk.webp";
+        img.decode()
+            .then(() => {
+                texW = img.naturalWidth;
+                texH = img.naturalHeight;
+                gl.bindTexture(gl.TEXTURE_2D, tex);
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                gl.texImage2D(
+                    gl.TEXTURE_2D,
+                    0,
+                    gl.RGB,
+                    gl.RGB,
+                    gl.UNSIGNED_BYTE,
+                    img,
+                );
+                texReady = true;
+                resize();
+            })
+            .catch(() => {
+                /* keep canvas transparent; CSS wood shows */
+            });
 
-        // rAF loop ONLY drives candle flicker (z + intensity), written on change
-        // so light mode stays idle when the cursor is still.
+        resize();
+        gl.uniform1f(uBump, 4.5);
+
+        const onMove = (e: MouseEvent) => {
+            mouse.x = e.clientX / window.innerWidth;
+            mouse.y = e.clientY / window.innerHeight;
+            dirty = true;
+        };
+        window.addEventListener("mousemove", onMove, { passive: true });
+        window.addEventListener("resize", resize);
+
+        const themeObserver = new MutationObserver(() => {
+            isDark =
+                document.documentElement.getAttribute("data-theme") === "dark";
+            dirty = true;
+        });
+        themeObserver.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ["data-theme"],
+        });
+
+        // ---- draw loop: draws ONLY when dirty or (dark && flicker tick) -----
         let raf = 0;
         let t = 0;
-        let last = 0;
-        let prevZ = "";
-        let prevI = "";
-        let prevColor = "";
-        const FRAME_MS = 1000 / 30;
+        let lastFlicker = 0;
+        const FLICKER_MS = 1000 / 30;
 
-        const loop = (now: number) => {
-            raf = requestAnimationFrame(loop);
-            if (now - last < FRAME_MS) return;
-            last = now;
-            t += 1;
+        const draw = (now: number) => {
+            raf = requestAnimationFrame(draw);
+            if (!texReady) return;
 
-            const isDark =
-                document.documentElement.getAttribute("data-theme") === "dark";
+            const flickerDue =
+                isDark && !reducedMotion && now - lastFlicker >= FLICKER_MS;
+            if (!dirty && !flickerDue) return;
+            if (flickerDue) {
+                lastFlicker = now;
+                t += 1;
+            }
+            dirty = false;
 
-            // Candle sits low & tight; sun sits higher & broad (viewBox units).
-            let z = isDark ? 26 : 64;
-            let intensity = isDark ? 1.15 : 1.0;
-            if (isDark) {
+            // Candle sits low and tight; sun high and broad (fractions of width).
+            let z = (isDark ? 0.052 : 0.3) * W;
+            let intensity = isDark ? 1.15 : 1.25;
+            if (isDark && !reducedMotion) {
                 const f =
                     Math.sin(t * 0.55) * 0.5 +
                     Math.sin(t * 0.91 + 1) * 0.3 +
                     Math.sin(t * 1.9 + 2) * 0.2;
-                z += f * 4;
+                z += f * 0.008 * W;
                 intensity += f * 0.14;
             }
 
-            const zStr = z.toFixed(1);
-            const iStr = intensity.toFixed(3);
-            const color = isDark ? "#ff9234" : "#fff1c4";
-            if (lightRef.current && zStr !== prevZ) {
-                lightRef.current.setAttribute("z", zStr);
-                prevZ = zStr;
+            gl.uniform3f(
+                uLight,
+                mouse.x * W,
+                (1 - mouse.y) * H, // GL y is bottom-up
+                z,
+            );
+            gl.uniform1f(uIntensity, intensity);
+            if (isDark) {
+                gl.uniform3f(uColor, 1.0, 0.573, 0.204); // #ff9234 candle
+            } else {
+                gl.uniform3f(uColor, 1.0, 0.945, 0.769); // #fff1c4 sun
             }
-            if (diffuseRef.current && iStr !== prevI) {
-                diffuseRef.current.setAttribute("diffuseConstant", iStr);
-                prevI = iStr;
-            }
-            if (diffuseRef.current && color !== prevColor) {
-                diffuseRef.current.setAttribute("lighting-color", color);
-                prevColor = color;
+            gl.drawArrays(gl.TRIANGLES, 0, 3);
+        };
+        raf = requestAnimationFrame(draw);
+
+        const onVisibility = () => {
+            cancelAnimationFrame(raf);
+            if (document.visibilityState === "visible") {
+                dirty = true;
+                raf = requestAnimationFrame(draw);
             }
         };
-        raf = requestAnimationFrame(loop);
+        document.addEventListener("visibilitychange", onVisibility);
+
+        const onContextLost = (e: Event) => e.preventDefault();
+        canvas.addEventListener("webglcontextlost", onContextLost);
 
         return () => {
             cancelAnimationFrame(raf);
             window.removeEventListener("mousemove", onMove);
+            window.removeEventListener("resize", resize);
+            document.removeEventListener("visibilitychange", onVisibility);
+            canvas.removeEventListener("webglcontextlost", onContextLost);
+            themeObserver.disconnect();
         };
     }, [themeFamily]);
 
     if (themeFamily !== "fantasy") return null;
 
     return (
-        <svg
-            ref={svgRef}
+        <canvas
+            ref={canvasRef}
             aria-hidden="true"
-            viewBox={`0 0 ${VB_W} ${VB_H}`}
-            preserveAspectRatio="xMidYMid slice"
             style={{
                 position: "fixed",
-                top: 0,
-                left: 0,
-                width: "20vw",
-                height: "20vh",
-                transform: "scale(5)",
-                transformOrigin: "top left",
+                inset: 0,
+                width: "100vw",
+                height: "100vh",
                 zIndex: -1,
                 pointerEvents: "none",
                 mixBlendMode: "multiply",
             }}
-        >
-            <defs>
-                <pattern
-                    id="deskWoodPattern"
-                    width={VB_W}
-                    height={VB_H}
-                    patternUnits="userSpaceOnUse"
-                >
-                    <image
-                        href="/textures/desk.webp"
-                        width={VB_W}
-                        height={VB_H}
-                        preserveAspectRatio="xMidYMid slice"
-                    />
-                </pattern>
-                {/* Output is the LIGHT only (no composite with the wood) — the
-                    wood comes from the CSS layer below via multiply blend. */}
-                <filter
-                    id="deskLightFilter"
-                    x="0"
-                    y="0"
-                    width="100%"
-                    height="100%"
-                >
-                    <feGaussianBlur
-                        in="SourceGraphic"
-                        stdDeviation="0.8"
-                        result="blurred"
-                    />
-                    <feColorMatrix
-                        in="blurred"
-                        type="luminanceToAlpha"
-                        result="bumpMap"
-                    />
-                    <feDiffuseLighting
-                        ref={diffuseRef}
-                        in="bumpMap"
-                        surfaceScale="2.2"
-                        diffuseConstant="1.1"
-                        lightingColor="#ff9234"
-                    >
-                        <fePointLight ref={lightRef} x="250" y="110" z="26" />
-                    </feDiffuseLighting>
-                </filter>
-            </defs>
-            <rect
-                width={VB_W}
-                height={VB_H}
-                fill="url(#deskWoodPattern)"
-                filter="url(#deskLightFilter)"
-            />
-        </svg>
+        />
     );
 }
