@@ -1,123 +1,165 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import * as THREE from "three";
 
 /**
- * DottedSurface — a lightweight animated dot field for the standard landing.
+ * DottedSurface — the three.js particle-wave background (21st.dev "dotted-surface").
  *
- * A grid of dots on a 2D canvas; a travelling sine wave modulates each dot's
- * vertical offset and opacity so the field drifts like a slow swell. No
- * three.js. Fixed dark palette. Pauses when the tab is hidden and renders a
- * single static frame under prefers-reduced-motion. DPR is capped and dot
- * density is fixed by GAP, so fill cost stays low on large/ultrawide screens.
+ * A 40×60 grid of points rendered in 3D perspective; each point's height is
+ * driven by two crossing sine waves so the field rolls like water. Ported from
+ * the 21st.dev registry component, with next-themes/Tailwind removed: the
+ * standard landing is always dark, so the point palette is fixed and the layer
+ * uses inline styles at z-index 0 (above the page's solid background, below the
+ * content). The WebGL canvas is transparent — the dark backdrop comes from the
+ * page behind it. Pauses on hidden tab and renders a single static frame under
+ * prefers-reduced-motion.
  */
 export default function DottedSurface() {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
+        const container = containerRef.current;
+        if (!container) return;
 
-        const GAP = 28;            // px between dots
-        const DOT_RADIUS = 1.4;    // px
-        const WAVE_SPEED = 0.0006; // radians per ms
-        const WAVE_LENGTH = 0.004; // radians per px
-        const AMPLITUDE = 10;      // px vertical drift
-        const DOT_COLOR = "236, 233, 226"; // faint warm-neutral
+        const SEPARATION = 150;
+        const AMOUNTX = 40;
+        const AMOUNTY = 60;
 
-        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-        let cols = 0;
-        let rows = 0;
-        let width = 0;
-        let height = 0;
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.Fog(0xffffff, 2000, 10000);
 
-        const resize = () => {
-            width = window.innerWidth;
-            height = window.innerHeight;
-            canvas.width = Math.floor(width * dpr);
-            canvas.height = Math.floor(height * dpr);
-            canvas.style.width = width + "px";
-            canvas.style.height = height + "px";
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            cols = Math.ceil(width / GAP) + 1;
-            rows = Math.ceil(height / GAP) + 1;
-        };
+        const camera = new THREE.PerspectiveCamera(
+            60,
+            window.innerWidth / window.innerHeight,
+            1,
+            10000,
+        );
+        camera.position.set(0, 355, 1220);
 
-        const render = (time: number) => {
-            ctx.clearRect(0, 0, width, height);
-            for (let r = 0; r < rows; r++) {
-                for (let c = 0; c < cols; c++) {
-                    const x = c * GAP;
-                    const baseY = r * GAP;
-                    const phase = (x + baseY) * WAVE_LENGTH + time * WAVE_SPEED;
-                    const wave = Math.sin(phase);
-                    const y = baseY + wave * AMPLITUDE;
-                    const alpha = 0.1 + (wave * 0.5 + 0.5) * 0.35;
-                    ctx.fillStyle = `rgba(${DOT_COLOR}, ${alpha})`;
-                    ctx.beginPath();
-                    ctx.arc(x, y, DOT_RADIUS, 0, Math.PI * 2);
-                    ctx.fill();
+        const renderer = new THREE.WebGLRenderer({
+            alpha: true,
+            antialias: true,
+        });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000000, 0);
+        container.appendChild(renderer.domElement);
+
+        const geometry = new THREE.BufferGeometry();
+        const positions: number[] = [];
+        const colors: number[] = [];
+
+        for (let ix = 0; ix < AMOUNTX; ix++) {
+            for (let iy = 0; iy < AMOUNTY; iy++) {
+                const x = ix * SEPARATION - (AMOUNTX * SEPARATION) / 2;
+                const y = 0; // animated per frame
+                const z = iy * SEPARATION - (AMOUNTY * SEPARATION) / 2;
+                positions.push(x, y, z);
+                colors.push(200, 200, 200);
+            }
+        }
+
+        geometry.setAttribute(
+            "position",
+            new THREE.Float32BufferAttribute(positions, 3),
+        );
+        geometry.setAttribute(
+            "color",
+            new THREE.Float32BufferAttribute(colors, 3),
+        );
+
+        const material = new THREE.PointsMaterial({
+            size: 8,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8,
+            sizeAttenuation: true,
+        });
+
+        const points = new THREE.Points(geometry, material);
+        scene.add(points);
+
+        let count = 0;
+        let animationId = 0;
+
+        const renderWave = () => {
+            const positionAttribute = geometry.attributes.position;
+            const arr = positionAttribute.array as Float32Array;
+            let i = 0;
+            for (let ix = 0; ix < AMOUNTX; ix++) {
+                for (let iy = 0; iy < AMOUNTY; iy++) {
+                    const index = i * 3;
+                    arr[index + 1] =
+                        Math.sin((ix + count) * 0.3) * 50 +
+                        Math.sin((iy + count) * 0.5) * 50;
+                    i++;
                 }
             }
+            positionAttribute.needsUpdate = true;
+            renderer.render(scene, camera);
+            count += 0.1;
         };
 
         const reduced = window.matchMedia(
             "(prefers-reduced-motion: reduce)",
         ).matches;
-        let raf = 0;
 
-        const loop = (t: number) => {
-            render(t);
-            raf = requestAnimationFrame(loop);
+        const animate = () => {
+            animationId = requestAnimationFrame(animate);
+            renderWave();
         };
 
         const start = () => {
             if (reduced) {
-                render(0);
+                renderWave();
                 return;
             }
-            cancelAnimationFrame(raf);
-            raf = requestAnimationFrame(loop);
+            cancelAnimationFrame(animationId);
+            animationId = requestAnimationFrame(animate);
         };
 
-        const onResize = () => {
-            resize();
-            if (reduced) render(0);
+        const handleResize = () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            if (reduced) renderWave();
         };
+
         const onVisibility = () => {
             if (document.visibilityState === "hidden") {
-                cancelAnimationFrame(raf);
+                cancelAnimationFrame(animationId);
             } else {
                 start();
             }
         };
 
-        resize();
         start();
-        window.addEventListener("resize", onResize);
+        window.addEventListener("resize", handleResize);
         document.addEventListener("visibilitychange", onVisibility);
 
         return () => {
-            cancelAnimationFrame(raf);
-            window.removeEventListener("resize", onResize);
+            cancelAnimationFrame(animationId);
+            window.removeEventListener("resize", handleResize);
             document.removeEventListener("visibilitychange", onVisibility);
+            geometry.dispose();
+            material.dispose();
+            renderer.dispose();
+            if (renderer.domElement.parentNode === container) {
+                container.removeChild(renderer.domElement);
+            }
         };
     }, []);
 
     return (
-        <canvas
-            ref={canvasRef}
+        <div
+            ref={containerRef}
             aria-hidden="true"
             style={{
                 position: "fixed",
                 inset: 0,
-                width: "100vw",
-                height: "100vh",
                 zIndex: 0,
                 pointerEvents: "none",
-                background: "#0a0a0b",
             }}
         />
     );
