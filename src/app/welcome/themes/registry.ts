@@ -5,9 +5,14 @@ export interface LandingThemeMeta {
 }
 
 export const THEME_STORAGE_KEY = 'lc-landing-theme';
-export const DEFAULT_THEME_ID = 'fantasy';
+export const DEFAULT_THEME_ID = 'standard';
 
 export const LANDING_THEMES: LandingThemeMeta[] = [
+    {
+        id: 'standard',
+        name: 'Minimalist',
+        tagline: 'Dark & modern',
+    },
     {
         id: 'fantasy',
         name: 'Fantasy Storybook',
