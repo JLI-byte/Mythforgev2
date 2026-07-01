@@ -6,9 +6,13 @@
     color: #ececec;
     font-family: var(--font-sans, ui-sans-serif, system-ui, -apple-system,
         "Segoe UI", Roboto, sans-serif);
-    /* Soft round glow — a touch lighter in the center, fading to near-black */
+    /* White spotlight behind the headline, fading to a neutral near-black */
     background:
-        radial-gradient(circle at 50% 42%, #1c1c22 0%, #101015 34%, #0a0a0b 68%);
+        radial-gradient(circle at 50% 40%,
+            rgba(255, 255, 255, 0.2) 0%,
+            rgba(255, 255, 255, 0.07) 16%,
+            rgba(255, 255, 255, 0) 42%),
+        #0a0a0a;
     overflow: hidden;
 }
 
