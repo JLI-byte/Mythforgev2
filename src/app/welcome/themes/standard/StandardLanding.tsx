@@ -22,6 +22,13 @@ export default function StandardLanding() {
 
     return (
         <div className={styles.page}>
+            <div className={styles.lamp} aria-hidden="true">
+                <div className={styles.lampConeLeft} />
+                <div className={styles.lampConeRight} />
+                <div className={styles.lampGlow} />
+                <div className={styles.lampBar} />
+            </div>
+
             <DottedSurface />
 
             <nav className={styles.nav}>
@@ -32,22 +39,24 @@ export default function StandardLanding() {
             </nav>
 
             <main className={styles.hero}>
-                <h1 className={styles.title}>Write your world into existence.</h1>
-                <p className={styles.sub}>
-                    The writing desk for novelists and worldbuilders — manuscript,
-                    lore, and momentum in one place.
-                </p>
-                <div className={styles.ctas}>
-                    <button
-                        type="button"
-                        className={styles.ctaPrimary}
-                        onClick={() => setShowRequest(true)}
-                    >
-                        Request beta access
-                    </button>
-                    <a href="/login" className={styles.ctaSecondary}>
-                        Beta tester sign in
-                    </a>
+                <div className={styles.heroInner}>
+                    <h1 className={styles.title}>Write your world into existence.</h1>
+                    <p className={styles.sub}>
+                        The writing desk for novelists and worldbuilders — manuscript,
+                        lore, and momentum in one place.
+                    </p>
+                    <div className={styles.ctas}>
+                        <button
+                            type="button"
+                            className={styles.ctaPrimary}
+                            onClick={() => setShowRequest(true)}
+                        >
+                            Request beta access
+                        </button>
+                        <a href="/login" className={styles.ctaSecondary}>
+                            Beta tester sign in
+                        </a>
+                    </div>
                 </div>
             </main>
 
