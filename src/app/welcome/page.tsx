@@ -14,6 +14,7 @@ import ThemeSwitcher from './shared/ThemeSwitcher';
  */
 
 const THEME_COMPONENTS: Record<string, React.ComponentType> = {
+    standard: dynamic(() => import('./themes/standard/StandardLanding')),
     fantasy: dynamic(() => import('./themes/fantasy/FantasyLanding')),
 };
 
