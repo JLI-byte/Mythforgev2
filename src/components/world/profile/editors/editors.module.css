@@ -1,0 +1,50 @@
+.input, .textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--primaryLine, rgba(132, 34, 43, 0.42));
+    border-radius: 6px;
+    padding: 4px 8px;
+    color: var(--ink, #171411);
+    font: inherit;
+}
+.textarea { min-height: 64px; resize: vertical; }
+.input:focus, .textarea:focus { outline: none; border-color: var(--primary, #84222b); }
+
+.imageWrap { position: relative; }
+.imageControls {
+    position: absolute; inset: auto 0 0 0;
+    display: flex; gap: 4px; padding: 4px;
+    background: rgba(0, 0, 0, 0.45);
+}
+.imageControls input[type="text"] {
+    flex: 1; min-width: 0; font-size: 11px; padding: 2px 4px;
+    border: none; border-radius: 4px;
+}
+.uploadBtn {
+    font-size: 11px; padding: 2px 6px; border: none; border-radius: 4px;
+    background: var(--gold, #bb8d59); color: #fff; cursor: pointer;
+}
+.emptyImage {
+    display: flex; align-items: center; justify-content: center;
+    background: color-mix(in srgb, var(--ink, #171411) 8%, transparent);
+    color: var(--muted, #9d8675); font-size: 11px;
+}
+
+.rangeRow { display: flex; align-items: center; gap: 8px; }
+.rangeRow input[type="range"] { flex: 1; accent-color: var(--primary, #84222b); }
+.meterLabelInput { width: 100%; font: inherit; border: none; background: transparent; color: var(--ink, #171411); }
+
+.itemWrap { position: relative; }
+.removeBtn {
+    position: absolute; top: -6px; right: -6px; z-index: 5;
+    width: 20px; height: 20px; border-radius: 50%;
+    border: none; background: var(--primary, #84222b); color: #fff;
+    font-size: 12px; line-height: 1; cursor: pointer;
+}
+.addBtn {
+    margin-top: 8px; padding: 4px 12px; border-radius: 14px;
+    border: 1px dashed var(--primaryLine, rgba(132, 34, 43, 0.42));
+    background: transparent; color: var(--primary, #84222b);
+    font-size: 12px; cursor: pointer;
+}
+.addBtn:hover { background: color-mix(in srgb, var(--primary, #84222b) 8%, transparent); }
