@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { getWorldBibleConfig } from '@/lib/worldBibleNav';
 import { worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
 import { BIBLE_PRESETS, createPresetLayout } from '@/lib/worldBiblePresets';
 import styles from './WorldBibleEdit.module.css';
+
+const CONFIRM_TIMEOUT_MS = 4000;
 
 /**
  * WorldBibleEdit — the book's "Edit" destination. Edits the active shelf's
@@ -23,6 +25,14 @@ export default function WorldBibleEdit() {
 
     // Two-click confirm state: which destructive control is armed.
     const [confirming, setConfirming] = useState<string | null>(null);
+
+    // An armed destructive confirm auto-disarms, so a later stray click can't
+    // fire an irreversible action the user forgot they'd armed.
+    useEffect(() => {
+        if (!confirming) return;
+        const t = setTimeout(() => setConfirming(null), CONFIRM_TIMEOUT_MS);
+        return () => clearTimeout(t);
+    }, [confirming]);
 
     const cfg = getWorldBibleConfig(worldBibles, activeWorldKey);
     const world = worlds.find(w => w.id === activeWorldKey);
