@@ -22,13 +22,6 @@ export default function StandardLanding() {
 
     return (
         <div className={styles.page}>
-            <div className={styles.lamp} aria-hidden="true">
-                <div className={styles.lampConeLeft} />
-                <div className={styles.lampConeRight} />
-                <div className={styles.lampGlow} />
-                <div className={styles.lampBar} />
-            </div>
-
             <ShaderSurface />
 
             <nav className={styles.nav}>

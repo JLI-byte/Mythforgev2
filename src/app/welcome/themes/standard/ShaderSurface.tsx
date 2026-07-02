@@ -217,7 +217,7 @@ export default function ShaderSurface() {
             <Canvas
                 gl={{ alpha: true, antialias: true }}
                 frameloop={reduced ? "demand" : "always"}
-                style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.5 }}
             >
                 <DotMatrix colors={[[255, 255, 255]]} dotSize={6} reduced={reduced} />
             </Canvas>
