@@ -1,0 +1,108 @@
+.bg {
+    /* palette (pen :root) — scoped to the profile */
+    --bg: #eee7dc; --paper: #f7f0e7; --ink: #171411; --soft: #67584f;
+    --muted: #9d8675; --cream: #f8eddf; --white: #fff; --black: #000;
+    --primary: #84222b; --secondary: #617b70; --gold: #bb8d59; --sideBg: #111;
+    --transparent: transparent;
+    --line: color-mix(in srgb, var(--ink) 20%, transparent);
+    --lineSoft: color-mix(in srgb, var(--white) 54%, transparent);
+    --white25: color-mix(in srgb, var(--white) 25%, transparent);
+    --black62: color-mix(in srgb, var(--black) 62%, transparent);
+    --primarySoft: color-mix(in srgb, var(--primary) 32%, transparent);
+    --secondarySoft: color-mix(in srgb, var(--secondary) 32%, transparent);
+    --primaryLine: color-mix(in srgb, var(--primary) 42%, transparent);
+
+    position: relative;
+    width: 900px;
+    height: 720px;
+    margin: 32px auto;
+    overflow: hidden;
+    border-radius: 22px;
+    color: var(--ink);
+    font-family: var(--profile-sans, 'Nunito', sans-serif);
+    background:
+        radial-gradient(circle at 82% 80%, var(--secondarySoft), transparent 32%),
+        radial-gradient(circle at 52% 78%, var(--primarySoft), transparent 26%),
+        linear-gradient(135deg, var(--paper), var(--bg));
+    border: 1px solid var(--lineSoft);
+    box-shadow: 0 28px 90px var(--black62);
+}
+
+.imgSide {
+    position: absolute; left: 0; top: 0; width: 380px; height: 100%;
+    background: var(--sideBg); overflow: hidden; z-index: 1;
+}
+.imgBox { position: absolute; inset: 0; }
+.imgBox img { width: 100%; height: 100%; object-fit: cover; }
+
+.sideStar {
+    position: absolute; left: 31px; top: 36px; z-index: 8;
+    color: var(--gold); font-size: 30px;
+}
+.sideQuote {
+    position: absolute; left: 32px; top: 110px; z-index: 8;
+    writing-mode: vertical-rl; transform: rotate(180deg);
+    font: 900 9px var(--profile-sans, sans-serif); letter-spacing: 4px;
+    text-transform: uppercase; color: var(--gold);
+}
+.sideCaption { position: absolute; left: 34px; bottom: 35px; z-index: 8; color: var(--cream); }
+.sideCaption b { display: block; font: 800 15px var(--profile-serif, serif); }
+.sideCaption span { font-size: 11px; color: var(--muted); }
+
+.decor { position: absolute; pointer-events: none; object-fit: cover; z-index: 7; border-radius: 8px; opacity: 0.92; }
+.decor:nth-of-type(1) { width: 150px; height: 150px; left: 250px; top: -30px; transform: rotate(-8deg); }
+.decor:nth-of-type(2) { width: 120px; height: 120px; left: 300px; bottom: -20px; transform: rotate(10deg); }
+
+.bigTitle {
+    position: absolute; left: 278px; top: 28px; width: 170px; height: 680px;
+    z-index: 12; pointer-events: none;
+    display: flex; align-items: flex-start; justify-content: center;
+}
+.bigTitle span {
+    writing-mode: vertical-rl; transform: rotate(180deg);
+    font: 900 64px/1 var(--profile-serif, serif); color: var(--ink);
+    letter-spacing: 2px; white-space: nowrap;
+}
+.number {
+    position: absolute; right: 94px; top: 0;
+    font: 900 96px/1 var(--profile-serif, serif);
+    color: color-mix(in srgb, var(--ink) 8%, transparent); z-index: 2;
+}
+
+.content { position: absolute; left: 410px; right: 92px; top: 32px; bottom: 24px; z-index: 15; }
+.topline {
+    display: grid; grid-template-columns: minmax(200px, 1fr) 90px;
+    align-items: center; gap: 10px; padding-bottom: 18px;
+    border-bottom: 1px solid var(--primaryLine);
+}
+.quote {
+    font: 700 14px/1.05 var(--profile-softserif, serif);
+    color: var(--primary); text-align: right; font-style: italic;
+}
+
+.nav {
+    position: absolute; right: 18px; top: 74px; bottom: 54px; width: 58px;
+    z-index: 40; display: grid; grid-template-rows: repeat(4, 1fr);
+    border-left: 1px solid var(--line);
+}
+.navBtn {
+    appearance: none; background: none; border: none; cursor: pointer;
+    writing-mode: vertical-rl; transform: rotate(180deg);
+    font: 800 11px var(--profile-sans, sans-serif); letter-spacing: 3px;
+    text-transform: uppercase; color: var(--muted); transition: color 0.3s;
+}
+.navBtn:hover { color: var(--ink); }
+.navBtnActive { color: var(--primary); }
+
+.page { position: absolute; inset: 98px 0 0 0; }
+.pageScroll {
+    height: 565px; overflow: auto; padding-right: 22px;
+    scrollbar-width: thin; scrollbar-color: var(--primary) var(--white25);
+}
+.pageScroll h1 { font: 800 30px var(--profile-serif, serif); margin: 0; color: var(--ink); }
+.pageScroll h2 {
+    font: 600 13px var(--profile-softserif, serif); margin: 2px 0 18px;
+    color: var(--primary); letter-spacing: 1px; text-transform: lowercase;
+}
+
+.placeholder { color: var(--muted); font-style: italic; font-size: 13px; padding: 8px 0; }
