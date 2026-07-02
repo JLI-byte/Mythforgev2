@@ -26,8 +26,10 @@ interface WorldBibleBookProps {
  */
 export default function WorldBibleBook({ title, subtitle, tint, onAction }: WorldBibleBookProps) {
     const [verbIndex, setVerbIndex] = useState(0);
+    const [announced, setAnnounced] = useState('Open');
     const bookRef = useRef<HTMLElement>(null);
     const cooldownRef = useRef(0);
+    const hoveredRef = useRef(false);
 
     // React's JSX onWheel is passive at the root — preventDefault is ignored
     // there. Attach a non-passive listener so scrolling the book doesn't
@@ -36,6 +38,7 @@ export default function WorldBibleBook({ title, subtitle, tint, onAction }: Worl
         const el = bookRef.current;
         if (!el) return;
         const onWheel = (e: WheelEvent) => {
+            if (!hoveredRef.current) return; // closed book: let the shelf scroll
             e.preventDefault();
             const now = Date.now();
             if (now - cooldownRef.current < WHEEL_COOLDOWN_MS) return;
@@ -45,6 +48,13 @@ export default function WorldBibleBook({ title, subtitle, tint, onAction }: Worl
         el.addEventListener('wheel', onWheel, { passive: false });
         return () => el.removeEventListener('wheel', onWheel);
     }, []);
+
+    // Announce the settled verb ~350ms after the last step, so a fast scroll
+    // doesn't queue "Open… Edit… Organize…" into the live region.
+    useEffect(() => {
+        const t = setTimeout(() => setAnnounced(BOOK_VERBS[verbIndex].label), 350);
+        return () => clearTimeout(t);
+    }, [verbIndex]);
 
     const verb = BOOK_VERBS[verbIndex];
 
@@ -56,6 +66,8 @@ export default function WorldBibleBook({ title, subtitle, tint, onAction }: Worl
                 role="button"
                 tabIndex={0}
                 aria-label={`${verb.label} the ${title} World Bible`}
+                onMouseEnter={() => { hoveredRef.current = true; }}
+                onMouseLeave={() => { hoveredRef.current = false; }}
                 onClick={() => onAction(verb.id)}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -88,7 +100,7 @@ export default function WorldBibleBook({ title, subtitle, tint, onAction }: Worl
                 <ul className={styles.page}>
                     <li></li>
                     <li>
-                        <div className={styles.pageAction} aria-live="polite">
+                        <div className={styles.pageAction}>
                             <span key={verbIndex} className={styles.pageVerb}>{verb.label}</span>
                             <span className={styles.pageHint}>the lore</span>
                             <span className={styles.pageScrollHint}>scroll ↕</span>
@@ -108,6 +120,9 @@ export default function WorldBibleBook({ title, subtitle, tint, onAction }: Worl
                     <li></li>
                     <li></li>
                 </ul>
+
+                {/* Debounced announcement, decoupled from the per-tick visual roll. */}
+                <span className={styles.srOnly} aria-live="polite">{announced} the lore</span>
             </figure>
             <span className={styles.label}>World Bible</span>
         </div>
