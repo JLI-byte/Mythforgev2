@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useWorkspaceStore } from './workspaceStore';
+import { useWorkspaceStore, selectProjectWorldKey } from './workspaceStore';
 
 const root = (id: string) => ({ id, label: id, icon: '📦', entityTypes: [] as never[] });
 
@@ -46,5 +46,12 @@ describe('per-shelf bible store actions', () => {
         useWorkspaceStore.setState({ activeWorldKey: null, activeProjectId: 'p2' });
         useWorkspaceStore.getState().setWorkspaceMode('worldBible');
         expect(useWorkspaceStore.getState().activeWorldKey).toBe('standalone');
+    });
+
+    it('selectProjectWorldKey resolves the active project world so sibling stories share lore', () => {
+        useWorkspaceStore.setState({ activeProjectId: 'p1' });
+        expect(selectProjectWorldKey(useWorkspaceStore.getState())).toBe('w1');
+        useWorkspaceStore.setState({ activeProjectId: 'p2' });
+        expect(selectProjectWorldKey(useWorkspaceStore.getState())).toBe('standalone');
     });
 });

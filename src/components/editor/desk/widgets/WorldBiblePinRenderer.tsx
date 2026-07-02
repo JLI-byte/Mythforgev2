@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from 'react';
-import { useWorkspaceStore, ENTITY_TYPE_LABELS } from '@/store/workspaceStore';
+import { useWorkspaceStore, ENTITY_TYPE_LABELS, selectProjectWorldKey } from '@/store/workspaceStore';
+import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../WritingDesk.module.css';
 
 function formatRelative(date: Date | string): string {
@@ -18,7 +19,7 @@ function formatRelative(date: Date | string): string {
 
 export function WorldBiblePinRenderer({ content, onChange }: { content: any; onChange: (c: any) => void; }) {
   const entities = useWorkspaceStore(s => s.entities);
-  const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
+  const projectWorldKey = useWorkspaceStore(selectProjectWorldKey);
   const [searchTerm, setSearchTerm] = useState('');
 
   const entityId = content.entityId;
@@ -27,9 +28,9 @@ export function WorldBiblePinRenderer({ content, onChange }: { content: any; onC
   const filtered = useMemo(() => {
     if (entityId) return [];
     return entities
-      .filter(e => e.projectId === activeProjectId && e.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      .filter(e => worldKeyForEntity(e) === projectWorldKey && e.name.toLowerCase().includes(searchTerm.toLowerCase()))
       .slice(0, 15);
-  }, [entities, activeProjectId, searchTerm, entityId]);
+  }, [entities, projectWorldKey, searchTerm, entityId]);
 
   if (!entityId) {
     return (

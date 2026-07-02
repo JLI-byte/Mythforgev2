@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
+import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../WritingDesk.module.css';
 
 export function RelationshipMapRenderer({ content, onChange }: { content: any; onChange: (c: any) => void; }) {
-  const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
+  const projectWorldKey = useWorkspaceStore(selectProjectWorldKey);
   const entities = useWorkspaceStore(s => s.entities);
-  const characters = useMemo(() => 
-    entities.filter(e => e.projectId === activeProjectId && e.type === 'character'),
-    [entities, activeProjectId]
+  const characters = useMemo(() =>
+    entities.filter(e => worldKeyForEntity(e) === projectWorldKey && e.type === 'character'),
+    [entities, projectWorldKey]
   );
 
   // Buffer node positions locally during drag; flush to onChange only on drag end.
