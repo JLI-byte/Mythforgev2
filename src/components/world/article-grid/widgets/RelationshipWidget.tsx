@@ -431,7 +431,7 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
       {/* Graph canvas */}
       {worldEntities.length === 0 ? (
         <div className={styles.relationshipEmpty}>
-          <span>No entities in this project yet.</span>
+          <span>No entities in this world yet.</span>
           <span>Add entities to the World Bible to see them here.</span>
         </div>
       ) : (
