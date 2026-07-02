@@ -197,3 +197,11 @@
 .appearanceMoodboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
 .moodItem img { width: 100%; height: 110px; object-fit: cover; border-radius: 6px; }
 .moodItem p { margin: 4px 0 0; font-size: 11px; color: var(--soft); }
+
+.relationStack { display: grid; gap: 12px; }
+.relationCard { background: var(--cream); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.relationInfo { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.relationInfo img { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; }
+.relationInfo b { display: block; font: 700 15px var(--profile-serif, serif); color: var(--ink); }
+.relationInfo span { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); }
+.relationText { margin: 0; font: 400 13px/1.5 var(--profile-sans, sans-serif); color: var(--soft); }
