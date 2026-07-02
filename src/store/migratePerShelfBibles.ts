@@ -25,7 +25,9 @@ export function migratePerShelfBibles(data: Record<string, any>): Record<string,
     const nextEntities = entities.map(e => {
         let worldId: string | undefined = e.worldId ?? projectWorld.get(e.projectId);
         if (worldId !== undefined && !worldIds.has(worldId)) worldId = undefined;
-        if (worldId === e.worldId) return e;
+        const hadKey = Object.prototype.hasOwnProperty.call(e, 'worldId');
+        const willHaveKey = worldId !== undefined;
+        if (hadKey === willHaveKey && e.worldId === worldId) return e;
         const next = { ...e, worldId };
         if (worldId === undefined) delete next.worldId;
         return next;

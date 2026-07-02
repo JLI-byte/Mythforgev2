@@ -74,4 +74,11 @@ describe('migratePerShelfBibles', () => {
     it('passes through non-object input unchanged', () => {
         expect(migratePerShelfBibles(null as any)).toBeNull();
     });
+
+    it('strips an explicit worldId: undefined key on standalone entities', () => {
+        const data = baseData();
+        (data.entities[1] as any).worldId = undefined; // explicit own-key, standalone project
+        const out = migratePerShelfBibles(data);
+        expect(Object.prototype.hasOwnProperty.call(out.entities[1], 'worldId')).toBe(false);
+    });
 });
