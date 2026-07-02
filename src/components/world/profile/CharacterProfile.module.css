@@ -150,3 +150,26 @@
 }
 .introCard p { margin: 0; font: 500 15px/1.5 var(--profile-softserif, serif); }
 .text p { margin: 0 0 12px; font: 400 14px/1.6 var(--profile-sans, sans-serif); color: var(--soft); }
+
+.personaFeature { display: grid; grid-template-columns: 130px 1fr; gap: 14px; margin-bottom: 18px; align-items: center; }
+.personaFeature img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; }
+.personaFeature b, .personaTextCard b {
+    display: block; font: 700 10px var(--profile-sans, sans-serif);
+    letter-spacing: 2px; text-transform: uppercase; color: var(--primary);
+}
+.personaFeature h3, .personaTextCard h3 { margin: 2px 0 6px; font: 600 18px var(--profile-softserif, serif); color: var(--ink); }
+.personaFeature p, .personaTextCard p { margin: 0; font: 400 13px/1.55 var(--profile-sans, sans-serif); color: var(--soft); }
+
+.personaRow { display: grid; grid-template-columns: 1fr 130px; gap: 14px; margin-bottom: 16px; align-items: center; }
+.personaRow.reverse { grid-template-columns: 130px 1fr; }
+.personaRow.reverse .personaTextCard { order: 2; }
+.personaRow img { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; }
+
+.personaMeters { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; margin: 18px 0; }
+.meterItem b { display: block; font-size: 12px; margin-bottom: 4px; color: var(--ink); }
+.meterItem > div { height: 6px; background: var(--white25); border-radius: 4px; overflow: hidden; }
+.meterItem > div > span { display: block; height: 100%; width: var(--level, 0%); background: linear-gradient(90deg, var(--primary), var(--gold)); }
+
+.personaNotes { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+.personaNotes b { display: block; font: 700 10px var(--profile-sans, sans-serif); letter-spacing: 2px; text-transform: uppercase; color: var(--primary); margin-bottom: 4px; }
+.personaNotes p { margin: 0; font-size: 13px; color: var(--soft); }
