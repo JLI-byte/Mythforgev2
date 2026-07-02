@@ -3,6 +3,7 @@
 import React from 'react';
 import { useWorkspaceStore, EntityType } from '@/store/workspaceStore';
 import { SUBCATEGORY_LABELS, SUBCATEGORY_ICONS } from '@/lib/worldBibleNav';
+import { worldKeyForEntity, worldKeyForProject } from '@/lib/worldKey';
 import { ArticleTabViewer } from './ArticleViewerShared';
 import styles from './ArticleReadView.module.css';
 
@@ -40,15 +41,15 @@ interface MentionResult {
 function findEntityMentions(
   entityId: string,
   entityName: string,
-  projectId: string,
+  projectIds: Set<string>,
   scenes: import('@/store/workspaceStore').Scene[],
   documents: import('@/store/workspaceStore').Document[]
 ): MentionResult[] {
   const results: MentionResult[] = [];
-  const projectScenes = scenes.filter(s => s.projectId === projectId);
+  const worldScenes = scenes.filter(s => projectIds.has(s.projectId));
   const docMap = new Map(documents.map(d => [d.id, d]));
 
-  for (const scene of projectScenes) {
+  for (const scene of worldScenes) {
     if (!scene.content) continue;
     const doc = docMap.get(scene.documentId);
     if (!doc) continue;
@@ -139,14 +140,18 @@ export default function ArticleReadView({ entityId, onBack }: ArticleReadViewPro
     if (activeTab !== 'mentions') return [];
     const entity = entities.find(e => e.id === entityId);
     if (!entity) return [];
+    const worldKey = worldKeyForEntity(entity);
+    const worldProjectIds = new Set(
+      projects.filter(p => worldKeyForProject(p) === worldKey).map(p => p.id)
+    );
     return findEntityMentions(
       entity.id,
       entity.name,
-      entity.projectId,
+      worldProjectIds,
       scenes,
       documents
     );
-  }, [activeTab, entityId, entities, scenes, documents]);
+  }, [activeTab, entityId, entities, projects, scenes, documents]);
 
   const entity = entities.find(e => e.id === entityId);
 

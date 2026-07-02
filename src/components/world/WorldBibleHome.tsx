@@ -14,11 +14,12 @@ import styles from './WorldBibleHome.module.css';
 import { useWorkspaceStore, EntityType, WorldBibleRootConfig, WorldBibleLayout } from '@/store/workspaceStore';
 import {
     WBView,
-    getProjectLayout,
+    getWorldBibleConfig,
     DEFAULT_WORLD_BIBLE_LAYOUT,
     SUBCATEGORY_LABELS,
     SUBCATEGORY_ICONS,
 } from '@/lib/worldBibleNav';
+import { worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
 
 interface WorldBibleHomeProps {
     onNavigate: (view: WBView) => void;
@@ -38,29 +39,27 @@ const ENTITY_TYPE_ICONS: Record<EntityType, string> = {
 };
 
 export default function WorldBibleHome({ onNavigate }: WorldBibleHomeProps) {
-    const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
-    const projects = useWorkspaceStore(state => state.projects);
-    const updateProject = useWorkspaceStore(state => state.updateProject);
-    const activeProject = projects.find(p => p.id === activeProjectId);
+    const worldBibles = useWorkspaceStore(state => state.worldBibles);
+    const activeWorldKey = useWorkspaceStore(state => state.activeWorldKey) ?? STANDALONE_KEY;
 
     const entities = useWorkspaceStore(state => state.entities);
     const openInlineCreator = useWorkspaceStore(state => state.openInlineCreator);
 
-    const layout = getProjectLayout(activeProject);
+    const layout = getWorldBibleConfig(worldBibles, activeWorldKey).layout;
 
     // Local search state
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Filter entities to current project
-    const projectEntities = entities.filter(e => e.projectId === activeProjectId);
+    // Filter entities to the active world (shelf)
+    const worldEntities = entities.filter(e => worldKeyForEntity(e) === activeWorldKey);
 
     // Apply search filter
     const filteredEntities = searchTerm.trim()
-        ? projectEntities.filter(e => e.name.toLowerCase().includes(searchTerm.toLowerCase()))
-        : projectEntities;
+        ? worldEntities.filter(e => e.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        : worldEntities;
 
     // Favorites — entities pinned by the user
-    const favorites = projectEntities.filter(e => e.isFavorite);
+    const favorites = worldEntities.filter(e => e.isFavorite);
 
     /** Count entities of a specific type */
     const countForType = (type: EntityType): number => {

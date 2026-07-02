@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useWorkspaceStore, Project, World, COVER_COLORS, WorldGenre } from '@/store/workspaceStore';
+import { STANDALONE_KEY } from '@/lib/worldKey';
 import WorldBibleBook from './WorldBibleBook';
 import styles from './Bookshelf.module.css';
 
@@ -38,6 +39,7 @@ export function Bookshelf() {
     const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
     const setActiveProject = useWorkspaceStore(s => s.setActiveProject);
     const setWorkspaceMode = useWorkspaceStore(s => s.setWorkspaceMode);
+    const setActiveWorldKey = useWorkspaceStore(s => s.setActiveWorldKey);
 
     // ─── STATE BLOCKS ──────────────────────────────────────────
 
@@ -356,7 +358,10 @@ export function Bookshelf() {
                 <div className={styles.shelfBody}>
                     <WorldBibleBook
                         title={isUncategorized ? 'Standalones' : title}
-                        onOpen={() => setWorkspaceMode('worldBible')}
+                        onOpen={() => {
+                            setActiveWorldKey(isUncategorized ? STANDALONE_KEY : worldId);
+                            setWorkspaceMode('worldBible');
+                        }}
                     />
                     <div className={styles.books}>
                         {rowChunks.map((row, ri) => (

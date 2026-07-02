@@ -11,10 +11,11 @@ import styles from './WorldBibleRoot.module.css';
 import { useWorkspaceStore, EntityType } from '@/store/workspaceStore';
 import {
     WBView,
-    getProjectLayout,
+    getWorldBibleConfig,
     SUBCATEGORY_LABELS,
     SUBCATEGORY_ICONS,
 } from '@/lib/worldBibleNav';
+import { worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
 
 interface WorldBibleRootProps {
     root: string;
@@ -22,17 +23,16 @@ interface WorldBibleRootProps {
 }
 
 export default function WorldBibleRoot({ root, onNavigate }: WorldBibleRootProps) {
-    const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
     const entities = useWorkspaceStore(state => state.entities);
-    const projects = useWorkspaceStore(state => state.projects);
+    const worldBibles = useWorkspaceStore(state => state.worldBibles);
+    const activeWorldKey = useWorkspaceStore(state => state.activeWorldKey) ?? STANDALONE_KEY;
     const addWorldBibleRoot = useWorkspaceStore(state => state.addWorldBibleRoot);
     const setWorkspaceMode = useWorkspaceStore(state => state.setWorkspaceMode);
-    const activeProject = projects.find(p => p.id === activeProjectId);
-    const layout = getProjectLayout(activeProject);
+    const layout = getWorldBibleConfig(worldBibles, activeWorldKey).layout;
     const category = layout.roots.find(r => r.id === root);
 
-    // Filter entities to current project
-    const projectEntities = entities.filter(e => e.projectId === activeProjectId);
+    // Filter entities to the active world (shelf)
+    const worldEntities = entities.filter(e => worldKeyForEntity(e) === activeWorldKey);
 
     // The EntityTypes belonging to this root category
     const subcategoryTypes = category?.entityTypes ?? [];
@@ -45,7 +45,7 @@ export default function WorldBibleRoot({ root, onNavigate }: WorldBibleRootProps
             {/* Subcategory cards */}
             <div className={styles.subcategoryGrid}>
                 {subcategoryTypes.map((entityType: EntityType) => {
-                    const count = projectEntities.filter((e: any) => e.type === entityType).length;
+                    const count = worldEntities.filter((e: any) => e.type === entityType).length;
                     return (
                         <button
                             key={entityType}

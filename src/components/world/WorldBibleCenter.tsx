@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import { useWorkspaceStore, EntityType, WorldBibleRootConfig } from '@/store/workspaceStore';
-import { getProjectLayout, SUBCATEGORY_LABELS } from '@/lib/worldBibleNav';
+import { getWorldBibleConfig, SUBCATEGORY_LABELS } from '@/lib/worldBibleNav';
 import { sanitizeLabel } from '@/lib/sanitize';
+import { worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
 import ArticleReadView from './ArticleReadView';
 import CharacterProfile from './profile/CharacterProfile';
 import styles from './WorldBibleCenter.module.css';
@@ -19,11 +20,11 @@ import styles from './WorldBibleCenter.module.css';
 export default function WorldBibleCenter() {
     const entities = useWorkspaceStore(state => state.entities);
     const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
-    const projects = useWorkspaceStore(state => state.projects);
+    const worldBibles = useWorkspaceStore(state => state.worldBibles);
+    const activeWorldKey = useWorkspaceStore(state => state.activeWorldKey) ?? STANDALONE_KEY;
     const addWorldBibleRoot = useWorkspaceStore(state => state.addWorldBibleRoot);
     const addEntity = useWorkspaceStore(state => state.addEntity);
     const setWorkspaceMode = useWorkspaceStore(state => state.setWorkspaceMode);
-    const activeProject = projects.find(p => p.id === activeProjectId);
 
     // Creates a custom category and jumps to the hierarchy canvas to name/arrange it.
     const handleAddCategory = () => {
@@ -38,7 +39,7 @@ export default function WorldBibleCenter() {
         setWorkspaceMode('hierarchy');
     };
 
-    const layout = getProjectLayout(activeProject);
+    const layout = getWorldBibleConfig(worldBibles, activeWorldKey).layout;
 
     const [selectedBucketId, setSelectedBucketId] = useState<string | null>(null);
     const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
@@ -62,21 +63,29 @@ export default function WorldBibleCenter() {
 
     const handleCreate = (root: WorldBibleRootConfig) => {
         const name = sanitizeLabel(draftName);
-        if (!name || !activeProjectId) return;
+        if (!name) return;
         const types = effectiveTypes(root);
         const type = types.includes(draftType) ? draftType : types[0];
         const id = crypto.randomUUID();
-        addEntity({ id, projectId: activeProjectId, name, type, description: '', createdAt: new Date() });
+        addEntity({
+            id,
+            projectId: activeProjectId ?? '',
+            worldId: activeWorldKey === STANDALONE_KEY ? undefined : activeWorldKey,
+            name,
+            type,
+            description: '',
+            createdAt: new Date(),
+        });
         cancelCreate();
         setSelectedEntityId(id); // drop straight into the new article
     };
 
-    // Filter entities for active project
-    const projectEntities = entities.filter(e => e.projectId === activeProjectId);
+    // Filter entities for the active world (shelf)
+    const worldEntities = entities.filter(e => worldKeyForEntity(e) === activeWorldKey);
 
     // Level 3 — Character profile for character entities, article view otherwise
     if (selectedEntityId) {
-        const selected = projectEntities.find(e => e.id === selectedEntityId);
+        const selected = worldEntities.find(e => e.id === selectedEntityId);
         if (selected?.type === 'character') {
             return (
                 <div className={styles.browserContainer}>
@@ -112,7 +121,7 @@ export default function WorldBibleCenter() {
         <div className={styles.browserContainer}>
             <div className={styles.strips}>
                 {layout.roots.map((root, i) => {
-                    const bucketEntities = projectEntities.filter(e => root.entityTypes.includes(e.type));
+                    const bucketEntities = worldEntities.filter(e => root.entityTypes.includes(e.type));
                     const isExpanded = selectedBucketId === root.id;
                     const color = stripColor(root.id);
                     return (

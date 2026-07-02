@@ -2,6 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useWorkspaceStore, WorldBibleRootConfig, EntityType, ENTITY_TYPE_LABELS } from '@/store/workspaceStore';
+import { getWorldBibleConfig } from '@/lib/worldBibleNav';
+import { STANDALONE_KEY } from '@/lib/worldKey';
 import styles from './HierarchyCanvas.module.css';
 
 const DEFAULT_NODE_WIDTH = 320;
@@ -28,8 +30,8 @@ interface HierarchyCanvasProps {
 }
 
 export default function HierarchyCanvas({ isDraft }: HierarchyCanvasProps) {
-    const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
-    const projects = useWorkspaceStore(state => state.projects);
+    const worldBibles = useWorkspaceStore(state => state.worldBibles);
+    const activeWorldKey = useWorkspaceStore(state => state.activeWorldKey) ?? STANDALONE_KEY;
     const draftLayout = useWorkspaceStore(state => state.draftHierarchyLayout);
     const setWorkspaceMode = useWorkspaceStore(state => state.setWorkspaceMode);
     const addWorldBibleRoot = useWorkspaceStore(state => state.addWorldBibleRoot);
@@ -37,8 +39,7 @@ export default function HierarchyCanvas({ isDraft }: HierarchyCanvasProps) {
     const deleteWorldBibleRoot = useWorkspaceStore(state => state.deleteWorldBibleRoot);
     const moveWorldBibleType = useWorkspaceStore(state => state.moveWorldBibleType);
 
-    const project = projects.find(p => p.id === activeProjectId);
-    const layout = isDraft ? (draftLayout || { roots: [] }) : (project?.worldBibleLayout || { roots: [] });
+    const layout = isDraft ? (draftLayout || { roots: [] }) : getWorldBibleConfig(worldBibles, activeWorldKey).layout;
     const roots = layout.roots;
 
     // Local state for dragging nodes

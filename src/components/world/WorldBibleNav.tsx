@@ -11,10 +11,11 @@ import styles from './WorldBibleNav.module.css';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import {
     WBView,
-    getProjectLayout,
+    getWorldBibleConfig,
     SUBCATEGORY_LABELS,
 } from '@/lib/worldBibleNav';
 import { exportWorldBible } from '@/lib/export';
+import { worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
 
 interface WorldBibleNavProps {
     currentView: WBView;
@@ -36,17 +37,18 @@ export default function WorldBibleNav({
     const entities = useWorkspaceStore(state => state.entities);
     const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
     const projects = useWorkspaceStore(state => state.projects);
+    const worldBibles = useWorkspaceStore(state => state.worldBibles);
+    const activeWorldKey = useWorkspaceStore(state => state.activeWorldKey) ?? STANDALONE_KEY;
 
     const handleExportBible = () => {
         const activeProject = projects.find(p => p.id === activeProjectId);
         if (!activeProject) return;
-        
-        const projectEntities = entities.filter(e => e.projectId === activeProject.id);
-        exportWorldBible(projectEntities, activeProject.name);
+
+        const worldEntities = entities.filter(e => worldKeyForEntity(e) === activeWorldKey);
+        exportWorldBible(worldEntities, activeProject.name);
     };
 
-    const activeProject = projects.find(p => p.id === activeProjectId);
-    const layout = getProjectLayout(activeProject);
+    const layout = getWorldBibleConfig(worldBibles, activeWorldKey).layout;
 
     /** Build the breadcrumb text based on the current view */
     const renderBreadcrumb = () => {

@@ -15,6 +15,7 @@ import {
     SUBCATEGORY_LABELS,
     SUBCATEGORY_ICONS,
 } from '@/lib/worldBibleNav';
+import { worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
 
 interface WorldBibleSubcategoryProps {
     root: string;
@@ -39,14 +40,14 @@ export default function WorldBibleSubcategory({
     entityType,
     onNavigate,
 }: WorldBibleSubcategoryProps) {
-    const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
     const entities = useWorkspaceStore(state => state.entities);
+    const activeWorldKey = useWorkspaceStore(state => state.activeWorldKey) ?? STANDALONE_KEY;
     const toggleEntityFavorite = useWorkspaceStore(state => state.toggleEntityFavorite);
     const openInlineCreator = useWorkspaceStore(state => state.openInlineCreator);
 
-    // Filter to entities of this type in the active project
+    // Filter to entities of this type in the active world (shelf)
     const typeEntities = entities.filter(
-        e => e.projectId === activeProjectId && e.type === entityType
+        e => worldKeyForEntity(e) === activeWorldKey && e.type === entityType
     );
 
     const label = SUBCATEGORY_LABELS[entityType];
