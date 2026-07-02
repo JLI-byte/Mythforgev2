@@ -69,29 +69,35 @@ export function useSupabaseSync(userId: string) {
     async function hydrate() {
       if (!userId || userId.trim() === '') return;
 
-      const cloud = await loadWorkspace(userId);
+      try {
+        const cloud = await loadWorkspace(userId);
 
-      if (cloud && looksLikeWorkspace(cloud.data)) {
-        const localState = useWorkspaceStore.getState() as Record<string, any>;
-        const localNewest = newestContentTime(localState);
-        const cloudNewest = Math.max(newestContentTime(cloud.data), cloud.updatedAt);
-        const localHasContent =
-          Array.isArray(localState.projects) && localState.projects.length > 0;
+        if (cloud && looksLikeWorkspace(cloud.data)) {
+          const localState = useWorkspaceStore.getState() as Record<string, any>;
+          const localNewest = newestContentTime(localState);
+          const cloudNewest = Math.max(newestContentTime(cloud.data), cloud.updatedAt);
+          const localHasContent =
+            Array.isArray(localState.projects) && localState.projects.length > 0;
 
-        // Take the cloud copy only when local is empty or the cloud is newer.
-        if (!localHasContent || cloudNewest > localNewest) {
-          // Cloud blobs bypass zustand's persist migrate — apply schema
-          // migrations here. Idempotent, so double-migration is harmless.
-          useWorkspaceStore.setState(migratePerShelfBibles(cloud.data));
-        } else {
-          logger.info('LoreCanvas Sync: local copy is newer — keeping local, skipping cloud overwrite');
+          // Take the cloud copy only when local is empty or the cloud is newer.
+          if (!localHasContent || cloudNewest > localNewest) {
+            // Cloud blobs bypass zustand's persist migrate — apply schema
+            // migrations here. Idempotent, so double-migration is harmless.
+            useWorkspaceStore.setState(migratePerShelfBibles(cloud.data));
+          } else {
+            logger.info('LoreCanvas Sync: local copy is newer — keeping local, skipping cloud overwrite');
+          }
+        } else if (cloud) {
+          logger.error('LoreCanvas Sync: cloud workspace failed validation — ignoring');
         }
-      } else if (cloud) {
-        logger.error('LoreCanvas Sync: cloud workspace failed validation — ignoring');
+      } catch (err) {
+        // A hydration failure must not brick the session: without the finally
+        // below, hasHydrated stays false and cloud saves stay disabled.
+        logger.error('LoreCanvas Sync: cloud hydration failed — continuing with local data', err);
+      } finally {
+        setHasHydrated(true);
+        isInitialLoadRef.current = false;
       }
-
-      setHasHydrated(true);
-      isInitialLoadRef.current = false;
     }
 
     hydrate();
