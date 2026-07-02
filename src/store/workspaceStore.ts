@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { logger } from '@/lib/logger';
 import { getStoredValue } from '@/lib/storage';
-import { WorldKey } from '@/lib/worldKey';
+import type { WorldKey } from '@/lib/worldKey';
 
 // Cover colors auto-assigned to new projects in rotation
 export const COVER_COLORS = [
