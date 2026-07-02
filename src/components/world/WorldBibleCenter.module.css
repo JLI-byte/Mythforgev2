@@ -36,6 +36,141 @@
   margin-left: auto;
 }
 
+/* --- Expanding column menu (codepen.io/ettrics/pen/ZYqKGb) --- */
+
+.strips {
+  position: relative;
+  height: 100%;
+  min-height: 540px;
+  overflow: hidden;
+  color: #fff;
+}
+
+.strip {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  overflow: hidden;
+  cursor: pointer;
+  will-change: width, left;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.stripContent {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* signature skewed sheen that grows on hover */
+.stripContent::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #fff;
+  opacity: 0.05;
+  transform-origin: center center;
+  transform: skew(-14deg) scaleY(1) translate(0, 0);
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  pointer-events: none;
+}
+.strip:not(.stripExpanded):hover .stripContent::before {
+  transform: skew(-14deg) scale(3);
+  opacity: 0.12;
+}
+
+.stripTitle {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  text-align: center;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.stripIcon {
+  font-size: 2rem;
+  line-height: 1;
+}
+.stripName {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.stripMeta {
+  font-size: 0.72rem;
+  opacity: 0.8;
+}
+
+.stripExpanded {
+  z-index: 3;
+  cursor: default;
+}
+.stripExpanded .stripTitle {
+  opacity: 0;
+  transform: scale(0.6);
+  pointer-events: none;
+}
+
+/* revealed content inside the expanded strip */
+.stripInner {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  padding: 40px clamp(24px, 5vw, 64px);
+  overflow-y: auto;
+  opacity: 0;
+  transform: scale(0.96);
+  animation: lc-strip-reveal 0.5s 0.15s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+@keyframes lc-strip-reveal {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.stripClose {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  z-index: 6;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.28);
+  color: #fff;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.stripClose:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.stripInnerHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.stripInnerHead .stripIcon {
+  font-size: 1.6rem;
+}
+
+.stripEmpty {
+  opacity: 0.85;
+  font-size: 0.95rem;
+}
+
 /* --- LEVEL 1: Category Grid --- */
 
 .categoryGrid {

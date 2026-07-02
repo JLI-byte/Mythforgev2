@@ -38,7 +38,6 @@ export default function WorldBibleCenter() {
     const layout = getProjectLayout(activeProject);
 
     const [selectedBucketId, setSelectedBucketId] = useState<string | null>(null);
-    const selectedBucket = layout.roots.find(r => r.id === selectedBucketId);
     const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
 
     // Filter entities for active project
@@ -54,123 +53,111 @@ export default function WorldBibleCenter() {
         );
     }
 
-    // Level 2 — Entity Grid (when a bucket is selected)
-    if (selectedBucket) {
-        const bucketEntities = projectEntities.filter(e => selectedBucket.entityTypes.includes(e.type));
+    // Level 1 + 2 — Expanding category strips (codepen.io/ettrics/pen/ZYqKGb).
+    // Each category is a vertical strip; clicking expands it to reveal that
+    // category's entities inline, with a close button to collapse.
+    const stripColor = (id: string) =>
+        id === 'people' ? '#2f5075'
+        : id === 'places' ? '#2f6b4a'
+        : id === 'things' ? '#8c3d33'
+        : id === 'world' ? '#5b4483'
+        : '#3a3a44';
 
-        return (
-            <div className={styles.browserContainer}>
-                <div className={styles.browserInner}>
-                    {/* Back button */}
-                    <button className={styles.backBtn} onClick={() => setSelectedBucketId(null)}>
-                        ← All Categories
-                    </button>
+    const stripCount = layout.roots.length + 1; // + Add Category
+    const stripWidth = 100 / stripCount;
 
-                    {/* Section header */}
-                    <div className={styles.levelHeader}>
-                        <span className={styles.levelIcon}>{selectedBucket.icon}</span>
-                        <h2 className={styles.levelTitle}>{selectedBucket.label}</h2>
-                        <span className={styles.browserCount}>{bucketEntities.length} entries</span>
-                    </div>
-
-                    {/* Empty state for this bucket */}
-                    {bucketEntities.length === 0 && (
-                        <div className={styles.emptyState}>
-                            <p className={styles.emptyText}>No {selectedBucket.label.toLowerCase()} yet</p>
-                            <p className={styles.emptyHint}>Type [[ in the editor to create one</p>
-                        </div>
-                    )}
-
-                    {/* Entity grid */}
-                    <div className={styles.entityGrid}>
-                        {bucketEntities.map(entity => (
-                            <div 
-                                key={entity.id} 
-                                className={styles.entityCard} 
-                                onClick={() => setSelectedEntityId(entity.id)}
-                            >
-                                {entity.imageUrl ? (
-                                    <img src={entity.imageUrl} alt={entity.name} className={styles.cardThumb} />
-                                ) : (
-                                    <div 
-                                        className={styles.cardColorBlock} 
-                                        style={{ backgroundColor: (selectedBucket.id === 'people' ? '#4A6FA5' : selectedBucket.id === 'places' ? '#2E8B57' : selectedBucket.id === 'things' ? '#C0392B' : selectedBucket.id === 'world' ? '#6B4C9A' : '#333') }} 
-                                    />
-                                )}
-                                <div className={styles.cardContent}>
-                                    <span className={styles.cardName}>{entity.name}</span>
-                                    {(entity.articleDoc || (entity.articleBlocks && entity.articleBlocks.length > 0))
-                                        ? <span className={styles.articleBadge}>📄 Article</span>
-                                        : <span className={styles.noArticleBadge}>No article</span>
-                                    }
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    // Level 1 — Category Landing (default)
     return (
         <div className={styles.browserContainer}>
-            <div className={styles.browserInner}>
-                {/* Header */}
-                <div className={styles.browserHeader}>
-                    <h2 className={styles.browserTitle}>World Bible</h2>
-                    <span className={styles.browserCount}>{projectEntities.length} entries</span>
-                    <span className={styles.browserHint}>Click an entity to open its article</span>
-                </div>
-
-                {/* Category grid */}
-                <div className={styles.categoryGrid}>
-                    {layout.roots.map(root => {
-                        const count = projectEntities.filter(e => root.entityTypes.includes(e.type)).length;
-                        const heroEntity = projectEntities.find(e => root.entityTypes.includes(e.type) && e.imageUrl);
-                        
-                        // Derived metadata for rendering
-                        const color = root.id === 'people' ? '#4A6FA5' : 
-                                      root.id === 'places' ? '#2E8B57' : 
-                                      root.id === 'things' ? '#C0392B' : 
-                                      root.id === 'world' ? '#6B4C9A' : '#333';
-                        
-                        return (
-                            <div
-                                key={root.id}
-                                className={styles.categoryCard}
-                                style={{
-                                    backgroundImage: heroEntity ? `url(${heroEntity.imageUrl})` : 'none',
-                                    backgroundColor: color,
-                                } as React.CSSProperties}
-                                onClick={() => setSelectedBucketId(root.id)}
-                            >
-                                <div className={styles.categoryOverlay} />
-                                <div className={styles.categoryContent}>
-                                    <span className={styles.categoryIcon}>{root.icon}</span>
-                                    <h3 className={styles.categoryLabel}>{root.label}</h3>
-                                    <span className={styles.categoryCount}>
-                                        {count} {count === 1 ? 'entry' : 'entries'}
+            <div className={styles.strips}>
+                {layout.roots.map((root, i) => {
+                    const bucketEntities = projectEntities.filter(e => root.entityTypes.includes(e.type));
+                    const isExpanded = selectedBucketId === root.id;
+                    const color = stripColor(root.id);
+                    return (
+                        <article
+                            key={root.id}
+                            className={`${styles.strip} ${isExpanded ? styles.stripExpanded : ''}`}
+                            style={
+                                isExpanded
+                                    ? { left: 0, width: '100%', background: color }
+                                    : { left: `${i * stripWidth}%`, width: `${stripWidth}%`, background: color }
+                            }
+                            onClick={isExpanded ? undefined : () => setSelectedBucketId(root.id)}
+                        >
+                            <div className={styles.stripContent}>
+                                <div className={styles.stripTitle}>
+                                    <span className={styles.stripIcon}>{root.icon}</span>
+                                    <span className={styles.stripName}>{root.label}</span>
+                                    <span className={styles.stripMeta}>
+                                        {bucketEntities.length} {bucketEntities.length === 1 ? 'entry' : 'entries'}
                                     </span>
                                 </div>
-                            </div>
-                        );
-                    })}
 
-                    {/* Static "Add Category" card — non-functional placeholder, Sprint 50 */}
-                    <div
-                        className={styles.addCategoryCard}
-                        role="button"
-                        tabIndex={0}
-                        onClick={handleAddCategory}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleAddCategory(); }}
-                        style={{ cursor: 'pointer' }}
-                    >
-                        <span className={styles.addCategoryIcon}>＋</span>
-                        <span className={styles.addCategoryLabel}>Add Category</span>
-                        <span className={styles.addCategoryHint}>Opens the hierarchy canvas</span>
+                                {isExpanded && (
+                                    <div className={styles.stripInner}>
+                                        <button
+                                            className={styles.stripClose}
+                                            onClick={(e) => { e.stopPropagation(); setSelectedBucketId(null); }}
+                                            aria-label="Close category"
+                                        >
+                                            ×
+                                        </button>
+                                        <div className={styles.stripInnerHead}>
+                                            <span className={styles.stripIcon}>{root.icon}</span>
+                                            <h2 className={styles.levelTitle}>{root.label}</h2>
+                                            <span className={styles.browserCount}>{bucketEntities.length} entries</span>
+                                        </div>
+
+                                        {bucketEntities.length === 0 ? (
+                                            <p className={styles.stripEmpty}>
+                                                No {root.label.toLowerCase()} yet — type [[ in the editor to create one.
+                                            </p>
+                                        ) : (
+                                            <div className={styles.entityGrid}>
+                                                {bucketEntities.map(entity => (
+                                                    <div
+                                                        key={entity.id}
+                                                        className={styles.entityCard}
+                                                        onClick={(e) => { e.stopPropagation(); setSelectedEntityId(entity.id); }}
+                                                    >
+                                                        {entity.imageUrl ? (
+                                                            <img src={entity.imageUrl} alt={entity.name} className={styles.cardThumb} />
+                                                        ) : (
+                                                            <div className={styles.cardColorBlock} style={{ backgroundColor: color }} />
+                                                        )}
+                                                        <div className={styles.cardContent}>
+                                                            <span className={styles.cardName}>{entity.name}</span>
+                                                            {(entity.articleDoc || (entity.articleBlocks && entity.articleBlocks.length > 0))
+                                                                ? <span className={styles.articleBadge}>📄 Article</span>
+                                                                : <span className={styles.noArticleBadge}>No article</span>}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </article>
+                    );
+                })}
+
+                {/* Add Category strip → opens the hierarchy canvas */}
+                <article
+                    className={styles.strip}
+                    style={{ left: `${layout.roots.length * stripWidth}%`, width: `${stripWidth}%`, background: '#2c2c33' }}
+                    role="button"
+                    tabIndex={0}
+                    onClick={handleAddCategory}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleAddCategory(); }}
+                >
+                    <div className={styles.stripContent}>
+                        <div className={styles.stripTitle}>
+                            <span className={styles.stripIcon}>＋</span>
+                            <span className={styles.stripName}>Add Category</span>
+                        </div>
                     </div>
-                </div>
+                </article>
             </div>
         </div>
     );
