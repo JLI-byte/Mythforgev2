@@ -81,4 +81,19 @@ describe('migratePerShelfBibles', () => {
         const out = migratePerShelfBibles(data);
         expect(Object.prototype.hasOwnProperty.call(out.entities[1], 'worldId')).toBe(false);
     });
+
+    it('passes malformed (null) entity entries through without crashing', () => {
+        const data = baseData();
+        (data.entities as any[]).unshift(null);
+        const out = migratePerShelfBibles(data);
+        expect(out.entities[0]).toBeNull();
+        expect(out.entities[1].worldId).toBe('w1'); // rest still migrated
+    });
+
+    it('leaves entities without projectId standalone', () => {
+        const data = baseData();
+        (data.entities as any[]).push({ id: 'e4', name: 'Keyless', type: 'lore' });
+        const out = migratePerShelfBibles(data);
+        expect(Object.prototype.hasOwnProperty.call(out.entities[3], 'worldId')).toBe(false);
+    });
 });

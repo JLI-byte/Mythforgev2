@@ -18,11 +18,12 @@ export function migratePerShelfBibles(data: Record<string, any>): Record<string,
     const projects: any[] = Array.isArray(data.projects) ? data.projects : [];
     const entities: any[] = Array.isArray(data.entities) ? data.entities : [];
 
-    const worldIds = new Set(worlds.map(w => w?.id));
+    const worldIds = new Set(worlds.map(w => w?.id).filter((id) => id !== undefined));
     const projectWorld = new Map(projects.map(p => [p?.id, p?.worldId]));
 
     // 1 + 2 — backfill and normalize entity.worldId
     const nextEntities = entities.map(e => {
+        if (!e || typeof e !== 'object') return e;
         let worldId: string | undefined = e.worldId ?? projectWorld.get(e.projectId);
         if (worldId !== undefined && !worldIds.has(worldId)) worldId = undefined;
         const hadKey = Object.prototype.hasOwnProperty.call(e, 'worldId');
@@ -37,6 +38,8 @@ export function migratePerShelfBibles(data: Record<string, any>): Record<string,
     let worldBibles = data.worldBibles;
     if (!worldBibles || typeof worldBibles !== 'object') {
         const built: Record<string, any> = {};
+        // First non-empty layout wins per key — deliberate: merging conflicting
+        // per-project layouts has no right answer, and first (oldest) is stable.
         for (const p of projects) {
             const key = p?.worldId && worldIds.has(p.worldId) ? p.worldId : 'standalone';
             if (built[key]) continue;
