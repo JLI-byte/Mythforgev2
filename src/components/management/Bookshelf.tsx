@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useWorkspaceStore, Project, World, COVER_COLORS, WorldGenre } from '@/store/workspaceStore';
 import { STANDALONE_KEY } from '@/lib/worldKey';
+import { getWorldBibleConfig } from '@/lib/worldBibleNav';
 import WorldBibleBook from './WorldBibleBook';
 import styles from './Bookshelf.module.css';
 
@@ -40,6 +41,7 @@ export function Bookshelf() {
     const setActiveProject = useWorkspaceStore(s => s.setActiveProject);
     const setWorkspaceMode = useWorkspaceStore(s => s.setWorkspaceMode);
     const setActiveWorldKey = useWorkspaceStore(s => s.setActiveWorldKey);
+    const worldBibles = useWorkspaceStore(s => s.worldBibles);
 
     // ─── STATE BLOCKS ──────────────────────────────────────────
 
@@ -298,6 +300,8 @@ export function Bookshelf() {
     const renderShelf = (title: string, worldId: string | 'standalone', projects: Project[], worldObj?: World) => {
         const isUncategorized = worldId === 'standalone';
         const isDeleting = deletingWorldId === worldId;
+        const worldKey = isUncategorized ? STANDALONE_KEY : worldId;
+        const bibleCfg = getWorldBibleConfig(worldBibles, worldKey);
 
         // Rows alternate 6 / 5 slots (even / odd) so the half-cell-offset odd
         // rows nest symmetrically inside the wider rows. At least 3 rows by
@@ -357,10 +361,14 @@ export function Bookshelf() {
                 </div>
                 <div className={styles.shelfBody}>
                     <WorldBibleBook
-                        title={isUncategorized ? 'Standalones' : title}
-                        onOpen={() => {
-                            setActiveWorldKey(isUncategorized ? STANDALONE_KEY : worldId);
-                            setWorkspaceMode('worldBible');
+                        title={bibleCfg.coverTitle ?? (isUncategorized ? 'Standalones' : title)}
+                        subtitle={bibleCfg.coverSub}
+                        tint={bibleCfg.tint}
+                        onAction={(action) => {
+                            setActiveWorldKey(worldKey);
+                            if (action === 'open') setWorkspaceMode('worldBible');
+                            else if (action === 'edit') setWorkspaceMode('worldBibleEdit');
+                            else setWorkspaceMode('hierarchy');
                         }}
                     />
                     <div className={styles.books}>

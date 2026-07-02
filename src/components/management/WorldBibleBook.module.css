@@ -332,12 +332,32 @@
     text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.2);
 }
 
-/* page-side hint, revealed when the book opens */
-.pageHint {
+/* page-side action selector, revealed when the book opens */
+.pageAction {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100%;
+    gap: 2px;
+    overflow: hidden;
+}
+
+.pageVerb {
+    display: block;
+    color: #3a3a42;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    animation: lc-verb-roll 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+@keyframes lc-verb-roll {
+    from { transform: translateY(90%); opacity: 0; }
+    to   { transform: translateY(0);   opacity: 1; }
+}
+
+.pageHint {
     color: #6b6b70;
     font-size: 0.62rem;
     font-weight: 700;
@@ -345,9 +365,21 @@
     text-transform: uppercase;
 }
 
+.pageScrollHint {
+    margin-top: 10px;
+    color: #9a9aa0;
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .hardcoverFront,
     .page > li {
         transition: none;
+    }
+    .pageVerb {
+        animation: none;
     }
 }
