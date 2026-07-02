@@ -158,6 +158,61 @@ export const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
     species: "Species / Race",
 };
 
+// =============================================
+// Character Profile ("Glamour" template)
+// =============================================
+
+export interface ProfileField { label: string; value: string; }
+export interface ProfileMeter { label: string; level: number; } // 0–100
+export interface PersonaRow { image?: string; label?: string; heading?: string; text?: string; }
+export interface PaletteSwatch { name: string; hex: string; }
+export interface LookItem { label: string; value?: string; image?: string; }
+export interface MoodItem { image?: string; caption?: string; }
+export interface AppearanceSection { label: string; note?: string; moodboard?: MoodItem[]; }
+export interface RelationEntry { image?: string; name?: string; relation?: string; text?: string; }
+
+export interface CharacterProfile {
+    tagline?: string;
+    decorImages?: string[];
+    quote?: string;
+    fullName?: string;
+    dossier?: ProfileField[];
+    firstImpression?: string;
+    bio?: string;
+    corePersonality?: { image?: string; heading?: string; text?: string };
+    personaRows?: PersonaRow[];
+    meters?: ProfileMeter[];
+    dos?: string;
+    donts?: string;
+    palette?: PaletteSwatch[];
+    lookbook?: LookItem[];
+    visualImpression?: string;
+    appearanceSections?: AppearanceSection[];
+    relations?: RelationEntry[];
+}
+
+/** A profile scaffold so a new character's pages aren't blank. */
+export function createDefaultProfile(): CharacterProfile {
+    return {
+        dossier: [
+            { label: 'Age', value: '' },
+            { label: 'Gender', value: '' },
+            { label: 'Sexuality', value: '' },
+            { label: 'Origin', value: '' },
+            { label: 'Job', value: '' },
+            { label: 'Role', value: '' },
+            { label: 'Status', value: '' },
+        ],
+        personaRows: [],
+        meters: [],
+        palette: [],
+        lookbook: [],
+        appearanceSections: [],
+        relations: [],
+        decorImages: [],
+    };
+}
+
 export interface Entity {
     /** Unique identifier for the entity */
     id: string;
@@ -185,6 +240,8 @@ export interface Entity {
     articleBlocks?: ArticleBlock[];
     /** Sprint 52: TipTap HTML content for the Document-mode article editor — separate from articleBlocks */
     articleDoc?: string;
+    /** Sprint 60: structured character profile ("glamour" template). */
+    profile?: CharacterProfile;
 }
 
 // =============================================
