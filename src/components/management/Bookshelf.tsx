@@ -4,9 +4,23 @@ import React, { useState, useEffect } from 'react';
 import { useWorkspaceStore, Project, World, COVER_COLORS, WorldGenre } from '@/store/workspaceStore';
 import styles from './Bookshelf.module.css';
 
+/** Diamond-lattice shelf layout: fixed columns, 3 rows of slots by default. */
+const DIAMOND_COLS = 6;
+const DEFAULT_ROWS = 3;
+
+/** Monochrome cover fills — the shelf stays black/white/grey. */
+const COVER_GREYS = ['#26262b', '#33333a', '#42424a', '#1e1e22', '#4d4d55', '#2c2c31'];
+
+/** Stable grey per project so a cover keeps its shade across renders. */
+const greyForId = (id: string): string => {
+    let h = 0;
+    for (let i = 0; i < id.length; i++) h = (h + id.charCodeAt(i)) % 997;
+    return COVER_GREYS[h % COVER_GREYS.length];
+};
+
 /**
  * Bookshelf Component
- * 
+ *
  * Provides a high-level overview of all worlds (shelves) and their associated projects.
  * Supports organizing projects via drag-and-drop, and managing shelves via a multi-step wizard.
  */
@@ -35,6 +49,9 @@ export function Bookshelf() {
     const [wizardStep, setWizardStep] = useState<1 | 2 | 3>(1);
     const [editingWorldId, setEditingWorldId] = useState<string | null>(null);
     const [deletingWorldId, setDeletingWorldId] = useState<string | null>(null);
+
+    /** Extra rows added per shelf beyond the default 3 (keyed by world id / 'standalone'). */
+    const [extraRows, setExtraRows] = useState<Record<string, number>>({});
 
     /** Wizard Form Data: Holds transient state for world creation/editing */
     const [wizardData, setWizardData] = useState<Partial<World>>({
@@ -235,38 +252,62 @@ export function Bookshelf() {
 
     // ─── RENDERING ─────────────────────────────────────────
 
-    const renderProjectCard = (p: Project) => (
-        <div 
+    /** A single book sitting in a diamond slot: greyscale cover, tilts on hover. */
+    const renderDiamondBook = (p: Project) => (
+        <div
             key={p.id}
-            draggable
-            onDragStart={(e) => handleDragStart(e, p.id)}
-            onDragEnd={() => setDraggedProjectId(null)}
-            className={`${styles.card} ${p.id === activeProjectId ? styles.cardActive : ''} ${draggedProjectId === p.id ? styles.dragging : ''}`}
-            onClick={() => handleSelectProject(p.id)}
+            className={`${styles.slot} ${draggedProjectId === p.id ? styles.dragging : ''}`}
         >
-            <div 
-                className={styles.cover}
-                style={{ 
-                    background: p.coverColor,
-                    backgroundImage: p.coverImageUrl ? `url(${p.coverImageUrl})` : 'none'
+            <span className={styles.slotDiamond} aria-hidden="true" />
+            <div
+                draggable
+                onDragStart={(e) => handleDragStart(e, p.id)}
+                onDragEnd={() => setDraggedProjectId(null)}
+                onClick={() => handleSelectProject(p.id)}
+                title={p.name}
+                className={`${styles.book} ${p.id === activeProjectId ? styles.bookActive : ''}`}
+                style={{
+                    background: p.coverImageUrl ? undefined : greyForId(p.id),
+                    backgroundImage: p.coverImageUrl ? `url(${p.coverImageUrl})` : undefined,
                 }}
             >
                 {!p.coverImageUrl && (
-                    <span className={styles.initials}>
+                    <span className={styles.bookInitials}>
                         {p.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                     </span>
                 )}
-            </div>
-            <div className={styles.cardInfo}>
-                <span className={styles.cardTitle}>{p.name}</span>
-                <span className={styles.cardMeta}>{p.writingMode.toUpperCase()}</span>
+                <span className={styles.bookLabel}>{p.name}</span>
             </div>
         </div>
+    );
+
+    /** Empty diamond slot — click to stock the shelf with a new story. */
+    const renderEmptySlot = (worldId: string | 'standalone', key: string) => (
+        <button
+            key={key}
+            type="button"
+            className={styles.slotEmpty}
+            onClick={() => handleCreateStory(worldId === 'standalone' ? undefined : worldId)}
+            aria-label="Add a story to this slot"
+        />
     );
 
     const renderShelf = (title: string, worldId: string | 'standalone', projects: Project[], worldObj?: World) => {
         const isUncategorized = worldId === 'standalone';
         const isDeleting = deletingWorldId === worldId;
+
+        // 3 rows of slots by default; grow to fit the books, plus any rows the
+        // user has explicitly added for this shelf.
+        const rows = Math.max(
+            DEFAULT_ROWS + (extraRows[worldId] || 0),
+            Math.ceil(projects.length / DIAMOND_COLS),
+        );
+        const slots: (Project | null)[] = [];
+        for (let i = 0; i < rows * DIAMOND_COLS; i++) slots.push(projects[i] ?? null);
+        const rowChunks: (Project | null)[][] = [];
+        for (let r = 0; r < rows; r++) {
+            rowChunks.push(slots.slice(r * DIAMOND_COLS, (r + 1) * DIAMOND_COLS));
+        }
 
         return (
             <div 
@@ -311,14 +352,34 @@ export function Bookshelf() {
                         </button>
                     )}
                 </div>
-                <div className={styles.grid}>
-                    {projects.length > 0 ? (
-                        projects.map(renderProjectCard)
-                    ) : (
-                        <div className={styles.emptyHint}>
-                            Drag a story here to organize it...
+                <div className={styles.diamondGrid}>
+                    {rowChunks.map((row, ri) => (
+                        <div
+                            key={ri}
+                            className={`${styles.dRow} ${ri % 2 === 1 ? styles.dRowOffset : ''}`}
+                        >
+                            {row.map((p, ci) =>
+                                p
+                                    ? renderDiamondBook(p)
+                                    : renderEmptySlot(worldId, `e-${ri}-${ci}`),
+                            )}
                         </div>
-                    )}
+                    ))}
+                </div>
+
+                <div className={styles.rowControls}>
+                    <button
+                        type="button"
+                        className={styles.addRowBtn}
+                        onClick={() =>
+                            setExtraRows(prev => ({
+                                ...prev,
+                                [worldId]: (prev[worldId] || 0) + 1,
+                            }))
+                        }
+                    >
+                        + Add row
+                    </button>
                 </div>
             </div>
         );
