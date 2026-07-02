@@ -56,8 +56,9 @@
   background-color: transparent;
   position: relative;
   cursor: crosshair;
-  margin-right: 260px;
 }
+
+.withTray { margin-right: 260px; }
 
 .canvasArea {
   width: 4000px;

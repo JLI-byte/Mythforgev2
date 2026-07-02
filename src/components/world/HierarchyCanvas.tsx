@@ -305,7 +305,7 @@ export default function HierarchyCanvas({ isDraft }: HierarchyCanvasProps) {
 
     return (
         <main className={styles.main}>
-            <div className={styles.canvasViewport} ref={canvasRef}>
+            <div className={`${styles.canvasViewport} ${!isDraft ? styles.withTray : ''}`} ref={canvasRef}>
                 <div 
                     className={styles.canvasArea}
                     onDrop={handleCanvasDrop}
@@ -380,6 +380,7 @@ export default function HierarchyCanvas({ isDraft }: HierarchyCanvasProps) {
                                                         className={`${styles.nodeChip} ${dragOverChip === chipKey ? styles.chipDropTarget : ''}`}
                                                         draggable
                                                         onDragStart={(e) => handleTypeDragStart(e, type, n.id)}
+                                                        // dragover can't read getData; dataTransfer type keys are lowercased by the browser, so 'entityId' → 'entityid'
                                                         onDragOver={(e) => {
                                                             if (e.dataTransfer.types.includes('entityid')) {
                                                                 e.preventDefault();
@@ -446,6 +447,7 @@ export default function HierarchyCanvas({ isDraft }: HierarchyCanvasProps) {
                                 className={styles.trayCard}
                                 draggable
                                 onDragStart={(e) => e.dataTransfer.setData('entityId', entity.id)}
+                                onDragEnd={() => setDragOverChip(null)}
                             >
                                 <span className={styles.trayIcon}>{TYPE_ICONS[entity.type]}</span>
                                 <span className={styles.trayName}>{entity.name}</span>
