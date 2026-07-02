@@ -173,3 +173,27 @@
 .personaNotes { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
 .personaNotes b { display: block; font: 700 10px var(--profile-sans, sans-serif); letter-spacing: 2px; text-transform: uppercase; color: var(--primary); margin-bottom: 4px; }
 .personaNotes p { margin: 0; font-size: 13px; color: var(--soft); }
+
+.palette { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.colorSwatch { text-align: center; }
+.colorSwatch i { display: block; width: 46px; height: 46px; border-radius: 8px; background: var(--swatch); border: 1px solid var(--line); }
+.colorSwatch b { display: block; font-size: 11px; margin-top: 4px; color: var(--ink); }
+.colorSwatch span { font-size: 10px; color: var(--muted); }
+
+.lookbook { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.lookItem { border-radius: 8px; overflow: hidden; background: var(--cream); }
+.lookItem img { width: 100%; height: 120px; object-fit: cover; display: block; }
+.lookItem.large img { height: 190px; }
+.lookItem b { display: block; padding: 6px 8px 0; font: 700 11px var(--profile-sans, sans-serif); color: var(--ink); }
+.lookItem span { display: block; padding: 0 8px 8px; font-size: 11px; color: var(--muted); }
+
+.appearanceBlock { margin-bottom: 16px; }
+.appearanceBlock b { display: block; font: 700 10px var(--profile-sans, sans-serif); letter-spacing: 2px; text-transform: uppercase; color: var(--primary); margin-bottom: 4px; }
+.appearanceBlock p { margin: 0; font: 400 14px/1.6 var(--profile-sans, sans-serif); color: var(--soft); }
+
+.appearanceSection { margin-bottom: 18px; }
+.appearanceSectionHead b { font: 600 16px var(--profile-softserif, serif); color: var(--ink); margin-right: 8px; }
+.appearanceSectionHead span { font-size: 12px; color: var(--muted); }
+.appearanceMoodboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+.moodItem img { width: 100%; height: 110px; object-fit: cover; border-radius: 6px; }
+.moodItem p { margin: 4px 0 0; font-size: 11px; color: var(--soft); }
