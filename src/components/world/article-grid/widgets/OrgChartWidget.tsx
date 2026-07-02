@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
+import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../ArticleGridEditor.module.css';
 
 interface OrgNode {
@@ -20,7 +21,7 @@ interface OrgEdge {
 
 export function OrgChartWidget({ content, onChange }: { content: any; onChange: (c: any) => void }) {
   const entities = useWorkspaceStore(s => s.entities);
-  const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
+  const projectWorldKey = useWorkspaceStore(selectProjectWorldKey);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef = useRef<number>(0);
@@ -32,7 +33,7 @@ export function OrgChartWidget({ content, onChange }: { content: any; onChange: 
 
   const nodes: OrgNode[] = content.nodes || [];
   const edges: OrgEdge[] = content.edges || [];
-  const projectEntities = entities.filter(e => e.projectId === activeProjectId);
+  const worldEntities = entities.filter(e => worldKeyForEntity(e) === projectWorldKey);
 
   // Layout: BFS from roots, assign generation + horizontal position
   const layout = React.useMemo(() => {
@@ -253,7 +254,7 @@ export function OrgChartWidget({ content, onChange }: { content: any; onChange: 
           <select className={styles.orgChartSelect} value={newNode.entityId}
             onChange={e => setNewNode(v => ({ ...v, entityId: e.target.value, label: e.target.value ? (entities.find(en => en.id === e.target.value)?.name ?? '') : v.label }))}>
             <option value="">Link entity (optional)</option>
-            {projectEntities.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+            {worldEntities.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
           </select>
           <input className={styles.orgChartInput} placeholder="Name *" value={newNode.label} onChange={e => setNewNode(v => ({ ...v, label: e.target.value }))} />
           <input className={styles.orgChartInput} placeholder="Role / Title (e.g. Commander)" value={newNode.role} onChange={e => setNewNode(v => ({ ...v, role: e.target.value }))} />

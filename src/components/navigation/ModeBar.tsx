@@ -120,7 +120,8 @@ function computeResults(
   projects: any[],
   documents: any[],
   entities: any[],
-  scenes: any[]
+  scenes: any[],
+  worlds: any[]
 ): SearchResult[] {
   const q = query.trim();
   if (q.length < 2) return [];
@@ -166,12 +167,12 @@ function computeResults(
     const nameMatch = e.name.toLowerCase().includes(qLower);
     const descMatch = e.description?.toLowerCase().includes(qLower);
     if (nameMatch || descMatch) {
-      const project = projects.find(p => p.id === e.projectId);
+      const world = worlds.find(w => w.id === e.worldId);
       hits.push({
         id: `entity-${e.id}`,
         kind: 'entity',
         title: e.name,
-        subtitle: `${e.type} · ${project?.name ?? ''}`,
+        subtitle: `${e.type} · ${world?.name ?? 'Standalone'}`,
         excerpt: descMatch && !nameMatch
           ? getExcerpt(e.description, q)
           : '',
@@ -261,8 +262,8 @@ export default function ModeBar({ onHome }: ModeBarProps) {
     // Performance Fix: Read store imperatively ONLY when user types.
     // This prevents ModeBar from subscribing to and re-rendering on 
     // every keystroke in the editor (which changes scenes/entities arrays).
-    const { projects, documents, entities, scenes } = useWorkspaceStore.getState();
-    const hits = computeResults(q, projects, documents, entities, scenes);
+    const { projects, documents, entities, scenes, worlds } = useWorkspaceStore.getState();
+    const hits = computeResults(q, projects, documents, entities, scenes, worlds);
     
     setResults(hits);
     setIsOpen(true);
@@ -292,7 +293,7 @@ export default function ModeBar({ onHome }: ModeBarProps) {
         setWorkspaceMode('desk');
         break;
       case 'entity':
-        setActiveProject(result.projectId);
+        if (result.projectId) setActiveProject(result.projectId);
         setFocusedArticleEntity(result.entityId!);
         setWorkspaceMode('worldBible');
         break;

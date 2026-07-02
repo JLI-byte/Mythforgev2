@@ -1,6 +1,7 @@
 "use client";
 
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
+import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../ArticleGridEditor.module.css';
 
 interface TimelineEvent {
@@ -18,12 +19,12 @@ interface TimelineContent {
 
 export function TimelineWidget({ content, onChange }: { content: any; onChange: (c: any) => void }) {
   const entities = useWorkspaceStore(s => s.entities);
-  const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
+  const projectWorldKey = useWorkspaceStore(selectProjectWorldKey);
 
   const events: TimelineEvent[] = content.events || [];
   const orientation: 'horizontal' | 'vertical' = content.orientation || 'horizontal';
 
-  const projectEntities = entities.filter(e => e.projectId === activeProjectId);
+  const worldEntities = entities.filter(e => worldKeyForEntity(e) === projectWorldKey);
 
   const addEvent = () => {
     const newEvent: TimelineEvent = {
@@ -109,7 +110,7 @@ export function TimelineWidget({ content, onChange }: { content: any; onChange: 
                     onChange={e => updateEvent(ev.id, 'entityId', e.target.value)}
                   >
                     <option value="">No linked entity</option>
-                    {projectEntities.map(entity => (
+                    {worldEntities.map(entity => (
                       <option key={entity.id} value={entity.id}>{entity.name}</option>
                     ))}
                   </select>
@@ -168,7 +169,7 @@ export function TimelineWidget({ content, onChange }: { content: any; onChange: 
                   onChange={e => updateEvent(ev.id, 'entityId', e.target.value)}
                 >
                   <option value="">No linked entity</option>
-                  {projectEntities.map(entity => (
+                  {worldEntities.map(entity => (
                     <option key={entity.id} value={entity.id}>{entity.name}</option>
                   ))}
                 </select>

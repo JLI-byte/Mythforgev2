@@ -3,7 +3,8 @@
 import React, { useEffect, useState, useRef, useCallback, MutableRefObject } from 'react';
 import { Editor } from '@tiptap/react';
 import { entitySuggestPluginKey, EntitySuggestState } from '@/lib/EntitySuggest';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
+import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from './EntitySuggestDropdown.module.css';
 
 interface Props {
@@ -12,7 +13,7 @@ interface Props {
 
 export default function EntitySuggestDropdown({ editorRef }: Props) {
   const entities = useWorkspaceStore(s => s.entities);
-  const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
+  const projectWorldKey = useWorkspaceStore(selectProjectWorldKey);
 
   const [pluginState, setPluginState] = useState<EntitySuggestState>({
     active: false, query: '', from: 0, to: 0,
@@ -49,15 +50,15 @@ export default function EntitySuggestDropdown({ editorRef }: Props) {
     return () => { activeEditor.off('transaction', update); };
   }, [activeEditor]);
 
-  // Filter entities to current project matching query
+  // Filter entities to current project's world matching query
   const filtered = React.useMemo(() => {
-    if (!pluginState.active || !activeProjectId) return [];
+    if (!pluginState.active) return [];
     const q = pluginState.query.toLowerCase();
     return entities
-      .filter(e => e.projectId === activeProjectId)
+      .filter(e => worldKeyForEntity(e) === projectWorldKey)
       .filter(e => e.name.toLowerCase().includes(q))
       .slice(0, 8); // max 8 results
-  }, [entities, activeProjectId, pluginState.active, pluginState.query]);
+  }, [entities, projectWorldKey, pluginState.active, pluginState.query]);
 
   const selectEntity = useCallback((entityId: string, entityName: string) => {
     if (!activeEditor) return;

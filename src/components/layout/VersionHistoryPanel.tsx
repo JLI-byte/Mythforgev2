@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './VersionHistoryPanel.module.css';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
+import { worldKeyForEntity } from '@/lib/worldKey';
 
 interface VersionHistoryPanelProps {
     isOpen: boolean;
@@ -40,6 +41,7 @@ export function VersionHistoryPanel({
     const documents = useWorkspaceStore(state => state.documents);
     const scenes = useWorkspaceStore(state => state.scenes);
     const entities = useWorkspaceStore(state => state.entities);
+    const projectWorldKey = useWorkspaceStore(selectProjectWorldKey);
     const sceneSnapshots = useWorkspaceStore(state => state.sceneSnapshots);
     const entitySnapshots = useWorkspaceStore(state => state.entitySnapshots);
     
@@ -61,20 +63,20 @@ export function VersionHistoryPanel({
         return scenes.filter(s => s.projectId === activeProjectId);
     }, [scenes, activeProjectId]);
 
-    // Filter entities with article content for current project
-    const projectEntities = useMemo(() => {
-        return entities.filter(e => e.projectId === activeProjectId && (e.articleDoc || (e.articleBlocks && e.articleBlocks.length > 0)));
-    }, [entities, activeProjectId]);
+    // Filter entities with article content for current project's world
+    const worldEntities = useMemo(() => {
+        return entities.filter(e => worldKeyForEntity(e) === projectWorldKey && (e.articleDoc || (e.articleBlocks && e.articleBlocks.length > 0)));
+    }, [entities, projectWorldKey]);
 
     // Set defaults when project or tab changes
     useEffect(() => {
         if (activeTab === 'scenes' && projectScenes.length > 0 && !selectedSceneId) {
             setSelectedSceneId(projectScenes[0].id);
         }
-        if (activeTab === 'world' && projectEntities.length > 0 && !selectedEntityId) {
-            setSelectedEntityId(projectEntities[0].id);
+        if (activeTab === 'world' && worldEntities.length > 0 && !selectedEntityId) {
+            setSelectedEntityId(worldEntities[0].id);
         }
-    }, [activeTab, projectScenes, projectEntities]);
+    }, [activeTab, projectScenes, worldEntities]);
 
     const activeSnapshots = useMemo(() => {
         if (activeTab === 'scenes') {
@@ -231,7 +233,7 @@ export function VersionHistoryPanel({
                                         return <option key={s.id} value={s.id}>{doc?.title || 'Chapter'} — {s.title}</option>;
                                     })
                                 ) : (
-                                    projectEntities.map(e => (
+                                    worldEntities.map(e => (
                                         <option key={e.id} value={e.id}>{e.name} ({e.type})</option>
                                     ))
                                 )}
@@ -249,7 +251,7 @@ export function VersionHistoryPanel({
                                 History for {
                                     activeTab === 'scenes' 
                                         ? projectScenes.find(s => s.id === selectedSceneId)?.title || 'Selected Scene'
-                                        : projectEntities.find(e => e.id === selectedEntityId)?.name || 'Selected Entity'
+                                        : worldEntities.find(e => e.id === selectedEntityId)?.name || 'Selected Entity'
                                 }
                             </div>
                             

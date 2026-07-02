@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
+import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../ArticleGridEditor.module.css';
 
 interface RelEdge {
@@ -26,6 +27,7 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
   const entities = useWorkspaceStore(s => s.entities);
   const scenes = useWorkspaceStore(s => s.scenes);
   const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
+  const projectWorldKey = useWorkspaceStore(selectProjectWorldKey);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const nodesRef = useRef<RelNode[]>([]);
@@ -40,8 +42,8 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
   const includedEntityIds: string[] = content.includedEntityIds || [];
 
   // Compute the full entity set for this widget
-  const projectEntities = entities.filter(e =>
-    e.projectId === activeProjectId &&
+  const worldEntities = entities.filter(e =>
+    worldKeyForEntity(e) === projectWorldKey &&
     (includedEntityIds.length === 0 || includedEntityIds.includes(e.id))
   );
 
@@ -53,8 +55,8 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
 
     for (const scene of projectScenes) {
       if (!scene.content) continue;
-      // Find which project entities appear in this scene's content
-      const presentIds = projectEntities
+      // Find which world entities appear in this scene's content
+      const presentIds = worldEntities
         .filter(e => scene.content.includes(e.id) || scene.content.toLowerCase().includes(e.name.toLowerCase()))
         .map(e => e.id);
 
@@ -75,7 +77,7 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
       }
     }
     return Array.from(edgeMap.values());
-  }, [autoDetect, scenes, projectEntities, activeProjectId]);
+  }, [autoDetect, scenes, worldEntities, activeProjectId]);
 
   // All edges combined
   const allEdges: RelEdge[] = React.useMemo(() => {
@@ -100,10 +102,10 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
     const cy = H / 2;
 
     const existing = new Map(nodesRef.current.map(n => [n.id, n]));
-    nodesRef.current = projectEntities.map((e, i) => {
+    nodesRef.current = worldEntities.map((e, i) => {
       if (existing.has(e.id)) return existing.get(e.id)!;
       // Place new nodes in a circle around center
-      const angle = (i / Math.max(projectEntities.length, 1)) * Math.PI * 2;
+      const angle = (i / Math.max(worldEntities.length, 1)) * Math.PI * 2;
       const r = Math.min(W, H) * 0.3;
       return {
         id: e.id,
@@ -115,7 +117,7 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
         vy: 0,
       };
     });
-  }, [projectEntities.map(e => e.id).join(',')]);
+  }, [worldEntities.map(e => e.id).join(',')]);
 
   // Force simulation + render loop
   useEffect(() => {
@@ -365,7 +367,7 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
           <span>Auto-detect</span>
         </label>
         <span className={styles.relationshipStats}>
-          {projectEntities.length} entities · {allEdges.length} connections
+          {worldEntities.length} entities · {allEdges.length} connections
         </span>
         <button
           className={styles.relationshipAddBtn}
@@ -384,7 +386,7 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
             onChange={e => setNewEdge(v => ({ ...v, sourceId: e.target.value }))}
           >
             <option value="">From entity…</option>
-            {projectEntities.map(e => (
+            {worldEntities.map(e => (
               <option key={e.id} value={e.id}>{e.name}</option>
             ))}
           </select>
@@ -394,7 +396,7 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
             onChange={e => setNewEdge(v => ({ ...v, targetId: e.target.value }))}
           >
             <option value="">To entity…</option>
-            {projectEntities.map(e => (
+            {worldEntities.map(e => (
               <option key={e.id} value={e.id}>{e.name}</option>
             ))}
           </select>
@@ -412,8 +414,8 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
           {manualEdges.length > 0 && (
             <div className={styles.manualEdgeList}>
               {manualEdges.map(me => {
-                const src = projectEntities.find(e => e.id === me.sourceId)?.name ?? me.sourceId;
-                const tgt = projectEntities.find(e => e.id === me.targetId)?.name ?? me.targetId;
+                const src = worldEntities.find(e => e.id === me.sourceId)?.name ?? me.sourceId;
+                const tgt = worldEntities.find(e => e.id === me.targetId)?.name ?? me.targetId;
                 return (
                   <div key={me.id} className={styles.manualEdgeItem}>
                     <span>{src} → {me.label ? `${me.label} → ` : ''}{tgt}</span>
@@ -427,7 +429,7 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
       )}
 
       {/* Graph canvas */}
-      {projectEntities.length === 0 ? (
+      {worldEntities.length === 0 ? (
         <div className={styles.relationshipEmpty}>
           <span>No entities in this project yet.</span>
           <span>Add entities to the World Bible to see them here.</span>

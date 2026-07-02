@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
+import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../ArticleGridEditor.module.css';
 
 interface FamilyMember {
@@ -21,7 +22,7 @@ interface FamilyEdge {
 
 export function FamilyTreeWidget({ content, onChange }: { content: any; onChange: (c: any) => void }) {
   const entities = useWorkspaceStore(s => s.entities);
-  const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
+  const projectWorldKey = useWorkspaceStore(selectProjectWorldKey);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef = useRef<number>(0);
@@ -33,7 +34,7 @@ export function FamilyTreeWidget({ content, onChange }: { content: any; onChange
 
   const members: FamilyMember[] = content.members || [];
   const edges: FamilyEdge[] = content.edges || [];
-  const projectEntities = entities.filter(e => e.projectId === activeProjectId);
+  const worldEntities = entities.filter(e => worldKeyForEntity(e) === projectWorldKey);
 
   // ── Layout computation ──
   const layout = React.useMemo(() => {
@@ -303,7 +304,7 @@ export function FamilyTreeWidget({ content, onChange }: { content: any; onChange
             }))}
           >
             <option value="">Link to entity (optional)</option>
-            {projectEntities
+            {worldEntities
               .filter(e => !members.some(m => m.entityId === e.id))
               .map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
           </select>

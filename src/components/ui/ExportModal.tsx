@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import styles from './ExportModal.module.css';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
+import { worldKeyForEntity } from '@/lib/worldKey';
 import { exportAsMarkdown, exportAsDocx, exportWorldBible } from '@/lib/export';
 import { exportAsEpub } from '@/lib/epub';
 
@@ -23,6 +24,7 @@ export default function ExportModal({ onClose }: ExportModalProps) {
     const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
     const projects = useWorkspaceStore(state => state.projects);
     const allEntities = useWorkspaceStore(state => state.entities);
+    const projectWorldKey = useWorkspaceStore(selectProjectWorldKey);
 
     const [isExporting, setIsExporting] = useState(false);
     const [exportError, setExportError] = useState<string | null>(null);
@@ -30,7 +32,7 @@ export default function ExportModal({ onClose }: ExportModalProps) {
     const activeDocument = documents.find(d => d.id === activeDocumentId);
     const documentScenes = scenes.filter(s => s.documentId === activeDocumentId);
     const activeProject = projects.find(p => p.id === activeProjectId);
-    const projectEntities = allEntities.filter(e => e.projectId === activeProjectId);
+    const worldEntities = allEntities.filter(e => worldKeyForEntity(e) === projectWorldKey);
 
     const handleDocumentMarkdown = () => {
         if (!activeDocument || !activeProject) return;
@@ -75,14 +77,14 @@ export default function ExportModal({ onClose }: ExportModalProps) {
         if (!activeProject) return;
         setExportError(null);
         try {
-            exportWorldBible(projectEntities, activeProject.name);
+            exportWorldBible(worldEntities, activeProject.name);
         } catch (err: unknown) {
             setExportError(err instanceof Error ? err.message : 'Unknown error exporting World Bible');
         }
     };
 
-    const hasEntities = projectEntities.length > 0;
-    const uniqueTypesCount = new Set(projectEntities.map(e => e.type)).size;
+    const hasEntities = worldEntities.length > 0;
+    const uniqueTypesCount = new Set(worldEntities.map(e => e.type)).size;
 
     return (
         <div className={styles.backdrop} onClick={onClose}>
@@ -158,7 +160,7 @@ export default function ExportModal({ onClose }: ExportModalProps) {
                         </div>
                         <p className={styles.subtext}>
                             {hasEntities
-                                ? `${projectEntities.length} entities across ${uniqueTypesCount} types`
+                                ? `${worldEntities.length} entities across ${uniqueTypesCount} types`
                                 : 'No entities found. Add entries to the World Bible.'
                             }
                         </p>

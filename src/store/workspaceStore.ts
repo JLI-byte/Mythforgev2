@@ -997,6 +997,10 @@ if (typeof window !== 'undefined') {
     });
 }
 
+/** WorldKey of the ACTIVE PROJECT's shelf — for desk/editor surfaces. */
+export const selectProjectWorldKey = (state: WorkspaceState): WorldKey =>
+    worldKeyForProject(state.projects.find(p => p.id === state.activeProjectId));
+
 /**
  * The persisted/synced subset of workspace state. Shared by the local persist
  * middleware AND the Supabase cloud sync so both layers always agree on the

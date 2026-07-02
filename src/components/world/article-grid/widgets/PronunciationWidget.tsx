@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from 'react';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
+import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../ArticleGridEditor.module.css';
 
 interface PronunciationEntry {
@@ -15,14 +16,14 @@ interface PronunciationEntry {
 
 export function PronunciationWidget({ content, onChange }: { content: any; onChange: (c: any) => void }) {
   const entities = useWorkspaceStore(s => s.entities);
-  const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
+  const projectWorldKey = useWorkspaceStore(selectProjectWorldKey);
 
   const entries: PronunciationEntry[] = content.entries || [];
   const [showAdd, setShowAdd] = useState(false);
   const [newEntry, setNewEntry] = useState({ name: '', phonetic: '', syllables: '', notes: '', entityId: '' });
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const projectEntities = entities.filter(e => e.projectId === activeProjectId);
+  const worldEntities = entities.filter(e => worldKeyForEntity(e) === projectWorldKey);
 
   const addEntry = () => {
     if (!newEntry.name.trim()) return;
@@ -65,7 +66,7 @@ export function PronunciationWidget({ content, onChange }: { content: any; onCha
               name: e.target.value ? (entities.find(en => en.id === e.target.value)?.name ?? '') : v.name,
             }))}>
             <option value="">Link entity (optional)</option>
-            {projectEntities.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+            {worldEntities.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
           </select>
           <input className={styles.pronInput} placeholder="Name *  (e.g. Aerindel)" value={newEntry.name} onChange={e => setNewEntry(v => ({ ...v, name: e.target.value }))} />
           <input className={styles.pronInput} placeholder="Phonetic  (e.g. ay-RIN-del)" value={newEntry.phonetic} onChange={e => setNewEntry(v => ({ ...v, phonetic: e.target.value }))} />

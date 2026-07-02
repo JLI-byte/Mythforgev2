@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
+import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../ArticleGridEditor.module.css';
 
 interface ArcBeat {
@@ -13,7 +14,7 @@ interface ArcBeat {
 
 export function CharacterArcWidget({ content, onChange }: { content: any; onChange: (c: any) => void }) {
   const entities = useWorkspaceStore(s => s.entities);
-  const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
+  const projectWorldKey = useWorkspaceStore(selectProjectWorldKey);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [showAddBeat, setShowAddBeat] = useState(false);
@@ -26,8 +27,8 @@ export function CharacterArcWidget({ content, onChange }: { content: any; onChan
   const beats: ArcBeat[] = content.beats || [];
   const goalStages: string[] = content.goalStages || ['Unaware', 'Aware', 'Pursuing', 'Achieved'];
 
-  const projectCharacters = entities.filter(e =>
-    e.projectId === activeProjectId && e.type === 'character'
+  const worldCharacters = entities.filter(e =>
+    worldKeyForEntity(e) === projectWorldKey && e.type === 'character'
   );
 
   const linkedEntity = entities.find(e => e.id === entityId);
@@ -277,7 +278,7 @@ export function CharacterArcWidget({ content, onChange }: { content: any; onChan
           onChange={e => onChange({ ...content, entityId: e.target.value })}
         >
           <option value="">No character linked</option>
-          {projectCharacters.map(e => (
+          {worldCharacters.map(e => (
             <option key={e.id} value={e.id}>{e.name}</option>
           ))}
         </select>
