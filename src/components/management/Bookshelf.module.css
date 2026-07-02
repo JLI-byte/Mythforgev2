@@ -68,48 +68,51 @@
 
 /* --- Diamond lattice (books sit in offset diamond slots) --- */
 
-/* The andybarefoot "Responsive CSS Grid - Books" mechanic: each li spans 2
-   columns, is pulled up 50% (padding-bottom:100% makes it square), and every
-   (C-1)n-((C-3)/2)th item is shifted one column, so the diamonds interlock and
-   stay aligned. Recoloured to greyscale. C = --columns (fixed at 7 here). */
+/* Explicit uniform rows (every row has DIAMOND_COLS slots), so no honeycomb
+   row-length drift. Rows interlock by overlapping half a diamond and offsetting
+   the odd rows by half a slot. Only rows AFTER the first are pulled up, so the
+   top never clips. Diamonds are portrait rhombi (matching the 2:3 covers) so a
+   sensibly-sized book fits fully inside. */
 .books {
-    --columns: 15;
-    list-style: none;
+    --w: clamp(96px, 9vw, 132px);       /* diamond slot width */
+    --h: calc(var(--w) * 1.4);          /* portrait diamond height */
+    width: max-content;
+    max-width: 100%;
     margin: 0;
-    /* top padding accommodates the first row's -50% pull */
-    padding: 3% 0 0;
-    display: grid;
-    grid-template-columns: repeat(var(--columns), 1fr);
-    overflow: hidden;
+    padding: 4px 0 2px;
 }
 
-.slot {
-    grid-column-end: span 2;
+.dRow {
+    display: flex;
+}
+.dRow + .dRow {
+    margin-top: calc(var(--h) * -0.5);  /* interlock */
+}
+.dRowOffset {
+    margin-left: calc(var(--w) * 0.5);  /* half-slot offset */
+}
+
+.slot,
+.slotEmpty {
     position: relative;
-    width: 100%;
-    padding-bottom: 100%;
-    margin-top: -50%;
-}
-.slot:nth-child(14n-6) {
-    grid-column-start: 2;
+    flex: none;
+    width: var(--w);
+    height: var(--h);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Clean diamond frame per cell: a rotated square whose points sit at the cell
-   edge midpoints (inset 14.65% ⇒ 70.7% side), so with the pen's 50% overlap +
-   offset the diamonds tessellate into an aligned lattice. */
+/* the diamond slot itself (portrait rhombus) */
 .slot::before {
     content: '';
     position: absolute;
-    inset: 14.65%;
-    transform: rotate(45deg);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.025);
+    inset: 0;
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    background: rgba(255, 255, 255, 0.05);
 }
-
-/* empty slots read a touch fainter than stocked ones */
 .slotEmpty::before {
-    border-color: rgba(255, 255, 255, 0.09);
-    background: none;
+    background: rgba(255, 255, 255, 0.028);
 }
 
 /* the cover (the pen's img): sits in the upper diamond, tilts on hover */
@@ -117,7 +120,7 @@
    the diamond edges), and tilts on hover. */
 .book {
     position: absolute;
-    width: 31%;
+    width: 48%;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
@@ -141,10 +144,9 @@
     z-index: 3;
 }
 
-/* Active project: light up its diamond frame instead of boxing the cover. */
+/* Active project: light up its diamond slot instead of boxing the cover. */
 .slot:has(.bookActive)::before {
-    border-color: rgba(255, 255, 255, 0.65);
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.14);
 }
 .bookActive {
     box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.45), 0 0 12px rgba(255, 255, 255, 0.25);
