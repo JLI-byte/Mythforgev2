@@ -78,7 +78,7 @@
     --w: clamp(140px, 15.5vw, 196px);   /* square diamond cell */
     width: max-content;
     max-width: 100%;
-    margin: 0;
+    margin: 0 auto;
     padding: 4px 0 2px;
 }
 
