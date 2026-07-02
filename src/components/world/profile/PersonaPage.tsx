@@ -1,59 +1,77 @@
 import React from 'react';
-import { CharacterProfile } from '@/store/workspaceStore';
+import { PageProps } from './CharacterProfile';
+import EditableText from './editors/EditableText';
+import EditableImage from './editors/EditableImage';
+import ListEditor from './editors/ListEditor';
+import MeterField from './editors/MeterField';
 import styles from './CharacterProfile.module.css';
 
-export default function PersonaPage({ profile }: { profile: CharacterProfile }) {
+export default function PersonaPage({ profile, editing, update }: PageProps) {
+    const core = profile.corePersonality ?? {};
     const rows = profile.personaRows ?? [];
     const meters = profile.meters ?? [];
-    const core = profile.corePersonality;
     return (
         <div className={styles.pageScroll}>
             <h1>Persona</h1>
             <h2>temper / desire / personality</h2>
 
-            {core && (core.text || core.heading || core.image) && (
-                <div className={styles.personaFeature}>
-                    {core.image && <img src={core.image} alt="" />}
-                    <div>
-                        <b>Core Personality</b>
-                        {core.heading && <h3>{core.heading}</h3>}
-                        {core.text && <p>{core.text}</p>}
-                    </div>
+            <div className={styles.personaFeature}>
+                <EditableImage editing={editing} value={core.image}
+                    onChange={(v) => update({ corePersonality: { ...core, image: v } })} />
+                <div>
+                    <b>Core Personality</b>
+                    <EditableText as="h3" editing={editing} value={core.heading ?? ''} placeholder="Heading"
+                        onChange={(v) => update({ corePersonality: { ...core, heading: v } })} />
+                    <EditableText as="p" multiline editing={editing} value={core.text ?? ''} placeholder="Describe the core personality."
+                        onChange={(v) => update({ corePersonality: { ...core, text: v } })} />
                 </div>
-            )}
+            </div>
 
-            {rows.map((row, i) => (
-                <div key={i} className={`${styles.personaRow} ${i % 2 === 1 ? styles.reverse : ''}`}>
-                    <div className={styles.personaTextCard}>
-                        {row.label && <b>{row.label}</b>}
-                        {row.heading && <h3>{row.heading}</h3>}
-                        {row.text && <p>{row.text}</p>}
-                    </div>
-                    {row.image && <img src={row.image} alt="" />}
-                </div>
-            ))}
-
-            {meters.length > 0 && (
-                <div className={styles.personaMeters}>
-                    {meters.map((m, i) => (
-                        <div key={i} className={styles.meterItem} style={{ ['--level' as string]: `${m.level}%` }}>
-                            <b>{m.label}</b>
-                            <div><span /></div>
+            <ListEditor
+                editing={editing}
+                items={rows}
+                onChange={(items) => update({ personaRows: items })}
+                newItem={() => ({ label: 'Trait', heading: '', text: '' })}
+                addLabel="+ Add trait"
+                renderItem={(row, i, onItem) => (
+                    <div className={`${styles.personaRow} ${i % 2 === 1 ? styles.reverse : ''}`}>
+                        <div className={styles.personaTextCard}>
+                            {editing
+                                ? <EditableText editing value={row.label ?? ''} placeholder="Label" onChange={(v) => onItem({ label: v })} />
+                                : row.label && <b>{row.label}</b>}
+                            <EditableText as="h3" editing={editing} value={row.heading ?? ''} placeholder="Heading" onChange={(v) => onItem({ heading: v })} />
+                            <EditableText as="p" multiline editing={editing} value={row.text ?? ''} placeholder="Text" onChange={(v) => onItem({ text: v })} />
                         </div>
-                    ))}
-                </div>
-            )}
+                        <EditableImage editing={editing} value={row.image} onChange={(v) => onItem({ image: v })} />
+                    </div>
+                )}
+            />
 
-            {(profile.dos || profile.donts) && (
-                <div className={styles.personaNotes}>
-                    <div><b>Do&rsquo;s</b><p>{profile.dos || '—'}</p></div>
-                    <div><b>Don&rsquo;ts</b><p>{profile.donts || '—'}</p></div>
-                </div>
-            )}
+            <ListEditor
+                className={styles.personaMeters}
+                editing={editing}
+                items={meters}
+                onChange={(items) => update({ meters: items })}
+                newItem={() => ({ label: 'Trait', level: 50 })}
+                addLabel="+ Add meter"
+                renderItem={(m, i, onItem) => (
+                    <MeterField editing={editing} meter={m} barClassName={styles.meterItem}
+                        onChange={(nm) => onItem(nm)} />
+                )}
+            />
 
-            {rows.length === 0 && meters.length === 0 && !core && (
-                <p className={styles.placeholder}>No persona details yet.</p>
-            )}
+            <div className={styles.personaNotes}>
+                <div>
+                    <b>Do&rsquo;s</b>
+                    <EditableText as="p" multiline editing={editing} value={profile.dos ?? ''} placeholder="—"
+                        onChange={(v) => update({ dos: v })} />
+                </div>
+                <div>
+                    <b>Don&rsquo;ts</b>
+                    <EditableText as="p" multiline editing={editing} value={profile.donts ?? ''} placeholder="—"
+                        onChange={(v) => update({ donts: v })} />
+                </div>
+            </div>
         </div>
     );
 }

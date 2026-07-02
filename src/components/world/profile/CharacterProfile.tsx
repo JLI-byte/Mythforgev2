@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Entity, CharacterProfile as ProfileData, createDefaultProfile } from '@/store/workspaceStore';
+import { Entity, CharacterProfile as ProfileData, createDefaultProfile, useWorkspaceStore } from '@/store/workspaceStore';
 import { playfair, cormorant, nunito, greatVibes } from './profileFonts';
 import MainPage from './MainPage';
 import PersonaPage from './PersonaPage';
 import AppearancePage from './AppearancePage';
 import RelationsPage from './RelationsPage';
+import EditableImage from './editors/EditableImage';
+import EditableText from './editors/EditableText';
 import styles from './CharacterProfile.module.css';
 
 type PageId = 'main' | 'persona' | 'appearance' | 'relations';
@@ -17,72 +19,101 @@ const PAGES: { id: PageId; label: string }[] = [
     { id: 'relations', label: 'Relations' },
 ];
 
+export interface PageProps {
+    profile: ProfileData;
+    editing: boolean;
+    update: (patch: Partial<ProfileData>) => void;
+}
+
 interface CharacterProfileProps {
     entity: Entity;
 }
 
-/**
- * CharacterProfile — read-only "glamour" character sheet
- * (codepen.io/mahricodes/pen/EaNZwYG). Fixed 900×720 card with a left image
- * panel + four navigable pages, rendered from entity.profile.
- */
 export default function CharacterProfile({ entity }: CharacterProfileProps) {
+    const updateEntity = useWorkspaceStore((s) => s.updateEntity);
     const [page, setPage] = useState<PageId>('main');
+    const [editing, setEditing] = useState(false);
 
-    // Merge stored profile over the default scaffold; fall back to entity fields.
-    const profile: ProfileData = { ...createDefaultProfile(), ...(entity.profile ?? {}) };
+    const merged: ProfileData = { ...createDefaultProfile(), ...(entity.profile ?? {}) };
+    const [draft, setDraft] = useState<ProfileData>(merged);
+
+    const profile = editing ? draft : merged;
+    const update = (patch: Partial<ProfileData>) => setDraft((d) => ({ ...d, ...patch }));
+
+    const startEdit = () => { setDraft(merged); setEditing(true); };
+    const save = () => { updateEntity(entity.id, { profile: draft }); setEditing(false); };
+    const cancel = () => { setDraft(merged); setEditing(false); };
+
     const displayName = profile.fullName || entity.name;
-    const pageNumber = String(PAGES.findIndex(p => p.id === page) + 1).padStart(2, '0');
+    const pageNumber = String(PAGES.findIndex((p) => p.id === page) + 1).padStart(2, '0');
     const fontVars = `${playfair.variable} ${cormorant.variable} ${nunito.variable} ${greatVibes.variable}`;
 
     return (
         <div className={`${styles.bg} ${fontVars}`}>
-            {/* Left image panel */}
             <div className={styles.imgSide}>
                 <div className={styles.imgBox}>
-                    {entity.imageUrl && <img src={entity.imageUrl} alt={displayName} />}
+                    <EditableImage
+                        editing={editing}
+                        value={entity.imageUrl}
+                        onChange={(v) => updateEntity(entity.id, { imageUrl: v })}
+                        alt={displayName}
+                    />
                 </div>
                 <div className={styles.sideStar}>✦</div>
-                {profile.tagline && <div className={styles.sideQuote}>{profile.tagline}</div>}
+                {(editing || profile.tagline) && (
+                    <div className={styles.sideQuote}>
+                        <EditableText editing={editing} value={profile.tagline ?? ''} placeholder="tagline"
+                            onChange={(v) => update({ tagline: v })} />
+                    </div>
+                )}
                 <div className={styles.sideCaption}>
                     <b>{displayName}</b>
                     {entity.subcategory && <span>{entity.subcategory}</span>}
                 </div>
             </div>
 
-            {/* Decorative (customizable) images */}
             {(profile.decorImages ?? []).slice(0, 2).map((src, i) =>
                 src ? <img key={i} className={styles.decor} src={src} alt="" aria-hidden="true" /> : null,
             )}
 
-            {/* Big vertical name + page number */}
             <div className={styles.bigTitle}><span>{displayName}</span></div>
             <div className={styles.number}>{pageNumber}</div>
 
-            {/* Right content */}
+            <div className={styles.toolbar}>
+                {editing ? (
+                    <>
+                        <button type="button" className={styles.toolBtnPrimary} onClick={save}>Save</button>
+                        <button type="button" className={styles.toolBtn} onClick={cancel}>Cancel</button>
+                    </>
+                ) : (
+                    <button type="button" className={styles.toolBtn} onClick={startEdit}>Edit</button>
+                )}
+            </div>
+
             <div className={styles.content}>
                 <div className={styles.topline}>
                     <span />
-                    {profile.quote && <div className={styles.quote}>“{profile.quote}”</div>}
+                    {(editing || profile.quote) && (
+                        <div className={styles.quote}>
+                            <EditableText editing={editing} value={profile.quote ?? ''} placeholder="quote"
+                                onChange={(v) => update({ quote: v })} />
+                        </div>
+                    )}
                 </div>
 
                 <div className={styles.page}>
-                    {page === 'main' && <MainPage profile={profile} name={displayName} />}
-                    {page === 'persona' && <PersonaPage profile={profile} />}
-                    {page === 'appearance' && <AppearancePage profile={profile} />}
-                    {page === 'relations' && <RelationsPage profile={profile} />}
+                    {page === 'main' && <MainPage profile={profile} editing={editing} update={update} />}
+                    {page === 'persona' && <PersonaPage profile={profile} editing={editing} update={update} />}
+                    {page === 'appearance' && <AppearancePage profile={profile} editing={editing} update={update} />}
+                    {page === 'relations' && <RelationsPage profile={profile} editing={editing} update={update} />}
                 </div>
             </div>
 
-            {/* Page nav */}
             <nav className={styles.nav}>
-                {PAGES.map(p => (
-                    <button
-                        key={p.id}
-                        type="button"
+                {PAGES.map((p) => (
+                    <button key={p.id} type="button"
                         className={`${styles.navBtn} ${page === p.id ? styles.navBtnActive : ''}`}
-                        onClick={() => setPage(p.id)}
-                    >
+                        onClick={() => setPage(p.id)}>
                         {p.label}
                     </button>
                 ))}

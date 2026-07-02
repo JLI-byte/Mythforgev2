@@ -1,68 +1,100 @@
 import React from 'react';
-import { CharacterProfile } from '@/store/workspaceStore';
+import { PageProps } from './CharacterProfile';
+import EditableText from './editors/EditableText';
+import EditableImage from './editors/EditableImage';
+import ListEditor from './editors/ListEditor';
 import styles from './CharacterProfile.module.css';
 
-export default function AppearancePage({ profile }: { profile: CharacterProfile }) {
+export default function AppearancePage({ profile, editing, update }: PageProps) {
     const palette = profile.palette ?? [];
     const lookbook = profile.lookbook ?? [];
     const sections = profile.appearanceSections ?? [];
-    const empty = palette.length === 0 && lookbook.length === 0 && sections.length === 0 && !profile.visualImpression;
     return (
         <div className={styles.pageScroll}>
             <h1>Appearance</h1>
             <h2>face / style / signature details</h2>
 
-            {palette.length > 0 && (
-                <div className={styles.palette}>
-                    {palette.map((s, i) => (
-                        <div key={i} className={styles.colorSwatch} style={{ ['--swatch' as string]: s.hex }}>
-                            <i /><b>{s.name}</b><span>{s.hex}</span>
+            <ListEditor
+                className={styles.palette}
+                editing={editing}
+                items={palette}
+                onChange={(items) => update({ palette: items })}
+                newItem={() => ({ name: 'Colour', hex: '#84222b' })}
+                addLabel="+ Add colour"
+                renderItem={(s, i, onItem) => (
+                    <div className={styles.colorSwatch} style={{ ['--swatch' as string]: s.hex }}>
+                        {editing
+                            ? <input type="color" value={s.hex} onChange={(e) => onItem({ hex: e.target.value })} />
+                            : <i />}
+                        {editing
+                            ? <EditableText editing value={s.name} onChange={(v) => onItem({ name: v })} />
+                            : <b>{s.name}</b>}
+                        <span>{s.hex}</span>
+                    </div>
+                )}
+            />
+
+            <ListEditor
+                className={styles.lookbook}
+                editing={editing}
+                items={lookbook}
+                onChange={(items) => update({ lookbook: items })}
+                newItem={() => ({ label: 'Item', value: '' })}
+                addLabel="+ Add look"
+                renderItem={(l, i, onItem) => (
+                    <div className={`${styles.lookItem} ${i === 0 ? styles.large : ''}`}>
+                        <EditableImage editing={editing} value={l.image} onChange={(v) => onItem({ image: v })} alt={l.label} />
+                        {editing
+                            ? <EditableText editing value={l.label} onChange={(v) => onItem({ label: v })} />
+                            : <b>{l.label}</b>}
+                        {editing
+                            ? <EditableText editing value={l.value ?? ''} placeholder="detail" onChange={(v) => onItem({ value: v })} />
+                            : l.value && <span>{l.value}</span>}
+                    </div>
+                )}
+            />
+
+            <div className={styles.appearanceBlock}>
+                <b>Visual Impression</b>
+                <EditableText as="p" multiline editing={editing} value={profile.visualImpression ?? ''}
+                    placeholder="No visual impression yet." onChange={(v) => update({ visualImpression: v })} />
+            </div>
+
+            <ListEditor
+                className={styles.appearanceSections}
+                editing={editing}
+                items={sections}
+                onChange={(items) => update({ appearanceSections: items })}
+                newItem={() => ({ label: 'Section', note: '', moodboard: [] })}
+                addLabel="+ Add section"
+                renderItem={(sec, i, onItem) => (
+                    <div className={styles.appearanceSection}>
+                        <div className={styles.appearanceSectionHead}>
+                            {editing
+                                ? <EditableText editing value={sec.label} onChange={(v) => onItem({ label: v })} />
+                                : <b>{sec.label}</b>}
+                            {editing
+                                ? <EditableText editing value={sec.note ?? ''} placeholder="note" onChange={(v) => onItem({ note: v })} />
+                                : sec.note && <span>{sec.note}</span>}
                         </div>
-                    ))}
-                </div>
-            )}
-
-            {lookbook.length > 0 && (
-                <div className={styles.lookbook}>
-                    {lookbook.map((l, i) => (
-                        <div key={i} className={`${styles.lookItem} ${i === 0 ? styles.large : ''}`}>
-                            {l.image && <img src={l.image} alt={l.label} />}
-                            <b>{l.label}</b>
-                            {l.value && <span>{l.value}</span>}
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {profile.visualImpression && (
-                <div className={styles.appearanceBlock}>
-                    <b>Visual Impression</b>
-                    <p>{profile.visualImpression}</p>
-                </div>
-            )}
-
-            {sections.length > 0 && (
-                <div className={styles.appearanceSections}>
-                    {sections.map((sec, i) => (
-                        <div key={i} className={styles.appearanceSection}>
-                            <div className={styles.appearanceSectionHead}>
-                                <b>{sec.label}</b>
-                                {sec.note && <span>{sec.note}</span>}
-                            </div>
-                            <div className={styles.appearanceMoodboard}>
-                                {(sec.moodboard ?? []).map((m, j) => (
-                                    <div key={j} className={styles.moodItem}>
-                                        {m.image && <img src={m.image} alt="" />}
-                                        {m.caption && <p>{m.caption}</p>}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {empty && <p className={styles.placeholder}>No appearance details yet.</p>}
+                        <ListEditor
+                            className={styles.appearanceMoodboard}
+                            editing={editing}
+                            items={sec.moodboard ?? []}
+                            onChange={(mb) => onItem({ moodboard: mb })}
+                            newItem={() => ({ image: '', caption: '' })}
+                            addLabel="+ Add image"
+                            renderItem={(m, j, onMood) => (
+                                <div className={styles.moodItem}>
+                                    <EditableImage editing={editing} value={m.image} onChange={(v) => onMood({ image: v })} />
+                                    <EditableText as="p" editing={editing} value={m.caption ?? ''} placeholder="caption"
+                                        onChange={(v) => onMood({ caption: v })} />
+                                </div>
+                            )}
+                        />
+                    </div>
+                )}
+            />
         </div>
     );
 }
