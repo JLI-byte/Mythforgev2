@@ -6,7 +6,7 @@
  * No logic lives here — just type declarations and mapping constants.
  */
 
-import { EntityType, Project, WorldBibleRootConfig, WorldBibleLayout } from '@/store/workspaceStore';
+import { EntityType, Project, WorldBibleRootConfig, WorldBibleLayout, WorldBibleConfig } from '@/store/workspaceStore';
 
 /** The three top-level groupings in the World Bible */
 export type RootCategory = 'people' | 'places' | 'things' | 'world';
@@ -105,4 +105,18 @@ export function getProjectLayout(project?: Project | null): WorldBibleLayout {
     return project.worldBibleLayout;
   }
   return DEFAULT_WORLD_BIBLE_LAYOUT;
+}
+
+/**
+ * Effective config for a shelf's World Bible — falls back to the default
+ * layout when the shelf has no custom layout yet. Identity fields
+ * (coverTitle etc.) pass through untouched.
+ */
+export function getWorldBibleConfig(
+  worldBibles: Record<string, WorldBibleConfig> | undefined,
+  key: string,
+): WorldBibleConfig {
+  const cfg = worldBibles?.[key];
+  if (cfg?.layout?.roots?.length) return cfg;
+  return { ...cfg, layout: DEFAULT_WORLD_BIBLE_LAYOUT };
 }
