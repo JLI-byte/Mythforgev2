@@ -75,7 +75,7 @@
      is what makes the book look tucked INSIDE the diamond.
    Layers must be opaque greys so the lip actually hides the corners. */
 .books {
-    --w: clamp(112px, 12vw, 152px);     /* square diamond cell */
+    --w: clamp(140px, 15.5vw, 196px);   /* square diamond cell */
     width: max-content;
     max-width: 100%;
     margin: 0;
