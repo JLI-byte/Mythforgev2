@@ -39,7 +39,18 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  // Resolve the session. The auth check runs in the edge-middleware sandbox,
+  // whose fetch to Supabase can fail transiently (notably under Turbopack dev).
+  // If it does, fail open: let the request through and let client-side gating +
+  // Supabase RLS protect data, rather than throwing or wrongly bouncing users.
+  let user: Awaited<ReturnType<typeof supabase.auth.getUser>>['data']['user'] = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (error) {
+    console.warn('[middleware] auth check failed, passing request through:', error);
+    return response;
+  }
 
   // Route protection logic
   const pathname = request.nextUrl.pathname;
