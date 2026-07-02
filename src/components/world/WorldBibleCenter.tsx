@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { useWorkspaceStore, EntityType, WorldBibleRootConfig } from '@/store/workspaceStore';
-import { getProjectLayout } from '@/lib/worldBibleNav';
+import { getProjectLayout, SUBCATEGORY_LABELS } from '@/lib/worldBibleNav';
+import { sanitizeLabel } from '@/lib/sanitize';
 import ArticleReadView from './ArticleReadView';
 import CharacterProfile from './profile/CharacterProfile';
 import styles from './WorldBibleCenter.module.css';
@@ -20,6 +21,7 @@ export default function WorldBibleCenter() {
     const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
     const projects = useWorkspaceStore(state => state.projects);
     const addWorldBibleRoot = useWorkspaceStore(state => state.addWorldBibleRoot);
+    const addEntity = useWorkspaceStore(state => state.addEntity);
     const setWorkspaceMode = useWorkspaceStore(state => state.setWorkspaceMode);
     const activeProject = projects.find(p => p.id === activeProjectId);
 
@@ -40,6 +42,34 @@ export default function WorldBibleCenter() {
 
     const [selectedBucketId, setSelectedBucketId] = useState<string | null>(null);
     const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
+
+    // Inline "new article" creation, scoped to whichever category is expanded.
+    const [creatingBucketId, setCreatingBucketId] = useState<string | null>(null);
+    const [draftName, setDraftName] = useState('');
+    const [draftType, setDraftType] = useState<EntityType>('lore');
+
+    // A category can hold several entity types; custom categories hold none,
+    // so fall back to a generic 'lore' article.
+    const effectiveTypes = (root: WorldBibleRootConfig): EntityType[] =>
+        root.entityTypes.length ? root.entityTypes : ['lore'];
+
+    const startCreate = (root: WorldBibleRootConfig) => {
+        setDraftName('');
+        setDraftType(effectiveTypes(root)[0]);
+        setCreatingBucketId(root.id);
+    };
+    const cancelCreate = () => { setCreatingBucketId(null); setDraftName(''); };
+
+    const handleCreate = (root: WorldBibleRootConfig) => {
+        const name = sanitizeLabel(draftName);
+        if (!name || !activeProjectId) return;
+        const types = effectiveTypes(root);
+        const type = types.includes(draftType) ? draftType : types[0];
+        const id = crypto.randomUUID();
+        addEntity({ id, projectId: activeProjectId, name, type, description: '', createdAt: new Date() });
+        cancelCreate();
+        setSelectedEntityId(id); // drop straight into the new article
+    };
 
     // Filter entities for active project
     const projectEntities = entities.filter(e => e.projectId === activeProjectId);
@@ -122,7 +152,7 @@ export default function WorldBibleCenter() {
 
                                         {bucketEntities.length === 0 ? (
                                             <p className={styles.stripEmpty}>
-                                                No {root.label.toLowerCase()} yet — type [[ in the editor to create one.
+                                                No {root.label.toLowerCase()} yet — add your first article below.
                                             </p>
                                         ) : (
                                             <div className={styles.entityGrid}>
@@ -146,6 +176,50 @@ export default function WorldBibleCenter() {
                                                     </div>
                                                 ))}
                                             </div>
+                                        )}
+
+                                        {creatingBucketId === root.id ? (
+                                            <div className={styles.newArticleForm} onClick={(e) => e.stopPropagation()}>
+                                                <input
+                                                    className={styles.newArticleInput}
+                                                    autoFocus
+                                                    placeholder="Article title…"
+                                                    value={draftName}
+                                                    onChange={(e) => setDraftName(e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') handleCreate(root);
+                                                        if (e.key === 'Escape') cancelCreate();
+                                                    }}
+                                                />
+                                                {effectiveTypes(root).length > 1 && (
+                                                    <select
+                                                        className={styles.newArticleSelect}
+                                                        value={draftType}
+                                                        onChange={(e) => setDraftType(e.target.value as EntityType)}
+                                                    >
+                                                        {effectiveTypes(root).map(t => (
+                                                            <option key={t} value={t}>{SUBCATEGORY_LABELS[t]}</option>
+                                                        ))}
+                                                    </select>
+                                                )}
+                                                <button
+                                                    className={styles.newArticleCreate}
+                                                    onClick={() => handleCreate(root)}
+                                                    disabled={!draftName.trim()}
+                                                >
+                                                    Create
+                                                </button>
+                                                <button className={styles.newArticleCancel} onClick={cancelCreate}>
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                className={styles.addArticleBtn}
+                                                onClick={(e) => { e.stopPropagation(); startCreate(root); }}
+                                            >
+                                                ＋ New article
+                                            </button>
                                         )}
                                     </div>
                                 )}
