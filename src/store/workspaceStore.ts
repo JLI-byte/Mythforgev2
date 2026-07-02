@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { logger } from '@/lib/logger';
 import { getStoredValue } from '@/lib/storage';
 import type { WorldKey } from '@/lib/worldKey';
+import { migratePerShelfBibles } from './migratePerShelfBibles';
 
 // Cover colors auto-assigned to new projects in rotation
 export const COVER_COLORS = [
@@ -2177,8 +2178,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             /**
              * Schema Versioning and Migration logic (Sprint 68)
              * version: 2 — Introduced targeted reviver and automatic backups.
+             * version: 3 — Per-shelf World Bibles (entity.worldId + worldBibles map).
              */
-            version: 2,
+            version: 3,
             migrate: (persistedState: any, fromVersion: number) => {
                 // Take an automatic backup BEFORE any migration
                 try {
@@ -2197,10 +2199,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     logger.warn('LoreCanvas: backup failed, proceeding with migration', e);
                 }
 
-                // Return the persisted state as-is — all field migrations already
-                // happen in onRehydrateStorage. migrate() just needs to return
-                // a valid object so Zustand doesn't discard the stored data.
-                return persistedState ?? {};
+                // v3: per-shelf World Bibles. Idempotent — safe even if the
+                // blob was already migrated by the cloud-hydrate path.
+                return migratePerShelfBibles(persistedState ?? {});
             },
         }
     )
