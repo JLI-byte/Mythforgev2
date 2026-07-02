@@ -46,8 +46,8 @@ export default function PersonaPage({ profile }: { profile: CharacterProfile }) 
 
             {(profile.dos || profile.donts) && (
                 <div className={styles.personaNotes}>
-                    <div><b>Do's</b><p>{profile.dos || '—'}</p></div>
-                    <div><b>Don'ts</b><p>{profile.donts || '—'}</p></div>
+                    <div><b>Do&rsquo;s</b><p>{profile.dos || '—'}</p></div>
+                    <div><b>Don&rsquo;ts</b><p>{profile.donts || '—'}</p></div>
                 </div>
             )}
 
