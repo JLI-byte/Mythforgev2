@@ -1689,6 +1689,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             updateWorldBibleConfig: (key, patch) =>
                 set((state) => {
                     const existing = state.worldBibles[key];
+                    // Destructure layout out first: spreading `existing` directly after an
+                    // explicit `layout:` key trips TS2783 (duplicate property). Behaviourally
+                    // identical to a plain spread, just strict-mode safe.
                     const { layout: existingLayout, ...existingIdentity } = existing ?? {};
                     return {
                         worldBibles: {
