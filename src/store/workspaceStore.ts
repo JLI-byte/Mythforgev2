@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { logger } from '@/lib/logger';
 import { getStoredValue } from '@/lib/storage';
+import { WorldKey } from '@/lib/worldKey';
 
 // Cover colors auto-assigned to new projects in rotation
 export const COVER_COLORS = [
@@ -66,6 +67,17 @@ export interface WorldBibleRootConfig {
 /** Per-project World Bible layout customization */
 export interface WorldBibleLayout {
   roots: WorldBibleRootConfig[];
+}
+
+/** Everything a single shelf's World Bible owns. Keyed by WorldKey in the store. */
+export interface WorldBibleConfig {
+  layout: WorldBibleLayout;
+  /** Cover title — defaults to the world name / "Standalones" when unset. */
+  coverTitle?: string;
+  /** Cover subtitle — defaults to "World Bible" when unset. */
+  coverSub?: string;
+  /** Cover accent color (hex). */
+  tint?: string;
 }
 
 export interface Project {
@@ -242,6 +254,8 @@ export interface Entity {
     articleDoc?: string;
     /** Sprint 60: structured character profile ("glamour" template). */
     profile?: CharacterProfile;
+    /** Sprint 69: the world (shelf) this entity belongs to. undefined = standalone shelf. */
+    worldId?: string;
 }
 
 // =============================================
@@ -592,7 +606,13 @@ export interface WorkspaceState {
      */
     deskStates: Record<string, DeskState>;
 
+    /** Sprint 69: per-shelf World Bible configs, keyed by world id or 'standalone'. */
+    worldBibles: Record<WorldKey, WorldBibleConfig>;
+    /** Sprint 69: which shelf's bible is currently open (null = derive from active project). */
+    activeWorldKey: WorldKey | null;
+
     setWorkspaceMode: (mode: WorkspaceMode) => void;
+    setActiveWorldKey: (key: WorldKey | null) => void;
 
     // --- ACTIONS ---
     addWorld: (world: World) => void;
@@ -997,6 +1017,8 @@ export function partializeWorkspace(state: WorkspaceState) {
         entitySnapshots: state.entitySnapshots,
         hierarchyTemplates: state.hierarchyTemplates,
         deskStates: state.deskStates,
+        worldBibles: state.worldBibles,
+        activeWorldKey: state.activeWorldKey,
     };
 }
 
@@ -1089,6 +1111,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             hierarchyTemplates: [],
             draftHierarchyLayout: null,
             workspaceMode: 'bookshelf',
+            worldBibles: {},
+            activeWorldKey: null,
 
             // Sprint 47A: Goals system initial state
             writingDays: [],
@@ -1602,13 +1626,15 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             setFocusedArticleEntity: (id) =>
                 set(() => ({ focusedArticleEntityId: id })),
 
-            setWorkspaceMode: (mode) => set((state) => ({ 
-                workspaceMode: mode, 
+            setWorkspaceMode: (mode) => set((state) => ({
+                workspaceMode: mode,
                 // Clear focused entity when browsing worldBible or hierarchy
                 focusedArticleEntityId: (mode === 'worldBible' || mode === 'hierarchy')
-                  ? null 
-                  : state.focusedArticleEntityId 
+                  ? null
+                  : state.focusedArticleEntityId
             })),
+
+            setActiveWorldKey: (key) => set(() => ({ activeWorldKey: key })),
 
             addWorldBibleRoot: (root, isDraft) =>
                 set((state) => {
