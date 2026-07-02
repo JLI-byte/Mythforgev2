@@ -1,4 +1,4 @@
-import { Playfair_Display, Cormorant_Garamond, Nunito } from 'next/font/google';
+import { Playfair_Display, Cormorant_Garamond, Nunito, Great_Vibes } from 'next/font/google';
 
 export const playfair = Playfair_Display({
     subsets: ['latin'],
@@ -18,5 +18,14 @@ export const nunito = Nunito({
     subsets: ['latin'],
     weight: ['300', '400', '600', '700', '800'],
     variable: '--profile-sans',
+    display: 'swap',
+});
+
+// Signature script for the character's name (Google-Fonts stand-in for the
+// pen's "Brittany Signature", which isn't on Google Fonts).
+export const greatVibes = Great_Vibes({
+    subsets: ['latin'],
+    weight: ['400'],
+    variable: '--profile-script',
     display: 'swap',
 });

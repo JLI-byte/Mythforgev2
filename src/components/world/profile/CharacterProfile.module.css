@@ -120,8 +120,15 @@
     color: var(--primary);
 }
 .dossierName span {
-    font: 700 22px var(--profile-serif, serif);
-    color: var(--ink);
+    display: block;
+    font-family: var(--profile-script, cursive);
+    font-size: 48px;
+    line-height: 0.8;
+    font-weight: 400;
+    color: color-mix(in srgb, var(--ink) 88%, var(--primary));
+    text-shadow: 0 2px 0 var(--cream), 0 8px 18px color-mix(in srgb, var(--primary) 18%, transparent);
+    transform: rotate(-3deg);
+    transform-origin: left center;
 }
 .dossierMeta p {
     display: flex;

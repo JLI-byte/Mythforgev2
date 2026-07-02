@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Entity, CharacterProfile as ProfileData, createDefaultProfile } from '@/store/workspaceStore';
-import { playfair, cormorant, nunito } from './profileFonts';
+import { playfair, cormorant, nunito, greatVibes } from './profileFonts';
 import MainPage from './MainPage';
 import PersonaPage from './PersonaPage';
 import AppearancePage from './AppearancePage';
@@ -33,7 +33,7 @@ export default function CharacterProfile({ entity }: CharacterProfileProps) {
     const profile: ProfileData = { ...createDefaultProfile(), ...(entity.profile ?? {}) };
     const displayName = profile.fullName || entity.name;
     const pageNumber = String(PAGES.findIndex(p => p.id === page) + 1).padStart(2, '0');
-    const fontVars = `${playfair.variable} ${cormorant.variable} ${nunito.variable}`;
+    const fontVars = `${playfair.variable} ${cormorant.variable} ${nunito.variable} ${greatVibes.variable}`;
 
     return (
         <div className={`${styles.bg} ${fontVars}`}>
