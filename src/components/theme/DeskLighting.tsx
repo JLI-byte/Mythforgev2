@@ -44,9 +44,10 @@ export default function DeskLighting() {
         });
         if (!gl) return; // CSS wood remains as the static fallback
 
-        // Half-resolution render target — the light is soft, so the compositor
-        // upscale is invisible and the fill cost drops 4x.
-        const RES = 0.5;
+        // Below-half render target — the light is soft, so the compositor
+        // upscale stays invisible while the per-move fill cost drops further
+        // (matters most on ultrawide, where the desk texture is ~3440px wide).
+        const RES = 0.4;
 
         const VERT = `
 attribute vec2 aPos;
@@ -199,7 +200,7 @@ void main() {
             });
 
         resize();
-        gl.uniform1f(uBump, 4.5);
+        gl.uniform1f(uBump, 3.0);
 
         const onMove = (e: MouseEvent) => {
             mouse.x = e.clientX / window.innerWidth;
@@ -223,7 +224,7 @@ void main() {
         let raf = 0;
         let t = 0;
         let lastFlicker = 0;
-        const FLICKER_MS = 1000 / 30;
+        const FLICKER_MS = 1000 / 20;
 
         const draw = (now: number) => {
             raf = requestAnimationFrame(draw);
@@ -248,14 +249,14 @@ void main() {
 
             // Candle sits low and tight (fractions of width).
             let z = 0.052 * W;
-            let intensity = 1.15;
+            let intensity = 0.9;
             if (!reducedMotion) {
                 const f =
                     Math.sin(t * 0.55) * 0.5 +
                     Math.sin(t * 0.91 + 1) * 0.3 +
                     Math.sin(t * 1.9 + 2) * 0.2;
-                z += f * 0.008 * W;
-                intensity += f * 0.14;
+                z += f * 0.006 * W;
+                intensity += f * 0.09;
             }
 
             gl.uniform3f(
