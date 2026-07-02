@@ -54,4 +54,27 @@ describe('per-shelf bible store actions', () => {
         useWorkspaceStore.setState({ activeProjectId: 'p2' });
         expect(selectProjectWorldKey(useWorkspaceStore.getState())).toBe('standalone');
     });
+
+    it('updateWorldBibleConfig sets identity fields without touching the layout', () => {
+        useWorkspaceStore.setState({ worldBibles: { w1: { layout: { roots: [root('keep')] } } } });
+        useWorkspaceStore.getState().updateWorldBibleConfig('w1', { coverTitle: 'Aetherium', tint: '#aa3344' });
+        const cfg = useWorkspaceStore.getState().worldBibles['w1'];
+        expect(cfg.coverTitle).toBe('Aetherium');
+        expect(cfg.tint).toBe('#aa3344');
+        expect(cfg.layout.roots.map(r => r.label)).toEqual(['keep']);
+    });
+
+    it('setWorldBibleLayout replaces the layout, preserving identity fields', () => {
+        useWorkspaceStore.setState({ worldBibles: { w1: { layout: { roots: [root('old')] }, coverTitle: 'Aetherium' } } });
+        useWorkspaceStore.getState().setWorldBibleLayout('w1', { roots: [root('new')] });
+        const cfg = useWorkspaceStore.getState().worldBibles['w1'];
+        expect(cfg.layout.roots.map(r => r.label)).toEqual(['new']);
+        expect(cfg.coverTitle).toBe('Aetherium');
+    });
+
+    it('deleteWorldEntities removes only that world\'s entities', () => {
+        useWorkspaceStore.getState().deleteWorldEntities('w1');
+        const names = useWorkspaceStore.getState().entities.map(e => e.name);
+        expect(names).toEqual(['Docks']); // e1 (Mira, w1) gone; e2 (standalone) stays
+    });
 });

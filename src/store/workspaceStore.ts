@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { logger } from '@/lib/logger';
 import { getStoredValue } from '@/lib/storage';
-import { worldKeyForProject, type WorldKey } from '@/lib/worldKey';
+import { worldKeyForProject, worldKeyForEntity, type WorldKey } from '@/lib/worldKey';
 import { migratePerShelfBibles } from './migratePerShelfBibles';
 import { DEFAULT_WORLD_BIBLE_LAYOUT } from '@/lib/worldBibleNav';
 
@@ -413,7 +413,7 @@ export interface SocialPost {
     timestamp: string;
 }
 
-export type WorkspaceMode = 'worldBible' | 'template' | 'desk' | 'hierarchy' | 'bookshelf';
+export type WorkspaceMode = 'worldBible' | 'worldBibleEdit' | 'template' | 'desk' | 'hierarchy' | 'bookshelf';
 
 export interface WorkspaceState {
     workspaceMode: WorkspaceMode;
@@ -615,6 +615,13 @@ export interface WorkspaceState {
 
     setWorkspaceMode: (mode: WorkspaceMode) => void;
     setActiveWorldKey: (key: WorldKey | null) => void;
+
+    /** Sprint 70: edit a bible's identity fields (cover title/sub/tint). */
+    updateWorldBibleConfig: (key: WorldKey, patch: Partial<Omit<WorldBibleConfig, 'layout'>>) => void;
+    /** Sprint 70: replace a bible's layout wholesale (presets, reset). */
+    setWorldBibleLayout: (key: WorldKey, layout: WorldBibleLayout) => void;
+    /** Sprint 70: danger zone — delete every entity belonging to a shelf. */
+    deleteWorldEntities: (key: WorldKey) => void;
 
     // --- ACTIONS ---
     addWorld: (world: World) => void;
@@ -1663,7 +1670,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             setWorkspaceMode: (mode) => set((state) => {
                 let activeWorldKey = state.activeWorldKey;
-                if ((mode === 'worldBible' || mode === 'hierarchy') && !activeWorldKey) {
+                if ((mode === 'worldBible' || mode === 'worldBibleEdit' || mode === 'hierarchy') && !activeWorldKey) {
                     activeWorldKey = worldKeyForProject(
                         state.projects.find(p => p.id === state.activeProjectId)
                     );
@@ -1678,6 +1685,36 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             }),
 
             setActiveWorldKey: (key) => set(() => ({ activeWorldKey: key })),
+
+            updateWorldBibleConfig: (key, patch) =>
+                set((state) => {
+                    const existing = state.worldBibles[key];
+                    const { layout: existingLayout, ...existingIdentity } = existing ?? {};
+                    return {
+                        worldBibles: {
+                            ...state.worldBibles,
+                            [key]: {
+                                layout: existingLayout ?? { roots: [] },
+                                ...existingIdentity,
+                                ...patch,
+                            },
+                        },
+                    };
+                }),
+
+            setWorldBibleLayout: (key, layout) =>
+                set((state) => ({
+                    worldBibles: {
+                        ...state.worldBibles,
+                        [key]: { ...state.worldBibles[key], layout },
+                    },
+                })),
+
+            deleteWorldEntities: (key) =>
+                set((state) => {
+                    logger.info('World bible cleared of articles:', key);
+                    return { entities: state.entities.filter(e => worldKeyForEntity(e) !== key) };
+                }),
 
             addWorldBibleRoot: (root, isDraft) =>
                 set((state) => {
