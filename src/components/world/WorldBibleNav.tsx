@@ -35,17 +35,15 @@ export default function WorldBibleNav({
     onHome,
 }: WorldBibleNavProps) {
     const entities = useWorkspaceStore(state => state.entities);
-    const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
-    const projects = useWorkspaceStore(state => state.projects);
+    const worlds = useWorkspaceStore(state => state.worlds);
     const worldBibles = useWorkspaceStore(state => state.worldBibles);
     const activeWorldKey = useWorkspaceStore(state => state.activeWorldKey) ?? STANDALONE_KEY;
 
     const handleExportBible = () => {
-        const activeProject = projects.find(p => p.id === activeProjectId);
-        if (!activeProject) return;
-
         const worldEntities = entities.filter(e => worldKeyForEntity(e) === activeWorldKey);
-        exportWorldBible(worldEntities, activeProject.name);
+        const world = worlds.find(w => w.id === activeWorldKey);
+        const title = worldBibles[activeWorldKey]?.coverTitle ?? world?.name ?? 'Standalones';
+        exportWorldBible(worldEntities, title);
     };
 
     const layout = getWorldBibleConfig(worldBibles, activeWorldKey).layout;
