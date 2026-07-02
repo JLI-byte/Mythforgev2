@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useWorkspaceStore, WorldBibleRootConfig, EntityType, ENTITY_TYPE_LABELS } from '@/store/workspaceStore';
 import { getWorldBibleConfig } from '@/lib/worldBibleNav';
-import { STANDALONE_KEY } from '@/lib/worldKey';
+import { worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
 import styles from './HierarchyCanvas.module.css';
 
 const DEFAULT_NODE_WIDTH = 320;
@@ -38,9 +38,20 @@ export default function HierarchyCanvas({ isDraft }: HierarchyCanvasProps) {
     const updateWorldBibleRoot = useWorkspaceStore(state => state.updateWorldBibleRoot);
     const deleteWorldBibleRoot = useWorkspaceStore(state => state.deleteWorldBibleRoot);
     const moveWorldBibleType = useWorkspaceStore(state => state.moveWorldBibleType);
+    const entities = useWorkspaceStore(state => state.entities);
+    const updateEntity = useWorkspaceStore(state => state.updateEntity);
 
     const layout = isDraft ? (draftLayout || { roots: [] }) : getWorldBibleConfig(worldBibles, activeWorldKey).layout;
     const roots = layout.roots;
+
+    // Article tray state
+    const [trayFilter, setTrayFilter] = useState('');
+    const [dragOverChip, setDragOverChip] = useState<string | null>(null); // `${rootId}:${type}`
+
+    const trayEntities = entities.filter(e =>
+        worldKeyForEntity(e) === activeWorldKey &&
+        e.name.toLowerCase().includes(trayFilter.toLowerCase())
+    );
 
     // Local state for dragging nodes
     const [dragNodeId, setDragNodeId] = useState<string | null>(null);
@@ -209,6 +220,7 @@ export default function HierarchyCanvas({ isDraft }: HierarchyCanvasProps) {
     };
 
     const handleTypeDrop = (e: React.DragEvent, targetRootId: string) => {
+        if (e.dataTransfer.getData('entityId')) return; // article drags only land on type chips
         e.preventDefault();
         e.stopPropagation(); // Prevent canvas from catching it
         const type = e.dataTransfer.getData('type') as EntityType;
@@ -231,6 +243,7 @@ export default function HierarchyCanvas({ isDraft }: HierarchyCanvasProps) {
     };
 
     const handleCanvasDrop = (e: React.DragEvent) => {
+        if (e.dataTransfer.getData('entityId')) return; // article drags only land on type chips
         e.preventDefault();
         const type = e.dataTransfer.getData('type') as EntityType;
         const sourceRootId = e.dataTransfer.getData('sourceRootId');
@@ -278,6 +291,16 @@ export default function HierarchyCanvas({ isDraft }: HierarchyCanvasProps) {
 
         setIsDraggingPaletteType(null);
         setDragSourceRootId(null);
+    };
+
+    /** Re-files an article: drop onto a type chip sets the entity's type. */
+    const handleArticleDropOnChip = (e: React.DragEvent, type: EntityType) => {
+        const entityId = e.dataTransfer.getData('entityId');
+        setDragOverChip(null);
+        if (!entityId) return; // a type-chip drag — let it bubble to the node handler
+        e.preventDefault();
+        e.stopPropagation();
+        updateEntity(entityId, { type });
     };
 
     return (
@@ -349,16 +372,28 @@ export default function HierarchyCanvas({ isDraft }: HierarchyCanvasProps) {
                                         </div>
                                     ) : (
                                         <>
-                                            {n.entityTypes.map(type => (
-                                                <div 
-                                                    key={type} 
-                                                    className={styles.nodeChip}
-                                                    draggable
-                                                    onDragStart={(e) => handleTypeDragStart(e, type, n.id)}
-                                                >
-                                                    <span>{TYPE_ICONS[type]} {ENTITY_TYPE_LABELS[type]}</span>
-                                                </div>
-                                            ))}
+                                            {n.entityTypes.map(type => {
+                                                const chipKey = `${n.id}:${type}`;
+                                                return (
+                                                    <div
+                                                        key={type}
+                                                        className={`${styles.nodeChip} ${dragOverChip === chipKey ? styles.chipDropTarget : ''}`}
+                                                        draggable
+                                                        onDragStart={(e) => handleTypeDragStart(e, type, n.id)}
+                                                        onDragOver={(e) => {
+                                                            if (e.dataTransfer.types.includes('entityid')) {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                setDragOverChip(chipKey);
+                                                            }
+                                                        }}
+                                                        onDragLeave={() => setDragOverChip(prev => prev === chipKey ? null : prev)}
+                                                        onDrop={(e) => handleArticleDropOnChip(e, type)}
+                                                    >
+                                                        <span>{TYPE_ICONS[type]} {ENTITY_TYPE_LABELS[type]}</span>
+                                                    </div>
+                                                );
+                                            })}
                                             {children.length > 0 && (
                                               <div className={styles.nodeChildren}>
                                                 {children.map(child => renderNode(child, depth + 1))}
@@ -392,6 +427,37 @@ export default function HierarchyCanvas({ isDraft }: HierarchyCanvasProps) {
                     })}
                 </div>
             </div>
+            {!isDraft && (
+                <aside className={styles.articleTray}>
+                    <div className={styles.trayHeader}>
+                        <b>Articles</b>
+                        <input
+                            className={styles.trayFilter}
+                            placeholder="Filter…"
+                            value={trayFilter}
+                            onChange={(e) => setTrayFilter(e.target.value)}
+                        />
+                    </div>
+                    <p className={styles.trayHint}>Drag an article onto a category chip to re-file it.</p>
+                    <div className={styles.trayList}>
+                        {trayEntities.map(entity => (
+                            <div
+                                key={entity.id}
+                                className={styles.trayCard}
+                                draggable
+                                onDragStart={(e) => e.dataTransfer.setData('entityId', entity.id)}
+                            >
+                                <span className={styles.trayIcon}>{TYPE_ICONS[entity.type]}</span>
+                                <span className={styles.trayName}>{entity.name}</span>
+                                <span className={styles.trayType}>{ENTITY_TYPE_LABELS[entity.type]}</span>
+                            </div>
+                        ))}
+                        {trayEntities.length === 0 && (
+                            <div className={styles.trayEmpty}>No articles in this world yet.</div>
+                        )}
+                    </div>
+                </aside>
+            )}
         </main>
     );
 }

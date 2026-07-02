@@ -56,6 +56,7 @@
   background-color: transparent;
   position: relative;
   cursor: crosshair;
+  margin-right: 260px;
 }
 
 .canvasArea {
@@ -233,6 +234,41 @@
   font-size: 0.8rem;
   font-weight: 500;
   cursor: grab;
+}
+
+/* --- Article tray (Sprint 70: drag articles onto type chips) --- */
+
+.articleTray {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 260px;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    z-index: 20;
+}
+.trayHeader { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 14px 8px; color: var(--foreground); }
+.trayFilter { flex: 1; min-width: 0; padding: 6px 9px; border-radius: 7px; border: 1px solid var(--border); background: var(--background); color: var(--foreground); font-size: 0.8rem; }
+.trayHint { padding: 0 14px 10px; margin: 0; color: var(--muted, #888); font-size: 0.72rem; }
+.trayList { flex: 1; overflow-y: auto; padding: 0 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+.trayCard {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; border-radius: 8px;
+    background: var(--background); border: 1px solid var(--border);
+    cursor: grab; user-select: none;
+}
+.trayCard:active { cursor: grabbing; }
+.trayIcon { flex: none; }
+.trayName { flex: 1; min-width: 0; color: var(--foreground); font-size: 0.82rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trayType { flex: none; color: var(--muted, #888); font-size: 0.68rem; }
+.trayEmpty { padding: 20px 6px; color: var(--muted, #888); font-size: 0.8rem; text-align: center; }
+
+.chipDropTarget {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
 }
 
 /* Tool Buttons on Canvas */
