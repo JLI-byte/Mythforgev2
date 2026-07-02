@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useWorkspaceStore, EntityType, WorldBibleRootConfig } from '@/store/workspaceStore';
 import { getProjectLayout } from '@/lib/worldBibleNav';
 import ArticleReadView from './ArticleReadView';
+import CharacterProfile from './profile/CharacterProfile';
 import styles from './WorldBibleCenter.module.css';
 
 /**
@@ -43,8 +44,19 @@ export default function WorldBibleCenter() {
     // Filter entities for active project
     const projectEntities = entities.filter(e => e.projectId === activeProjectId);
 
-    // Level 3 — Article View (highest priority)
+    // Level 3 — Character profile for character entities, article view otherwise
     if (selectedEntityId) {
+        const selected = projectEntities.find(e => e.id === selectedEntityId);
+        if (selected?.type === 'character') {
+            return (
+                <div className={styles.browserContainer}>
+                    <button className={styles.backBtn} onClick={() => setSelectedEntityId(null)}>
+                        ← Back
+                    </button>
+                    <CharacterProfile entity={selected} />
+                </div>
+            );
+        }
         return (
             <ArticleReadView
                 entityId={selectedEntityId}
