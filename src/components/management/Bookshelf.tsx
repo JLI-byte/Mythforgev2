@@ -297,17 +297,16 @@ export function Bookshelf() {
         const isUncategorized = worldId === 'standalone';
         const isDeleting = deletingWorldId === worldId;
 
-        // 3 rows of slots by default; grow to fit the books, plus any rows the
-        // user has explicitly added for this shelf. Every row has DIAMOND_COLS
-        // slots so rows stay uniform.
-        const rows = Math.max(
-            DEFAULT_ROWS + (extraRows[worldId] || 0),
-            Math.ceil(projects.length / DIAMOND_COLS),
-        );
+        // Rows alternate 6 / 5 slots (even / odd) so the half-cell-offset odd
+        // rows nest symmetrically inside the wider rows. At least 3 rows by
+        // default (+ any the user added), growing to fit all the books.
+        const minRows = DEFAULT_ROWS + (extraRows[worldId] || 0);
         const rowChunks: (Project | null)[][] = [];
-        for (let r = 0; r < rows; r++) {
+        let idx = 0;
+        for (let r = 0; r < minRows || idx < projects.length; r++) {
+            const cols = DIAMOND_COLS - (r % 2); // 6, 5, 6, 5, …
             const row: (Project | null)[] = [];
-            for (let c = 0; c < DIAMOND_COLS; c++) row.push(projects[r * DIAMOND_COLS + c] ?? null);
+            for (let c = 0; c < cols; c++) row.push(projects[idx++] ?? null);
             rowChunks.push(row);
         }
 
