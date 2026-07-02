@@ -55,6 +55,7 @@
     }
   },
   "dependencies": {
+    "@react-three/fiber": "^9.6.1",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.103.0",
     "@tiptap/extension-color": "^3.22.2",

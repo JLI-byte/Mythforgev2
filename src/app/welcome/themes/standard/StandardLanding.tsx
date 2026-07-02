@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import DottedSurface from "./DottedSurface";
+import ShaderSurface from "./ShaderSurface";
 import RequestAccessModal from "./RequestAccessModal";
 import styles from "./standard.module.css";
 
@@ -29,7 +29,7 @@ export default function StandardLanding() {
                 <div className={styles.lampBar} />
             </div>
 
-            <DottedSurface />
+            <ShaderSurface />
 
             <nav className={styles.nav}>
                 <div className={styles.brand}>LoreCanvas</div>
