@@ -2,8 +2,9 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { logger } from '@/lib/logger';
 import { getStoredValue } from '@/lib/storage';
-import type { WorldKey } from '@/lib/worldKey';
+import { worldKeyForProject, type WorldKey } from '@/lib/worldKey';
 import { migratePerShelfBibles } from './migratePerShelfBibles';
+import { DEFAULT_WORLD_BIBLE_LAYOUT } from '@/lib/worldBibleNav';
 
 // Cover colors auto-assigned to new projects in rotation
 export const COVER_COLORS = [
@@ -728,7 +729,7 @@ export interface WorkspaceState {
 
     /** Designer / Draft Table State */
     setDraftHierarchyLayout: (layout: WorldBibleLayout | null) => void;
-    applyDraftHierarchyToProject: () => void;
+    applyDraftHierarchy: () => void;
 
     /** Updates an existing entity. */
     updateEntity: (id: string, updates: Partial<Omit<Entity, 'id' | 'createdAt'>>) => void;
@@ -825,7 +826,30 @@ export interface WorkspaceState {
     /** World Bible Hierarchy Templates */
     saveHierarchyTemplate: (name: string, description: string | undefined, layout: WorldBibleLayout) => void;
     deleteHierarchyTemplate: (templateId: string) => void;
-    applyHierarchyTemplate: (projectId: string, templateId: string) => void;
+    applyHierarchyTemplate: (worldKey: WorldKey, templateId: string) => void;
+}
+
+/**
+ * Applies fn to the active shelf's bible layout. First-time customization
+ * seeds from the DEFAULT layout (deep copy) so user edits start from
+ * People/Places/Things/World Systems instead of an empty layout.
+ */
+function withActiveBibleLayout(
+    state: Pick<WorkspaceState, 'activeWorldKey' | 'worldBibles'>,
+    fn: (layout: WorldBibleLayout) => WorldBibleLayout,
+): Partial<WorkspaceState> {
+    const key = state.activeWorldKey;
+    if (!key) return {};
+    const existing = state.worldBibles[key]?.layout;
+    const current: WorldBibleLayout = existing?.roots?.length
+        ? existing
+        : JSON.parse(JSON.stringify(DEFAULT_WORLD_BIBLE_LAYOUT));
+    return {
+        worldBibles: {
+            ...state.worldBibles,
+            [key]: { ...state.worldBibles[key], layout: fn(current) },
+        },
+    };
 }
 
 /**
@@ -1155,12 +1179,20 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             deleteWorld: (id) =>
                 set((state) => {
                     logger.info('World deleted (reassigning orphans):', id);
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    const { [id]: _removed, ...remainingBibles } = state.worldBibles;
                     return {
                         worlds: state.worlds.filter(w => w.id !== id),
                         // Sprint 66: Projects tied to this world move to Uncategorized (standalone)
                         projects: state.projects.map(p =>
                             p.worldId === id ? { ...p, worldId: undefined, updatedAt: new Date() } : p
                         ),
+                        // Lore moves to the standalone shelf, mirroring projects
+                        entities: state.entities.map(e =>
+                            e.worldId === id ? { ...e, worldId: undefined } : e
+                        ),
+                        worldBibles: remainingBibles,
+                        activeWorldKey: state.activeWorldKey === id ? null : state.activeWorldKey,
                     };
                 }),
 
@@ -1182,16 +1214,14 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             deleteProject: (id) =>
                 set((state) => {
-                    logger.info('Project deleted (with cascade):', id);
+                    logger.info('Project deleted (lore stays with its world):', id);
                     return {
                         projects: state.projects.filter(p => p.id !== id),
                         documents: state.documents.filter(d => d.projectId !== id),
                         scenes: state.scenes.filter(s => s.projectId !== id),
-                        entities: state.entities.filter(e => e.projectId !== id),
                         activeProjectId: state.activeProjectId === id ? null : state.activeProjectId,
                         activeDocumentId: state.documents.find(d => d.id === state.activeDocumentId)?.projectId === id ? null : state.activeDocumentId,
                         activeSceneId: state.scenes.find(s => s.id === state.activeSceneId)?.projectId === id ? null : state.activeSceneId,
-                        selectedEntityId: state.entities.find(e => e.id === state.selectedEntityId)?.projectId === id ? null : state.selectedEntityId,
                     };
                 }),
 
@@ -1627,13 +1657,21 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             setFocusedArticleEntity: (id) =>
                 set(() => ({ focusedArticleEntityId: id })),
 
-            setWorkspaceMode: (mode) => set((state) => ({
-                workspaceMode: mode,
-                // Clear focused entity when browsing worldBible or hierarchy
-                focusedArticleEntityId: (mode === 'worldBible' || mode === 'hierarchy')
-                  ? null
-                  : state.focusedArticleEntityId
-            })),
+            setWorkspaceMode: (mode) => set((state) => {
+                let activeWorldKey = state.activeWorldKey;
+                if ((mode === 'worldBible' || mode === 'hierarchy') && !activeWorldKey) {
+                    activeWorldKey = worldKeyForProject(
+                        state.projects.find(p => p.id === state.activeProjectId)
+                    );
+                }
+                return {
+                    workspaceMode: mode,
+                    activeWorldKey,
+                    focusedArticleEntityId: (mode === 'worldBible' || mode === 'hierarchy')
+                        ? null
+                        : state.focusedArticleEntityId,
+                };
+            }),
 
             setActiveWorldKey: (key) => set(() => ({ activeWorldKey: key })),
 
@@ -1643,18 +1681,10 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         const layout = state.draftHierarchyLayout || { roots: [] };
                         return { draftHierarchyLayout: { ...layout, roots: [...layout.roots, root] } };
                     }
-                    const activeProjectId = state.activeProjectId;
-                    if (!activeProjectId) return state;
-                    return {
-                        projects: state.projects.map(p => {
-                            if (p.id !== activeProjectId) return p;
-                            const layout = p.worldBibleLayout || { roots: [] };
-                            return {
-                                ...p,
-                                worldBibleLayout: { ...layout, roots: [...layout.roots, root] }
-                            };
-                        })
-                    };
+                    return withActiveBibleLayout(state, (layout) => ({
+                        ...layout,
+                        roots: [...layout.roots, root],
+                    }));
                 }),
 
             updateWorldBibleRoot: (id, updates, isDraft) =>
@@ -1669,28 +1699,20 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                             }
                         };
                     }
-                    const activeProjectId = state.activeProjectId;
-                    if (!activeProjectId) return state;
-                    return {
-                        projects: state.projects.map(p => {
-                            if (p.id !== activeProjectId) return p;
-                            const layout = p.worldBibleLayout;
-                            if (!layout) return p;
-                            return {
-                                ...p,
-                                worldBibleLayout: {
-                                    ...layout,
-                                    roots: layout.roots.map(r => r.id === id ? { ...r, ...updates } : r)
-                                }
-                            };
-                        })
-                    };
+                    return withActiveBibleLayout(state, (layout) => ({
+                        ...layout,
+                        roots: layout.roots.map(r => r.id === id ? { ...r, ...updates } : r),
+                    }));
                 }),
 
             deleteWorldBibleRoot: (id, isDraft) =>
                 set((state) => {
-                    const activeProjectId = state.activeProjectId;
-                    const layout = isDraft ? state.draftHierarchyLayout : state.projects.find(p => p.id === activeProjectId)?.worldBibleLayout;
+                    const layout = isDraft
+                        ? state.draftHierarchyLayout
+                        : (state.activeWorldKey
+                            ? state.worldBibles[state.activeWorldKey]?.layout
+                                ?? JSON.parse(JSON.stringify(DEFAULT_WORLD_BIBLE_LAYOUT))
+                            : undefined);
                     if (!layout) return state;
                     
                     // Find all nested IDs to remove (recursive cascade)
@@ -1721,12 +1743,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         return { draftHierarchyLayout: nextLayout };
                     }
 
-                    return {
-                        projects: state.projects.map(p => {
-                            if (p.id !== activeProjectId) return p;
-                            return { ...p, worldBibleLayout: nextLayout };
-                        })
-                    };
+                    return withActiveBibleLayout(state, () => nextLayout);
                 }),
 
             moveWorldBibleType: (type, fromRootId, toRootId, isDraft) =>
@@ -1745,41 +1762,22 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                             }
                         };
                     }
-                    const activeProjectId = state.activeProjectId;
-                    if (!activeProjectId) return state;
-                    return {
-                        projects: state.projects.map(p => {
-                            if (p.id !== activeProjectId) return p;
-                            const layout = p.worldBibleLayout;
-                            if (!layout) return p;
-                            return {
-                                ...p,
-                                worldBibleLayout: {
-                                    ...layout,
-                                    roots: layout.roots.map(r => {
-                                        if (r.id === fromRootId) return { ...r, entityTypes: r.entityTypes.filter(t => t !== type) };
-                                        if (r.id === toRootId) return { ...r, entityTypes: [...new Set([...r.entityTypes, type])] };
-                                        return r;
-                                    })
-                                }
-                            };
-                        })
-                    };
+                    return withActiveBibleLayout(state, (layout) => ({
+                        ...layout,
+                        roots: layout.roots.map(r => {
+                            if (r.id === fromRootId) return { ...r, entityTypes: r.entityTypes.filter(t => t !== type) };
+                            if (r.id === toRootId) return { ...r, entityTypes: [...new Set([...r.entityTypes, type])] };
+                            return r;
+                        }),
+                    }));
                 }),
 
             setDraftHierarchyLayout: (layout) => set({ draftHierarchyLayout: layout }),
 
-            applyDraftHierarchyToProject: () =>
+            applyDraftHierarchy: () =>
                 set((state) => {
-                    const activeProjectId = state.activeProjectId;
-                    if (!activeProjectId || !state.draftHierarchyLayout) return state;
-                    return {
-                        projects: state.projects.map(p => 
-                            p.id === activeProjectId 
-                                ? { ...p, worldBibleLayout: state.draftHierarchyLayout ?? undefined } 
-                                : p
-                        )
-                    };
+                    if (!state.draftHierarchyLayout) return state;
+                    return withActiveBibleLayout(state, () => state.draftHierarchyLayout!);
                 }),
 
             saveArticleTemplate: (name, description, sourceBlocks) =>
@@ -1836,14 +1834,18 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 hierarchyTemplates: state.hierarchyTemplates.filter(t => t.id !== templateId)
             })),
 
-            applyHierarchyTemplate: (projectId, templateId) => set(state => {
+            applyHierarchyTemplate: (worldKey, templateId) => set(state => {
                 const template = state.hierarchyTemplates.find(t => t.id === templateId);
                 if (!template) return state;
-
-                const projects = state.projects.map(p =>
-                    p.id === projectId ? { ...p, worldBibleLayout: JSON.parse(JSON.stringify(template.layout)) } : p
-                );
-                return { projects };
+                return {
+                    worldBibles: {
+                        ...state.worldBibles,
+                        [worldKey]: {
+                            ...state.worldBibles[worldKey],
+                            layout: JSON.parse(JSON.stringify(template.layout)),
+                        },
+                    },
+                };
             }),
 
             saveSceneSnapshot: (sceneId, label, isAuto) =>

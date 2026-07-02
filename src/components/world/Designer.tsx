@@ -23,7 +23,7 @@ export default function Designer() {
   const updateProject = useWorkspaceStore(state => state.updateProject);
   const draftHierarchyLayout = useWorkspaceStore(state => state.draftHierarchyLayout);
   const setDraftHierarchyLayout = useWorkspaceStore(state => state.setDraftHierarchyLayout);
-  const applyDraftHierarchyToProject = useWorkspaceStore(state => state.applyDraftHierarchyToProject);
+  const applyDraftHierarchy = useWorkspaceStore(state => state.applyDraftHierarchy);
 
   const [mode, setMode] = useState<DesignerMode>('landing');
   const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
@@ -164,7 +164,7 @@ export default function Designer() {
   };
 
   const handleApplyToProject = () => {
-    applyDraftHierarchyToProject();
+    applyDraftHierarchy();
     setApplyConfirm(true);
     setTimeout(() => setApplyConfirm(false), 2000);
   };
