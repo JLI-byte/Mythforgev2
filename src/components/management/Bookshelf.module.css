@@ -73,11 +73,11 @@
    (C-1)n-((C-3)/2)th item is shifted one column, so the diamonds interlock and
    stay aligned. Recoloured to greyscale. C = --columns (fixed at 7 here). */
 .books {
-    --columns: 9;
+    --columns: 15;
     list-style: none;
     margin: 0;
     /* top padding accommodates the first row's -50% pull */
-    padding: 5% 0 0;
+    padding: 3% 0 0;
     display: grid;
     grid-template-columns: repeat(var(--columns), 1fr);
     overflow: hidden;
@@ -90,48 +90,37 @@
     padding-bottom: 100%;
     margin-top: -50%;
 }
-.slot:nth-child(8n-3) {
+.slot:nth-child(14n-6) {
     grid-column-start: 2;
 }
 
-/* greyscale argyle diamond behind every slot (the pen's ::before / ::after) */
-.slot::before,
-.slot::after {
+/* Clean diamond frame per cell: a rotated square whose points sit at the cell
+   edge midpoints (inset 14.65% ⇒ 70.7% side), so with the pen's 50% overlap +
+   offset the diamonds tessellate into an aligned lattice. */
+.slot::before {
     content: '';
     position: absolute;
-    display: block;
-    width: 100%;
-    height: 100%;
-    background-repeat: no-repeat;
-    background-size: 50% 100%, 100% 100%;
-    background-position: left, right;
-}
-.slot::before {
-    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
-    background-image:
-        linear-gradient(-45deg, transparent 53.5%, rgba(255, 255, 255, 0.14) 53.5%, rgba(255, 255, 255, 0.14) 60%, transparent 60%),
-        linear-gradient(45deg, transparent 65.3%, rgba(255, 255, 255, 0.14) 65.3%, rgba(255, 255, 255, 0.14) 69.9%, transparent 69.9%);
-}
-.slot::after {
-    clip-path: polygon(100% 50%, 50% 100%, 0 50%, 20% 50%, 50% 80%, 80% 50%);
-    background-image:
-        linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.14) 40%),
-        linear-gradient(-45deg, transparent 30%, rgba(255, 255, 255, 0.14) 30%);
+    inset: 14.65%;
+    transform: rotate(45deg);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.025);
 }
 
 /* empty slots read a touch fainter than stocked ones */
-.slotEmpty::before,
-.slotEmpty::after {
-    opacity: 0.55;
+.slotEmpty::before {
+    border-color: rgba(255, 255, 255, 0.09);
+    background: none;
 }
 
 /* the cover (the pen's img): sits in the upper diamond, tilts on hover */
+/* cover sits centered INSIDE the diamond (width+height ≈ cell ⇒ corners touch
+   the diamond edges), and tilts on hover. */
 .book {
     position: absolute;
-    width: 43%;
+    width: 31%;
     left: 50%;
     top: 50%;
-    transform: translateX(-50%) translateY(-60%);
+    transform: translate(-50%, -50%);
     aspect-ratio: 2 / 3;
     border-radius: 3px;
     background-size: cover;
@@ -140,21 +129,25 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 5px -5px 10px rgba(0, 0, 0, 0.35);
+    box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.45);
     cursor: grab;
     user-select: none;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     z-index: 1;
 }
 .book:hover {
-    transform: translateX(-40%) translateY(-70%) rotate(25deg);
-    box-shadow: 8px 10px 18px rgba(0, 0, 0, 0.5);
+    transform: translate(-50%, -56%) rotate(10deg);
+    box-shadow: 6px 9px 18px rgba(0, 0, 0, 0.55);
     z-index: 3;
 }
 
+/* Active project: light up its diamond frame instead of boxing the cover. */
+.slot:has(.bookActive)::before {
+    border-color: rgba(255, 255, 255, 0.65);
+    background: rgba(255, 255, 255, 0.06);
+}
 .bookActive {
-    outline: 2px solid #fff;
-    outline-offset: 1px;
+    box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.45), 0 0 12px rgba(255, 255, 255, 0.25);
 }
 
 .bookInitials {
@@ -169,8 +162,8 @@
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -60%);
-    width: 34%;
+    transform: translate(-50%, -50%);
+    width: 30%;
     aspect-ratio: 1;
     appearance: none;
     background: none;
