@@ -68,105 +68,87 @@
 
 /* --- Diamond lattice (books sit in offset diamond slots) --- */
 
-.diamondGrid {
-    /* Fixed cell so overlaps/offsets can be expressed in cell units and the
-       diamonds tessellate cleanly. --gap is 0 so diamond points meet. */
-    --cell: clamp(100px, 12vw, 140px);
-    --gap: 0px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px 0 4px;
+/* The andybarefoot "Responsive CSS Grid - Books" mechanic: each li spans 2
+   columns, is pulled up 50% (padding-bottom:100% makes it square), and every
+   (C-1)n-((C-3)/2)th item is shifted one column, so the diamonds interlock and
+   stay aligned. Recoloured to greyscale. C = --columns (fixed at 7 here). */
+.books {
+    --columns: 9;
+    list-style: none;
+    margin: 0;
+    /* top padding accommodates the first row's -50% pull */
+    padding: 5% 0 0;
+    display: grid;
+    grid-template-columns: repeat(var(--columns), 1fr);
     overflow: hidden;
 }
 
-.dRow {
-    display: flex;
-    gap: var(--gap);
-}
-
-/* Interlock: overlap each row by half a cell vertically, and shift the odd
-   rows by half a cell horizontally, so the diamonds tile into a lattice. */
-.dRow + .dRow {
-    margin-top: calc(var(--cell) * -0.5);
-}
-.dRowOffset {
-    margin-left: calc((var(--cell) + var(--gap)) * 0.5);
-}
-
-.slot,
-.slotEmpty {
+.slot {
+    grid-column-end: span 2;
     position: relative;
-    flex: none;
-    width: var(--cell);
-    height: var(--cell);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 100%;
+    padding-bottom: 100%;
+    margin-top: -50%;
+}
+.slot:nth-child(8n-3) {
+    grid-column-start: 2;
 }
 
-/* decorative diamond behind a filled slot — a square rotated 45° whose points
-   meet the cell edge midpoints (70.7% ⇒ inset 14.65%). */
-.slotDiamond {
-    position: absolute;
-    inset: 14.65%;
-    transform: rotate(45deg);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    background: rgba(255, 255, 255, 0.03);
-}
-
-/* empty slot — a dashed diamond with a + that lights up on hover */
-.slotEmpty {
-    appearance: none;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-}
-.slotEmpty::before {
+/* greyscale argyle diamond behind every slot (the pen's ::before / ::after) */
+.slot::before,
+.slot::after {
     content: '';
     position: absolute;
-    inset: 14.65%;
-    transform: rotate(45deg);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    transition: border-color 0.2s ease, background 0.2s ease;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-size: 50% 100%, 100% 100%;
+    background-position: left, right;
 }
-.slotEmpty:hover::before {
-    border-color: rgba(255, 255, 255, 0.32);
-    background: rgba(255, 255, 255, 0.04);
+.slot::before {
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    background-image:
+        linear-gradient(-45deg, transparent 53.5%, rgba(255, 255, 255, 0.14) 53.5%, rgba(255, 255, 255, 0.14) 60%, transparent 60%),
+        linear-gradient(45deg, transparent 65.3%, rgba(255, 255, 255, 0.14) 65.3%, rgba(255, 255, 255, 0.14) 69.9%, transparent 69.9%);
 }
-.slotEmpty::after {
-    content: '+';
-    color: rgba(255, 255, 255, 0.22);
-    font-size: 1.5rem;
-    line-height: 1;
-    transition: color 0.2s ease;
-}
-.slotEmpty:hover::after {
-    color: rgba(255, 255, 255, 0.55);
+.slot::after {
+    clip-path: polygon(100% 50%, 50% 100%, 0 50%, 20% 50%, 50% 80%, 80% 50%);
+    background-image:
+        linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.14) 40%),
+        linear-gradient(-45deg, transparent 30%, rgba(255, 255, 255, 0.14) 30%);
 }
 
-/* the book cover, sitting upright on the diamond */
+/* empty slots read a touch fainter than stocked ones */
+.slotEmpty::before,
+.slotEmpty::after {
+    opacity: 0.55;
+}
+
+/* the cover (the pen's img): sits in the upper diamond, tilts on hover */
 .book {
-    position: relative;
-    z-index: 1;
-    width: 40%;
+    position: absolute;
+    width: 43%;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-60%);
     aspect-ratio: 2 / 3;
-    border-radius: 4px;
+    border-radius: 3px;
     background-size: cover;
     background-position: center;
     filter: grayscale(1);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 4px 6px 14px rgba(0, 0, 0, 0.5);
+    box-shadow: 5px -5px 10px rgba(0, 0, 0, 0.35);
     cursor: grab;
     user-select: none;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    z-index: 1;
 }
 .book:hover {
-    transform: translateY(-8%) rotate(7deg);
-    box-shadow: 8px 12px 22px rgba(0, 0, 0, 0.6);
+    transform: translateX(-40%) translateY(-70%) rotate(25deg);
+    box-shadow: 8px 10px 18px rgba(0, 0, 0, 0.5);
     z-index: 3;
 }
 
@@ -176,25 +158,51 @@
 }
 
 .bookInitials {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 800;
     color: rgba(255, 255, 255, 0.85);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
+/* + affordance for an empty slot, where a cover would sit */
+.slotAdd {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -60%);
+    width: 34%;
+    aspect-ratio: 1;
+    appearance: none;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.25);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 1;
+    transition: color 0.2s ease;
+}
+.slotAdd::before {
+    content: '+';
+}
+.slotAdd:hover {
+    color: rgba(255, 255, 255, 0.6);
+}
+
 /* full name, shown on hover so the lattice stays clean */
 .bookLabel {
     position: absolute;
-    bottom: -20px;
+    top: 100%;
     left: 50%;
     transform: translateX(-50%);
+    margin-top: 4px;
     max-width: 150px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 0.6rem;
     color: #fff;
-    background: rgba(0, 0, 0, 0.78);
+    background: rgba(0, 0, 0, 0.8);
     padding: 2px 7px;
     border-radius: 4px;
     opacity: 0;
@@ -206,9 +214,8 @@
     opacity: 1;
 }
 
-.dragging {
+.dragging .book {
     opacity: 0.4;
-    transform: scale(0.95);
 }
 
 .rowControls {

@@ -252,13 +252,12 @@ export function Bookshelf() {
 
     // ─── RENDERING ─────────────────────────────────────────
 
-    /** A single book sitting in a diamond slot: greyscale cover, tilts on hover. */
+    /** A book slot (li) — greyscale cover centered in the diamond, tilts on hover. */
     const renderDiamondBook = (p: Project) => (
-        <div
+        <li
             key={p.id}
             className={`${styles.slot} ${draggedProjectId === p.id ? styles.dragging : ''}`}
         >
-            <span className={styles.slotDiamond} aria-hidden="true" />
             <div
                 draggable
                 onDragStart={(e) => handleDragStart(e, p.id)}
@@ -278,18 +277,19 @@ export function Bookshelf() {
                 )}
                 <span className={styles.bookLabel}>{p.name}</span>
             </div>
-        </div>
+        </li>
     );
 
-    /** Empty diamond slot — click to stock the shelf with a new story. */
+    /** Empty slot (li) — click the diamond to stock the shelf with a new story. */
     const renderEmptySlot = (worldId: string | 'standalone', key: string) => (
-        <button
-            key={key}
-            type="button"
-            className={styles.slotEmpty}
-            onClick={() => handleCreateStory(worldId === 'standalone' ? undefined : worldId)}
-            aria-label="Add a story to this slot"
-        />
+        <li key={key} className={`${styles.slot} ${styles.slotEmpty}`}>
+            <button
+                type="button"
+                className={styles.slotAdd}
+                onClick={() => handleCreateStory(worldId === 'standalone' ? undefined : worldId)}
+                aria-label="Add a story to this slot"
+            />
+        </li>
     );
 
     const renderShelf = (title: string, worldId: string | 'standalone', projects: Project[], worldObj?: World) => {
@@ -297,17 +297,14 @@ export function Bookshelf() {
         const isDeleting = deletingWorldId === worldId;
 
         // 3 rows of slots by default; grow to fit the books, plus any rows the
-        // user has explicitly added for this shelf.
+        // user has explicitly added for this shelf. The pen's grid overlaps
+        // rows, so a "row" of slots is DIAMOND_COLS items.
         const rows = Math.max(
             DEFAULT_ROWS + (extraRows[worldId] || 0),
             Math.ceil(projects.length / DIAMOND_COLS),
         );
         const slots: (Project | null)[] = [];
         for (let i = 0; i < rows * DIAMOND_COLS; i++) slots.push(projects[i] ?? null);
-        const rowChunks: (Project | null)[][] = [];
-        for (let r = 0; r < rows; r++) {
-            rowChunks.push(slots.slice(r * DIAMOND_COLS, (r + 1) * DIAMOND_COLS));
-        }
 
         return (
             <div 
@@ -352,20 +349,13 @@ export function Bookshelf() {
                         </button>
                     )}
                 </div>
-                <div className={styles.diamondGrid}>
-                    {rowChunks.map((row, ri) => (
-                        <div
-                            key={ri}
-                            className={`${styles.dRow} ${ri % 2 === 1 ? styles.dRowOffset : ''}`}
-                        >
-                            {row.map((p, ci) =>
-                                p
-                                    ? renderDiamondBook(p)
-                                    : renderEmptySlot(worldId, `e-${ri}-${ci}`),
-                            )}
-                        </div>
-                    ))}
-                </div>
+                <ul className={styles.books}>
+                    {slots.map((p, i) =>
+                        p
+                            ? renderDiamondBook(p)
+                            : renderEmptySlot(worldId, `e-${i}`),
+                    )}
+                </ul>
 
                 <div className={styles.rowControls}>
                     <button
