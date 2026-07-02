@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useWorkspaceStore, Project, World, COVER_COLORS, WorldGenre } from '@/store/workspaceStore';
+import WorldBibleBook from './WorldBibleBook';
 import styles from './Bookshelf.module.css';
 
 /** Diamond-lattice shelf layout: fixed columns, 3 rows of slots by default. */
@@ -353,19 +354,25 @@ export function Bookshelf() {
                         </button>
                     )}
                 </div>
-                <div className={styles.books}>
-                    {rowChunks.map((row, ri) => (
-                        <div
-                            key={ri}
-                            className={`${styles.dRow} ${ri % 2 === 1 ? styles.dRowOffset : ''}`}
-                        >
-                            {row.map((p, ci) =>
-                                p
-                                    ? renderDiamondBook(p)
-                                    : renderEmptySlot(worldId, `e-${ri}-${ci}`),
-                            )}
-                        </div>
-                    ))}
+                <div className={styles.shelfBody}>
+                    <WorldBibleBook
+                        title={isUncategorized ? 'Standalones' : title}
+                        onOpen={() => setWorkspaceMode('worldBible')}
+                    />
+                    <div className={styles.books}>
+                        {rowChunks.map((row, ri) => (
+                            <div
+                                key={ri}
+                                className={`${styles.dRow} ${ri % 2 === 1 ? styles.dRowOffset : ''}`}
+                            >
+                                {row.map((p, ci) =>
+                                    p
+                                        ? renderDiamondBook(p)
+                                        : renderEmptySlot(worldId, `e-${ri}-${ci}`),
+                                )}
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 <div className={styles.rowControls}>

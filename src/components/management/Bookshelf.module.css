@@ -66,6 +66,13 @@
     color: var(--muted);
 }
 
+/* World Bible book on the left, diamond lattice filling the rest */
+.shelfBody {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 /* --- Diamond lattice (books sit in offset diamond slots) --- */
 
 /* The pen's pocket mechanic, done with uniform rows:

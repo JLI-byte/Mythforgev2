@@ -1,0 +1,348 @@
+/* 3D hardcover book — ported from codepen.io/fivera/pen/kQJzxP ("HARDCOVER"),
+   recoloured to LoreCanvas greyscale. Dimensions are the pen's 160×220: the
+   cover-thickness transforms use hardcoded px offsets tied to that size, so
+   the book is scaled as a whole via the wrapper instead of resizing parts. */
+
+.wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    /* room for the front cover to swing open to the left */
+    padding-left: 64px;
+    flex: none;
+}
+
+.label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.book {
+    position: relative;
+    width: 160px;
+    height: 220px;
+    margin: 0;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+    cursor: pointer;
+}
+
+.book ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* ---- 2. background & color (greyscale) ---- */
+
+.hardcoverFront li:first-child {
+    background-color: #3a3a42;
+    backface-visibility: hidden;
+}
+.hardcoverFront li:last-child {
+    background: #ececea;
+}
+
+.hardcoverBack li:first-child {
+    background: #ececea;
+}
+.hardcoverBack li:last-child {
+    background: #ececea;
+}
+
+.bookSpine li:first-child {
+    background: #2e2e35;
+}
+.bookSpine li:last-child {
+    background: #1b1b1f;
+}
+
+/* thickness of cover */
+.hardcoverFront li:first-child:after,
+.hardcoverFront li:first-child:before,
+.hardcoverFront li:last-child:after,
+.hardcoverFront li:last-child:before,
+.hardcoverBack li:first-child:after,
+.hardcoverBack li:first-child:before,
+.hardcoverBack li:last-child:after,
+.hardcoverBack li:last-child:before,
+.bookSpine li:first-child:after,
+.bookSpine li:first-child:before,
+.bookSpine li:last-child:after,
+.bookSpine li:last-child:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #8a8a90;
+}
+
+/* pages */
+.page > li {
+    background: linear-gradient(to right, #d9d9d6 0%, #f7f7f4 100%);
+    box-shadow:
+        inset 0px -1px 2px rgba(50, 50, 50, 0.1),
+        inset -1px 0px 1px rgba(150, 150, 150, 0.2);
+    border-radius: 0px 5px 5px 0px;
+}
+
+/* ---- 3. opening cover, back cover and pages ---- */
+
+.hardcoverFront {
+    transform: rotateY(-34deg) translateZ(8px);
+    z-index: 100;
+}
+.hardcoverBack {
+    transform: rotateY(-15deg) translateZ(-8px);
+}
+
+.page li:nth-child(1) { transform: rotateY(-28deg); }
+.page li:nth-child(2) { transform: rotateY(-30deg); }
+.page li:nth-child(3) { transform: rotateY(-32deg); }
+.page li:nth-child(4) { transform: rotateY(-34deg); }
+.page li:nth-child(5) { transform: rotateY(-36deg); }
+
+/* ---- 4. position, transform & transition ---- */
+
+.hardcoverFront,
+.hardcoverBack,
+.bookSpine,
+.hardcoverFront li,
+.hardcoverBack li,
+.bookSpine li {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+}
+
+.hardcoverFront,
+.hardcoverBack {
+    transform-origin: 0% 100%;
+}
+
+.hardcoverFront {
+    transition: all 0.8s ease, z-index 0.6s;
+}
+
+.hardcoverFront li:first-child {
+    user-select: none;
+    transform: translateZ(2px);
+}
+.hardcoverFront li:last-child {
+    transform: rotateY(180deg) translateZ(2px);
+}
+
+.hardcoverBack li:first-child {
+    transform: translateZ(2px);
+}
+.hardcoverBack li:last-child {
+    transform: translateZ(-2px);
+}
+
+/* cover thickness (front) */
+.hardcoverFront li:first-child:after,
+.hardcoverFront li:first-child:before {
+    width: 4px;
+    height: 100%;
+}
+.hardcoverFront li:first-child:after {
+    transform: rotateY(90deg) translateZ(-2px) translateX(2px);
+}
+.hardcoverFront li:first-child:before {
+    transform: rotateY(90deg) translateZ(158px) translateX(2px);
+}
+.hardcoverFront li:last-child:after,
+.hardcoverFront li:last-child:before {
+    width: 4px;
+    height: 160px;
+}
+.hardcoverFront li:last-child:after {
+    transform: rotateX(90deg) rotateZ(90deg) translateZ(80px) translateX(-2px) translateY(-78px);
+}
+.hardcoverFront li:last-child:before {
+    box-shadow: 0px 0px 30px 5px #111;
+    transform: rotateX(90deg) rotateZ(90deg) translateZ(-140px) translateX(-2px) translateY(-78px);
+}
+
+/* cover thickness (back) */
+.hardcoverBack li:first-child:after,
+.hardcoverBack li:first-child:before {
+    width: 4px;
+    height: 100%;
+}
+.hardcoverBack li:first-child:after {
+    transform: rotateY(90deg) translateZ(-2px) translateX(2px);
+}
+.hardcoverBack li:first-child:before {
+    transform: rotateY(90deg) translateZ(158px) translateX(2px);
+}
+.hardcoverBack li:last-child:after,
+.hardcoverBack li:last-child:before {
+    width: 4px;
+    height: 160px;
+}
+.hardcoverBack li:last-child:after {
+    transform: rotateX(90deg) rotateZ(90deg) translateZ(80px) translateX(2px) translateY(-78px);
+}
+.hardcoverBack li:last-child:before {
+    box-shadow: 10px -1px 80px 20px rgba(0, 0, 0, 0.55);
+    transform: rotateX(90deg) rotateZ(90deg) translateZ(-140px) translateX(2px) translateY(-78px);
+}
+
+/* book spine */
+.bookSpine {
+    transform: rotateY(60deg) translateX(-5px) translateZ(-12px);
+    width: 16px;
+    z-index: 0;
+}
+.bookSpine li:first-child {
+    transform: translateZ(2px);
+}
+.bookSpine li:last-child {
+    transform: translateZ(-2px);
+}
+.bookSpine li:first-child:after,
+.bookSpine li:first-child:before {
+    width: 4px;
+    height: 100%;
+}
+.bookSpine li:first-child:after {
+    transform: rotateY(90deg) translateZ(-2px) translateX(2px);
+}
+.bookSpine li:first-child:before {
+    transform: rotateY(-90deg) translateZ(-12px);
+}
+.bookSpine li:last-child:after,
+.bookSpine li:last-child:before {
+    width: 4px;
+    height: 16px;
+}
+.bookSpine li:last-child:after {
+    transform: rotateX(90deg) rotateZ(90deg) translateZ(8px) translateX(2px) translateY(-6px);
+}
+.bookSpine li:last-child:before {
+    box-shadow: 5px -1px 100px 40px rgba(0, 0, 0, 0.2);
+    transform: rotateX(90deg) rotateZ(90deg) translateZ(-210px) translateX(2px) translateY(-6px);
+}
+
+/* pages block */
+.page,
+.page > li {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-style: preserve-3d;
+}
+.page {
+    width: 100%;
+    height: 98%;
+    top: 1%;
+    left: 3%;
+    z-index: 10;
+}
+.page > li {
+    width: 100%;
+    height: 100%;
+    transform-origin: left center;
+    transition-property: transform;
+    transition-timing-function: ease;
+}
+.page > li:nth-child(1) { transition-duration: 0.6s; }
+.page > li:nth-child(2) { transition-duration: 0.6s; }
+.page > li:nth-child(3) { transition-duration: 0.4s; }
+.page > li:nth-child(4) { transition-duration: 0.5s; }
+.page > li:nth-child(5) { transition-duration: 0.6s; }
+
+/* ---- 5. events ---- */
+
+.book:hover > .hardcoverFront {
+    transform: rotateY(-145deg) translateZ(0);
+    z-index: 0;
+}
+.book:hover > .page li:nth-child(1) { transform: rotateY(-30deg); transition-duration: 1.5s; }
+.book:hover > .page li:nth-child(2) { transform: rotateY(-35deg); transition-duration: 1.8s; }
+.book:hover > .page li:nth-child(3) { transform: rotateY(-118deg); transition-duration: 1.6s; }
+.book:hover > .page li:nth-child(4) { transform: rotateY(-130deg); transition-duration: 1.4s; }
+.book:hover > .page li:nth-child(5) { transform: rotateY(-140deg); transition-duration: 1.2s; }
+
+/* ---- 6. cover design (greyscale) ---- */
+
+.coverDesign {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    overflow: hidden;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 14px;
+    background-color: #34343c;
+    background-image: linear-gradient(to bottom, #3d3d46 58%, #2e2e36 0%);
+}
+.coverDesign::after {
+    content: '';
+    background-image: linear-gradient(-135deg, rgba(255, 255, 255, 0.18) 0%, transparent 100%);
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
+
+.coverTitle {
+    margin: 0;
+    color: #f2f2f2;
+    font-size: 1.05rem;
+    line-height: 1.25;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.03em;
+    text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.coverSub {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    text-align: center;
+    text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* page-side hint, revealed when the book opens */
+.pageHint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #6b6b70;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hardcoverFront,
+    .page > li {
+        transition: none;
+    }
+}
