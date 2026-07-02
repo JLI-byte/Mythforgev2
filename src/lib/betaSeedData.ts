@@ -196,6 +196,7 @@ export function seedBetaData(store: WorkspaceState): void {
   store.addEntity({
     id: char1Id,
     projectId: proj1Id,
+    worldId,
     name: 'Kael Morvant',
     type: 'character',
     description: 'Former Conclave archivist, now a fugitive. Youngest field archivist in four decades. Exposed to Shard resonance during a classified retrieval mission. The exposure changed him in ways the Conclave found inconvenient.',
@@ -246,6 +247,7 @@ export function seedBetaData(store: WorkspaceState): void {
   store.addEntity({
     id: char2Id,
     projectId: proj1Id,
+    worldId,
     name: 'Mira Solenne',
     type: 'character',
     description: 'Intelligence operative and Kael\'s most unreliable reliable contact. Her loyalties have always been her own business. She works with the Unshackled not out of ideology but because they are the most interesting client.',
@@ -280,6 +282,7 @@ export function seedBetaData(store: WorkspaceState): void {
   store.addEntity({
     id: char3Id,
     projectId: proj1Id,
+    worldId,
     name: 'Commander Adra Vel',
     type: 'character',
     description: 'Senior Conclave Warden Commander. Vel is not a villain — she is a person who believes in the system she serves, and the system is doing something monstrous. She is the primary antagonistic force in the story and one of its most sympathetic characters.',
@@ -310,6 +313,7 @@ export function seedBetaData(store: WorkspaceState): void {
   store.addEntity({
     id: loc1Id,
     projectId: proj1Id,
+    worldId,
     name: 'The Grand Archive',
     type: 'location',
     description: 'The largest repository of Shard research and historical records in the Realm. Kael worked here for eight years. It is also one of the most heavily surveilled buildings in Veldrath.',
@@ -353,6 +357,7 @@ export function seedBetaData(store: WorkspaceState): void {
   store.addEntity({
     id: loc2Id,
     projectId: proj1Id,
+    worldId,
     name: 'The Ashen Quarter',
     type: 'location',
     description: 'The densest district in Veldrath. The Conclave maintains minimal presence here. The Unshackled have several safe houses, as does everyone else who prefers to operate without oversight.',
@@ -380,6 +385,7 @@ export function seedBetaData(store: WorkspaceState): void {
   store.addEntity({
     id: loc3Id,
     projectId: proj1Id,
+    worldId,
     name: "Veldrath Harbor",
     type: 'location',
     description: 'The commercial lifeline of the city. The Merchant Guilds control the harbor, making it a rare neutral zone where Conclave jurisdiction is genuinely contested. Mira has deep contacts here.',
@@ -404,6 +410,7 @@ export function seedBetaData(store: WorkspaceState): void {
   store.addEntity({
     id: fac1Id,
     projectId: proj1Id,
+    worldId,
     name: 'The Conclave',
     type: 'faction',
     description: 'The governing body of the Shattered Realm. Founded to contain Shard power following the Sundering. Has since become the primary political and military force in the realm, using Shard-powered enforcers to maintain control.',
@@ -449,6 +456,7 @@ export function seedBetaData(store: WorkspaceState): void {
   store.addEntity({
     id: fac2Id,
     projectId: proj1Id,
+    worldId,
     name: 'The Unshackled',
     type: 'faction',
     description: 'A resistance network of rogue resonance users and dissident scholars. No central leadership — operates in cells. Dedicated to preventing Conclave suppression of resonance users.',
@@ -473,6 +481,7 @@ export function seedBetaData(store: WorkspaceState): void {
   store.addEntity({
     id: fac3Id,
     projectId: proj1Id,
+    worldId,
     name: 'The Merchant Guilds',
     type: 'faction',
     description: 'The commercial federation that controls Veldrath\'s harbor and trade networks. Nominally neutral. Heavily invested in Shard-powered trade goods. They play both sides and profit from the tension.',
@@ -497,6 +506,7 @@ export function seedBetaData(store: WorkspaceState): void {
   store.addEntity({
     id: art1Id,
     projectId: proj1Id,
+    worldId,
     name: 'Shard 7-C',
     type: 'artifact',
     description: 'The specific fragment of divine essence that triggered Kael\'s resonance development. Classified as Tier-Unknown by the Conclave. Its precise properties are not fully documented even in restricted files.',
@@ -532,6 +542,7 @@ export function seedBetaData(store: WorkspaceState): void {
   store.addEntity({
     id: art2Id,
     projectId: proj1Id,
+    worldId,
     name: "The Conclave Cipher Key",
     type: 'artifact',
     description: 'A master decryption tool for Conclave communication codes. Mira obtained one through means she has not specified. It is worth more than most small buildings.',
@@ -555,6 +566,7 @@ export function seedBetaData(store: WorkspaceState): void {
   store.addEntity({
     id: art3Id,
     projectId: proj1Id,
+    worldId,
     name: 'The Resonance Atlas',
     type: 'artifact',
     description: 'A pre-Sundering cartographic document showing the locations of divine essence concentrations across the realm — what would become the Shard sites. If accurate, it would completely overturn the Conclave\'s account of Shard distribution.',
@@ -581,6 +593,7 @@ export function seedBetaData(store: WorkspaceState): void {
   store.addEntity({
     id: lore1Id,
     projectId: proj1Id,
+    worldId,
     name: 'The Sundering',
     type: 'lore',
     description: 'The defining event of the current era. Three hundred years ago, the god Vel-Arath was destroyed by a mortal coalition. The destruction scattered divine essence across the realm as Shard fragments. The Conclave was founded in the aftermath.',
@@ -619,6 +632,7 @@ export function seedBetaData(store: WorkspaceState): void {
   store.addEntity({
     id: lore2Id,
     projectId: proj1Id,
+    worldId,
     name: 'The Resonance Classification System',
     type: 'lore',
     description: 'The Conclave\'s formal framework for categorizing Shard-derived abilities in resonance users. Determines how individuals are treated — integrated, monitored, or suppressed.',
@@ -650,6 +664,7 @@ export function seedBetaData(store: WorkspaceState): void {
   store.addEntity({
     id: lore3Id,
     projectId: proj1Id,
+    worldId,
     name: 'The Night of Corrections',
     type: 'lore',
     description: 'An event from forty years ago, rarely discussed openly. The Conclave conducted a systematic operation to "reclassify" a large number of Tier 3 and Tier 4 resonance users. Most were never heard from again.',
@@ -679,6 +694,7 @@ export function seedBetaData(store: WorkspaceState): void {
   store.addEntity({
     id: uuid(),
     projectId: proj1Id,
+    worldId,
     name: 'Shard Resonance',
     type: 'magic',
     description: 'The system by which fragments of the destroyed god Vel-Arath grant abilities to those who survive prolonged exposure. Classified and controlled by the Conclave.',
@@ -724,6 +740,7 @@ export function seedBetaData(store: WorkspaceState): void {
   store.addEntity({
     id: uuid(),
     projectId: proj1Id,
+    worldId,
     name: 'The Vel-Arath Orthodoxy',
     type: 'religion',
     description: 'The surviving theological tradition around the destroyed god Vel-Arath. Officially suppressed by the Conclave, practiced quietly in the Ashen Quarter. Believers hold that the Sundering was not a victory but a catastrophe.',
@@ -748,6 +765,7 @@ export function seedBetaData(store: WorkspaceState): void {
   store.addEntity({
     id: uuid(),
     projectId: proj1Id,
+    worldId,
     name: 'The Resonance-Born',
     type: 'species',
     description: 'Individuals in whom Shard exposure has caused heritable biological changes across generations. Extremely rare. The Conclave does not officially acknowledge their existence.',

@@ -1,14 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useWorkspaceStore, WorldBibleLayout } from '@/store/workspaceStore';
+import { useWorkspaceStore, WorldBibleLayout, selectProjectWorldKey } from '@/store/workspaceStore';
 import { GridWidget, ArticleTab, WidgetType, parseArticleTabs, StaticGridCanvas } from './ArticleGridEditor';
 import ArticleGridEditor from './ArticleGridEditor';
 import HierarchyCanvas from './HierarchyCanvas';
 import styles from './Designer.module.css';
+import { STANDALONE_KEY } from '@/lib/worldKey';
 
 type DesignerMode = 'landing' | 'article' | 'hierarchy';
 
 export default function Designer() {
   const activeProjectId = useWorkspaceStore(state => state.activeProjectId);
+  const projectWorldKey = useWorkspaceStore(selectProjectWorldKey);
   const entities = useWorkspaceStore(state => state.entities);
   const addEntity = useWorkspaceStore(state => state.addEntity);
   const deleteEntity = useWorkspaceStore(state => state.deleteEntity);
@@ -46,6 +48,7 @@ export default function Designer() {
     const phantomEntity = {
       id,
       projectId: activeProjectId ?? '',
+      worldId: projectWorldKey === STANDALONE_KEY ? undefined : projectWorldKey,
       name: '__template_designer_canvas__',
       type: 'lore' as const,
       description: '',
@@ -57,7 +60,7 @@ export default function Designer() {
       deleteEntity(id);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [activeProjectId, projectWorldKey]);
 
   const phantomEntity = entities.find(e => e.id === phantomIdRef.current);
 

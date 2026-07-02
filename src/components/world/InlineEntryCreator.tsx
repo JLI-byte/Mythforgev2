@@ -2,8 +2,9 @@
 
 import React, { useEffect, useRef } from 'react';
 import styles from './InlineEntryCreator.module.css';
-import { useWorkspaceStore, Entity, EntityType, ENTITY_TYPE_LABELS } from '@/store/workspaceStore';
+import { useWorkspaceStore, Entity, EntityType, ENTITY_TYPE_LABELS, selectProjectWorldKey } from '@/store/workspaceStore';
 import { sanitizeLabel } from '@/lib/sanitize';
+import { STANDALONE_KEY } from '@/lib/worldKey';
 
 /**
  * Inline Entry Creator
@@ -15,6 +16,7 @@ import { sanitizeLabel } from '@/lib/sanitize';
 export default function InlineEntryCreator() {
     // Subscribe to store state and actions
     const activeProjectId = useWorkspaceStore((state) => state.activeProjectId);
+    const projectWorldKey = useWorkspaceStore(selectProjectWorldKey);
     const isInlineCreatorOpen = useWorkspaceStore((state) => state.isInlineCreatorOpen);
     const pendingEntityName = useWorkspaceStore((state) => state.pendingEntityName);
     const closeInlineCreator = useWorkspaceStore((state) => state.closeInlineCreator);
@@ -65,6 +67,7 @@ export default function InlineEntryCreator() {
         const newEntity: Entity = {
             id: crypto.randomUUID(),
             projectId: activeProjectId,
+            worldId: projectWorldKey === STANDALONE_KEY ? undefined : projectWorldKey,
             name,
             type,
             description,

@@ -1,10 +1,11 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './ImportModal.module.css';
-import { useWorkspaceStore, COVER_COLORS } from '@/store/workspaceStore';
+import { useWorkspaceStore, COVER_COLORS, selectProjectWorldKey } from '@/store/workspaceStore';
 import { sanitizeImportedHtml, markdownToBasicHtml, fetchGDriveFileContent, parseFdxToHtml } from '@/lib/export';
 import { parseCSV, flattenJSON } from '@/lib/importUtils';
 import { logger } from '@/lib/logger';
+import { STANDALONE_KEY } from '@/lib/worldKey';
 // mammoth (~1MB) is loaded on demand in the DOCX handlers below so it stays out
 // of the main app bundle — most sessions never import a Word file.
 
@@ -30,6 +31,7 @@ export function ImportModal({ isOpen, onClose }: ImportModalProps) {
     const addDocument = useWorkspaceStore(state => state.addDocument);
     const addScene = useWorkspaceStore(state => state.addScene);
     const addEntity = useWorkspaceStore(state => state.addEntity);
+    const projectWorldKey = useWorkspaceStore(selectProjectWorldKey);
     const setActiveProject = useWorkspaceStore(state => state.setActiveProject);
     const setActiveDocument = useWorkspaceStore(state => state.setActiveDocument);
     const setActiveScene = useWorkspaceStore(state => state.setActiveScene);
@@ -274,10 +276,11 @@ export function ImportModal({ isOpen, onClose }: ImportModalProps) {
                 const desc = mapping.description ? raw[mapping.description] : '';
                 const type = mapping.type ? raw[mapping.type].toLowerCase() : 'lore';
                 const safeType = ['character', 'location', 'faction', 'artifact', 'lore'].includes(type) ? type : 'lore';
-                
+
                 addEntity({
                     id: crypto.randomUUID(),
                     projectId: newProjectId,
+                    worldId: projectWorldKey === STANDALONE_KEY ? undefined : projectWorldKey,
                     name,
                     type: safeType as any,
                     description: desc || '',
