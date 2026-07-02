@@ -2156,7 +2156,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     state.streakState = computeStreakFromDays(state.writingDays ?? []);
 
                     // Hydration/Migration: Ensure workspaceMode is initialized correctly for Sprint 99
-                    if (!['worldBible', 'template', 'desk', 'bookshelf'].includes((state as any).workspaceMode)) {
+                    if (!['worldBible', 'worldBibleEdit', 'hierarchy', 'template', 'desk', 'bookshelf'].includes((state as any).workspaceMode)) {
                         state.workspaceMode = 'bookshelf';
                     }
 
