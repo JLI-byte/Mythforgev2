@@ -23,6 +23,7 @@ import DeskLighting from '@/components/theme/DeskLighting';
 const Designer = lazy(() => import('@/components/world/Designer'));
 const HierarchyCanvas = lazy(() => import('@/components/world/HierarchyCanvas'));
 const WorldBibleCenter = lazy(() => import('@/components/world/WorldBibleCenter'));
+const WorldBibleEdit = lazy(() => import('@/components/world/WorldBibleEdit'));
 const WritingDesk = lazy(() => import('@/components/editor/WritingDesk'));
 const Bookshelf = lazy(() => import('@/components/management/Bookshelf').then(m => ({ default: m.Bookshelf })));
 
@@ -169,6 +170,8 @@ export default function Home() {
               <Suspense fallback={<div style={{ flex: 1, minHeight: '60vh' }} />}>
                 {workspaceMode === 'worldBible' ? (
                   <WorldBibleCenter />
+                ) : workspaceMode === 'worldBibleEdit' ? (
+                  <WorldBibleEdit />
                 ) : workspaceMode === 'template' ? (
                   <Designer />
                 ) : workspaceMode === 'hierarchy' ? (
