@@ -68,14 +68,14 @@
 
 /* --- Diamond lattice (books sit in offset diamond slots) --- */
 
-/* Explicit uniform rows (every row has DIAMOND_COLS slots), so no honeycomb
-   row-length drift. Rows interlock by overlapping half a diamond and offsetting
-   the odd rows by half a slot. Only rows AFTER the first are pulled up, so the
-   top never clips. Diamonds are portrait rhombi (matching the 2:3 covers) so a
-   sensibly-sized book fits fully inside. */
+/* The pen's pocket mechanic, done with uniform rows:
+   - ::before = the FULL diamond, painted BEHIND the book (back of the pocket)
+   - ::after  = the BOTTOM V of the diamond (the pen's exact polygon), painted
+     ON TOP of the book — its bottom corners disappear behind this lip, which
+     is what makes the book look tucked INSIDE the diamond.
+   Layers must be opaque greys so the lip actually hides the corners. */
 .books {
-    --w: clamp(96px, 9vw, 132px);       /* diamond slot width */
-    --h: calc(var(--w) * 1.4);          /* portrait diamond height */
+    --w: clamp(112px, 12vw, 152px);     /* square diamond cell */
     width: max-content;
     max-width: 100%;
     margin: 0;
@@ -86,7 +86,7 @@
     display: flex;
 }
 .dRow + .dRow {
-    margin-top: calc(var(--h) * -0.5);  /* interlock */
+    margin-top: calc(var(--w) * -0.5);  /* interlock */
 }
 .dRowOffset {
     margin-left: calc(var(--w) * 0.5);  /* half-slot offset */
@@ -97,59 +97,72 @@
     position: relative;
     flex: none;
     width: var(--w);
-    height: var(--h);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: var(--w);
 }
 
-/* the diamond slot itself (portrait rhombus) */
+/* back of the pocket: full diamond, behind the book */
 .slot::before {
     content: '';
     position: absolute;
     inset: 0;
     clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
-    background: rgba(255, 255, 255, 0.05);
+    background: #1c1c21;
 }
-.slotEmpty::before {
-    background: rgba(255, 255, 255, 0.028);
+/* front lip of the pocket: the pen's bottom-V band, OVER the book */
+.slot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    clip-path: polygon(100% 50%, 50% 100%, 0 50%, 20% 50%, 50% 80%, 80% 50%);
+    background: #2f2f36;
+    z-index: 2;
+    pointer-events: none;
 }
 
-/* the cover (the pen's img): sits in the upper diamond, tilts on hover */
-/* cover sits centered INSIDE the diamond (width+height ≈ cell ⇒ corners touch
-   the diamond edges), and tilts on hover. */
+.slotEmpty::before {
+    background: #17171b;
+}
+.slotEmpty::after {
+    background: #222227;
+}
+
+/* the cover (the pen's img): rises out of the pocket, bottom tucked behind
+   the lip. 44% + translateY(-60%) keeps the bottom corners under the band. */
 .book {
     position: absolute;
-    width: 48%;
+    width: 44%;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%) translateY(-60%);
     aspect-ratio: 2 / 3;
-    border-radius: 3px;
+    border-radius: 3px 3px 0 0;
     background-size: cover;
     background-position: center;
     filter: grayscale(1);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.45);
+    box-shadow: 5px -5px 10px rgba(0, 0, 0, 0.35);
     cursor: grab;
     user-select: none;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     z-index: 1;
 }
+/* pen hover: the book slides up out of the pocket and tilts */
 .book:hover {
-    transform: translate(-50%, -56%) rotate(10deg);
-    box-shadow: 6px 9px 18px rgba(0, 0, 0, 0.55);
-    z-index: 3;
+    transform: translateX(-40%) translateY(-78%) rotate(18deg);
+    box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.5);
 }
 
-/* Active project: light up its diamond slot instead of boxing the cover. */
+/* Active project: light up its pocket instead of boxing the cover. */
 .slot:has(.bookActive)::before {
-    background: rgba(255, 255, 255, 0.14);
+    background: #34343c;
+}
+.slot:has(.bookActive)::after {
+    background: #4a4a54;
 }
 .bookActive {
-    box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.45), 0 0 12px rgba(255, 255, 255, 0.25);
+    box-shadow: 5px -5px 10px rgba(0, 0, 0, 0.35), 0 0 12px rgba(255, 255, 255, 0.28);
 }
 
 .bookInitials {
@@ -164,8 +177,8 @@
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%);
-    width: 30%;
+    transform: translate(-50%, -60%);
+    width: 44%;
     aspect-ratio: 1;
     appearance: none;
     background: none;
@@ -187,10 +200,10 @@
 /* full name, shown on hover so the lattice stays clean */
 .bookLabel {
     position: absolute;
-    top: 100%;
+    bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
-    margin-top: 4px;
+    margin-bottom: 4px;
     max-width: 150px;
     white-space: nowrap;
     overflow: hidden;
