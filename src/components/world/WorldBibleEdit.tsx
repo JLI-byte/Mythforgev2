@@ -19,7 +19,7 @@ export default function WorldBibleEdit() {
     const worlds = useWorkspaceStore(s => s.worlds);
     const entities = useWorkspaceStore(s => s.entities);
     const updateWorldBibleConfig = useWorkspaceStore(s => s.updateWorldBibleConfig);
-    const setWorldBibleLayout = useWorkspaceStore(s => s.setWorldBibleLayout);
+    const applyBibleLayout = useWorkspaceStore(s => s.applyBibleLayout);
     const deleteWorldEntities = useWorkspaceStore(s => s.deleteWorldEntities);
     const setWorkspaceMode = useWorkspaceStore(s => s.setWorkspaceMode);
 
@@ -47,7 +47,7 @@ export default function WorldBibleEdit() {
             setConfirming(`preset-${presetId}`);
             return;
         }
-        setWorldBibleLayout(activeWorldKey, createPresetLayout(preset));
+        applyBibleLayout(activeWorldKey, createPresetLayout(preset));
         setConfirming(null);
     };
 
@@ -149,7 +149,7 @@ export default function WorldBibleEdit() {
                             className={styles.dangerBtn}
                             onClick={() => {
                                 if (confirming !== 'reset') { setConfirming('reset'); return; }
-                                setWorldBibleLayout(activeWorldKey, createPresetLayout(BIBLE_PRESETS[0]));
+                                applyBibleLayout(activeWorldKey, createPresetLayout(BIBLE_PRESETS[0]));
                                 setConfirming(null);
                             }}
                         >

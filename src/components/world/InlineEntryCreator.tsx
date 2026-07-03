@@ -5,6 +5,8 @@ import styles from './InlineEntryCreator.module.css';
 import { useWorkspaceStore, Entity, EntityType, ENTITY_TYPE_LABELS, selectProjectWorldKey } from '@/store/workspaceStore';
 import { sanitizeLabel } from '@/lib/sanitize';
 import { STANDALONE_KEY } from '@/lib/worldKey';
+import { getWorldBibleConfig } from '@/lib/worldBibleNav';
+import { fileByType } from '@/lib/folderTree';
 
 /**
  * Inline Entry Creator
@@ -17,6 +19,7 @@ export default function InlineEntryCreator() {
     // Subscribe to store state and actions
     const activeProjectId = useWorkspaceStore((state) => state.activeProjectId);
     const projectWorldKey = useWorkspaceStore(selectProjectWorldKey);
+    const worldBibles = useWorkspaceStore((state) => state.worldBibles);
     const isInlineCreatorOpen = useWorkspaceStore((state) => state.isInlineCreatorOpen);
     const pendingEntityName = useWorkspaceStore((state) => state.pendingEntityName);
     const closeInlineCreator = useWorkspaceStore((state) => state.closeInlineCreator);
@@ -64,10 +67,13 @@ export default function InlineEntryCreator() {
 
         if (!name || !activeProjectId) return; // rudimentary validation & null guard
 
+        const layout = getWorldBibleConfig(worldBibles, projectWorldKey).layout;
+
         const newEntity: Entity = {
             id: crypto.randomUUID(),
             projectId: activeProjectId,
             worldId: projectWorldKey === STANDALONE_KEY ? undefined : projectWorldKey,
+            categoryId: fileByType(layout.roots, type),
             name,
             type,
             description,

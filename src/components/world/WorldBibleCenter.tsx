@@ -71,6 +71,7 @@ export default function WorldBibleCenter() {
             id,
             projectId: activeProjectId ?? '',
             worldId: activeWorldKey === STANDALONE_KEY ? undefined : activeWorldKey,
+            categoryId: root.id,
             name,
             type,
             description: '',

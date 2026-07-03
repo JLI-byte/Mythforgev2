@@ -5,6 +5,8 @@ import { useWorkspaceStore, COVER_COLORS } from '@/store/workspaceStore';
 import { sanitizeImportedHtml, markdownToBasicHtml, fetchGDriveFileContent, parseFdxToHtml } from '@/lib/export';
 import { parseCSV, flattenJSON } from '@/lib/importUtils';
 import { logger } from '@/lib/logger';
+import { getWorldBibleConfig } from '@/lib/worldBibleNav';
+import { fileByType } from '@/lib/folderTree';
 // mammoth (~1MB) is loaded on demand in the DOCX handlers below so it stays out
 // of the main app bundle — most sessions never import a Word file.
 
@@ -26,6 +28,7 @@ const MODES: { id: WritingMode; label: string; icon: string }[] = [
 export function ImportModal({ isOpen, onClose }: ImportModalProps) {
     const projects = useWorkspaceStore(state => state.projects);
     const worlds = useWorkspaceStore(state => state.worlds);
+    const worldBibles = useWorkspaceStore(state => state.worldBibles);
     const addProject = useWorkspaceStore(state => state.addProject);
     const addDocument = useWorkspaceStore(state => state.addDocument);
     const addScene = useWorkspaceStore(state => state.addScene);
@@ -268,6 +271,9 @@ export function ImportModal({ isOpen, onClose }: ImportModalProps) {
                 updatedAt: new Date()
             });
 
+            const targetKey = selectedWorldId || 'standalone';
+            const layout = getWorldBibleConfig(worldBibles, targetKey).layout;
+
             rawEntities.forEach(raw => {
                 const name = raw[mapping.name];
                 if (!name) return;
@@ -279,6 +285,7 @@ export function ImportModal({ isOpen, onClose }: ImportModalProps) {
                     id: crypto.randomUUID(),
                     projectId: newProjectId,
                     worldId: selectedWorldId || undefined,
+                    categoryId: fileByType(layout.roots, safeType),
                     name,
                     type: safeType as any,
                     description: desc || '',
