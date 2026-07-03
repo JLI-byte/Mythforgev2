@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useWorkspaceStore, WorldBibleLayout, selectProjectWorldKey } from '@/store/workspaceStore';
 import { GridWidget, ArticleTab, WidgetType, parseArticleTabs, StaticGridCanvas } from './ArticleGridEditor';
 import ArticleGridEditor from './ArticleGridEditor';
-import HierarchyCanvas from './HierarchyCanvas';
+import WorldBibleFolderTree from './WorldBibleFolderTree';
 import styles from './Designer.module.css';
 import { STANDALONE_KEY } from '@/lib/worldKey';
 
@@ -283,7 +283,7 @@ export default function Designer() {
 
         {mode === 'hierarchy' && (
           <div className={styles.canvasArea}>
-            <HierarchyCanvas isDraft={true} />
+            <WorldBibleFolderTree isDraft={true} />
           </div>
         )}
       </main>

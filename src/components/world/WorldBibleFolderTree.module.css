@@ -1,0 +1,55 @@
+/* WorldBibleFolderTree — file-explorer style Organize view (Sprint 72) */
+
+.main { width: 100%; height: 100%; overflow-y: auto; background: var(--background); }
+.treePanel { max-width: 720px; margin: 0 auto; padding: 32px 24px 80px; min-height: 100%; }
+.treePanel.dropTarget { outline: 2px dashed var(--accent); outline-offset: -6px; border-radius: 12px; }
+
+.header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+.title { font-size: 1.4rem; font-weight: 700; color: var(--foreground); margin: 0; }
+.newFolderBtn { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--foreground); font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+.newFolderBtn:hover { border-color: var(--accent); }
+.hint { color: var(--muted, #888); font-size: 0.8rem; margin: 0 0 18px; }
+
+.tree { display: flex; flex-direction: column; gap: 2px; }
+
+.folderRow {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 8px; border-radius: 8px;
+    border: 1px solid transparent;
+    cursor: grab;
+}
+.folderRow:hover { background: var(--surface); }
+.folderRow:hover .rowActions { opacity: 1; }
+.folderRow.dropTarget { border-color: var(--accent); background: var(--surface); }
+
+.chevron { width: 20px; height: 20px; border: none; background: none; color: var(--muted, #888); cursor: pointer; font-size: 0.7rem; padding: 0; }
+.chevron:disabled { cursor: default; opacity: 0.4; }
+.folderIcon { flex: none; }
+.folderName {
+    flex: 1; min-width: 0;
+    border: none; background: transparent; color: var(--foreground);
+    font-size: 0.92rem; font-weight: 600; padding: 2px 4px; border-radius: 4px;
+}
+.folderName:focus { outline: 1px solid var(--accent); background: var(--background); }
+.count { flex: none; font-size: 0.72rem; color: var(--muted, #888); background: var(--background); border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; }
+
+.rowActions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.12s; }
+.rowBtn { width: 26px; height: 22px; border: none; border-radius: 5px; background: transparent; color: var(--muted, #888); cursor: pointer; font-size: 0.85rem; line-height: 1; }
+.rowBtn:hover { background: var(--border); color: var(--foreground); }
+.rowBtnDanger { width: auto; padding: 0 8px; background: rgba(220, 80, 80, 0.15); color: #e07070; font-size: 0.72rem; font-weight: 700; }
+
+.articleRow {
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 8px; border-radius: 6px; cursor: grab;
+    color: var(--foreground);
+}
+.articleRow:hover { background: var(--surface); }
+.articleSelected { background: var(--surface); outline: 1px solid var(--accent); }
+.articleIcon { flex: none; font-size: 0.8rem; }
+.articleName { flex: 1; min-width: 0; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.empty { color: var(--muted, #888); font-size: 0.88rem; padding: 18px 4px; }
+
+.unfiled { margin-top: 26px; border-top: 1px solid var(--border); padding-top: 14px; }
+.unfiledTitle { font-size: 0.95rem; font-weight: 700; color: var(--foreground); margin: 0 0 2px; }
+.unfiledHint { color: var(--muted, #888); font-size: 0.75rem; margin: 0 0 8px; }

@@ -21,7 +21,7 @@ import DeskLighting from '@/components/theme/DeskLighting';
 // Center-column modes are code-split: only the active one is downloaded/parsed,
 // instead of bundling all five (WritingDesk, ArticleGrid, etc.) into first paint.
 const Designer = lazy(() => import('@/components/world/Designer'));
-const HierarchyCanvas = lazy(() => import('@/components/world/HierarchyCanvas'));
+const WorldBibleFolderTree = lazy(() => import('@/components/world/WorldBibleFolderTree'));
 const WorldBibleCenter = lazy(() => import('@/components/world/WorldBibleCenter'));
 const WorldBibleEdit = lazy(() => import('@/components/world/WorldBibleEdit'));
 const WritingDesk = lazy(() => import('@/components/editor/WritingDesk'));
@@ -175,7 +175,7 @@ export default function Home() {
                 ) : workspaceMode === 'template' ? (
                   <Designer />
                 ) : workspaceMode === 'hierarchy' ? (
-                  <HierarchyCanvas />
+                  <WorldBibleFolderTree />
                 ) : workspaceMode === 'bookshelf' ? (
                   <Bookshelf />
                 ) : (
