@@ -158,6 +158,10 @@ export default function WorldBibleFolderTree({ isDraft }: WorldBibleFolderTreePr
                         value={folder.label}
                         onChange={(e) => updateWorldBibleRoot(folder.id, { label: e.target.value }, isDraft)}
                         onClick={(e) => e.stopPropagation()}
+                        // Text-selection drags must not become row drags: intercept
+                        // native drag pickup when the gesture starts inside the input.
+                        draggable
+                        onDragStart={(e) => { e.preventDefault(); e.stopPropagation(); }}
                     />
                     {!isDraft && <span className={styles.count}>{count}</span>}
                     <div className={styles.rowActions}>
