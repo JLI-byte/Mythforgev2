@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getDescendantIds, wouldCreateCycle, fileByType } from './folderTree';
+import { getDescendantIds, wouldCreateCycle, fileByType, folderMemberSet } from './folderTree';
 
 const roots = [
     { id: 'a', parentId: undefined, entityTypes: ['character'] },
@@ -31,5 +31,14 @@ describe('folderTree helpers', () => {
         const messy = [null, { id: 'x' }, ...roots] as never[];
         expect(fileByType(messy, 'character')).toBe('a');
         expect([...getDescendantIds(messy, 'a')].sort()).toEqual(['a1', 'a1x']);
+    });
+
+    it('folderMemberSet includes the folder itself plus all descendants', () => {
+        expect([...folderMemberSet(roots, 'a')].sort()).toEqual(['a', 'a1', 'a1x']);
+        expect([...folderMemberSet(roots, 'b')]).toEqual(['b']);
+    });
+
+    it('folderMemberSet tolerates unknown ids', () => {
+        expect([...folderMemberSet(roots, 'nope')]).toEqual(['nope']);
     });
 });

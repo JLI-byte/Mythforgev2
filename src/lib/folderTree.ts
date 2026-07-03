@@ -51,3 +51,13 @@ export function fileByType(
     }
     return undefined;
 }
+
+/** The folder itself plus every descendant — the membership set for counts. */
+export function folderMemberSet(
+    roots: ReadonlyArray<FolderLike | null | undefined>,
+    folderId: string,
+): Set<string> {
+    const out = getDescendantIds(roots, folderId);
+    out.add(folderId);
+    return out;
+}
