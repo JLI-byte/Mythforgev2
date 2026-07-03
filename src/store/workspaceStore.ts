@@ -258,6 +258,9 @@ export interface Entity {
     profile?: CharacterProfile;
     /** Sprint 69: the world (shelf) this entity belongs to. undefined = standalone shelf. */
     worldId?: string;
+    /** Sprint 71: the folder (WorldBibleRootConfig id in this world's bible)
+     *  this article lives in. undefined = Unfiled. Dormant until Phase 3B UI. */
+    categoryId?: string;
 }
 
 // =============================================
