@@ -5,6 +5,7 @@ import { getStoredValue } from '@/lib/storage';
 import { worldKeyForProject, worldKeyForEntity, type WorldKey } from '@/lib/worldKey';
 import { migrateWorkspaceSchema } from './migrateWorkspaceSchema';
 import { DEFAULT_WORLD_BIBLE_LAYOUT } from '@/lib/worldBibleNav';
+import { wouldCreateCycle, fileByType } from '@/lib/folderTree';
 
 // Cover colors auto-assigned to new projects in rotation
 export const COVER_COLORS = [
@@ -623,6 +624,8 @@ export interface WorkspaceState {
     updateWorldBibleConfig: (key: WorldKey, patch: Partial<Omit<WorldBibleConfig, 'layout'>>) => void;
     /** Sprint 70: replace a bible's layout wholesale (presets, reset). */
     setWorldBibleLayout: (key: WorldKey, layout: WorldBibleLayout) => void;
+    /** Sprint 71: replace a bible's layout AND re-file its articles by type. */
+    applyBibleLayout: (key: WorldKey, layout: WorldBibleLayout) => void;
     /** Sprint 70: danger zone — delete every entity belonging to a shelf. */
     deleteWorldEntities: (key: WorldKey) => void;
 
@@ -1203,7 +1206,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         ),
                         // Lore moves to the standalone shelf, mirroring projects
                         entities: state.entities.map(e =>
-                            e.worldId === id ? { ...e, worldId: undefined } : e
+                            e.worldId === id ? { ...e, worldId: undefined, categoryId: undefined } : e
                         ),
                         worldBibles: remainingBibles,
                         activeWorldKey: state.activeWorldKey === id ? null : state.activeWorldKey,
@@ -1716,6 +1719,20 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     },
                 })),
 
+            applyBibleLayout: (key, layout) =>
+                set((state) => ({
+                    worldBibles: {
+                        ...state.worldBibles,
+                        [key]: { ...state.worldBibles[key], layout },
+                    },
+                    // Re-file this world's articles into the new structure by type
+                    // (covers previously-unfiled ones too; presets span all 8 types).
+                    entities: state.entities.map(e => {
+                        if (worldKeyForEntity(e) !== key) return e;
+                        return { ...e, categoryId: fileByType(layout.roots, e.type) };
+                    }),
+                })),
+
             deleteWorldEntities: (key) =>
                 set((state) => {
                     logger.info('World bible cleared of articles:', key);
@@ -1736,6 +1753,13 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             updateWorldBibleRoot: (id, updates, isDraft) =>
                 set((state) => {
+                    // Folder re-parenting must never create a loop.
+                    if (updates.parentId !== undefined) {
+                        const layout = isDraft
+                            ? state.draftHierarchyLayout
+                            : (state.activeWorldKey ? state.worldBibles[state.activeWorldKey]?.layout : undefined);
+                        if (layout && wouldCreateCycle(layout.roots, id, updates.parentId)) return state;
+                    }
                     if (isDraft) {
                         const layout = state.draftHierarchyLayout;
                         if (!layout) return state;
@@ -1761,36 +1785,28 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                                 ?? JSON.parse(JSON.stringify(DEFAULT_WORLD_BIBLE_LAYOUT))
                             : undefined);
                     if (!layout) return state;
-                    
-                    // Find all nested IDs to remove (recursive cascade)
-                    const findChildren = (parentId: string): string[] => {
-                        const direct = layout.roots.filter(r => r.parentId === parentId).map(r => r.id);
-                        return [...direct, ...direct.flatMap(findChildren)];
-                    };
-                    const idsToRemove = [id, ...findChildren(id)];
-                    
-                    // Collect all entity types that were in these removed folders
-                    const freed = layout.roots
-                        .filter(r => idsToRemove.includes(r.id))
-                        .flatMap(r => r.entityTypes);
 
-                    const remaining = layout.roots.filter(r => !idsToRemove.includes(r.id));
-                    
-                    // Reassign types to first remaining if available
-                    if (remaining.length > 0 && freed.length > 0) {
-                        remaining[0] = { 
-                            ...remaining[0], 
-                            entityTypes: [...new Set([...remaining[0].entityTypes, ...freed])] 
-                        };
-                    }
+                    const removed = layout.roots.find(r => r.id === id);
+                    if (!removed) return state;
+                    const parentId = removed.parentId;
 
+                    // Children re-parent to the deleted folder's parent — nothing cascades.
+                    const remaining = layout.roots
+                        .filter(r => r.id !== id)
+                        .map(r => (r.parentId === id ? { ...r, parentId } : r));
                     const nextLayout = { ...layout, roots: remaining };
 
                     if (isDraft) {
                         return { draftHierarchyLayout: nextLayout };
                     }
 
-                    return withActiveBibleLayout(state, () => nextLayout);
+                    // Articles in the deleted folder move up (top-level → Unfiled).
+                    return {
+                        ...withActiveBibleLayout(state, () => nextLayout),
+                        entities: state.entities.map(e =>
+                            e.categoryId === id ? { ...e, categoryId: parentId } : e
+                        ),
+                    };
                 }),
 
             moveWorldBibleType: (type, fromRootId, toRootId, isDraft) =>

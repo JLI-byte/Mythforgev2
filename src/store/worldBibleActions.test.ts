@@ -77,4 +77,80 @@ describe('per-shelf bible store actions', () => {
         const names = useWorkspaceStore.getState().entities.map(e => e.name);
         expect(names).toEqual(['Docks']); // e1 (Mira, w1) gone; e2 (standalone) stays
     });
+
+    it('deleteWorldBibleRoot re-parents children and re-files articles to the parent', () => {
+        useWorkspaceStore.setState({
+            worldBibles: { w1: { layout: { roots: [
+                { ...root('top'), entityTypes: [] },
+                { ...root('mid'), parentId: 'top' },
+                { ...root('leaf'), parentId: 'mid' },
+            ] } } },
+            entities: [
+                { id: 'e1', projectId: 'p1', worldId: 'w1', categoryId: 'mid', name: 'Mira', type: 'character' } as never,
+            ],
+            activeWorldKey: 'w1',
+        });
+        useWorkspaceStore.getState().deleteWorldBibleRoot('mid');
+        const s = useWorkspaceStore.getState();
+        const roots = s.worldBibles['w1'].layout.roots;
+        expect(roots.map(r => r.id)).toEqual(['top', 'leaf']);
+        expect(roots.find(r => r.id === 'leaf')?.parentId).toBe('top'); // child re-parented, not deleted
+        expect(s.entities[0].categoryId).toBe('top');                    // article moved up
+    });
+
+    it('deleteWorldBibleRoot on a top-level folder unfiles its articles', () => {
+        useWorkspaceStore.setState({
+            worldBibles: { w1: { layout: { roots: [root('solo'), root('other')] } } },
+            entities: [
+                { id: 'e1', projectId: 'p1', worldId: 'w1', categoryId: 'solo', name: 'Mira', type: 'character' } as never,
+            ],
+            activeWorldKey: 'w1',
+        });
+        useWorkspaceStore.getState().deleteWorldBibleRoot('solo');
+        expect(useWorkspaceStore.getState().entities[0].categoryId).toBeUndefined();
+    });
+
+    it('updateWorldBibleRoot rejects cyclic re-parenting', () => {
+        useWorkspaceStore.setState({
+            worldBibles: { w1: { layout: { roots: [
+                root('top'),
+                { ...root('kid'), parentId: 'top' },
+            ] } } },
+            activeWorldKey: 'w1',
+        });
+        useWorkspaceStore.getState().updateWorldBibleRoot('top', { parentId: 'kid' });
+        expect(useWorkspaceStore.getState().worldBibles['w1'].layout.roots
+            .find(r => r.id === 'top')?.parentId).toBeUndefined(); // unchanged
+    });
+
+    it('applyBibleLayout re-files every article by type, including unfiled ones', () => {
+        useWorkspaceStore.setState({
+            worldBibles: { w1: { layout: { roots: [root('old')] } } },
+            entities: [
+                { id: 'e1', projectId: 'p1', worldId: 'w1', categoryId: 'old', name: 'Mira', type: 'character' } as never,
+                { id: 'e2', projectId: 'p1', worldId: 'w1', name: 'Ghost', type: 'lore' } as never, // unfiled
+                { id: 'e3', projectId: 'p2', name: 'Docks', type: 'location' } as never,            // other world — untouched
+            ],
+        });
+        useWorkspaceStore.getState().applyBibleLayout('w1', { roots: [
+            { ...root('chars'), entityTypes: ['character'] as never },
+            { ...root('archive'), entityTypes: ['lore'] as never },
+        ] });
+        const s = useWorkspaceStore.getState();
+        expect(s.entities.find(e => e.id === 'e1')?.categoryId).toBe('chars');
+        expect(s.entities.find(e => e.id === 'e2')?.categoryId).toBe('archive');
+        expect(s.entities.find(e => e.id === 'e3')?.categoryId).toBeUndefined();
+    });
+
+    it('deleteWorld strips categoryId from lore moving to standalone', () => {
+        useWorkspaceStore.setState({
+            entities: [
+                { id: 'e1', projectId: 'p1', worldId: 'w1', categoryId: 'people', name: 'Mira', type: 'character' } as never,
+            ],
+        });
+        useWorkspaceStore.getState().deleteWorld('w1');
+        const e = useWorkspaceStore.getState().entities.find(x => x.id === 'e1');
+        expect(e?.worldId).toBeUndefined();
+        expect(e?.categoryId).toBeUndefined();
+    });
 });
