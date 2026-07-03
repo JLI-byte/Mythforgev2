@@ -5,6 +5,7 @@ import { useWorkspaceStore, EntityType, WorldBibleRootConfig } from '@/store/wor
 import { getWorldBibleConfig, SUBCATEGORY_LABELS } from '@/lib/worldBibleNav';
 import { sanitizeLabel } from '@/lib/sanitize';
 import { worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
+import { folderMemberSet } from '@/lib/folderTree';
 import ArticleReadView from './ArticleReadView';
 import CharacterProfile from './profile/CharacterProfile';
 import styles from './WorldBibleCenter.module.css';
@@ -33,8 +34,6 @@ export default function WorldBibleCenter() {
             label: 'New Category',
             icon: '📂',
             entityTypes: [],
-            x: 120,
-            y: 120,
         });
         setWorkspaceMode('hierarchy');
     };
@@ -84,6 +83,10 @@ export default function WorldBibleCenter() {
     // Filter entities for the active world (shelf)
     const worldEntities = entities.filter(e => worldKeyForEntity(e) === activeWorldKey);
 
+    const topFolders = layout.roots.filter(r => !r.parentId);
+    const validIds = new Set(layout.roots.map(r => r.id));
+    const unfiledEntities = worldEntities.filter(e => !e.categoryId || !validIds.has(e.categoryId));
+
     // Level 3 — Character profile for character entities, article view otherwise
     if (selectedEntityId) {
         const selected = worldEntities.find(e => e.id === selectedEntityId);
@@ -115,14 +118,37 @@ export default function WorldBibleCenter() {
         : id === 'world' ? '#5b4483'
         : '#3a3a44';
 
-    const stripCount = layout.roots.length + 1; // + Add Category
+    const stripCount = topFolders.length + (unfiledEntities.length > 0 ? 1 : 0) + 1; // + Add Category
     const stripWidth = 100 / stripCount;
+
+    const renderCard = (entity: (typeof worldEntities)[number], color: string) => (
+        <div
+            key={entity.id}
+            className={styles.entityCard}
+            onClick={(e) => { e.stopPropagation(); setSelectedEntityId(entity.id); }}
+        >
+            {entity.imageUrl ? (
+                <img src={entity.imageUrl} alt={entity.name} className={styles.cardThumb} />
+            ) : (
+                <div className={styles.cardColorBlock} style={{ backgroundColor: color }} />
+            )}
+            <div className={styles.cardContent}>
+                <span className={styles.cardName}>{entity.name}</span>
+                {(entity.articleDoc || (entity.articleBlocks && entity.articleBlocks.length > 0))
+                    ? <span className={styles.articleBadge}>📄 Article</span>
+                    : <span className={styles.noArticleBadge}>No article</span>}
+            </div>
+        </div>
+    );
 
     return (
         <div className={styles.browserContainer}>
             <div className={styles.strips}>
-                {layout.roots.map((root, i) => {
-                    const bucketEntities = worldEntities.filter(e => root.entityTypes.includes(e.type));
+                {topFolders.map((root, i) => {
+                    const memberIds = folderMemberSet(layout.roots, root.id);
+                    const bucketEntities = worldEntities.filter(e => e.categoryId && memberIds.has(e.categoryId));
+                    const directArticles = bucketEntities.filter(e => e.categoryId === root.id);
+                    const childFolders = layout.roots.filter(r => r.parentId === root.id);
                     const isExpanded = selectedBucketId === root.id;
                     const color = stripColor(root.id);
                     return (
@@ -162,30 +188,32 @@ export default function WorldBibleCenter() {
 
                                         {bucketEntities.length === 0 ? (
                                             <p className={styles.stripEmpty}>
-                                                No {root.label.toLowerCase()} yet — add your first article below.
+                                                No articles in {root.label.toLowerCase()} yet — add your first article below.
                                             </p>
                                         ) : (
-                                            <div className={styles.entityGrid}>
-                                                {bucketEntities.map(entity => (
-                                                    <div
-                                                        key={entity.id}
-                                                        className={styles.entityCard}
-                                                        onClick={(e) => { e.stopPropagation(); setSelectedEntityId(entity.id); }}
-                                                    >
-                                                        {entity.imageUrl ? (
-                                                            <img src={entity.imageUrl} alt={entity.name} className={styles.cardThumb} />
-                                                        ) : (
-                                                            <div className={styles.cardColorBlock} style={{ backgroundColor: color }} />
-                                                        )}
-                                                        <div className={styles.cardContent}>
-                                                            <span className={styles.cardName}>{entity.name}</span>
-                                                            {(entity.articleDoc || (entity.articleBlocks && entity.articleBlocks.length > 0))
-                                                                ? <span className={styles.articleBadge}>📄 Article</span>
-                                                                : <span className={styles.noArticleBadge}>No article</span>}
-                                                        </div>
+                                            <>
+                                                {directArticles.length > 0 && (
+                                                    <div className={styles.entityGrid}>
+                                                        {directArticles.map(entity => renderCard(entity, color))}
                                                     </div>
-                                                ))}
-                                            </div>
+                                                )}
+                                                {childFolders.map(child => {
+                                                    const childMembers = folderMemberSet(layout.roots, child.id);
+                                                    const childArticles = worldEntities.filter(e => e.categoryId && childMembers.has(e.categoryId));
+                                                    if (childArticles.length === 0) return null;
+                                                    return (
+                                                        <div key={child.id} className={styles.subfolderSection}>
+                                                            <h3 className={styles.subfolderTitle}>
+                                                                {child.icon} {child.label}
+                                                                <span className={styles.subfolderCount}>{childArticles.length}</span>
+                                                            </h3>
+                                                            <div className={styles.entityGrid}>
+                                                                {childArticles.map(entity => renderCard(entity, color))}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </>
                                         )}
 
                                         {creatingBucketId === root.id ? (
@@ -238,10 +266,59 @@ export default function WorldBibleCenter() {
                     );
                 })}
 
+                {unfiledEntities.length > 0 && (() => {
+                    const isExpanded = selectedBucketId === '__unfiled__';
+                    const color = '#3a3a44';
+                    const i = topFolders.length;
+                    return (
+                        <article
+                            key="__unfiled__"
+                            className={`${styles.strip} ${isExpanded ? styles.stripExpanded : ''}`}
+                            style={
+                                isExpanded
+                                    ? { left: 0, width: '100%', background: color }
+                                    : { left: `${i * stripWidth}%`, width: `${stripWidth}%`, background: color }
+                            }
+                            onClick={isExpanded ? undefined : () => setSelectedBucketId('__unfiled__')}
+                        >
+                            <div className={styles.stripContent}>
+                                <div className={styles.stripTitle}>
+                                    <span className={styles.stripIcon}>🗂️</span>
+                                    <span className={styles.stripName}>Unfiled</span>
+                                    <span className={styles.stripMeta}>
+                                        {unfiledEntities.length} {unfiledEntities.length === 1 ? 'entry' : 'entries'}
+                                    </span>
+                                </div>
+
+                                {isExpanded && (
+                                    <div className={styles.stripInner}>
+                                        <button
+                                            className={styles.stripClose}
+                                            onClick={(e) => { e.stopPropagation(); setSelectedBucketId(null); }}
+                                            aria-label="Close category"
+                                        >
+                                            ×
+                                        </button>
+                                        <div className={styles.stripInnerHead}>
+                                            <span className={styles.stripIcon}>🗂️</span>
+                                            <h2 className={styles.levelTitle}>Unfiled</h2>
+                                            <span className={styles.browserCount}>{unfiledEntities.length} entries</span>
+                                        </div>
+
+                                        <div className={styles.entityGrid}>
+                                            {unfiledEntities.map(entity => renderCard(entity, color))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </article>
+                    );
+                })()}
+
                 {/* Add Category strip → opens the hierarchy canvas */}
                 <article
                     className={styles.strip}
-                    style={{ left: `${layout.roots.length * stripWidth}%`, width: `${stripWidth}%`, background: '#2c2c33' }}
+                    style={{ left: `${(topFolders.length + (unfiledEntities.length > 0 ? 1 : 0)) * stripWidth}%`, width: `${stripWidth}%`, background: '#2c2c33' }}
                     role="button"
                     tabIndex={0}
                     onClick={handleAddCategory}

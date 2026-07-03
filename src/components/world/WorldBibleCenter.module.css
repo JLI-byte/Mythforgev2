@@ -487,3 +487,7 @@
   color: var(--muted, #888);
   margin: 0;
 }
+
+.subfolderSection { margin-top: 18px; }
+.subfolderTitle { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; font-weight: 700; margin: 0 0 8px; }
+.subfolderCount { font-size: 0.7rem; opacity: 0.75; background: rgba(0,0,0,0.25); border-radius: 999px; padding: 1px 8px; }
