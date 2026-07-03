@@ -1801,10 +1801,14 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     }
 
                     // Articles in the deleted folder move up (top-level → Unfiled).
+                    // Scoped to the active world: folder ids are only unique per bible
+                    // (materialized default layouts share ids across worlds).
                     return {
                         ...withActiveBibleLayout(state, () => nextLayout),
                         entities: state.entities.map(e =>
-                            e.categoryId === id ? { ...e, categoryId: parentId } : e
+                            worldKeyForEntity(e) === state.activeWorldKey && e.categoryId === id
+                                ? { ...e, categoryId: parentId }
+                                : e
                         ),
                     };
                 }),

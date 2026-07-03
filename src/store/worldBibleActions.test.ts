@@ -110,6 +110,25 @@ describe('per-shelf bible store actions', () => {
         expect(useWorkspaceStore.getState().entities[0].categoryId).toBeUndefined();
     });
 
+    it('deleteWorldBibleRoot only re-files articles in the active world (default ids collide across worlds)', () => {
+        useWorkspaceStore.setState({
+            worlds: [{ id: 'w1', name: 'Aether' } as never, { id: 'w2', name: 'Verge' } as never],
+            worldBibles: {
+                w1: { layout: { roots: [root('people'), root('other')] } },
+                w2: { layout: { roots: [root('people')] } }, // same id — materialized defaults collide
+            },
+            entities: [
+                { id: 'e1', projectId: 'p1', worldId: 'w1', categoryId: 'people', name: 'Mira', type: 'character' } as never,
+                { id: 'e2', projectId: 'p1', worldId: 'w2', categoryId: 'people', name: 'Rex', type: 'character' } as never,
+            ],
+            activeWorldKey: 'w1',
+        });
+        useWorkspaceStore.getState().deleteWorldBibleRoot('people');
+        const s = useWorkspaceStore.getState();
+        expect(s.entities.find(e => e.id === 'e1')?.categoryId).toBeUndefined(); // w1 article unfiled
+        expect(s.entities.find(e => e.id === 'e2')?.categoryId).toBe('people');  // w2 article untouched
+    });
+
     it('updateWorldBibleRoot rejects cyclic re-parenting', () => {
         useWorkspaceStore.setState({
             worldBibles: { w1: { layout: { roots: [
