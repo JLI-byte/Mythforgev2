@@ -202,6 +202,15 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.categoryCardStatic {
+    cursor: default;
+}
+
+.categoryCardStatic:hover {
+    transform: none;
+    box-shadow: none;
+}
+
 /* Left: icon with colored background */
 .categoryIconWrap {
     width: 80px;

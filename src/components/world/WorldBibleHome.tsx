@@ -16,10 +16,9 @@ import {
     WBView,
     getWorldBibleConfig,
     DEFAULT_WORLD_BIBLE_LAYOUT,
-    SUBCATEGORY_LABELS,
-    SUBCATEGORY_ICONS,
 } from '@/lib/worldBibleNav';
 import { worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
+import { folderMemberSet } from '@/lib/folderTree';
 
 interface WorldBibleHomeProps {
     onNavigate: (view: WBView) => void;
@@ -61,10 +60,9 @@ export default function WorldBibleHome({ onNavigate }: WorldBibleHomeProps) {
     // Favorites — entities pinned by the user
     const favorites = worldEntities.filter(e => e.isFavorite);
 
-    /** Count entities of a specific type */
-    const countForType = (type: EntityType): number => {
-        return filteredEntities.filter(e => e.type === type).length;
-    };
+    // Unfiled = no categoryId, or a categoryId that doesn't resolve to a real folder
+    const validIds = new Set(layout.roots.map(r => r.id));
+    const unfiledCount = filteredEntities.filter(e => !e.categoryId || !validIds.has(e.categoryId)).length;
 
     return (
         <div className={styles.homeContainer}>
@@ -130,15 +128,14 @@ export default function WorldBibleHome({ onNavigate }: WorldBibleHomeProps) {
 
             {/* === Section 3: Category cards === */}
             <div className={styles.categoryStack}>
-                {layout.roots.map(root => {
-                    const count = root.entityTypes.reduce((sum, type) =>
-                        sum + filteredEntities.filter(e => e.type === type).length, 0
-                    );
+                {layout.roots.filter(root => !root.parentId).map(root => {
+                    const memberIds = folderMemberSet(layout.roots, root.id);
+                    const count = filteredEntities.filter(e => e.categoryId && memberIds.has(e.categoryId)).length;
                     return (
                         <button
                             key={root.id}
                             className={styles.categoryCard}
-                            onClick={() => onNavigate({ level: 'root', root: root.id as any })}
+                            onClick={() => onNavigate({ level: 'root', root: root.id })}
                         >
                             <div className={styles.categoryIconWrap}>
                                 <span className={styles.categoryIcon}>{root.icon}</span>
@@ -149,18 +146,37 @@ export default function WorldBibleHome({ onNavigate }: WorldBibleHomeProps) {
                                     {count > 0 ? `${count} ${count === 1 ? 'entry' : 'entries'}` : 'No entries yet'}
                                 </span>
                                 <div className={styles.subcategoryPills}>
-                                    {root.entityTypes.map(type => (
-                                        <span key={type} className={styles.subcategoryPill}>
-                                            {SUBCATEGORY_ICONS[type]} {SUBCATEGORY_LABELS[type]} (
-                                            {filteredEntities.filter(e => e.type === type).length})
-                                        </span>
-                                    ))}
+                                    {layout.roots.filter(r => r.parentId === root.id).map(child => {
+                                        const childMembers = folderMemberSet(layout.roots, child.id);
+                                        const childCount = filteredEntities.filter(e => e.categoryId && childMembers.has(e.categoryId)).length;
+                                        return (
+                                            <span key={child.id} className={styles.subcategoryPill}>
+                                                {child.icon} {child.label} ({childCount})
+                                            </span>
+                                        );
+                                    })}
                                 </div>
                             </div>
                             <div className={styles.categoryChevron}>›</div>
                         </button>
                     );
                 })}
+                {unfiledCount > 0 && (
+                    <div
+                        className={`${styles.categoryCard} ${styles.categoryCardStatic}`}
+                        title="File these from the Organize view"
+                    >
+                        <div className={styles.categoryIconWrap}>
+                            <span className={styles.categoryIcon}>🗂️</span>
+                        </div>
+                        <div className={styles.categoryCenter}>
+                            <span className={styles.categoryLabel}>Unfiled</span>
+                            <span className={styles.categoryCount}>
+                                {unfiledCount} {unfiledCount === 1 ? 'entry' : 'entries'}
+                            </span>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* === Section 4: Add Entry button === */}

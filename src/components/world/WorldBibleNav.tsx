@@ -55,25 +55,20 @@ export default function WorldBibleNav({
                 return <span>World Bible</span>;
 
             case 'root': {
-                const rootLabel = layout.roots.find(r => r.id === currentView.root)?.label ?? 'Unknown';
+                const byId = new Map(layout.roots.map(r => [r.id, r]));
+                const path: string[] = [];
+                let cur = byId.get(currentView.root);
+                while (cur) { path.unshift(cur.label); cur = cur.parentId ? byId.get(cur.parentId) : undefined; }
+                const shown = path.slice(-3);
                 return (
                     <>
                         <span className={styles.crumbMuted}>World Bible</span>
-                        <span className={styles.crumbSep}>›</span>
-                        <span>{rootLabel}</span>
-                    </>
-                );
-            }
-
-            case 'subcategory': {
-                const rootLabel = layout.roots.find(r => r.id === currentView.root)?.label ?? 'Unknown';
-                return (
-                    <>
-                        <span className={styles.crumbMuted}>
-                            {rootLabel}
-                        </span>
-                        <span className={styles.crumbSep}>›</span>
-                        <span>{SUBCATEGORY_LABELS[currentView.entityType]}</span>
+                        {shown.map((label, i) => (
+                            <React.Fragment key={i}>
+                                <span className={styles.crumbSep}>›</span>
+                                {i === shown.length - 1 ? <span>{label}</span> : <span className={styles.crumbMuted}>{label}</span>}
+                            </React.Fragment>
+                        ))}
                     </>
                 );
             }

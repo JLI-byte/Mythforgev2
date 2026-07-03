@@ -5,7 +5,7 @@
  * Owns the history stack and renders the correct view component
  * based on the current navigation position.
  *
- * Hierarchy: Home → Root Category → Subcategory → Entry
+ * Hierarchy: Home → Folder (recursive) → Entry
  */
 "use client";
 
@@ -15,7 +15,6 @@ import { WBView } from '@/lib/worldBibleNav';
 import WorldBibleNav from './WorldBibleNav';
 import WorldBibleHome from './WorldBibleHome';
 import WorldBibleRoot from './WorldBibleRoot';
-import WorldBibleSubcategory from './WorldBibleSubcategory';
 import WorldBibleEntry from './WorldBibleEntry';
 
 export default function WorldBible() {
@@ -68,13 +67,6 @@ export default function WorldBible() {
                 )}
                 {currentView.level === 'root' && (
                     <WorldBibleRoot root={currentView.root} onNavigate={navigateTo} />
-                )}
-                {currentView.level === 'subcategory' && (
-                    <WorldBibleSubcategory
-                        root={currentView.root}
-                        entityType={currentView.entityType}
-                        onNavigate={navigateTo}
-                    />
                 )}
                 {currentView.level === 'entry' && (
                     <WorldBibleEntry

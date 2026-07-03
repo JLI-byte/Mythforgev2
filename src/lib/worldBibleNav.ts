@@ -15,8 +15,7 @@ export type RootCategory = 'people' | 'places' | 'things' | 'world';
 /** Discriminated union describing every possible World Bible view */
 export type WBView =
     | { level: 'home' }
-    | { level: 'root'; root: string }
-    | { level: 'subcategory'; root: string; entityType: EntityType }
+    | { level: 'root'; root: string }   // root = any folder id — drill recurses through this
     | { level: 'entry'; entityId: string };
 
 /** Maps root categories to the EntityTypes they contain */
