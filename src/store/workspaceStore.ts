@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { logger } from '@/lib/logger';
 import { getStoredValue } from '@/lib/storage';
 import { worldKeyForProject, worldKeyForEntity, type WorldKey } from '@/lib/worldKey';
-import { migratePerShelfBibles } from './migratePerShelfBibles';
+import { migrateWorkspaceSchema } from './migrateWorkspaceSchema';
 import { DEFAULT_WORLD_BIBLE_LAYOUT } from '@/lib/worldBibleNav';
 
 // Cover colors auto-assigned to new projects in rotation
@@ -2228,8 +2228,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
              * Schema Versioning and Migration logic (Sprint 68)
              * version: 2 — Introduced targeted reviver and automatic backups.
              * version: 3 — Per-shelf World Bibles (entity.worldId + worldBibles map).
+             * version: 4 — Article folder membership (entity.categoryId).
              */
-            version: 3,
+            version: 4,
             migrate: (persistedState: any, fromVersion: number) => {
                 // Take an automatic backup BEFORE any migration
                 try {
@@ -2248,9 +2249,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     logger.warn('LoreCanvas: backup failed, proceeding with migration', e);
                 }
 
-                // v3: per-shelf World Bibles. Idempotent — safe even if the
-                // blob was already migrated by the cloud-hydrate path.
-                return migratePerShelfBibles(persistedState ?? {});
+                // v4: full schema chain (per-shelf bibles + article folders).
+                // Idempotent — safe even if the cloud path already migrated it.
+                return migrateWorkspaceSchema(persistedState ?? {});
             },
         }
     )

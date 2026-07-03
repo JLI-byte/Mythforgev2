@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useWorkspaceStore, partializeWorkspace, type WorkspaceState } from '@/store/workspaceStore';
 import { loadWorkspace, saveWorkspace } from './workspaceSync';
 import { logger } from '@/lib/logger';
-import { migratePerShelfBibles } from '@/store/migratePerShelfBibles';
+import { migrateWorkspaceSchema } from '@/store/migrateWorkspaceSchema';
 
 const SAVE_DEBOUNCE_MS = 800;
 // After repeated save failures, stop hammering the endpoint (each attempt
@@ -83,7 +83,7 @@ export function useSupabaseSync(userId: string) {
           if (!localHasContent || cloudNewest > localNewest) {
             // Cloud blobs bypass zustand's persist migrate — apply schema
             // migrations here. Idempotent, so double-migration is harmless.
-            useWorkspaceStore.setState(migratePerShelfBibles(cloud.data));
+            useWorkspaceStore.setState(migrateWorkspaceSchema(cloud.data));
           } else {
             logger.info('LoreCanvas Sync: local copy is newer — keeping local, skipping cloud overwrite');
           }
