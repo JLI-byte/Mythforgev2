@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- raw persisted blobs are
+   untyped by design at the migration boundary. */
 import { migratePerShelfBibles } from './migratePerShelfBibles';
 import { migrateArticleFolders } from './migrateArticleFolders';
 

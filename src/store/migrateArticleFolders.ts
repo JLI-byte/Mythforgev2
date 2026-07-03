@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- migrations operate on
+   raw persisted blobs of unknown historical shape; `any` at this boundary is
+   deliberate (same idiom as migratePerShelfBibles). */
 import { DEFAULT_WORLD_BIBLE_LAYOUT } from '@/lib/worldBibleNav';
 import { fileByType } from '@/lib/folderTree';
 
