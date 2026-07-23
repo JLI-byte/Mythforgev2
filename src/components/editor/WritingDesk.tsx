@@ -160,14 +160,14 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
   const draftTypeId = deskState?.draftTypeId ?? null;
 
   const setDraftType = useCallback((typeId: string) => {
-    if (!activeProjectId) return;
+    if (!activeProjectId || isResearch) return;
     updateDeskState(activeProjectId, { draftTypeId: typeId, draftFormat: getDraftType(typeId)?.format });
-  }, [activeProjectId, updateDeskState]);
+  }, [activeProjectId, isResearch, updateDeskState]);
 
   const startBlank = useCallback(() => {
-    if (!activeProjectId) return;
+    if (!activeProjectId || isResearch) return;
     updateDeskState(activeProjectId, { methodId: 'blank' });
-  }, [activeProjectId, updateDeskState]);
+  }, [activeProjectId, isResearch, updateDeskState]);
 
   /** Pending destructive action awaiting user confirmation. */
   const [confirmState, setConfirmState] = useState<
@@ -176,7 +176,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
 
   const doApplyMethod = useCallback((methodId: string) => {
     const method = getMethod(methodId);
-    if (!method || !activeProjectId || !viewportRef.current) return;
+    if (!method || !activeProjectId || isResearch || !viewportRef.current) return;
 
     // Switching methods REPLACES the previous outline: beat cards are removed,
     // everything else (stickies, images, references) stays.
@@ -196,7 +196,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
     updateDeskState(activeProjectId, { widgets: all, methodId, zoom: nextZoom, canvasOffset: nextOffset });
     setIsLibraryOpen(false);
     setConfirmState(null);
-  }, [activeProjectId, updateDeskState]);
+  }, [activeProjectId, isResearch, updateDeskState]);
 
   const applyMethod = useCallback((methodId: string) => {
     // Confirm first if replacing beat cards the writer has typed into.
@@ -214,12 +214,12 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
   }, [doApplyMethod]);
 
   const clearCanvas = useCallback(() => {
-    if (!activeProjectId) return;
+    if (!activeProjectId || isResearch) return;
     widgetsRef.current = [];
     setSelectedId(null);
     updateDeskState(activeProjectId, { widgets: [], methodId: undefined, zoom: 1, canvasOffset: { x: 0, y: 0 } });
     setConfirmState(null);
-  }, [activeProjectId, updateDeskState]);
+  }, [activeProjectId, isResearch, updateDeskState]);
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const drawGhostRef = useRef<HTMLDivElement>(null);
@@ -281,7 +281,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
       ...current,
       widgets: [nw, ...current.widgets],
     });
-  }, [activeProjectId, isDraft, deskState, updateDeskState, updateWidgets]);
+  }, [activeProjectId, isDraft, isResearch, deskState, updateDeskState, updateWidgets]);
 
   const updateContentSilent = useCallback((id: string, content: any) => {
     liveContentRef.current[id] = content;
