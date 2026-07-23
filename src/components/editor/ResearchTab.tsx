@@ -114,14 +114,14 @@ export default function ResearchTab() {
       if (!entity) return `Couldn't find an article named "${evt.name}".`;
 
       if (evt.type === 'rename_article') {
-        s.updateEntity(entity.id, { name: evt.new_name });
+        s.updateEntity(entity.id, { name: evt.new_name.trim() });
       } else if (evt.type === 'delete_article') {
         s.deleteEntity(entity.id);
       } else {
         const updates: Partial<Entity> = {};
         if (typeof evt.description === 'string') updates.description = evt.description;
         if (evt.append_sections?.length) updates.articleDoc = appendSectionsToDoc(entity.articleDoc, evt.append_sections);
-        if (evt.tags?.length) updates.tags = [...(entity.tags ?? []), ...evt.tags];
+        if (evt.tags?.length) updates.tags = [...new Set([...(entity.tags ?? []), ...evt.tags])];
         s.updateEntity(entity.id, updates);
       }
       return;
@@ -130,6 +130,10 @@ export default function ResearchTab() {
     if (evt.type === 'rename_category') {
       const folderId = resolveFolderIdByName(layout.roots, evt.name);
       if (!folderId) return `Couldn't find a category named "${evt.name}".`;
+      const clash = resolveFolderIdByName(layout.roots, evt.new_name);
+      if (clash && clash !== folderId) {
+        return `A category named "${evt.new_name}" already exists — rename skipped.`;
+      }
       s.setWorldBibleLayout(worldKey, {
         roots: layout.roots.map(r => (r.id === folderId ? { ...r, label: evt.new_name.trim() } : r)),
       });

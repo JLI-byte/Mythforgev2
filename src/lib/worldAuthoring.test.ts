@@ -132,6 +132,25 @@ describe('articleDocToText', () => {
         expect(articleDocToText('not json')).toBe('');
         expect(articleDocToText(undefined)).toBe('');
     });
+
+    it('extracts text from quote, statblock, and table widgets, skipping image data URLs', () => {
+        const doc = JSON.stringify([{
+            id: 't', name: 'Main', widgets: [
+                { id: '1', type: 'quote', x: 0, y: 0, width: 1, height: 1, content: { text: 'No stars here.', attribution: 'A sailor' } },
+                { id: '2', type: 'statblock', x: 0, y: 0, width: 1, height: 1, content: { rows: [{ label: 'Population', value: '40,000' }] } },
+                { id: '3', type: 'table', x: 0, y: 0, width: 1, height: 1, content: { headers: ['Ward', 'Trade'], rows: [['Docks', 'Salt']] } },
+                { id: '4', type: 'image', x: 0, y: 0, width: 1, height: 1, content: { src: 'data:image/png;base64,AAAA', caption: 'The harbor at dusk' } },
+            ],
+        }]);
+        const text = articleDocToText(doc);
+        expect(text).toContain('No stars here.');
+        expect(text).toContain('A sailor');
+        expect(text).toContain('Population: 40,000');
+        expect(text).toContain('Ward | Trade');
+        expect(text).toContain('Docks | Salt');
+        expect(text).toContain('The harbor at dusk'.replace('dusk', 'dusk')); // caption
+        expect(text).not.toContain('data:image'); // never leak image data
+    });
 });
 
 describe('appendSectionsToDoc', () => {

@@ -123,25 +123,67 @@ export function appendSectionsToDoc(existingDoc: string | undefined, sections: A
     return JSON.stringify(tabs);
 }
 
-/** Extract readable plain text from an articleDoc, for showing the assistant. */
+function stripHtmlText(html: string): string {
+    return html
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/p>/gi, '\n\n')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+}
+
+/**
+ * Extract readable plain text from an articleDoc, for showing the assistant.
+ * Handles the text-bearing widget types the article grid supports; images and
+ * dividers contribute captions only (never data URLs), and unknown widget types
+ * fall back to their short string fields so nothing meaningful is silently lost.
+ */
 export function articleDocToText(raw: string | undefined): string {
     const tabs = parseDocTabs(raw);
     if (!tabs) return '';
     const lines: string[] = [];
+    const push = (s: string | undefined | null) => { if (s && s.trim()) lines.push(s.trim()); };
+
     for (const tab of tabs) {
         for (const w of tab.widgets ?? []) {
-            if (w.type === 'heading' && typeof w.content?.text === 'string') {
-                lines.push(w.content.text.trim());
-            } else if (w.type === 'text' && typeof w.content?.html === 'string') {
-                const text = w.content.html
-                    .replace(/<br\s*\/?>/gi, '\n')
-                    .replace(/<\/p>/gi, '\n\n')
-                    .replace(/<[^>]+>/g, '')
-                    .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-                    .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&')
-                    .replace(/\n{3,}/g, '\n\n')
-                    .trim();
-                if (text) lines.push(text);
+            const c = (w.content ?? {}) as Record<string, unknown>;
+            switch (w.type) {
+                case 'heading':
+                    if (typeof c.text === 'string') push(c.text);
+                    break;
+                case 'text':
+                    if (typeof c.html === 'string') push(stripHtmlText(c.html));
+                    break;
+                case 'quote':
+                    if (typeof c.text === 'string') {
+                        push(`"${c.text}"${typeof c.attribution === 'string' && c.attribution ? ` — ${c.attribution}` : ''}`);
+                    }
+                    break;
+                case 'statblock':
+                    if (Array.isArray(c.rows)) {
+                        for (const r of c.rows as Array<Record<string, unknown>>) push(`${r?.label ?? ''}: ${r?.value ?? ''}`);
+                    }
+                    break;
+                case 'table':
+                    if (Array.isArray(c.headers)) push((c.headers as unknown[]).join(' | '));
+                    if (Array.isArray(c.rows)) {
+                        for (const row of c.rows as unknown[]) if (Array.isArray(row)) push(row.join(' | '));
+                    }
+                    break;
+                case 'image':
+                case 'gallery':
+                    if (typeof c.label === 'string') push(c.label);
+                    if (typeof c.caption === 'string') push(c.caption);
+                    break;
+                case 'divider':
+                    break;
+                default:
+                    // Unknown widget — pull its short string fields, never data URLs or bodies.
+                    for (const [k, v] of Object.entries(c)) {
+                        if (typeof v === 'string' && k !== 'src' && k !== 'html' && !v.startsWith('data:') && v.length < 400) push(v);
+                    }
             }
         }
     }
