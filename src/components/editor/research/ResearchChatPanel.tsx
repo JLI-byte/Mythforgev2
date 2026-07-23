@@ -8,16 +8,30 @@ interface ChatMessage {
     content: string;
 }
 
+/** An AI action the panel forwards to the tab to apply against the store. */
+export type ToolEvent =
+    | { type: 'card'; text: string }
+    | {
+          type: 'article';
+          name: string;
+          entityType: string;
+          description: string;
+          sections: { heading?: string; body: string }[];
+          category?: string;
+      }
+    | { type: 'category'; name: string; icon?: string; parent?: string }
+    | { type: 'move'; article: string; category: string };
+
 interface ResearchChatPanelProps {
     /** null when no project is active — add-to-board is then disabled. */
     scopeKey: string | null;
-    /** Reads the current board as plain text at send time. */
-    getBoardContext: () => string;
-    /** Appends the given text to the current board as a Note card. */
-    onAddCard: (text: string) => void;
+    /** Reads the current board + world structure as text at send time. */
+    getContext: () => { board: string; world: string };
+    /** Apply an AI action (add card, create article/category, move) to the store. */
+    onToolEvent: (event: ToolEvent) => void;
 }
 
-export function ResearchChatPanel({ scopeKey, getBoardContext, onAddCard }: ResearchChatPanelProps) {
+export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: ResearchChatPanelProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState('');
     const [isStreaming, setIsStreaming] = useState(false);
@@ -67,7 +81,7 @@ export function ResearchChatPanel({ scopeKey, getBoardContext, onAddCard }: Rese
             const res = await fetch('/api/research-chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messages: outgoing, board: getBoardContext() }),
+                body: JSON.stringify({ messages: outgoing, ...getContext() }),
                 signal: controller.signal,
             });
             if (!res.ok || !res.body) {
@@ -75,7 +89,8 @@ export function ResearchChatPanel({ scopeKey, getBoardContext, onAddCard }: Rese
                 appendToAssistant(`[${info.error ?? 'Request failed'}]`);
                 return;
             }
-            // Response is newline-delimited JSON: {type:'text'|'card', text}.
+            // Response is newline-delimited JSON: a {type:'text',text} chunk, or a
+            // tool event ({type:'card'|'article'|'category'|'move', ...}).
             const handleEvent = (line: string) => {
                 const trimmed = line.trim();
                 if (!trimmed) return;
@@ -87,8 +102,8 @@ export function ResearchChatPanel({ scopeKey, getBoardContext, onAddCard }: Rese
                 }
                 if (evt.type === 'text' && typeof evt.text === 'string') {
                     appendToAssistant(evt.text);
-                } else if (evt.type === 'card' && typeof evt.text === 'string') {
-                    onAddCard(evt.text);
+                } else if (evt.type) {
+                    onToolEvent(evt as ToolEvent);
                 }
             };
 
@@ -144,7 +159,7 @@ export function ResearchChatPanel({ scopeKey, getBoardContext, onAddCard }: Rese
                                 className={styles.researchChatAddBtn}
                                 disabled={!scopeKey}
                                 title={scopeKey ? 'Add this reply to the board as a note' : 'Select a project first'}
-                                onClick={() => onAddCard(m.content)}
+                                onClick={() => onToolEvent({ type: 'card', text: m.content })}
                             >
                                 + Add to board
                             </button>

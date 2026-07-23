@@ -9,8 +9,14 @@ export const dynamic = 'force-dynamic';
 /** Default model for the research assistant. */
 const RESEARCH_CHAT_MODEL = 'claude-opus-4-8';
 
-/** Fully-qualified name of the in-process card tool (mcp__<server>__<tool>). */
+/** Fully-qualified names of the in-process tools (mcp__<server>__<tool>). */
 const ADD_CARD_TOOL = 'mcp__research__add_research_card';
+const CREATE_ARTICLE_TOOL = 'mcp__research__create_article';
+
+/** The eight World Bible entity types. */
+const ENTITY_TYPES = [
+    'character', 'location', 'faction', 'artifact', 'lore', 'magic', 'religion', 'species',
+] as const;
 
 interface ChatMessage {
     role: 'user' | 'assistant';
@@ -30,7 +36,7 @@ interface ChatMessage {
  * the handler emits a `card` event on this stream and the client creates it.
  */
 export async function POST(request: Request) {
-    let body: { messages?: ChatMessage[]; board?: string };
+    let body: { messages?: ChatMessage[]; board?: string; world?: string };
     try {
         body = await request.json();
     } catch {
@@ -39,20 +45,28 @@ export async function POST(request: Request) {
 
     const messages = Array.isArray(body.messages) ? body.messages : [];
     const board = typeof body.board === 'string' ? body.board : '';
+    const world = typeof body.world === 'string' ? body.world : '';
     if (messages.length === 0) {
         return NextResponse.json({ error: 'No messages provided' }, { status: 400 });
     }
 
-    const systemPrompt =
-        'You are a research assistant embedded in LoreCanvas, a writing app for ' +
-        'novelists and worldbuilders. Help the user develop, organize, and ' +
-        'interrogate their research. Be concise and concrete. ' +
-        'You have an add_research_card tool that places a note on the user\'s board. ' +
-        'ONLY call it when the user explicitly asks you to save or add something ' +
-        '(e.g. "add that to my board", "save these ideas"). Never add cards unprompted. ' +
-        (board.trim()
-            ? `The user's current research board contains:\n${board}`
-            : "The user's research board is currently empty.");
+    const systemPrompt = [
+        'You are a research and worldbuilding assistant embedded in LoreCanvas, a writing app for novelists and worldbuilders.',
+        'Help the user develop, organize, and build their world. Be concise and concrete.',
+        '',
+        'TOOLS — only call a tool when the user explicitly asks you to create, add, save, or organize something. Never act unprompted.',
+        '- add_research_card: place a short note on the research board.',
+        '- create_article: create a World Bible article. Its type must be one of: ' + ENTITY_TYPES.join(', ') + '.',
+        '  Give it a name, a one- or two-sentence description, and a body of titled sections (rich, multi-section prose).',
+        '  Optionally pass `category` (an existing folder name from the World Bible below) to file it there; otherwise it is filed by type.',
+        '',
+        'BE PROACTIVE WITH SUGGESTIONS: as the user describes their world, suggest articles or categories worth creating',
+        '(e.g. "Sounds like you need an article for the Crimson King — want me to make it?"). But only call a tool after they agree.',
+        '',
+        board.trim() ? `Research board:\n${board}` : 'The research board is empty.',
+        '',
+        world.trim() ? `World Bible (folders and articles):\n${world}` : 'The World Bible is empty.',
+    ].join('\n');
 
     // Render the conversation as a single prompt string. A literal "User:" /
     // "Assistant:" line in board or user text could visually spoof a turn
@@ -78,12 +92,14 @@ export async function POST(request: Request) {
     const encoder = new TextEncoder();
     const stream = new ReadableStream<Uint8Array>({
         async start(controller) {
-            const send = (event: { type: 'text' | 'card'; text: string }) => {
+            // Emit one NDJSON event on the response stream. The tool handlers
+            // below run server-side but the board/World Bible live in the
+            // browser, so each tool forwards its parameters as an event and the
+            // client applies it to the store.
+            const send = (event: Record<string, unknown>) => {
                 controller.enqueue(encoder.encode(JSON.stringify(event) + '\n'));
             };
 
-            // In-process tool: when the model calls it, emit a `card` event on
-            // this response stream so the browser can add the note to the board.
             const addCardTool = tool(
                 'add_research_card',
                 "Add a note card to the user's research board. Only use when the user asks to save or add something.",
@@ -93,10 +109,41 @@ export async function POST(request: Request) {
                     return { content: [{ type: 'text', text: 'Added a note card to the board.' }] };
                 },
             );
+
+            const createArticleTool = tool(
+                'create_article',
+                'Create a World Bible article (an entity). Only use when the user asks to create or add an article. Provide rich, multi-section content.',
+                {
+                    name: z.string().describe('The article / entity name'),
+                    type: z.enum(ENTITY_TYPES).describe('The entity type'),
+                    description: z.string().describe('A one- or two-sentence summary'),
+                    sections: z
+                        .array(
+                            z.object({
+                                heading: z.string().optional().describe('Section heading'),
+                                body: z.string().describe('Section prose; blank lines separate paragraphs'),
+                            }),
+                        )
+                        .describe('The article body, as titled sections'),
+                    category: z.string().optional().describe('Existing folder name to file it under (optional)'),
+                },
+                async (args) => {
+                    send({
+                        type: 'article',
+                        name: args.name,
+                        entityType: args.type,
+                        description: args.description,
+                        sections: args.sections,
+                        category: args.category,
+                    });
+                    return { content: [{ type: 'text', text: `Created the "${args.name}" article.` }] };
+                },
+            );
+
             const researchServer = createSdkMcpServer({
                 name: 'research',
                 version: '1.0.0',
-                tools: [addCardTool],
+                tools: [addCardTool, createArticleTool],
             });
 
             try {
@@ -107,7 +154,7 @@ export async function POST(request: Request) {
                         systemPrompt,
                         tools: [], // no built-in file/bash tools
                         mcpServers: { research: researchServer },
-                        allowedTools: [ADD_CARD_TOOL], // auto-approve the card tool (no prompt)
+                        allowedTools: [ADD_CARD_TOOL, CREATE_ARTICLE_TOOL], // auto-approve our tools (no prompt)
                         settingSources: [], // isolation: ignore ~/.claude settings, hooks, MCP, CLAUDE.md
                         permissionMode: 'default',
                         env: childEnv,
