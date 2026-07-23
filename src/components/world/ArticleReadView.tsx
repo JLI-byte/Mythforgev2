@@ -23,7 +23,7 @@ const ENTITY_TYPE_COLORS: Record<EntityType, string> = {
   species: '#27AE60',
 };
 
-interface MentionResult {
+export interface MentionResult {
   sceneId: string;
   documentId: string;
   documentTitle: string;
@@ -37,8 +37,9 @@ interface MentionResult {
  * Scans all scenes in a project for mentions of an entity.
  * Checks both EntityMark spans (data-entity-id) and plain text name matches.
  * Returns up to 50 results sorted by document order.
+ * Exported: the gallery-hero ArticleView reuses this for its Mentions tab.
  */
-function findEntityMentions(
+export function findEntityMentions(
   entityId: string,
   entityName: string,
   projectIds: Set<string>,

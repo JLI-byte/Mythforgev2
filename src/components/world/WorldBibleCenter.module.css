@@ -1,98 +1,169 @@
 .browserContainer {
   width: 100%;
   height: 100%;
-  overflow-y: auto;
-  background: var(--background);
-}
-
-.browserInner {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 40px 32px;
-}
-
-.browserHeader {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin-bottom: 32px;
-}
-
-.browserTitle {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--foreground);
-  margin: 0;
-}
-
-.browserCount {
-  font-size: 0.9rem;
-  color: var(--muted, #888);
-}
-
-.browserHint {
-  font-size: 0.8rem;
-  color: var(--muted, #888);
-  margin-left: auto;
-}
-
-/* --- Expanding column menu (codepen.io/ettrics/pen/ZYqKGb) --- */
-
-.strips {
-  position: relative;
-  height: 100%;
   min-height: 540px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background: var(--background) url("/LoreCanvasbg.webp") center / cover no-repeat fixed;
+}
+
+/* --- Breadcrumb trail --- */
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 16px 20px 12px;
+}
+
+.crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 7px;
+  background: none;
+  color: var(--muted, #888);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.15s, background-color 0.15s;
+}
+.crumb:hover {
+  color: var(--foreground);
+  background: var(--surface);
+}
+.crumbCurrent {
+  color: var(--foreground);
+  font-weight: 700;
+  cursor: default;
+}
+.crumbCurrent:hover {
+  background: none;
+}
+.crumbIcon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+.crumbSep {
+  color: var(--muted, #888);
+  opacity: 0.5;
+  padding: 0 2px;
+}
+
+/* --- Drill level: strips that alternate orientation per depth --- */
+
+/* Persists across level swaps so the zoom clone can cover the transition */
+.levelWrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
-  color: #fff;
+}
+
+.level {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+  padding: 0 20px 20px;
+  /* NO entrance animation: transforms suppress the strips' backdrop-filter
+     while they run, and even an opacity fade turns this container into a
+     backdrop root that blocks blur sampling until it finishes. Either way
+     the frost "pops" in late. The drill split provides the motion instead. */
+}
+.levelVertical {
+  flex-direction: row;   /* strips stand as columns */
+}
+.levelHorizontal {
+  flex-direction: column; /* strips stack as rows */
 }
 
 .strip {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  overflow: hidden;
-  cursor: pointer;
-  will-change: width, left;
-  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.stripContent {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 16px;
   overflow: hidden;
+  color: #fff;
+  cursor: pointer;
+  /* highly frosted white glass body */
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(28px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+    0 10px 38px rgba(0, 0, 0, 0.35);
+  transition: transform 0.25s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.strip:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+    0 16px 44px rgba(0, 0, 0, 0.45);
 }
 
-/* signature skewed sheen that grows on hover */
-.stripContent::before {
+/* Corner pieces — solid charcoal panels resting at top-left and
+   bottom-right. On hover they slide out toward their corners; on release
+   they slide back in. Their shapes are the split-seam half panels,
+   retracted so only a slanted shard shows at each corner. */
+.strip::before,
+.strip::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: #fff;
-  opacity: 0.05;
-  transform-origin: center center;
-  transform: skew(-14deg) scaleY(1) translate(0, 0);
-  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  background: #1f1f1e;
   pointer-events: none;
-}
-.strip:not(.stripExpanded):hover .stripContent::before {
-  transform: skew(-14deg) scale(3);
-  opacity: 0.12;
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.stripTitle {
+/* Column levels — pieces lean with the vertical seam */
+.levelVertical .strip::before {
+  clip-path: polygon(0 0, 58% 0, 42% 100%, 0 100%);
+  transform: translate(-33%, -11%);
+}
+.levelVertical .strip::after {
+  clip-path: polygon(58% 0, 100% 0, 100% 100%, 42% 100%);
+  transform: translate(33%, 11%);
+}
+.levelVertical .strip:hover::before { transform: translate(-78%, -27%); }
+.levelVertical .strip:hover::after  { transform: translate(78%, 27%); }
+
+/* Row levels — the same pieces rotated 90° */
+.levelHorizontal .strip::before {
+  clip-path: polygon(0 0, 100% 0, 100% 42%, 0 58%);
+  transform: translate(-11%, -33%);
+}
+.levelHorizontal .strip::after {
+  clip-path: polygon(0 58%, 100% 42%, 100% 100%, 0 100%);
+  transform: translate(11%, 33%);
+}
+.levelHorizontal .strip:hover::before { transform: translate(-27%, -78%); }
+.levelHorizontal .strip:hover::after  { transform: translate(27%, 78%); }
+
+.stripBody {
   position: relative;
   z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  padding: 12px;
+  padding: 16px;
   text-align: center;
-  transition: opacity 0.4s ease, transform 0.4s ease;
 }
 .stripIcon {
   font-size: 2rem;
@@ -105,363 +176,412 @@
 }
 .stripMeta {
   font-size: 0.72rem;
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
-.stripExpanded {
-  z-index: 3;
-  cursor: default;
+/* Drill transition, beat 1 — the clone is the card's frosted glass body
+   with NO corner pieces (they slid out on hover), so the close beat's
+   returning panels are the only set. Source strip hides underneath it. */
+.zoomClone {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  overflow: hidden;
+  color: #fff;
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(28px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+    0 26px 80px rgba(0, 0, 0, 0.55);
+  transform-origin: 0 0;
+  will-change: transform;
+  pointer-events: none;
+  transition: transform 0.45s cubic-bezier(0.23, 1, 0.32, 1);
 }
-.stripExpanded .stripTitle {
-  opacity: 0;
-  transform: scale(0.6);
+
+/* Beat 2 — the charcoal corner pieces sweep back in from top-left and
+   bottom-right and close on the seam, sealing the card solid before the
+   crack. Same material as the resting corner pieces. */
+.zoomSheen {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: #1f1f1e;
+  will-change: transform;
   pointer-events: none;
 }
 
-/* revealed content inside the expanded strip */
-.stripInner {
+/* Vertical seam (column levels) — steep skewed line through center.
+   Duration/easing match the clone's grow so both land together. */
+.sheenLeftV {
+  clip-path: polygon(0 0, 58% 0, 42% 100%, 0 100%);
+  animation: lc-sheen-left-v 0.45s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.sheenRightV {
+  clip-path: polygon(58% 0, 100% 0, 100% 100%, 42% 100%);
+  animation: lc-sheen-right-v 0.45s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+@keyframes lc-sheen-left-v {
+  from { transform: translate(-75%, -25%); }
+  to   { transform: none; }
+}
+@keyframes lc-sheen-right-v {
+  from { transform: translate(75%, 25%); }
+  to   { transform: none; }
+}
+
+/* Horizontal seam (row levels) — the same sweep rotated 90° */
+.sheenTopH {
+  clip-path: polygon(0 0, 100% 0, 100% 42%, 0 58%);
+  animation: lc-sheen-top-h 0.45s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.sheenBottomH {
+  clip-path: polygon(0 58%, 100% 42%, 100% 100%, 0 100%);
+  animation: lc-sheen-bottom-h 0.45s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+@keyframes lc-sheen-top-h {
+  from { transform: translate(-25%, -75%); }
+  to   { transform: none; }
+}
+@keyframes lc-sheen-bottom-h {
+  from { transform: translate(25%, 75%); }
+  to   { transform: none; }
+}
+
+/* Beat 3 — the sealed charcoal card cracks along the seam; each solid
+   half retreats toward the corner its piece came from, revealing the
+   level behind through the widening crack. */
+.zoomHalf {
   position: absolute;
   inset: 0;
-  z-index: 5;
-  padding: 40px clamp(24px, 5vw, 64px);
-  overflow-y: auto;
-  opacity: 0;
-  transform: scale(0.96);
-  animation: lc-strip-reveal 0.5s 0.15s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-}
-@keyframes lc-strip-reveal {
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  z-index: 10;
+  background: #1f1f1e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  will-change: transform, opacity;
+  pointer-events: none;
 }
 
-.stripClose {
-  position: absolute;
-  top: 18px;
-  right: 22px;
-  z-index: 6;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(0, 0, 0, 0.28);
-  color: #fff;
-  font-size: 1.4rem;
-  line-height: 1;
-  cursor: pointer;
-  transition: background 0.2s ease;
+/* Vertical seam halves — part sideways */
+.halfLeftV {
+  clip-path: polygon(0 0, 58% 0, 42% 100%, 0 100%);
+  animation: lc-half-left-v 0.55s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
 }
-.stripClose:hover {
-  background: rgba(0, 0, 0, 0.5);
+.halfRightV {
+  clip-path: polygon(58% 0, 100% 0, 100% 100%, 42% 100%);
+  animation: lc-half-right-v 0.55s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+}
+@keyframes lc-half-left-v {
+  0%   { transform: none; opacity: 1; }
+  45%  { opacity: 1; }
+  100% { transform: translate(-80%, -30%) rotate(-4deg); opacity: 0; }
+}
+@keyframes lc-half-right-v {
+  0%   { transform: none; opacity: 1; }
+  45%  { opacity: 1; }
+  100% { transform: translate(80%, 30%) rotate(-4deg); opacity: 0; }
 }
 
-.stripInnerHead {
+/* Horizontal seam halves — part vertically (same motion rotated 90°) */
+.halfTopH {
+  clip-path: polygon(0 0, 100% 0, 100% 42%, 0 58%);
+  animation: lc-half-top-h 0.55s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+}
+.halfBottomH {
+  clip-path: polygon(0 58%, 100% 42%, 100% 100%, 0 100%);
+  animation: lc-half-bottom-h 0.55s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+}
+@keyframes lc-half-top-h {
+  0%   { transform: none; opacity: 1; }
+  45%  { opacity: 1; }
+  100% { transform: translate(-30%, -80%) rotate(-4deg); opacity: 0; }
+}
+@keyframes lc-half-bottom-h {
+  0%   { transform: none; opacity: 1; }
+  45%  { opacity: 1; }
+  100% { transform: translate(30%, 80%) rotate(-4deg); opacity: 0; }
+}
+
+/* "New Folder" card — a create affordance styled as a muted dashed strip.
+   No charcoal corner pieces (it never drills/splits). */
+.stripNew {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+  box-shadow: none;
+  color: rgba(255, 255, 255, 0.82);
+}
+.stripNew::before,
+.stripNew::after {
+  display: none;
+}
+.stripNew:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.42);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+}
+/* while entering a name, widen and settle */
+.stripNewActive {
+  flex: 2.4 1 0;
+  cursor: default;
+}
+.stripNewActive:hover {
+  transform: none;
+  box-shadow: none;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.newFolderForm {
+  position: relative;
+  z-index: 2;
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-.stripInnerHead .stripIcon {
-  font-size: 1.6rem;
-}
-
-.stripEmpty {
-  opacity: 0.85;
-  font-size: 0.95rem;
-}
-
-/* --- Inline "new article" creator (inside an expanded category) --- */
-
-.addArticleBtn {
-  margin-top: 16px;
-  width: 100%;
-  padding: 14px;
-  border: 2px dashed rgba(255, 255, 255, 0.4);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-}
-.addArticleBtn:hover {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.7);
-}
-
-.newArticleForm {
-  margin-top: 16px;
-  display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 8px;
-  align-items: center;
-  padding: 14px;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.18);
+  width: 100%;
+  max-width: 260px;
+  padding: 18px;
 }
-.newArticleInput {
-  flex: 1 1 200px;
-  min-width: 160px;
-  padding: 10px 12px;
+.newFolderInput {
+  padding: 9px 12px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.94);
   color: #1a1a1a;
   font-size: 0.9rem;
 }
-.newArticleInput:focus {
-  outline: 2px solid rgba(255, 255, 255, 0.6);
+.newFolderInput:focus {
+  outline: 2px solid var(--accent);
 }
-.newArticleSelect {
-  padding: 10px 12px;
+.newFolderSelect {
+  padding: 9px 12px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.94);
   color: #1a1a1a;
   font-size: 0.9rem;
   cursor: pointer;
 }
-.newArticleCreate {
-  padding: 10px 18px;
+.newFolderCreate {
+  padding: 9px 14px;
   border-radius: 8px;
   border: none;
-  background: #fff;
-  color: #1a1a1a;
+  background: var(--accent);
+  color: #fff;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   cursor: pointer;
 }
-.newArticleCreate:disabled {
+.newFolderCreate:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-.newArticleCancel {
-  padding: 10px 14px;
-  border-radius: 8px;
+.newFolderCancel {
+  padding: 6px;
   border: none;
   background: transparent;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.85rem;
   cursor: pointer;
 }
-.newArticleCancel:hover {
+.newFolderCancel:hover {
   color: #fff;
   text-decoration: underline;
 }
 
-/* --- LEVEL 1: Category Grid --- */
+/* --- Leaf article layer --- */
 
-.categoryGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
-}
-
-.categoryCard {
+.leaf {
   position: relative;
-  height: 160px;
-  border-radius: 14px;
-  overflow: hidden;
-  cursor: pointer;
-  background-size: cover;
-  background-position: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  border: 1px solid rgba(var(--overlay-rgb),0.06);
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 20px 24px;
 }
 
-.categoryCard:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.4);
-}
 
-.categoryOverlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(0,0,0,0.85) 0%,
-    rgba(0,0,0,0.3) 60%,
-    rgba(0,0,0,0.05) 100%
-  );
-}
-
-.categoryContent {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 20px 24px;
-  gap: 4px;
-}
-
-.categoryIcon {
-  font-size: 1.8rem;
-  margin-bottom: 4px;
-  line-height: 1;
-}
-
-.categoryLabel {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0;
-  line-height: 1.2;
-}
-
-.categoryDescription {
-  font-size: 0.85rem;
-  color: rgba(var(--overlay-rgb),0.7);
-  margin: 0;
-  line-height: 1.4;
-}
-
-.categoryCount {
-  font-size: 0.78rem;
-  color: rgba(var(--overlay-rgb),0.5);
-  font-weight: 500;
-  margin-top: 2px;
-}
-
-.addCategoryCard {
-  height: 160px;
-  border-radius: 14px;
-  border: 2px dashed var(--border);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  cursor: default;
-  opacity: 0.5;
-  transition: opacity 0.2s;
-}
-
-.addCategoryCard:hover {
-  opacity: 0.7;
-}
-
-.addCategoryIcon {
-  font-size: 2rem;
-  color: var(--muted, #888);
-  line-height: 1;
-}
-
-.addCategoryLabel {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--muted, #888);
-}
-
-.addCategoryHint {
-  font-size: 0.8rem;
-  color: var(--muted, #888);
-}
-
-/* --- LEVEL 2: Entity Grid --- */
-
-.backBtn {
-  background: none;
-  border: none;
-  color: var(--muted, #888);
-  font-size: 0.9rem;
-  cursor: pointer;
-  padding: 0;
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: color 0.15s;
-}
-
-.backBtn:hover {
-  color: var(--foreground);
-}
-
-.levelHeader {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.levelIcon {
-  font-size: 1.6rem;
-}
-
-.levelTitle {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: var(--foreground);
-  margin: 0;
-}
-
+/* --- Article cards: frosted-glass preview (codepen.io/lessthanthree) ---
+   Full-bleed art; a masked backdrop-filter frosts only the bottom, where the
+   category / title / description sit. Card lifts on hover; art & chevron scale. */
 .entityGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
 }
 
-.entityCard {
+.previewCard {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  border-radius: 16px;
+  padding: 16px;
+  display: grid;
+  justify-content: start;
+  align-content: end;
+  overflow: hidden;
+  cursor: pointer;
+  background: #2a2a30;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  transition: transform 0.25s ease-in-out, box-shadow 0.25s ease;
+}
+.previewCard:hover {
+  transform: scale(1.03);
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.5);
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+  transition: transform 0.5s ease-in-out;
+}
+.previewCard:hover .backdrop {
+  transform: scale(1.1);
+}
+.backdropIcon {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px;
-  cursor: pointer;
-  transition: border-color 0.15s, background-color 0.15s;
+  justify-content: center;
+  font-size: 3.4rem;
+  opacity: 0.45;
+  pointer-events: none;
 }
 
-.entityCard:hover {
-  background: var(--background);
-  border-color: var(--accent);
+/* the bottom frost — masked so the top of the art stays clear */
+.previewCard::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  z-index: 1;
+  pointer-events: none;
+  backdrop-filter: blur(16px) saturate(1.5) brightness(0.85);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5) brightness(0.85);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.1) 40%, rgba(0, 0, 0, 0.5) 55%, black 75%);
+  mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.1) 40%, rgba(0, 0, 0, 0.5) 55%, black 75%);
 }
 
-.cardThumb {
-  width: 48px;
-  height: 48px;
-  object-fit: cover;
-  border-radius: 6px;
-  flex-shrink: 0;
-}
-
-.cardColorBlock {
-  width: 48px;
-  height: 48px;
-  border-radius: 6px;
-  flex-shrink: 0;
-  opacity: 0.85;
-}
-
-.cardContent {
-  display: flex;
-  flex-direction: column;
+.previewContent {
+  position: relative;
+  z-index: 2;
+  display: grid;
   gap: 4px;
-  min-width: 0;
 }
-
-.cardName {
+.previewCategory {
+  text-transform: uppercase;
   font-weight: 600;
-  font-size: 0.95rem;
-  color: var(--foreground);
-  white-space: nowrap;
+  letter-spacing: 0.1em;
+  font-size: 0.68rem;
+  opacity: 0.55;
+  color: #fff;
+}
+.previewTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+.previewDesc {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.85);
+}
+.previewDesc p {
+  margin: 0;
   overflow: hidden;
+  white-space: nowrap;
   text-overflow: ellipsis;
 }
-
-.articleBadge {
-  font-size: 0.75rem;
-  color: var(--accent);
-  font-weight: 500;
+.previewArrow {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  transition: transform 0.25s ease-in-out;
+}
+.previewCard:hover .previewArrow {
+  transform: scale(1.4);
+}
+.previewArrow svg {
+  width: 20px;
+  height: 20px;
+  fill: #e3e3e3;
 }
 
-.noArticleBadge {
-  font-size: 0.75rem;
-  color: var(--muted, #888);
+/* "New Article" card — ghost variant of the preview card (dashed, no art) */
+.previewNew {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  box-shadow: none;
+  color: rgba(255, 255, 255, 0.72);
+}
+.previewNew::after {
+  display: none;
+}
+.previewNew:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.42);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+}
+.previewNewInner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.previewNewPlus {
+  font-size: 2rem;
+  line-height: 1;
+}
+.previewNewActive {
+  cursor: default;
+  align-items: stretch;
+  aspect-ratio: auto;
+  min-height: 180px;
+  background: rgba(255, 255, 255, 0.05);
+}
+.previewNewActive:hover {
+  transform: none;
+  box-shadow: none;
+  background: rgba(255, 255, 255, 0.05);
+}
+.previewNewForm {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+.previewNewBtns {
+  display: flex;
+  gap: 8px;
 }
 
 /* --- Shared --- */
@@ -481,13 +601,3 @@
   font-weight: 600;
   margin: 0;
 }
-
-.emptyHint {
-  font-size: 0.85rem;
-  color: var(--muted, #888);
-  margin: 0;
-}
-
-.subfolderSection { margin-top: 18px; }
-.subfolderTitle { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; font-weight: 700; margin: 0 0 8px; }
-.subfolderCount { font-size: 0.7rem; opacity: 0.75; background: rgba(0,0,0,0.25); border-radius: 999px; padding: 1px 8px; }
