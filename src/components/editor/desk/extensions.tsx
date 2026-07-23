@@ -1,13 +1,22 @@
 "use client";
 
-import { Extension, Node as TiptapNode, mergeAttributes } from '@tiptap/core';
-import { NodeViewWrapper } from '@tiptap/react';
+import { Extension, Node as TiptapNode, mergeAttributes, CommandProps } from '@tiptap/core';
+import { NodeViewWrapper, type NodeViewProps } from '@tiptap/react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from '../WritingDesk.module.css';
 
 // ============================================================
 // CUSTOM TIPTAP EXTENSIONS
 // ============================================================
+
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    fontSize: {
+      setFontSize: (fontSize: string) => ReturnType;
+      unsetFontSize: () => ReturnType;
+    };
+  }
+}
 
 export const FontSize = Extension.create({
   name: 'fontSize',
@@ -24,7 +33,7 @@ export const FontSize = Extension.create({
           fontSize: {
             default: null,
             parseHTML: (element: HTMLElement) => element.style.fontSize?.replace(/['"]+/g, ''),
-            renderHTML: (attributes: Record<string, any>) => {
+            renderHTML: (attributes: Record<string, string | null>) => {
               if (!attributes.fontSize) return {};
               return { style: `font-size: ${attributes.fontSize}` };
             },
@@ -35,13 +44,13 @@ export const FontSize = Extension.create({
   },
   addCommands() {
     return {
-      setFontSize: (fontSize: string) => ({ chain }: any) => {
+      setFontSize: (fontSize: string) => ({ chain }: CommandProps) => {
         return chain().setMark('textStyle', { fontSize }).run();
       },
-      unsetFontSize: () => ({ chain }: any) => {
+      unsetFontSize: () => ({ chain }: CommandProps) => {
         return chain().setMark('textStyle', { fontSize: null }).run();
       },
-    } as any;
+    };
   },
 });
 
@@ -85,8 +94,7 @@ export const SceneSeparator = TiptapNode.create({
   },
 });
 
-export const ChapterTitleNodeView = (props: any) => {
-  const updateProject = useWorkspaceStore(s => s.updateProject);
+export const ChapterTitleNodeView = (props: NodeViewProps) => {
   const updateDocument = useWorkspaceStore(s => s.updateDocument);
   const { node, updateAttributes } = props;
 
@@ -113,7 +121,7 @@ export const ChapterTitleNodeView = (props: any) => {
   );
 };
 
-export const SceneTitleNodeView = (props: any) => {
+export const SceneTitleNodeView = (props: NodeViewProps) => {
   const updateScene = useWorkspaceStore(s => s.updateScene);
   const { node, updateAttributes } = props;
 

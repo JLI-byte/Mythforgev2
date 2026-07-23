@@ -15,6 +15,7 @@ import { ResearchRenderer } from './ResearchRenderer';
 import { ProgressRenderer } from './ProgressRenderer';
 import { RelationshipMapRenderer } from './RelationshipMapRenderer';
 import { DraftNavRenderer } from './DraftNavRenderer';
+import { BeatCardRenderer } from './BeatCardRenderer';
 import { UntypedWidgetRenderer } from './UntypedWidgetRenderer';
 
 // ============================================================
@@ -65,6 +66,7 @@ export const WidgetRenderer = React.memo(function WidgetRenderer({
     case 'progress':    return <ProgressRenderer content={content} onChange={handleChange} />;
     case 'relMap':      return <RelationshipMapRenderer content={content} onChange={handleChange} />;
     case 'draftNav':    return <DraftNavRenderer content={content} onChange={handleChange} />;
+    case 'beatCard':    return <BeatCardRenderer content={content} onChange={handleChange} />;
     case 'untyped':     return <UntypedWidgetRenderer />;
     default:            return null;
   }

@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useEffect } from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useRef, useEffect, useState } from 'react';
+import { useEditor, EditorContent, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
@@ -12,13 +12,14 @@ import Color from '@tiptap/extension-color';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { useWritingSession } from '@/lib/useWritingSession';
 import { FontSize } from './extensions';
+import { GlassDropdown } from './GlassDropdown';
 import styles from '../WritingDesk.module.css';
 
 export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
   sceneId: string;
   content: string;
   onUpdate: (html: string, wordCount: number) => void;
-  onFocus: (editor: any) => void;
+  onFocus: (editor: Editor) => void;
 }) {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedContentRef = useRef<string>(content || '');
@@ -68,6 +69,17 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
     };
   }, []);
 
+  // TipTap v3's useEditor no longer re-renders on transactions, so toolbar
+  // state (dropdown values, active format buttons) would go stale. Re-render
+  // on every transaction to keep the toolbar live.
+  const [, forceRender] = useState(0);
+  useEffect(() => {
+    if (!editor) return;
+    const rerender = () => forceRender(x => x + 1);
+    editor.on('transaction', rerender);
+    return () => { editor.off('transaction', rerender); };
+  }, [editor]);
+
   useEffect(() => {
     if (editor) {
       lastSavedContentRef.current = editor.getHTML();
@@ -82,51 +94,51 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
     <div className={styles.deskEditorWrapper}>
       <div className={styles.deskEditorToolbar}>
         <div className={styles.deskToolbarGroup}>
-          <select
-            className={styles.deskToolbarDropdown}
+          <GlassDropdown
+            title="Block style"
+            options={[
+              { value: 'p', label: 'Paragraph' },
+              { value: 'h1', label: 'Heading 1' },
+              { value: 'h2', label: 'Heading 2' },
+              { value: 'h3', label: 'Heading 3' },
+              { value: 'blockquote', label: 'Quote' },
+            ]}
             value={
               editor.isActive('heading', { level: 1 }) ? 'h1' :
               editor.isActive('heading', { level: 2 }) ? 'h2' :
               editor.isActive('heading', { level: 3 }) ? 'h3' :
               editor.isActive('blockquote') ? 'blockquote' : 'p'
             }
-            onChange={e => {
-              const val = e.target.value;
+            onChange={val => {
               if (val === 'p') editor.chain().focus().setParagraph().run();
               if (val === 'h1') editor.chain().focus().toggleHeading({ level: 1 }).run();
               if (val === 'h2') editor.chain().focus().toggleHeading({ level: 2 }).run();
               if (val === 'h3') editor.chain().focus().toggleHeading({ level: 3 }).run();
               if (val === 'blockquote') editor.chain().focus().toggleBlockquote().run();
             }}
-          >
-            <option value="p">Paragraph</option>
-            <option value="h1">Heading 1</option>
-            <option value="h2">Heading 2</option>
-            <option value="h3">Heading 3</option>
-            <option value="blockquote">Quote</option>
-          </select>
-          <select
-            className={styles.deskToolbarDropdown}
-            style={{ width: '110px' }}
-            onChange={e => editor.chain().focus().setFontFamily(e.target.value).run()}
+          />
+          <GlassDropdown
+            title="Font family"
+            width={110}
+            options={[
+              { value: 'Inter', label: 'Sans (Inter)' },
+              { value: 'Georgia', label: 'Serif (Georgia)' },
+              { value: "'Times New Roman'", label: 'Serif (TNR)' },
+              { value: 'Arial', label: 'Sans (Arial)' },
+              { value: "'Courier New'", label: 'Mono (Courier)' },
+            ]}
             value={editor.getAttributes('textStyle').fontFamily || 'Inter'}
-          >
-            <option value="Inter">Sans (Inter)</option>
-            <option value="Georgia">Serif (Georgia)</option>
-            <option value="'Times New Roman'">Serif (TNR)</option>
-            <option value="Arial">Sans (Arial)</option>
-            <option value="'Courier New'">Mono (Courier)</option>
-          </select>
-          <select
-            className={styles.deskToolbarDropdown}
-            style={{ width: '60px' }}
-            onChange={e => (editor.commands as any).setFontSize(e.target.value)}
-            value={editor.getAttributes('textStyle').fontSize || '16px'}
-          >
-            {['12px', '14px', '16px', '18px', '20px', '24px', '32px', '40px'].map(size => (
-              <option key={size} value={size}>{size.replace('px', '')}</option>
+            onChange={val => editor.chain().focus().setFontFamily(val).run()}
+          />
+          <GlassDropdown
+            title="Font size"
+            width={60}
+            options={['12px', '14px', '16px', '18px', '20px', '24px', '32px', '40px'].map(size => (
+              { value: size, label: size.replace('px', '') }
             ))}
-          </select>
+            value={editor.getAttributes('textStyle').fontSize || '16px'}
+            onChange={val => editor.commands.setFontSize(val)}
+          />
         </div>
         <span className={styles.deskFmtSep} />
         <div className={styles.deskToolbarGroup}>
