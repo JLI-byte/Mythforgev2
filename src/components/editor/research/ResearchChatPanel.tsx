@@ -75,13 +75,37 @@ export function ResearchChatPanel({ scopeKey, getBoardContext, onAddCard }: Rese
                 appendToAssistant(`[${info.error ?? 'Request failed'}]`);
                 return;
             }
+            // Response is newline-delimited JSON: {type:'text'|'card', text}.
+            const handleEvent = (line: string) => {
+                const trimmed = line.trim();
+                if (!trimmed) return;
+                let evt: { type?: string; text?: string };
+                try {
+                    evt = JSON.parse(trimmed);
+                } catch {
+                    return; // ignore malformed line
+                }
+                if (evt.type === 'text' && typeof evt.text === 'string') {
+                    appendToAssistant(evt.text);
+                } else if (evt.type === 'card' && typeof evt.text === 'string') {
+                    onAddCard(evt.text);
+                }
+            };
+
             const reader = res.body.getReader();
             const decoder = new TextDecoder();
+            let buffer = '';
             for (;;) {
                 const { done, value } = await reader.read();
                 if (done) break;
-                appendToAssistant(decoder.decode(value, { stream: true }));
+                buffer += decoder.decode(value, { stream: true });
+                let nl: number;
+                while ((nl = buffer.indexOf('\n')) >= 0) {
+                    handleEvent(buffer.slice(0, nl));
+                    buffer = buffer.slice(nl + 1);
+                }
             }
+            if (buffer) handleEvent(buffer);
         } catch (err) {
             if (controller.signal.aborted) return; // cancelled by unmount — no error note
             const detail = err instanceof Error ? err.message : 'network error';
