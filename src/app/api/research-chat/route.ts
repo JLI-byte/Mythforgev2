@@ -28,14 +28,16 @@ interface ChatMessage {
 /**
  * Research AI chat — LOCAL ONLY. Drives the user's signed-in Claude Code via
  * the Agent SDK, so replies run on their Max subscription. Built-in file/bash
- * tools are disabled (`tools: []`); the only capability the assistant has is an
- * in-process `add_research_card` tool that places a note on the user's board.
+ * tools are disabled (`tools: []`); the assistant's only capabilities are the
+ * in-process tools add_research_card, create_article, create_category, and
+ * move_article.
  *
- * The response is newline-delimited JSON (NDJSON). Each line is one of:
- *   { "type": "text", "text": "..." }   — a chunk of the reply
- *   { "type": "card", "text": "..." }   — the model asked to add a board card
- * The card tool runs server-side here, but the board lives in the browser, so
- * the handler emits a `card` event on this stream and the client creates it.
+ * The response is newline-delimited JSON (NDJSON). Each line is a text chunk
+ * ({type:'text',text}) or a tool event the client applies to the store:
+ * {type:'card'}, {type:'article'}, {type:'category'}, or {type:'move'}. The
+ * tools run server-side here, but the board and World Bible live in the
+ * browser, so each tool forwards its parameters as an event and the client
+ * performs the mutation.
  */
 export async function POST(request: Request) {
     let body: { messages?: ChatMessage[]; board?: string; world?: string };

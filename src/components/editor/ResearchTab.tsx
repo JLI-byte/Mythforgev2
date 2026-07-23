@@ -44,11 +44,14 @@ export default function ResearchTab() {
     return { board, world };
   }, [scopeKey]);
 
-  const handleToolEvent = useCallback((evt: ToolEvent) => {
+  // Apply an AI action to the store. Returns a warning string when the action
+  // can't be applied (unresolved name, no project, etc.) so the chat can tell
+  // the user honestly instead of the model's optimistic "done" standing alone.
+  const handleToolEvent = useCallback((evt: ToolEvent): string | void => {
     const s = useWorkspaceStore.getState();
 
     if (evt.type === 'card') {
-      if (!scopeKey) return;
+      if (!scopeKey) return 'No active board to add the note to.';
       const current = s.researchStates[scopeKey]?.widgets ?? [];
       s.updateResearchState(scopeKey, {
         widgets: [...current, makeNoteCard(evt.text, current.length)],
@@ -57,7 +60,7 @@ export default function ResearchTab() {
     }
 
     const project = s.projects.find(p => p.id === s.activeProjectId) ?? null;
-    if (!project) return; // articles/categories need a project's world
+    if (!project) return 'No active project — open one to build its world.';
     const worldKey = worldKeyForProject(project);
     const worldId = worldKey === STANDALONE_KEY ? undefined : worldKey;
     const layout = getWorldBibleConfig(s.worldBibles, worldKey).layout;
@@ -80,17 +83,25 @@ export default function ResearchTab() {
     }
 
     if (evt.type === 'category') {
+      if (resolveFolderIdByName(layout.roots, evt.name)) {
+        return `A category named "${evt.name}" already exists — skipped.`;
+      }
       const parentId = resolveFolderIdByName(layout.roots, evt.parent);
       const newRoot = makeCategoryRoot(evt.name, evt.icon, parentId);
       s.setWorldBibleLayout(worldKey, { roots: [...layout.roots, newRoot] });
+      if (evt.parent && !parentId) {
+        return `Created "${evt.name}" at the top level — no parent category named "${evt.parent}".`;
+      }
       return;
     }
 
     if (evt.type === 'move') {
       const worldEntities = s.entities.filter(e => worldKeyForEntity(e) === worldKey);
       const entity = findEntityByName(worldEntities, evt.article);
+      if (!entity) return `Couldn't find an article named "${evt.article}".`;
       const folderId = resolveFolderIdByName(layout.roots, evt.category);
-      if (entity && folderId) s.updateEntity(entity.id, { categoryId: folderId });
+      if (!folderId) return `Couldn't find a category named "${evt.category}".`;
+      s.updateEntity(entity.id, { categoryId: folderId });
     }
   }, [scopeKey]);
 

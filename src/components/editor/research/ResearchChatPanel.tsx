@@ -27,8 +27,9 @@ interface ResearchChatPanelProps {
     scopeKey: string | null;
     /** Reads the current board + world structure as text at send time. */
     getContext: () => { board: string; world: string };
-    /** Apply an AI action (add card, create article/category, move) to the store. */
-    onToolEvent: (event: ToolEvent) => void;
+    /** Apply an AI action to the store. Returns a warning string when the action
+     *  could not be applied (e.g. an unresolved name), so the chat can say so. */
+    onToolEvent: (event: ToolEvent) => string | void;
 }
 
 export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: ResearchChatPanelProps) {
@@ -103,7 +104,10 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
                 if (evt.type === 'text' && typeof evt.text === 'string') {
                     appendToAssistant(evt.text);
                 } else if (evt.type) {
-                    onToolEvent(evt as ToolEvent);
+                    // A tool event succeeded or returned a warning the model can't
+                    // know (name resolution happens client-side) — surface it.
+                    const warning = onToolEvent(evt as ToolEvent);
+                    if (warning) appendToAssistant(`\n\n⚠️ ${warning}`);
                 }
             };
 
