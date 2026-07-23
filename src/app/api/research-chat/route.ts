@@ -41,7 +41,10 @@ export async function POST(request: Request) {
             ? `The user's current research board contains:\n${board}`
             : "The user's research board is currently empty.");
 
-    // Render the conversation as a single prompt string.
+    // Render the conversation as a single prompt string. A literal "User:" /
+    // "Assistant:" line in board or user text could visually spoof a turn
+    // boundary, but with tools disabled the worst case is a mangled reply —
+    // accepted tradeoff for Phase 1 over the SDK's streaming-input message form.
     const prompt = messages
         .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
         .join('\n\n');
@@ -74,20 +77,45 @@ export async function POST(request: Request) {
                         env: childEnv,
                     },
                 });
+                let gotText = false;
                 for await (const message of q) {
                     if (message.type === 'assistant') {
                         // The SDK wraps the API message: text lives at message.message.content.
                         const wrapped = message as {
+                            error?: string;
                             message?: { content?: Array<{ type?: string; text?: string }> };
                             content?: Array<{ type?: string; text?: string }>;
                         };
+                        // Some failures (auth, billing, rate limit) arrive as data on the
+                        // assistant message rather than a thrown error — surface them.
+                        if (wrapped.error) {
+                            controller.enqueue(encoder.encode(`\n\n[Claude Code error: ${wrapped.error}.]`));
+                            gotText = true;
+                            continue;
+                        }
                         const blocks = wrapped.message?.content ?? wrapped.content ?? [];
                         for (const block of blocks) {
                             if (block?.type === 'text' && block.text) {
                                 controller.enqueue(encoder.encode(block.text));
+                                gotText = true;
                             }
                         }
+                    } else if (message.type === 'result') {
+                        // The terminal result can also report a non-thrown failure.
+                        const r = message as { is_error?: boolean; subtype?: string; errors?: string[] };
+                        if (r.is_error) {
+                            const detail = r.errors?.join('; ') || r.subtype || 'unknown error';
+                            controller.enqueue(
+                                encoder.encode(
+                                    `\n\n[Claude Code error: ${detail}. Make sure it is installed and signed in.]`,
+                                ),
+                            );
+                            gotText = true;
+                        }
                     }
+                }
+                if (!gotText) {
+                    controller.enqueue(encoder.encode('[No response from Claude Code.]'));
                 }
             } catch (err) {
                 const detail = err instanceof Error ? err.message : 'unknown error';
