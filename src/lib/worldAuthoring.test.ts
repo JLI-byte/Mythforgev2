@@ -3,6 +3,8 @@ import {
     escapeHtml,
     bodyToHtml,
     buildArticleDoc,
+    appendSectionsToDoc,
+    articleDocToText,
     resolveFolderIdByName,
     resolveCategoryId,
     makeCategoryRoot,
@@ -99,5 +101,51 @@ describe('serializeWorld', () => {
     });
     it('reports an empty world clearly', () => {
         expect(serializeWorld([], [])).toContain('no folders or articles');
+    });
+
+    it('includes descriptions inline and full article contents', () => {
+        const roots = [root('places', 'Places')];
+        const doc = buildArticleDoc([{ heading: 'Overview', body: 'A grey city.' }]);
+        const e: Entity = {
+            id: 'v', projectId: 'p', name: 'Veldrath', type: 'location',
+            description: 'A rain-drowned harbor.', articleDoc: doc, createdAt: new Date(), categoryId: 'places',
+        };
+        const out = serializeWorld(roots, [e]);
+        expect(out).toContain('• Veldrath (location) — A rain-drowned harbor.');
+        expect(out).toContain('Article contents:');
+        expect(out).toContain('### Veldrath (location)');
+        expect(out).toContain('Overview');
+        expect(out).toContain('A grey city.');
+    });
+});
+
+describe('articleDocToText', () => {
+    it('round-trips a built article doc back to readable text', () => {
+        const doc = buildArticleDoc([{ heading: 'History', body: 'Founded on salt.\n\nBurned twice.' }]);
+        const text = articleDocToText(doc);
+        expect(text).toContain('History');
+        expect(text).toContain('Founded on salt.');
+        expect(text).toContain('Burned twice.');
+        expect(text).not.toMatch(/<[^>]+>/); // no HTML tags
+    });
+    it('returns empty string for malformed input', () => {
+        expect(articleDocToText('not json')).toBe('');
+        expect(articleDocToText(undefined)).toBe('');
+    });
+});
+
+describe('appendSectionsToDoc', () => {
+    it('adds widgets below existing content', () => {
+        const base = buildArticleDoc([{ heading: 'Overview', body: 'One.' }]);
+        const baseCount = JSON.parse(base)[0].widgets.length;
+        const next = appendSectionsToDoc(base, [{ heading: 'Economy', body: 'Two.' }]);
+        const tabs = JSON.parse(next);
+        expect(tabs[0].widgets.length).toBe(baseCount + 2); // heading + text
+        expect(articleDocToText(next)).toContain('Overview');
+        expect(articleDocToText(next)).toContain('Economy');
+    });
+    it('falls back to a fresh doc when input is unparseable', () => {
+        const doc = appendSectionsToDoc('garbage', [{ heading: 'New', body: 'Fresh.' }]);
+        expect(articleDocToText(doc)).toContain('Fresh.');
     });
 });
