@@ -262,13 +262,36 @@ export interface Entity {
     /** Sprint 71: the folder (WorldBibleRootConfig id in this world's bible)
      *  this article lives in. undefined = Unfiled. Dormant until Phase 3B UI. */
     categoryId?: string;
+    /** Sprint 74: gallery-hero article — header images (url OR color placeholder) */
+    galleryImages?: GalleryImage[];
+    /** Sprint 74: custom prose tabs shown in the article view */
+    articleTabs?: ArticleTab[];
+    /** Sprint 74: freeform tag pills */
+    tags?: string[];
+    /** Sprint 74: hand-picked related entity ids for the Connections tab */
+    relatedIds?: string[];
+}
+
+/** Sprint 74: one image panel in the article's gallery hero */
+export interface GalleryImage {
+    /** base64 data URL or remote URL; when absent, `color` renders a placeholder */
+    url?: string;
+    color?: string;
+    caption: string;
+}
+
+/** Sprint 74: one custom prose tab in the article view (plain text, \n\n = paragraphs) */
+export interface ArticleTab {
+    id: string;
+    label: string;
+    content: string;
 }
 
 // =============================================
 // Writing Desk System Interfaces
 // =============================================
 
-export type DeskWidgetType = 'writingZone' | 'sticky' | 'reference' | 'image' | 'biblePinit' | 'sceneControl' | 'characterState' | 'continuity' | 'structure' | 'research' | 'progress' | 'relMap' | 'draftNav' | 'untyped';
+export type DeskWidgetType = 'writingZone' | 'sticky' | 'reference' | 'image' | 'biblePinit' | 'sceneControl' | 'characterState' | 'continuity' | 'structure' | 'research' | 'progress' | 'relMap' | 'draftNav' | 'beatCard' | 'untyped';
 
 export interface DeskWidget {
   id: string;
@@ -288,6 +311,12 @@ export interface DeskState {
   widgets: DeskWidget[];
   zoom: number;
   canvasOffset: { x: number; y: number };
+  /** Draft Table only: the writing method currently applied to this canvas ('blank' = started without one). */
+  methodId?: string;
+  /** Draft Table only: what's being drafted — filters the method library. */
+  draftFormat?: 'all' | 'story' | 'script' | 'article' | 'game';
+  /** Draft Table only: the specific draft type (novel, backstory, YouTube script…). */
+  draftTypeId?: string;
 }
 
 export interface SceneSnapshot {
@@ -417,7 +446,7 @@ export interface SocialPost {
     timestamp: string;
 }
 
-export type WorkspaceMode = 'worldBible' | 'worldBibleEdit' | 'template' | 'desk' | 'hierarchy' | 'bookshelf';
+export type WorkspaceMode = 'home' | 'worldBible' | 'worldBibleEdit' | 'template' | 'desk' | 'hierarchy' | 'bookshelf' | 'research';
 
 export interface WorkspaceState {
     workspaceMode: WorkspaceMode;
@@ -612,6 +641,19 @@ export interface WorkspaceState {
      */
     deskStates: Record<string, DeskState>;
 
+    /**
+     * Draft Table canvas states per project. Same shape as a desk state, but a
+     * separate blank canvas with no seeded Writing Zone — used for outlining.
+     */
+    draftStates: Record<string, DeskState>;
+
+    /**
+     * Research Table canvas states, keyed by a composite scope key:
+     * `project:<projectId>` for per-project boards, `world:<worldKey>` for
+     * per-shelf boards. Same shape as a desk state.
+     */
+    researchStates: Record<string, DeskState>;
+
     /** Sprint 69: per-shelf World Bible configs, keyed by world id or 'standalone'. */
     worldBibles: Record<WorldKey, WorldBibleConfig>;
     /** Sprint 69: which shelf's bible is currently open (null = derive from active project). */
@@ -795,6 +837,11 @@ export interface WorkspaceState {
 
     /** Writing Desk Actions */
     updateDeskState: (projectId: string, updates: Partial<DeskState>) => void;
+    /** Draft Table Actions — parallel canvas, same shape as the desk. */
+    updateDraftState: (projectId: string, updates: Partial<DeskState>) => void;
+
+    /** Research Table Actions — parallel canvas keyed by composite scope key. */
+    updateResearchState: (scopeKey: string, updates: Partial<DeskState>) => void;
     pinEntityToDesk: (projectId: string, entityId: string) => void;
 
 
@@ -1059,6 +1106,8 @@ export function partializeWorkspace(state: WorkspaceState) {
         entitySnapshots: state.entitySnapshots,
         hierarchyTemplates: state.hierarchyTemplates,
         deskStates: state.deskStates,
+        draftStates: state.draftStates,
+        researchStates: state.researchStates,
         worldBibles: state.worldBibles,
         activeWorldKey: state.activeWorldKey,
     };
@@ -1143,6 +1192,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             isHierarchyScratchMode: false,
             _hasHydrated: false,
             deskStates: {},
+            draftStates: {},
+            researchStates: {},
             writingGoal: { dailyTarget: 0, sessionTarget: 0 },
             sessionWordCount: 0,
             isToolbarVisible: true,
@@ -2041,6 +2092,28 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         deskStates: {
                             ...state.deskStates,
                             [projectId]: { ...current, ...updates }
+                        }
+                    };
+                }),
+
+            updateDraftState: (projectId, updates) =>
+                set((state) => {
+                    const current = state.draftStates[projectId] || { widgets: [], zoom: 1, canvasOffset: { x: 0, y: 0 } };
+                    return {
+                        draftStates: {
+                            ...state.draftStates,
+                            [projectId]: { ...current, ...updates }
+                        }
+                    };
+                }),
+
+            updateResearchState: (scopeKey, updates) =>
+                set((state) => {
+                    const current = state.researchStates[scopeKey] || { widgets: [], zoom: 1, canvasOffset: { x: 0, y: 0 } };
+                    return {
+                        researchStates: {
+                            ...state.researchStates,
+                            [scopeKey]: { ...current, ...updates }
                         }
                     };
                 }),
