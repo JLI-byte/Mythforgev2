@@ -12,6 +12,8 @@ const RESEARCH_CHAT_MODEL = 'claude-opus-4-8';
 /** Fully-qualified names of the in-process tools (mcp__<server>__<tool>). */
 const ADD_CARD_TOOL = 'mcp__research__add_research_card';
 const CREATE_ARTICLE_TOOL = 'mcp__research__create_article';
+const CREATE_CATEGORY_TOOL = 'mcp__research__create_category';
+const MOVE_ARTICLE_TOOL = 'mcp__research__move_article';
 
 /** The eight World Bible entity types. */
 const ENTITY_TYPES = [
@@ -59,6 +61,8 @@ export async function POST(request: Request) {
         '- create_article: create a World Bible article. Its type must be one of: ' + ENTITY_TYPES.join(', ') + '.',
         '  Give it a name, a one- or two-sentence description, and a body of titled sections (rich, multi-section prose).',
         '  Optionally pass `category` (an existing folder name from the World Bible below) to file it there; otherwise it is filed by type.',
+        '- create_category: create a folder to organize articles, optionally nested under an existing folder.',
+        '- move_article: move an existing article into a folder.',
         '',
         'BE PROACTIVE WITH SUGGESTIONS: as the user describes their world, suggest articles or categories worth creating',
         '(e.g. "Sounds like you need an article for the Crimson King — want me to make it?"). But only call a tool after they agree.',
@@ -140,10 +144,37 @@ export async function POST(request: Request) {
                 },
             );
 
+            const createCategoryTool = tool(
+                'create_category',
+                'Create a World Bible category (folder), optionally nested under an existing one. Only use when the user asks to create or add a category.',
+                {
+                    name: z.string().describe('The category (folder) name'),
+                    icon: z.string().optional().describe('An emoji icon (optional)'),
+                    parent: z.string().optional().describe('Existing category name to nest under (optional)'),
+                },
+                async (args) => {
+                    send({ type: 'category', name: args.name, icon: args.icon, parent: args.parent });
+                    return { content: [{ type: 'text', text: `Created the "${args.name}" category.` }] };
+                },
+            );
+
+            const moveArticleTool = tool(
+                'move_article',
+                'Move an existing article into a category. Only use when the user asks to move or reorganize.',
+                {
+                    article: z.string().describe('The article name to move'),
+                    category: z.string().describe('The destination category (folder) name'),
+                },
+                async (args) => {
+                    send({ type: 'move', article: args.article, category: args.category });
+                    return { content: [{ type: 'text', text: `Moved "${args.article}" to "${args.category}".` }] };
+                },
+            );
+
             const researchServer = createSdkMcpServer({
                 name: 'research',
                 version: '1.0.0',
-                tools: [addCardTool, createArticleTool],
+                tools: [addCardTool, createArticleTool, createCategoryTool, moveArticleTool],
             });
 
             try {
@@ -154,7 +185,7 @@ export async function POST(request: Request) {
                         systemPrompt,
                         tools: [], // no built-in file/bash tools
                         mcpServers: { research: researchServer },
-                        allowedTools: [ADD_CARD_TOOL, CREATE_ARTICLE_TOOL], // auto-approve our tools (no prompt)
+                        allowedTools: [ADD_CARD_TOOL, CREATE_ARTICLE_TOOL, CREATE_CATEGORY_TOOL, MOVE_ARTICLE_TOOL], // auto-approve our tools (no prompt)
                         settingSources: [], // isolation: ignore ~/.claude settings, hooks, MCP, CLAUDE.md
                         permissionMode: 'default',
                         env: childEnv,

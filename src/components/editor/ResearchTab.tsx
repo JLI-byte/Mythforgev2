@@ -4,7 +4,14 @@ import React, { useCallback, useState } from 'react';
 import { useWorkspaceStore, type Entity, type EntityType } from '@/store/workspaceStore';
 import { researchScopeKey, type ResearchScope } from '@/lib/researchScope';
 import { serializeBoard, makeNoteCard } from '@/lib/researchBoard';
-import { buildArticleDoc, resolveCategoryId, serializeWorld } from '@/lib/worldAuthoring';
+import {
+  buildArticleDoc,
+  resolveCategoryId,
+  serializeWorld,
+  makeCategoryRoot,
+  resolveFolderIdByName,
+  findEntityByName,
+} from '@/lib/worldAuthoring';
 import { worldKeyForProject, worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
 import { getWorldBibleConfig } from '@/lib/worldBibleNav';
 import WritingDesk from './WritingDesk';
@@ -69,8 +76,22 @@ export default function ResearchTab() {
         createdAt: new Date(),
       };
       s.addEntity(entity);
+      return;
     }
-    // 'category' and 'move' events are handled once their tools are added.
+
+    if (evt.type === 'category') {
+      const parentId = resolveFolderIdByName(layout.roots, evt.parent);
+      const newRoot = makeCategoryRoot(evt.name, evt.icon, parentId);
+      s.setWorldBibleLayout(worldKey, { roots: [...layout.roots, newRoot] });
+      return;
+    }
+
+    if (evt.type === 'move') {
+      const worldEntities = s.entities.filter(e => worldKeyForEntity(e) === worldKey);
+      const entity = findEntityByName(worldEntities, evt.article);
+      const folderId = resolveFolderIdByName(layout.roots, evt.category);
+      if (entity && folderId) s.updateEntity(entity.id, { categoryId: folderId });
+    }
   }, [scopeKey]);
 
   return (
