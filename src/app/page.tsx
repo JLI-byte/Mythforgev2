@@ -20,12 +20,13 @@ import DeskLighting from '@/components/theme/DeskLighting';
 
 // Center-column modes are code-split: only the active one is downloaded/parsed,
 // instead of bundling all five (WritingDesk, ArticleGrid, etc.) into first paint.
-const Designer = lazy(() => import('@/components/world/Designer'));
 const WorldBibleFolderTree = lazy(() => import('@/components/world/WorldBibleFolderTree'));
 const WorldBibleCenter = lazy(() => import('@/components/world/WorldBibleCenter'));
 const WorldBibleEdit = lazy(() => import('@/components/world/WorldBibleEdit'));
 const WritingDesk = lazy(() => import('@/components/editor/WritingDesk'));
 const Bookshelf = lazy(() => import('@/components/management/Bookshelf').then(m => ({ default: m.Bookshelf })));
+const HomePage = lazy(() => import('@/components/home/HomePage'));
+const ResearchTab = lazy(() => import('@/components/editor/ResearchTab'));
 
 /**
  * Main Workspace View
@@ -50,7 +51,6 @@ export default function Home() {
   const toggleFullscreen = useWorkspaceStore((state) => state.toggleFullscreen);
   const isFocusMode = useWorkspaceStore((state) => state.isFocusMode);
   const toggleFocusMode = useWorkspaceStore((state) => state.toggleFocusMode);
-  const activeProjectId = useWorkspaceStore((state) => state.activeProjectId);
   const theme = useWorkspaceStore((state) => state.theme);
   const themeFamily = useWorkspaceStore((state) => state.themeFamily);
   const tabRailWidth = useWorkspaceStore((state) => state.tabRailWidth);
@@ -152,7 +152,7 @@ export default function Home() {
       className={`${styles.workspace} ${isFullscreen ? styles.fullscreenMode : ''} ${isFocusMode ? styles.focusMode : ''}`}
     >
       <DeskLighting />
-      <ModeBar onHome={() => { useWorkspaceStore.getState().setActiveProject(null); }} />
+      <ModeBar />
       <div className={styles.workspaceRow}>
         <div
           className={styles.editorContainer}
@@ -168,16 +168,20 @@ export default function Home() {
           >
             <ErrorBoundary label="this workspace">
               <Suspense fallback={<div style={{ flex: 1, minHeight: '60vh' }} />}>
-                {workspaceMode === 'worldBible' ? (
+                {workspaceMode === 'home' ? (
+                  <HomePage />
+                ) : workspaceMode === 'worldBible' ? (
                   <WorldBibleCenter />
                 ) : workspaceMode === 'worldBibleEdit' ? (
                   <WorldBibleEdit />
                 ) : workspaceMode === 'template' ? (
-                  <Designer />
+                  <WritingDesk variant="draft" />
                 ) : workspaceMode === 'hierarchy' ? (
                   <WorldBibleFolderTree />
                 ) : workspaceMode === 'bookshelf' ? (
                   <Bookshelf />
+                ) : workspaceMode === 'research' ? (
+                  <ResearchTab />
                 ) : (
                   <WritingDesk />
                 )}

@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { Home, Library, NotebookPen, Globe, LayoutTemplate, Telescope } from 'lucide-react';
+import type { User } from '@supabase/supabase-js';
+import { useWorkspaceStore, Project, Document, Entity, Scene, World } from '@/store/workspaceStore';
 import styles from './ModeBar.module.css';
 import SettingsModal from '../ui/SettingsModal';
 import { NewProjectModal } from '../ui/NewProjectModal';
@@ -12,7 +14,7 @@ import { createClient } from '@/lib/supabase/client';
 // ── User Profile Component ─────────────────────────────
 
 function UserProfilePill({ onShowLogin }: { onShowLogin: () => void }) {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const supabase = createClient();
 
@@ -117,11 +119,11 @@ function stripHtml(html: string): string {
  */
 function computeResults(
   query: string,
-  projects: any[],
-  documents: any[],
-  entities: any[],
-  scenes: any[],
-  worlds: any[]
+  projects: Project[],
+  documents: Document[],
+  entities: Entity[],
+  scenes: Scene[],
+  worlds: World[]
 ): SearchResult[] {
   const q = query.trim();
   if (q.length < 2) return [];
@@ -205,18 +207,21 @@ function computeResults(
   return hits;
 }
 
-interface ModeBarProps {
-  onHome?: () => void;
-}
+/** Top-bar tabs the limelight indicator tracks. */
+const MODE_TABS = [
+  { mode: 'bookshelf', label: 'Bookshelf', Icon: Library },
+  { mode: 'research', label: 'Research', Icon: Telescope },
+  { mode: 'template', label: 'Draft Table', Icon: LayoutTemplate },
+  { mode: 'desk', label: 'Writing Desk', Icon: NotebookPen },
+  { mode: 'worldBible', label: 'World Bible', Icon: Globe },
+] as const;
 
-export default function ModeBar({ onHome }: ModeBarProps) {
+export default function ModeBar() {
   const workspaceMode = useWorkspaceStore(state => state.workspaceMode);
   const setWorkspaceMode = useWorkspaceStore(state => state.setWorkspaceMode);
-  const setHierarchyModal = useWorkspaceStore(state => state.setHierarchyModal);
   const setActiveProject = useWorkspaceStore(state => state.setActiveProject);
   const setActiveDocument = useWorkspaceStore(state => state.setActiveDocument);
   const setActiveScene = useWorkspaceStore(state => state.setActiveScene);
-  const setSelectedEntity = useWorkspaceStore(state => state.setSelectedEntity);
   const setFocusedArticleEntity = useWorkspaceStore(state => state.setFocusedArticleEntity);
   const theme = useWorkspaceStore(state => state.theme);
   const setTheme = useWorkspaceStore(state => state.setTheme);
@@ -232,6 +237,35 @@ export default function ModeBar({ onHome }: ModeBarProps) {
   const [showLoad, setShowLoad] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // ── Limelight tab indicator ───────────────────────
+  const leftGroupRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [limelight, setLimelight] = useState({ left: 0, width: 0, visible: false });
+  const [limelightReady, setLimelightReady] = useState(false);
+
+  useEffect(() => {
+    const measure = () => {
+      const group = leftGroupRef.current;
+      const active = tabRefs.current[workspaceMode];
+      if (group && active) {
+        const g = group.getBoundingClientRect();
+        const a = active.getBoundingClientRect();
+        setLimelight({ left: a.left - g.left, width: a.width, visible: true });
+      } else {
+        // Modes without a tab (hierarchy, edit…) — dim the light in place.
+        setLimelight(prev => ({ ...prev, visible: false }));
+      }
+    };
+    measure();
+    // Enable the slide transition only after the first placement.
+    const id = requestAnimationFrame(() => setLimelightReady(true));
+    window.addEventListener('resize', measure);
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener('resize', measure);
+    };
+  }, [workspaceMode]);
 
   // ── Theme / Settings helpers ───────────────────────
 
@@ -260,12 +294,13 @@ export default function ModeBar({ onHome }: ModeBarProps) {
     }
 
     // Performance Fix: Read store imperatively ONLY when user types.
-    // This prevents ModeBar from subscribing to and re-rendering on 
+    // This prevents ModeBar from subscribing to and re-rendering on
     // every keystroke in the editor (which changes scenes/entities arrays).
     const { projects, documents, entities, scenes, worlds } = useWorkspaceStore.getState();
     const hits = computeResults(q, projects, documents, entities, scenes, worlds);
-    
+
     setResults(hits);
+    setSelectedIndex(0); // fresh results, fresh selection
     setIsOpen(true);
   };
 
@@ -320,11 +355,6 @@ export default function ModeBar({ onHome }: ModeBarProps) {
     }
   };
 
-  // Reset selectedIndex when results change
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [results]);
-
   // Close dropdown on outside click
   useEffect(() => {
     if (!isOpen) return;
@@ -360,34 +390,41 @@ export default function ModeBar({ onHome }: ModeBarProps) {
 
   return (
     <nav className={styles.modeBar}>
-      <div className={styles.leftGroup}>
+      <div className={styles.leftGroup} ref={leftGroupRef}>
+        {/* Home — the logged-in home base (tracked by the limelight too) */}
         <button
-          className={`${styles.modeBtn} ${workspaceMode === 'bookshelf' ? styles.modeBtnActive : ''}`}
-          onClick={() => setWorkspaceMode('bookshelf')}
+          ref={el => { tabRefs.current['home'] = el; }}
+          className={`${styles.homeBtn} ${workspaceMode === 'home' ? styles.homeBtnActive : ''}`}
+          onClick={() => setWorkspaceMode('home')}
+          title="Home"
+          aria-label="Home"
         >
-          Bookshelf
+          <Home size={18} strokeWidth={1.75} />
         </button>
 
-        <button
-          className={`${styles.modeBtn} ${workspaceMode === 'desk' ? styles.modeBtnActive : ''}`}
-          onClick={() => setWorkspaceMode('desk')}
+        {/* Limelight — glowing indicator that slides to the active tab and
+            casts a light cone down over it. */}
+        <span
+          className={`${styles.limelight} ${limelightReady ? styles.limelightReady : ''} ${limelight.visible ? '' : styles.limelightHidden}`}
+          style={{ left: limelight.left, width: limelight.width }}
+          aria-hidden="true"
         >
-          Writing Desk
-        </button>
+          <span className={styles.limelightBar} />
+          <span className={styles.limelightCone} />
+        </span>
 
-        <button
-          className={`${styles.modeBtn} ${workspaceMode === 'worldBible' ? styles.modeBtnActive : ''}`}
-          onClick={() => setWorkspaceMode('worldBible')}
-        >
-          World Bible
-        </button>
-
-        <button
-          className={`${styles.modeBtn} ${workspaceMode === 'template' ? styles.modeBtnActive : ''}`}
-          onClick={() => setWorkspaceMode('template')}
-        >
-          Draft Table
-        </button>
+        {MODE_TABS.map(tab => (
+          <button
+            key={tab.mode}
+            ref={el => { tabRefs.current[tab.mode] = el; }}
+            className={`${styles.modeBtn} ${workspaceMode === tab.mode ? styles.modeBtnActive : ''}`}
+            onClick={() => setWorkspaceMode(tab.mode)}
+            title={tab.label}
+            aria-label={tab.label}
+          >
+            <tab.Icon size={18} strokeWidth={1.75} />
+          </button>
+        ))}
       </div>
 
       {/* Center — global search */}
@@ -421,7 +458,7 @@ export default function ModeBar({ onHome }: ModeBarProps) {
           <div ref={dropdownRef} className={styles.searchDropdown}>
             {results.length === 0 ? (
               <div className={styles.searchEmpty}>
-                No results for "{query}"
+                No results for &quot;{query}&quot;
               </div>
             ) : (
               results.map((result, i) => (
