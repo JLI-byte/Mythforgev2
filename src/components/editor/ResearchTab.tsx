@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { researchScopeKey, type ResearchScope } from '@/lib/researchScope';
 import WritingDesk from './WritingDesk';
+import { ResearchEmptyState } from './ResearchEmptyState';
 import styles from './WritingDesk.module.css';
 
 /**
@@ -17,6 +18,16 @@ export default function ResearchTab() {
     s.projects.find(p => p.id === s.activeProjectId) ?? null
   );
   const scopeKey = researchScopeKey(scope, activeProject);
+
+  // No active project → own empty state (keeps the writer on Research rather
+  // than the desk's welcome, which would switch them to the Writing Desk).
+  if (!scopeKey) {
+    return (
+      <div className={styles.researchRoot}>
+        <ResearchEmptyState />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.researchRoot}>
