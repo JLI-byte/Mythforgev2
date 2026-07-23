@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from '../WritingDesk.module.css';
 
 interface ChatMessage {
@@ -22,6 +22,11 @@ export function ResearchChatPanel({ scopeKey, getBoardContext, onAddCard }: Rese
     const [input, setInput] = useState('');
     const [isStreaming, setIsStreaming] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const abortRef = useRef<AbortController | null>(null);
+
+    // Abort any in-flight request if the panel unmounts (e.g. switching tabs
+    // mid-stream) so the fetch and its subprocess don't keep running.
+    useEffect(() => () => abortRef.current?.abort(), []);
 
     const scrollToBottom = () => {
         requestAnimationFrame(() => {
@@ -45,18 +50,25 @@ export function ResearchChatPanel({ scopeKey, getBoardContext, onAddCard }: Rese
                 const next = [...prev];
                 const last = next[next.length - 1];
                 if (last && last.role === 'assistant') {
-                    next[next.length - 1] = { ...last, content: last.content + chunk };
+                    // Separate an error note from any already-streamed text, but don't
+                    // leave a leading blank line when the reply is still empty.
+                    const sep = chunk.startsWith('\n') && !last.content ? chunk.replace(/^\n+/, '') : chunk;
+                    next[next.length - 1] = { ...last, content: last.content + sep };
                 }
                 return next;
             });
             scrollToBottom();
         };
 
+        const controller = new AbortController();
+        abortRef.current = controller;
+
         try {
             const res = await fetch('/api/research-chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ messages: outgoing, board: getBoardContext() }),
+                signal: controller.signal,
             });
             if (!res.ok || !res.body) {
                 const info = await res.json().catch(() => ({ error: 'Request failed' }));
@@ -71,9 +83,11 @@ export function ResearchChatPanel({ scopeKey, getBoardContext, onAddCard }: Rese
                 appendToAssistant(decoder.decode(value, { stream: true }));
             }
         } catch (err) {
+            if (controller.signal.aborted) return; // cancelled by unmount — no error note
             const detail = err instanceof Error ? err.message : 'network error';
             appendToAssistant(`\n\n[Chat failed: ${detail}]`);
         } finally {
+            if (abortRef.current === controller) abortRef.current = null;
             setIsStreaming(false);
         }
     };
