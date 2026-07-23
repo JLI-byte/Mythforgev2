@@ -12,15 +12,18 @@
   flex: 1;
   position: relative;
   overflow: hidden;
-  background-color: var(--background);
+  /* Same charcoal grunge texture as the World Bible / Bookshelf — the
+     frosted widgets need visible variation behind them to read as glass */
+  background: var(--background) url("/LoreCanvasbg.webp") center / cover no-repeat fixed;
   cursor: default;
 }
 
 /* Fantasy: let the candlelit wood desk (body::before + DeskLighting canvas)
-   show through. The widget cards stay opaque and float on the desk. */
+   show through. The widget cards stay opaque and float on the desk.
+   `background` (not -color) so the grunge texture image clears too. */
 :global(:root[data-theme-family="fantasy"]) .deskRoot,
 :global(:root[data-theme-family="fantasy"]) .deskViewport {
-  background-color: transparent;
+  background: transparent;
 }
 
 .deskViewport:active {
@@ -43,10 +46,16 @@
 
 .deskWidget {
   position: absolute;
-  background-color: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  /* frosted white glass — brighter than the WB strips because the desk
+     backdrop is near-uniform dark, so the tint must carry the effect */
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.07) 100%);
+  backdrop-filter: blur(28px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+    0 10px 38px rgba(0, 0, 0, 0.45);
   display: flex;
   flex-direction: column;
   overflow: visible;
@@ -55,21 +64,24 @@
 }
 
 .deskWidgetSelected {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(208, 188, 255, 0.3), 0 12px 32px rgba(0, 0, 0, 0.6);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    0 0 0 2px rgba(255, 255, 255, 0.22),
+    0 12px 32px rgba(0, 0, 0, 0.6);
   z-index: 50 !important;
 }
 
 .deskTitleBar {
   height: 28px;
-  background: rgba(var(--overlay-rgb), 0.05);
+  background: rgba(255, 255, 255, 0.06);
   display: flex;
   flex-direction: row;
   align-items: center;
   padding: 0 8px;
   gap: 8px;
   cursor: move;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
 }
 
@@ -254,7 +266,13 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: var(--surface);
+  /* fogged white glass writing surface */
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  overflow: hidden;
 }
 
 .deskEditorToolbar {
@@ -265,8 +283,8 @@
   align-items: center;
   padding: 4px 8px;
   gap: 4px;
-  background: var(--surface-mid);
-  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   flex-shrink: 0;
 }
 
@@ -277,19 +295,29 @@
 }
 
 .deskToolbarDropdown {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  /* see-through fogged glass, matching the writing surface */
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
   color: var(--foreground);
   font-size: 0.72rem;
   padding: 2px 4px;
   cursor: pointer;
   outline: none;
-  transition: all 0.15s;
+  transition: border-color 0.15s, background-color 0.15s;
 }
 
 .deskToolbarDropdown:hover {
-  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.36);
+}
+
+/* the opened option list is OS-rendered — translucency isn't possible
+   there, so keep the options on-theme charcoal instead */
+.deskToolbarDropdown option {
+  background: #1f1f1e;
+  color: var(--foreground);
 }
 
 .deskFmtBtn {
@@ -342,7 +370,8 @@
   flex: 1;
   overflow-y: auto;
   padding: 24px;
-  background: var(--surface-mid);
+  /* transparent — the frosted wrapper provides the surface */
+  background: transparent;
   user-select: text !important;
   display: flex;
   flex-direction: column;
@@ -593,13 +622,15 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  background: rgba(20, 20, 20, 0.85);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(var(--overlay-rgb), 0.1);
+  background: rgba(31, 31, 30, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 12px;
   padding: 4px;
   gap: 4px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.3);
   z-index: 100;
 }
 
@@ -802,9 +833,10 @@
   border-radius: 0 !important;
   box-shadow: none !important;
   pointer-events: auto;
-  background: var(--surface);
-  border-left: 1px solid var(--border);
-  border-right: 1px solid var(--border);
+  /* frosted white glass — docked flavor of the .deskWidget material */
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.06) 100%);
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+  border-right: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .dockedWidgetCollapsed {
@@ -814,8 +846,8 @@
 
 .dockedWidgetHandle {
   height: 28px;
-  background: rgba(var(--overlay-rgb), 0.05);
-  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   padding: 0 12px;
@@ -889,8 +921,9 @@
   overflow: hidden;
   border-radius: 6px;
   position: relative;
-  background-color: var(--surface);
-  border: 1px solid var(--border);
+  /* transparent — the frosted .deskWidget frame provides the surface */
+  background-color: transparent;
+  border: none;
 }
 
 /* Fantasy: the manuscript page is a parchment SHEET — light cream (light) /
@@ -982,8 +1015,9 @@
   width: 160px;
   flex-shrink: 0;
   height: 100%;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
+  /* translucent charcoal — lets the widget's frost show through */
+  background: rgba(31, 31, 30, 0.35);
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -1374,9 +1408,9 @@
 }
 
 .spineControlBtnActive {
-  background: rgba(208, 188, 255, 0.15);
-  border-color: var(--accent);
-  color: var(--accent);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
 }
 
 .spineControlBtnIdle {
@@ -1457,7 +1491,8 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--background);
+  /* translucent charcoal — lets the widget frost show through */
+  background: rgba(20, 20, 19, 0.35);
   overflow: hidden;
 }
 
@@ -1679,7 +1714,8 @@
   display: flex;
   flex-direction: column;
   gap: 80px;
-  background: var(--background);
+  /* translucent charcoal keeps manuscript contrast while the frost shows */
+  background: rgba(25, 25, 24, 0.3);
   scroll-behavior: smooth;
 }
 
@@ -3769,7 +3805,8 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: var(--surface);
+  /* transparent — the frosted widget frame provides the surface */
+  background-color: transparent;
   overflow: hidden;
 }
 
@@ -4477,4 +4514,214 @@
   border-bottom-color: var(--accent);
   opacity: 1;
 }
+
+/* ── Beat Card (Draft Table writing methods) ─────────────── */
+
+.beatCard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--surface-mid);
+  overflow: hidden;
+}
+
+.beatCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px 6px;
+  border-bottom: 1px solid rgba(var(--overlay-rgb), 0.08);
+}
+
+.beatCardTitles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.beatCardGroup {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.beatCardLabel {
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--foreground);
+  width: 100%;
+  padding: 0;
+}
+
+.beatCardMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.beatCardStep {
+  font-size: 0.62rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.beatCardInfoBtn {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--overlay-rgb), 0.2);
+  background: none;
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-style: italic;
+  font-family: Georgia, serif;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.beatCardInfoBtn:hover,
+.beatCardInfoBtnActive {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.1);
+}
+
+.beatCardGuidance {
+  padding: 8px 12px;
+  font-size: 0.7rem;
+  line-height: 1.45;
+  color: var(--muted);
+  background: rgba(var(--accent-rgb), 0.06);
+  border-bottom: 1px solid rgba(var(--accent-rgb), 0.12);
+}
+
+.beatCardTextarea {
+  flex: 1;
+  width: 100%;
+  background: none;
+  border: none;
+  outline: none;
+  resize: none;
+  padding: 10px 12px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--foreground);
+  font-family: inherit;
+}
+
+.beatCardTextarea::placeholder {
+  color: var(--muted);
+  opacity: 0.55;
+  font-style: italic;
+}
+
+/* ── Draft Table method picker (Stage 1 minimal) ─────────── */
+
+.topCenterControls {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.methodPickerBtn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface-mid);
+  color: var(--foreground);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s;
+}
+
+.methodPickerBtn:hover {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.1);
+}
+
+.clearCanvasBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface-mid);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s;
+}
+
+.clearCanvasBtn:hover {
+  border-color: #e5484d;
+  color: #e5484d;
+  background: rgba(229, 72, 77, 0.08);
+}
+
+/* ── Research Tab scope switcher ─────────────────────────── */
+.researchRoot {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.researchScopeBar {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  flex: 0 0 auto;
+  border-bottom: 1px solid var(--border, rgba(128, 128, 128, 0.2));
+}
+
+.researchScopeBtn {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid var(--border, rgba(128, 128, 128, 0.25));
+  background: transparent;
+  color: var(--muted, #888);
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.researchScopeBtn:hover {
+  color: var(--text, inherit);
+}
+
+.researchScopeBtnActive {
+  background: var(--accent, #4a6fa5);
+  border-color: var(--accent, #4a6fa5);
+  color: #fff;
+}
+
+.researchCanvasHost {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+}
+
 
