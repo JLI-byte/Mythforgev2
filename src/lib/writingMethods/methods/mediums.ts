@@ -1,0 +1,150 @@
+import { WritingMethod } from '../types';
+
+/**
+ * Medium-specific methods: screenwriting, comics, interactive fiction,
+ * TTRPG design, and nonfiction. Field-guide family X.
+ */
+export const MEDIUM_METHODS: WritingMethod[] = [
+    // ── Screenwriting ────────────────────────────────────────
+    {
+        id: 'screen-doc-chain',
+        name: 'Treatment Chain',
+        family: 'screen',
+        formats: ['script'],
+        tagline: 'The industry ladder: logline → beat sheet → step outline → treatment → scriptment.',
+        bestFor: 'Film & TV development; pitching before drafting',
+        beats: [
+            { label: 'Logline', guidance: 'One or two sentences: protagonist + goal + obstacle + stakes, with the hook visible. If it doesn\'t sell here, pages won\'t save it.', placeholder: 'e.g. A burned-out air-traffic controller must land forty planes during a solar storm that erases every screen — including the one tracking her son\'s flight.' },
+            { label: 'Beat Sheet', guidance: 'The major story beats as a bulleted list — a page or two. Movement and turns, not scenes yet.', placeholder: 'e.g. • Storm warning dismissed • First screen flickers • The choice: protocol vs. instinct…' },
+            { label: 'Step Outline', guidance: 'One entry per scene: a slugline and 2–3 sentences of what happens. The film, scene by scene, before any dialogue.', placeholder: 'e.g. INT. TOWER — NIGHT — Rosa reroutes the cargo jet manually; her supervisor reaches for the phone…' },
+            { label: 'Treatment', guidance: 'The story as present-tense prose, 10–30 pages, no dialogue (or almost none). Reads like a short story of the film.', placeholder: 'e.g. Rosa hasn\'t slept. We know because the coffee cups are labeled by day…' },
+            { label: 'Scriptment', guidance: 'The hybrid: treatment prose with key dialogue dropped in where the scenes are already alive. The last stop before FADE IN.', placeholder: 'e.g. …Rosa keys the mic. ROSA: "Delta 9, I\'m your eyes now. Tell me what you see."' },
+        ],
+    },
+    {
+        id: 'eight-sequence',
+        name: 'Eight-Sequence Structure',
+        family: 'screen',
+        formats: ['script'],
+        tagline: 'A feature as eight mini-movies of 10–15 minutes, each with its own goal and turn.',
+        bestFor: 'Feature screenplays; taming the 120-page mountain',
+        beats: [
+            { group: 'Act I', label: 'Sequence 1: Status Quo & Inciting Incident', guidance: 'Introduce the world and protagonist; end with the event that disturbs everything. Mini-goal: make us care before you strike.', placeholder: 'e.g. The wedding planner\'s flawless Tuesday — until the groom is her ex…' },
+            { group: 'Act I', label: 'Sequence 2: The Lock-In', guidance: 'The protagonist tries the easy way out and fails; end of Act I locks them into the journey.', placeholder: 'e.g. She tries to hand off the contract — the bride insists on her…' },
+            { group: 'Act II-A', label: 'Sequence 3: First Attempts', guidance: 'The protagonist pursues the goal with the old toolkit. Rising obstacles; first real complications.', placeholder: 'e.g. Strict professionalism: menus, seating charts, no eye contact…' },
+            { group: 'Act II-A', label: 'Sequence 4: Higher Stakes', guidance: 'Complications compound to the midpoint — a revelation or reversal that changes the game.', placeholder: 'e.g. The rehearsal dance; the bride sees what the planner won\'t admit…' },
+            { group: 'Act II-B', label: 'Sequence 5: The New Game', guidance: 'Post-midpoint, the protagonist plays by new rules. Subplots braid in and tighten.', placeholder: 'e.g. Honesty policy: she tells the truth about everything but the one thing…' },
+            { group: 'Act II-B', label: 'Sequence 6: The Collapse', guidance: 'The main tension resolves badly — everything falls apart at the end of Act II.', placeholder: 'e.g. The toast, the slip, the bride walking out — all of it her fault…' },
+            { group: 'Act III', label: 'Sequence 7: The Final Effort', guidance: 'A new tension rises from the wreckage; the true climax builds.', placeholder: 'e.g. Two venues, one night, and the truth owed to two people…' },
+            { group: 'Act III', label: 'Sequence 8: Resolution', guidance: 'Climax resolves; the epilogue shows the changed world. Every sequence goal paid off.', placeholder: 'e.g. A wedding she attends as a guest, finally…' },
+        ],
+    },
+    {
+        id: 'comics-script',
+        name: 'Comics: Page & Panel',
+        family: 'screen',
+        formats: ['script'],
+        tagline: 'Story disciplined by the page: panels per page, words per panel, reveals on the turn.',
+        bestFor: 'Comics and graphic novels',
+        beats: [
+            { label: 'Issue Premise & Page Budget', guidance: 'The issue\'s single arc, and the hard page count (20? 22?). Comics are written against the page as a physical unit.', placeholder: 'e.g. 22 pages: the courier discovers what she\'s carrying…' },
+            { label: 'Page Map', guidance: 'One line per page: what it accomplishes. Even-numbered pages face reveals — the reader turns INTO odd pages, so put gasps on the turn.', placeholder: 'e.g. p.1 splash: the drop-off / p.2–3 chase / p.4 turn-reveal: the package moves…' },
+            { label: 'Panel Breakdown', guidance: 'For each page: panels with what\'s in frame and who speaks. Rule of thumb: ≤6 panels/page, ≤25 words/panel — art needs room to act.', placeholder: 'e.g. p.4, panel 3: close on the satchel. SFX: thump. No dialogue…' },
+            { label: 'Full Script vs. Marvel Method', guidance: 'Decide the collaboration mode: Full Script (every panel specified) or Marvel Method (plot summary → artist draws → dialogue after). Note which sections use which.', placeholder: 'e.g. Full script for the heist; Marvel method for the crowd scenes…' },
+            { label: 'The Silent Test', guidance: 'Could a reader follow the story with every balloon empty? Comics that pass are comics that work.', placeholder: 'e.g. Weak spot: p.9 depends entirely on the caption — re-stage it…' },
+        ],
+    },
+
+    // ── Interactive fiction / games ──────────────────────────
+    {
+        id: 'interactive-fiction',
+        name: 'Interactive Fiction Map',
+        family: 'game',
+        formats: ['game'],
+        tagline: 'Passages linked by choices — the story as a navigable graph.',
+        bestFor: 'IF, CYOA, narrative games',
+        beats: [
+            { label: 'Start Passage', guidance: 'The opening node: situation + the first meaningful choice. Every option should promise a genuinely different story.', placeholder: 'e.g. The elevator opens on a floor that isn\'t listed. [Step out] [Close the doors]…' },
+            { label: 'Branch Nodes', guidance: 'One card per passage (duplicate freely). Note each card\'s choices and where they lead. Position cards spatially to see the graph.', placeholder: 'e.g. FLOOR-13: the hallway of doors → [red door] [the stairs] [call out]…' },
+            { label: 'State Variables', guidance: 'The memory of the story: flags and counters set by choices and read later. Every variable needs at least one place that sets it and one that pays it off.', placeholder: 'e.g. took_key (set: red door / read: basement ending)…' },
+            { label: 'Convergence Points', guidance: 'Where branches rejoin so the story stays writable. Good convergence remembers — the same scene reads differently depending on state.', placeholder: 'e.g. All paths reach the lobby — but WITH the key it\'s an exit, without it a trap…' },
+            { label: 'Endings Map', guidance: 'List every ending and the path conditions that reach it. Check: any orphaned passages? Any choices that secretly don\'t matter?', placeholder: 'e.g. 4 endings: escape / stay / trade places / the loop…' },
+        ],
+    },
+    {
+        id: 'three-clue-rule',
+        name: 'Node-Based Mystery (Three-Clue Rule)',
+        family: 'game',
+        formats: ['game', 'story'],
+        tagline: 'For every conclusion the audience must reach, plant at least three clues.',
+        bestFor: 'Mysteries, investigations, TTRPG scenarios',
+        beats: [
+            { label: 'The Conclusions', guidance: 'List every deduction the audience/players MUST make for the story to progress. These are your nodes.', placeholder: 'e.g. 1) The butler was blackmailed 2) The will was forged 3) The garden hides the safe…' },
+            { label: 'Clues per Conclusion', guidance: 'For each conclusion, list its clues. THREE minimum — one will be missed, one will be misread, and the third saves the story.', placeholder: 'e.g. Forged will: ink anachronism / notary\'s absence / sister\'s handwriting…' },
+            { label: 'Clue Placement', guidance: 'Where does each clue physically live, and what leads there? A clue nobody can encounter doesn\'t exist.', placeholder: 'e.g. Ink report: the stationer\'s shop — reachable via receipt OR gossip…' },
+            { label: 'Single-Point-of-Failure Audit', guidance: 'Walk each conclusion: if THIS clue is missed, can the audience still get there? Any conclusion resting on one clue needs two more.', placeholder: 'e.g. FAIL: the safe depends only on the gardener\'s hint — add two routes…' },
+            { label: 'The Revelation List', guidance: 'The truths in the order they should ideally land, and the alternate orders that still work. Mysteries are revelation-order machines.', placeholder: 'e.g. Ideal: forgery → blackmail → safe. Also works: blackmail first if…' },
+        ],
+    },
+    {
+        id: 'five-room-dungeon',
+        name: 'Five-Room Dungeon',
+        family: 'game',
+        formats: ['game', 'story'],
+        tagline: 'A complete adventure in five beats: guardian, puzzle, setback, climax, reward.',
+        bestFor: 'One-shots, side quests — and surprisingly, short stories',
+        beats: [
+            { label: 'Room 1: Entrance & Guardian', guidance: 'The threshold and its challenge. Why hasn\'t anyone just walked in? The guardian sets the tone.', placeholder: 'e.g. The archive door answers only to a true name — and takes it as toll…' },
+            { label: 'Room 2: Puzzle or Roleplay Challenge', guidance: 'A challenge force can\'t solve. Brains, empathy, or trade — a different muscle than Room 1.', placeholder: 'e.g. The index ghost will find any book — for a memory of equal weight…' },
+            { label: 'Room 3: Trick or Setback', guidance: 'The reversal — a trap, betrayal, or false victory. Confidence built in Rooms 1–2 gets punctured.', placeholder: 'e.g. The book is a decoy; the real text has been checked out… by them…' },
+            { label: 'Room 4: Climax', guidance: 'The big fight or confrontation — the scenario\'s reason to exist. Spend the drama budget here.', placeholder: 'e.g. Their older self, mid-heist, needs the book for a better reason…' },
+            { label: 'Room 5: Reward & Revelation', guidance: 'The payoff — treasure, truth, or a hook to the next adventure. Best rewards change what the players want next.', placeholder: 'e.g. The book is blank until you\'ve paid the door\'s toll — reread Room 1…' },
+        ],
+    },
+    {
+        id: 'progress-clocks',
+        name: 'Progress & Faction Clocks',
+        family: 'game',
+        formats: ['game', 'story'],
+        tagline: 'Segmented clocks that tick offscreen — the world advances whether or not you\'re watching.',
+        bestFor: 'Sandbox GMs; novelists keeping antagonists alive off-page',
+        beats: [
+            { label: 'Clock: The Main Threat', guidance: 'Name the threat and give it 4–8 segments, each a visible stage of progress. Tick it when time passes or the protagonists ignore it. Mark segments right in the card: ○○○○ → ●●○○.', placeholder: 'e.g. THE FLOOD WALL FAILS ○○○○○○ — ticks each chapter it goes unrepaired…' },
+            { label: 'Clock: Faction Two', guidance: 'A second agenda moving in parallel. Clocks make the world feel alive because they advance during OTHER scenes.', placeholder: 'e.g. THE SYNDICATE CONSOLIDATES ○○○○ — ticks when heroes make noise…' },
+            { label: 'Tick Triggers', guidance: 'The rules for advancing each clock: time passing, protagonist choices, or offscreen logic. Write them down or you\'ll forget to be fair.', placeholder: 'e.g. Flood wall: +1 per chapter of neglect. Syndicate: +1 per public victory…' },
+            { label: 'What Each Segment Looks Like', guidance: 'For key clocks, describe the visible sign of each tick — how characters (and readers) sense the world worsening.', placeholder: 'e.g. ●1: seepage in the market / ●2: the north quarter evacuates / ●●● full: …' },
+        ],
+    },
+    {
+        id: 'dungeon-world-fronts',
+        name: 'Fronts & Grim Portents',
+        family: 'game',
+        formats: ['game'],
+        tagline: 'Threats as living countdowns — dangers with agendas that advance until opposed.',
+        bestFor: 'Emergent campaigns; sandbox worlds that push back',
+        beats: [
+            { label: 'The Front', guidance: 'The umbrella threat — a storm on the horizon made of linked dangers. Name it and its dark ambition.', placeholder: 'e.g. THE HOLLOW COURT — the fae buy the city, deed by deed…' },
+            { label: 'The Dangers', guidance: 'The front\'s moving parts: a villain, a cult, a disaster. Each gets an impulse — what it always tends to do.', placeholder: 'e.g. The Broker (impulse: to hold every debt) / The Tithe-Choir (impulse: to sing doors open)…' },
+            { label: 'Grim Portents', guidance: 'The countdown: 3–5 events that WILL happen, in order, if no one intervenes. This is your plot-if-heroes-fail.', placeholder: 'e.g. 1) The orphanage sells 2) Rent paid in memories 3) The mayor forgets his name…' },
+            { label: 'Impending Doom', guidance: 'The final state if the whole countdown completes. Knowing the doom makes every portent scarier.', placeholder: 'e.g. A city of tenants who can\'t remember owning anything…' },
+            { label: 'Stakes Questions', guidance: 'What you genuinely don\'t know yet: questions about how protagonists and fronts will collide. Play (or write) to find out.', placeholder: 'e.g. Will Vess trade her sister\'s memory to save the shop?…' },
+        ],
+    },
+
+    // ── Nonfiction ───────────────────────────────────────────
+    {
+        id: 'narrative-nonfiction',
+        name: 'Narrative Nonfiction',
+        family: 'nonfiction',
+        formats: ['article'],
+        tagline: 'True stories with scene craft — every anecdote in service of a claim.',
+        bestFor: 'Memoir, longform journalism, essays',
+        beats: [
+            { label: 'The Thesis', guidance: 'The claim or question the whole piece serves. Every scene must earn its place against this line.', placeholder: 'e.g. The town didn\'t die when the mill closed — it died when the diner did…' },
+            { label: 'The Scenes', guidance: 'The story\'s real moments, told with fiction\'s tools: place, people, tension. List each scene and what it SHOWS.', placeholder: 'e.g. Last breakfast shift: the regulars\' orders known by heart…' },
+            { label: 'Claim-to-Evidence Map', guidance: 'For each claim: its supporting evidence (scene, document, quote, data). Unsupported claims and beautiful-but-irrelevant scenes both show up here.', placeholder: 'e.g. "Diner = town square" ← county census + the funeral-notice corkboard…' },
+            { label: 'Chronology vs. Telling Order', guidance: 'When things happened vs. when the reader learns them. Nonfiction is still structured — you just can\'t invent, only arrange.', placeholder: 'e.g. Open at the auction (2024), rewind to the first pancake (1961)…' },
+            { label: 'The Reverse-Outline Check', guidance: 'After drafting: one line per section. Does each advance the thesis? What\'s missing; what\'s ornamental?', placeholder: 'e.g. §4 is gorgeous and proves nothing — cut or connect…' },
+        ],
+    },
+];
