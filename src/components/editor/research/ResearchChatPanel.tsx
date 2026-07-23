@@ -1,0 +1,133 @@
+"use client";
+
+import React, { useRef, useState } from 'react';
+import styles from '../WritingDesk.module.css';
+
+interface ChatMessage {
+    role: 'user' | 'assistant';
+    content: string;
+}
+
+interface ResearchChatPanelProps {
+    /** null when no project is active — add-to-board is then disabled. */
+    scopeKey: string | null;
+    /** Reads the current board as plain text at send time. */
+    getBoardContext: () => string;
+    /** Appends the given text to the current board as a Note card. */
+    onAddCard: (text: string) => void;
+}
+
+export function ResearchChatPanel({ scopeKey, getBoardContext, onAddCard }: ResearchChatPanelProps) {
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [input, setInput] = useState('');
+    const [isStreaming, setIsStreaming] = useState(false);
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        requestAnimationFrame(() => {
+            const el = scrollRef.current;
+            if (el) el.scrollTop = el.scrollHeight;
+        });
+    };
+
+    const send = async () => {
+        const text = input.trim();
+        if (!text || isStreaming) return;
+
+        const outgoing: ChatMessage[] = [...messages, { role: 'user', content: text }];
+        setMessages([...outgoing, { role: 'assistant', content: '' }]);
+        setInput('');
+        setIsStreaming(true);
+        scrollToBottom();
+
+        const appendToAssistant = (chunk: string) => {
+            setMessages(prev => {
+                const next = [...prev];
+                const last = next[next.length - 1];
+                if (last && last.role === 'assistant') {
+                    next[next.length - 1] = { ...last, content: last.content + chunk };
+                }
+                return next;
+            });
+            scrollToBottom();
+        };
+
+        try {
+            const res = await fetch('/api/research-chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: outgoing, board: getBoardContext() }),
+            });
+            if (!res.ok || !res.body) {
+                const info = await res.json().catch(() => ({ error: 'Request failed' }));
+                appendToAssistant(`[${info.error ?? 'Request failed'}]`);
+                return;
+            }
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            for (;;) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                appendToAssistant(decoder.decode(value, { stream: true }));
+            }
+        } catch (err) {
+            const detail = err instanceof Error ? err.message : 'network error';
+            appendToAssistant(`\n\n[Chat failed: ${detail}]`);
+        } finally {
+            setIsStreaming(false);
+        }
+    };
+
+    const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            send();
+        }
+    };
+
+    return (
+        <div className={styles.researchChat}>
+            <div className={styles.researchChatHeader}>Research Assistant</div>
+
+            <div className={styles.researchChatScroll} ref={scrollRef}>
+                {messages.length === 0 && (
+                    <div className={styles.researchChatEmpty}>
+                        Ask about your research board, or anything else.
+                    </div>
+                )}
+                {messages.map((m, i) => (
+                    <div
+                        key={i}
+                        className={`${styles.researchChatMsg} ${m.role === 'user' ? styles.researchChatMsgUser : styles.researchChatMsgAssistant}`}
+                    >
+                        <div className={styles.researchChatMsgBody}>{m.content}</div>
+                        {m.role === 'assistant' && m.content.trim() && (
+                            <button
+                                className={styles.researchChatAddBtn}
+                                disabled={!scopeKey}
+                                title={scopeKey ? 'Add this reply to the board as a note' : 'Select a project first'}
+                                onClick={() => onAddCard(m.content)}
+                            >
+                                + Add to board
+                            </button>
+                        )}
+                    </div>
+                ))}
+            </div>
+
+            <div className={styles.researchChatInputRow}>
+                <textarea
+                    className={styles.researchChatInput}
+                    placeholder="Message the research assistant…"
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    onKeyDown={onKeyDown}
+                    rows={2}
+                />
+                <button className={styles.researchChatSendBtn} onClick={send} disabled={isStreaming || !input.trim()}>
+                    {isStreaming ? '…' : 'Send'}
+                </button>
+            </div>
+        </div>
+    );
+}
