@@ -6,6 +6,7 @@ import { researchScopeKey, type ResearchScope } from '@/lib/researchScope';
 import { serializeBoard, makeNoteCard } from '@/lib/researchBoard';
 import {
   buildArticleDoc,
+  appendSectionsToDoc,
   resolveCategoryId,
   serializeWorld,
   makeCategoryRoot,
@@ -13,6 +14,7 @@ import {
   findEntityByName,
 } from '@/lib/worldAuthoring';
 import { worldKeyForProject, worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
+import { folderMemberSet } from '@/lib/folderTree';
 import { getWorldBibleConfig } from '@/lib/worldBibleNav';
 import WritingDesk from './WritingDesk';
 import { ResearchEmptyState } from './ResearchEmptyState';
@@ -102,6 +104,49 @@ export default function ResearchTab() {
       const folderId = resolveFolderIdByName(layout.roots, evt.category);
       if (!folderId) return `Couldn't find a category named "${evt.category}".`;
       s.updateEntity(entity.id, { categoryId: folderId });
+      return;
+    }
+
+    // Article edit / rename / delete resolve by name within this world.
+    if (evt.type === 'edit' || evt.type === 'rename_article' || evt.type === 'delete_article') {
+      const worldEntities = s.entities.filter(e => worldKeyForEntity(e) === worldKey);
+      const entity = findEntityByName(worldEntities, evt.name);
+      if (!entity) return `Couldn't find an article named "${evt.name}".`;
+
+      if (evt.type === 'rename_article') {
+        s.updateEntity(entity.id, { name: evt.new_name });
+      } else if (evt.type === 'delete_article') {
+        s.deleteEntity(entity.id);
+      } else {
+        const updates: Partial<Entity> = {};
+        if (typeof evt.description === 'string') updates.description = evt.description;
+        if (evt.append_sections?.length) updates.articleDoc = appendSectionsToDoc(entity.articleDoc, evt.append_sections);
+        if (evt.tags?.length) updates.tags = [...(entity.tags ?? []), ...evt.tags];
+        s.updateEntity(entity.id, updates);
+      }
+      return;
+    }
+
+    if (evt.type === 'rename_category') {
+      const folderId = resolveFolderIdByName(layout.roots, evt.name);
+      if (!folderId) return `Couldn't find a category named "${evt.name}".`;
+      s.setWorldBibleLayout(worldKey, {
+        roots: layout.roots.map(r => (r.id === folderId ? { ...r, label: evt.new_name.trim() } : r)),
+      });
+      return;
+    }
+
+    if (evt.type === 'delete_category') {
+      const folderId = resolveFolderIdByName(layout.roots, evt.name);
+      if (!folderId) return `Couldn't find a category named "${evt.name}".`;
+      // Remove the folder and its descendants; unfile any articles they held.
+      const removed = folderMemberSet(layout.roots, folderId);
+      s.setWorldBibleLayout(worldKey, { roots: layout.roots.filter(r => !removed.has(r.id)) });
+      s.entities.forEach(e => {
+        if (worldKeyForEntity(e) === worldKey && e.categoryId && removed.has(e.categoryId)) {
+          s.updateEntity(e.id, { categoryId: undefined });
+        }
+      });
     }
   }, [scopeKey]);
 

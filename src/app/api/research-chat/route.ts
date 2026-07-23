@@ -14,6 +14,11 @@ const ADD_CARD_TOOL = 'mcp__research__add_research_card';
 const CREATE_ARTICLE_TOOL = 'mcp__research__create_article';
 const CREATE_CATEGORY_TOOL = 'mcp__research__create_category';
 const MOVE_ARTICLE_TOOL = 'mcp__research__move_article';
+const EDIT_ARTICLE_TOOL = 'mcp__research__edit_article';
+const RENAME_ARTICLE_TOOL = 'mcp__research__rename_article';
+const DELETE_ARTICLE_TOOL = 'mcp__research__delete_article';
+const RENAME_CATEGORY_TOOL = 'mcp__research__rename_category';
+const DELETE_CATEGORY_TOOL = 'mcp__research__delete_category';
 
 /** The eight World Bible entity types. */
 const ENTITY_TYPES = [
@@ -65,6 +70,9 @@ export async function POST(request: Request) {
         '  Optionally pass `category` (an existing folder name from the World Bible below) to file it there; otherwise it is filed by type.',
         '- create_category: create a folder to organize articles, optionally nested under an existing folder.',
         '- move_article: move an existing article into a folder.',
+        '- edit_article: revise an existing article — replace its description, append new sections to its body, and/or add tags. Use this to flesh out or update articles. The full text of every article is included below, so read it before editing.',
+        '- rename_article / delete_article: rename or remove an article.',
+        '- rename_category / delete_category: rename or remove a folder (deleting a folder leaves its articles unfiled).',
         '',
         'BE PROACTIVE WITH SUGGESTIONS: as the user describes their world, suggest articles or categories worth creating',
         '(e.g. "Sounds like you need an article for the Crimson King — want me to make it?"). But only call a tool after they agree.',
@@ -173,10 +181,84 @@ export async function POST(request: Request) {
                 },
             );
 
+            const editArticleTool = tool(
+                'edit_article',
+                'Revise an existing article: replace its description, append new sections to its body, and/or add tags. Only use when the user asks to edit, expand, or flesh out an article.',
+                {
+                    name: z.string().describe('The article to edit'),
+                    description: z.string().optional().describe('New summary (replaces the old one)'),
+                    append_sections: z
+                        .array(z.object({ heading: z.string().optional(), body: z.string() }))
+                        .optional()
+                        .describe('New titled sections to append to the article body'),
+                    tags: z.array(z.string()).optional().describe('Tags to add'),
+                },
+                async (args) => {
+                    send({
+                        type: 'edit',
+                        name: args.name,
+                        description: args.description,
+                        append_sections: args.append_sections,
+                        tags: args.tags,
+                    });
+                    return { content: [{ type: 'text', text: `Updated "${args.name}".` }] };
+                },
+            );
+
+            const renameArticleTool = tool(
+                'rename_article',
+                'Rename an existing article. Only use when the user asks to rename it.',
+                { name: z.string().describe('Current article name'), new_name: z.string().describe('New name') },
+                async (args) => {
+                    send({ type: 'rename_article', name: args.name, new_name: args.new_name });
+                    return { content: [{ type: 'text', text: `Renamed "${args.name}" to "${args.new_name}".` }] };
+                },
+            );
+
+            const deleteArticleTool = tool(
+                'delete_article',
+                'Delete an article from the World Bible. Only use when the user asks to delete it.',
+                { name: z.string().describe('The article to delete') },
+                async (args) => {
+                    send({ type: 'delete_article', name: args.name });
+                    return { content: [{ type: 'text', text: `Deleted "${args.name}".` }] };
+                },
+            );
+
+            const renameCategoryTool = tool(
+                'rename_category',
+                'Rename a category (folder). Only use when the user asks to rename it.',
+                { name: z.string().describe('Current folder name'), new_name: z.string().describe('New name') },
+                async (args) => {
+                    send({ type: 'rename_category', name: args.name, new_name: args.new_name });
+                    return { content: [{ type: 'text', text: `Renamed category "${args.name}" to "${args.new_name}".` }] };
+                },
+            );
+
+            const deleteCategoryTool = tool(
+                'delete_category',
+                'Delete a category (folder); its articles become unfiled. Only use when the user asks to delete it.',
+                { name: z.string().describe('The folder to delete') },
+                async (args) => {
+                    send({ type: 'delete_category', name: args.name });
+                    return { content: [{ type: 'text', text: `Deleted category "${args.name}".` }] };
+                },
+            );
+
             const researchServer = createSdkMcpServer({
                 name: 'research',
                 version: '1.0.0',
-                tools: [addCardTool, createArticleTool, createCategoryTool, moveArticleTool],
+                tools: [
+                    addCardTool,
+                    createArticleTool,
+                    createCategoryTool,
+                    moveArticleTool,
+                    editArticleTool,
+                    renameArticleTool,
+                    deleteArticleTool,
+                    renameCategoryTool,
+                    deleteCategoryTool,
+                ],
             });
 
             try {
@@ -187,7 +269,17 @@ export async function POST(request: Request) {
                         systemPrompt,
                         tools: [], // no built-in file/bash tools
                         mcpServers: { research: researchServer },
-                        allowedTools: [ADD_CARD_TOOL, CREATE_ARTICLE_TOOL, CREATE_CATEGORY_TOOL, MOVE_ARTICLE_TOOL], // auto-approve our tools (no prompt)
+                        allowedTools: [
+                            ADD_CARD_TOOL,
+                            CREATE_ARTICLE_TOOL,
+                            CREATE_CATEGORY_TOOL,
+                            MOVE_ARTICLE_TOOL,
+                            EDIT_ARTICLE_TOOL,
+                            RENAME_ARTICLE_TOOL,
+                            DELETE_ARTICLE_TOOL,
+                            RENAME_CATEGORY_TOOL,
+                            DELETE_CATEGORY_TOOL,
+                        ], // auto-approve our tools (no prompt)
                         settingSources: [], // isolation: ignore ~/.claude settings, hooks, MCP, CLAUDE.md
                         permissionMode: 'default',
                         env: childEnv,

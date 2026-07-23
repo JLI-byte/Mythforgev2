@@ -20,7 +20,18 @@ export type ToolEvent =
           category?: string;
       }
     | { type: 'category'; name: string; icon?: string; parent?: string }
-    | { type: 'move'; article: string; category: string };
+    | { type: 'move'; article: string; category: string }
+    | {
+          type: 'edit';
+          name: string;
+          description?: string;
+          append_sections?: { heading?: string; body: string }[];
+          tags?: string[];
+      }
+    | { type: 'rename_article'; name: string; new_name: string }
+    | { type: 'delete_article'; name: string }
+    | { type: 'rename_category'; name: string; new_name: string }
+    | { type: 'delete_category'; name: string };
 
 interface ResearchChatPanelProps {
     /** null when no project is active — add-to-board is then disabled. */
