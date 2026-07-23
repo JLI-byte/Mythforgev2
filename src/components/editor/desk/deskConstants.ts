@@ -26,6 +26,7 @@ export const DEFAULT_DIMS: Record<DeskWidgetType, { w: number; h: number }> = {
   progress: { w: 340, h: 480 },
   relMap: { w: 440, h: 540 },
   draftNav: { w: 340, h: 620 },
+  beatCard: { w: 320, h: 240 },
   untyped:     { w: 300, h: 200 },
 };
 
@@ -43,6 +44,7 @@ export const PALETTE_ITEMS: { type: DeskWidgetType; icon: string; label: string 
   { type: 'progress',      icon: '📈', label: 'Progress' },
   { type: 'relMap',        icon: '🕸️', label: 'Rel Map' },
   { type: 'draftNav',      icon: '🗺️', label: 'Draft Nav' },
+  { type: 'beatCard',      icon: '🪧', label: 'Beat Card' },
 ];
 
 export const PALETTE_MAP = Object.fromEntries(
