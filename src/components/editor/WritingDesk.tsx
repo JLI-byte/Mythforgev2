@@ -6,6 +6,10 @@ import { useWorkspaceStore, DeskWidget, DeskWidgetType } from '@/store/workspace
 import styles from './WritingDesk.module.css';
 
 import { BinderMode, ResizeDir, MIN_W, MIN_H, DEFAULT_DIMS, PALETTE_ITEMS, PALETTE_MAP } from './desk/deskConstants';
+import { getMethod, getDraftType, buildMethodWidgets } from '@/lib/writingMethods';
+import { MethodLibrary, DraftTableWelcome, ConfirmDialog } from './desk/MethodLibrary';
+import { MethodFinder } from './desk/MethodFinder';
+import { DraftExport, collectExportBeats, ExportBeat } from './desk/DraftExport';
 import { SurfaceCanvas } from './desk/SurfaceCanvas';
 import { EmptyDeskWelcome } from './desk/EmptyDeskWelcome';
 import { WidgetRenderer } from './desk/widgets/WidgetRenderer';
@@ -15,13 +19,42 @@ import { WidgetRenderer } from './desk/widgets/WidgetRenderer';
 // ============================================================
 
 
-export default function WritingDesk() {
+/** Stable empty array so the draft canvas doesn't re-render on globalWidgets churn. */
+const NO_GLOBAL_WIDGETS: DeskWidget[] = [];
+
+interface WritingDeskProps {
+  /** 'desk' = the manuscript Writing Desk (seeds a Writing Zone).
+   *  'draft' = the Draft Table: a blank per-project canvas, no Writing Zone.
+   *  'research' = the Research Table: a blank canvas keyed by scopeKey. */
+  variant?: 'desk' | 'draft' | 'research';
+  /** Research variant only: composite scope key (`project:<id>` | `world:<key>`). */
+  scopeKey?: string | null;
+}
+
+export default function WritingDesk({ variant = 'desk', scopeKey = null }: WritingDeskProps) {
+  const isDraft = variant === 'draft';
+  const isResearch = variant === 'research';
   const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
   const activeDocumentId = useWorkspaceStore(s => s.activeDocumentId);
   const activeSceneId = useWorkspaceStore(s => s.activeSceneId);
-  const deskState = useWorkspaceStore(s => activeProjectId ? s.deskStates[activeProjectId] : null);
-  const updateDeskState = useWorkspaceStore(s => s.updateDeskState);
-  const globalWidgets = useWorkspaceStore(s => s.globalWidgets);
+  // Storage identity: research boards key by scopeKey; desk/draft by project id.
+  const stateKey = isResearch ? scopeKey : activeProjectId;
+  const deskState = useWorkspaceStore(s =>
+    isResearch
+      ? (scopeKey ? s.researchStates[scopeKey] : null)
+      : activeProjectId
+        ? (isDraft ? s.draftStates[activeProjectId] : s.deskStates[activeProjectId])
+        : null
+  );
+  // Route persistence to the matching slice; local name is kept so every
+  // existing call site (updateDeskState(stateKey, …)) is unchanged.
+  const updateDeskStateAction = useWorkspaceStore(s => s.updateDeskState);
+  const updateDraftStateAction = useWorkspaceStore(s => s.updateDraftState);
+  const updateResearchStateAction = useWorkspaceStore(s => s.updateResearchState);
+  const updateDeskState = isResearch ? updateResearchStateAction : isDraft ? updateDraftStateAction : updateDeskStateAction;
+  // Draft and Research are blank canvases — global desk widgets don't bleed on.
+  const globalWidgetsRaw = useWorkspaceStore(s => s.globalWidgets);
+  const globalWidgets = (isDraft || isResearch) ? NO_GLOBAL_WIDGETS : globalWidgetsRaw;
   const updateGlobalWidgets = useWorkspaceStore(s => s.updateGlobalWidgets);
 
   // Derived state from store
@@ -63,14 +96,14 @@ export default function WritingDesk() {
   const viewportRef = useRef<HTMLDivElement>(null);
 
   const updateWidgets = useCallback((next: DeskWidget[], silentUI: boolean = true) => {
-    if (!activeProjectId) return;
+    if (!stateKey) return;
     widgetsRef.current = next;
-    updateDeskState(activeProjectId, { widgets: next });
+    updateDeskState(stateKey, { widgets: next });
     if (!silentUI) {
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 2000);
     }
-  }, [activeProjectId, updateDeskState]);
+  }, [stateKey, updateDeskState]);
 
   const updateDock = useCallback((id: string, dock: DeskWidget['dock']) => {
     const all = [...widgetsRef.current, ...globalWidgets];
@@ -118,6 +151,76 @@ export default function WritingDesk() {
   // New state for creation flow
   const [pendingWidget, setPendingWidget] = useState<{ x: number, y: number, width: number, height: number } | null>(null);
 
+  /** Draft Table: method library modal + finder quiz + per-project format filter. */
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+  const [isFinderOpen, setIsFinderOpen] = useState(false);
+  /** Snapshot of beat cards taken when the export modal opens (null = closed). */
+  const [exportBeats, setExportBeats] = useState<ExportBeat[] | null>(null);
+  const draftMethodId = deskState?.methodId;
+  const draftTypeId = deskState?.draftTypeId ?? null;
+
+  const setDraftType = useCallback((typeId: string) => {
+    if (!activeProjectId) return;
+    updateDeskState(activeProjectId, { draftTypeId: typeId, draftFormat: getDraftType(typeId)?.format });
+  }, [activeProjectId, updateDeskState]);
+
+  const startBlank = useCallback(() => {
+    if (!activeProjectId) return;
+    updateDeskState(activeProjectId, { methodId: 'blank' });
+  }, [activeProjectId, updateDeskState]);
+
+  /** Pending destructive action awaiting user confirmation. */
+  const [confirmState, setConfirmState] = useState<
+    null | { kind: 'apply'; methodId: string; lostCards: number } | { kind: 'clear' }
+  >(null);
+
+  const doApplyMethod = useCallback((methodId: string) => {
+    const method = getMethod(methodId);
+    if (!method || !activeProjectId || !viewportRef.current) return;
+
+    // Switching methods REPLACES the previous outline: beat cards are removed,
+    // everything else (stickies, images, references) stays.
+    const kept = widgetsRef.current.filter(w => w.type !== 'beatCard');
+    const newWidgets = buildMethodWidgets(method);
+    const all = [...kept, ...newWidgets];
+
+    // Fit the view around everything on the canvas so the new cards are visible.
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    all.forEach(w => { minX = Math.min(minX, w.x); minY = Math.min(minY, w.y); maxX = Math.max(maxX, w.x + w.width); maxY = Math.max(maxY, w.y + w.height); });
+    const cw = maxX - minX, ch = maxY - minY;
+    const vW = viewportRef.current.clientWidth, vH = viewportRef.current.clientHeight;
+    const nextZoom = Math.min(Math.max(0.2, Math.min((vW - 100) / cw, (vH - 100) / ch)), 1);
+    const nextOffset = { x: (vW / 2) - (minX + cw / 2) * nextZoom, y: (vH / 2) - (minY + ch / 2) * nextZoom };
+
+    widgetsRef.current = all;
+    updateDeskState(activeProjectId, { widgets: all, methodId, zoom: nextZoom, canvasOffset: nextOffset });
+    setIsLibraryOpen(false);
+    setConfirmState(null);
+  }, [activeProjectId, updateDeskState]);
+
+  const applyMethod = useCallback((methodId: string) => {
+    // Confirm first if replacing beat cards the writer has typed into.
+    // liveContentRef holds text newer than the debounced store copy.
+    const lostCards = widgetsRef.current.filter(w =>
+      w.type === 'beatCard' &&
+      ((liveContentRef.current[w.id]?.text ?? w.content?.text ?? '') as string).trim() !== ''
+    ).length;
+
+    if (lostCards > 0) {
+      setConfirmState({ kind: 'apply', methodId, lostCards });
+      return;
+    }
+    doApplyMethod(methodId);
+  }, [doApplyMethod]);
+
+  const clearCanvas = useCallback(() => {
+    if (!activeProjectId) return;
+    widgetsRef.current = [];
+    setSelectedId(null);
+    updateDeskState(activeProjectId, { widgets: [], methodId: undefined, zoom: 1, canvasOffset: { x: 0, y: 0 } });
+    setConfirmState(null);
+  }, [activeProjectId, updateDeskState]);
+
   const canvasRef = useRef<HTMLDivElement>(null);
   const drawGhostRef = useRef<HTMLDivElement>(null);
 
@@ -125,17 +228,17 @@ export default function WritingDesk() {
   const zoomRafRef = useRef<number | null>(null);
 
   const setOffset = useCallback((off: { x: number; y: number }) => {
-    if (!activeProjectId) return;
+    if (!stateKey) return;
     canvasOffsetRef.current = off;
     offsetRef.current = off;
-    updateDeskState(activeProjectId, { canvasOffset: off });
-  }, [activeProjectId, updateDeskState]);
+    updateDeskState(stateKey, { canvasOffset: off });
+  }, [stateKey, updateDeskState]);
 
   const setZoomValue = useCallback((z: number) => {
-    if (!activeProjectId) return;
+    if (!stateKey) return;
     zoomRef.current = z;
-    updateDeskState(activeProjectId, { zoom: z });
-  }, [activeProjectId, updateDeskState]);
+    updateDeskState(stateKey, { zoom: z });
+  }, [stateKey, updateDeskState]);
 
   // Initial liveContent sync when widgets are added externally
   useEffect(() => {
@@ -153,6 +256,7 @@ export default function WritingDesk() {
 
   useEffect(() => {
     if (!activeProjectId) return;
+    if (isDraft || isResearch) return; // Blank canvases — no seeded Writing Zone.
     const projectWidgets = deskState?.widgets || [];
     const wz = projectWidgets.find(w => w.type === 'writingZone');
 
@@ -177,7 +281,7 @@ export default function WritingDesk() {
       ...current,
       widgets: [nw, ...current.widgets],
     });
-  }, [activeProjectId, deskState, updateDeskState, updateWidgets]);
+  }, [activeProjectId, isDraft, deskState, updateDeskState, updateWidgets]);
 
   const updateContentSilent = useCallback((id: string, content: any) => {
     liveContentRef.current[id] = content;
@@ -451,8 +555,8 @@ export default function WritingDesk() {
     const cw = maxX - minX, ch = maxY - minY, vW = viewportRef.current.clientWidth, vH = viewportRef.current.clientHeight;
     const nextZoom = Math.min(Math.max(0.2, Math.min((vW-100)/cw, (vH-100)/ch)), 1.2);
     const nextOffset = { x: (vW/2) - (minX + cw/2)*nextZoom, y: (vH/2) - (minY + ch/2)*nextZoom };
-    if (activeProjectId) {
-      updateDeskState(activeProjectId, { zoom: nextZoom, canvasOffset: nextOffset });
+    if (stateKey) {
+      updateDeskState(stateKey, { zoom: nextZoom, canvasOffset: nextOffset });
     }
   };
 
@@ -490,7 +594,7 @@ export default function WritingDesk() {
 
   if (!hasMounted) return null;
 
-  if (!activeProjectId) {
+  if (!stateKey) {
     return (
       <div className={styles.deskRoot}>
         <div className={styles.deskViewport}>
@@ -764,6 +868,107 @@ export default function WritingDesk() {
           <button className={styles.fitBtn} style={{ background: 'transparent', color: 'var(--muted)', fontSize: '0.65rem' }} onClick={() => { setZoomValue(1); }}>100%</button>
           <button className={styles.fitBtn} onClick={handleFit}>Fit</button>
         </div>
+
+        {isResearch && (
+          <div className={styles.topCenterControls}>
+            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('sticky')}>📝 Note</button>
+            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('image')}>🖼️ Clipping</button>
+            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('reference')}>🔗 Link</button>
+          </div>
+        )}
+
+        {isDraft && (
+          <>
+            <div className={styles.topCenterControls}>
+              <button
+                className={styles.methodPickerBtn}
+                onMouseDown={e => e.stopPropagation()}
+                onClick={() => setIsLibraryOpen(true)}
+              >
+                📚 {draftMethodId && draftMethodId !== 'blank' ? getMethod(draftMethodId)?.name ?? 'Writing Methods' : 'Writing Methods'}
+              </button>
+              {activeWidgets.some(w => w.type === 'beatCard') && (
+                <button
+                  className={styles.methodPickerBtn}
+                  onMouseDown={e => e.stopPropagation()}
+                  onClick={() => setExportBeats(collectExportBeats(widgetsRef.current, liveContentRef.current))}
+                  title="Export this outline to the Writing Desk or World Bible"
+                >
+                  📤 Export
+                </button>
+              )}
+              {activeWidgets.length > 0 && (
+                <button
+                  className={styles.clearCanvasBtn}
+                  onMouseDown={e => e.stopPropagation()}
+                  onClick={() => setConfirmState({ kind: 'clear' })}
+                  title="Remove everything from this canvas"
+                >
+                  🧹 Clear
+                </button>
+              )}
+            </div>
+
+            {activeWidgets.length === 0 && !draftMethodId && (
+              <DraftTableWelcome
+                onPickMethod={() => setIsLibraryOpen(true)}
+                onFindMethod={() => setIsFinderOpen(true)}
+                onStartBlank={startBlank}
+              />
+            )}
+
+            {isLibraryOpen && (
+              <MethodLibrary
+                onClose={() => setIsLibraryOpen(false)}
+                onApply={applyMethod}
+                draftTypeId={draftTypeId}
+                onDraftTypeChange={setDraftType}
+                onOpenFinder={() => { setIsLibraryOpen(false); setIsFinderOpen(true); }}
+              />
+            )}
+
+            {isFinderOpen && (
+              <MethodFinder
+                onClose={() => setIsFinderOpen(false)}
+                onApply={(methodId, typeId) => {
+                  setDraftType(typeId);
+                  setIsFinderOpen(false);
+                  applyMethod(methodId);
+                }}
+                onBrowseLibrary={() => { setIsFinderOpen(false); setIsLibraryOpen(true); }}
+              />
+            )}
+
+            {confirmState?.kind === 'apply' && (
+              <ConfirmDialog
+                title="Replace your current outline?"
+                body={`${confirmState.lostCards} card${confirmState.lostCards === 1 ? ' contains' : 's contain'} text that will be deleted. Notes, images, and other widgets stay.`}
+                confirmLabel="Replace Outline"
+                onConfirm={() => doApplyMethod(confirmState.methodId)}
+                onCancel={() => setConfirmState(null)}
+              />
+            )}
+
+            {exportBeats && activeProjectId && (
+              <DraftExport
+                projectId={activeProjectId}
+                methodName={draftMethodId && draftMethodId !== 'blank' ? getMethod(draftMethodId)?.name ?? 'Outline' : 'Outline'}
+                beats={exportBeats}
+                onClose={() => setExportBeats(null)}
+              />
+            )}
+
+            {confirmState?.kind === 'clear' && (
+              <ConfirmDialog
+                title="Clear this canvas?"
+                body="Everything on this Draft Table will be removed, including all cards and widgets."
+                confirmLabel="Clear Canvas"
+                onConfirm={clearCanvas}
+                onCancel={() => setConfirmState(null)}
+              />
+            )}
+          </>
+        )}
       </div>
 
       {/* Select-Before-Create (or Upgrade) Picker */}
