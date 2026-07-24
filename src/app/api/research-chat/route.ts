@@ -231,9 +231,13 @@ export async function POST(request: Request) {
                             gotText = true;
                             break;
                         }
+                        // Some local models omit tool_calls[].id — assign stable fallbacks
+                        // BEFORE recording the assistant message, so the ids in the
+                        // assistant turn and the role:'tool' replies always match.
+                        const toolCalls = Array.isArray(msg.tool_calls) ? msg.tool_calls : [];
+                        toolCalls.forEach((tc, i) => { if (!tc.id) tc.id = `call_${step}_${i}`; });
                         convo.push(msg as Record<string, unknown>);
 
-                        const toolCalls = Array.isArray(msg.tool_calls) ? msg.tool_calls : [];
                         if (toolCalls.length > 0) {
                             for (const tc of toolCalls) {
                                 const name = tc?.function?.name;

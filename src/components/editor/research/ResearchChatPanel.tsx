@@ -176,12 +176,23 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
     // flips this to run off their own hardware; the choice + model persist.
     const [provider, setProvider] = useState<'claude' | 'local'>('claude');
     const [localModel, setLocalModel] = useState('');
+    // Read persisted values in an effect (not a lazy initializer) to stay
+    // hydration-safe; WRITE only in the handlers below — a write-on-change
+    // effect fires with the initial '' during StrictMode's double mount and
+    // wipes the stored value before the read can restore it.
     useEffect(() => {
         if (localStorage.getItem('lc-chat-provider') === 'local') setProvider('local');
         setLocalModel(localStorage.getItem('lc-chat-local-model') ?? '');
     }, []);
-    useEffect(() => { localStorage.setItem('lc-chat-provider', provider); }, [provider]);
-    useEffect(() => { localStorage.setItem('lc-chat-local-model', localModel); }, [localModel]);
+    const toggleProvider = () => {
+        const next = provider === 'claude' ? 'local' : 'claude';
+        setProvider(next);
+        localStorage.setItem('lc-chat-provider', next);
+    };
+    const changeLocalModel = (value: string) => {
+        setLocalModel(value);
+        localStorage.setItem('lc-chat-local-model', value);
+    };
     // Editor modal: the interview being edited, and the id it updates on save
     // (null → adding a new custom interview).
     const [editorDraft, setEditorDraft] = useState<Interview | null>(null);
@@ -538,7 +549,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                 <div className={styles.researchChatHeaderActions}>
                     <button
                         className={`${styles.chatProviderBtn} ${provider === 'local' ? styles.chatProviderBtnLocal : ''}`}
-                        onClick={() => setProvider(p => (p === 'claude' ? 'local' : 'claude'))}
+                        onClick={toggleProvider}
                         disabled={isStreaming}
                         title={provider === 'claude' ? 'Using Claude — click to switch to your local model' : 'Using your local model — click to switch back to Claude'}
                     >
@@ -571,7 +582,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                     <input
                         className={styles.chatModelInput}
                         value={localModel}
-                        onChange={e => setLocalModel(e.target.value)}
+                        onChange={e => changeLocalModel(e.target.value)}
                         placeholder="local model (e.g. llama3.1)"
                         title="The Ollama model name to run locally"
                     />

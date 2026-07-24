@@ -47,13 +47,21 @@ function launch(cmd: string): void {
 export type OllamaStatus = 'up' | 'launched' | 'failed';
 
 /**
+ * In-flight launches keyed by origin. Concurrent requests that find the server
+ * down await the SAME launch attempt instead of each spawning `ollama serve`.
+ */
+const inFlight = new Map<string, Promise<OllamaStatus>>();
+
+/**
  * Ensure the local Ollama server is reachable, starting it if needed.
  * - 'up': it was already running.
  * - 'launched': it was down; we started it and it came up.
  * - 'failed': not localhost, auto-launch disabled, or it didn't come up in time.
  *
  * `onLaunching` fires once, right before we spawn the server, so the caller can
- * tell the user we're starting it.
+ * tell the user we're starting it. If another request is already launching this
+ * origin, `onLaunching` still fires (the caller is waiting either way) and the
+ * shared attempt's result is returned.
  */
 export async function ensureOllama(base: string, onLaunching?: () => void): Promise<OllamaStatus> {
     const origin = safeOrigin(base);
@@ -64,18 +72,27 @@ export async function ensureOllama(base: string, onLaunching?: () => void): Prom
     if (!isLocalOrigin(origin)) return 'failed';
     if (process.env.OLLAMA_AUTOLAUNCH === '0' || process.env.OLLAMA_AUTOLAUNCH === 'false') return 'failed';
 
-    onLaunching?.();
-    const cmd = process.env.OLLAMA_LAUNCH_CMD || 'ollama serve';
-    try {
-        launch(cmd);
-    } catch {
-        return 'failed';
+    const existing = inFlight.get(origin);
+    if (existing) {
+        onLaunching?.();
+        return existing;
     }
 
-    // Poll for it to bind — a cold start takes a few seconds.
-    for (let i = 0; i < 15; i++) {
-        await delay(1000);
-        if (await pingUp(origin)) return 'launched';
-    }
-    return 'failed';
+    onLaunching?.();
+    const attempt = (async (): Promise<OllamaStatus> => {
+        const cmd = process.env.OLLAMA_LAUNCH_CMD || 'ollama serve';
+        try {
+            launch(cmd);
+        } catch {
+            return 'failed';
+        }
+        // Poll for it to bind — a cold start takes a few seconds.
+        for (let i = 0; i < 15; i++) {
+            await delay(1000);
+            if (await pingUp(origin)) return 'launched';
+        }
+        return 'failed';
+    })().finally(() => inFlight.delete(origin));
+    inFlight.set(origin, attempt);
+    return attempt;
 }
