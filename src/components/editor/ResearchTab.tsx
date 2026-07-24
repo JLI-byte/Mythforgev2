@@ -4,6 +4,7 @@ import React, { useCallback, useState } from 'react';
 import { useWorkspaceStore, type Entity, type EntityType } from '@/store/workspaceStore';
 import { researchScopeKey, type ResearchScope } from '@/lib/researchScope';
 import { serializeBoard, makeNoteCard } from '@/lib/researchBoard';
+import { addSuggestionToWidgets, serializeSuggestions, type ArticleSuggestion } from '@/lib/articleSuggestions';
 import {
   buildArticleDoc,
   appendSectionsToDoc,
@@ -37,7 +38,13 @@ export default function ResearchTab() {
   // re-render on every board or entity edit.
   const getContext = useCallback(() => {
     const s = useWorkspaceStore.getState();
-    const board = scopeKey ? serializeBoard(s.researchStates[scopeKey]?.widgets ?? []) : '';
+    const widgets = scopeKey ? s.researchStates[scopeKey]?.widgets ?? [] : [];
+    // Include pending suggestions so the assistant won't re-propose them.
+    const pending = serializeSuggestions(widgets);
+    const board = [
+      serializeBoard(widgets),
+      pending ? `Already suggested (pending on the board):\n${pending}` : '',
+    ].filter(Boolean).join('\n\n');
     const project = s.projects.find(p => p.id === s.activeProjectId) ?? null;
     const worldKey = worldKeyForProject(project);
     const layout = getWorldBibleConfig(s.worldBibles, worldKey).layout;
@@ -58,6 +65,28 @@ export default function ResearchTab() {
       s.updateResearchState(scopeKey, {
         widgets: [...current, makeNoteCard(evt.text, current.length)],
       });
+      return;
+    }
+
+    if (evt.type === 'suggest') {
+      if (!scopeKey) return;
+      const proj = s.projects.find(p => p.id === s.activeProjectId) ?? null;
+      const key = worldKeyForProject(proj);
+      const worldEntities = s.entities.filter(e => worldKeyForEntity(e) === key);
+      // Don't suggest something that already has an article.
+      if (findEntityByName(worldEntities, evt.name)) return;
+      const roots = getWorldBibleConfig(s.worldBibles, key).layout.roots;
+      const suggestion: ArticleSuggestion = {
+        id: crypto.randomUUID(),
+        name: evt.name,
+        type: evt.entityType,
+        category: evt.category,
+        isNewCategory: Boolean(evt.category) && !resolveFolderIdByName(roots, evt.category),
+        reason: evt.reason,
+      };
+      const widgets = s.researchStates[scopeKey]?.widgets ?? [];
+      const next = addSuggestionToWidgets(widgets, suggestion);
+      if (next !== widgets) s.updateResearchState(scopeKey, { widgets: next });
       return;
     }
 

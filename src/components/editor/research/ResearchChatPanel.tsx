@@ -21,6 +21,7 @@ interface ChatMessage {
 /** An AI action the panel forwards to the tab to apply against the store. */
 export type ToolEvent =
     | { type: 'card'; text: string }
+    | { type: 'suggest'; name: string; entityType: string; category?: string; reason?: string }
     | {
           type: 'article';
           name: string;

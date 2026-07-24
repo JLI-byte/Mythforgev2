@@ -16,6 +16,7 @@ import { ProgressRenderer } from './ProgressRenderer';
 import { RelationshipMapRenderer } from './RelationshipMapRenderer';
 import { DraftNavRenderer } from './DraftNavRenderer';
 import { BeatCardRenderer } from './BeatCardRenderer';
+import { ArticleSuggestionsRenderer } from './ArticleSuggestionsRenderer';
 import { UntypedWidgetRenderer } from './UntypedWidgetRenderer';
 
 // ============================================================
@@ -67,6 +68,7 @@ export const WidgetRenderer = React.memo(function WidgetRenderer({
     case 'relMap':      return <RelationshipMapRenderer content={content} onChange={handleChange} />;
     case 'draftNav':    return <DraftNavRenderer content={content} onChange={handleChange} />;
     case 'beatCard':    return <BeatCardRenderer content={content} onChange={handleChange} />;
+    case 'articleSuggestions': return <ArticleSuggestionsRenderer content={content} onChange={handleChangeImmediate} />;
     case 'untyped':     return <UntypedWidgetRenderer />;
     default:            return null;
   }
