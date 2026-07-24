@@ -6298,3 +6298,13 @@
   cursor: default;
 }
 
+/* Send flips to Stop while a reply is streaming. */
+.researchChatStopBtn {
+  background: color-mix(in srgb, var(--danger, #e5484d) 78%, transparent);
+  white-space: nowrap;
+}
+
+.researchChatStopBtn:hover {
+  background: var(--danger, #e5484d);
+}
+

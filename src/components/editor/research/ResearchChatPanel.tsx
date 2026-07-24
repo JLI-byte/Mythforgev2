@@ -13,16 +13,11 @@ import {
 import { InterviewMenu } from './InterviewMenu';
 import { InterviewEditorModal } from './InterviewEditorModal';
 import { CreditTracker } from './CreditTracker';
+import type { ChatMessage, PendingChange, ToolEvent } from '@/lib/researchChatTypes';
 import styles from '../WritingDesk.module.css';
 
-/** A mutating action held for the user to Apply or Discard before it touches the store. */
-interface PendingChange {
-    id: string;
-    label: string;
-    evt: ToolEvent;
-    status: 'pending' | 'applied' | 'discarded';
-    warning?: string;
-}
+// Re-export so existing consumers (ResearchTab) keep importing from here.
+export type { ToolEvent };
 
 // Minimal typing for the Web Speech API (absent from some TS DOM lib configs).
 interface SpeechRecognitionLike {
@@ -39,21 +34,6 @@ type SpeechRecognitionCtor = new () => SpeechRecognitionLike;
 interface WindowWithSpeech extends Window {
     SpeechRecognition?: SpeechRecognitionCtor;
     webkitSpeechRecognition?: SpeechRecognitionCtor;
-}
-
-interface ChatMessage {
-    role: 'user' | 'assistant';
-    content: string;
-    /** Clickable choices the assistant offered (via ask_options). */
-    options?: { prompt: string; choices: string[]; chosen?: string };
-    /** In-place edits/deletes/renames awaiting the user's Apply/Discard. */
-    pending?: PendingChange[];
-    /** The user's 👍/👎 on an assistant reply (also sends a quick steer). */
-    reaction?: 'up' | 'down';
-    /** Images the assistant generated (data URLs), shown inline with save actions. */
-    generatedImages?: { prompt: string; url: string }[];
-    /** Which backend produced this reply — tints the bubble (Claude vs local). */
-    provider?: 'claude' | 'local';
 }
 
 /** Event types held for preview instead of applied immediately (mutating-in-place). */
@@ -118,35 +98,6 @@ function renderWithEntityChips(
     return out;
 }
 
-/** An AI action the panel forwards to the tab to apply against the store. */
-export type ToolEvent =
-    | { type: 'card'; text: string }
-    | { type: 'suggest'; name: string; entityType: string; category?: string; reason?: string }
-    | { type: 'flag'; kind: 'contradiction' | 'gap'; summary: string; detail?: string }
-    | { type: 'understanding'; summary: string; preferences: string }
-    | { type: 'save_image'; target: 'board' | 'article'; url: string; label?: string; articleName?: string }
-    | {
-          type: 'article';
-          name: string;
-          entityType: string;
-          description: string;
-          sections: { heading?: string; body: string }[];
-          category?: string;
-      }
-    | { type: 'category'; name: string; icon?: string; parent?: string }
-    | { type: 'move'; article: string; category: string }
-    | {
-          type: 'edit';
-          name: string;
-          description?: string;
-          append_sections?: { heading?: string; body: string }[];
-          tags?: string[];
-      }
-    | { type: 'rename_article'; name: string; new_name: string }
-    | { type: 'delete_article'; name: string }
-    | { type: 'rename_category'; name: string; new_name: string }
-    | { type: 'delete_category'; name: string };
-
 interface ResearchChatPanelProps {
     /** null when no project is active — add-to-board is then disabled. */
     scopeKey: string | null;
@@ -162,7 +113,60 @@ interface ResearchChatPanelProps {
 }
 
 export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, onCollapse }: ResearchChatPanelProps) {
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    // Conversations live in the store keyed by board scope, so history survives
+    // collapsing the panel, switching tabs, and reloads. Streaming stays in
+    // local state for speed; the store mirror is debounced, and flushed on
+    // unmount and on board switch.
+    const historyKey = scopeKey ?? 'standalone';
+    const historyKeyRef = useRef(historyKey);
+    const [messages, setMessagesState] = useState<ChatMessage[]>(
+        () => useWorkspaceStore.getState().chatHistories[historyKey] ?? [],
+    );
+    const messagesRef = useRef(messages);
+    const persistTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const setMessages = (updater: React.SetStateAction<ChatMessage[]>) => {
+        setMessagesState(prev => {
+            const next = typeof updater === 'function' ? updater(prev) : updater;
+            messagesRef.current = next;
+            return next;
+        });
+        if (persistTimer.current) clearTimeout(persistTimer.current);
+        persistTimer.current = setTimeout(() => {
+            persistTimer.current = null;
+            useWorkspaceStore.getState().setChatHistory(historyKeyRef.current, messagesRef.current);
+        }, 400);
+    };
+    const flushHistory = (key: string) => {
+        if (persistTimer.current) {
+            clearTimeout(persistTimer.current);
+            persistTimer.current = null;
+        }
+        useWorkspaceStore.getState().setChatHistory(key, messagesRef.current);
+    };
+    // Board/scope switch: flush the old conversation, stop any stream, load the new one.
+    useEffect(() => {
+        if (historyKeyRef.current !== historyKey) {
+            flushHistory(historyKeyRef.current);
+            abortRef.current?.abort();
+            historyKeyRef.current = historyKey;
+            const next = useWorkspaceStore.getState().chatHistories[historyKey] ?? [];
+            messagesRef.current = next;
+            setMessagesState(next);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [historyKey]);
+    // If the panel mounted before the persisted store finished hydrating, pick
+    // up the stored conversation once hydration lands (never over a live one).
+    const storeHydrated = useWorkspaceStore(s => s._hasHydrated);
+    useEffect(() => {
+        if (storeHydrated && messagesRef.current.length === 0) {
+            const stored = useWorkspaceStore.getState().chatHistories[historyKeyRef.current] ?? [];
+            if (stored.length > 0) {
+                messagesRef.current = stored;
+                setMessagesState(stored);
+            }
+        }
+    }, [storeHydrated]);
     const [input, setInput] = useState('');
     const [isStreaming, setIsStreaming] = useState(false);
     // The active interview's rendered guide ('' when none). Once an interview is
@@ -248,11 +252,15 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
             .map(e => ({ id: e.id, name: e.name }));
     }, [entities, activeProject]);
 
-    // Abort any in-flight request if the panel unmounts (e.g. switching tabs
-    // mid-stream) so the fetch and its subprocess don't keep running.
+    // On unmount (collapse, tab switch): abort any in-flight request so the
+    // fetch and its subprocess don't keep running, and flush the conversation
+    // to the store so nothing typed or streamed is lost.
     useEffect(() => () => {
         abortRef.current?.abort();
         recognitionRef.current?.stop();
+        if (persistTimer.current) clearTimeout(persistTimer.current);
+        useWorkspaceStore.getState().setChatHistory(historyKeyRef.current, messagesRef.current);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Toggle voice dictation: recognized speech streams into the input box.
@@ -419,7 +427,11 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
             }
             if (buffer) handleEvent(buffer);
         } catch (err) {
-            if (controller.signal.aborted) return; // cancelled by unmount — no error note
+            if (controller.signal.aborted) {
+                // Stopped by the user (⏹) or the panel unmounting — mark, don't error.
+                appendToAssistant('\n\n⏹ (stopped)');
+                return;
+            }
             const detail = err instanceof Error ? err.message : 'network error';
             appendToAssistant(`\n\n[Chat failed: ${detail}]`);
         } finally {
@@ -759,9 +771,19 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                         {isListening ? '⏹' : '🎤'}
                     </button>
                 )}
-                <button className={styles.researchChatSendBtn} onClick={() => send()} disabled={isStreaming || (!input.trim() && !imageAttach)}>
-                    {isStreaming ? '…' : 'Send'}
-                </button>
+                {isStreaming ? (
+                    <button
+                        className={`${styles.researchChatSendBtn} ${styles.researchChatStopBtn}`}
+                        onClick={() => abortRef.current?.abort()}
+                        title="Stop generating"
+                    >
+                        ⏹ Stop
+                    </button>
+                ) : (
+                    <button className={styles.researchChatSendBtn} onClick={() => send()} disabled={!input.trim() && !imageAttach}>
+                        Send
+                    </button>
+                )}
             </div>
 
             {editorDraft && (

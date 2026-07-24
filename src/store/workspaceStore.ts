@@ -7,6 +7,7 @@ import { migrateWorkspaceSchema } from './migrateWorkspaceSchema';
 import { DEFAULT_WORLD_BIBLE_LAYOUT } from '@/lib/worldBibleNav';
 import { wouldCreateCycle, fileByType } from '@/lib/folderTree';
 import type { Interview } from '@/lib/interviews/types';
+import { sanitizeChatHistories, type ChatMessage as ResearchChatMessage } from '@/lib/researchChatTypes';
 
 // Cover colors auto-assigned to new projects in rotation
 export const COVER_COLORS = [
@@ -688,6 +689,13 @@ export interface WorkspaceState {
      */
     customBoards: Record<string, ResearchBoard[]>;
 
+    /**
+     * Research-chat conversations, keyed by board scope key — so the chat
+     * survives collapsing the panel, switching tabs, and reloads. Persisted in
+     * sanitized form (capped length, generated images dropped).
+     */
+    chatHistories: Record<string, ResearchChatMessage[]>;
+
     /** User-authored research-chat interview skills (built-ins live in the registry). */
     customInterviews: Interview[];
 
@@ -895,6 +903,9 @@ export interface WorkspaceState {
     addResearchBoard: (baseScopeKey: string, name: string) => string;
     renameResearchBoard: (baseScopeKey: string, boardId: string, name: string) => void;
     deleteResearchBoard: (baseScopeKey: string, boardId: string) => void;
+
+    /** Replace a board's chat conversation (the panel mirrors its state here). */
+    setChatHistory: (scopeKey: string, messages: ResearchChatMessage[]) => void;
 
     /** Custom interview skills — add, update in place, or remove by id. */
     addInterview: (interview: Interview) => void;
@@ -1169,6 +1180,8 @@ export function partializeWorkspace(state: WorkspaceState) {
         draftStates: state.draftStates,
         researchStates: state.researchStates,
         customBoards: state.customBoards,
+        // Persist conversations in shrunk form: capped length, image data dropped.
+        chatHistories: sanitizeChatHistories(state.chatHistories),
         customInterviews: state.customInterviews,
         worldUnderstanding: state.worldUnderstanding,
         worldBibles: state.worldBibles,
@@ -1259,6 +1272,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             draftStates: {},
             researchStates: {},
             customBoards: {},
+            chatHistories: {},
             customInterviews: [],
             worldUnderstanding: {},
             writingGoal: { dailyTarget: 0, sessionTarget: 0 },
@@ -2212,13 +2226,21 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             deleteResearchBoard: (baseScopeKey, boardId) =>
                 set((state) => {
                     const nextBoards = (state.customBoards[baseScopeKey] ?? []).filter(b => b.id !== boardId);
-                    // Drop the deleted board's canvas state too.
-                    const { [`${baseScopeKey}::${boardId}`]: _removed, ...restStates } = state.researchStates;
+                    // Drop the deleted board's canvas state and chat history too.
+                    const boardKey = `${baseScopeKey}::${boardId}`;
+                    const { [boardKey]: _removed, ...restStates } = state.researchStates;
+                    const { [boardKey]: _removedChat, ...restChats } = state.chatHistories;
                     return {
                         customBoards: { ...state.customBoards, [baseScopeKey]: nextBoards },
                         researchStates: restStates,
+                        chatHistories: restChats,
                     };
                 }),
+
+            setChatHistory: (scopeKey, messages) =>
+                set((state) => ({
+                    chatHistories: { ...state.chatHistories, [scopeKey]: messages },
+                })),
 
             addInterview: (interview) =>
                 set((state) => ({ customInterviews: [...state.customInterviews, interview] })),
@@ -2414,6 +2436,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     // Custom research boards arrived later too.
                     if (!state.customBoards || typeof state.customBoards !== 'object') {
                         state.customBoards = {};
+                    }
+                    if (!state.chatHistories || typeof state.chatHistories !== 'object') {
+                        state.chatHistories = {};
                     }
                     if (!state.worldUnderstanding || typeof state.worldUnderstanding !== 'object') {
                         state.worldUnderstanding = {};

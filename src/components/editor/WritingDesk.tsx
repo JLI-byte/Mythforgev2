@@ -792,17 +792,27 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                 <div className={styles.dockedHandleDots}><span/><span/><span/></div>
 
                 <div className={styles.deskHeaderControls}>
-                  <button 
-                    className={`${styles.deskHeaderBtn} ${w.dock ? styles.deskHeaderBtnActive : ''}`} 
-                    title={w.dock ? "Unlock & Move Freely" : "Dock to Center"} 
+                  {isResearch && (
+                    <button
+                      className={styles.deskHeaderBtn}
+                      title="Ask the AI about this"
+                      onMouseDown={e => e.stopPropagation()}
+                      onClick={() => setChatAttachment(chatAttachmentForWidget({ ...w, content: liveContentRef.current[w.id] ?? w.content }))}
+                    >
+                      💬
+                    </button>
+                  )}
+                  <button
+                    className={`${styles.deskHeaderBtn} ${w.dock ? styles.deskHeaderBtnActive : ''}`}
+                    title={w.dock ? "Unlock & Move Freely" : "Dock to Center"}
                     onMouseDown={e => e.stopPropagation()}
                     onClick={() => updateDock(w.id, w.dock ? null : 'center')}
                   >
                     ⚓
                   </button>
-                  <button 
-                    className={styles.deskHeaderBtn} 
-                    title={w.content.isCollapsed ? "Expand" : "Minimize"} 
+                  <button
+                    className={styles.deskHeaderBtn}
+                    title={w.content.isCollapsed ? "Expand" : "Minimize"}
                     onMouseDown={e => e.stopPropagation()}
                     onClick={() => updateContentImmediate(w.id, { ...w.content, isCollapsed: !w.content.isCollapsed })}
                   >
