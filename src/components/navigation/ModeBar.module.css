@@ -18,6 +18,7 @@
 }
 
 .leftGroup {
+  position: relative;
   display: flex;
   align-items: center;
   height: 100%;
@@ -25,21 +26,18 @@
 }
 
 .modeBtn {
+  position: relative;
+  z-index: 1;
   height: 100%;
   display: flex;
   align-items: center;
+  justify-content: center;
   padding: 0 16px;
   background: none;
   border: none;
-  border-bottom: 2px solid transparent;
   color: var(--muted, #958ea0);
   cursor: pointer;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  font-family: var(--font-sans);
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition: color 0.25s ease;
 }
 
 .modeBtn:hover {
@@ -48,21 +46,77 @@
 
 .modeBtnActive {
   color: var(--foreground, #e5e2e1);
-  border-bottom-color: var(--accent, #d0bcff);
 }
 
-.modeBtnDisabled {
-  opacity: 0.35;
-  cursor: not-allowed;
+/* Home — sits before the tabs, with a subtle divider */
+.homeBtn {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  margin-right: 6px;
+  background: none;
+  border: none;
+  border-right: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+  color: var(--muted, #958ea0);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.homeBtn:hover,
+.homeBtnActive {
+  color: var(--foreground, #e5e2e1);
 }
 
+/* ── Limelight indicator ─────────────────────────────── */
 
+.limelight {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+.limelightReady {
+  transition:
+    left 0.42s cubic-bezier(0.5, 0.15, 0.15, 1),
+    width 0.42s cubic-bezier(0.5, 0.15, 0.15, 1),
+    opacity 0.3s ease;
+}
+.limelightHidden {
+  opacity: 0;
+}
 
+/* the bright white light source above the wording */
+.limelightBar {
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 2px;
+  border-radius: 2px;
+  background: #ffffff;
+  box-shadow:
+    0 0 10px 1px rgba(255, 255, 255, 0.85),
+    0 0 22px 4px rgba(255, 255, 255, 0.45);
+}
 
-/* ── ModeBar spacer ──────────────────────────────────── */
-
-.modeBarSpacer {
-  flex: 1;
+/* the white light cone shining down over the active tab */
+.limelightCone {
+  position: absolute;
+  top: 0;
+  left: -22%;
+  width: 144%;
+  height: 46px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.5) 0%,
+    transparent 82%
+  );
+  clip-path: polygon(37% 0, 63% 0, 100% 100%, 0 100%);
+  filter: blur(6px);
 }
 
 /* ── Global search bar ───────────────────────────────── */
@@ -238,32 +292,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   margin-top: 2px;
-}
-
-.homeBtn {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  padding: 0 14px;
-  background: none;
-  border: none;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 1rem;
-  transition: color 0.15s;
-  flex-shrink: 0;
-}
-
-.homeBtn:hover {
-  color: var(--foreground);
-}
-
-.modeSep {
-  width: 1px;
-  height: 20px;
-  background: rgba(var(--overlay-rgb), 0.1);
-  flex-shrink: 0;
-  margin: 0 4px;
 }
 
 .topBarActions {

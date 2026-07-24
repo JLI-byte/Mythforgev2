@@ -58,6 +58,11 @@ export function Bookshelf() {
     /** Extra rows added per shelf beyond the default 3 (keyed by world id / 'standalone'). */
     const [extraRows, setExtraRows] = useState<Record<string, number>>({});
 
+    /** Story-creation modal state (replaces the unsupported native prompt()). */
+    const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
+    const [storyWorldId, setStoryWorldId] = useState<string | undefined>(undefined);
+    const [storyName, setStoryName] = useState('');
+
     /** Wizard Form Data: Holds transient state for world creation/editing */
     const [wizardData, setWizardData] = useState<Partial<World>>({
         name: '',
@@ -212,15 +217,36 @@ export function Bookshelf() {
         setDragOverWorldId(null);
     };
 
+    /**
+     * Opening a book routes by progress: a story with written scene content
+     * goes to the Writing Desk; an unwritten one starts at the Draft Table.
+     */
     const handleSelectProject = (id: string) => {
+        const { scenes } = useWorkspaceStore.getState();
+        const hasWriting = scenes.some(sc =>
+            sc.projectId === id &&
+            sc.content.replace(/<[^>]*>/g, '').trim() !== ''
+        );
         setActiveProject(id);
-        setWorkspaceMode('desk');
+        setWorkspaceMode(hasWriting ? 'desk' : 'template');
     };
 
     // ─── STORY CREATION ─────────────────────────────────────
 
+    /** Opens the story-name modal, remembering which shelf to file it under. */
     const handleCreateStory = (worldId?: string) => {
-        const name = prompt("Enter story name:");
+        setStoryWorldId(worldId);
+        setStoryName('');
+        setIsStoryModalOpen(true);
+    };
+
+    /**
+     * Creates the story with its first chapter + scene, then routes to the
+     * chosen starting point: the Draft Table (outline first) or the Writing
+     * Desk (dive straight into prose).
+     */
+    const confirmCreateStory = (destination: 'template' | 'desk') => {
+        const name = storyName.trim();
         if (!name) return;
 
         const projectId = crypto.randomUUID();
@@ -232,7 +258,7 @@ export function Bookshelf() {
             name,
             writingMode: 'novel',
             coverColor: COVER_COLORS[Math.floor(Math.random() * COVER_COLORS.length)],
-            worldId,
+            worldId: storyWorldId,
             createdAt: new Date()
         });
 
@@ -253,6 +279,11 @@ export function Bookshelf() {
             order: 0,
             createdAt: new Date()
         });
+
+        setIsStoryModalOpen(false);
+        setStoryName('');
+        setActiveProject(projectId);
+        setWorkspaceMode(destination);
     };
 
     // ─── RENDERING ─────────────────────────────────────────
@@ -562,6 +593,51 @@ export function Bookshelf() {
                                     {editingWorldId ? 'Save Changes' : '✓ Create Shelf'}
                                 </button>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ─── NEW STORY MODAL ─────────────────────────────────── */}
+            {isStoryModalOpen && (
+                <div className={styles.wizardBackdrop} onClick={() => setIsStoryModalOpen(false)}>
+                    <div className={styles.wizardModal} onClick={e => e.stopPropagation()}>
+                        <h2 className={styles.wizardTitle}>New Story</h2>
+                        <div style={{ marginBottom: '16px' }}>
+                            <label className={styles.shelfLabel}>Story Name</label>
+                            <input
+                                className={styles.wizardInput}
+                                value={storyName}
+                                onChange={e => setStoryName(e.target.value)}
+                                onKeyDown={e => {
+                                    if (e.key === 'Enter') { e.preventDefault(); confirmCreateStory('template'); }
+                                    if (e.key === 'Escape') setIsStoryModalOpen(false);
+                                }}
+                                placeholder="e.g. The Long Winter"
+                                autoFocus
+                            />
+                        </div>
+                        <label className={styles.shelfLabel}>How do you want to begin?</label>
+                        <div className={styles.beginOptions}>
+                            <button
+                                className={styles.beginOption}
+                                onClick={() => confirmCreateStory('template')}
+                                disabled={!storyName.trim()}
+                            >
+                                <span className={styles.beginOptionTitle}>🗺️ Draft First</span>
+                                <span className={styles.beginOptionDesc}>Outline on the Draft Table with a writing method</span>
+                            </button>
+                            <button
+                                className={styles.beginOption}
+                                onClick={() => confirmCreateStory('desk')}
+                                disabled={!storyName.trim()}
+                            >
+                                <span className={styles.beginOptionTitle}>✍️ Start Writing</span>
+                                <span className={styles.beginOptionDesc}>Jump straight into prose on the Writing Desk</span>
+                            </button>
+                        </div>
+                        <div className={styles.wizardActions}>
+                            <button className={styles.wizardBtnSecondary} onClick={() => setIsStoryModalOpen(false)}>Cancel</button>
                         </div>
                     </div>
                 </div>
