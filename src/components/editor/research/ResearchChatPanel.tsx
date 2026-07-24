@@ -170,6 +170,16 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
     // Bumped after each assistant turn so the credit tracker refetches (a turn
     // may have spent OpenRouter credits on image generation).
     const [creditSignal, setCreditSignal] = useState(0);
+    // Chat backend: 'claude' (Max subscription) or 'local' (Ollama). The user
+    // flips this to run off their own hardware; the choice + model persist.
+    const [provider, setProvider] = useState<'claude' | 'local'>('claude');
+    const [localModel, setLocalModel] = useState('');
+    useEffect(() => {
+        if (localStorage.getItem('lc-chat-provider') === 'local') setProvider('local');
+        setLocalModel(localStorage.getItem('lc-chat-local-model') ?? '');
+    }, []);
+    useEffect(() => { localStorage.setItem('lc-chat-provider', provider); }, [provider]);
+    useEffect(() => { localStorage.setItem('lc-chat-local-model', localModel); }, [localModel]);
     // Editor modal: the interview being edited, and the id it updates on save
     // (null → adding a new custom interview).
     const [editorDraft, setEditorDraft] = useState<Interview | null>(null);
@@ -343,6 +353,8 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                     interviewGuide: forceGuide ?? interviewGuide,
                     attachment: attach ? { label: attach.label, content: attach.content } : undefined,
                     image: img ? { mediaType: img.mediaType, data: img.data } : undefined,
+                    provider,
+                    localModel: provider === 'local' ? localModel : undefined,
                 }),
                 signal: controller.signal,
             });
@@ -523,6 +535,14 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                 <CreditTracker refreshSignal={creditSignal} />
                 <div className={styles.researchChatHeaderActions}>
                     <button
+                        className={`${styles.chatProviderBtn} ${provider === 'local' ? styles.chatProviderBtnLocal : ''}`}
+                        onClick={() => setProvider(p => (p === 'claude' ? 'local' : 'claude'))}
+                        disabled={isStreaming}
+                        title={provider === 'claude' ? 'Using Claude — click to switch to your local model' : 'Using your local model — click to switch back to Claude'}
+                    >
+                        {provider === 'claude' ? '🧠 Claude' : '💻 Local'}
+                    </button>
+                    <button
                         className={styles.researchBuildWorldBtn}
                         onClick={reviewWorld}
                         disabled={isStreaming}
@@ -542,6 +562,19 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                     )}
                 </div>
             </div>
+
+            {provider === 'local' && (
+                <div className={styles.chatModelBar}>
+                    <span className={styles.chatModelBarIcon}>💻</span>
+                    <input
+                        className={styles.chatModelInput}
+                        value={localModel}
+                        onChange={e => setLocalModel(e.target.value)}
+                        placeholder="local model (e.g. llama3.1)"
+                        title="The Ollama model name to run locally"
+                    />
+                </div>
+            )}
 
             <div className={styles.researchChatScroll} ref={scrollRef}>
                 {messages.length === 0 && (

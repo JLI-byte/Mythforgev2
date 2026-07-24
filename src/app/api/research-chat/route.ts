@@ -1,55 +1,20 @@
 import { NextResponse } from 'next/server';
 import { query, tool, createSdkMcpServer, type SDKUserMessage } from '@anthropic-ai/claude-agent-sdk';
 import { z } from 'zod';
+import { researchToolDefs, ENTITY_TYPES } from '@/lib/researchToolDefs';
 
 // Must spawn the local Claude Code process — Node runtime, never edge.
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-/** Default model for the research assistant. */
+/** Default model for the Claude-backed research assistant. */
 const RESEARCH_CHAT_MODEL = 'claude-opus-4-8';
 
-/** Fully-qualified names of the in-process tools (mcp__<server>__<tool>). */
-const ADD_CARD_TOOL = 'mcp__research__add_research_card';
-const SUGGEST_ARTICLE_TOOL = 'mcp__research__suggest_article';
-const FLAG_ISSUE_TOOL = 'mcp__research__flag_issue';
-const UPDATE_UNDERSTANDING_TOOL = 'mcp__research__update_understanding';
-const GENERATE_IMAGE_TOOL = 'mcp__research__generate_image';
-const ASK_OPTIONS_TOOL = 'mcp__research__ask_options';
-
-/** OpenRouter image model, overridable via env. */
-const OPENROUTER_IMAGE_MODEL = process.env.OPENROUTER_IMAGE_MODEL || 'black-forest-labs/flux.2-pro';
-
-/**
- * Pull a displayable image (a data URL) out of an OpenRouter image response,
- * tolerating both the dedicated /images shape (data[].b64_json) and the older
- * chat-completions image shape (message.images[].image_url.url).
- */
-function extractImageDataUrl(json: unknown): string | null {
-    const j = json as {
-        data?: Array<{ b64_json?: string; media_type?: string; url?: string }>;
-        choices?: Array<{ message?: { images?: Array<{ image_url?: { url?: string } }> } }>;
-    };
-    const d = j?.data?.[0];
-    if (d?.b64_json) return `data:${d.media_type || 'image/png'};base64,${d.b64_json}`;
-    const chatImg = j?.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-    if (typeof chatImg === 'string') return chatImg;
-    if (typeof d?.url === 'string') return d.url;
-    return null;
-}
-const CREATE_ARTICLE_TOOL = 'mcp__research__create_article';
-const CREATE_CATEGORY_TOOL = 'mcp__research__create_category';
-const MOVE_ARTICLE_TOOL = 'mcp__research__move_article';
-const EDIT_ARTICLE_TOOL = 'mcp__research__edit_article';
-const RENAME_ARTICLE_TOOL = 'mcp__research__rename_article';
-const DELETE_ARTICLE_TOOL = 'mcp__research__delete_article';
-const RENAME_CATEGORY_TOOL = 'mcp__research__rename_category';
-const DELETE_CATEGORY_TOOL = 'mcp__research__delete_category';
-
-/** The eight World Bible entity types. */
-const ENTITY_TYPES = [
-    'character', 'location', 'faction', 'artifact', 'lore', 'magic', 'religion', 'species',
-] as const;
+/** Local (Ollama) fallback defaults, both overridable via env / the request. */
+const OLLAMA_BASE_URL = (process.env.OLLAMA_BASE_URL || 'http://localhost:11434/v1').replace(/\/+$/, '');
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.1';
+/** Bound the local tool-call loop so a misbehaving model can't spin forever. */
+const LOCAL_MAX_STEPS = 8;
 
 interface ChatMessage {
     role: 'user' | 'assistant';
@@ -57,21 +22,31 @@ interface ChatMessage {
 }
 
 /**
- * Research AI chat — LOCAL ONLY. Drives the user's signed-in Claude Code via
- * the Agent SDK, so replies run on their Max subscription. Built-in file/bash
- * tools are disabled (`tools: []`); the assistant's only capabilities are the
- * in-process tools add_research_card, create_article, create_category, and
- * move_article.
+ * Research AI chat. Two interchangeable backends, selected per request:
+ *  - `claude` (default): drives the user's signed-in Claude Code via the Agent
+ *    SDK, so replies run on their Max subscription.
+ *  - `local`: an OpenAI-compatible local model (Ollama) at OLLAMA_BASE_URL —
+ *    a quick, reliable fallback the user flips to when they want to run off
+ *    their own hardware. Same worldbuilding tools, same NDJSON event contract.
  *
  * The response is newline-delimited JSON (NDJSON). Each line is a text chunk
- * ({type:'text',text}) or a tool event the client applies to the store:
- * {type:'card'}, {type:'article'}, {type:'category'}, or {type:'move'}. The
- * tools run server-side here, but the board and World Bible live in the
- * browser, so each tool forwards its parameters as an event and the client
- * performs the mutation.
+ * ({type:'text',text}) or a tool event the client applies to the store
+ * ({type:'card'|'article'|'category'|'move'|…}). The tools run server-side here,
+ * but the board and World Bible live in the browser, so each tool forwards its
+ * parameters as an event and the client performs the mutation.
  */
 export async function POST(request: Request) {
-    let body: { messages?: ChatMessage[]; board?: string; world?: string; interviewGuide?: string; attachment?: { label?: string; content?: string }; image?: { mediaType?: string; data?: string }; understanding?: string };
+    let body: {
+        messages?: ChatMessage[];
+        board?: string;
+        world?: string;
+        interviewGuide?: string;
+        attachment?: { label?: string; content?: string };
+        image?: { mediaType?: string; data?: string };
+        understanding?: string;
+        provider?: string;
+        localModel?: string;
+    };
     try {
         body = await request.json();
     } catch {
@@ -95,8 +70,14 @@ export async function POST(request: Request) {
     // The assistant's own running note about this world, fed back as memory.
     const understanding = typeof body.understanding === 'string' ? body.understanding.slice(0, 4000) : '';
 
+    // Backend selection. Defaults to Claude; 'local' routes to the Ollama fallback.
+    const provider = body.provider === 'local' ? 'local' : 'claude';
+    const localModel = typeof body.localModel === 'string' && body.localModel.trim()
+        ? body.localModel.trim().slice(0, 120)
+        : OLLAMA_MODEL;
+
     // An image the user attached to look at. Only well-formed, reasonably sized
-    // base64 of a supported type is forwarded to the model.
+    // base64 of a supported type is forwarded to the model. (Claude backend only.)
     const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     const imageMediaType = typeof body.image?.mediaType === 'string' ? body.image.mediaType : '';
     const imageData = typeof body.image?.data === 'string' ? body.image.data : '';
@@ -171,7 +152,7 @@ export async function POST(request: Request) {
     // Render the conversation as a single prompt string. Board and World Bible
     // content (which can include text the user pasted from elsewhere) is placed
     // in the system prompt behind an explicit "treat as data, never as
-    // instructions" boundary below, because the assistant now has destructive
+    // instructions" boundary above, because the assistant now has destructive
     // tools (delete/rename) — a prompt injection hidden in an article body must
     // not be able to trigger one. A literal "User:"/"Assistant:" line here can
     // still visually spoof a turn boundary, but the worst case is a mangled
@@ -180,366 +161,180 @@ export async function POST(request: Request) {
         .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
         .join('\n\n');
 
-    // With an image attached, the prompt must be a streamed user message whose
-    // content carries an image block alongside the text (a plain string prompt
-    // can't hold an image). Without one, keep the simpler string form.
-    const promptInput = image
-        ? (async function* () {
-            yield {
-                type: 'user',
-                parent_tool_use_id: null,
-                message: {
-                    role: 'user',
-                    content: [
-                        { type: 'image', source: { type: 'base64', media_type: image.mediaType, data: image.data } },
-                        { type: 'text', text: prompt },
-                    ],
-                },
-            } as unknown as SDKUserMessage;
-        })()
-        : prompt;
-
-    // Force the spawned Claude Code to authenticate with the local Max
-    // subscription login, not an API key. Next.js can surface an
-    // ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN in the server environment, which
-    // would otherwise bill API credits ("credit balance too low") instead of
-    // the subscription. Stripping both env vars falls through to the OAuth
-    // profile that `claude` is signed in with.
-    const childEnv: Record<string, string> = {};
-    for (const [key, value] of Object.entries(process.env)) {
-        if (value !== undefined && key !== 'ANTHROPIC_API_KEY' && key !== 'ANTHROPIC_AUTH_TOKEN' && key !== 'OPENROUTER_API_KEY') {
-            childEnv[key] = value;
-        }
-    }
-
     const encoder = new TextEncoder();
     const stream = new ReadableStream<Uint8Array>({
         async start(controller) {
             // Emit one NDJSON event on the response stream. The tool handlers
-            // below run server-side but the board/World Bible live in the
-            // browser, so each tool forwards its parameters as an event and the
-            // client applies it to the store.
+            // run server-side but the board/World Bible live in the browser, so
+            // each tool forwards its parameters as an event and the client
+            // applies it to the store.
             const send = (event: Record<string, unknown>) => {
                 controller.enqueue(encoder.encode(JSON.stringify(event) + '\n'));
             };
 
-            const addCardTool = tool(
-                'add_research_card',
-                "Add a note card to the user's research board. Only use when the user asks to save or add something.",
-                { text: z.string().describe('The note text to place on the board') },
-                async (args) => {
-                    send({ type: 'card', text: args.text });
-                    return { content: [{ type: 'text', text: 'Added a note card to the board.' }] };
-                },
-            );
+            const defs = researchToolDefs();
+            let gotText = false;
 
-            const askOptionsTool = tool(
-                'ask_options',
-                "Offer the user a small set of mutually-exclusive choices as clickable buttons instead of asking in prose. Use it for forks — e.g. 'hard or soft magic?', 'port city or mountain hold?'. Give a short prompt and 2-4 concise options. After calling this, STOP and wait: the user's click becomes their next message.",
-                {
-                    prompt: z.string().describe('The question to put above the choices'),
-                    options: z.array(z.string()).min(2).max(4).describe('2-4 short, mutually-exclusive choices'),
-                },
-                async (args) => {
-                    send({ type: 'options', prompt: args.prompt, options: args.options });
-                    return { content: [{ type: 'text', text: 'Presented options; waiting for the user to choose.' }] };
-                },
-            );
-
-            const updateUnderstandingTool = tool(
-                'update_understanding',
-                "Update your living 'What I Understand' note for this world: a short summary of the world as you now grasp it, and any preferences you've learned about how the user wants to work. Call it when your understanding materially changes or the user corrects you or signals a preference (including 👍/👎). Keep the summary to a tight paragraph.",
-                {
-                    summary: z.string().describe("A tight paragraph summarizing the world as you understand it"),
-                    preferences: z.string().optional().describe("Learned preferences: tone, taste, what to avoid"),
-                },
-                async (args) => {
-                    send({ type: 'understanding', summary: args.summary, preferences: args.preferences ?? '' });
-                    return { content: [{ type: 'text', text: 'Updated my understanding.' }] };
-                },
-            );
-
-            const generateImageTool = tool(
-                'generate_image',
-                "Generate an image from a text prompt and show it in the chat. Use when the user asks you to draw, illustrate, visualize, or make a picture — a character portrait, a map, a location, an item. Write a rich, specific visual prompt (subject, setting, mood, style). Costs the user money, so only when asked.",
-                { prompt: z.string().describe('A detailed visual description of the image to generate') },
-                async (args) => {
-                    const key = process.env.OPENROUTER_API_KEY;
-                    if (!key) {
-                        return { content: [{ type: 'text', text: 'Image generation is not configured — tell the user to add OPENROUTER_API_KEY to .env.local and restart the dev server.' }] };
+            try {
+                if (provider === 'local') {
+                    // ── Local (Ollama) backend: OpenAI-compatible chat + tools ──
+                    const oaiTools = defs.map(d => {
+                        const schema = z.toJSONSchema(z.object(d.shape)) as Record<string, unknown>;
+                        delete schema.$schema; // some strict validators reject this
+                        return { type: 'function', function: { name: d.name, description: d.description, parameters: schema } };
+                    });
+                    // Build the conversation. The board/World Bible boundary lives in
+                    // the system prompt; the chat turns follow as native messages.
+                    const convo: Array<Record<string, unknown>> = [
+                        { role: 'system', content: systemPrompt },
+                        ...messages.map(m => ({ role: m.role, content: m.content })),
+                    ];
+                    if (image) {
+                        // Local text models can't see images; say so rather than drop it silently.
+                        send({ type: 'text', text: '(Local mode can’t view attached images — describe it in text, or switch to Claude.)\n\n' });
+                        gotText = true;
                     }
-                    try {
-                        const resp = await fetch('https://openrouter.ai/api/v1/images', {
+
+                    for (let step = 0; step < LOCAL_MAX_STEPS; step++) {
+                        const resp = await fetch(`${OLLAMA_BASE_URL}/chat/completions`, {
                             method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${key}`,
-                                'Content-Type': 'application/json',
-                                'HTTP-Referer': 'https://lorecanvas.app',
-                                'X-Title': 'LoreCanvas',
-                            },
-                            body: JSON.stringify({ model: OPENROUTER_IMAGE_MODEL, prompt: args.prompt }),
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ model: localModel, messages: convo, tools: oaiTools, stream: false }),
                         });
                         if (!resp.ok) {
                             const errText = await resp.text().catch(() => '');
-                            return { content: [{ type: 'text', text: `Image generation failed (HTTP ${resp.status}). ${errText.slice(0, 200)}` }] };
-                        }
-                        const dataUrl = extractImageDataUrl(await resp.json());
-                        if (!dataUrl) {
-                            return { content: [{ type: 'text', text: 'Image generation returned no usable image.' }] };
-                        }
-                        send({ type: 'generated_image', prompt: args.prompt, dataUrl });
-                        return { content: [{ type: 'text', text: `Generated an image for: ${args.prompt}` }] };
-                    } catch (e) {
-                        return { content: [{ type: 'text', text: `Image generation error: ${e instanceof Error ? e.message : 'unknown'}` }] };
-                    }
-                },
-            );
-
-            const flagIssueTool = tool(
-                'flag_issue',
-                "Flag a consistency problem in the World Bible onto the Consistency & Gaps board. Use kind 'contradiction' when two articles disagree, or 'gap' when something is clearly missing (a faction with no leader, a place mentioned but never described). Non-destructive — this only flags. Skip anything already on the flags list below.",
-                {
-                    kind: z.enum(['contradiction', 'gap']).describe('contradiction (two articles disagree) or gap (something missing)'),
-                    summary: z.string().describe('One-line statement of the problem'),
-                    detail: z.string().optional().describe('A sentence of explanation or how to resolve it'),
-                },
-                async (args) => {
-                    send({ type: 'flag', kind: args.kind, summary: args.summary, detail: args.detail });
-                    return { content: [{ type: 'text', text: `Flagged: ${args.summary}` }] };
-                },
-            );
-
-            const suggestArticleTool = tool(
-                'suggest_article',
-                "Add an entity to the Article Suggestions board as something that probably deserves its own World Bible article but doesn't have one yet. Non-destructive — this only suggests, it never creates the article. Call it freely as you talk whenever you name such a thing.",
-                {
-                    name: z.string().describe('The proposed article / entity name'),
-                    type: z.enum(ENTITY_TYPES).describe('The entity type'),
-                    category: z.string().optional().describe('Best-fitting folder: an existing folder name, or a short new folder name if none fits'),
-                    reason: z.string().optional().describe('One line on what it is / why it matters'),
-                },
-                async (args) => {
-                    send({ type: 'suggest', name: args.name, entityType: args.type, category: args.category, reason: args.reason });
-                    return { content: [{ type: 'text', text: `Suggested "${args.name}".` }] };
-                },
-            );
-
-            const createArticleTool = tool(
-                'create_article',
-                'Create a World Bible article (an entity). Only use when the user asks to create or add an article. Provide rich, multi-section content.',
-                {
-                    name: z.string().describe('The article / entity name'),
-                    type: z.enum(ENTITY_TYPES).describe('The entity type'),
-                    description: z.string().describe('A one- or two-sentence summary'),
-                    sections: z
-                        .array(
-                            z.object({
-                                heading: z.string().optional().describe('Section heading'),
-                                body: z.string().describe('Section prose; blank lines separate paragraphs'),
-                            }),
-                        )
-                        .describe('The article body, as titled sections'),
-                    category: z.string().optional().describe('Existing folder name to file it under (optional)'),
-                },
-                async (args) => {
-                    send({
-                        type: 'article',
-                        name: args.name,
-                        entityType: args.type,
-                        description: args.description,
-                        sections: args.sections,
-                        category: args.category,
-                    });
-                    return { content: [{ type: 'text', text: `Created the "${args.name}" article.` }] };
-                },
-            );
-
-            const createCategoryTool = tool(
-                'create_category',
-                'Create a World Bible category (folder), optionally nested under an existing one. Only use when the user asks to create or add a category.',
-                {
-                    name: z.string().describe('The category (folder) name'),
-                    icon: z.string().optional().describe('An emoji icon (optional)'),
-                    parent: z.string().optional().describe('Existing category name to nest under (optional)'),
-                },
-                async (args) => {
-                    send({ type: 'category', name: args.name, icon: args.icon, parent: args.parent });
-                    return { content: [{ type: 'text', text: `Created the "${args.name}" category.` }] };
-                },
-            );
-
-            const moveArticleTool = tool(
-                'move_article',
-                'Move an existing article into a category. Only use when the user asks to move or reorganize.',
-                {
-                    article: z.string().describe('The article name to move'),
-                    category: z.string().describe('The destination category (folder) name'),
-                },
-                async (args) => {
-                    send({ type: 'move', article: args.article, category: args.category });
-                    return { content: [{ type: 'text', text: `Moved "${args.article}" to "${args.category}".` }] };
-                },
-            );
-
-            const editArticleTool = tool(
-                'edit_article',
-                'Revise an existing article: replace its description, append new sections to its body, and/or add tags. Only use when the user asks to edit, expand, or flesh out an article.',
-                {
-                    name: z.string().describe('The article to edit'),
-                    description: z.string().optional().describe('New summary (replaces the old one)'),
-                    append_sections: z
-                        .array(z.object({ heading: z.string().optional(), body: z.string() }))
-                        .optional()
-                        .describe('New titled sections to append to the article body'),
-                    tags: z.array(z.string()).optional().describe('Tags to add'),
-                },
-                async (args) => {
-                    send({
-                        type: 'edit',
-                        name: args.name,
-                        description: args.description,
-                        append_sections: args.append_sections,
-                        tags: args.tags,
-                    });
-                    return { content: [{ type: 'text', text: `Updated "${args.name}".` }] };
-                },
-            );
-
-            const renameArticleTool = tool(
-                'rename_article',
-                'Rename an existing article. Only use when the user asks to rename it.',
-                { name: z.string().describe('Current article name'), new_name: z.string().describe('New name') },
-                async (args) => {
-                    send({ type: 'rename_article', name: args.name, new_name: args.new_name });
-                    return { content: [{ type: 'text', text: `Renamed "${args.name}" to "${args.new_name}".` }] };
-                },
-            );
-
-            const deleteArticleTool = tool(
-                'delete_article',
-                'Delete an article from the World Bible. Only use when the user asks to delete it.',
-                { name: z.string().describe('The article to delete') },
-                async (args) => {
-                    send({ type: 'delete_article', name: args.name });
-                    return { content: [{ type: 'text', text: `Deleted "${args.name}".` }] };
-                },
-            );
-
-            const renameCategoryTool = tool(
-                'rename_category',
-                'Rename a category (folder). Only use when the user asks to rename it.',
-                { name: z.string().describe('Current folder name'), new_name: z.string().describe('New name') },
-                async (args) => {
-                    send({ type: 'rename_category', name: args.name, new_name: args.new_name });
-                    return { content: [{ type: 'text', text: `Renamed category "${args.name}" to "${args.new_name}".` }] };
-                },
-            );
-
-            const deleteCategoryTool = tool(
-                'delete_category',
-                'Delete a category (folder); its articles become unfiled. Only use when the user asks to delete it.',
-                { name: z.string().describe('The folder to delete') },
-                async (args) => {
-                    send({ type: 'delete_category', name: args.name });
-                    return { content: [{ type: 'text', text: `Deleted category "${args.name}".` }] };
-                },
-            );
-
-            const researchServer = createSdkMcpServer({
-                name: 'research',
-                version: '1.0.0',
-                tools: [
-                    addCardTool,
-                    askOptionsTool,
-                    suggestArticleTool,
-                    flagIssueTool,
-                    updateUnderstandingTool,
-                    generateImageTool,
-                    createArticleTool,
-                    createCategoryTool,
-                    moveArticleTool,
-                    editArticleTool,
-                    renameArticleTool,
-                    deleteArticleTool,
-                    renameCategoryTool,
-                    deleteCategoryTool,
-                ],
-            });
-
-            try {
-                const q = query({
-                    prompt: promptInput,
-                    options: {
-                        model: RESEARCH_CHAT_MODEL,
-                        systemPrompt,
-                        tools: [], // no built-in file/bash tools
-                        mcpServers: { research: researchServer },
-                        allowedTools: [
-                            ADD_CARD_TOOL,
-                            ASK_OPTIONS_TOOL,
-                            SUGGEST_ARTICLE_TOOL,
-                            FLAG_ISSUE_TOOL,
-                            UPDATE_UNDERSTANDING_TOOL,
-                            GENERATE_IMAGE_TOOL,
-                            CREATE_ARTICLE_TOOL,
-                            CREATE_CATEGORY_TOOL,
-                            MOVE_ARTICLE_TOOL,
-                            EDIT_ARTICLE_TOOL,
-                            RENAME_ARTICLE_TOOL,
-                            DELETE_ARTICLE_TOOL,
-                            RENAME_CATEGORY_TOOL,
-                            DELETE_CATEGORY_TOOL,
-                        ], // auto-approve our tools (no prompt)
-                        settingSources: [], // isolation: ignore ~/.claude settings, hooks, MCP, CLAUDE.md
-                        permissionMode: 'default',
-                        env: childEnv,
-                    },
-                });
-                let gotText = false;
-                for await (const message of q) {
-                    if (message.type === 'assistant') {
-                        // The SDK wraps the API message: text lives at message.message.content.
-                        const wrapped = message as {
-                            error?: string;
-                            message?: { content?: Array<{ type?: string; text?: string }> };
-                            content?: Array<{ type?: string; text?: string }>;
-                        };
-                        // Some failures (auth, billing, rate limit) arrive as data on the
-                        // assistant message rather than a thrown error — surface them.
-                        if (wrapped.error) {
-                            send({ type: 'text', text: `\n\n[Claude Code error: ${wrapped.error}.]` });
+                            send({ type: 'text', text: `\n\n[Local model error (HTTP ${resp.status}) at ${OLLAMA_BASE_URL}. ${errText.slice(0, 200)}]` });
                             gotText = true;
-                            continue;
+                            break;
                         }
-                        const blocks = wrapped.message?.content ?? wrapped.content ?? [];
-                        for (const block of blocks) {
-                            if (block?.type === 'text' && block.text) {
-                                send({ type: 'text', text: block.text });
+                        const json = await resp.json() as {
+                            choices?: Array<{ message?: { content?: string | null; tool_calls?: Array<{ id?: string; function?: { name?: string; arguments?: unknown } }> } }>;
+                        };
+                        const msg = json?.choices?.[0]?.message;
+                        if (!msg) {
+                            send({ type: 'text', text: '\n\n[Local model returned no message.]' });
+                            gotText = true;
+                            break;
+                        }
+                        convo.push(msg as Record<string, unknown>);
+
+                        const toolCalls = Array.isArray(msg.tool_calls) ? msg.tool_calls : [];
+                        if (toolCalls.length > 0) {
+                            for (const tc of toolCalls) {
+                                const name = tc?.function?.name;
+                                const d = defs.find(x => x.name === name);
+                                let result: string;
+                                if (!d) {
+                                    result = `Unknown tool: ${name}`;
+                                } else {
+                                    try {
+                                        const raw = tc.function?.arguments;
+                                        const parsed = typeof raw === 'string' ? (raw ? JSON.parse(raw) : {}) : (raw ?? {});
+                                        result = await d.run(parsed as Record<string, unknown>, send);
+                                    } catch (e) {
+                                        result = `Tool error: ${e instanceof Error ? e.message : 'bad arguments'}`;
+                                    }
+                                }
+                                convo.push({ role: 'tool', tool_call_id: tc.id, content: result });
+                            }
+                            continue; // let the model respond to the tool results
+                        }
+
+                        // No tool calls — this is the final answer.
+                        if (typeof msg.content === 'string' && msg.content.trim()) {
+                            send({ type: 'text', text: msg.content });
+                            gotText = true;
+                        }
+                        break;
+                    }
+                    if (!gotText) send({ type: 'text', text: '[No response from the local model.]' });
+                } else {
+                    // ── Claude backend: the user's signed-in Claude Code ──
+                    // With an image attached, the prompt must be a streamed user message
+                    // whose content carries an image block alongside the text.
+                    const promptInput = image
+                        ? (async function* () {
+                            yield {
+                                type: 'user',
+                                parent_tool_use_id: null,
+                                message: {
+                                    role: 'user',
+                                    content: [
+                                        { type: 'image', source: { type: 'base64', media_type: image.mediaType, data: image.data } },
+                                        { type: 'text', text: prompt },
+                                    ],
+                                },
+                            } as unknown as SDKUserMessage;
+                        })()
+                        : prompt;
+
+                    // Force the spawned Claude Code to authenticate with the local Max
+                    // subscription login, not an API key. Stripping these env vars falls
+                    // through to the OAuth profile that `claude` is signed in with.
+                    const childEnv: Record<string, string> = {};
+                    for (const [key, value] of Object.entries(process.env)) {
+                        if (value !== undefined && key !== 'ANTHROPIC_API_KEY' && key !== 'ANTHROPIC_AUTH_TOKEN' && key !== 'OPENROUTER_API_KEY') {
+                            childEnv[key] = value;
+                        }
+                    }
+
+                    const claudeTools = defs.map(d =>
+                        tool(d.name, d.description, d.shape, async (args) => ({
+                            content: [{ type: 'text', text: await d.run(args as Record<string, unknown>, send) }],
+                        })),
+                    );
+                    const researchServer = createSdkMcpServer({ name: 'research', version: '1.0.0', tools: claudeTools });
+                    const allowedTools = defs.map(d => `mcp__research__${d.name}`);
+
+                    const q = query({
+                        prompt: promptInput,
+                        options: {
+                            model: RESEARCH_CHAT_MODEL,
+                            systemPrompt,
+                            tools: [], // no built-in file/bash tools
+                            mcpServers: { research: researchServer },
+                            allowedTools, // auto-approve our tools (no prompt)
+                            settingSources: [], // isolation: ignore ~/.claude settings, hooks, MCP, CLAUDE.md
+                            permissionMode: 'default',
+                            env: childEnv,
+                        },
+                    });
+                    for await (const message of q) {
+                        if (message.type === 'assistant') {
+                            const wrapped = message as {
+                                error?: string;
+                                message?: { content?: Array<{ type?: string; text?: string }> };
+                                content?: Array<{ type?: string; text?: string }>;
+                            };
+                            if (wrapped.error) {
+                                send({ type: 'text', text: `\n\n[Claude Code error: ${wrapped.error}.]` });
+                                gotText = true;
+                                continue;
+                            }
+                            const blocks = wrapped.message?.content ?? wrapped.content ?? [];
+                            for (const block of blocks) {
+                                if (block?.type === 'text' && block.text) {
+                                    send({ type: 'text', text: block.text });
+                                    gotText = true;
+                                }
+                            }
+                        } else if (message.type === 'result') {
+                            const r = message as { is_error?: boolean; subtype?: string; errors?: string[] };
+                            if (r.is_error) {
+                                const detail = r.errors?.join('; ') || r.subtype || 'unknown error';
+                                send({ type: 'text', text: `\n\n[Claude Code error: ${detail}. Make sure it is installed and signed in.]` });
                                 gotText = true;
                             }
                         }
-                    } else if (message.type === 'result') {
-                        // The terminal result can also report a non-thrown failure.
-                        const r = message as { is_error?: boolean; subtype?: string; errors?: string[] };
-                        if (r.is_error) {
-                            const detail = r.errors?.join('; ') || r.subtype || 'unknown error';
-                            send({
-                                type: 'text',
-                                text: `\n\n[Claude Code error: ${detail}. Make sure it is installed and signed in.]`,
-                            });
-                            gotText = true;
-                        }
                     }
-                }
-                if (!gotText) {
-                    send({ type: 'text', text: '[No response from Claude Code.]' });
+                    if (!gotText) send({ type: 'text', text: '[No response from Claude Code.]' });
                 }
             } catch (err) {
                 const detail = err instanceof Error ? err.message : 'unknown error';
-                send({
-                    type: 'text',
-                    text: `\n\n[Could not reach Claude Code: ${detail}. Make sure Claude Code is installed and signed in.]`,
-                });
+                const where = provider === 'local'
+                    ? `Could not reach the local model at ${OLLAMA_BASE_URL}: ${detail}. Is your local server (Ollama) running?`
+                    : `Could not reach Claude Code: ${detail}. Make sure Claude Code is installed and signed in.`;
+                send({ type: 'text', text: `\n\n[${where}]` });
             } finally {
                 controller.close();
             }
