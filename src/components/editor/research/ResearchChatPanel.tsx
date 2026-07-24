@@ -14,11 +14,44 @@ import { InterviewMenu } from './InterviewMenu';
 import { InterviewEditorModal } from './InterviewEditorModal';
 import styles from '../WritingDesk.module.css';
 
+/** A mutating action held for the user to Apply or Discard before it touches the store. */
+interface PendingChange {
+    id: string;
+    label: string;
+    evt: ToolEvent;
+    status: 'pending' | 'applied' | 'discarded';
+    warning?: string;
+}
+
 interface ChatMessage {
     role: 'user' | 'assistant';
     content: string;
     /** Clickable choices the assistant offered (via ask_options). */
     options?: { prompt: string; choices: string[]; chosen?: string };
+    /** In-place edits/deletes/renames awaiting the user's Apply/Discard. */
+    pending?: PendingChange[];
+}
+
+/** Event types held for preview instead of applied immediately (mutating-in-place). */
+const PREVIEW_TYPES = new Set(['edit', 'delete_article', 'delete_category', 'rename_article', 'rename_category', 'move']);
+
+/** A short human description of a pending change, for the preview card. */
+function describeChange(evt: ToolEvent): string {
+    switch (evt.type) {
+        case 'edit': {
+            const bits: string[] = [];
+            if (typeof evt.description === 'string') bits.push('new description');
+            if (evt.append_sections?.length) bits.push(`+${evt.append_sections.length} section${evt.append_sections.length > 1 ? 's' : ''}`);
+            if (evt.tags?.length) bits.push(`+${evt.tags.length} tag${evt.tags.length > 1 ? 's' : ''}`);
+            return `Edit “${evt.name}”${bits.length ? ` — ${bits.join(', ')}` : ''}`;
+        }
+        case 'delete_article': return `Delete article “${evt.name}”`;
+        case 'delete_category': return `Delete folder “${evt.name}”`;
+        case 'rename_article': return `Rename “${evt.name}” → “${evt.new_name}”`;
+        case 'rename_category': return `Rename folder “${evt.name}” → “${evt.new_name}”`;
+        case 'move': return `Move “${evt.article}” → “${evt.category}”`;
+        default: return 'Apply change';
+    }
 }
 
 /**
@@ -178,6 +211,19 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
             scrollToBottom();
         };
 
+        const attachPending = (evt: ToolEvent) => {
+            const change: PendingChange = { id: crypto.randomUUID(), label: describeChange(evt), evt, status: 'pending' };
+            setMessages(prev => {
+                const next = [...prev];
+                const last = next[next.length - 1];
+                if (last && last.role === 'assistant') {
+                    next[next.length - 1] = { ...last, pending: [...(last.pending ?? []), change] };
+                }
+                return next;
+            });
+            scrollToBottom();
+        };
+
         const controller = new AbortController();
         abortRef.current = controller;
 
@@ -209,9 +255,11 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
                 } else if (evt.type === 'options' && Array.isArray(evt.options)) {
                     // Attach clickable choices to the current assistant message.
                     attachOptions(evt.prompt ?? '', evt.options);
+                } else if (evt.type && PREVIEW_TYPES.has(evt.type)) {
+                    // A mutating-in-place action — hold it for the user to Apply/Discard.
+                    attachPending(evt as ToolEvent);
                 } else if (evt.type) {
-                    // A tool event succeeded or returned a warning the model can't
-                    // know (name resolution happens client-side) — surface it.
+                    // Additive actions (card, suggest, create) apply immediately.
                     const warning = onToolEvent(evt as ToolEvent);
                     if (warning) appendToAssistant(`\n\n⚠️ ${warning}`);
                 }
@@ -246,6 +294,20 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
             e.preventDefault();
             send();
         }
+    };
+
+    // Apply or discard a held change. The store mutation runs outside the state
+    // updater so it can't double-fire under React's dev double-invoke.
+    const resolvePending = (messageIndex: number, pendingId: string, accept: boolean) => {
+        const change = messages[messageIndex]?.pending?.find(p => p.id === pendingId);
+        if (!change || change.status !== 'pending') return;
+        let warning: string | undefined;
+        if (accept) warning = onToolEvent(change.evt) || undefined;
+        setMessages(prev => prev.map((m, i) =>
+            i === messageIndex && m.pending
+                ? { ...m, pending: m.pending.map(p => p.id === pendingId ? { ...p, status: accept ? 'applied' : 'discarded', warning } : p) }
+                : m,
+        ));
     };
 
     // Clicking an offered option records the pick (locking that card) and sends
@@ -350,6 +412,22 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
                                 </div>
                             </div>
                         )}
+
+                        {m.pending?.map(p => (
+                            <div key={p.id} className={`${styles.chatPending} ${p.status !== 'pending' ? styles.chatPendingResolved : ''}`}>
+                                <span className={styles.chatPendingLabel}>{p.label}</span>
+                                {p.status === 'pending' ? (
+                                    <div className={styles.chatPendingBtns}>
+                                        <button className={styles.chatPendingApply} onClick={() => resolvePending(i, p.id, true)}>Apply</button>
+                                        <button className={styles.chatPendingDiscard} onClick={() => resolvePending(i, p.id, false)}>Discard</button>
+                                    </div>
+                                ) : (
+                                    <span className={styles.chatPendingStatus}>
+                                        {p.status === 'applied' ? (p.warning ? `⚠️ ${p.warning}` : '✓ Applied') : 'Discarded'}
+                                    </span>
+                                )}
+                            </div>
+                        ))}
 
                         {m.role === 'assistant' && m.content.trim() && (
                             <button

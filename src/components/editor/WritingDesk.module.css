@@ -5439,6 +5439,71 @@
   background: color-mix(in srgb, var(--accent, #6c8cff) 26%, transparent);
 }
 
+/* ── Preview-before-apply cards ──────────────────────────── */
+.chatPending {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  font-size: 0.76rem;
+  color: var(--text, inherit);
+  background: color-mix(in srgb, #e5a24a 12%, transparent);
+  border: 1px solid color-mix(in srgb, #e5a24a 40%, transparent);
+  border-radius: 9px;
+}
+
+.chatPendingResolved {
+  opacity: 0.7;
+  background: color-mix(in srgb, var(--text, #888) 6%, transparent);
+  border-color: var(--border, rgba(128, 128, 128, 0.25));
+}
+
+.chatPendingLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.chatPendingBtns {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 5px;
+}
+
+.chatPendingApply,
+.chatPendingDiscard {
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 7px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.chatPendingApply {
+  color: #fff;
+  background: var(--accent, #6c8cff);
+}
+
+.chatPendingApply:hover { filter: brightness(1.08); }
+
+.chatPendingDiscard {
+  color: var(--text, inherit);
+  background: transparent;
+  border-color: var(--border, rgba(128, 128, 128, 0.35));
+}
+
+.chatPendingDiscard:hover {
+  background: color-mix(in srgb, var(--text, #888) 10%, transparent);
+}
+
+.chatPendingStatus {
+  flex: 0 0 auto;
+  font-size: 0.72rem;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
 .researchChatScroll {
   flex: 1 1 auto;
   min-height: 0;
