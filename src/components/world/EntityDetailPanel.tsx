@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import styles from './EntityDetailPanel.module.css';
 import { useWorkspaceStore, EntityType, ENTITY_TYPE_LABELS } from '@/store/workspaceStore';
 import { articleDocToText } from '@/lib/worldAuthoring';
+import { formatDateTime } from '@/lib/formatDate';
 
 export function EntityDetailPanel() {
     // Essential store hooks
@@ -166,9 +167,9 @@ export function EntityDetailPanel() {
                     </div>
 
                     <div className={styles.metadataFields}>
-                        <p><strong>Created:</strong> {selectedEntity.createdAt.toLocaleString()}</p>
+                        <p><strong>Created:</strong> {formatDateTime(selectedEntity.createdAt)}</p>
                         {selectedEntity.updatedAt && (
-                            <p><strong>Last Updated:</strong> {selectedEntity.updatedAt.toLocaleString()}</p>
+                            <p><strong>Last Updated:</strong> {formatDateTime(selectedEntity.updatedAt)}</p>
                         )}
                         <p className={styles.idLabel}><strong>ID:</strong> {selectedEntity.id}</p>
                     </div>

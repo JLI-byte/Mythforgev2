@@ -12,6 +12,7 @@ import styles from './WorldBibleEntry.module.css';
 import { useWorkspaceStore, EntityType } from '@/store/workspaceStore';
 import { WBView, SUBCATEGORY_LABELS, SUBCATEGORY_ICONS } from '@/lib/worldBibleNav';
 import { ArticleViewer, ArticleTabViewer } from './ArticleViewerShared';
+import { formatDate } from '@/lib/formatDate';
 
 interface WorldBibleEntryProps {
     entityId: string;
@@ -261,9 +262,9 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
 
             {/* === Metadata footer === */}
             <footer className={styles.metaFooter}>
-                <span>Created {entity.createdAt.toLocaleDateString()}</span>
+                <span>Created {formatDate(entity.createdAt)}</span>
                 {entity.updatedAt && (
-                    <span>Updated {entity.updatedAt.toLocaleDateString()}</span>
+                    <span>Updated {formatDate(entity.updatedAt)}</span>
                 )}
             </footer>
 
