@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { query, tool, createSdkMcpServer, type SDKUserMessage } from '@anthropic-ai/claude-agent-sdk';
 import { z } from 'zod';
 import { researchToolDefs, ENTITY_TYPES } from '@/lib/researchToolDefs';
+import { ensureOllama } from '@/lib/localServer';
 
 // Must spawn the local Claude Code process — Node runtime, never edge.
 export const runtime = 'nodejs';
@@ -178,6 +179,20 @@ export async function POST(request: Request) {
             try {
                 if (provider === 'local') {
                     // ── Local (Ollama) backend: OpenAI-compatible chat + tools ──
+                    // Make sure the server is up first — start it if it isn't.
+                    const health = await ensureOllama(OLLAMA_BASE_URL, () => {
+                        send({ type: 'text', text: '⏳ Starting your local model server…\n\n' });
+                        gotText = true;
+                    });
+                    if (health === 'failed') {
+                        send({
+                            type: 'text',
+                            text: `\n\n[Couldn't reach or start your local model server at ${OLLAMA_BASE_URL}. Start Ollama manually with \`ollama serve\`, or set OLLAMA_LAUNCH_CMD to its full path.]`,
+                        });
+                        gotText = true;
+                        return;
+                    }
+
                     const oaiTools = defs.map(d => {
                         const schema = z.toJSONSchema(z.object(d.shape)) as Record<string, unknown>;
                         delete schema.$schema; // some strict validators reject this
