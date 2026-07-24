@@ -292,7 +292,7 @@ export interface ArticleTab {
 // Writing Desk System Interfaces
 // =============================================
 
-export type DeskWidgetType = 'writingZone' | 'sticky' | 'reference' | 'image' | 'biblePinit' | 'sceneControl' | 'characterState' | 'continuity' | 'structure' | 'research' | 'progress' | 'relMap' | 'draftNav' | 'beatCard' | 'articleSuggestions' | 'untyped';
+export type DeskWidgetType = 'writingZone' | 'sticky' | 'reference' | 'image' | 'biblePinit' | 'sceneControl' | 'characterState' | 'continuity' | 'structure' | 'research' | 'progress' | 'relMap' | 'draftNav' | 'beatCard' | 'articleSuggestions' | 'consistencyFlags' | 'untyped';
 
 /** An object attached to the research chat as context for the next message. */
 export interface ChatAttachment {

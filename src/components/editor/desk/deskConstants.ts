@@ -28,6 +28,7 @@ export const DEFAULT_DIMS: Record<DeskWidgetType, { w: number; h: number }> = {
   draftNav: { w: 340, h: 620 },
   beatCard: { w: 320, h: 240 },
   articleSuggestions: { w: 340, h: 420 },
+  consistencyFlags: { w: 340, h: 380 },
   untyped:     { w: 300, h: 200 },
 };
 

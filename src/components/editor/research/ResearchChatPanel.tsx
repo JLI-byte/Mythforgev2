@@ -117,6 +117,7 @@ function renderWithEntityChips(
 export type ToolEvent =
     | { type: 'card'; text: string }
     | { type: 'suggest'; name: string; entityType: string; category?: string; reason?: string }
+    | { type: 'flag'; kind: 'contradiction' | 'gap'; summary: string; detail?: string }
     | {
           type: 'article';
           name: string;
@@ -436,6 +437,13 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
         send(choice);
     };
 
+    // Ask the assistant to sweep the whole world for contradictions and gaps,
+    // flagging each onto the Consistency & Gaps board.
+    const reviewWorld = () => {
+        if (isStreaming) return;
+        send('Review my whole World Bible for contradictions and gaps. Flag each real problem you find, then give me a one-line summary.');
+    };
+
     // Launch an interview: render its guide, keep it active for the rest of the
     // conversation, and send the opening line so the assistant asks question one.
     const launchInterview = (iv: Interview) => {
@@ -485,13 +493,23 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
         >
             <div className={styles.researchChatHeader}>
                 <span>Research Assistant</span>
-                <InterviewMenu
-                    interviews={allInterviews}
-                    disabled={isStreaming}
-                    onLaunch={launchInterview}
-                    onNew={newInterview}
-                    onEdit={editInterview}
-                />
+                <div className={styles.researchChatHeaderActions}>
+                    <button
+                        className={styles.researchBuildWorldBtn}
+                        onClick={reviewWorld}
+                        disabled={isStreaming}
+                        title="Review the world for contradictions and gaps"
+                    >
+                        🔍 Review
+                    </button>
+                    <InterviewMenu
+                        interviews={allInterviews}
+                        disabled={isStreaming}
+                        onLaunch={launchInterview}
+                        onNew={newInterview}
+                        onEdit={editInterview}
+                    />
+                </div>
             </div>
 
             <div className={styles.researchChatScroll} ref={scrollRef}>

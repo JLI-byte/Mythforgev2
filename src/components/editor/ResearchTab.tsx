@@ -5,6 +5,7 @@ import { useWorkspaceStore, type Entity, type EntityType } from '@/store/workspa
 import { researchScopeKey, type ResearchScope } from '@/lib/researchScope';
 import { serializeBoard, makeNoteCard } from '@/lib/researchBoard';
 import { addSuggestionToWidgets, serializeSuggestions, type ArticleSuggestion } from '@/lib/articleSuggestions';
+import { addFlagToWidgets, serializeFlags, type ConsistencyFlag } from '@/lib/consistencyFlags';
 import {
   buildArticleDoc,
   appendSectionsToDoc,
@@ -39,11 +40,13 @@ export default function ResearchTab() {
   const getContext = useCallback(() => {
     const s = useWorkspaceStore.getState();
     const widgets = scopeKey ? s.researchStates[scopeKey]?.widgets ?? [] : [];
-    // Include pending suggestions so the assistant won't re-propose them.
+    // Include pending suggestions and flags so the assistant won't repeat them.
     const pending = serializeSuggestions(widgets);
+    const flags = serializeFlags(widgets);
     const board = [
       serializeBoard(widgets),
       pending ? `Already suggested (pending on the board):\n${pending}` : '',
+      flags ? `Already flagged (pending on the board):\n${flags}` : '',
     ].filter(Boolean).join('\n\n');
     const project = s.projects.find(p => p.id === s.activeProjectId) ?? null;
     const worldKey = worldKeyForProject(project);
@@ -86,6 +89,20 @@ export default function ResearchTab() {
       };
       const widgets = s.researchStates[scopeKey]?.widgets ?? [];
       const next = addSuggestionToWidgets(widgets, suggestion);
+      if (next !== widgets) s.updateResearchState(scopeKey, { widgets: next });
+      return;
+    }
+
+    if (evt.type === 'flag') {
+      if (!scopeKey) return;
+      const flag: ConsistencyFlag = {
+        id: crypto.randomUUID(),
+        kind: evt.kind,
+        summary: evt.summary,
+        detail: evt.detail,
+      };
+      const widgets = s.researchStates[scopeKey]?.widgets ?? [];
+      const next = addFlagToWidgets(widgets, flag);
       if (next !== widgets) s.updateResearchState(scopeKey, { widgets: next });
       return;
     }

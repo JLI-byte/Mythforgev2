@@ -17,6 +17,7 @@ import { RelationshipMapRenderer } from './RelationshipMapRenderer';
 import { DraftNavRenderer } from './DraftNavRenderer';
 import { BeatCardRenderer } from './BeatCardRenderer';
 import { ArticleSuggestionsRenderer } from './ArticleSuggestionsRenderer';
+import { ConsistencyFlagsRenderer } from './ConsistencyFlagsRenderer';
 import { UntypedWidgetRenderer } from './UntypedWidgetRenderer';
 
 // ============================================================
@@ -69,6 +70,7 @@ export const WidgetRenderer = React.memo(function WidgetRenderer({
     case 'draftNav':    return <DraftNavRenderer content={content} onChange={handleChange} />;
     case 'beatCard':    return <BeatCardRenderer content={content} onChange={handleChange} />;
     case 'articleSuggestions': return <ArticleSuggestionsRenderer content={content} onChange={handleChangeImmediate} />;
+    case 'consistencyFlags': return <ConsistencyFlagsRenderer content={content} onChange={handleChangeImmediate} />;
     case 'untyped':     return <UntypedWidgetRenderer />;
     default:            return null;
   }

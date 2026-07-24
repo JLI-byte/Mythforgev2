@@ -4793,6 +4793,12 @@
 }
 
 /* ── Interview launcher menu ─────────────────────────────── */
+.researchChatHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .interviewMenuRoot {
   position: relative;
   flex: 0 0 auto;
@@ -5367,6 +5373,69 @@
   border-color: color-mix(in srgb, var(--accent, #6c8cff) 55%, transparent);
   background: color-mix(in srgb, var(--accent, #6c8cff) 12%, transparent);
 }
+
+/* ── Consistency & Gaps flags ────────────────────────────── */
+.flagRow {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px;
+  border: 1px solid var(--border, rgba(128, 128, 128, 0.2));
+  border-left: 3px solid color-mix(in srgb, #e5a24a 70%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--text, #888) 4%, transparent);
+}
+
+.flagRowContradiction {
+  border-left-color: #e5484d;
+}
+
+.flagHead {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.flagIcon { flex: 0 0 auto; font-size: 0.8rem; }
+
+.flagSummary {
+  flex: 1 1 auto;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text, inherit);
+}
+
+.flagDetail {
+  font-size: 0.72rem;
+  line-height: 1.45;
+  opacity: 0.72;
+  color: var(--text, inherit);
+}
+
+.flagActions {
+  display: flex;
+  gap: 5px;
+}
+
+.flagAsk,
+.flagDismiss {
+  padding: 3px 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid var(--border, rgba(128, 128, 128, 0.3));
+  background: transparent;
+  color: var(--text, inherit);
+}
+
+.flagAsk {
+  color: var(--accent, #6c8cff);
+  border-color: color-mix(in srgb, var(--accent, #6c8cff) 45%, transparent);
+}
+
+.flagAsk:hover { background: color-mix(in srgb, var(--accent, #6c8cff) 14%, transparent); }
+.flagDismiss:hover { background: color-mix(in srgb, var(--text, #888) 10%, transparent); }
 
 /* ── Chat option cards (ask_options) ─────────────────────── */
 .chatOptions {
