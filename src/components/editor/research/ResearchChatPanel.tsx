@@ -12,6 +12,7 @@ import {
 } from '@/lib/interviews';
 import { InterviewMenu } from './InterviewMenu';
 import { InterviewEditorModal } from './InterviewEditorModal';
+import { CreditTracker } from './CreditTracker';
 import styles from '../WritingDesk.module.css';
 
 /** A mutating action held for the user to Apply or Discard before it touches the store. */
@@ -162,6 +163,9 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
     // launched it rides every turn so the guide keeps reaching the model until
     // the subject is built.
     const [interviewGuide, setInterviewGuide] = useState('');
+    // Bumped after each assistant turn so the credit tracker refetches (a turn
+    // may have spent OpenRouter credits on image generation).
+    const [creditSignal, setCreditSignal] = useState(0);
     // Editor modal: the interview being edited, and the id it updates on save
     // (null → adding a new custom interview).
     const [editorDraft, setEditorDraft] = useState<Interview | null>(null);
@@ -392,6 +396,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
         } finally {
             if (abortRef.current === controller) abortRef.current = null;
             setIsStreaming(false);
+            setCreditSignal(n => n + 1); // refresh the credit tracker after each turn
         }
     };
 
@@ -512,6 +517,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
             <div className={styles.researchChatHeader}>
                 <span>Research Assistant</span>
                 <div className={styles.researchChatHeaderActions}>
+                    <CreditTracker refreshSignal={creditSignal} />
                     <button
                         className={styles.researchBuildWorldBtn}
                         onClick={reviewWorld}
