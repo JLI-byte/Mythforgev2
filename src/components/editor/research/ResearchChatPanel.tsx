@@ -153,9 +153,13 @@ interface ResearchChatPanelProps {
     /** Apply an AI action to the store. Returns a warning string when the action
      *  could not be applied (e.g. an unresolved name), so the chat can say so. */
     onToolEvent: (event: ToolEvent) => string | void;
+    /** Explicit panel width in px (from the drag-resizer). */
+    width?: number;
+    /** Collapse the panel to a slim re-open strip. */
+    onCollapse?: () => void;
 }
 
-export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: ResearchChatPanelProps) {
+export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, onCollapse }: ResearchChatPanelProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState('');
     const [isStreaming, setIsStreaming] = useState(false);
@@ -510,6 +514,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
     return (
         <div
             className={`${styles.researchChat} ${dragOver ? styles.researchChatDragOver : ''}`}
+            style={width ? { flex: `0 0 ${width}px`, width } : undefined}
             onDragOver={onChatDragOver}
             onDragLeave={() => setDragOver(false)}
             onDrop={onChatDrop}
@@ -533,6 +538,9 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
                         onNew={newInterview}
                         onEdit={editInterview}
                     />
+                    {onCollapse && (
+                        <button className={styles.chatCollapseBtn} onClick={onCollapse} title="Collapse chat">«</button>
+                    )}
                 </div>
             </div>
 

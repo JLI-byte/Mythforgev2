@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useWorkspaceStore, type Entity, type EntityType } from '@/store/workspaceStore';
 import { researchScopeKey, type ResearchScope } from '@/lib/researchScope';
 import { serializeBoard, makeNoteCard } from '@/lib/researchBoard';
@@ -28,12 +28,50 @@ import styles from './WritingDesk.module.css';
  * The chat sees the active board and the active project's World Bible, and can
  * add note cards or author World Bible articles/categories on request.
  */
+const CHAT_MIN_WIDTH = 240;
+const CHAT_MAX_WIDTH = 640;
+const CHAT_DEFAULT_WIDTH = 320;
+
 export default function ResearchTab() {
   const [scope, setScope] = useState<ResearchScope>('project');
   const activeProject = useWorkspaceStore(s =>
     s.projects.find(p => p.id === s.activeProjectId) ?? null
   );
   const scopeKey = researchScopeKey(scope, activeProject);
+
+  // Chat panel layout: resizable width + collapsed state, persisted locally.
+  const [chatWidth, setChatWidth] = useState(CHAT_DEFAULT_WIDTH);
+  const [chatCollapsed, setChatCollapsed] = useState(false);
+
+  useEffect(() => {
+    const w = Number(localStorage.getItem('lc-research-chat-width'));
+    if (Number.isFinite(w) && w >= CHAT_MIN_WIDTH && w <= CHAT_MAX_WIDTH) setChatWidth(w);
+    setChatCollapsed(localStorage.getItem('lc-research-chat-collapsed') === '1');
+  }, []);
+  useEffect(() => { localStorage.setItem('lc-research-chat-width', String(chatWidth)); }, [chatWidth]);
+  useEffect(() => { localStorage.setItem('lc-research-chat-collapsed', chatCollapsed ? '1' : '0'); }, [chatCollapsed]);
+
+  // Drag the divider to resize; listeners live on document so the drag keeps
+  // tracking even when the cursor leaves the thin handle.
+  const startResize = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startW = chatWidth;
+    const onMove = (ev: MouseEvent) => {
+      const next = Math.min(CHAT_MAX_WIDTH, Math.max(CHAT_MIN_WIDTH, startW + (ev.clientX - startX)));
+      setChatWidth(next);
+    };
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  };
 
   // Read board + world imperatively at call time so the chat panel doesn't
   // re-render on every board or entity edit.
@@ -253,7 +291,32 @@ export default function ResearchTab() {
 
   return (
     <div className={styles.researchLayout}>
-      <ResearchChatPanel scopeKey={scopeKey} getContext={getContext} onToolEvent={handleToolEvent} />
+      {chatCollapsed ? (
+        <button
+          className={styles.researchChatReopen}
+          onClick={() => setChatCollapsed(false)}
+          title="Show research assistant"
+        >
+          💬
+        </button>
+      ) : (
+        <>
+          <ResearchChatPanel
+            scopeKey={scopeKey}
+            getContext={getContext}
+            onToolEvent={handleToolEvent}
+            width={chatWidth}
+            onCollapse={() => setChatCollapsed(true)}
+          />
+          <div
+            className={styles.researchResizer}
+            onMouseDown={startResize}
+            title="Drag to resize"
+            role="separator"
+            aria-orientation="vertical"
+          />
+        </>
+      )}
       <div className={styles.researchMain}>
         {scopeKey ? (
           <>
