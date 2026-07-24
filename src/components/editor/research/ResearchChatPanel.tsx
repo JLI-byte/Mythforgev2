@@ -47,6 +47,10 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState('');
     const [isStreaming, setIsStreaming] = useState(false);
+    // Once the guided "Build a World" interview is launched it stays on for the
+    // rest of the conversation, so the interview guide keeps reaching the model
+    // on every turn until the world is built.
+    const [interviewActive, setInterviewActive] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const abortRef = useRef<AbortController | null>(null);
 
@@ -61,13 +65,13 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
         });
     };
 
-    const send = async () => {
-        const text = input.trim();
+    const send = async (explicitText?: string, forceInterview = false) => {
+        const text = (explicitText ?? input).trim();
         if (!text || isStreaming) return;
 
         const outgoing: ChatMessage[] = [...messages, { role: 'user', content: text }];
         setMessages([...outgoing, { role: 'assistant', content: '' }]);
-        setInput('');
+        if (explicitText === undefined) setInput('');
         setIsStreaming(true);
         scrollToBottom();
 
@@ -93,7 +97,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
             const res = await fetch('/api/research-chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messages: outgoing, ...getContext() }),
+                body: JSON.stringify({ messages: outgoing, ...getContext(), interview: forceInterview || interviewActive }),
                 signal: controller.signal,
             });
             if (!res.ok || !res.body) {
@@ -153,9 +157,28 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
         }
     };
 
+    // Launch the guided ten-question world-building interview. Turns on interview
+    // mode (so the guide reaches the model every turn) and sends the opening
+    // message that gets the assistant asking question one.
+    const startInterview = () => {
+        if (isStreaming) return;
+        setInterviewActive(true);
+        send("Let's build a world from scratch — walk me through it, one question at a time.", true);
+    };
+
     return (
         <div className={styles.researchChat}>
-            <div className={styles.researchChatHeader}>Research Assistant</div>
+            <div className={styles.researchChatHeader}>
+                <span>Research Assistant</span>
+                <button
+                    className={styles.researchBuildWorldBtn}
+                    onClick={startInterview}
+                    disabled={isStreaming}
+                    title="Start a guided ten-question interview to build your world from scratch"
+                >
+                    🌍 Build a World
+                </button>
+            </div>
 
             <div className={styles.researchChatScroll} ref={scrollRef}>
                 {messages.length === 0 && (
@@ -192,7 +215,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
                     onKeyDown={onKeyDown}
                     rows={2}
                 />
-                <button className={styles.researchChatSendBtn} onClick={send} disabled={isStreaming || !input.trim()}>
+                <button className={styles.researchChatSendBtn} onClick={() => send()} disabled={isStreaming || !input.trim()}>
                     {isStreaming ? '…' : 'Send'}
                 </button>
             </div>

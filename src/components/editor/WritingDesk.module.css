@@ -4754,11 +4754,42 @@
 
 .researchChatHeader {
   flex: 0 0 auto;
-  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px 8px 14px;
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--text, inherit);
   border-bottom: 1px solid var(--border, rgba(128, 128, 128, 0.2));
+}
+
+.researchBuildWorldBtn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text, inherit);
+  background: color-mix(in srgb, var(--accent, #6c8cff) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent, #6c8cff) 40%, transparent);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+
+.researchBuildWorldBtn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent, #6c8cff) 24%, transparent);
+  border-color: color-mix(in srgb, var(--accent, #6c8cff) 60%, transparent);
+  transform: translateY(-1px);
+}
+
+.researchBuildWorldBtn:disabled {
+  opacity: 0.45;
+  cursor: default;
 }
 
 .researchChatScroll {
