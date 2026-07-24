@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { query, tool, createSdkMcpServer } from '@anthropic-ai/claude-agent-sdk';
+import { query, tool, createSdkMcpServer, type SDKUserMessage } from '@anthropic-ai/claude-agent-sdk';
 import { z } from 'zod';
 
 // Must spawn the local Claude Code process — Node runtime, never edge.
@@ -47,7 +47,7 @@ interface ChatMessage {
  * performs the mutation.
  */
 export async function POST(request: Request) {
-    let body: { messages?: ChatMessage[]; board?: string; world?: string; interviewGuide?: string; attachment?: { label?: string; content?: string } };
+    let body: { messages?: ChatMessage[]; board?: string; world?: string; interviewGuide?: string; attachment?: { label?: string; content?: string }; image?: { mediaType?: string; data?: string } };
     try {
         body = await request.json();
     } catch {
@@ -68,6 +68,15 @@ export async function POST(request: Request) {
     // so it goes behind the same untrusted-data boundary. Capped for prompt size.
     const attachLabel = typeof body.attachment?.label === 'string' ? body.attachment.label.slice(0, 200) : '';
     const attachContent = typeof body.attachment?.content === 'string' ? body.attachment.content.slice(0, 6000) : '';
+
+    // An image the user attached to look at. Only well-formed, reasonably sized
+    // base64 of a supported type is forwarded to the model.
+    const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const imageMediaType = typeof body.image?.mediaType === 'string' ? body.image.mediaType : '';
+    const imageData = typeof body.image?.data === 'string' ? body.image.data : '';
+    const image = ALLOWED_IMAGE_TYPES.includes(imageMediaType) && imageData.length > 0 && imageData.length < 7_000_000
+        ? { mediaType: imageMediaType, data: imageData }
+        : null;
     if (messages.length === 0) {
         return NextResponse.json({ error: 'No messages provided' }, { status: 400 });
     }
@@ -126,6 +135,25 @@ export async function POST(request: Request) {
     const prompt = messages
         .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
         .join('\n\n');
+
+    // With an image attached, the prompt must be a streamed user message whose
+    // content carries an image block alongside the text (a plain string prompt
+    // can't hold an image). Without one, keep the simpler string form.
+    const promptInput = image
+        ? (async function* () {
+            yield {
+                type: 'user',
+                parent_tool_use_id: null,
+                message: {
+                    role: 'user',
+                    content: [
+                        { type: 'image', source: { type: 'base64', media_type: image.mediaType, data: image.data } },
+                        { type: 'text', text: prompt },
+                    ],
+                },
+            } as unknown as SDKUserMessage;
+        })()
+        : prompt;
 
     // Force the spawned Claude Code to authenticate with the local Max
     // subscription login, not an API key. Next.js can surface an
@@ -330,7 +358,7 @@ export async function POST(request: Request) {
 
             try {
                 const q = query({
-                    prompt,
+                    prompt: promptInput,
                     options: {
                         model: RESEARCH_CHAT_MODEL,
                         systemPrompt,

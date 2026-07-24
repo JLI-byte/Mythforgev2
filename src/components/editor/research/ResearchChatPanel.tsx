@@ -186,6 +186,25 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
     const chatAttachment = useWorkspaceStore(s => s.chatAttachment);
     const setChatAttachment = useWorkspaceStore(s => s.setChatAttachment);
     const [dragOver, setDragOver] = useState(false);
+
+    // An image the user attached for the assistant to look at (base64 + a data
+    // URL for the local thumbnail). Rides the next message, then clears.
+    const [imageAttach, setImageAttach] = useState<{ mediaType: string; data: string; url: string } | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const onImageSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = ''; // allow re-picking the same file
+        if (!file || !file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            const url = String(reader.result);
+            const comma = url.indexOf(',');
+            if (comma < 0) return;
+            setImageAttach({ mediaType: file.type, data: url.slice(comma + 1), url });
+        };
+        reader.readAsDataURL(file);
+    };
     const chipEntities = useMemo(() => {
         const worldKey = worldKeyForProject(activeProject);
         return entities
@@ -231,13 +250,16 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
 
     const send = async (explicitText?: string, forceGuide?: string) => {
         const text = (explicitText ?? input).trim();
-        if (!text || isStreaming) return;
+        const img = imageAttach;
+        if ((!text && !img) || isStreaming) return;
 
-        // Consume any attached context for this one message, then clear it.
+        // Consume any attached context/image for this one message, then clear.
         const attach = chatAttachment;
         if (attach) setChatAttachment(null);
+        if (img) setImageAttach(null);
 
-        const outgoing: ChatMessage[] = [...messages, { role: 'user', content: text }];
+        const messageText = text || 'What do you see in this image, and how might it fit my world?';
+        const outgoing: ChatMessage[] = [...messages, { role: 'user', content: img ? `🖼️ ${messageText}` : messageText }];
         setMessages([...outgoing, { role: 'assistant', content: '' }]);
         if (explicitText === undefined) setInput('');
         setIsStreaming(true);
@@ -295,6 +317,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
                     ...getContext(),
                     interviewGuide: forceGuide ?? interviewGuide,
                     attachment: attach ? { label: attach.label, content: attach.content } : undefined,
+                    image: img ? { mediaType: img.mediaType, data: img.data } : undefined,
                 }),
                 signal: controller.signal,
             });
@@ -567,6 +590,15 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
                 </div>
             )}
 
+            {imageAttach && (
+                <div className={styles.chatImageAttach}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={imageAttach.url} alt="Attached" className={styles.chatImageThumb} />
+                    <span className={styles.chatAttachmentLabel}>Image attached</span>
+                    <button className={styles.chatAttachmentClear} onClick={() => setImageAttach(null)} title="Remove image">✕</button>
+                </div>
+            )}
+
             <div className={styles.researchChatInputRow}>
                 <textarea
                     className={styles.researchChatInput}
@@ -576,6 +608,20 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
                     onKeyDown={onKeyDown}
                     rows={2}
                 />
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={onImageSelected}
+                />
+                <button
+                    className={styles.chatMicBtn}
+                    onClick={() => fileInputRef.current?.click()}
+                    title="Attach an image"
+                >
+                    📷
+                </button>
                 {voiceSupported && (
                     <button
                         className={`${styles.chatMicBtn} ${isListening ? styles.chatMicBtnActive : ''}`}
@@ -586,7 +632,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
                         {isListening ? '⏹' : '🎤'}
                     </button>
                 )}
-                <button className={styles.researchChatSendBtn} onClick={() => send()} disabled={isStreaming || !input.trim()}>
+                <button className={styles.researchChatSendBtn} onClick={() => send()} disabled={isStreaming || (!input.trim() && !imageAttach)}>
                     {isStreaming ? '…' : 'Send'}
                 </button>
             </div>

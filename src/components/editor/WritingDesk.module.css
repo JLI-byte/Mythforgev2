@@ -5596,6 +5596,28 @@
   background: color-mix(in srgb, var(--text, #888) 12%, transparent);
 }
 
+/* ── Attached image preview ──────────────────────────────── */
+.chatImageAttach {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 10px 6px;
+  padding: 6px 8px;
+  font-size: 0.74rem;
+  background: color-mix(in srgb, var(--accent, #6c8cff) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent, #6c8cff) 40%, transparent);
+  border-radius: 8px;
+}
+
+.chatImageThumb {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
 /* ── Voice dictation button ──────────────────────────────── */
 .chatMicBtn {
   flex: 0 0 auto;
