@@ -12,6 +12,7 @@ const RESEARCH_CHAT_MODEL = 'claude-opus-4-8';
 /** Fully-qualified names of the in-process tools (mcp__<server>__<tool>). */
 const ADD_CARD_TOOL = 'mcp__research__add_research_card';
 const SUGGEST_ARTICLE_TOOL = 'mcp__research__suggest_article';
+const ASK_OPTIONS_TOOL = 'mcp__research__ask_options';
 const CREATE_ARTICLE_TOOL = 'mcp__research__create_article';
 const CREATE_CATEGORY_TOOL = 'mcp__research__create_category';
 const MOVE_ARTICLE_TOOL = 'mcp__research__move_article';
@@ -73,6 +74,7 @@ export async function POST(request: Request) {
         'TOOLS — only call a tool when the user explicitly asks you to create, add, save, or organize something. Never act unprompted.',
         '(The one exception is suggest_article — see PROACTIVE SUGGESTIONS below. It is non-destructive and you SHOULD call it unprompted.)',
         '- add_research_card: place a short note on the research board.',
+        '- ask_options: offer 2-4 clickable choices instead of asking the user to pick in prose.',
         '- suggest_article: add an article-worthy entity to the Article Suggestions board (a proposal, not a creation).',
         '- create_article: create a World Bible article. Its type must be one of: ' + ENTITY_TYPES.join(', ') + '.',
         '  Give it a name, a one- or two-sentence description, and a body of titled sections (rich, multi-section prose).',
@@ -82,6 +84,9 @@ export async function POST(request: Request) {
         '- edit_article: revise an existing article — replace its description, append new sections to its body, and/or add tags. Use this to flesh out or update articles. The full text of every article is included below, so read it before editing.',
         '- rename_article / delete_article: rename or remove an article.',
         '- rename_category / delete_category: rename or remove a folder (deleting a folder leaves its articles unfiled).',
+        '',
+        'PREFER CLICKABLE CHOICES: whenever you would ask the user to pick between a few clear directions, call ask_options',
+        'instead of listing them in prose, then stop and wait for their pick. Keep each option to a few words.',
         '',
         'BE PROACTIVE WITH SUGGESTIONS: as the user describes their world, suggest articles or categories worth creating',
         '(e.g. "Sounds like you need an article for the Crimson King — want me to make it?"). But only call a CREATION tool after they agree.',
@@ -147,6 +152,19 @@ export async function POST(request: Request) {
                 async (args) => {
                     send({ type: 'card', text: args.text });
                     return { content: [{ type: 'text', text: 'Added a note card to the board.' }] };
+                },
+            );
+
+            const askOptionsTool = tool(
+                'ask_options',
+                "Offer the user a small set of mutually-exclusive choices as clickable buttons instead of asking in prose. Use it for forks — e.g. 'hard or soft magic?', 'port city or mountain hold?'. Give a short prompt and 2-4 concise options. After calling this, STOP and wait: the user's click becomes their next message.",
+                {
+                    prompt: z.string().describe('The question to put above the choices'),
+                    options: z.array(z.string()).min(2).max(4).describe('2-4 short, mutually-exclusive choices'),
+                },
+                async (args) => {
+                    send({ type: 'options', prompt: args.prompt, options: args.options });
+                    return { content: [{ type: 'text', text: 'Presented options; waiting for the user to choose.' }] };
                 },
             );
 
@@ -291,6 +309,7 @@ export async function POST(request: Request) {
                 version: '1.0.0',
                 tools: [
                     addCardTool,
+                    askOptionsTool,
                     suggestArticleTool,
                     createArticleTool,
                     createCategoryTool,
@@ -313,6 +332,7 @@ export async function POST(request: Request) {
                         mcpServers: { research: researchServer },
                         allowedTools: [
                             ADD_CARD_TOOL,
+                            ASK_OPTIONS_TOOL,
                             SUGGEST_ARTICLE_TOOL,
                             CREATE_ARTICLE_TOOL,
                             CREATE_CATEGORY_TOOL,

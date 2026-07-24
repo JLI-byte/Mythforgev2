@@ -16,6 +16,8 @@ import styles from '../WritingDesk.module.css';
 interface ChatMessage {
     role: 'user' | 'assistant';
     content: string;
+    /** Clickable choices the assistant offered (via ask_options). */
+    options?: { prompt: string; choices: string[]; chosen?: string };
 }
 
 /** An AI action the panel forwards to the tab to apply against the store. */
@@ -111,6 +113,18 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
             scrollToBottom();
         };
 
+        const attachOptions = (prompt: string, choices: string[]) => {
+            setMessages(prev => {
+                const next = [...prev];
+                const last = next[next.length - 1];
+                if (last && last.role === 'assistant') {
+                    next[next.length - 1] = { ...last, options: { prompt, choices } };
+                }
+                return next;
+            });
+            scrollToBottom();
+        };
+
         const controller = new AbortController();
         abortRef.current = controller;
 
@@ -131,7 +145,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
             const handleEvent = (line: string) => {
                 const trimmed = line.trim();
                 if (!trimmed) return;
-                let evt: { type?: string; text?: string };
+                let evt: { type?: string; text?: string; prompt?: string; options?: string[] };
                 try {
                     evt = JSON.parse(trimmed);
                 } catch {
@@ -139,6 +153,9 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
                 }
                 if (evt.type === 'text' && typeof evt.text === 'string') {
                     appendToAssistant(evt.text);
+                } else if (evt.type === 'options' && Array.isArray(evt.options)) {
+                    // Attach clickable choices to the current assistant message.
+                    attachOptions(evt.prompt ?? '', evt.options);
                 } else if (evt.type) {
                     // A tool event succeeded or returned a warning the model can't
                     // know (name resolution happens client-side) — surface it.
@@ -176,6 +193,16 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
             e.preventDefault();
             send();
         }
+    };
+
+    // Clicking an offered option records the pick (locking that card) and sends
+    // the choice as the user's next message.
+    const chooseOption = (messageIndex: number, choice: string) => {
+        if (isStreaming) return;
+        setMessages(prev => prev.map((m, i) =>
+            i === messageIndex && m.options ? { ...m, options: { ...m.options, chosen: choice } } : m,
+        ));
+        send(choice);
     };
 
     // Launch an interview: render its guide, keep it active for the rest of the
@@ -242,7 +269,29 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
                         key={i}
                         className={`${styles.researchChatMsg} ${m.role === 'user' ? styles.researchChatMsgUser : styles.researchChatMsgAssistant}`}
                     >
-                        <div className={styles.researchChatMsgBody}>{m.content}</div>
+                        {m.content.trim() && <div className={styles.researchChatMsgBody}>{m.content}</div>}
+
+                        {m.options && (
+                            <div className={styles.chatOptions}>
+                                {m.options.prompt && <div className={styles.chatOptionsPrompt}>{m.options.prompt}</div>}
+                                <div className={styles.chatOptionsList}>
+                                    {m.options.choices.map((choice, ci) => {
+                                        const picked = m.options!.chosen;
+                                        return (
+                                            <button
+                                                key={ci}
+                                                className={`${styles.chatOption} ${picked === choice ? styles.chatOptionChosen : ''}`}
+                                                disabled={Boolean(picked) || isStreaming}
+                                                onClick={() => chooseOption(i, choice)}
+                                            >
+                                                {choice}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
                         {m.role === 'assistant' && m.content.trim() && (
                             <button
                                 className={styles.researchChatAddBtn}

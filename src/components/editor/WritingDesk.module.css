@@ -5368,6 +5368,58 @@
   background: color-mix(in srgb, var(--accent, #6c8cff) 12%, transparent);
 }
 
+/* ── Chat option cards (ask_options) ─────────────────────── */
+.chatOptions {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chatOptionsPrompt {
+  font-size: 0.76rem;
+  font-weight: 600;
+  opacity: 0.8;
+  color: var(--text, inherit);
+}
+
+.chatOptionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.chatOption {
+  text-align: left;
+  padding: 8px 11px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text, inherit);
+  background: color-mix(in srgb, var(--accent, #6c8cff) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent, #6c8cff) 32%, transparent);
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 130ms ease, border-color 130ms ease, transform 130ms ease;
+}
+
+.chatOption:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent, #6c8cff) 18%, transparent);
+  border-color: color-mix(in srgb, var(--accent, #6c8cff) 55%, transparent);
+  transform: translateX(2px);
+}
+
+.chatOptionChosen {
+  background: var(--accent, #6c8cff);
+  border-color: var(--accent, #6c8cff);
+  color: #fff;
+  font-weight: 600;
+}
+
+.chatOption:disabled:not(.chatOptionChosen) {
+  opacity: 0.4;
+  cursor: default;
+}
+
 .researchChatScroll {
   flex: 1 1 auto;
   min-height: 0;
