@@ -23,6 +23,23 @@ interface PendingChange {
     warning?: string;
 }
 
+// Minimal typing for the Web Speech API (absent from some TS DOM lib configs).
+interface SpeechRecognitionLike {
+    continuous: boolean;
+    interimResults: boolean;
+    lang: string;
+    onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+    onend: (() => void) | null;
+    onerror: (() => void) | null;
+    start: () => void;
+    stop: () => void;
+}
+type SpeechRecognitionCtor = new () => SpeechRecognitionLike;
+interface WindowWithSpeech extends Window {
+    SpeechRecognition?: SpeechRecognitionCtor;
+    webkitSpeechRecognition?: SpeechRecognitionCtor;
+}
+
 interface ChatMessage {
     role: 'user' | 'assistant';
     content: string;
@@ -146,6 +163,11 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
     const [editorExistingId, setEditorExistingId] = useState<string | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const abortRef = useRef<AbortController | null>(null);
+    // Voice dictation via the browser Speech Recognition API (Chromium/Opera GX).
+    const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+    const [isListening, setIsListening] = useState(false);
+    const voiceSupported = typeof window !== 'undefined'
+        && Boolean((window as WindowWithSpeech).SpeechRecognition || (window as WindowWithSpeech).webkitSpeechRecognition);
 
     const customInterviews = useWorkspaceStore(s => s.customInterviews);
     const addInterview = useWorkspaceStore(s => s.addInterview);
@@ -173,7 +195,32 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
 
     // Abort any in-flight request if the panel unmounts (e.g. switching tabs
     // mid-stream) so the fetch and its subprocess don't keep running.
-    useEffect(() => () => abortRef.current?.abort(), []);
+    useEffect(() => () => {
+        abortRef.current?.abort();
+        recognitionRef.current?.stop();
+    }, []);
+
+    // Toggle voice dictation: recognized speech streams into the input box.
+    const toggleVoice = () => {
+        if (isListening) { recognitionRef.current?.stop(); return; }
+        const Ctor = (window as WindowWithSpeech).SpeechRecognition || (window as WindowWithSpeech).webkitSpeechRecognition;
+        if (!Ctor) return;
+        const rec = new Ctor();
+        rec.continuous = true;
+        rec.interimResults = true;
+        rec.lang = 'en-US';
+        const base = input ? `${input} ` : '';
+        rec.onresult = (e) => {
+            let transcript = '';
+            for (let i = 0; i < e.results.length; i++) transcript += e.results[i][0].transcript;
+            setInput(base + transcript);
+        };
+        rec.onend = () => { setIsListening(false); recognitionRef.current = null; };
+        rec.onerror = () => { setIsListening(false); recognitionRef.current = null; };
+        recognitionRef.current = rec;
+        setIsListening(true);
+        rec.start();
+    };
 
     const scrollToBottom = () => {
         requestAnimationFrame(() => {
@@ -529,6 +576,16 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
                     onKeyDown={onKeyDown}
                     rows={2}
                 />
+                {voiceSupported && (
+                    <button
+                        className={`${styles.chatMicBtn} ${isListening ? styles.chatMicBtnActive : ''}`}
+                        onClick={toggleVoice}
+                        title={isListening ? 'Stop dictation' : 'Dictate with your voice'}
+                        aria-pressed={isListening}
+                    >
+                        {isListening ? '⏹' : '🎤'}
+                    </button>
+                )}
                 <button className={styles.researchChatSendBtn} onClick={() => send()} disabled={isStreaming || !input.trim()}>
                     {isStreaming ? '…' : 'Send'}
                 </button>
