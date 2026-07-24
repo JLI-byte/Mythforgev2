@@ -1,6 +1,16 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
+import { useWorkspaceStore } from '@/store/workspaceStore';
+import {
+    BUILTIN_INTERVIEWS,
+    makeBlankInterview,
+    interviewLaunchLine,
+    renderInterviewGuide,
+    type Interview,
+} from '@/lib/interviews';
+import { InterviewMenu } from './InterviewMenu';
+import { InterviewEditorModal } from './InterviewEditorModal';
 import styles from '../WritingDesk.module.css';
 
 interface ChatMessage {
@@ -47,12 +57,22 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState('');
     const [isStreaming, setIsStreaming] = useState(false);
-    // Once the guided "Build a World" interview is launched it stays on for the
-    // rest of the conversation, so the interview guide keeps reaching the model
-    // on every turn until the world is built.
-    const [interviewActive, setInterviewActive] = useState(false);
+    // The active interview's rendered guide ('' when none). Once an interview is
+    // launched it rides every turn so the guide keeps reaching the model until
+    // the subject is built.
+    const [interviewGuide, setInterviewGuide] = useState('');
+    // Editor modal: the interview being edited, and the id it updates on save
+    // (null → adding a new custom interview).
+    const [editorDraft, setEditorDraft] = useState<Interview | null>(null);
+    const [editorExistingId, setEditorExistingId] = useState<string | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const abortRef = useRef<AbortController | null>(null);
+
+    const customInterviews = useWorkspaceStore(s => s.customInterviews);
+    const addInterview = useWorkspaceStore(s => s.addInterview);
+    const updateInterview = useWorkspaceStore(s => s.updateInterview);
+    const deleteInterview = useWorkspaceStore(s => s.deleteInterview);
+    const allInterviews: Interview[] = [...BUILTIN_INTERVIEWS, ...customInterviews];
 
     // Abort any in-flight request if the panel unmounts (e.g. switching tabs
     // mid-stream) so the fetch and its subprocess don't keep running.
@@ -65,7 +85,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
         });
     };
 
-    const send = async (explicitText?: string, forceInterview = false) => {
+    const send = async (explicitText?: string, forceGuide?: string) => {
         const text = (explicitText ?? input).trim();
         if (!text || isStreaming) return;
 
@@ -97,7 +117,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
             const res = await fetch('/api/research-chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messages: outgoing, ...getContext(), interview: forceInterview || interviewActive }),
+                body: JSON.stringify({ messages: outgoing, ...getContext(), interviewGuide: forceGuide ?? interviewGuide }),
                 signal: controller.signal,
             });
             if (!res.ok || !res.body) {
@@ -157,27 +177,57 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
         }
     };
 
-    // Launch the guided ten-question world-building interview. Turns on interview
-    // mode (so the guide reaches the model every turn) and sends the opening
-    // message that gets the assistant asking question one.
-    const startInterview = () => {
+    // Launch an interview: render its guide, keep it active for the rest of the
+    // conversation, and send the opening line so the assistant asks question one.
+    const launchInterview = (iv: Interview) => {
         if (isStreaming) return;
-        setInterviewActive(true);
-        send("Let's build a world from scratch — walk me through it, one question at a time.", true);
+        const guide = renderInterviewGuide(iv);
+        setInterviewGuide(guide);
+        send(interviewLaunchLine(iv), guide);
+    };
+
+    // Open the editor on a fresh custom interview.
+    const newInterview = () => {
+        setEditorDraft(makeBlankInterview(crypto.randomUUID()));
+        setEditorExistingId(null);
+    };
+
+    // Edit an interview. A built-in can't be edited in place, so it opens as a
+    // fresh, editable duplicate; a custom one edits in place.
+    const editInterview = (iv: Interview) => {
+        if (iv.builtIn) {
+            setEditorDraft({ ...iv, id: crypto.randomUUID(), builtIn: false, title: `${iv.title} (copy)` });
+            setEditorExistingId(null);
+        } else {
+            setEditorDraft(structuredClone(iv));
+            setEditorExistingId(iv.id);
+        }
+    };
+
+    const saveInterview = (iv: Interview) => {
+        if (editorExistingId) updateInterview(editorExistingId, iv);
+        else addInterview(iv);
+        setEditorDraft(null);
+        setEditorExistingId(null);
+    };
+
+    const removeInterview = (id: string) => {
+        deleteInterview(id);
+        setEditorDraft(null);
+        setEditorExistingId(null);
     };
 
     return (
         <div className={styles.researchChat}>
             <div className={styles.researchChatHeader}>
                 <span>Research Assistant</span>
-                <button
-                    className={styles.researchBuildWorldBtn}
-                    onClick={startInterview}
+                <InterviewMenu
+                    interviews={allInterviews}
                     disabled={isStreaming}
-                    title="Start a guided ten-question interview to build your world from scratch"
-                >
-                    🌍 Build a World
-                </button>
+                    onLaunch={launchInterview}
+                    onNew={newInterview}
+                    onEdit={editInterview}
+                />
             </div>
 
             <div className={styles.researchChatScroll} ref={scrollRef}>
@@ -219,6 +269,16 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
                     {isStreaming ? '…' : 'Send'}
                 </button>
             </div>
+
+            {editorDraft && (
+                <InterviewEditorModal
+                    interview={editorDraft}
+                    canDelete={editorExistingId !== null}
+                    onSave={saveInterview}
+                    onDelete={editorExistingId ? () => removeInterview(editorExistingId) : undefined}
+                    onClose={() => { setEditorDraft(null); setEditorExistingId(null); }}
+                />
+            )}
         </div>
     );
 }

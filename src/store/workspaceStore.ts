@@ -6,6 +6,7 @@ import { worldKeyForProject, worldKeyForEntity, type WorldKey } from '@/lib/worl
 import { migrateWorkspaceSchema } from './migrateWorkspaceSchema';
 import { DEFAULT_WORLD_BIBLE_LAYOUT } from '@/lib/worldBibleNav';
 import { wouldCreateCycle, fileByType } from '@/lib/folderTree';
+import type { Interview } from '@/lib/interviews/types';
 
 // Cover colors auto-assigned to new projects in rotation
 export const COVER_COLORS = [
@@ -654,6 +655,9 @@ export interface WorkspaceState {
      */
     researchStates: Record<string, DeskState>;
 
+    /** User-authored research-chat interview skills (built-ins live in the registry). */
+    customInterviews: Interview[];
+
     /** Sprint 69: per-shelf World Bible configs, keyed by world id or 'standalone'. */
     worldBibles: Record<WorldKey, WorldBibleConfig>;
     /** Sprint 69: which shelf's bible is currently open (null = derive from active project). */
@@ -843,6 +847,11 @@ export interface WorkspaceState {
     /** Research Table Actions — parallel canvas keyed by composite scope key. */
     updateResearchState: (scopeKey: string, updates: Partial<DeskState>) => void;
     pinEntityToDesk: (projectId: string, entityId: string) => void;
+
+    /** Custom interview skills — add, update in place, or remove by id. */
+    addInterview: (interview: Interview) => void;
+    updateInterview: (id: string, interview: Interview) => void;
+    deleteInterview: (id: string) => void;
 
 
     /**
@@ -1108,6 +1117,7 @@ export function partializeWorkspace(state: WorkspaceState) {
         deskStates: state.deskStates,
         draftStates: state.draftStates,
         researchStates: state.researchStates,
+        customInterviews: state.customInterviews,
         worldBibles: state.worldBibles,
         activeWorldKey: state.activeWorldKey,
     };
@@ -1194,6 +1204,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             deskStates: {},
             draftStates: {},
             researchStates: {},
+            customInterviews: [],
             writingGoal: { dailyTarget: 0, sessionTarget: 0 },
             sessionWordCount: 0,
             isToolbarVisible: true,
@@ -2118,6 +2129,19 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     };
                 }),
 
+            addInterview: (interview) =>
+                set((state) => ({ customInterviews: [...state.customInterviews, interview] })),
+
+            updateInterview: (id, interview) =>
+                set((state) => ({
+                    customInterviews: state.customInterviews.map(i => (i.id === id ? interview : i)),
+                })),
+
+            deleteInterview: (id) =>
+                set((state) => ({
+                    customInterviews: state.customInterviews.filter(i => i.id !== id),
+                })),
+
             pinEntityToDesk: (projectId, entityId) =>
                 set((state) => {
                     const current = state.deskStates[projectId] || { widgets: [], zoom: 1, canvasOffset: { x: 0, y: 0 } };
@@ -2285,6 +2309,11 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
                     if (typeof (state as unknown as Record<string, unknown>).articleZoneWidth !== 'number') {
                         state.articleZoneWidth = 680;
+                    }
+
+                    // Custom interviews arrived after the initial persisted schema.
+                    if (!Array.isArray(state.customInterviews)) {
+                        state.customInterviews = [];
                     }
                     state.setHasHydrated(true);
                 }

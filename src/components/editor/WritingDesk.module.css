@@ -4792,6 +4792,362 @@
   cursor: default;
 }
 
+/* ── Interview launcher menu ─────────────────────────────── */
+.interviewMenuRoot {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.interviewMenuPopover {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 40;
+  width: 280px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 6px;
+  background: var(--background, #141418);
+  border: 1px solid var(--border, rgba(128, 128, 128, 0.28));
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+.interviewMenuRow {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.interviewMenuLaunch {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 9px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text, inherit);
+  transition: background 120ms ease;
+}
+
+.interviewMenuLaunch:hover {
+  background: color-mix(in srgb, var(--accent, #6c8cff) 16%, transparent);
+}
+
+.interviewMenuIcon {
+  flex: 0 0 auto;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.interviewMenuText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.interviewMenuTitle {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.interviewMenuTagline {
+  font-size: 0.7rem;
+  opacity: 0.6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.interviewMenuEdit {
+  flex: 0 0 auto;
+  width: 30px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text, inherit);
+  opacity: 0.5;
+  font-size: 0.85rem;
+  transition: background 120ms ease, opacity 120ms ease;
+}
+
+.interviewMenuEdit:hover {
+  background: color-mix(in srgb, var(--accent, #6c8cff) 16%, transparent);
+  opacity: 1;
+}
+
+.interviewMenuNew {
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px 9px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--border, rgba(128, 128, 128, 0.2));
+  border-radius: 0 0 8px 8px;
+  cursor: pointer;
+  color: var(--accent, #6c8cff);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.interviewMenuNew:hover {
+  background: color-mix(in srgb, var(--accent, #6c8cff) 12%, transparent);
+}
+
+/* ── Interview editor modal ──────────────────────────────── */
+.interviewEditorBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.interviewEditorModal {
+  display: flex;
+  flex-direction: column;
+  width: min(560px, 100%);
+  max-height: 88vh;
+  background: var(--background, #141418);
+  border: 1px solid var(--border, rgba(128, 128, 128, 0.28));
+  border-radius: 16px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.interviewEditorHeader {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border, rgba(128, 128, 128, 0.2));
+}
+
+.interviewEditorTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text, inherit);
+}
+
+.interviewEditorClose {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text, inherit);
+  opacity: 0.6;
+  font-size: 0.95rem;
+}
+
+.interviewEditorClose:hover { opacity: 1; }
+
+.interviewEditorBody {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.interviewEditorMeta {
+  display: flex;
+  gap: 10px;
+}
+
+.interviewEditorField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.interviewEditorLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.6;
+  color: var(--text, inherit);
+}
+
+.interviewEditorHint {
+  font-size: 0.72rem;
+  opacity: 0.5;
+}
+
+.interviewEditorInput,
+.interviewEditorTextarea {
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.82rem;
+  padding: 8px 10px;
+  color: var(--text, inherit);
+  background: var(--surface, rgba(128, 128, 128, 0.06));
+  border: 1px solid var(--border, rgba(128, 128, 128, 0.28));
+  border-radius: 8px;
+}
+
+.interviewEditorTextarea {
+  resize: vertical;
+  min-height: 44px;
+}
+
+.interviewEditorInput:focus,
+.interviewEditorTextarea:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--accent, #6c8cff) 60%, transparent);
+}
+
+.interviewEditorQuestionsHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.interviewEditorQuestion {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: color-mix(in srgb, var(--text, #888) 4%, transparent);
+  border: 1px solid var(--border, rgba(128, 128, 128, 0.18));
+  border-radius: 10px;
+}
+
+.interviewEditorQuestionTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.interviewEditorQuestionNum {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent, #6c8cff) 22%, transparent);
+  color: var(--text, inherit);
+}
+
+.interviewEditorQuestionBtns {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 2px;
+}
+
+.interviewEditorQuestionBtns button {
+  width: 26px;
+  height: 26px;
+  background: transparent;
+  border: 1px solid var(--border, rgba(128, 128, 128, 0.22));
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text, inherit);
+  opacity: 0.7;
+  font-size: 0.75rem;
+}
+
+.interviewEditorQuestionBtns button:hover:not(:disabled) {
+  opacity: 1;
+  background: color-mix(in srgb, var(--accent, #6c8cff) 14%, transparent);
+}
+
+.interviewEditorQuestionBtns button:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.interviewEditorAddQ {
+  align-self: flex-start;
+  padding: 7px 12px;
+  background: transparent;
+  border: 1px dashed var(--border, rgba(128, 128, 128, 0.4));
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--accent, #6c8cff);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.interviewEditorAddQ:hover {
+  background: color-mix(in srgb, var(--accent, #6c8cff) 10%, transparent);
+}
+
+.interviewEditorActions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border, rgba(128, 128, 128, 0.2));
+}
+
+.interviewEditorActionsRight {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.interviewEditorDelete,
+.interviewEditorCancel,
+.interviewEditorSave {
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid var(--border, rgba(128, 128, 128, 0.3));
+  background: transparent;
+  color: var(--text, inherit);
+}
+
+.interviewEditorDelete {
+  color: #e5646a;
+  border-color: color-mix(in srgb, #e5646a 45%, transparent);
+}
+
+.interviewEditorDelete:hover {
+  background: color-mix(in srgb, #e5646a 14%, transparent);
+}
+
+.interviewEditorCancel:hover {
+  background: color-mix(in srgb, var(--text, #888) 10%, transparent);
+}
+
+.interviewEditorSave {
+  background: var(--accent, #6c8cff);
+  border-color: var(--accent, #6c8cff);
+  color: #fff;
+}
+
+.interviewEditorSave:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.interviewEditorSave:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
 .researchChatScroll {
   flex: 1 1 auto;
   min-height: 0;
