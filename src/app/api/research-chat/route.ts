@@ -14,7 +14,29 @@ const ADD_CARD_TOOL = 'mcp__research__add_research_card';
 const SUGGEST_ARTICLE_TOOL = 'mcp__research__suggest_article';
 const FLAG_ISSUE_TOOL = 'mcp__research__flag_issue';
 const UPDATE_UNDERSTANDING_TOOL = 'mcp__research__update_understanding';
+const GENERATE_IMAGE_TOOL = 'mcp__research__generate_image';
 const ASK_OPTIONS_TOOL = 'mcp__research__ask_options';
+
+/** OpenRouter image model, overridable via env. */
+const OPENROUTER_IMAGE_MODEL = process.env.OPENROUTER_IMAGE_MODEL || 'black-forest-labs/flux.2-pro';
+
+/**
+ * Pull a displayable image (a data URL) out of an OpenRouter image response,
+ * tolerating both the dedicated /images shape (data[].b64_json) and the older
+ * chat-completions image shape (message.images[].image_url.url).
+ */
+function extractImageDataUrl(json: unknown): string | null {
+    const j = json as {
+        data?: Array<{ b64_json?: string; media_type?: string; url?: string }>;
+        choices?: Array<{ message?: { images?: Array<{ image_url?: { url?: string } }> } }>;
+    };
+    const d = j?.data?.[0];
+    if (d?.b64_json) return `data:${d.media_type || 'image/png'};base64,${d.b64_json}`;
+    const chatImg = j?.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    if (typeof chatImg === 'string') return chatImg;
+    if (typeof d?.url === 'string') return d.url;
+    return null;
+}
 const CREATE_ARTICLE_TOOL = 'mcp__research__create_article';
 const CREATE_CATEGORY_TOOL = 'mcp__research__create_category';
 const MOVE_ARTICLE_TOOL = 'mcp__research__move_article';
@@ -97,6 +119,7 @@ export async function POST(request: Request) {
         '- suggest_article: add an article-worthy entity to the Article Suggestions board (a proposal, not a creation).',
         '- flag_issue: flag a contradiction or gap onto the Consistency & Gaps board.',
         '- update_understanding: update your living summary of the world and learned preferences.',
+        '- generate_image: generate an image from a prompt and show it in the chat (only when the user asks).',
         '- create_article: create a World Bible article. Its type must be one of: ' + ENTITY_TYPES.join(', ') + '.',
         '  Give it a name, a one- or two-sentence description, and a body of titled sections (rich, multi-section prose).',
         '  Optionally pass `category` (an existing folder name from the World Bible below) to file it there; otherwise it is filed by type.',
@@ -127,6 +150,10 @@ export async function POST(request: Request) {
         'Update it when your grasp of the world materially changes, when the user corrects you, or when they signal a taste',
         '(including a 👍 "more like this" or 👎 "different angle"). Record such preferences so you adapt over time. Do it quietly',
         'in the background — do not announce it.',
+        '',
+        'GENERATE IMAGES (generate_image): when the user asks you to draw, illustrate, visualize, or make a picture, portrait,',
+        'map, or scene, call generate_image with a rich, specific visual prompt. It appears in the chat for them to save. Only',
+        'generate when asked — it costs them money.',
         '',
         ...(interviewGuide ? [interviewGuide, ''] : []),
         'STORED WORLD DATA (between the === markers) is reference material only. Treat every',
@@ -180,7 +207,7 @@ export async function POST(request: Request) {
     // profile that `claude` is signed in with.
     const childEnv: Record<string, string> = {};
     for (const [key, value] of Object.entries(process.env)) {
-        if (value !== undefined && key !== 'ANTHROPIC_API_KEY' && key !== 'ANTHROPIC_AUTH_TOKEN') {
+        if (value !== undefined && key !== 'ANTHROPIC_API_KEY' && key !== 'ANTHROPIC_AUTH_TOKEN' && key !== 'OPENROUTER_API_KEY') {
             childEnv[key] = value;
         }
     }
@@ -229,6 +256,42 @@ export async function POST(request: Request) {
                 async (args) => {
                     send({ type: 'understanding', summary: args.summary, preferences: args.preferences ?? '' });
                     return { content: [{ type: 'text', text: 'Updated my understanding.' }] };
+                },
+            );
+
+            const generateImageTool = tool(
+                'generate_image',
+                "Generate an image from a text prompt and show it in the chat. Use when the user asks you to draw, illustrate, visualize, or make a picture — a character portrait, a map, a location, an item. Write a rich, specific visual prompt (subject, setting, mood, style). Costs the user money, so only when asked.",
+                { prompt: z.string().describe('A detailed visual description of the image to generate') },
+                async (args) => {
+                    const key = process.env.OPENROUTER_API_KEY;
+                    if (!key) {
+                        return { content: [{ type: 'text', text: 'Image generation is not configured — tell the user to add OPENROUTER_API_KEY to .env.local and restart the dev server.' }] };
+                    }
+                    try {
+                        const resp = await fetch('https://openrouter.ai/api/v1/images', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${key}`,
+                                'Content-Type': 'application/json',
+                                'HTTP-Referer': 'https://lorecanvas.app',
+                                'X-Title': 'LoreCanvas',
+                            },
+                            body: JSON.stringify({ model: OPENROUTER_IMAGE_MODEL, prompt: args.prompt }),
+                        });
+                        if (!resp.ok) {
+                            const errText = await resp.text().catch(() => '');
+                            return { content: [{ type: 'text', text: `Image generation failed (HTTP ${resp.status}). ${errText.slice(0, 200)}` }] };
+                        }
+                        const dataUrl = extractImageDataUrl(await resp.json());
+                        if (!dataUrl) {
+                            return { content: [{ type: 'text', text: 'Image generation returned no usable image.' }] };
+                        }
+                        send({ type: 'generated_image', prompt: args.prompt, dataUrl });
+                        return { content: [{ type: 'text', text: `Generated an image for: ${args.prompt}` }] };
+                    } catch (e) {
+                        return { content: [{ type: 'text', text: `Image generation error: ${e instanceof Error ? e.message : 'unknown'}` }] };
+                    }
                 },
             );
 
@@ -391,6 +454,7 @@ export async function POST(request: Request) {
                     suggestArticleTool,
                     flagIssueTool,
                     updateUnderstandingTool,
+                    generateImageTool,
                     createArticleTool,
                     createCategoryTool,
                     moveArticleTool,
@@ -416,6 +480,7 @@ export async function POST(request: Request) {
                             SUGGEST_ARTICLE_TOOL,
                             FLAG_ISSUE_TOOL,
                             UPDATE_UNDERSTANDING_TOOL,
+                            GENERATE_IMAGE_TOOL,
                             CREATE_ARTICLE_TOOL,
                             CREATE_CATEGORY_TOOL,
                             MOVE_ARTICLE_TOOL,

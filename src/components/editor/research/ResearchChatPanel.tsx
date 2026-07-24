@@ -49,6 +49,8 @@ interface ChatMessage {
     pending?: PendingChange[];
     /** The user's 👍/👎 on an assistant reply (also sends a quick steer). */
     reaction?: 'up' | 'down';
+    /** Images the assistant generated (data URLs), shown inline with save actions. */
+    generatedImages?: { prompt: string; url: string }[];
 }
 
 /** Event types held for preview instead of applied immediately (mutating-in-place). */
@@ -119,6 +121,7 @@ export type ToolEvent =
     | { type: 'suggest'; name: string; entityType: string; category?: string; reason?: string }
     | { type: 'flag'; kind: 'contradiction' | 'gap'; summary: string; detail?: string }
     | { type: 'understanding'; summary: string; preferences: string }
+    | { type: 'save_image'; target: 'board' | 'article'; url: string; label?: string; articleName?: string }
     | {
           type: 'article';
           name: string;
@@ -294,6 +297,18 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
             scrollToBottom();
         };
 
+        const attachGeneratedImage = (prompt: string, url: string) => {
+            setMessages(prev => {
+                const next = [...prev];
+                const last = next[next.length - 1];
+                if (last && last.role === 'assistant') {
+                    next[next.length - 1] = { ...last, generatedImages: [...(last.generatedImages ?? []), { prompt, url }] };
+                }
+                return next;
+            });
+            scrollToBottom();
+        };
+
         const attachPending = (evt: ToolEvent) => {
             const change: PendingChange = { id: crypto.randomUUID(), label: describeChange(evt), evt, status: 'pending' };
             setMessages(prev => {
@@ -333,7 +348,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
             const handleEvent = (line: string) => {
                 const trimmed = line.trim();
                 if (!trimmed) return;
-                let evt: { type?: string; text?: string; prompt?: string; options?: string[] };
+                let evt: { type?: string; text?: string; prompt?: string; options?: string[]; dataUrl?: string };
                 try {
                     evt = JSON.parse(trimmed);
                 } catch {
@@ -344,6 +359,8 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
                 } else if (evt.type === 'options' && Array.isArray(evt.options)) {
                     // Attach clickable choices to the current assistant message.
                     attachOptions(evt.prompt ?? '', evt.options);
+                } else if (evt.type === 'generated_image' && typeof evt.dataUrl === 'string') {
+                    attachGeneratedImage(evt.prompt ?? '', evt.dataUrl);
                 } else if (evt.type && PREVIEW_TYPES.has(evt.type)) {
                     // A mutating-in-place action — hold it for the user to Apply/Discard.
                     attachPending(evt as ToolEvent);
@@ -552,6 +569,34 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
                                 </div>
                             </div>
                         )}
+
+                        {m.generatedImages?.map((img, gi) => (
+                            <div key={gi} className={styles.genImage}>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={img.url} alt={img.prompt} className={styles.genImageImg} />
+                                <div className={styles.genImageActions}>
+                                    <button
+                                        className={styles.genImageBtn}
+                                        onClick={() => onToolEvent({ type: 'save_image', target: 'board', url: img.url, label: img.prompt.slice(0, 60) })}
+                                    >
+                                        ＋ Add to board
+                                    </button>
+                                    {chipEntities.length > 0 && (
+                                        <select
+                                            className={styles.genImageSelect}
+                                            value=""
+                                            onChange={e => {
+                                                if (!e.target.value) return;
+                                                onToolEvent({ type: 'save_image', target: 'article', url: img.url, articleName: e.target.value });
+                                            }}
+                                        >
+                                            <option value="">Set as article image…</option>
+                                            {chipEntities.map(en => <option key={en.id} value={en.name}>{en.name}</option>)}
+                                        </select>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
 
                         {m.pending?.map(p => (
                             <div key={p.id} className={`${styles.chatPending} ${p.status !== 'pending' ? styles.chatPendingResolved : ''}`}>

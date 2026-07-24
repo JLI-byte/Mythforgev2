@@ -75,6 +75,33 @@ export default function ResearchTab() {
       return;
     }
 
+    if (evt.type === 'save_image') {
+      if (evt.target === 'board') {
+        if (!scopeKey) return 'No active board to add the image to.';
+        const current = s.researchStates[scopeKey]?.widgets ?? [];
+        s.updateResearchState(scopeKey, {
+          widgets: [...current, {
+            id: crypto.randomUUID(),
+            type: 'image',
+            x: 80 + current.length * 24,
+            y: 80 + current.length * 24,
+            width: 300,
+            height: 360,
+            content: { src: evt.url, label: evt.label ?? '' },
+          }],
+        });
+        return;
+      }
+      // target 'article' — set the image on an existing World Bible entity.
+      const proj = s.projects.find(p => p.id === s.activeProjectId) ?? null;
+      const key = worldKeyForProject(proj);
+      const worldEntities = s.entities.filter(e => worldKeyForEntity(e) === key);
+      const entity = findEntityByName(worldEntities, evt.articleName ?? '');
+      if (!entity) return `Couldn't find an article named "${evt.articleName}".`;
+      s.updateEntityImage(entity.id, evt.url);
+      return;
+    }
+
     if (evt.type === 'suggest') {
       if (!scopeKey) return;
       const proj = s.projects.find(p => p.id === s.activeProjectId) ?? null;

@@ -5552,6 +5552,53 @@
   background: color-mix(in srgb, var(--accent, #6c8cff) 26%, transparent);
 }
 
+/* ── Generated images in chat ────────────────────────────── */
+.genImage {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.genImageImg {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--border, rgba(128, 128, 128, 0.25));
+  display: block;
+}
+
+.genImageActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.genImageBtn {
+  padding: 5px 11px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent, #6c8cff);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.genImageBtn:hover { filter: brightness(1.08); }
+
+.genImageSelect {
+  padding: 5px 8px;
+  font-size: 0.72rem;
+  font-family: inherit;
+  color: var(--text, inherit);
+  background: var(--surface, rgba(128, 128, 128, 0.06));
+  border: 1px solid var(--border, rgba(128, 128, 128, 0.3));
+  border-radius: 8px;
+  cursor: pointer;
+}
+
 /* ── Preview-before-apply cards ──────────────────────────── */
 .chatPending {
   margin-top: 8px;
