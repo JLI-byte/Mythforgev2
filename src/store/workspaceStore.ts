@@ -292,7 +292,7 @@ export interface ArticleTab {
 // Writing Desk System Interfaces
 // =============================================
 
-export type DeskWidgetType = 'writingZone' | 'sticky' | 'reference' | 'image' | 'biblePinit' | 'sceneControl' | 'characterState' | 'continuity' | 'structure' | 'research' | 'progress' | 'relMap' | 'draftNav' | 'beatCard' | 'articleSuggestions' | 'consistencyFlags' | 'untyped';
+export type DeskWidgetType = 'writingZone' | 'sticky' | 'reference' | 'image' | 'biblePinit' | 'sceneControl' | 'characterState' | 'continuity' | 'structure' | 'research' | 'progress' | 'relMap' | 'draftNav' | 'beatCard' | 'articleSuggestions' | 'consistencyFlags' | 'worldUnderstanding' | 'untyped';
 
 /** An object attached to the research chat as context for the next message. */
 export interface ChatAttachment {
@@ -675,6 +675,13 @@ export interface WorkspaceState {
     /** User-authored research-chat interview skills (built-ins live in the registry). */
     customInterviews: Interview[];
 
+    /**
+     * The assistant's living understanding of each world, keyed by world id /
+     * 'standalone': a running summary plus learned preferences. Maintained by the
+     * assistant and correctable by the user.
+     */
+    worldUnderstanding: Record<string, { summary: string; preferences: string }>;
+
     /** Sprint 69: per-shelf World Bible configs, keyed by world id or 'standalone'. */
     worldBibles: Record<WorldKey, WorldBibleConfig>;
     /** Sprint 69: which shelf's bible is currently open (null = derive from active project). */
@@ -872,6 +879,9 @@ export interface WorkspaceState {
     addInterview: (interview: Interview) => void;
     updateInterview: (id: string, interview: Interview) => void;
     deleteInterview: (id: string) => void;
+
+    /** Set the assistant's understanding (summary + preferences) for a world. */
+    setWorldUnderstanding: (key: string, data: { summary: string; preferences: string }) => void;
 
 
     /**
@@ -1138,6 +1148,7 @@ export function partializeWorkspace(state: WorkspaceState) {
         draftStates: state.draftStates,
         researchStates: state.researchStates,
         customInterviews: state.customInterviews,
+        worldUnderstanding: state.worldUnderstanding,
         worldBibles: state.worldBibles,
         activeWorldKey: state.activeWorldKey,
     };
@@ -1226,6 +1237,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             draftStates: {},
             researchStates: {},
             customInterviews: [],
+            worldUnderstanding: {},
             writingGoal: { dailyTarget: 0, sessionTarget: 0 },
             sessionWordCount: 0,
             isToolbarVisible: true,
@@ -2166,6 +2178,11 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     customInterviews: state.customInterviews.filter(i => i.id !== id),
                 })),
 
+            setWorldUnderstanding: (key, data) =>
+                set((state) => ({
+                    worldUnderstanding: { ...state.worldUnderstanding, [key]: data },
+                })),
+
             pinEntityToDesk: (projectId, entityId) =>
                 set((state) => {
                     const current = state.deskStates[projectId] || { widgets: [], zoom: 1, canvasOffset: { x: 0, y: 0 } };
@@ -2338,6 +2355,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     // Custom interviews arrived after the initial persisted schema.
                     if (!Array.isArray(state.customInterviews)) {
                         state.customInterviews = [];
+                    }
+                    if (!state.worldUnderstanding || typeof state.worldUnderstanding !== 'object') {
+                        state.worldUnderstanding = {};
                     }
                     state.setHasHydrated(true);
                 }

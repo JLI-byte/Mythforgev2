@@ -118,6 +118,7 @@ export type ToolEvent =
     | { type: 'card'; text: string }
     | { type: 'suggest'; name: string; entityType: string; category?: string; reason?: string }
     | { type: 'flag'; kind: 'contradiction' | 'gap'; summary: string; detail?: string }
+    | { type: 'understanding'; summary: string; preferences: string }
     | {
           type: 'article';
           name: string;
@@ -144,7 +145,7 @@ interface ResearchChatPanelProps {
     /** null when no project is active — add-to-board is then disabled. */
     scopeKey: string | null;
     /** Reads the current board + world structure as text at send time. */
-    getContext: () => { board: string; world: string };
+    getContext: () => { board: string; world: string; understanding?: string };
     /** Apply an AI action to the store. Returns a warning string when the action
      *  could not be applied (e.g. an unresolved name), so the chat can say so. */
     onToolEvent: (event: ToolEvent) => string | void;

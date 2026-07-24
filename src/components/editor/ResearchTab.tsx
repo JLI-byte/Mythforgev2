@@ -53,7 +53,11 @@ export default function ResearchTab() {
     const layout = getWorldBibleConfig(s.worldBibles, worldKey).layout;
     const worldEntities = s.entities.filter(e => worldKeyForEntity(e) === worldKey);
     const world = serializeWorld(layout.roots, worldEntities);
-    return { board, world };
+    const u = s.worldUnderstanding[worldKey];
+    const understanding = u && (u.summary.trim() || u.preferences.trim())
+      ? [u.summary.trim(), u.preferences.trim() ? `Learned preferences: ${u.preferences.trim()}` : ''].filter(Boolean).join('\n')
+      : '';
+    return { board, world, understanding };
   }, [scopeKey]);
 
   // Apply an AI action to the store. Returns a warning string when the action
@@ -104,6 +108,26 @@ export default function ResearchTab() {
       const widgets = s.researchStates[scopeKey]?.widgets ?? [];
       const next = addFlagToWidgets(widgets, flag);
       if (next !== widgets) s.updateResearchState(scopeKey, { widgets: next });
+      return;
+    }
+
+    if (evt.type === 'understanding') {
+      const proj = s.projects.find(p => p.id === s.activeProjectId) ?? null;
+      const key = worldKeyForProject(proj);
+      s.setWorldUnderstanding(key, { summary: evt.summary, preferences: evt.preferences });
+      // Surface the "What I Understand" widget on the board the first time.
+      if (scopeKey) {
+        const widgets = s.researchStates[scopeKey]?.widgets ?? [];
+        if (!widgets.some(w => w.type === 'worldUnderstanding')) {
+          const dims = { w: 340, h: 360 };
+          s.updateResearchState(scopeKey, {
+            widgets: [...widgets, {
+              id: crypto.randomUUID(), type: 'worldUnderstanding',
+              x: 120, y: 500, width: dims.w, height: dims.h, content: {},
+            }],
+          });
+        }
+      }
       return;
     }
 
