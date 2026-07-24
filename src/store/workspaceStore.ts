@@ -331,6 +331,15 @@ export interface DeskState {
   draftTypeId?: string;
 }
 
+/**
+ * A user-created research board within a scope. The scope's default board reuses
+ * the bare scope key; custom boards get a composite key `<baseScopeKey>::<id>`.
+ */
+export interface ResearchBoard {
+  id: string;
+  name: string;
+}
+
 export interface SceneSnapshot {
   id: string;
   sceneId: string;
@@ -672,6 +681,13 @@ export interface WorkspaceState {
      */
     researchStates: Record<string, DeskState>;
 
+    /**
+     * User-created boards within each research scope, keyed by base scope key
+     * (`project:<id>` | `world:<worldKey>`). The scope's default "Main" board is
+     * implicit (it reuses the base key) and isn't listed here.
+     */
+    customBoards: Record<string, ResearchBoard[]>;
+
     /** User-authored research-chat interview skills (built-ins live in the registry). */
     customInterviews: Interview[];
 
@@ -874,6 +890,11 @@ export interface WorkspaceState {
     /** Research Table Actions — parallel canvas keyed by composite scope key. */
     updateResearchState: (scopeKey: string, updates: Partial<DeskState>) => void;
     pinEntityToDesk: (projectId: string, entityId: string) => void;
+
+    /** Research boards within a scope — add returns the new board's id. */
+    addResearchBoard: (baseScopeKey: string, name: string) => string;
+    renameResearchBoard: (baseScopeKey: string, boardId: string, name: string) => void;
+    deleteResearchBoard: (baseScopeKey: string, boardId: string) => void;
 
     /** Custom interview skills — add, update in place, or remove by id. */
     addInterview: (interview: Interview) => void;
@@ -1147,6 +1168,7 @@ export function partializeWorkspace(state: WorkspaceState) {
         deskStates: state.deskStates,
         draftStates: state.draftStates,
         researchStates: state.researchStates,
+        customBoards: state.customBoards,
         customInterviews: state.customInterviews,
         worldUnderstanding: state.worldUnderstanding,
         worldBibles: state.worldBibles,
@@ -1236,6 +1258,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             deskStates: {},
             draftStates: {},
             researchStates: {},
+            customBoards: {},
             customInterviews: [],
             worldUnderstanding: {},
             writingGoal: { dailyTarget: 0, sessionTarget: 0 },
@@ -2165,6 +2188,38 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     };
                 }),
 
+            addResearchBoard: (baseScopeKey, name) => {
+                const id = crypto.randomUUID();
+                set((state) => ({
+                    customBoards: {
+                        ...state.customBoards,
+                        [baseScopeKey]: [...(state.customBoards[baseScopeKey] ?? []), { id, name }],
+                    },
+                }));
+                return id;
+            },
+
+            renameResearchBoard: (baseScopeKey, boardId, name) =>
+                set((state) => ({
+                    customBoards: {
+                        ...state.customBoards,
+                        [baseScopeKey]: (state.customBoards[baseScopeKey] ?? []).map(b =>
+                            b.id === boardId ? { ...b, name } : b,
+                        ),
+                    },
+                })),
+
+            deleteResearchBoard: (baseScopeKey, boardId) =>
+                set((state) => {
+                    const nextBoards = (state.customBoards[baseScopeKey] ?? []).filter(b => b.id !== boardId);
+                    // Drop the deleted board's canvas state too.
+                    const { [`${baseScopeKey}::${boardId}`]: _removed, ...restStates } = state.researchStates;
+                    return {
+                        customBoards: { ...state.customBoards, [baseScopeKey]: nextBoards },
+                        researchStates: restStates,
+                    };
+                }),
+
             addInterview: (interview) =>
                 set((state) => ({ customInterviews: [...state.customInterviews, interview] })),
 
@@ -2355,6 +2410,10 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     // Custom interviews arrived after the initial persisted schema.
                     if (!Array.isArray(state.customInterviews)) {
                         state.customInterviews = [];
+                    }
+                    // Custom research boards arrived later too.
+                    if (!state.customBoards || typeof state.customBoards !== 'object') {
+                        state.customBoards = {};
                     }
                     if (!state.worldUnderstanding || typeof state.worldUnderstanding !== 'object') {
                         state.worldUnderstanding = {};

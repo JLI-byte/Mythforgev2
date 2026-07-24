@@ -22,6 +22,7 @@ import WritingDesk from './WritingDesk';
 import { ResearchEmptyState } from './ResearchEmptyState';
 import { ResearchChatPanel, type ToolEvent } from './research/ResearchChatPanel';
 import { ChatTrays } from './research/ChatTrays';
+import { ResearchBoardBar } from './research/ResearchBoardBar';
 import styles from './WritingDesk.module.css';
 
 /**
@@ -38,7 +39,12 @@ export default function ResearchTab() {
   const activeProject = useWorkspaceStore(s =>
     s.projects.find(p => p.id === s.activeProjectId) ?? null
   );
-  const scopeKey = researchScopeKey(scope, activeProject);
+  // Each scope (project / world) is its own base key; within it the user can
+  // pick a board. null = the scope's default "Main" board (reuses the base key).
+  const baseScopeKey = researchScopeKey(scope, activeProject);
+  const [activeBoardId, setActiveBoardId] = useState<string | null>(null);
+  useEffect(() => { setActiveBoardId(null); }, [baseScopeKey]);
+  const scopeKey = activeBoardId && baseScopeKey ? `${baseScopeKey}::${activeBoardId}` : baseScopeKey;
 
   // Chat panel layout: resizable width + collapsed state, persisted locally.
   const [chatWidth, setChatWidth] = useState(CHAT_DEFAULT_WIDTH);
@@ -325,6 +331,13 @@ export default function ResearchTab() {
                 This World
               </button>
             </div>
+            {baseScopeKey && (
+              <ResearchBoardBar
+                baseScopeKey={baseScopeKey}
+                activeBoardId={activeBoardId}
+                onSelect={setActiveBoardId}
+              />
+            )}
             <div className={styles.researchCanvasHost}>
               <WritingDesk variant="research" scopeKey={scopeKey} />
             </div>
