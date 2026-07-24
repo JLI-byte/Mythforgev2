@@ -13,6 +13,7 @@ import { DraftExport, collectExportBeats, ExportBeat } from './desk/DraftExport'
 import { SurfaceCanvas } from './desk/SurfaceCanvas';
 import { EmptyDeskWelcome } from './desk/EmptyDeskWelcome';
 import { WidgetRenderer } from './desk/widgets/WidgetRenderer';
+import { chatAttachmentForWidget } from '@/lib/chatAttachmentForWidget';
 
 // ============================================================
 // MAIN COMPONENT
@@ -59,6 +60,8 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
   const globalWidgetsRaw = useWorkspaceStore(s => s.globalWidgets);
   const globalWidgets = (isDraft || isResearch) ? NO_GLOBAL_WIDGETS : globalWidgetsRaw;
   const updateGlobalWidgets = useWorkspaceStore(s => s.updateGlobalWidgets);
+  // Research only: "Ask the AI about this" attaches a board element to the chat.
+  const setChatAttachment = useWorkspaceStore(s => s.setChatAttachment);
 
   // Derived state from store
   const widgets = useMemo(() => deskState?.widgets || [], [deskState]);
@@ -696,6 +699,16 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                   <div className={styles.dockedHandleDots}><span/><span/><span/></div>
 
                   <div className={styles.deskHeaderControls}>
+                    {isResearch && (
+                      <button
+                        className={styles.deskHeaderBtn}
+                        title="Ask the AI about this"
+                        onMouseDown={e => e.stopPropagation()}
+                        onClick={() => setChatAttachment(chatAttachmentForWidget({ ...w, content: liveContentRef.current[w.id] ?? w.content }))}
+                      >
+                        💬
+                      </button>
+                    )}
                     {w.type === 'untyped' && (
                       <button className={styles.deskTypePickerTrigger} onClick={() => setTypePickerWidgetId(w.id)}>Choose</button>
                     )}
