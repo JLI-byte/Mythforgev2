@@ -21,6 +21,7 @@ import { getWorldBibleConfig } from '@/lib/worldBibleNav';
 import WritingDesk from './WritingDesk';
 import { ResearchEmptyState } from './ResearchEmptyState';
 import { ResearchChatPanel, type ToolEvent } from './research/ResearchChatPanel';
+import { ChatTrays } from './research/ChatTrays';
 import styles from './WritingDesk.module.css';
 
 /**
@@ -179,20 +180,9 @@ export default function ResearchTab() {
     if (evt.type === 'understanding') {
       const proj = s.projects.find(p => p.id === s.activeProjectId) ?? null;
       const key = worldKeyForProject(proj);
+      // Understanding lives in the store keyed by world and is shown in the chat's
+      // "What I Understand" tray — no board widget needed.
       s.setWorldUnderstanding(key, { summary: evt.summary, preferences: evt.preferences });
-      // Surface the "What I Understand" widget on the board the first time.
-      if (scopeKey) {
-        const widgets = s.researchStates[scopeKey]?.widgets ?? [];
-        if (!widgets.some(w => w.type === 'worldUnderstanding')) {
-          const dims = { w: 340, h: 360 };
-          s.updateResearchState(scopeKey, {
-            widgets: [...widgets, {
-              id: crypto.randomUUID(), type: 'worldUnderstanding',
-              x: 120, y: 500, width: dims.w, height: dims.h, content: {},
-            }],
-          });
-        }
-      }
       return;
     }
 
@@ -308,6 +298,7 @@ export default function ResearchTab() {
             width={chatWidth}
             onCollapse={() => setChatCollapsed(true)}
           />
+          <ChatTrays scopeKey={scopeKey} />
           <div
             className={styles.researchResizer}
             onMouseDown={startResize}

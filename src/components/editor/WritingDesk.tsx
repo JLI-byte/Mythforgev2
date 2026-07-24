@@ -22,6 +22,9 @@ import { WidgetRenderer } from './desk/widgets/WidgetRenderer';
 /** Stable empty array so the draft canvas doesn't re-render on globalWidgets churn. */
 const NO_GLOBAL_WIDGETS: DeskWidget[] = [];
 
+/** Assistant panels that now live in the chat's side trays, not on the board. */
+const TRAY_WIDGET_TYPES = new Set<DeskWidgetType>(['articleSuggestions', 'consistencyFlags', 'worldUnderstanding']);
+
 interface WritingDeskProps {
   /** 'desk' = the manuscript Writing Desk (seeds a Writing Zone).
    *  'draft' = the Draft Table: a blank per-project canvas, no Writing Zone.
@@ -133,6 +136,8 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
   const activeWidgets = useMemo(() => {
     const all = [...widgets, ...globalWidgets];
     return all.filter(w => {
+      // These three are shown in the chat trays now, not on the board.
+      if (TRAY_WIDGET_TYPES.has(w.type)) return false;
       const scope = w.scope || 'project';
       if (scope === 'global') return true;
       if (scope === 'project') {
