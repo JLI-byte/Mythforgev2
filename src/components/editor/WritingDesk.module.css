@@ -5545,6 +5545,57 @@
   cursor: default;
 }
 
+/* ── Chat attachment (Ask about this / drag-in) ──────────── */
+.researchChatDragOver {
+  outline: 2px dashed color-mix(in srgb, var(--accent, #6c8cff) 70%, transparent);
+  outline-offset: -4px;
+}
+
+.chatAttachment {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 10px 6px;
+  padding: 6px 8px;
+  font-size: 0.74rem;
+  background: color-mix(in srgb, var(--accent, #6c8cff) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent, #6c8cff) 40%, transparent);
+  border-radius: 8px;
+}
+
+.chatAttachmentIcon { flex: 0 0 auto; }
+
+.chatAttachmentLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text, inherit);
+}
+
+.chatAttachmentClear {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: var(--text, inherit);
+  opacity: 0.6;
+  font-size: 0.72rem;
+}
+
+.chatAttachmentClear:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--text, #888) 12%, transparent);
+}
+
 .researchChatScroll {
   flex: 1 1 auto;
   min-height: 0;

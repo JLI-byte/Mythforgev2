@@ -134,8 +134,11 @@ export function ArticleSuggestionsRenderer({ content, onChange }: RendererProps)
     };
 
     // ── Drag & drop ─────────────────────────────────────────
-    const onChipDragStart = (id: string) => (e: React.DragEvent) => {
+    const onChipDragStart = (id: string, name: string) => (e: React.DragEvent) => {
         e.dataTransfer.setData(DRAG_MIME, id);
+        // Also expose the name as plain text so the chip can be dropped onto the
+        // research chat as an attachment, not only re-filed within the widget.
+        e.dataTransfer.setData('text/plain', name);
         e.dataTransfer.effectAllowed = 'move';
         e.stopPropagation();
     };
@@ -152,7 +155,7 @@ export function ArticleSuggestionsRenderer({ content, onChange }: RendererProps)
             key={s.id}
             className={styles.suggestChip}
             draggable
-            onDragStart={onChipDragStart(s.id)}
+            onDragStart={onChipDragStart(s.id, s.name)}
             onMouseDown={e => e.stopPropagation()}
             title={s.reason || undefined}
         >

@@ -294,6 +294,17 @@ export interface ArticleTab {
 
 export type DeskWidgetType = 'writingZone' | 'sticky' | 'reference' | 'image' | 'biblePinit' | 'sceneControl' | 'characterState' | 'continuity' | 'structure' | 'research' | 'progress' | 'relMap' | 'draftNav' | 'beatCard' | 'articleSuggestions' | 'untyped';
 
+/** An object attached to the research chat as context for the next message. */
+export interface ChatAttachment {
+  kind: 'entity' | 'text';
+  /** Short label shown on the attachment chip. */
+  label: string;
+  /** The full context text sent to the assistant. */
+  content: string;
+  /** Set when the attachment is a World Bible entity. */
+  entityId?: string;
+}
+
 export interface DeskWidget {
   id: string;
   type: DeskWidgetType;
@@ -562,7 +573,13 @@ export interface WorkspaceState {
      * This is intentionally not persisted (resets to null on refresh).
      */
     selectedEntityId: string | null;
-    
+
+    /**
+     * An object the user attached to the research chat as context for their next
+     * message ("Ask about this", or a passage dragged in). Transient; not persisted.
+     */
+    chatAttachment: ChatAttachment | null;
+
     /** Whether the World Bible Hierarchy Designer modal is open */
     isHierarchyModalOpen: boolean;
     /** Whether the designer should start in scratch mode */
@@ -779,6 +796,9 @@ export interface WorkspaceState {
 
     /** Sets the currently selected entity for the detail view. */
     setSelectedEntity: (id: string | null) => void;
+
+    /** Attach (or clear) an object as context for the next research-chat message. */
+    setChatAttachment: (attachment: ChatAttachment | null) => void;
 
     /** Hierarchy Canvas Management */
     addWorldBibleRoot: (root: WorldBibleRootConfig, isDraft?: boolean) => void;
@@ -1198,6 +1218,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             panelWidth: 480,
             articleZoneWidth: 680,
             selectedEntityId: null,
+            chatAttachment: null,
             isHierarchyModalOpen: false,
             isHierarchyScratchMode: false,
             _hasHydrated: false,
@@ -1550,6 +1571,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             setSelectedEntity: (id) =>
                 set(() => ({ selectedEntityId: id })),
+
+            setChatAttachment: (attachment) =>
+                set(() => ({ chatAttachment: attachment })),
 
             setHierarchyModal: (open, scratch = false) =>
                 set(() => ({ 

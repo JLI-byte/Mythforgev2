@@ -158,6 +158,12 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
     const entities = useWorkspaceStore(s => s.entities);
     const activeProject = useWorkspaceStore(s => s.projects.find(p => p.id === s.activeProjectId) ?? null);
     const setSelectedEntity = useWorkspaceStore(s => s.setSelectedEntity);
+
+    // An object the user attached ("Ask about this" / dragged-in passage) that
+    // rides the next message as focused context, then clears.
+    const chatAttachment = useWorkspaceStore(s => s.chatAttachment);
+    const setChatAttachment = useWorkspaceStore(s => s.setChatAttachment);
+    const [dragOver, setDragOver] = useState(false);
     const chipEntities = useMemo(() => {
         const worldKey = worldKeyForProject(activeProject);
         return entities
@@ -179,6 +185,10 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
     const send = async (explicitText?: string, forceGuide?: string) => {
         const text = (explicitText ?? input).trim();
         if (!text || isStreaming) return;
+
+        // Consume any attached context for this one message, then clear it.
+        const attach = chatAttachment;
+        if (attach) setChatAttachment(null);
 
         const outgoing: ChatMessage[] = [...messages, { role: 'user', content: text }];
         setMessages([...outgoing, { role: 'assistant', content: '' }]);
@@ -233,7 +243,12 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
             const res = await fetch('/api/research-chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messages: outgoing, ...getContext(), interviewGuide: forceGuide ?? interviewGuide }),
+                body: JSON.stringify({
+                    messages: outgoing,
+                    ...getContext(),
+                    interviewGuide: forceGuide ?? interviewGuide,
+                    attachment: attach ? { label: attach.label, content: attach.content } : undefined,
+                }),
                 signal: controller.signal,
             });
             if (!res.ok || !res.body) {
@@ -324,6 +339,23 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
             : '👎 Not quite — try a different angle.');
     };
 
+    // Dropping selected text (from an article, note, anywhere) onto the chat
+    // attaches it as context for the next message.
+    const onChatDrop = (e: React.DragEvent) => {
+        setDragOver(false);
+        const text = e.dataTransfer.getData('text/plain').trim();
+        if (!text) return;
+        e.preventDefault();
+        const label = text.length > 40 ? `${text.slice(0, 40)}…` : text;
+        setChatAttachment({ kind: 'text', label, content: text });
+    };
+    const onChatDragOver = (e: React.DragEvent) => {
+        if (e.dataTransfer.types.includes('text/plain')) {
+            e.preventDefault();
+            if (!dragOver) setDragOver(true);
+        }
+    };
+
     // Clicking an offered option records the pick (locking that card) and sends
     // the choice as the user's next message.
     const chooseOption = (messageIndex: number, choice: string) => {
@@ -375,7 +407,12 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
     };
 
     return (
-        <div className={styles.researchChat}>
+        <div
+            className={`${styles.researchChat} ${dragOver ? styles.researchChatDragOver : ''}`}
+            onDragOver={onChatDragOver}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={onChatDrop}
+        >
             <div className={styles.researchChatHeader}>
                 <span>Research Assistant</span>
                 <InterviewMenu
@@ -475,10 +512,18 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
                 ))}
             </div>
 
+            {chatAttachment && (
+                <div className={styles.chatAttachment}>
+                    <span className={styles.chatAttachmentIcon}>📎</span>
+                    <span className={styles.chatAttachmentLabel} title={chatAttachment.content}>{chatAttachment.label}</span>
+                    <button className={styles.chatAttachmentClear} onClick={() => setChatAttachment(null)} title="Remove attachment">✕</button>
+                </div>
+            )}
+
             <div className={styles.researchChatInputRow}>
                 <textarea
                     className={styles.researchChatInput}
-                    placeholder="Message the research assistant…"
+                    placeholder={chatAttachment ? `Ask about “${chatAttachment.label}”…` : 'Message the research assistant…'}
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={onKeyDown}
