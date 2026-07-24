@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
+import { worldKeyForProject, worldKeyForEntity } from '@/lib/worldKey';
 import {
     BUILTIN_INTERVIEWS,
     makeBlankInterview,
@@ -18,6 +19,46 @@ interface ChatMessage {
     content: string;
     /** Clickable choices the assistant offered (via ask_options). */
     options?: { prompt: string; choices: string[]; chosen?: string };
+}
+
+/**
+ * Render assistant text with existing World Bible entity names turned into
+ * clickable chips that open the article. Longest names match first so
+ * "Salt Guild" wins over "Guild". Falls back to plain text when nothing matches.
+ */
+function renderWithEntityChips(
+    text: string,
+    entities: { id: string; name: string }[],
+    onOpen: (id: string) => void,
+    chipClass: string,
+): React.ReactNode {
+    if (!entities.length || !text) return text;
+    const sorted = [...entities].filter(e => e.name.trim()).sort((a, b) => b.name.length - a.name.length);
+    if (!sorted.length) return text;
+    const byLower = new Map(sorted.map(e => [e.name.toLowerCase(), e.id]));
+    const escaped = sorted.map(e => e.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const re = new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi');
+
+    const out: React.ReactNode[] = [];
+    let last = 0;
+    let key = 0;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(text)) !== null) {
+        if (m.index > last) out.push(text.slice(last, m.index));
+        const id = byLower.get(m[0].toLowerCase());
+        if (id) {
+            out.push(
+                <button key={`chip-${key++}`} className={chipClass} onClick={() => onOpen(id)} title="Open article">
+                    {m[0]}
+                </button>,
+            );
+        } else {
+            out.push(m[0]);
+        }
+        last = m.index + m[0].length;
+    }
+    if (last < text.length) out.push(text.slice(last));
+    return out;
 }
 
 /** An AI action the panel forwards to the tab to apply against the store. */
@@ -76,6 +117,18 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
     const updateInterview = useWorkspaceStore(s => s.updateInterview);
     const deleteInterview = useWorkspaceStore(s => s.deleteInterview);
     const allInterviews: Interview[] = [...BUILTIN_INTERVIEWS, ...customInterviews];
+
+    // Entity names the assistant can reference as clickable chips, scoped to the
+    // active project's world. Clicking a chip opens that article's detail panel.
+    const entities = useWorkspaceStore(s => s.entities);
+    const activeProject = useWorkspaceStore(s => s.projects.find(p => p.id === s.activeProjectId) ?? null);
+    const setSelectedEntity = useWorkspaceStore(s => s.setSelectedEntity);
+    const chipEntities = useMemo(() => {
+        const worldKey = worldKeyForProject(activeProject);
+        return entities
+            .filter(e => worldKeyForEntity(e) === worldKey)
+            .map(e => ({ id: e.id, name: e.name }));
+    }, [entities, activeProject]);
 
     // Abort any in-flight request if the panel unmounts (e.g. switching tabs
     // mid-stream) so the fetch and its subprocess don't keep running.
@@ -269,7 +322,13 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
                         key={i}
                         className={`${styles.researchChatMsg} ${m.role === 'user' ? styles.researchChatMsgUser : styles.researchChatMsgAssistant}`}
                     >
-                        {m.content.trim() && <div className={styles.researchChatMsgBody}>{m.content}</div>}
+                        {m.content.trim() && (
+                            <div className={styles.researchChatMsgBody}>
+                                {m.role === 'assistant'
+                                    ? renderWithEntityChips(m.content, chipEntities, setSelectedEntity, styles.entityChip)
+                                    : m.content}
+                            </div>
+                        )}
 
                         {m.options && (
                             <div className={styles.chatOptions}>

@@ -5420,6 +5420,25 @@
   cursor: default;
 }
 
+/* ── Inline entity chips in assistant replies ────────────── */
+.entityChip {
+  display: inline;
+  padding: 0 3px;
+  margin: 0 -1px;
+  font: inherit;
+  color: var(--accent, #6c8cff);
+  background: color-mix(in srgb, var(--accent, #6c8cff) 12%, transparent);
+  border: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent, #6c8cff) 45%, transparent);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.entityChip:hover {
+  background: color-mix(in srgb, var(--accent, #6c8cff) 26%, transparent);
+}
+
 .researchChatScroll {
   flex: 1 1 auto;
   min-height: 0;
