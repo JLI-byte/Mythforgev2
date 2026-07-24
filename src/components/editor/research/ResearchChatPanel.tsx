@@ -30,6 +30,8 @@ interface ChatMessage {
     options?: { prompt: string; choices: string[]; chosen?: string };
     /** In-place edits/deletes/renames awaiting the user's Apply/Discard. */
     pending?: PendingChange[];
+    /** The user's 👍/👎 on an assistant reply (also sends a quick steer). */
+    reaction?: 'up' | 'down';
 }
 
 /** Event types held for preview instead of applied immediately (mutating-in-place). */
@@ -310,6 +312,18 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
         ));
     };
 
+    // A 👍/👎 marks the reply and sends a one-line steer so the assistant adjusts
+    // in the moment — one-click feedback without typing.
+    const react = (messageIndex: number, kind: 'up' | 'down') => {
+        if (isStreaming) return;
+        const m = messages[messageIndex];
+        if (!m || m.reaction) return;
+        setMessages(prev => prev.map((mm, i) => (i === messageIndex ? { ...mm, reaction: kind } : mm)));
+        send(kind === 'up'
+            ? '👍 That direction works — more like this.'
+            : '👎 Not quite — try a different angle.');
+    };
+
     // Clicking an offered option records the pick (locking that card) and sends
     // the choice as the user's next message.
     const chooseOption = (messageIndex: number, choice: string) => {
@@ -430,14 +444,32 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent }: Researc
                         ))}
 
                         {m.role === 'assistant' && m.content.trim() && (
-                            <button
-                                className={styles.researchChatAddBtn}
-                                disabled={!scopeKey}
-                                title={scopeKey ? 'Add this reply to the board as a note' : 'Select a project first'}
-                                onClick={() => onToolEvent({ type: 'card', text: m.content })}
-                            >
-                                + Add to board
-                            </button>
+                            <div className={styles.chatMsgActions}>
+                                <button
+                                    className={`${styles.chatReactBtn} ${m.reaction === 'up' ? styles.chatReactChosen : ''}`}
+                                    disabled={Boolean(m.reaction) || isStreaming}
+                                    title="More like this"
+                                    onClick={() => react(i, 'up')}
+                                >
+                                    👍
+                                </button>
+                                <button
+                                    className={`${styles.chatReactBtn} ${m.reaction === 'down' ? styles.chatReactChosen : ''}`}
+                                    disabled={Boolean(m.reaction) || isStreaming}
+                                    title="Try a different angle"
+                                    onClick={() => react(i, 'down')}
+                                >
+                                    👎
+                                </button>
+                                <button
+                                    className={styles.researchChatAddBtn}
+                                    disabled={!scopeKey}
+                                    title={scopeKey ? 'Add this reply to the board as a note' : 'Select a project first'}
+                                    onClick={() => onToolEvent({ type: 'card', text: m.content })}
+                                >
+                                    + Add to board
+                                </button>
+                            </div>
                         )}
                     </div>
                 ))}
