@@ -4854,6 +4854,7 @@
 
 /* ── Interview launcher menu ─────────────────────────────── */
 .researchChatHeaderActions {
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 6px;

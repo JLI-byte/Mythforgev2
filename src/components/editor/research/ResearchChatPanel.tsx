@@ -520,9 +520,8 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
             onDrop={onChatDrop}
         >
             <div className={styles.researchChatHeader}>
-                <span>Research Assistant</span>
+                <CreditTracker refreshSignal={creditSignal} />
                 <div className={styles.researchChatHeaderActions}>
-                    <CreditTracker refreshSignal={creditSignal} />
                     <button
                         className={styles.researchBuildWorldBtn}
                         onClick={reviewWorld}
