@@ -6229,6 +6229,18 @@
   color: var(--text, inherit);
 }
 
+/* Assistant bubbles are tinted by the backend that answered:
+   Claude = Anthropic coral/orange, Local = emerald (self-hosted). */
+.researchChatMsgClaude .researchChatMsgBody {
+  background: color-mix(in srgb, #d97757 16%, transparent);
+  border-left: 3px solid #d97757;
+}
+
+.researchChatMsgLocal .researchChatMsgBody {
+  background: color-mix(in srgb, #2ec27e 15%, transparent);
+  border-left: 3px solid #2ec27e;
+}
+
 .researchChatAddBtn {
   align-self: flex-start;
   font-size: 0.68rem;

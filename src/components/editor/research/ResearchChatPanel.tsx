@@ -52,6 +52,8 @@ interface ChatMessage {
     reaction?: 'up' | 'down';
     /** Images the assistant generated (data URLs), shown inline with save actions. */
     generatedImages?: { prompt: string; url: string }[];
+    /** Which backend produced this reply — tints the bubble (Claude vs local). */
+    provider?: 'claude' | 'local';
 }
 
 /** Event types held for preview instead of applied immediately (mutating-in-place). */
@@ -283,7 +285,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
 
         const messageText = text || 'What do you see in this image, and how might it fit my world?';
         const outgoing: ChatMessage[] = [...messages, { role: 'user', content: img ? `🖼️ ${messageText}` : messageText }];
-        setMessages([...outgoing, { role: 'assistant', content: '' }]);
+        setMessages([...outgoing, { role: 'assistant', content: '', provider }]);
         if (explicitText === undefined) setInput('');
         setIsStreaming(true);
         scrollToBottom();
@@ -585,7 +587,11 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                 {messages.map((m, i) => (
                     <div
                         key={i}
-                        className={`${styles.researchChatMsg} ${m.role === 'user' ? styles.researchChatMsgUser : styles.researchChatMsgAssistant}`}
+                        className={`${styles.researchChatMsg} ${
+                            m.role === 'user'
+                                ? styles.researchChatMsgUser
+                                : `${styles.researchChatMsgAssistant} ${m.provider === 'local' ? styles.researchChatMsgLocal : styles.researchChatMsgClaude}`
+                        }`}
                     >
                         {m.content.trim() && (
                             <div className={styles.researchChatMsgBody}>
