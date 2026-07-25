@@ -1,0 +1,329 @@
+/*
+ * Login page — Minimalist theme (the default), matching StandardLanding:
+ * near-black surface, animated dot field, lamp glow, sans type, pill CTA.
+ */
+
+.page {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: #ececec;
+    font-family: var(--font-sans, ui-sans-serif, system-ui, -apple-system,
+        "Segoe UI", Roboto, sans-serif);
+    background: #0a0a0a;
+    overflow: hidden;
+}
+
+/* ---- Lamp light, same motif as the landing hero ---- */
+.lamp {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 60vh;
+    z-index: 0;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.lampConeLeft,
+.lampConeRight,
+.lampGlow,
+.lampBar {
+    position: absolute;
+    top: 22vh;
+}
+
+.lampConeLeft,
+.lampConeRight {
+    height: 22rem;
+    width: 26rem;
+    -webkit-mask-image: linear-gradient(to top, transparent 8%, #000 60%);
+    mask-image: linear-gradient(to top, transparent 8%, #000 60%);
+    animation: lc-login-cone 0.9s ease-in-out 0.2s both;
+}
+
+.lampConeLeft {
+    right: 50%;
+    background-image: conic-gradient(
+        from 70deg at center top,
+        rgba(255, 255, 255, 0.42),
+        transparent 42%
+    );
+}
+
+.lampConeRight {
+    left: 50%;
+    background-image: conic-gradient(
+        from 290deg at center top,
+        transparent 58%,
+        rgba(255, 255, 255, 0.42)
+    );
+}
+
+.lampGlow {
+    width: 24rem;
+    height: 9rem;
+    transform: translateY(-40%);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.45);
+    filter: blur(80px);
+    animation: lc-login-glow 0.9s ease-in-out 0.25s both;
+}
+
+.lampBar {
+    height: 2px;
+    width: 22rem;
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 0 24px 3px rgba(255, 255, 255, 0.4);
+    animation: lc-login-bar 0.9s ease-in-out 0.25s both;
+}
+
+@keyframes lc-login-cone {
+    from { opacity: 0; width: 13rem; }
+    to   { opacity: 1; width: 26rem; }
+}
+@keyframes lc-login-bar {
+    from { opacity: 0; width: 7rem; }
+    to   { opacity: 1; width: 22rem; }
+}
+@keyframes lc-login-glow {
+    from { opacity: 0; transform: translateY(-40%) scale(0.6); }
+    to   { opacity: 0.85; transform: translateY(-40%) scale(1); }
+}
+
+/* ---- Chrome ---- */
+
+.nav {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem clamp(1.25rem, 4vw, 3rem);
+}
+
+.brand {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    font-size: 1.1rem;
+    color: #ececec;
+    text-decoration: none;
+}
+
+.navBack {
+    color: rgba(236, 236, 236, 0.7);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 150ms ease;
+}
+.navBack:hover { color: #fff; }
+
+.main {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem clamp(1.25rem, 5vw, 4rem) 3rem;
+}
+
+/* ---- Card ---- */
+
+.card {
+    width: 100%;
+    max-width: 25rem;
+    padding: clamp(1.75rem, 4vw, 2.5rem);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(236, 236, 236, 0.12);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.8);
+    animation: lc-login-rise 0.8s ease-in-out 0.25s both;
+}
+
+@keyframes lc-login-rise {
+    from { opacity: 0.5; transform: translateY(40px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.title {
+    margin: 0;
+    font-size: 1.9rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.sub {
+    margin: 0.5rem 0 1.75rem;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: rgba(236, 236, 236, 0.62);
+}
+
+/* ---- Form ---- */
+
+.form {
+    display: flex;
+    flex-direction: column;
+}
+
+.fieldLabel {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: rgba(236, 236, 236, 0.72);
+    margin-bottom: 0.45rem;
+}
+
+.fieldInput {
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: #ececec;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(236, 236, 236, 0.16);
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 150ms ease, background 150ms ease;
+}
+
+.fieldInput::placeholder { color: rgba(236, 236, 236, 0.32); }
+
+.fieldInput:focus-visible {
+    border-color: rgba(236, 236, 236, 0.45);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.submit {
+    appearance: none;
+    margin-top: 1.25rem;
+    width: 100%;
+    padding: 0.8rem 1.6rem;
+    font-family: inherit;
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: #0a0a0b;
+    background: #f5f5f5;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform 150ms ease, background 150ms ease, opacity 150ms ease;
+}
+
+.submit:hover:not(:disabled) {
+    background: #fff;
+    transform: translateY(-1px);
+}
+
+.submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ---- Notices ---- */
+
+.notice {
+    margin-top: 1.15rem;
+    padding: 0.8rem 0.95rem;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    text-align: center;
+    border: 1px solid rgba(236, 236, 236, 0.14);
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(236, 236, 236, 0.85);
+}
+
+.noticeSuccess {
+    color: #6ee7b7;
+    border-color: rgba(110, 231, 183, 0.28);
+    background: rgba(110, 231, 183, 0.08);
+}
+
+.noticeInvite {
+    color: #fbbf68;
+    border-color: rgba(251, 191, 104, 0.28);
+    background: rgba(251, 191, 104, 0.08);
+}
+
+.noticeError {
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.3);
+    background: rgba(248, 113, 113, 0.08);
+}
+
+.noticeLink {
+    color: inherit;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.footnote {
+    margin: 1.6rem 0 0;
+    text-align: center;
+    font-size: 0.88rem;
+    color: rgba(236, 236, 236, 0.55);
+}
+
+.footnoteLink {
+    color: rgba(236, 236, 236, 0.85);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(236, 236, 236, 0.3);
+    transition: color 150ms ease, border-color 150ms ease;
+}
+
+.footnoteLink:hover {
+    color: #fff;
+    border-bottom-color: #fff;
+}
+
+/* ---- Dev-only button ---- */
+
+.devButton {
+    margin-top: 1.25rem;
+    width: 100%;
+    padding: 0.65rem;
+    font-family: inherit;
+    font-size: 0.86rem;
+    color: rgba(236, 236, 236, 0.6);
+    background: none;
+    border: 1px dashed rgba(236, 236, 236, 0.22);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 150ms ease, color 150ms ease;
+}
+
+.devButton:hover:not(:disabled) {
+    color: #ececec;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.devButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 0.82rem;
+    color: rgba(236, 236, 236, 0.5);
+}
+
+/* Respect reduced motion: settled state, no entrance. */
+@media (prefers-reduced-motion: reduce) {
+    .card,
+    .lampConeLeft,
+    .lampConeRight,
+    .lampGlow,
+    .lampBar {
+        animation: none;
+    }
+    .card { opacity: 1; transform: none; }
+    .lampGlow { opacity: 0.85; transform: translateY(-40%) scale(1); }
+}
