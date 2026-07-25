@@ -169,6 +169,11 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
     }, [storeHydrated]);
     const [input, setInput] = useState('');
     const [isStreaming, setIsStreaming] = useState(false);
+    // Slash-command palette: typing "/" in the composer opens a filterable
+    // menu of quick actions (Claude-style). Escape dismisses until the input
+    // changes again; arrows navigate; Enter/Tab runs the highlighted command.
+    const [cmdIndex, setCmdIndex] = useState(0);
+    const [cmdDismissed, setCmdDismissed] = useState(false);
     // The active interview's rendered guide ('' when none). Once an interview is
     // launched it rides every turn so the guide keeps reaching the model until
     // the subject is built.
@@ -188,11 +193,11 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
         if (localStorage.getItem('lc-chat-provider') === 'local') setProvider('local');
         setLocalModel(localStorage.getItem('lc-chat-local-model') ?? '');
     }, []);
-    const toggleProvider = () => {
-        const next = provider === 'claude' ? 'local' : 'claude';
+    const setProviderTo = (next: 'claude' | 'local') => {
         setProvider(next);
         localStorage.setItem('lc-chat-provider', next);
     };
+    const toggleProvider = () => setProviderTo(provider === 'claude' ? 'local' : 'claude');
     const changeLocalModel = (value: string) => {
         setLocalModel(value);
         localStorage.setItem('lc-chat-local-model', value);
@@ -307,6 +312,21 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
         const text = (explicitText ?? input).trim();
         const img = imageAttach;
         if ((!text && !img) || isStreaming) return;
+
+        // A typed "/command" runs the matching quick action instead of chatting.
+        // Longest name first so "interview <long title>" beats shorter prefixes.
+        if (explicitText === undefined && text.startsWith('/')) {
+            const body = text.slice(1).toLowerCase();
+            const cmd = [...slashCommands]
+                .sort((a, b) => b.name.length - a.name.length)
+                .find(c => body === c.name.toLowerCase() || body.startsWith(`${c.name.toLowerCase()} `));
+            if (cmd) {
+                setInput('');
+                setCmdDismissed(false);
+                cmd.run(text.slice(1 + cmd.name.length).trim());
+                return;
+            }
+        }
 
         // Consume any attached context/image for this one message, then clear.
         const attach = chatAttachment;
@@ -453,6 +473,28 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
     };
 
     const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (cmdMenuOpen) {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setCmdIndex(i => (i + 1) % filteredCommands.length);
+                return;
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setCmdIndex(i => (i - 1 + filteredCommands.length) % filteredCommands.length);
+                return;
+            }
+            if ((e.key === 'Enter' && !e.shiftKey) || e.key === 'Tab') {
+                e.preventDefault();
+                selectCommand(filteredCommands[highlighted]);
+                return;
+            }
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                setCmdDismissed(true);
+                return;
+            }
+        }
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             send();
@@ -526,6 +568,59 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
         const guide = renderInterviewGuide(iv);
         setInterviewGuide(guide);
         send(interviewLaunchLine(iv), guide);
+    };
+
+    // ── Slash commands ──────────────────────────────────────
+    // Quick actions the user can run by typing "/" in the composer. Arg-less
+    // commands run on select; arg commands ("/image castle at dawn") run on
+    // Enter with everything after the name as the argument.
+    interface SlashCommand {
+        name: string;
+        icon: string;
+        description: string;
+        /** Placeholder shown for commands that take text after the name. */
+        args?: string;
+        run: (args: string) => void;
+    }
+
+    const slashCommands: SlashCommand[] = [
+        { name: 'review', icon: '🔍', description: 'Scan the World Bible for contradictions and gaps', run: () => reviewWorld() },
+        { name: 'image', icon: '🎨', args: '<description>', description: 'Generate an image', run: a => { if (a) send(`Generate an image of: ${a}`); } },
+        { name: 'note', icon: '📝', args: '<text>', description: 'Add a note card to the board', run: a => { if (a) onToolEvent({ type: 'card', text: a }); } },
+        { name: 'clear', icon: '🧹', description: "Clear this board's conversation", run: () => setMessages([]) },
+        { name: 'claude', icon: '🧠', description: 'Switch to the Claude backend', run: () => setProviderTo('claude') },
+        { name: 'local', icon: '💻', description: 'Switch to your local model', run: () => setProviderTo('local') },
+        ...allInterviews.map(iv => ({
+            name: `interview ${iv.title}`,
+            icon: '🎙️',
+            description: `Launch the “${iv.title}” interview`,
+            run: () => launchInterview(iv),
+        })),
+    ];
+
+    // "/rev" filters by name; "/image castle" keeps the matched arg command
+    // pinned while the argument is typed.
+    const cmdFilter = input.startsWith('/') ? input.slice(1).toLowerCase() : null;
+    const filteredCommands = cmdFilter === null
+        ? []
+        : slashCommands.filter(c =>
+              c.name.toLowerCase().startsWith(cmdFilter) || cmdFilter.startsWith(`${c.name.toLowerCase()} `),
+          );
+    const cmdMenuOpen = cmdFilter !== null && !cmdDismissed && filteredCommands.length > 0;
+    const highlighted = Math.min(cmdIndex, Math.max(0, filteredCommands.length - 1));
+
+    const selectCommand = (cmd: SlashCommand) => {
+        if (isStreaming) return;
+        const argText = input.slice(1 + cmd.name.length).trim();
+        if (cmd.args && !argText) {
+            // Needs an argument — insert the command and let the user type it.
+            setInput(`/${cmd.name} `);
+            composerRef.current?.focus();
+            return;
+        }
+        setInput('');
+        setCmdDismissed(false);
+        cmd.run(argText);
     };
 
     // Open the editor on a fresh custom interview.
@@ -733,6 +828,23 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
             </div>
 
             <div className={styles.chatComposer}>
+                {cmdMenuOpen && (
+                    <div className={styles.commandMenu}>
+                        {filteredCommands.map((c, ci) => (
+                            <button
+                                key={c.name}
+                                className={`${styles.commandItem} ${ci === highlighted ? styles.commandItemActive : ''}`}
+                                onMouseDown={e => { e.preventDefault(); selectCommand(c); }}
+                                onMouseEnter={() => setCmdIndex(ci)}
+                            >
+                                <span className={styles.commandIcon}>{c.icon}</span>
+                                <span className={styles.commandName}>/{c.name}</span>
+                                {c.args && <span className={styles.commandArgs}>{c.args}</span>}
+                                <span className={styles.commandDesc}>{c.description}</span>
+                            </button>
+                        ))}
+                    </div>
+                )}
                 {chatAttachment && (
                     <div className={styles.chatAttachment}>
                         <span className={styles.chatAttachmentIcon}>📎</span>
@@ -753,9 +865,9 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                 <textarea
                     ref={composerRef}
                     className={styles.chatComposerInput}
-                    placeholder={chatAttachment ? `Ask about “${chatAttachment.label}”…` : 'Message the research assistant…'}
+                    placeholder={chatAttachment ? `Ask about “${chatAttachment.label}”…` : 'Message the research assistant — "/" for commands…'}
                     value={input}
-                    onChange={e => { setInput(e.target.value); autoGrow(); }}
+                    onChange={e => { setInput(e.target.value); setCmdDismissed(false); setCmdIndex(0); autoGrow(); }}
                     onKeyDown={onKeyDown}
                     rows={1}
                 />

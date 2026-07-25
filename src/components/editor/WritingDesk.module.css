@@ -6236,6 +6236,7 @@
    One rounded container: attachments on top, a borderless growing
    textarea, then a toolbar row — icons left, ↑ send right. */
 .chatComposer {
+  position: relative;
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
@@ -6246,6 +6247,70 @@
   border: 1px solid var(--border, rgba(128, 128, 128, 0.28));
   border-radius: 14px;
   transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+/* Slash-command palette, floating above the composer. */
+.commandMenu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 260px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  background: var(--background, #17171c);
+  border: 1px solid var(--border, rgba(128, 128, 128, 0.3));
+  border-radius: 12px;
+  box-shadow: 0 -8px 28px -10px rgba(0, 0, 0, 0.55);
+  z-index: 30;
+}
+
+.commandItem {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 7px 9px;
+  font-size: 0.78rem;
+  text-align: left;
+  color: var(--text, inherit);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.commandItemActive {
+  background: color-mix(in srgb, var(--accent, #6c8cff) 16%, transparent);
+}
+
+.commandIcon {
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+.commandName {
+  flex: 0 0 auto;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.commandArgs {
+  flex: 0 0 auto;
+  font-size: 0.7rem;
+  color: var(--muted, #999);
+  font-style: normal;
+}
+
+.commandDesc {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  color: var(--muted, #999);
 }
 
 .chatComposer:focus-within {
