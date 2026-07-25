@@ -13,6 +13,8 @@ import {
 import { InterviewMenu } from './InterviewMenu';
 import { InterviewEditorModal } from './InterviewEditorModal';
 import { CreditTracker } from './CreditTracker';
+import { ChatModelPicker } from './ChatModelPicker';
+import { ContextRing } from './ContextRing';
 import type { ChatMessage, PendingChange, ToolEvent } from '@/lib/researchChatTypes';
 import styles from '../WritingDesk.module.css';
 
@@ -35,6 +37,12 @@ interface WindowWithSpeech extends Window {
     SpeechRecognition?: SpeechRecognitionCtor;
     webkitSpeechRecognition?: SpeechRecognitionCtor;
 }
+
+/** Usable context window per backend, for the composer's context ring. */
+const CONTEXT_WINDOW: Record<'claude' | 'local', number> = { claude: 200_000, local: 32_768 };
+
+/** Rough token estimate — ~4 characters per token. Good enough for a gauge. */
+const estimateTokens = (chars: number): number => Math.ceil(chars / 4);
 
 /** Event types held for preview instead of applied immediately (mutating-in-place). */
 const PREVIEW_TYPES = new Set(['edit', 'delete_article', 'delete_category', 'rename_article', 'rename_category', 'move']);
@@ -197,7 +205,19 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
         setProvider(next);
         localStorage.setItem('lc-chat-provider', next);
     };
-    const toggleProvider = () => setProviderTo(provider === 'claude' ? 'local' : 'claude');
+
+    // Context ring: estimate what the next request will carry (conversation +
+    // board + World Bible + understanding). Recomputed when the conversation
+    // changes and when the composer is focused, so it reflects board edits made
+    // between turns without re-serializing the world on every keystroke.
+    const [contextTick, setContextTick] = useState(0);
+    const usedTokens = useMemo(() => {
+        const ctx = getContext();
+        const contextChars = (ctx.board?.length ?? 0) + (ctx.world?.length ?? 0) + (ctx.understanding?.length ?? 0);
+        const convoChars = messages.reduce((n, m) => n + m.content.length, 0);
+        return estimateTokens(contextChars + convoChars);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [messages, getContext, contextTick]);
     const changeLocalModel = (value: string) => {
         setLocalModel(value);
         localStorage.setItem('lc-chat-local-model', value);
@@ -663,16 +683,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
             onDrop={onChatDrop}
         >
             <div className={styles.researchChatHeader}>
-                <CreditTracker refreshSignal={creditSignal} />
                 <div className={styles.researchChatHeaderActions}>
-                    <button
-                        className={`${styles.chatProviderBtn} ${provider === 'local' ? styles.chatProviderBtnLocal : ''}`}
-                        onClick={toggleProvider}
-                        disabled={isStreaming}
-                        title={provider === 'claude' ? 'Using Claude — click to switch to your local model' : 'Using your local model — click to switch back to Claude'}
-                    >
-                        {provider === 'claude' ? '🧠 Claude' : '💻 Local'}
-                    </button>
                     <button
                         className={styles.researchBuildWorldBtn}
                         onClick={reviewWorld}
@@ -693,19 +704,6 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                     )}
                 </div>
             </div>
-
-            {provider === 'local' && (
-                <div className={styles.chatModelBar}>
-                    <span className={styles.chatModelBarIcon}>💻</span>
-                    <input
-                        className={styles.chatModelInput}
-                        value={localModel}
-                        onChange={e => changeLocalModel(e.target.value)}
-                        placeholder="local model (e.g. llama3.1)"
-                        title="The Ollama model name to run locally"
-                    />
-                </div>
-            )}
 
             <div className={styles.researchChatScroll} ref={scrollRef}>
                 {messages.length === 0 && (
@@ -869,6 +867,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                     value={input}
                     onChange={e => { setInput(e.target.value); setCmdDismissed(false); setCmdIndex(0); autoGrow(); }}
                     onKeyDown={onKeyDown}
+                    onFocus={() => setContextTick(n => n + 1)}
                     rows={1}
                 />
 
@@ -898,6 +897,20 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                                 {isListening ? '⏹' : '🎤'}
                             </button>
                         )}
+                    </div>
+
+                    <div className={styles.composerMeta}>
+                        <ChatModelPicker
+                            provider={provider}
+                            localModel={localModel}
+                            disabled={isStreaming}
+                            onPick={(p, model) => {
+                                if (model !== localModel) changeLocalModel(model);
+                                setProviderTo(p);
+                            }}
+                        />
+                        <CreditTracker refreshSignal={creditSignal} />
+                        <ContextRing usedTokens={usedTokens} windowTokens={CONTEXT_WINDOW[provider]} />
                     </div>
                     {isStreaming ? (
                         <button
