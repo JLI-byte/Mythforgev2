@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { resolveSecret } from '@/lib/aiSettingsStore';
 
 // Reads the user's OpenRouter balance server-side so the key never reaches the
 // browser. Errors are returned as a 200 with an `error` field so the client can
@@ -7,7 +8,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-    const key = process.env.OPENROUTER_API_KEY;
+    const key = await resolveSecret('openrouterApiKey');
     if (!key) return NextResponse.json({ error: 'not_configured' });
 
     try {

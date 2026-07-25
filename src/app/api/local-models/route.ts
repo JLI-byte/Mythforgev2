@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { resolveAISettings } from '@/lib/aiSettingsStore';
 
 // Lists the locally installed Ollama models so the composer's model picker can
 // offer them. Deliberately does NOT auto-launch the server — merely opening a
@@ -7,12 +8,11 @@ import { NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const OLLAMA_BASE_URL = (process.env.OLLAMA_BASE_URL || 'http://localhost:11434/v1').replace(/\/+$/, '');
-
 export async function GET() {
-    // /v1/models is the OpenAI-compatible listing; strip the /v1 for the origin.
+    // /v1/models is the OpenAI-compatible listing.
+    const { ollamaBaseUrl } = await resolveAISettings();
     try {
-        const resp = await fetch(`${OLLAMA_BASE_URL}/models`, {
+        const resp = await fetch(`${ollamaBaseUrl}/models`, {
             cache: 'no-store',
             signal: AbortSignal.timeout(2500),
         });

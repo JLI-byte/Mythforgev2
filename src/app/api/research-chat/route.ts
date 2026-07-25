@@ -3,17 +3,12 @@ import { query, tool, createSdkMcpServer, type SDKUserMessage } from '@anthropic
 import { z } from 'zod';
 import { researchToolDefs, ENTITY_TYPES } from '@/lib/researchToolDefs';
 import { ensureOllama } from '@/lib/localServer';
+import { resolveAISettings } from '@/lib/aiSettingsStore';
 
 // Must spawn the local Claude Code process — Node runtime, never edge.
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-/** Default model for the Claude-backed research assistant. */
-const RESEARCH_CHAT_MODEL = 'claude-opus-4-8';
-
-/** Local (Ollama) fallback defaults, both overridable via env / the request. */
-const OLLAMA_BASE_URL = (process.env.OLLAMA_BASE_URL || 'http://localhost:11434/v1').replace(/\/+$/, '');
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.1';
 /** Bound the local tool-call loop so a misbehaving model can't spin forever. */
 const LOCAL_MAX_STEPS = 8;
 
@@ -71,11 +66,17 @@ export async function POST(request: Request) {
     // The assistant's own running note about this world, fed back as memory.
     const understanding = typeof body.understanding === 'string' ? body.understanding.slice(0, 4000) : '';
 
-    // Backend selection. Defaults to Claude; 'local' routes to the Ollama fallback.
-    const provider = body.provider === 'local' ? 'local' : 'claude';
+    // Saved AI settings supply the defaults the request can override.
+    const aiSettings = await resolveAISettings();
+    const OLLAMA_BASE_URL = aiSettings.ollamaBaseUrl;
+
+    // Backend selection: the request wins, otherwise the configured default.
+    const provider = body.provider === 'local' || body.provider === 'claude'
+        ? body.provider
+        : aiSettings.defaultProvider;
     const localModel = typeof body.localModel === 'string' && body.localModel.trim()
         ? body.localModel.trim().slice(0, 120)
-        : OLLAMA_MODEL;
+        : (aiSettings.defaultLocalModel || 'llama3.1');
 
     // An image the user attached to look at. Only well-formed, reasonably sized
     // base64 of a supported type is forwarded to the model. (Claude backend only.)
@@ -179,11 +180,14 @@ export async function POST(request: Request) {
             try {
                 if (provider === 'local') {
                     // ── Local (Ollama) backend: OpenAI-compatible chat + tools ──
-                    // Make sure the server is up first — start it if it isn't.
-                    const health = await ensureOllama(OLLAMA_BASE_URL, () => {
-                        send({ type: 'text', text: '⏳ Starting your local model server…\n\n' });
-                        gotText = true;
-                    });
+                    // Make sure the server is up first — start it if it isn't
+                    // and the user hasn't turned auto-launch off in Settings.
+                    const health = aiSettings.autoLaunchOllama
+                        ? await ensureOllama(OLLAMA_BASE_URL, () => {
+                            send({ type: 'text', text: '⏳ Starting your local model server…\n\n' });
+                            gotText = true;
+                        })
+                        : 'up';
                     if (health === 'failed') {
                         send({
                             type: 'text',
@@ -287,15 +291,22 @@ export async function POST(request: Request) {
                         })()
                         : prompt;
 
-                    // Force the spawned Claude Code to authenticate with the local Max
-                    // subscription login, not an API key. Stripping these env vars falls
-                    // through to the OAuth profile that `claude` is signed in with.
+                    // How the spawned Claude Code authenticates, per Settings → AI:
+                    //  - 'subscription' (default): strip every Anthropic credential so
+                    //    it falls through to the OAuth profile `claude` is signed in
+                    //    with — i.e. the user's Max plan, no API billing.
+                    //  - 'apiKey': inject the saved key so usage bills the API account.
+                    // OPENROUTER_API_KEY is always withheld — the subprocess has no
+                    // business seeing the image-generation key.
+                    const useApiKey = aiSettings.claudeAuth === 'apiKey' && Boolean(aiSettings.anthropicApiKey);
                     const childEnv: Record<string, string> = {};
                     for (const [key, value] of Object.entries(process.env)) {
-                        if (value !== undefined && key !== 'ANTHROPIC_API_KEY' && key !== 'ANTHROPIC_AUTH_TOKEN' && key !== 'OPENROUTER_API_KEY') {
-                            childEnv[key] = value;
-                        }
+                        if (value === undefined) continue;
+                        if (key === 'OPENROUTER_API_KEY') continue;
+                        if (key === 'ANTHROPIC_API_KEY' || key === 'ANTHROPIC_AUTH_TOKEN') continue;
+                        childEnv[key] = value;
                     }
+                    if (useApiKey) childEnv.ANTHROPIC_API_KEY = aiSettings.anthropicApiKey;
 
                     const claudeTools = defs.map(d =>
                         tool(d.name, d.description, d.shape, async (args) => ({
@@ -308,7 +319,7 @@ export async function POST(request: Request) {
                     const q = query({
                         prompt: promptInput,
                         options: {
-                            model: RESEARCH_CHAT_MODEL,
+                            model: aiSettings.claudeModel,
                             systemPrompt,
                             tools: [], // no built-in file/bash tools
                             mcpServers: { research: researchServer },

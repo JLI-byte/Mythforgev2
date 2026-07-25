@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import styles from './SettingsModal.module.css';
+import AISettingsSection from './AISettingsSection';
 import {
     useWorkspaceStore,
     listDataBackups,
@@ -218,6 +219,8 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                             Browser spellcheck (turn off to stop red squiggles under fantasy names)
                         </label>
                     </section>
+
+                    <AISettingsSection />
 
                     <section className={styles.section} style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
                         <div className={styles.providerHeader}>

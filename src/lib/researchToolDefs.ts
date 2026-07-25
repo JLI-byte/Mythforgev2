@@ -41,8 +41,7 @@ function def<S extends z.ZodRawShape>(
     };
 }
 
-/** OpenRouter image model, overridable via env. */
-const OPENROUTER_IMAGE_MODEL = process.env.OPENROUTER_IMAGE_MODEL || 'black-forest-labs/flux.2-pro';
+import { resolveAISettings } from './aiSettingsStore';
 
 /**
  * Pull a displayable image (a data URL) out of an OpenRouter image response,
@@ -135,9 +134,9 @@ export function researchToolDefs(): ResearchToolDef[] {
             "Generate an image from a text prompt and show it in the chat. Use when the user asks you to draw, illustrate, visualize, or make a picture — a character portrait, a map, a location, an item. Write a rich, specific visual prompt (subject, setting, mood, style). Costs the user money, so only when asked.",
             { prompt: z.string().describe('A detailed visual description of the image to generate') },
             async (args, send) => {
-                const key = process.env.OPENROUTER_API_KEY;
+                const { openrouterApiKey: key, imageModel } = await resolveAISettings();
                 if (!key) {
-                    return 'Image generation is not configured — tell the user to add OPENROUTER_API_KEY to .env.local and restart the dev server.';
+                    return 'Image generation is not configured — tell the user to add their OpenRouter API key in Settings → AI.';
                 }
                 try {
                     const resp = await fetch('https://openrouter.ai/api/v1/images', {
@@ -148,7 +147,7 @@ export function researchToolDefs(): ResearchToolDef[] {
                             'HTTP-Referer': 'https://lorecanvas.app',
                             'X-Title': 'LoreCanvas',
                         },
-                        body: JSON.stringify({ model: OPENROUTER_IMAGE_MODEL, prompt: args.prompt }),
+                        body: JSON.stringify({ model: imageModel, prompt: args.prompt }),
                     });
                     if (!resp.ok) {
                         const errText = await resp.text().catch(() => '');

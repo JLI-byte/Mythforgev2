@@ -277,3 +277,170 @@
     font-style: italic;
     margin-top: 0.25rem;
 }
+/* ── AI settings ─────────────────────────────────────────── */
+
+.aiGroupTitle {
+    margin: 1.4rem 0 0.6rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.aiInput {
+    width: 100%;
+    padding: 0.5rem 0.65rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--foreground);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.aiInput:focus-visible {
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.aiField {
+    margin-top: 0.5rem;
+}
+
+.aiFieldHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.3rem;
+}
+
+.aiRow {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.aiHelp {
+    margin: 0.35rem 0 0;
+    font-size: 0.76rem;
+    line-height: 1.5;
+    color: var(--muted);
+}
+
+.aiCode {
+    padding: 0.05rem 0.3rem;
+    font-size: 0.72rem;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.07);
+    word-break: break-all;
+}
+
+.aiBadgeOk,
+.aiBadgeOff {
+    flex: 0 0 auto;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    border-radius: 999px;
+}
+
+.aiBadgeOk {
+    color: #6ee7b7;
+    background: rgba(110, 231, 183, 0.12);
+}
+
+.aiBadgeOff {
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.aiSegmented {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-top: 0.35rem;
+}
+
+.aiSeg,
+.aiSegActive {
+    padding: 0.45rem 0.8rem;
+    font-family: inherit;
+    font-size: 0.82rem;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--foreground);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.aiSeg:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.aiSegActive {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.aiCheckRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.8rem;
+    font-size: 0.83rem;
+    cursor: pointer;
+}
+
+.aiSaveBtn,
+.aiClearBtn,
+.aiTestBtn {
+    flex: 0 0 auto;
+    padding: 0.4rem 0.7rem;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--foreground);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.aiSaveBtn {
+    margin-top: 0.5rem;
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.aiSaveBtn:hover,
+.aiClearBtn:hover,
+.aiTestBtn:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.aiTestRow {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+    margin-top: 0.7rem;
+}
+
+.aiTestOk,
+.aiTestBad {
+    font-size: 0.76rem;
+}
+
+.aiTestOk { color: #6ee7b7; }
+.aiTestBad { color: #f87171; }
+
+.aiStatus {
+    font-size: 0.74rem;
+    color: var(--muted);
+}
