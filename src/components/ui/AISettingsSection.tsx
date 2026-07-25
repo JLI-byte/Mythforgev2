@@ -320,9 +320,60 @@ export default function AISettingsSection() {
                         onBlur={e => update({ comfyuiUrl: e.target.value })}
                     />
                     <p className={styles.aiHelp}>
-                        Generates on your own GPU with no per-image cost. The assistant&apos;s
-                        image tool still routes through OpenRouter for now.
+                        Renders on your own GPU with no per-image cost. Slower than the hosted
+                        provider, and ComfyUI must be running.
                     </p>
+
+                    <label className={styles.label} style={{ marginTop: '0.9rem' }}>Diffusion model</label>
+                    <input
+                        className={styles.aiInput}
+                        value={settings.comfyModel}
+                        spellCheck={false}
+                        onChange={e => setSettings({ ...settings, comfyModel: e.target.value })}
+                        onBlur={e => update({ comfyModel: e.target.value })}
+                    />
+
+                    <label className={styles.label} style={{ marginTop: '0.9rem' }}>Text encoder</label>
+                    <input
+                        className={styles.aiInput}
+                        value={settings.comfyClip}
+                        spellCheck={false}
+                        onChange={e => setSettings({ ...settings, comfyClip: e.target.value })}
+                        onBlur={e => update({ comfyClip: e.target.value })}
+                    />
+                    <p className={styles.aiHelp}>Must match the model family — a FLUX.2 model needs a FLUX.2 encoder.</p>
+
+                    <label className={styles.label} style={{ marginTop: '0.9rem' }}>VAE</label>
+                    <input
+                        className={styles.aiInput}
+                        value={settings.comfyVae}
+                        spellCheck={false}
+                        onChange={e => setSettings({ ...settings, comfyVae: e.target.value })}
+                        onBlur={e => update({ comfyVae: e.target.value })}
+                    />
+
+                    <label className={styles.label} style={{ marginTop: '0.9rem' }}>Steps</label>
+                    <input
+                        className={styles.aiInput}
+                        type="number"
+                        min={1}
+                        max={60}
+                        value={settings.comfySteps}
+                        onChange={e => setSettings({ ...settings, comfySteps: Number(e.target.value) })}
+                        onBlur={e => update({ comfySteps: Number(e.target.value) })}
+                    />
+
+                    <label className={styles.label} style={{ marginTop: '0.9rem' }}>Negative prompt</label>
+                    <textarea
+                        className={styles.aiInput}
+                        rows={2}
+                        value={settings.comfyNegative}
+                        spellCheck={false}
+                        onChange={e => setSettings({ ...settings, comfyNegative: e.target.value })}
+                        onBlur={e => update({ comfyNegative: e.target.value })}
+                    />
+                    <p className={styles.aiHelp}>Applied to every local render — the main lever against the plastic AI look.</p>
+
                     <TestLine target="comfyui" />
                 </>
             )}

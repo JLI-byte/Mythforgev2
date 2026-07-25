@@ -42,6 +42,7 @@ function def<S extends z.ZodRawShape>(
 }
 
 import { resolveAISettings } from './aiSettingsStore';
+import { generateWithComfyUI } from './comfyClient';
 
 /**
  * Pull a displayable image (a data URL) out of an OpenRouter image response,
@@ -131,12 +132,35 @@ export function researchToolDefs(): ResearchToolDef[] {
 
         def(
             'generate_image',
-            "Generate an image from a text prompt and show it in the chat. Use when the user asks you to draw, illustrate, visualize, or make a picture — a character portrait, a map, a location, an item. Write a rich, specific visual prompt (subject, setting, mood, style). Costs the user money, so only when asked.",
-            { prompt: z.string().describe('A detailed visual description of the image to generate') },
+            "Generate an image from a text prompt and show it in the chat. Use when the user asks you to draw, illustrate, visualize, or make a picture — a character portrait, a map, a location, an item. Write a rich, specific visual prompt (subject, setting, mood, style). For photorealistic people, name a camera and lens and ask for natural skin texture. Pick the orientation that suits the subject: portrait for a character, landscape for a vista or map. Only generate when asked.",
+            {
+                prompt: z.string().describe('A detailed visual description of the image to generate'),
+                orientation: z.enum(['square', 'portrait', 'landscape']).optional()
+                    .describe('Frame shape. Applies when rendering locally; the hosted provider always returns a square.'),
+            },
             async (args, send) => {
-                const { openrouterApiKey: key, imageModel } = await resolveAISettings();
+                const settings = await resolveAISettings();
+
+                // Local ComfyUI: renders on the user's own GPU, no per-image cost.
+                if (settings.imageProvider === 'comfyui') {
+                    const result = await generateWithComfyUI({
+                        baseUrl: settings.comfyuiUrl,
+                        prompt: args.prompt,
+                        negative: settings.comfyNegative,
+                        model: settings.comfyModel,
+                        clip: settings.comfyClip,
+                        vae: settings.comfyVae,
+                        steps: settings.comfySteps,
+                        orientation: args.orientation,
+                    });
+                    if (!result.ok) return `Local image generation failed. ${result.error}`;
+                    send({ type: 'generated_image', prompt: args.prompt, dataUrl: result.dataUrl });
+                    return `Generated an image locally for: ${args.prompt}`;
+                }
+
+                const { openrouterApiKey: key, imageModel } = settings;
                 if (!key) {
-                    return 'Image generation is not configured — tell the user to add their OpenRouter API key in Settings → AI.';
+                    return 'Image generation is not configured — tell the user to add their OpenRouter API key in Settings → AI, or switch image generation to local ComfyUI.';
                 }
                 try {
                     const resp = await fetch('https://openrouter.ai/api/v1/images', {

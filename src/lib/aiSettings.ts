@@ -30,7 +30,16 @@ export interface AISettings {
     imageProvider: ImageProvider;
     openrouterApiKey: string;
     imageModel: string;
+
     comfyuiUrl: string;
+    /** Diffusion model file inside ComfyUI's models/diffusion_models. */
+    comfyModel: string;
+    /** Text encoder file — must match the model family. */
+    comfyClip: string;
+    comfyVae: string;
+    comfySteps: number;
+    /** Applied via CFGGuider; the main lever against the "AI plastic" look. */
+    comfyNegative: string;
 }
 
 /** Fields that must never be sent to the browser. */
@@ -50,7 +59,13 @@ export const DEFAULT_AI_SETTINGS: AISettings = {
     imageProvider: 'openrouter',
     openrouterApiKey: '',
     imageModel: 'black-forest-labs/flux.2-pro',
+
     comfyuiUrl: 'http://127.0.0.1:8188',
+    comfyModel: 'flux-2-klein-base-9b-fp8.safetensors',
+    comfyClip: 'qwen_3_8b_fp8mixed.safetensors',
+    comfyVae: 'flux2-vae.safetensors',
+    comfySteps: 20,
+    comfyNegative: 'smooth plastic skin, airbrushed, waxy, doll-like, 3d render, illustration, cartoon, oversaturated colors',
 };
 
 /** What the client sees in place of a secret. */
@@ -107,6 +122,15 @@ export function mergeSettings(base: AISettings, patch: unknown): AISettings {
     if ('imageModel' in p) next.imageModel = pickString(p.imageModel, base.imageModel, 160) || base.imageModel;
     if ('ollamaBaseUrl' in p) next.ollamaBaseUrl = pickString(p.ollamaBaseUrl, base.ollamaBaseUrl) || base.ollamaBaseUrl;
     if ('comfyuiUrl' in p) next.comfyuiUrl = pickString(p.comfyuiUrl, base.comfyuiUrl) || base.comfyuiUrl;
+    if ('comfyModel' in p) next.comfyModel = pickString(p.comfyModel, base.comfyModel, 200) || base.comfyModel;
+    if ('comfyClip' in p) next.comfyClip = pickString(p.comfyClip, base.comfyClip, 200) || base.comfyClip;
+    if ('comfyVae' in p) next.comfyVae = pickString(p.comfyVae, base.comfyVae, 200) || base.comfyVae;
+    if ('comfyNegative' in p) next.comfyNegative = pickString(p.comfyNegative, base.comfyNegative, 800);
+
+    if ('comfySteps' in p) {
+        const n = Math.round(Number(p.comfySteps));
+        if (Number.isFinite(n) && n > 0) next.comfySteps = Math.min(60, n);
+    }
 
     if ('autoLaunchOllama' in p && typeof p.autoLaunchOllama === 'boolean') {
         next.autoLaunchOllama = p.autoLaunchOllama;
