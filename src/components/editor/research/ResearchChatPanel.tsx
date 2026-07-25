@@ -232,6 +232,17 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
     const [imageAttach, setImageAttach] = useState<{ mediaType: string; data: string; url: string } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Claude-style composer: the textarea grows with content (capped in CSS)
+    // and snaps back to one line when the input clears after sending.
+    const composerRef = useRef<HTMLTextAreaElement>(null);
+    const autoGrow = () => {
+        const el = composerRef.current;
+        if (!el) return;
+        el.style.height = 'auto';
+        el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+    };
+    useEffect(() => { if (!input) autoGrow(); }, [input]);
+
     const onImageSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         e.target.value = ''; // allow re-picking the same file
@@ -721,69 +732,80 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                 ))}
             </div>
 
-            {chatAttachment && (
-                <div className={styles.chatAttachment}>
-                    <span className={styles.chatAttachmentIcon}>📎</span>
-                    <span className={styles.chatAttachmentLabel} title={chatAttachment.content}>{chatAttachment.label}</span>
-                    <button className={styles.chatAttachmentClear} onClick={() => setChatAttachment(null)} title="Remove attachment">✕</button>
-                </div>
-            )}
+            <div className={styles.chatComposer}>
+                {chatAttachment && (
+                    <div className={styles.chatAttachment}>
+                        <span className={styles.chatAttachmentIcon}>📎</span>
+                        <span className={styles.chatAttachmentLabel} title={chatAttachment.content}>{chatAttachment.label}</span>
+                        <button className={styles.chatAttachmentClear} onClick={() => setChatAttachment(null)} title="Remove attachment">✕</button>
+                    </div>
+                )}
 
-            {imageAttach && (
-                <div className={styles.chatImageAttach}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={imageAttach.url} alt="Attached" className={styles.chatImageThumb} />
-                    <span className={styles.chatAttachmentLabel}>Image attached</span>
-                    <button className={styles.chatAttachmentClear} onClick={() => setImageAttach(null)} title="Remove image">✕</button>
-                </div>
-            )}
+                {imageAttach && (
+                    <div className={styles.chatImageAttach}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={imageAttach.url} alt="Attached" className={styles.chatImageThumb} />
+                        <span className={styles.chatAttachmentLabel}>Image attached</span>
+                        <button className={styles.chatAttachmentClear} onClick={() => setImageAttach(null)} title="Remove image">✕</button>
+                    </div>
+                )}
 
-            <div className={styles.researchChatInputRow}>
                 <textarea
-                    className={styles.researchChatInput}
+                    ref={composerRef}
+                    className={styles.chatComposerInput}
                     placeholder={chatAttachment ? `Ask about “${chatAttachment.label}”…` : 'Message the research assistant…'}
                     value={input}
-                    onChange={e => setInput(e.target.value)}
+                    onChange={e => { setInput(e.target.value); autoGrow(); }}
                     onKeyDown={onKeyDown}
-                    rows={2}
+                    rows={1}
                 />
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    onChange={onImageSelected}
-                />
-                <button
-                    className={styles.chatMicBtn}
-                    onClick={() => fileInputRef.current?.click()}
-                    title="Attach an image"
-                >
-                    📷
-                </button>
-                {voiceSupported && (
-                    <button
-                        className={`${styles.chatMicBtn} ${isListening ? styles.chatMicBtnActive : ''}`}
-                        onClick={toggleVoice}
-                        title={isListening ? 'Stop dictation' : 'Dictate with your voice'}
-                        aria-pressed={isListening}
-                    >
-                        {isListening ? '⏹' : '🎤'}
-                    </button>
-                )}
-                {isStreaming ? (
-                    <button
-                        className={`${styles.researchChatSendBtn} ${styles.researchChatStopBtn}`}
-                        onClick={() => abortRef.current?.abort()}
-                        title="Stop generating"
-                    >
-                        ⏹ Stop
-                    </button>
-                ) : (
-                    <button className={styles.researchChatSendBtn} onClick={() => send()} disabled={!input.trim() && !imageAttach}>
-                        Send
-                    </button>
-                )}
+
+                <div className={styles.chatComposerRow}>
+                    <div className={styles.chatComposerTools}>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            onChange={onImageSelected}
+                        />
+                        <button
+                            className={styles.composerIconBtn}
+                            onClick={() => fileInputRef.current?.click()}
+                            title="Attach an image"
+                        >
+                            📷
+                        </button>
+                        {voiceSupported && (
+                            <button
+                                className={`${styles.composerIconBtn} ${isListening ? styles.composerIconBtnActive : ''}`}
+                                onClick={toggleVoice}
+                                title={isListening ? 'Stop dictation' : 'Dictate with your voice'}
+                                aria-pressed={isListening}
+                            >
+                                {isListening ? '⏹' : '🎤'}
+                            </button>
+                        )}
+                    </div>
+                    {isStreaming ? (
+                        <button
+                            className={`${styles.composerSendBtn} ${provider === 'local' ? styles.composerSendBtnLocal : ''}`}
+                            onClick={() => abortRef.current?.abort()}
+                            title="Stop generating"
+                        >
+                            ◼
+                        </button>
+                    ) : (
+                        <button
+                            className={`${styles.composerSendBtn} ${provider === 'local' ? styles.composerSendBtnLocal : ''}`}
+                            onClick={() => send()}
+                            disabled={!input.trim() && !imageAttach}
+                            title="Send"
+                        >
+                            ↑
+                        </button>
+                    )}
+                </div>
             </div>
 
             {editorDraft && (
