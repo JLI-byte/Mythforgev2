@@ -14,7 +14,7 @@ import { useWorkspaceStore, Scene } from '@/store/workspaceStore';
 import { EntityMark } from '@/lib/EntityMark';
 import { EntitySuggest } from '@/lib/EntitySuggest';
 import EntitySuggestDropdown from './EntitySuggestDropdown';
-import { useWritingSession } from '@/lib/useWritingSession';
+import { useWritingSession, useSeedWritingBaseline } from '@/lib/useWritingSession';
 
 export default function ScreenplayEditor({ scene, onEditorFocus }: { scene: Scene, onEditorFocus?: (editor: any) => void }) {
     const updateScene = useWorkspaceStore((state) => state.updateScene);
@@ -71,6 +71,14 @@ export default function ScreenplayEditor({ scene, onEditorFocus }: { scene: Scen
             }
         }
     }, [scene.id]);
+
+    // Baseline the scene as soon as its editor is ready, so words typed before
+    // the first debounced save still count toward goals and streaks.
+    useSeedWritingBaseline(
+        scene.id,
+        editor ? editor.getText().split(/\s+/).filter(w => w.length > 0).length : undefined,
+    );
+
     const editorRef = useRef<any>(editor);
     useEffect(() => {
         editorRef.current = editor;

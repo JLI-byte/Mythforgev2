@@ -10,7 +10,7 @@ import FontFamily from '@tiptap/extension-font-family';
 import Highlight from '@tiptap/extension-highlight';
 import Color from '@tiptap/extension-color';
 import { useWorkspaceStore } from '@/store/workspaceStore';
-import { useWritingSession } from '@/lib/useWritingSession';
+import { useWritingSession, useSeedWritingBaseline } from '@/lib/useWritingSession';
 import { FontSize } from './extensions';
 import { GlassDropdown } from './GlassDropdown';
 import styles from '../WritingDesk.module.css';
@@ -62,6 +62,13 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
     },
     onFocus: ({ editor }) => onFocus(editor),
   }, [sceneId, isSpellcheckEnabled]);
+
+  // Baseline the scene the moment its editor is ready, so words typed before
+  // the first debounced save are still counted toward goals and streaks.
+  useSeedWritingBaseline(
+    sceneId,
+    editor ? editor.getText().split(/\s+/).filter(w => w.length > 0).length : undefined,
+  );
 
   useEffect(() => {
     return () => {
