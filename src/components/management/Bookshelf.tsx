@@ -256,10 +256,10 @@ export function Bookshelf() {
 
     /**
      * Creates the story with its first chapter + scene, then routes to the
-     * chosen starting point: the Draft Table (outline first) or the Writing
-     * Desk (dive straight into prose).
+     * chosen starting point: the Research Table (gather first), the Draft
+     * Table (outline first), or the Writing Desk (straight into prose).
      */
-    const confirmCreateStory = (destination: 'template' | 'desk') => {
+    const confirmCreateStory = (destination: 'template' | 'desk' | 'research') => {
         const name = storyName.trim();
         const workType = getWorkType(storyTypeId);
         if (!name || !workType) return;
@@ -667,6 +667,14 @@ export function Bookshelf() {
                                 </div>
                                 <label className={styles.shelfLabel}>Where do you want to begin?</label>
                                 <div className={styles.beginOptions}>
+                                    <button
+                                        className={styles.beginOption}
+                                        onClick={() => confirmCreateStory('research')}
+                                        disabled={!storyName.trim()}
+                                    >
+                                        <span className={styles.beginOptionTitle}>🔎 Research First</span>
+                                        <span className={styles.beginOptionDesc}>Gather notes and build the world with the AI assistant</span>
+                                    </button>
                                     <button
                                         className={styles.beginOption}
                                         onClick={() => confirmCreateStory('template')}

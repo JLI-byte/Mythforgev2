@@ -375,9 +375,11 @@
 }
 
 /* New-story begin choices: Draft First vs Start Writing */
+/* One per row: three side-by-side left no room for the descriptions.
+   (Grid, so .beginOption's flex:1 no longer stretches them unevenly.) */
 .beginOptions {
-    display: flex;
-    gap: 10px;
+    display: grid;
+    gap: 8px;
     margin: 8px 0 16px;
 }
 
