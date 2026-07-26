@@ -9,6 +9,8 @@ interface InterviewMenuProps {
     interviews: Interview[];
     /** Disabled while a message is streaming. */
     disabled?: boolean;
+    /** 'rail' renders a square icon button whose menu opens to the side. */
+    variant?: 'button' | 'rail';
     onLaunch: (interview: Interview) => void;
     onNew: () => void;
     onEdit: (interview: Interview) => void;
@@ -19,7 +21,8 @@ interface InterviewMenuProps {
  * a row launches it; the pencil opens it in the editor (built-ins open as an
  * editable copy). A footer button creates a new one.
  */
-export function InterviewMenu({ interviews, disabled, onLaunch, onNew, onEdit }: InterviewMenuProps) {
+export function InterviewMenu({ interviews, disabled, variant = 'button', onLaunch, onNew, onEdit }: InterviewMenuProps) {
+    const isRail = variant === 'rail';
     const [open, setOpen] = useState(false);
     const rootRef = useRef<HTMLDivElement>(null);
 
@@ -41,18 +44,23 @@ export function InterviewMenu({ interviews, disabled, onLaunch, onNew, onEdit }:
     return (
         <div className={styles.interviewMenuRoot} ref={rootRef}>
             <button
-                className={styles.researchBuildWorldBtn}
+                className={isRail
+                    ? `${styles.chatTrayTab} ${open ? styles.chatTrayTabActive : ''}`
+                    : styles.researchBuildWorldBtn}
                 onClick={() => setOpen(o => !o)}
                 disabled={disabled}
                 title="Launch a guided interview to build part of your world"
                 aria-haspopup="menu"
                 aria-expanded={open}
             >
-                🧭 Interviews ▾
+                {isRail ? <span className={styles.chatTrayTabIcon}>🧭</span> : '🧭 Interviews ▾'}
             </button>
 
             {open && (
-                <div className={styles.interviewMenuPopover} role="menu">
+                <div
+                    className={`${styles.interviewMenuPopover} ${isRail ? styles.interviewMenuPopoverRail : ''}`}
+                    role="menu"
+                >
                     {interviews.map(iv => (
                         <div key={iv.id} className={styles.interviewMenuRow}>
                             <button

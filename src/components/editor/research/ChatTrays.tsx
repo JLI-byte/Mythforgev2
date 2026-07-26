@@ -7,6 +7,8 @@ import { makeFlagsWidget, type ConsistencyFlag } from '@/lib/consistencyFlags';
 import { ArticleSuggestionsRenderer } from '../desk/widgets/ArticleSuggestionsRenderer';
 import { ConsistencyFlagsRenderer } from '../desk/widgets/ConsistencyFlagsRenderer';
 import { UnderstandingRenderer } from '../desk/widgets/UnderstandingRenderer';
+import { InterviewMenu } from './InterviewMenu';
+import type { Interview } from '@/lib/interviews';
 import styles from '../WritingDesk.module.css';
 
 type TrayId = 'suggestions' | 'flags' | 'understanding';
@@ -14,6 +16,13 @@ type TrayId = 'suggestions' | 'flags' | 'understanding';
 interface ChatTraysProps {
     /** Composite research scope key — suggestions & flags live under it. */
     scopeKey: string | null;
+    /** Assistant actions that share the rail with the trays. */
+    busy?: boolean;
+    onReview: () => void;
+    interviews: Interview[];
+    onLaunchInterview: (iv: Interview) => void;
+    onNewInterview: () => void;
+    onEditInterview: (iv: Interview) => void;
 }
 
 /**
@@ -24,7 +33,10 @@ interface ChatTraysProps {
  * of floating on the board. Data is unchanged — suggestions/flags in the scope's
  * widgets, understanding keyed by world in the store.
  */
-export function ChatTrays({ scopeKey }: ChatTraysProps) {
+export function ChatTrays({
+    scopeKey, busy, onReview, interviews,
+    onLaunchInterview, onNewInterview, onEditInterview,
+}: ChatTraysProps) {
     const [active, setActive] = useState<TrayId | null>(null);
 
     const widgets = useWorkspaceStore(s => (scopeKey ? s.researchStates[scopeKey]?.widgets : undefined)) ?? [];
@@ -66,6 +78,27 @@ export function ChatTrays({ scopeKey }: ChatTraysProps) {
 
     return (
         <div className={styles.chatTrayRail}>
+            {/* Assistant actions: they run something rather than opening a tray,
+                so they sit above the divider. */}
+            <button
+                className={styles.chatTrayTab}
+                onClick={onReview}
+                disabled={busy}
+                title="Review the world for contradictions and gaps"
+            >
+                <span className={styles.chatTrayTabIcon}>🔍</span>
+            </button>
+            <InterviewMenu
+                interviews={interviews}
+                disabled={busy}
+                variant="rail"
+                onLaunch={onLaunchInterview}
+                onNew={onNewInterview}
+                onEdit={onEditInterview}
+            />
+
+            <span className={styles.chatTrayDivider} />
+
             {tabs.map(t => (
                 <button
                     key={t.id}

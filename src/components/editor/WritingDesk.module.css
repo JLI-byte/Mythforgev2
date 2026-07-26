@@ -4834,6 +4834,14 @@
   min-height: 0;
 }
 
+/* Chat column + its tray rail travel together as one unit. */
+.researchChatShell {
+  display: flex;
+  flex-direction: row;
+  flex: 0 0 auto;
+  min-height: 0;
+}
+
 .researchChat {
   display: flex;
   flex-direction: column;
@@ -4949,6 +4957,19 @@
 
 .chatTrayTabIcon {
   pointer-events: none;
+}
+
+.chatTrayTab:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Separates the action buttons from the tray tabs below them. */
+.chatTrayDivider {
+  width: 18px;
+  height: 1px;
+  margin: 3px 0;
+  background: var(--border, rgba(128, 128, 128, 0.3));
 }
 
 .chatTrayBadge {
@@ -5110,6 +5131,15 @@
 .interviewMenuRoot {
   position: relative;
   flex: 0 0 auto;
+}
+
+/* Rail variant: the trigger is a 30px icon button, so the menu opens to the
+   side (over the board) instead of below, where there is no room. */
+.interviewMenuPopoverRail {
+  top: 0;
+  right: auto;
+  left: calc(100% + 6px);
+  max-height: 70vh;
 }
 
 .interviewMenuPopover {

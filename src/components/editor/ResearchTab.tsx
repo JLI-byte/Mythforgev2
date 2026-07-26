@@ -21,7 +21,6 @@ import { getWorldBibleConfig } from '@/lib/worldBibleNav';
 import WritingDesk from './WritingDesk';
 import { ResearchEmptyState } from './ResearchEmptyState';
 import { ResearchChatPanel, type ToolEvent } from './research/ResearchChatPanel';
-import { ChatTrays } from './research/ChatTrays';
 import { ResearchBoardBar } from './research/ResearchBoardBar';
 import styles from './WritingDesk.module.css';
 
@@ -304,7 +303,6 @@ export default function ResearchTab() {
             width={chatWidth}
             onCollapse={() => setChatCollapsed(true)}
           />
-          <ChatTrays scopeKey={scopeKey} />
           <div
             className={styles.researchResizer}
             onMouseDown={startResize}

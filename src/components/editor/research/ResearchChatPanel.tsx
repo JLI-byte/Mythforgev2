@@ -10,8 +10,8 @@ import {
     renderInterviewGuide,
     type Interview,
 } from '@/lib/interviews';
-import { InterviewMenu } from './InterviewMenu';
 import { InterviewEditorModal } from './InterviewEditorModal';
+import { ChatTrays } from './ChatTrays';
 import { CreditTracker } from './CreditTracker';
 import { ChatModelPicker } from './ChatModelPicker';
 import { ContextRing } from './ContextRing';
@@ -675,6 +675,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
     };
 
     return (
+        <div className={styles.researchChatShell}>
         <div
             className={`${styles.researchChat} ${dragOver ? styles.researchChatDragOver : ''}`}
             style={width ? { flex: `0 0 ${width}px`, width } : undefined}
@@ -684,21 +685,6 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
         >
             <div className={styles.researchChatHeader}>
                 <div className={styles.researchChatHeaderActions}>
-                    <button
-                        className={styles.researchBuildWorldBtn}
-                        onClick={reviewWorld}
-                        disabled={isStreaming}
-                        title="Review the world for contradictions and gaps"
-                    >
-                        🔍 Review
-                    </button>
-                    <InterviewMenu
-                        interviews={allInterviews}
-                        disabled={isStreaming}
-                        onLaunch={launchInterview}
-                        onNew={newInterview}
-                        onEdit={editInterview}
-                    />
                     {onCollapse && (
                         <button className={styles.chatCollapseBtn} onClick={onCollapse} title="Collapse chat">«</button>
                     )}
@@ -942,6 +928,19 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                     onClose={() => { setEditorDraft(null); setEditorExistingId(null); }}
                 />
             )}
+        </div>
+
+        {/* The tray rail lives beside the chat: assistant actions on top, then
+            the Suggestions / Gaps / Understanding drawers. */}
+        <ChatTrays
+            scopeKey={scopeKey}
+            busy={isStreaming}
+            onReview={reviewWorld}
+            interviews={allInterviews}
+            onLaunchInterview={launchInterview}
+            onNewInterview={newInterview}
+            onEditInterview={editInterview}
+        />
         </div>
     );
 }
