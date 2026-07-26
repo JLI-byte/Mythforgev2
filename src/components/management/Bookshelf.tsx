@@ -37,6 +37,7 @@ export function Bookshelf() {
     const updateWorld = useWorkspaceStore(s => s.updateWorld);
     const deleteWorld = useWorkspaceStore(s => s.deleteWorld);
     const addProject = useWorkspaceStore(s => s.addProject);
+    const deleteProject = useWorkspaceStore(s => s.deleteProject);
     const addDocument = useWorkspaceStore(s => s.addDocument);
     const addScene = useWorkspaceStore(s => s.addScene);
     const updateDraftState = useWorkspaceStore(s => s.updateDraftState);
@@ -57,6 +58,8 @@ export function Bookshelf() {
     const [wizardStep, setWizardStep] = useState<1 | 2 | 3>(1);
     const [editingWorldId, setEditingWorldId] = useState<string | null>(null);
     const [deletingWorldId, setDeletingWorldId] = useState<string | null>(null);
+    /** Book awaiting delete confirmation (two-step, in place on the cover). */
+    const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
 
     /** Extra rows added per shelf beyond the default 3 (keyed by world id / 'standalone'). */
     const [extraRows, setExtraRows] = useState<Record<string, number>>({});
@@ -313,32 +316,65 @@ export function Bookshelf() {
     // ─── RENDERING ─────────────────────────────────────────
 
     /** A book slot — greyscale cover centered inside its diamond, tilts on hover. */
-    const renderDiamondBook = (p: Project) => (
-        <div
-            key={p.id}
-            className={`${styles.slot} ${draggedProjectId === p.id ? styles.dragging : ''}`}
-        >
+    const renderDiamondBook = (p: Project) => {
+        const isDeleting = deletingProjectId === p.id;
+        return (
             <div
-                draggable
-                onDragStart={(e) => handleDragStart(e, p.id)}
-                onDragEnd={() => setDraggedProjectId(null)}
-                onClick={() => handleSelectProject(p.id)}
-                title={p.name}
-                className={`${styles.book} ${p.id === activeProjectId ? styles.bookActive : ''}`}
-                style={{
-                    background: p.coverImageUrl ? undefined : greyForId(p.id),
-                    backgroundImage: p.coverImageUrl ? `url(${p.coverImageUrl})` : undefined,
-                }}
+                key={p.id}
+                className={`${styles.slot} ${draggedProjectId === p.id ? styles.dragging : ''}`}
             >
-                {!p.coverImageUrl && (
-                    <span className={styles.bookInitials}>
-                        {p.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
-                    </span>
+                <div
+                    draggable={!isDeleting}
+                    onDragStart={(e) => handleDragStart(e, p.id)}
+                    onDragEnd={() => setDraggedProjectId(null)}
+                    onClick={() => { if (!isDeleting) handleSelectProject(p.id); }}
+                    title={p.name}
+                    className={`${styles.book} ${p.id === activeProjectId ? styles.bookActive : ''}`}
+                    style={{
+                        background: p.coverImageUrl ? undefined : greyForId(p.id),
+                        backgroundImage: p.coverImageUrl ? `url(${p.coverImageUrl})` : undefined,
+                    }}
+                >
+                    {!p.coverImageUrl && (
+                        <span className={styles.bookInitials}>
+                            {p.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+                        </span>
+                    )}
+                    <span className={styles.bookLabel}>{p.name}</span>
+                </div>
+
+                {/* Delete lives on the slot, not the cover: the cover tilts 18°
+                    on hover, which would make a button inside it hard to hit. */}
+                {isDeleting ? (
+                    <div className={styles.bookConfirm} onClick={e => e.stopPropagation()}>
+                        <span className={styles.bookConfirmText}>Delete?</span>
+                        <div className={styles.bookConfirmActions}>
+                            <button
+                                className={styles.bookConfirmNo}
+                                onClick={() => setDeletingProjectId(null)}
+                            >
+                                No
+                            </button>
+                            <button
+                                className={styles.bookConfirmYes}
+                                onClick={() => { deleteProject(p.id); setDeletingProjectId(null); }}
+                            >
+                                Yes
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <button
+                        className={styles.bookDeleteBtn}
+                        title={`Delete “${p.name}”`}
+                        onClick={e => { e.stopPropagation(); setDeletingProjectId(p.id); }}
+                    >
+                        ✕
+                    </button>
                 )}
-                <span className={styles.bookLabel}>{p.name}</span>
             </div>
-        </div>
-    );
+        );
+    };
 
     /** Empty slot — click the diamond to stock the shelf with a new story. */
     const renderEmptySlot = (worldId: string | 'standalone', key: string) => (
