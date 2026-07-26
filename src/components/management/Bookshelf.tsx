@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useWorkspaceStore, Project, World, COVER_COLORS, WorldGenre } from '@/store/workspaceStore';
 import { STANDALONE_KEY } from '@/lib/worldKey';
 import { getWorldBibleConfig } from '@/lib/worldBibleNav';
+import { WORK_TYPES, getWorkType } from '@/lib/workTypes';
+import { getDraftType } from '@/lib/writingMethods';
 import WorldBibleBook from './WorldBibleBook';
 import styles from './Bookshelf.module.css';
 
@@ -37,6 +39,7 @@ export function Bookshelf() {
     const addProject = useWorkspaceStore(s => s.addProject);
     const addDocument = useWorkspaceStore(s => s.addDocument);
     const addScene = useWorkspaceStore(s => s.addScene);
+    const updateDraftState = useWorkspaceStore(s => s.updateDraftState);
     const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
     const setActiveProject = useWorkspaceStore(s => s.setActiveProject);
     const setWorkspaceMode = useWorkspaceStore(s => s.setWorkspaceMode);
@@ -62,6 +65,9 @@ export function Bookshelf() {
     const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
     const [storyWorldId, setStoryWorldId] = useState<string | undefined>(undefined);
     const [storyName, setStoryName] = useState('');
+    /** New-work modal: pick what you're writing, then name it and choose a start. */
+    const [storyStep, setStoryStep] = useState<'type' | 'details'>('type');
+    const [storyTypeId, setStoryTypeId] = useState<string | null>(null);
 
     /** Wizard Form Data: Holds transient state for world creation/editing */
     const [wizardData, setWizardData] = useState<Partial<World>>({
@@ -233,11 +239,19 @@ export function Bookshelf() {
 
     // ─── STORY CREATION ─────────────────────────────────────
 
-    /** Opens the story-name modal, remembering which shelf to file it under. */
+    /** Opens the new-work modal at step one, remembering the shelf to file it under. */
     const handleCreateStory = (worldId?: string) => {
         setStoryWorldId(worldId);
         setStoryName('');
+        setStoryTypeId(null);
+        setStoryStep('type');
         setIsStoryModalOpen(true);
+    };
+
+    /** Step one: what kind of work this is, then on to naming it. */
+    const pickWorkType = (id: string) => {
+        setStoryTypeId(id);
+        setStoryStep('details');
     };
 
     /**
@@ -247,7 +261,8 @@ export function Bookshelf() {
      */
     const confirmCreateStory = (destination: 'template' | 'desk') => {
         const name = storyName.trim();
-        if (!name) return;
+        const workType = getWorkType(storyTypeId);
+        if (!name || !workType) return;
 
         const projectId = crypto.randomUUID();
         const docId = crypto.randomUUID();
@@ -256,11 +271,20 @@ export function Bookshelf() {
         addProject({
             id: projectId,
             name,
-            writingMode: 'novel',
+            writingMode: workType.writingMode,
             coverColor: COVER_COLORS[Math.floor(Math.random() * COVER_COLORS.length)],
             worldId: storyWorldId,
             createdAt: new Date()
         });
+
+        // Pre-filter the Draft Table's method library to suit the work, so the
+        // writer isn't offered screenplay beats for an essay.
+        if (workType.draftTypeId) {
+            updateDraftState(projectId, {
+                draftTypeId: workType.draftTypeId,
+                draftFormat: getDraftType(workType.draftTypeId)?.format,
+            });
+        }
 
         addDocument({
             id: docId,
@@ -602,43 +626,70 @@ export function Bookshelf() {
             {isStoryModalOpen && (
                 <div className={styles.wizardBackdrop} onClick={() => setIsStoryModalOpen(false)}>
                     <div className={styles.wizardModal} onClick={e => e.stopPropagation()}>
-                        <h2 className={styles.wizardTitle}>New Story</h2>
-                        <div style={{ marginBottom: '16px' }}>
-                            <label className={styles.shelfLabel}>Story Name</label>
-                            <input
-                                className={styles.wizardInput}
-                                value={storyName}
-                                onChange={e => setStoryName(e.target.value)}
-                                onKeyDown={e => {
-                                    if (e.key === 'Enter') { e.preventDefault(); confirmCreateStory('template'); }
-                                    if (e.key === 'Escape') setIsStoryModalOpen(false);
-                                }}
-                                placeholder="e.g. The Long Winter"
-                                autoFocus
-                            />
-                        </div>
-                        <label className={styles.shelfLabel}>How do you want to begin?</label>
-                        <div className={styles.beginOptions}>
-                            <button
-                                className={styles.beginOption}
-                                onClick={() => confirmCreateStory('template')}
-                                disabled={!storyName.trim()}
-                            >
-                                <span className={styles.beginOptionTitle}>🗺️ Draft First</span>
-                                <span className={styles.beginOptionDesc}>Outline on the Draft Table with a writing method</span>
-                            </button>
-                            <button
-                                className={styles.beginOption}
-                                onClick={() => confirmCreateStory('desk')}
-                                disabled={!storyName.trim()}
-                            >
-                                <span className={styles.beginOptionTitle}>✍️ Start Writing</span>
-                                <span className={styles.beginOptionDesc}>Jump straight into prose on the Writing Desk</span>
-                            </button>
-                        </div>
-                        <div className={styles.wizardActions}>
-                            <button className={styles.wizardBtnSecondary} onClick={() => setIsStoryModalOpen(false)}>Cancel</button>
-                        </div>
+                        {storyStep === 'type' ? (
+                            <>
+                                <h2 className={styles.wizardTitle}>What are you writing?</h2>
+                                <div className={styles.workTypeGrid}>
+                                    {WORK_TYPES.map(t => (
+                                        <button
+                                            key={t.id}
+                                            className={styles.workTypeCard}
+                                            onClick={() => pickWorkType(t.id)}
+                                        >
+                                            <span className={styles.workTypeIcon}>{t.icon}</span>
+                                            <span className={styles.workTypeLabel}>{t.label}</span>
+                                            <span className={styles.workTypeDesc}>{t.desc}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className={styles.wizardActions}>
+                                    <button className={styles.wizardBtnSecondary} onClick={() => setIsStoryModalOpen(false)}>Cancel</button>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <h2 className={styles.wizardTitle}>
+                                    {getWorkType(storyTypeId)?.icon} New {getWorkType(storyTypeId)?.label}
+                                </h2>
+                                <div style={{ marginBottom: '16px' }}>
+                                    <label className={styles.shelfLabel}>Name</label>
+                                    <input
+                                        className={styles.wizardInput}
+                                        value={storyName}
+                                        onChange={e => setStoryName(e.target.value)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') { e.preventDefault(); confirmCreateStory('template'); }
+                                            if (e.key === 'Escape') setIsStoryModalOpen(false);
+                                        }}
+                                        placeholder={getWorkType(storyTypeId)?.namePlaceholder}
+                                        autoFocus
+                                    />
+                                </div>
+                                <label className={styles.shelfLabel}>Where do you want to begin?</label>
+                                <div className={styles.beginOptions}>
+                                    <button
+                                        className={styles.beginOption}
+                                        onClick={() => confirmCreateStory('template')}
+                                        disabled={!storyName.trim()}
+                                    >
+                                        <span className={styles.beginOptionTitle}>🗺️ Draft First</span>
+                                        <span className={styles.beginOptionDesc}>Outline on the Draft Table with a writing method</span>
+                                    </button>
+                                    <button
+                                        className={styles.beginOption}
+                                        onClick={() => confirmCreateStory('desk')}
+                                        disabled={!storyName.trim()}
+                                    >
+                                        <span className={styles.beginOptionTitle}>✍️ Start Writing</span>
+                                        <span className={styles.beginOptionDesc}>Jump straight in on the Writing Desk</span>
+                                    </button>
+                                </div>
+                                <div className={styles.wizardActions}>
+                                    <button className={styles.wizardBtnSecondary} onClick={() => setStoryStep('type')}>← Back</button>
+                                    <button className={styles.wizardBtnSecondary} onClick={() => setIsStoryModalOpen(false)}>Cancel</button>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             )}

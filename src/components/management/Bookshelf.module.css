@@ -570,3 +570,55 @@
     font-size: 0.65rem;
     border-radius: 12px;
 }
+
+/* ── New-work step 1: what are you writing? ─────────────── */
+
+.workTypeGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.workTypeCard {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    text-align: left;
+    padding: 16px 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(var(--overlay-rgb), 0.1);
+    background: rgba(var(--overlay-rgb), 0.04);
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.workTypeCard:hover {
+    border-color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.1);
+    transform: translateY(-2px);
+}
+
+.workTypeIcon {
+    font-size: 1.5rem;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.workTypeLabel {
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.workTypeDesc {
+    font-size: 0.76rem;
+    line-height: 1.4;
+    opacity: 0.65;
+}
+
+@media (max-width: 520px) {
+    .workTypeGrid {
+        grid-template-columns: 1fr;
+    }
+}
