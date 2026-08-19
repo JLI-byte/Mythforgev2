@@ -233,6 +233,17 @@ scenes would silently rewire the story. The exporter is therefore explicit:
 This makes every edge in the exported script deliberate, and means the
 *dead end* validation only fires where a scene genuinely has nowhere to go.
 
+**Order is the story's spine.** A scene that ends a branch must be ordered
+last, or fall-through will run it straight into an unrelated branch's opening.
+This is a real authoring hazard, and the reason the *dead end* and
+*unreachable* warnings exist — between them they catch a misplaced ending.
+
+An earlier draft tried to avoid the hazard by treating `choices: undefined`
+(fall through) as different from `choices: []` (explicit ending). That was
+rejected: it makes an invisible distinction load-bearing, which the editor
+would have to preserve exactly, and clearing the last choice in the UI would
+silently change where the story goes. One rule, `choices ?? []`, is safer.
+
 ### Dialogue parsing
 
 For each line of scene content:
