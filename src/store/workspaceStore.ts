@@ -9,6 +9,7 @@ import { wouldCreateCycle, fileByType } from '@/lib/folderTree';
 import type { Interview } from '@/lib/interviews/types';
 import type { ProjectBrief } from '@/lib/workSubTypes';
 import { sanitizeChatHistories, type ChatMessage as ResearchChatMessage } from '@/lib/researchChatTypes';
+import type { VNChoice } from '@/lib/visualNovel';
 
 // Cover colors auto-assigned to new projects in rotation
 export const COVER_COLORS = [
@@ -126,6 +127,8 @@ export interface Scene {
     createdAt: Date;
     updatedAt?: Date;
     wordCount?: number;
+    /** Visual novel projects only: the choices that lead out of this scene. */
+    choices?: VNChoice[];
 }
 
 export type BlockType = 'richtext' | 'image' | 'statrow' | 'divider' | 'quote' | 'timeline';
