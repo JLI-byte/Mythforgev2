@@ -39,6 +39,6 @@ describe('buildLabelMap', () => {
     });
 
     it('falls back to a usable label when a title has no usable characters', () => {
-        expect(buildLabelMap([titled('1', '???')]).get('1')).toBe('scene');
+        expect(buildLabelMap([titled('1', '???')]).get('1')).toBe('untitled');
     });
 });

@@ -33,13 +33,11 @@ export function buildLabelMap(scenes: { id: string; title: string }[]): Map<stri
             .replace(/[^a-z0-9]+/g, '_')
             .replace(/^_+|_+$/g, '');
 
-        let isFromFallback = false;
-        if (!base) {
-            base = 'scene';
-            isFromFallback = true;
-        }
+        // 'untitled' rather than 'scene': 'scene' is itself a Ren'Py keyword,
+        // so using it as the fallback would trip the guard below.
+        if (!base) base = 'untitled';
         if (/^[0-9]/.test(base)) base = `s_${base}`;
-        if (!isFromFallback && RENPY_KEYWORDS.has(base)) base = `${base}_scene`;
+        if (RENPY_KEYWORDS.has(base)) base = `${base}_scene`;
 
         let label = base;
         let n = 2;
