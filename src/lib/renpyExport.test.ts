@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildLabelMap } from './renpyExport';
+import { buildLabelMap, escapeRenpyText } from './renpyExport';
 
 const titled = (id: string, title: string) => ({ id, title });
 
@@ -40,5 +40,34 @@ describe('buildLabelMap', () => {
 
     it('falls back to a usable label when a title has no usable characters', () => {
         expect(buildLabelMap([titled('1', '???')]).get('1')).toBe('untitled');
+    });
+});
+
+describe('escapeRenpyText', () => {
+    it('escapes double quotes, which would otherwise end the string', () => {
+        expect(escapeRenpyText('She said "no"')).toBe('She said \\"no\\"');
+    });
+
+    it('doubles square brackets, which are variable interpolation', () => {
+        expect(escapeRenpyText('[again]')).toBe('[[again]');
+    });
+
+    it('doubles curly braces, which are text tags', () => {
+        expect(escapeRenpyText('{b}bold{/b}')).toBe('{{b}bold{{/b}');
+    });
+
+    it('escapes backslashes first so the other rules are not double-escaped', () => {
+        expect(escapeRenpyText('back\\slash')).toBe('back\\\\slash');
+        expect(escapeRenpyText('a\\"b')).toBe('a\\\\\\"b');
+    });
+
+    it('handles a line that trips all three rules at once', () => {
+        expect(escapeRenpyText('She said "no" [again] {sigh}'))
+            .toBe('She said \\"no\\" [[again] {{sigh}');
+    });
+
+    it('leaves ordinary prose untouched', () => {
+        expect(escapeRenpyText('The meadow is gold this time of year.'))
+            .toBe('The meadow is gold this time of year.');
     });
 });

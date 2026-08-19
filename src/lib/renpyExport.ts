@@ -52,3 +52,18 @@ export function buildLabelMap(scenes: { id: string; title: string }[]): Map<stri
 
     return map;
 }
+
+/**
+ * Makes a line safe inside a Ren'Py double-quoted string.
+ *
+ * Backslash goes first on purpose: the later rules introduce backslashes, and
+ * escaping them again would corrupt the output. Closing brackets need no
+ * escape — only the opening ones are significant.
+ */
+export function escapeRenpyText(text: string): string {
+    return text
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"')
+        .replace(/\[/g, '[[')
+        .replace(/\{/g, '{{');
+}
