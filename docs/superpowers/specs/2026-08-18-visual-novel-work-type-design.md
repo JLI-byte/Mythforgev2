@@ -269,6 +269,23 @@ Three rules, all mandatory. Each has a golden test.
 Without these, a line such as `She said "no" [again]` produces a file that
 fails to compile.
 
+### Identifiers
+
+Labels and flag names are both emitted bare into the script, so both must be
+Python-style identifiers. They share one `toIdentifier` helper.
+
+**Flag names are the easy one to forget.** They come from a free-text field, so
+`met bob` arrives unsanitised and `default met bob = False` is a syntax error —
+and it is the likeliest thing a writer types. Scene titles were slugified from
+the start; flags must go through the same path.
+
+### Speaker casing
+
+The alias map is keyed by **lowercased** name. `parseDialogueLine` matches the
+cast case-insensitively and returns the casing found on that line, so a writer
+typing `Sylvie:` once and `SYLVIE:` later hits the same alias. Keying by exact
+case emits the literal string `undefined` as the speaker on the second line.
+
 ### Character aliases
 
 Characters are **scoped to the shelf, not the project** — entities carry a
