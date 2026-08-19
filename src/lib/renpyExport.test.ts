@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildLabelMap, escapeRenpyText } from './renpyExport';
+import { buildLabelMap, escapeRenpyText, parseDialogueLine, buildAliasMap } from './renpyExport';
 
 const titled = (id: string, title: string) => ({ id, title });
 
@@ -69,5 +69,56 @@ describe('escapeRenpyText', () => {
     it('leaves ordinary prose untouched', () => {
         expect(escapeRenpyText('The meadow is gold this time of year.'))
             .toBe('The meadow is gold this time of year.');
+    });
+});
+
+describe('parseDialogueLine', () => {
+    const cast = new Set(['sylvie', 'me']);
+
+    it('splits a known speaker from their line', () => {
+        expect(parseDialogueLine('Sylvie: Hey... umm...', cast))
+            .toEqual({ speaker: 'Sylvie', text: 'Hey... umm...' });
+    });
+
+    it('matches the speaker regardless of case', () => {
+        expect(parseDialogueLine('SYLVIE: Hi', cast).speaker).toBe('SYLVIE');
+    });
+
+    it('treats a colon line as narration when the name is not in the cast', () => {
+        expect(parseDialogueLine('The sign read: Keep Out', cast))
+            .toEqual({ text: 'The sign read: Keep Out' });
+    });
+
+    it('treats a plain line as narration', () => {
+        expect(parseDialogueLine('The meadow is gold.', cast))
+            .toEqual({ text: 'The meadow is gold.' });
+    });
+
+    it('trims surrounding whitespace', () => {
+        expect(parseDialogueLine('   Me:   Yeah?   ', cast))
+            .toEqual({ speaker: 'Me', text: 'Yeah?' });
+    });
+});
+
+describe('buildAliasMap', () => {
+    it('uses the first letter of each name', () => {
+        const map = buildAliasMap(['Sylvie', 'Me']);
+        expect(map.get('Sylvie')).toBe('s');
+        expect(map.get('Me')).toBe('m');
+    });
+
+    it('grows the alias when two names share a first letter', () => {
+        const map = buildAliasMap(['Sylvie', 'Sam']);
+        expect(map.get('Sylvie')).toBe('s');
+        expect(map.get('Sam')).toBe('sa');
+    });
+
+    it('falls back to a numbered alias when the letters run out', () => {
+        const map = buildAliasMap(['S', 'S ', ' S']);
+        expect(new Set(map.values()).size).toBe(3);
+    });
+
+    it('ignores punctuation and spacing when deriving letters', () => {
+        expect(buildAliasMap(["D'Arcy"]).get("D'Arcy")).toBe('d');
     });
 });
