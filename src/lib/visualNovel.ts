@@ -48,7 +48,7 @@ export function collectFlags(scenes: VNScene[]): string[] {
 }
 
 export type VNIssueKind =
-    | 'broken-jump' | 'unreachable' | 'dead-end' | 'unsatisfiable-flag';
+    | 'broken-jump' | 'unreachable' | 'unsatisfiable-flag';
 
 export interface VNIssue {
     kind: VNIssueKind;
@@ -107,10 +107,10 @@ export function validateVisualNovel(scenes: VNScene[]): VNIssue[] {
             });
         }
 
-        // Note: a choiceless final scene is the normal, valid way a visual
-        // novel ends (it compiles to `return`), so it is never flagged here.
-        // 'dead-end' is kept in VNIssueKind for future use but nothing in
-        // this function currently emits it — see report for details.
+        // There is deliberately no dead-end check. Fall-through means every
+        // scene but the last leads somewhere, and a choiceless last scene is
+        // how a visual novel is supposed to end — it compiles to `return`.
+        // A dead end in this model cannot occur without also being correct.
     });
 
     return issues;
