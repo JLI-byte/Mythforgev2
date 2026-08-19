@@ -20,7 +20,10 @@ import { BookViewEditor } from '../../BookViewEditor';
 import { BookCoverEditor } from '../../BookCoverEditor';
 import { WidgetLibraryDropdown } from '../../WidgetLibraryDropdown';
 import { WritingZoneProps } from './zoneTypes';
+import { exportAsRenpy } from '@/lib/export';
+import { validateVisualNovel } from '@/lib/visualNovel';
 import type { VNChoice } from '@/lib/visualNovel';
+import { worldKeyForProject, worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../../WritingDesk.module.css';
 
 interface ChoicesStripProps {
@@ -96,6 +99,40 @@ function ChoicesStrip({ scene, scenes, onChange }: ChoicesStripProps) {
     );
 }
 
+interface ExportBarProps {
+    scenes: { id: string; title: string; content: string; order: number; choices?: VNChoice[] }[];
+    castNames: string[];
+    projectName: string;
+}
+
+/**
+ * Export, plus the warnings worth seeing first. A branching story can go wrong
+ * in ways a linear one cannot — a choice pointing at a deleted scene, a scene
+ * nothing leads to — and those are invisible in the text itself.
+ *
+ * Warnings never block: a work in progress is always exportable.
+ */
+function ExportBar({ scenes, castNames, projectName }: ExportBarProps) {
+    const issues = validateVisualNovel(scenes);
+
+    return (
+        <div className={styles.exportBar}>
+            <button
+                type="button"
+                onClick={() => exportAsRenpy(scenes, castNames, projectName)}
+            >
+                Export to Ren&apos;Py
+            </button>
+
+            {issues.length > 0 && (
+                <ul className={styles.exportIssues}>
+                    {issues.map((issue, i) => <li key={i}>{issue.message}</li>)}
+                </ul>
+            )}
+        </div>
+    );
+}
+
 export function VisualNovelWritingZone({ content, onChange, onChangeImmediate, widget, onDragStart, onDeleteWidget, onDockChange, onManualSave, onAddAtCenter }: WritingZoneProps) {
   const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
   const updateScene = useWorkspaceStore(s => s.updateScene);
@@ -150,6 +187,11 @@ export function VisualNovelWritingZone({ content, onChange, onChangeImmediate, w
   );
 
   const activeProject = useWorkspaceStore(s => s.projects.find(p => p.id === activeProjectId));
+  const castNames = useWorkspaceStore(useShallow(s =>
+    s.entities
+      .filter(e => worldKeyForEntity(e) === worldKeyForProject(activeProject) && e.type === 'character')
+      .map(e => e.name),
+  ));
   const projectDocs = useMemo(() =>
     [...allDocs].sort((a, b) =>
       new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
@@ -507,6 +549,11 @@ export function VisualNovelWritingZone({ content, onChange, onChangeImmediate, w
                         onChange={choices => updateScene(activeScene.id, { choices })}
                     />
                 )}
+                <ExportBar
+                    scenes={projectScenes}
+                    castNames={castNames}
+                    projectName={activeProject?.name ?? 'visual-novel'}
+                />
               </div>
             </div>
           </div>
