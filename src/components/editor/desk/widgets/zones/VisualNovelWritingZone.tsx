@@ -46,7 +46,7 @@ function ChoicesStrip({ scene, scenes, onChange }: ChoicesStripProps) {
 
     const add = () =>
         onChange([...choices, {
-            id: `choice-${Date.now()}`,
+            id: crypto.randomUUID(),
             text: '',
             targetSceneId: scenes.find(s => s.id !== scene.id)?.id ?? scene.id,
         }]);

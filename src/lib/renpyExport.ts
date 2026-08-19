@@ -25,21 +25,49 @@ const RENPY_KEYWORDS = new Set([
  * Scene id → Ren'Py label, derived rather than stored so renaming a scene
  * renames its label. Order matters: dedupe suffixes follow the input order.
  */
+/**
+ * A raw string as a Python-style identifier: letters, digits and underscores,
+ * never leading with a digit, never a word Ren'Py owns.
+ *
+ * Shared by labels and flag names because both are emitted bare into the
+ * script. Only the fallback and the keyword-collision suffix differ.
+ *
+ * Non-Latin titles reduce to the fallback, since the regex keeps only ASCII.
+ * Transliteration is out of scope; the dedupe suffix keeps the output valid,
+ * just less readable if the writer hand-edits the exported file.
+ */
+function toIdentifier(raw: string, fallback: string, keywordSuffix: string): string {
+    let base = raw
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '');
+
+    if (!base) base = fallback;
+    if (/^[0-9]/.test(base)) base = `s_${base}`;
+    if (RENPY_KEYWORDS.has(base)) base = `${base}${keywordSuffix}`;
+
+    return base;
+}
+
+/**
+ * A flag name as Ren'Py will see it.
+ *
+ * Flags are typed into a free-text field, so "met bob" reaches here as-is —
+ * and `default met bob = False` is a syntax error. The writer has no way to
+ * discover that without a Ren'Py install, so it is normalised here instead.
+ */
+export function toFlagName(raw: string): string {
+    return toIdentifier(raw, 'flag', '_flag');
+}
+
 export function buildLabelMap(scenes: { id: string; title: string }[]): Map<string, string> {
     const taken = new Set<string>();
     const map = new Map<string, string>();
 
     for (const scene of scenes) {
-        let base = scene.title
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '_')
-            .replace(/^_+|_+$/g, '');
-
         // 'untitled' rather than 'scene': 'scene' is itself a Ren'Py keyword,
-        // so using it as the fallback would trip the guard below.
-        if (!base) base = 'untitled';
-        if (/^[0-9]/.test(base)) base = `s_${base}`;
-        if (RENPY_KEYWORDS.has(base)) base = `${base}_scene`;
+        // so using it as the fallback would trip the keyword guard.
+        const base = toIdentifier(scene.title, 'untitled', '_scene');
 
         let label = base;
         let n = 2;
@@ -165,6 +193,12 @@ export function buildRenpyScript(
     const speakers = collectSpeakers(ordered, castNames);
     const aliases = buildAliasMap(speakers);
     const cast = new Set(speakers.map(n => n.toLowerCase()));
+    // Keyed by lowercase because parseDialogueLine returns the casing used on
+    // that line: a writer typing "Sylvie:" once and "SYLVIE:" later must reach
+    // the same alias, or the second line emits `undefined` as its speaker.
+    const aliasByName = new Map(
+        [...aliases].map(([name, alias]) => [name.toLowerCase(), alias]),
+    );
     const flags = collectFlags(ordered);
 
     const out: string[] = [
@@ -178,7 +212,7 @@ export function buildRenpyScript(
     }
     if (speakers.length) out.push('');
 
-    for (const flag of flags) out.push(`default ${flag} = False`);
+    for (const flag of flags) out.push(`default ${toFlagName(flag)} = False`);
     if (flags.length) out.push('');
 
     if (!ordered.length) return `${out.join('\n').trimEnd()}\n`;
@@ -196,7 +230,7 @@ export function buildRenpyScript(
             const parsed = parseDialogueLine(raw, cast);
             const text = `"${escapeRenpyText(parsed.text)}"`;
             out.push(parsed.speaker
-                ? `${INDENT}${aliases.get(parsed.speaker)} ${text}`
+                ? `${INDENT}${aliasByName.get(parsed.speaker.toLowerCase())} ${text}`
                 : `${INDENT}${text}`);
         }
 
@@ -205,10 +239,10 @@ export function buildRenpyScript(
         if (choices.length) {
             out.push('', `${INDENT}menu:`);
             for (const choice of choices) {
-                const guard = choice.requiresFlag ? ` if ${choice.requiresFlag}` : '';
+                const guard = choice.requiresFlag ? ` if ${toFlagName(choice.requiresFlag)}` : '';
                 out.push(`${INDENT.repeat(2)}"${escapeRenpyText(choice.text)}"${guard}:`);
                 if (choice.setsFlag) {
-                    out.push(`${INDENT.repeat(3)}$ ${choice.setsFlag} = True`);
+                    out.push(`${INDENT.repeat(3)}$ ${toFlagName(choice.setsFlag)} = True`);
                 }
                 const target = labels.get(choice.targetSceneId);
                 if (target) {
