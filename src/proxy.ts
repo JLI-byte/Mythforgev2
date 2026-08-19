@@ -2,14 +2,14 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 /**
- * LoreCanvas Global Auth Middleware
- * 
+ * LoreCanvas Global Auth Proxy
+ *
  * Manages session refreshing and access control.
  * Unauthenticated users are redirected to /login for all restricted routes.
- * 
+ *
  * Creator: Antigravity
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -39,8 +39,8 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Resolve the session. The auth check runs in the edge-middleware sandbox,
-  // whose fetch to Supabase can fail transiently (notably under Turbopack dev).
+  // Resolve the session. The auth check runs in the proxy sandbox, whose fetch
+  // to Supabase can fail transiently (notably under Turbopack dev).
   // If it does, fail open: let the request through and let client-side gating +
   // Supabase RLS protect data, rather than throwing or wrongly bouncing users.
   let user: Awaited<ReturnType<typeof supabase.auth.getUser>>['data']['user'] = null;
@@ -48,7 +48,7 @@ export async function middleware(request: NextRequest) {
     const { data } = await supabase.auth.getUser();
     user = data.user;
   } catch (error) {
-    console.warn('[middleware] auth check failed, passing request through:', error);
+    console.warn('[proxy] auth check failed, passing request through:', error);
     return response;
   }
 
