@@ -89,7 +89,7 @@ export interface WorldBibleConfig {
 export interface Project {
     id: string;
     name: string;
-    writingMode: 'novel' | 'screenplay' | 'markdown' | 'poetry' | 'real-world';
+    writingMode: 'novel' | 'screenplay' | 'markdown' | 'poetry' | 'real-world' | 'visual-novel';
     coverColor: string;
     coverImageUrl?: string;
     worldId?: string;

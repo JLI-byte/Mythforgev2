@@ -8,10 +8,10 @@
  */
 
 /** Mirrors Project['writingMode'] in the workspace store. */
-export type WritingMode = 'novel' | 'screenplay' | 'markdown' | 'poetry' | 'real-world';
+export type WritingMode = 'novel' | 'screenplay' | 'markdown' | 'poetry' | 'real-world' | 'visual-novel';
 
 export interface WorkType {
-    id: 'story' | 'screenplay' | 'script-report' | 'lyrics';
+    id: 'story' | 'screenplay' | 'script-report' | 'lyrics' | 'visual-novel';
     label: string;
     icon: string;
     desc: string;
@@ -60,6 +60,17 @@ export const WORK_TYPES: WorkType[] = [
         // No draft type: none of the outlining methods are written for songs,
         // so the Draft Table stays unfiltered rather than suggesting a bad fit.
         namePlaceholder: 'e.g. Ballad of the Drowned Bell',
+    },
+    {
+        id: 'visual-novel',
+        label: 'Visual Novel',
+        icon: '🎮',
+        desc: 'Choice-driven branching stories',
+        writingMode: 'visual-novel',
+        // No draft type: the outlining methods assume a linear story, and a
+        // branching one is a graph. Leaving it unset keeps the Draft Table
+        // unfiltered rather than suggesting a shape that does not fit.
+        namePlaceholder: 'e.g. The Lighthouse Summer',
     },
 ];
 

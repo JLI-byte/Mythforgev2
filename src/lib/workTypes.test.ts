@@ -3,14 +3,16 @@ import { WORK_TYPES, getWorkType, getWorkTypeByWritingMode } from './workTypes';
 import { getDraftType } from './writingMethods/draftTypes';
 
 describe('WORK_TYPES', () => {
-    it('offers exactly the four choices the new-work flow asks about', () => {
+    it('offers exactly the five choices the new-work flow asks about', () => {
         expect(WORK_TYPES.map(t => t.id)).toEqual([
-            'story', 'screenplay', 'script-report', 'lyrics',
+            'story', 'screenplay', 'script-report', 'lyrics', 'visual-novel',
         ]);
     });
 
     it('gives every type a writing mode the store accepts', () => {
-        const allowed = ['novel', 'screenplay', 'markdown', 'poetry', 'real-world'];
+        const allowed = [
+            'novel', 'screenplay', 'markdown', 'poetry', 'real-world', 'visual-novel',
+        ];
         for (const t of WORK_TYPES) {
             expect(allowed).toContain(t.writingMode);
         }
@@ -60,6 +62,7 @@ describe('getWorkTypeByWritingMode', () => {
         expect(getWorkTypeByWritingMode('screenplay')?.id).toBe('screenplay');
         expect(getWorkTypeByWritingMode('markdown')?.id).toBe('script-report');
         expect(getWorkTypeByWritingMode('poetry')?.id).toBe('lyrics');
+        expect(getWorkTypeByWritingMode('visual-novel')?.id).toBe('visual-novel');
     });
 
     it('maps each mode to exactly one type, so the shelf art is unambiguous', () => {

@@ -21,6 +21,7 @@ import { StoryWritingZone } from './zones/StoryWritingZone';
 import { ScreenplayWritingZone } from './zones/ScreenplayWritingZone';
 import { ReportWritingZone } from './zones/ReportWritingZone';
 import { LyricsWritingZone } from './zones/LyricsWritingZone';
+import { VisualNovelWritingZone } from './zones/VisualNovelWritingZone';
 
 /** Work type id → the zone written for it. */
 const ZONES: Record<string, React.ComponentType<WritingZoneProps>> = {
@@ -28,6 +29,7 @@ const ZONES: Record<string, React.ComponentType<WritingZoneProps>> = {
     'screenplay': ScreenplayWritingZone,
     'script-report': ReportWritingZone,
     'lyrics': LyricsWritingZone,
+    'visual-novel': VisualNovelWritingZone,
 };
 
 /**

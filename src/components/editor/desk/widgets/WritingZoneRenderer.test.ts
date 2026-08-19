@@ -4,6 +4,7 @@ import { StoryWritingZone } from './zones/StoryWritingZone';
 import { ScreenplayWritingZone } from './zones/ScreenplayWritingZone';
 import { ReportWritingZone } from './zones/ReportWritingZone';
 import { LyricsWritingZone } from './zones/LyricsWritingZone';
+import { VisualNovelWritingZone } from './zones/VisualNovelWritingZone';
 import { WORK_TYPES } from '@/lib/workTypes';
 
 describe('pickZone', () => {
@@ -12,6 +13,7 @@ describe('pickZone', () => {
         expect(pickZone('screenplay')).toBe(ScreenplayWritingZone);
         expect(pickZone('markdown')).toBe(ReportWritingZone);
         expect(pickZone('poetry')).toBe(LyricsWritingZone);
+        expect(pickZone('visual-novel')).toBe(VisualNovelWritingZone);
     });
 
     it('never sends two modes to the same zone', () => {
