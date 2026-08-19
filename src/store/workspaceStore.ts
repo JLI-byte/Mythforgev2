@@ -7,6 +7,7 @@ import { migrateWorkspaceSchema } from './migrateWorkspaceSchema';
 import { DEFAULT_WORLD_BIBLE_LAYOUT } from '@/lib/worldBibleNav';
 import { wouldCreateCycle, fileByType } from '@/lib/folderTree';
 import type { Interview } from '@/lib/interviews/types';
+import type { ProjectBrief } from '@/lib/workSubTypes';
 import { sanitizeChatHistories, type ChatMessage as ResearchChatMessage } from '@/lib/researchChatTypes';
 
 // Cover colors auto-assigned to new projects in rotation
@@ -99,6 +100,10 @@ export interface Project {
     description?: string;
     authorName?: string;
     worldBibleLayout?: WorldBibleLayout;
+    /** Which kind of script or report this is (see WORK_SUB_TYPES). */
+    workSubTypeId?: string;
+    /** Audience, length and goal, answered when the project was created. */
+    brief?: ProjectBrief;
 }
 
 export interface Document {
