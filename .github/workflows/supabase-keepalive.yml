@@ -1,0 +1,55 @@
+name: Supabase keep-alive
+
+# Free-tier Supabase pauses a project after 7 days of inactivity.
+# This runs a real (RLS-filtered, zero-row) query against Postgres every
+# 2 days so the inactivity clock never gets close to the limit.
+#
+# NOTE: GitHub only fires `schedule` triggers from the default branch,
+# so this file has to live on `main` to actually run.
+
+on:
+  schedule:
+    # 06:00 UTC every other day. Max gap between runs is 2 days,
+    # including across month boundaries.
+    - cron: '0 6 */2 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Query Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_ANON_KEY:-}" ]; then
+            echo "::error::SUPABASE_URL or SUPABASE_ANON_KEY repo secret is not set."
+            exit 1
+          fi
+
+          # Retry a few times so one transient network blip doesn't
+          # burn the whole run and leave the project drifting toward a pause.
+          for attempt in 1 2 3; do
+            code=$(curl -sS -o /tmp/response.txt -w '%{http_code}' \
+              --max-time 30 \
+              "${SUPABASE_URL}/rest/v1/workspaces?select=id&limit=1" \
+              -H "apikey: ${SUPABASE_ANON_KEY}" \
+              -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" || echo "000")
+
+            if [ "$code" = "200" ]; then
+              echo "Keep-alive OK (HTTP 200) on attempt ${attempt}."
+              exit 0
+            fi
+
+            echo "Attempt ${attempt} failed with HTTP ${code}."
+            [ "$attempt" -lt 3 ] && sleep 15
+          done
+
+          echo "::error::Keep-alive failed after 3 attempts (last HTTP ${code}). \
+          The project may be paused, or the anon key may have been rotated."
+          cat /tmp/response.txt || true
+          exit 1
