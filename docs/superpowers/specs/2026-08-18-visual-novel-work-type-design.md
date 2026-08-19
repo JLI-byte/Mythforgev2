@@ -318,9 +318,17 @@ in progress can always be exported.
 | Check | Meaning |
 |---|---|
 | Broken jump | A choice targets a scene that no longer exists |
-| Unreachable | No choice anywhere targets this scene, and it is not the first |
-| Dead end | A scene has no choices and no following scene by order |
+| Unreachable | Nothing leads here — no choice from another scene targets it, no choiceless scene falls through into it, and it is not the first |
 | Unsatisfiable flag | A choice requires a flag that no choice ever sets |
+
+Two subtleties, both found while implementing:
+
+- **A self-loop is not reachability.** A scene whose only inbound choice is its
+  own is still unreachable. Counting it would silently hide the orphan.
+- **There is no dead-end check.** An earlier draft had one — "no choices and no
+  following scene" — but fall-through means every scene except the last leads
+  somewhere, and a choiceless last scene is precisely how a visual novel ends.
+  The check would have fired on every valid multi-scene story.
 
 This is the part a plain text editor cannot do, and it is a meaningful reason
 to write a branching story here rather than directly in Ren'Py.
@@ -379,7 +387,7 @@ Vitest, matching the style of `workTypes.test.ts`.
 - A golden test asserting complete, paste-able output for a small two-branch
   story that converges
 
-**`visualNovel.test.ts`** covers the four validation rules, including a
+**`visualNovel.test.ts`** covers the three validation rules, including a
 convergent graph (two choices, one destination) to confirm convergence is not
 misreported as an error.
 
