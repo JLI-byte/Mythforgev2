@@ -66,3 +66,14 @@ export const WORK_TYPES: WorkType[] = [
 export function getWorkType(id: string | null | undefined): WorkType | undefined {
     return WORK_TYPES.find(t => t.id === id);
 }
+
+/**
+ * Recovers the work type from a project's writing mode — projects store the
+ * mode, not the type they were created from. Undefined for 'real-world', which
+ * no work type claims.
+ */
+export function getWorkTypeByWritingMode(
+    mode: string | null | undefined,
+): WorkType | undefined {
+    return WORK_TYPES.find(t => t.writingMode === mode);
+}
