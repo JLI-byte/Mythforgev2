@@ -200,9 +200,9 @@ export function buildRenpyScript(
                 : `${INDENT}${text}`);
         }
 
-        const choices = scene.choices;
+        const choices = scene.choices ?? [];
 
-        if (choices && choices.length) {
+        if (choices.length) {
             out.push('', `${INDENT}menu:`);
             for (const choice of choices) {
                 const guard = choice.requiresFlag ? ` if ${choice.requiresFlag}` : '';
@@ -219,11 +219,11 @@ export function buildRenpyScript(
                 }
                 out.push('');
             }
-        } else if (choices) {
-            // Explicitly cleared choices: the author authored a dead end.
-            out.push(`${INDENT}return`, '');
         } else {
-            // No choices defined yet: fall through to the next scene in order.
+            // No choices: fall through to the next scene by order, or end the
+            // game if this is the last one. Order is the story's spine, so a
+            // scene that ends a branch belongs last — validateVisualNovel
+            // warns about the dead ends this leaves.
             const next = ordered[index + 1];
             out.push(next ? `${INDENT}jump ${labels.get(next.id)}` : `${INDENT}return`);
             out.push('');

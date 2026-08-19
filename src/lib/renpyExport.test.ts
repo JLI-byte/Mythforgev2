@@ -134,10 +134,13 @@ describe('buildRenpyScript', () => {
                 { id: 'c2', text: 'Ask what that means.', targetSceneId: 'explain' },
             ],
         },
-        { id: 'partners', title: 'Partners', order: 1, content: 'Sylvie: Partners, then.', choices: [] },
-        { id: 'explain', title: 'Explain', order: 2, content: 'Me: It is a kind of game.', choices: [
+        // 'partners' is an ending, so it sits last. A scene with no choices
+        // falls through to the next by order — put an ending mid-list and it
+        // would run straight into an unrelated branch.
+        { id: 'explain', title: 'Explain', order: 1, content: 'Me: It is a kind of game.', choices: [
             { id: 'c3', text: 'Say yes now.', targetSceneId: 'partners', requiresFlag: 'agreed' },
         ] },
+        { id: 'partners', title: 'Partners', order: 2, content: 'Sylvie: Partners, then.', choices: [] },
     ];
 
     it('emits a complete, paste-able script', () => {
@@ -167,16 +170,16 @@ label the_meadow:
         "Ask what that means.":
             jump explain
 
-label partners:
-    s "Partners, then."
-    return
-
 label explain:
     m "It is a kind of game."
 
     menu:
         "Say yes now." if agreed:
             jump partners
+
+label partners:
+    s "Partners, then."
+    return
 `);
     });
 
