@@ -4,7 +4,7 @@
  * WritingZoneRenderer — hands the desk's centre widget to the writing zone
  * built for the project's medium.
  *
- * The zone used to be one story-shaped component. It's now four siblings under
+ * The zone used to be one story-shaped component. It's now five siblings under
  * ./zones, one per work type, so a screenplay's binder can stop pretending to
  * be a book without breaking novels. They start as identical clones; each is
  * customised on its own.
