@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { WORK_TYPES, getWorkType } from './workTypes';
+import { WORK_TYPES, getWorkType, getWorkTypeByWritingMode } from './workTypes';
 import { getDraftType } from './writingMethods/draftTypes';
 
 describe('WORK_TYPES', () => {
@@ -51,5 +51,25 @@ describe('getWorkType', () => {
         expect(getWorkType(null)).toBeUndefined();
         expect(getWorkType(undefined)).toBeUndefined();
         expect(getWorkType('')).toBeUndefined();
+    });
+});
+
+describe('getWorkTypeByWritingMode', () => {
+    it('recovers the type a project was created from', () => {
+        expect(getWorkTypeByWritingMode('novel')?.id).toBe('story');
+        expect(getWorkTypeByWritingMode('screenplay')?.id).toBe('screenplay');
+        expect(getWorkTypeByWritingMode('markdown')?.id).toBe('script-report');
+        expect(getWorkTypeByWritingMode('poetry')?.id).toBe('lyrics');
+    });
+
+    it('maps each mode to exactly one type, so the shelf art is unambiguous', () => {
+        const modes = WORK_TYPES.map(t => t.writingMode);
+        expect(new Set(modes).size).toBe(WORK_TYPES.length);
+    });
+
+    it('returns undefined for real-world and for missing modes', () => {
+        expect(getWorkTypeByWritingMode('real-world')).toBeUndefined();
+        expect(getWorkTypeByWritingMode(null)).toBeUndefined();
+        expect(getWorkTypeByWritingMode(undefined)).toBeUndefined();
     });
 });
