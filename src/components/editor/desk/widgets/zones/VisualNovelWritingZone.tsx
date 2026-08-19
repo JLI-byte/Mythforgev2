@@ -20,7 +20,81 @@ import { BookViewEditor } from '../../BookViewEditor';
 import { BookCoverEditor } from '../../BookCoverEditor';
 import { WidgetLibraryDropdown } from '../../WidgetLibraryDropdown';
 import { WritingZoneProps } from './zoneTypes';
+import type { VNChoice } from '@/lib/visualNovel';
 import styles from '../../../WritingDesk.module.css';
+
+interface ChoicesStripProps {
+    scene: { id: string; choices?: VNChoice[] };
+    /** Every scene in the project, for the target dropdown. */
+    scenes: { id: string; title: string }[];
+    onChange: (choices: VNChoice[]) => void;
+}
+
+/**
+ * The edges leading out of a scene. A visual novel is a graph, and this is
+ * where the writer draws it: each row is one option in the Ren'Py menu, the
+ * scene it jumps to, and the flags it sets or needs.
+ */
+function ChoicesStrip({ scene, scenes, onChange }: ChoicesStripProps) {
+    const choices = scene.choices ?? [];
+
+    const update = (id: string, patch: Partial<VNChoice>) =>
+        onChange(choices.map(c => (c.id === id ? { ...c, ...patch } : c)));
+
+    const add = () =>
+        onChange([...choices, {
+            id: `choice-${Date.now()}`,
+            text: '',
+            targetSceneId: scenes.find(s => s.id !== scene.id)?.id ?? scene.id,
+        }]);
+
+    const remove = (id: string) => onChange(choices.filter(c => c.id !== id));
+
+    return (
+        <div className={styles.choicesStrip}>
+            <h4>Choices</h4>
+
+            {choices.length === 0 && (
+                <p className={styles.choicesEmpty}>
+                    No choices — this scene flows into the next one.
+                </p>
+            )}
+
+            {choices.map(choice => (
+                <div key={choice.id} className={styles.choiceRow}>
+                    <input
+                        value={choice.text}
+                        placeholder="What the player sees"
+                        onChange={e => update(choice.id, { text: e.target.value })}
+                    />
+                    <select
+                        value={choice.targetSceneId}
+                        onChange={e => update(choice.id, { targetSceneId: e.target.value })}
+                    >
+                        {scenes.map(s => (
+                            <option key={s.id} value={s.id}>{s.title}</option>
+                        ))}
+                    </select>
+                    <input
+                        value={choice.setsFlag ?? ''}
+                        placeholder="sets flag"
+                        onChange={e => update(choice.id, { setsFlag: e.target.value || undefined })}
+                    />
+                    <input
+                        value={choice.requiresFlag ?? ''}
+                        placeholder="needs flag"
+                        onChange={e => update(choice.id, { requiresFlag: e.target.value || undefined })}
+                    />
+                    <button type="button" onClick={() => remove(choice.id)} aria-label="Remove choice">
+                        ×
+                    </button>
+                </div>
+            ))}
+
+            <button type="button" onClick={add}>Add choice</button>
+        </div>
+    );
+}
 
 export function VisualNovelWritingZone({ content, onChange, onChangeImmediate, widget, onDragStart, onDeleteWidget, onDockChange, onManualSave, onAddAtCenter }: WritingZoneProps) {
   const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
@@ -426,6 +500,13 @@ export function VisualNovelWritingZone({ content, onChange, onChangeImmediate, w
             <div className={styles.binderChapterActive}>
               <div className={styles.binderEditorArea}>
                 {editorSlot}
+                {activeScene && (
+                    <ChoicesStrip
+                        scene={activeScene}
+                        scenes={projectScenes}
+                        onChange={choices => updateScene(activeScene.id, { choices })}
+                    />
+                )}
               </div>
             </div>
           </div>
