@@ -68,6 +68,13 @@ memory. The parts that constrain this design:
 
 ## Existing Architecture Being Reused
 
+- **`src/lib/export.ts`** — already serialises projects to Markdown and DOCX,
+  already owns the Blob download bridge and filename slugify, and already
+  separates pure content-building (`buildMarkdownContent`) from
+  download-triggering (`exportAsMarkdown`). The Ren'Py export follows that
+  split rather than introducing a second download path.
+- **`src/lib/worldKey.ts`** — `worldKeyForProject` / `worldKeyForEntity` give
+  the shelf a project and its cast share.
 - **`src/lib/workTypes.ts`** — `WORK_TYPES` already pins each type to a
   `writingMode`, and `getWorkTypeByWritingMode` recovers the type from a
   project. Adding an entry plus a new mode is the whole change.
@@ -188,9 +195,13 @@ label the_meadow:
 
 ### Label naming
 
-Scene titles are slugified to label names, **derived at export time** rather
-than stored, so there is a single source of truth and renaming a scene renames
-its label.
+Scene titles become label names, **derived at export time** rather than stored,
+so there is a single source of truth and renaming a scene renames its label.
+
+**The existing `slugify` in `src/lib/export.ts` must not be used here.** It
+emits hyphens (`the-meadow`), which are invalid in a Ren'Py label — labels are
+Python-style identifiers. `renpyExport.ts` needs its own `toLabel()`. The
+existing `slugify` is still the right tool for the download **filename**.
 
 - Lowercase; non-alphanumeric runs collapse to a single `_`.
 - Leading digits are prefixed, since a label cannot start with a number.
@@ -249,15 +260,44 @@ fails to compile.
 
 ### Character aliases
 
-Speakers are collected from the project's World Bible entities plus any names
-found in scene text. Each gets a short alias derived from its initials, deduped
-with a numeric suffix, emitted as `define <alias> = Character("<name>")`.
+Characters are **scoped to the shelf, not the project** — entities carry a
+`worldId`, and a project shares its shelf's cast. The selector is the one
+already used by `CharacterStateRenderer.tsx` and `RelationshipMapRenderer.tsx`:
+
+```ts
+entities.filter(
+    e => worldKeyForEntity(e) === worldKeyForProject(project)
+        && e.type === 'character'
+)
+```
+
+`worldKeyForEntity` and `worldKeyForProject` come from `src/lib/worldKey.ts`;
+`Entity.name` is the display name. Names typed in scene text that match no
+entity are added to the cast, so a speaker is never silently demoted to
+narration.
+
+Each speaker gets a short alias derived from its initials, deduped with a
+numeric suffix, emitted as `define <alias> = Character("<name>")`.
 
 ### Delivery
 
-A button in the writing zone serialises the project and downloads it via a
-Blob, named from the project (`lighthouse_summer.rpy`). No filesystem access,
-no Electron work — this works in the browser build as it exists today.
+**Reuse the existing export infrastructure** rather than building a second
+download path. `src/lib/export.ts` already owns the Blob bridge
+(`downloadFile`) and the filename `slugify`, and already separates pure
+content-building from download-triggering — `buildMarkdownContent` versus
+`exportAsMarkdown`. This feature follows the same split:
+
+- `buildRenpyScript(scenes, characters, projectName): string` — pure, lives in
+  `renpyExport.ts`, and is what the tests exercise.
+- `exportAsRenpy(...)` — lives in `export.ts` beside `exportAsMarkdown` and
+  `exportWorldBible`, calls `buildRenpyScript`, then `downloadFile(script,
+  `${slugify(name)}.rpy`, 'text/plain')`.
+
+`downloadFile` is currently module-private; `exportAsRenpy` living in the same
+file means it stays private and no new export surface is created.
+
+No filesystem access and no Electron work — this works in the browser build as
+it exists today.
 
 ## Validation
 
@@ -295,7 +335,7 @@ Export and validation warnings live in the same strip.
 
 - `src/lib/visualNovel.ts` — types, flag helpers, validation
 - `src/lib/visualNovel.test.ts`
-- `src/lib/renpyExport.ts` — the serializer
+- `src/lib/renpyExport.ts` — `buildRenpyScript`, pure
 - `src/lib/renpyExport.test.ts`
 - `src/components/editor/desk/widgets/zones/VisualNovelWritingZone.tsx`
 
@@ -304,6 +344,7 @@ Export and validation warnings live in the same strip.
 - `src/lib/workTypes.ts` — new entry, `WritingMode` gains `'visual-novel'`
 - `src/store/workspaceStore.ts` — `Project['writingMode']` union,
   `Scene.choices`
+- `src/lib/export.ts` — add `exportAsRenpy` beside the existing exporters
 - `src/components/editor/desk/widgets/WritingZoneRenderer.tsx` — register zone
 - `src/components/editor/desk/widgets/WritingZoneRenderer.test.ts` — assert
   `visual-novel` dispatches to the new zone
@@ -318,7 +359,9 @@ Vitest, matching the style of `workTypes.test.ts`.
 - All three escaping rules, including a combined case
 - Menu generation with and without flags
 - `default` emission for every flag used
-- Label slugify, dedupe, leading digits, and keyword collision
+- `toLabel` — underscores not hyphens, dedupe, leading digits, keyword
+  collision. A regression test asserts no label contains `-`, since reaching
+  for the existing `slugify` is the obvious mistake here.
 - `label start:` indirection
 - Fall-through: a choiceless scene emits `jump <next>`, and a choiceless final
   scene emits `return`
