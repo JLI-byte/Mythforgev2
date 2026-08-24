@@ -270,6 +270,40 @@ label partners:
         expect(script).toContain('"Kiss her" if mara_trust >= 3:');
     });
 
+    it('gives colliding flag names distinct identifiers', () => {
+        // 'met bob' and 'met-bob' both slugify to met_bob. Sharing one
+        // identifier compiles fine and silently shares state, which is worse
+        // than a syntax error because nothing surfaces it.
+        const script = buildRenpyScript([{
+            id: 'a', title: 'A', order: 0, content: 'Hi.',
+            choices: [
+                { id: 'c1', text: 'One', targetSceneId: 'a',
+                  effects: [{ flagId: 'f1', op: 'set' }] },
+                { id: 'c2', text: 'Two', targetSceneId: 'a',
+                  effects: [{ flagId: 'f2', op: 'set' }] },
+            ],
+        }], [], 'X', [
+            { id: 'f1', name: 'met bob', kind: 'bool', initial: 0 },
+            { id: 'f2', name: 'met-bob', kind: 'bool', initial: 0 },
+        ]);
+        expect(script).toContain('default met_bob = False');
+        expect(script).toContain('default met_bob_2 = False');
+        expect(script).toContain('$ met_bob = True');
+        expect(script).toContain('$ met_bob_2 = True');
+    });
+
+    it('names flags the same way regardless of registry array order', () => {
+        const forward = buildRenpyScript([], [], 'X', [
+            { id: 'f1', name: 'met bob', kind: 'bool', initial: 0 },
+            { id: 'f2', name: 'met-bob', kind: 'bool', initial: 0 },
+        ]);
+        const reversed = buildRenpyScript([], [], 'X', [
+            { id: 'f2', name: 'met-bob', kind: 'bool', initial: 0 },
+            { id: 'f1', name: 'met bob', kind: 'bool', initial: 0 },
+        ]);
+        expect(forward).toBe(reversed);
+    });
+
     it('skips an effect whose flag was deleted rather than emitting undefined', () => {
         const script = buildRenpyScript([{
             id: 'a', title: 'A', order: 0, content: 'Hi.',
