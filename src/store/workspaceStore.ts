@@ -10,6 +10,8 @@ import type { Interview } from '@/lib/interviews/types';
 import type { ProjectBrief } from '@/lib/workSubTypes';
 import { sanitizeChatHistories, type ChatMessage as ResearchChatMessage } from '@/lib/researchChatTypes';
 import type { VNChoice } from '@/lib/visualNovel';
+import type { VNBlockChoice } from '@/lib/vnBlocks';
+import type { VNFlag } from '@/lib/vnFlags';
 
 // Cover colors auto-assigned to new projects in rotation
 export const COVER_COLORS = [
@@ -105,6 +107,8 @@ export interface Project {
     workSubTypeId?: string;
     /** Audience, length and goal, answered when the project was created. */
     brief?: ProjectBrief;
+    /** Visual novel projects only: declared story state for the branch map. */
+    vnFlags?: VNFlag[];
 }
 
 export interface Document {
@@ -115,6 +119,8 @@ export interface Document {
     createdAt: Date;
     updatedAt?: Date;
     wordCount?: number;
+    /** Visual novel projects only: the decision this beat ends on. */
+    choices?: VNBlockChoice[];
 }
 
 export interface Scene {
