@@ -6735,3 +6735,22 @@
 }
 
 .vnFlagRow select { font: inherit; font-size: 0.7rem; }
+
+.vnEdgeLayer {
+    position: absolute;
+    left: -4000px;
+    top: -4000px;
+    width: 12000px;
+    height: 12000px;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.vnEdgePath {
+    fill: none;
+    stroke: rgba(124, 92, 255, 0.55);
+    stroke-width: 2;
+}
+
+.vnEdgeArrow { fill: rgba(124, 92, 255, 0.55); }
