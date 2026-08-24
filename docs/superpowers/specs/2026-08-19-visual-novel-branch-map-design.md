@@ -215,6 +215,24 @@ Consequences worth stating:
   comment and `return`.
 - A map where **every** block is empty flattens to an empty scene list, which
   the exporter already renders as a header with no body.
+- An empty block's own **outgoing choices are dropped**, not forwarded — only
+  choices pointing *into* it are re-routed. There is nowhere to hang a menu
+  when a block has no last scene. Harmless today, because nothing can author a
+  choice on an empty block; **Phase 2 must warn about it**, since the map will
+  let a writer wire a beat before writing any scenes into it, and the branch
+  would then vanish on export with no error.
+
+**Flag identifiers are deduped like labels.** Slugifying is lossy — `met bob`
+and `met-bob` both reduce to `met_bob` — and two flags sharing an identifier is
+not a syntax error, because `default` does not rebind an existing name. The
+second flag would silently read and write the first one's state. The identifier
+map is built from a name-then-id sort so a registry always produces the same
+identifiers regardless of array order.
+
+**A condition on a deleted flag drops its guard**, leaving the choice always
+offered. This is deliberately asymmetric with effects, which are skipped:
+hiding the choice would strand whatever branch it leads to, and an unreachable
+ending is harder to notice than an over-offered choice.
 - A block with **no choices** falls through to the next block by order, which is
   the linear-continue case and already correct.
 - Blocks must occupy a **contiguous run of scene `order` values**. The adapter
