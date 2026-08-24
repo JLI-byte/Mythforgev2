@@ -6650,7 +6650,7 @@
 .vnChoiceRow {
     display: grid;
     grid-template-columns: 1fr auto;
-    grid-template-areas: "text remove" "chips chips" "target target";
+    grid-template-areas: "text remove" "chips chips" "target target" "state state";
     gap: 0.25rem 0.4rem;
     align-items: center;
     padding: 0.3rem;
@@ -6663,6 +6663,26 @@
 .vnChoiceTarget { grid-area: target; font: inherit; font-size: 0.74rem; min-width: 0; }
 .vnChoiceRemove { grid-area: remove; border: none; background: transparent; cursor: pointer; opacity: 0.5; }
 .vnChoiceRemove:hover { opacity: 1; }
+
+.vnChoiceState {
+    grid-area: state;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.vnStateRow {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.7rem;
+    opacity: 0.85;
+}
+
+.vnStateRow > span { opacity: 0.6; min-width: 2.6rem; }
+.vnStateRow select { font: inherit; font-size: 0.7rem; max-width: 7rem; }
+.vnStateNumber { width: 3.2rem; font: inherit; font-size: 0.7rem; }
+.vnStateHint { font-size: 0.68rem; opacity: 0.45; }
 
 .vnChipEffect,
 .vnChipCondition {

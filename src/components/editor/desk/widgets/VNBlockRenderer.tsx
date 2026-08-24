@@ -14,7 +14,138 @@ import { useShallow } from 'zustand/react/shallow';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import type { VNBlockChoice } from '@/lib/vnBlocks';
 import { describeEffect, describeCondition } from '@/lib/vnBlockView';
+import type { VNEffect, VNCondition, VNFlag } from '@/lib/vnFlags';
 import styles from '../../WritingDesk.module.css';
+
+interface ChoiceStateEditorProps {
+    choice: VNBlockChoice;
+    flags: VNFlag[];
+    onChange: (patch: Partial<VNBlockChoice>) => void;
+}
+
+/**
+ * The state controls for one choice: what it does, and what it needs.
+ *
+ * Every operand comes from the declared registry — there is no free-text path
+ * into the generated script, because nothing here can be compiled to find out
+ * it was wrong.
+ *
+ * One effect per choice is deliberate. A choice moving two counters at once is
+ * real but rare, and the data model already holds `effects[]`, so a second
+ * needs no migration when it is wanted.
+ */
+function ChoiceStateEditor({ choice, flags, onChange }: ChoiceStateEditorProps) {
+    const effect = choice.effects?.[0];
+    const condition = choice.condition;
+
+    const setEffect = (next: VNEffect | undefined) =>
+        onChange({ effects: next ? [next] : undefined });
+
+    const flagById = (id: string) => flags.find(f => f.id === id);
+
+    if (!flags.length) {
+        return (
+            <div className={styles.vnChoiceState}>
+                <span className={styles.vnStateHint}>
+                    Add a Story Flags card to track state.
+                </span>
+            </div>
+        );
+    }
+
+    return (
+        <div className={styles.vnChoiceState} onMouseDown={e => e.stopPropagation()}>
+            <label className={styles.vnStateRow}>
+                <span>does</span>
+                <select
+                    value={effect?.flagId ?? ''}
+                    onChange={e => {
+                        const flagId = e.target.value;
+                        if (!flagId) return setEffect(undefined);
+                        const flag = flagById(flagId);
+                        setEffect({
+                            flagId,
+                            op: flag?.kind === 'counter' ? 'add' : 'set',
+                            value: flag?.kind === 'counter' ? 1 : undefined,
+                        });
+                    }}
+                >
+                    <option value="">nothing</option>
+                    {flags.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+                </select>
+
+                {effect && flagById(effect.flagId)?.kind === 'bool' && (
+                    <select
+                        value={effect.op}
+                        onChange={e => setEffect({ ...effect, op: e.target.value as VNEffect['op'] })}
+                    >
+                        <option value="set">on</option>
+                        <option value="clear">off</option>
+                    </select>
+                )}
+
+                {effect && flagById(effect.flagId)?.kind === 'counter' && (
+                    <input
+                        type="number"
+                        className={styles.vnStateNumber}
+                        value={effect.value ?? 1}
+                        onChange={e => setEffect({ ...effect, op: 'add', value: Number(e.target.value) })}
+                    />
+                )}
+            </label>
+
+            <label className={styles.vnStateRow}>
+                <span>needs</span>
+                <select
+                    value={condition?.flagId ?? ''}
+                    onChange={e => {
+                        const flagId = e.target.value;
+                        if (!flagId) return onChange({ condition: undefined });
+                        const flag = flagById(flagId);
+                        onChange({
+                            condition: {
+                                flagId,
+                                op: flag?.kind === 'counter' ? 'atLeast' : 'is',
+                                value: flag?.kind === 'counter' ? 1 : undefined,
+                            },
+                        });
+                    }}
+                >
+                    <option value="">nothing</option>
+                    {flags.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+                </select>
+
+                {condition && flagById(condition.flagId)?.kind === 'bool' && (
+                    <select
+                        value={condition.op}
+                        onChange={e => onChange({ condition: { ...condition, op: e.target.value as VNCondition['op'] } })}
+                    >
+                        <option value="is">is set</option>
+                        <option value="not">is not set</option>
+                    </select>
+                )}
+
+                {condition && flagById(condition.flagId)?.kind === 'counter' && (
+                    <>
+                        <select
+                            value={condition.op}
+                            onChange={e => onChange({ condition: { ...condition, op: e.target.value as VNCondition['op'] } })}
+                        >
+                            <option value="atLeast">≥</option>
+                            <option value="atMost">≤</option>
+                        </select>
+                        <input
+                            type="number"
+                            className={styles.vnStateNumber}
+                            value={condition.value ?? 1}
+                            onChange={e => onChange({ condition: { ...condition, value: Number(e.target.value) } })}
+                        />
+                    </>
+                )}
+            </label>
+        </div>
+    );
+}
 
 export function VNBlockRenderer({ content, onChange }: { content: any; onChange: (c: any) => void }) {
     const blockId: string | undefined = content?.blockId;
@@ -145,6 +276,12 @@ export function VNBlockRenderer({ content, onChange }: { content: any; onChange:
                                 <option key={b.id} value={b.id}>{b.title}</option>
                             ))}
                         </select>
+
+                        <ChoiceStateEditor
+                            choice={choice}
+                            flags={flags}
+                            onChange={patch => updateChoice(choice.id, patch)}
+                        />
                     </div>
                 ))}
 
