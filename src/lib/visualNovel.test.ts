@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateVisualNovel, type VNScene } from './visualNovel';
-
-const scene = (id: string, choices: VNScene['choices'] = []): VNScene => ({
-    id, title: id, content: '', order: 0, choices,
-});
+import { validateVisualNovel } from './visualNovel';
 
 describe('validateVisualNovel', () => {
     it('reports a choice pointing at a scene that no longer exists', () => {

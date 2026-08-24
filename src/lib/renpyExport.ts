@@ -25,10 +25,6 @@ const RENPY_KEYWORDS = new Set([
 ]);
 
 /**
- * Scene id → Ren'Py label, derived rather than stored so renaming a scene
- * renames its label. Order matters: dedupe suffixes follow the input order.
- */
-/**
  * A raw string as a Python-style identifier: letters, digits and underscores,
  * never leading with a digit, never a word Ren'Py owns.
  *
@@ -63,6 +59,10 @@ export function toFlagName(raw: string): string {
     return toIdentifier(raw, 'flag', '_flag');
 }
 
+/**
+ * Scene id → Ren'Py label, derived rather than stored so renaming a scene
+ * renames its label. Order matters: dedupe suffixes follow the input order.
+ */
 export function buildLabelMap(scenes: { id: string; title: string }[]): Map<string, string> {
     const taken = new Set<string>();
     const map = new Map<string, string>();
