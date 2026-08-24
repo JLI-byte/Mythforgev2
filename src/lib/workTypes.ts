@@ -67,9 +67,7 @@ export const WORK_TYPES: WorkType[] = [
         icon: '🎮',
         desc: 'Choice-driven branching stories',
         writingMode: 'visual-novel',
-        // No draft type: the outlining methods assume a linear story, and a
-        // branching one is a graph. Leaving it unset keeps the Draft Table
-        // unfiltered rather than suggesting a shape that does not fit.
+        draftTypeId: 'visual-novel',
         namePlaceholder: 'e.g. The Lighthouse Summer',
     },
 ];

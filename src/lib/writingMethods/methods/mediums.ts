@@ -57,6 +57,22 @@ export const MEDIUM_METHODS: WritingMethod[] = [
 
     // ── Interactive fiction / games ──────────────────────────
     {
+        id: 'vn-branch-map',
+        name: 'Visual Novel Branch Map',
+        family: 'game',
+        formats: ['game'],
+        tagline: 'Beats wired by choices, with the state each one changes.',
+        bestFor: 'visual novels, AVNs, romance routes',
+        beats: [
+            { label: 'Prologue', guidance: 'Everything before the first real decision. One beat, however many scenes it takes.', placeholder: 'e.g. Arrival, the bar, she sits down' },
+            { label: 'First Decision', guidance: 'The choice that opens the routes. Each option should promise a different story, not a different sentence.', placeholder: 'e.g. Ask her name / keep quiet' },
+            { label: 'Route A', guidance: 'One side of the branch. Note what state it sets — that is what makes the convergence read differently later.', placeholder: 'e.g. Bold route, sets mara_trust +1' },
+            { label: 'Route B', guidance: 'The other side. It should reach the same convergence by a different road.', placeholder: 'e.g. Shy route' },
+            { label: 'Convergence', guidance: 'Where the routes rejoin so the story stays writable. Good convergence remembers — gate a choice here on what happened earlier.', placeholder: 'e.g. The morning after — different if she trusts you' },
+            { label: 'Ending', guidance: 'Where it lands. A beat with no choices ends the game.', placeholder: 'e.g. Goodnight' },
+        ],
+    },
+    {
         id: 'interactive-fiction',
         name: 'Interactive Fiction Map',
         family: 'game',

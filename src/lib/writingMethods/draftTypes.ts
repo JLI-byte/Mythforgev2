@@ -99,6 +99,15 @@ export const DRAFT_TYPES: DraftType[] = [
         format: 'game',
         recommended: ['five-room-dungeon', 'interactive-fiction', 'progress-clocks', 'three-clue-rule'],
     },
+    {
+        id: 'visual-novel',
+        label: 'Visual Novel',
+        icon: '🔀',
+        desc: 'Choice-driven branching stories',
+        format: 'game',
+        recommended: ['vn-branch-map', 'interactive-fiction', 'three-clue-rule'],
+        finderWhy: 'Draft the decision branches and the state they track, then write into them.',
+    },
 ];
 
 export function getDraftType(id: string): DraftType | undefined {

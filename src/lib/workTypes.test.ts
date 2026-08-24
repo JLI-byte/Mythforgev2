@@ -29,6 +29,10 @@ describe('WORK_TYPES', () => {
         expect(getWorkType('lyrics')!.draftTypeId).toBeUndefined();
     });
 
+    it('sends a visual novel to the branch map draft type', () => {
+        expect(getWorkType('visual-novel')!.draftTypeId).toBe('visual-novel');
+    });
+
     it('gives every type a label, icon and its own name placeholder', () => {
         const placeholders = new Set<string>();
         for (const t of WORK_TYPES) {
