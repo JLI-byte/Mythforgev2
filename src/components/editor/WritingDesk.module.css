@@ -6598,3 +6598,92 @@
     font-size: 0.8rem;
     opacity: 0.75;
 }
+
+.vnBlock {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: auto;
+    font-size: 0.82rem;
+}
+
+.vnBlockHeader {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.12));
+}
+
+.vnBlockTitle {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.92rem;
+    padding: 0;
+}
+
+.vnBlockScenes {
+    opacity: 0.55;
+    font-size: 0.72rem;
+    margin-top: 0.15rem;
+}
+
+.vnBlockMissing {
+    padding: 0.75rem;
+    opacity: 0.6;
+    font-size: 0.78rem;
+}
+
+.vnBlockChoices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.4rem 0.6rem 0.6rem;
+}
+
+.vnBlockEmpty {
+    margin: 0;
+    opacity: 0.5;
+    font-size: 0.74rem;
+}
+
+.vnChoiceRow {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "text remove" "chips chips" "target target";
+    gap: 0.25rem 0.4rem;
+    align-items: center;
+    padding: 0.3rem;
+    border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.1));
+    border-radius: 6px;
+}
+
+.vnChoiceText { grid-area: text; border: none; background: transparent; font: inherit; min-width: 0; }
+.vnChoiceChips { grid-area: chips; display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.vnChoiceTarget { grid-area: target; font: inherit; font-size: 0.74rem; min-width: 0; }
+.vnChoiceRemove { grid-area: remove; border: none; background: transparent; cursor: pointer; opacity: 0.5; }
+.vnChoiceRemove:hover { opacity: 1; }
+
+.vnChipEffect,
+.vnChipCondition {
+    font-size: 0.66rem;
+    padding: 0.08rem 0.35rem;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.vnChipEffect { background: rgba(124, 92, 255, 0.18); color: #b9a6ff; }
+.vnChipCondition { background: rgba(90, 160, 90, 0.18); color: #9ad19a; }
+
+.vnAddChoice {
+    align-self: flex-start;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    opacity: 0.6;
+    font: inherit;
+    font-size: 0.74rem;
+    padding: 0.15rem 0;
+}
+
+.vnAddChoice:hover { opacity: 1; }
