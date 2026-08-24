@@ -6649,8 +6649,8 @@
 
 .vnChoiceRow {
     display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-areas: "text remove" "chips chips" "target target" "state state";
+    grid-template-columns: 1fr auto auto;
+    grid-template-areas: "text remove dot" "chips chips chips" "target target target" "state state state";
     gap: 0.25rem 0.4rem;
     align-items: center;
     padding: 0.3rem;
@@ -6663,6 +6663,24 @@
 .vnChoiceTarget { grid-area: target; font: inherit; font-size: 0.74rem; min-width: 0; }
 .vnChoiceRemove { grid-area: remove; border: none; background: transparent; cursor: pointer; opacity: 0.5; }
 .vnChoiceRemove:hover { opacity: 1; }
+
+.vnChoiceDot {
+    grid-area: dot;
+    width: 12px;
+    height: 12px;
+    padding: 0;
+    border: 2px solid rgba(124, 92, 255, 0.8);
+    border-radius: 50%;
+    background: transparent;
+    cursor: crosshair;
+}
+
+.vnChoiceDot:hover { background: rgba(124, 92, 255, 0.8); }
+
+.vnBlockDropTarget {
+    outline: 2px solid rgba(124, 92, 255, 0.9);
+    outline-offset: 2px;
+}
 
 .vnChoiceState {
     grid-area: state;

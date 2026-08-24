@@ -210,6 +210,43 @@ export function VNBlockRenderer({ content, onChange }: { content: any; onChange:
 
     const removeChoice = (id: string) => setChoices(choices.filter(c => c.id !== id));
 
+    /**
+     * Wire a choice by dragging onto another block.
+     *
+     * The drop target is found with elementFromPoint rather than by comparing
+     * coordinates: the canvas is panned and zoomed, and asking the browser
+     * what sits under the cursor is exact where re-deriving the transform is
+     * a reliable source of off-by-a-few-pixels bugs.
+     */
+    const startConnect = (choiceId: string) => {
+        const paint = (x: number, y: number) => {
+            const card = (document.elementFromPoint(x, y) as HTMLElement | null)
+                ?.closest('[data-vn-block-id]');
+            document.querySelectorAll('[data-vn-block-id]').forEach(node =>
+                node.classList.toggle(styles.vnBlockDropTarget, node === card));
+            return card as HTMLElement | null;
+        };
+
+        const onMove = (e: MouseEvent) => { paint(e.clientX, e.clientY); };
+
+        const onUp = (e: MouseEvent) => {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+
+            const card = paint(e.clientX, e.clientY);
+            document.querySelectorAll('[data-vn-block-id]').forEach(node =>
+                node.classList.remove(styles.vnBlockDropTarget));
+
+            const targetBlockId = card?.dataset.vnBlockId;
+            if (targetBlockId && targetBlockId !== block.id) {
+                updateChoice(choiceId, { targetBlockId });
+            }
+        };
+
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+    };
+
     return (
         <div className={styles.vnBlock} data-vn-block-id={block.id}>
             <div className={styles.vnBlockHeader}>
@@ -252,6 +289,18 @@ export function VNBlockRenderer({ content, onChange }: { content: any; onChange:
                         >
                             ×
                         </button>
+
+                        <button
+                            type="button"
+                            className={styles.vnChoiceDot}
+                            title="Drag to a block to connect"
+                            aria-label="Drag to connect this choice"
+                            onMouseDown={e => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                startConnect(choice.id);
+                            }}
+                        />
 
                         <div className={styles.vnChoiceChips}>
                             {(choice.effects ?? []).map((effect, i) => (
