@@ -57,3 +57,5 @@ my_lint.txt
 
 # ComfyUI generated images
 outputs/
+
+.superpowers/
