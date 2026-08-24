@@ -21,6 +21,7 @@ import { ConsistencyFlagsRenderer } from './ConsistencyFlagsRenderer';
 import { UnderstandingRenderer } from './UnderstandingRenderer';
 import { UntypedWidgetRenderer } from './UntypedWidgetRenderer';
 import { VNBlockRenderer } from './VNBlockRenderer';
+import { VNFlagsRenderer } from './VNFlagsRenderer';
 
 // ============================================================
 // WIDGET RENDERERS
@@ -72,6 +73,7 @@ export const WidgetRenderer = React.memo(function WidgetRenderer({
     case 'draftNav':    return <DraftNavRenderer content={content} onChange={handleChange} />;
     case 'beatCard':    return <BeatCardRenderer content={content} onChange={handleChange} />;
     case 'vnBlock':     return <VNBlockRenderer content={content} onChange={handleChange} />;
+    case 'vnFlags':     return <VNFlagsRenderer />;
     case 'articleSuggestions': return <ArticleSuggestionsRenderer content={content} onChange={handleChangeImmediate} />;
     case 'consistencyFlags': return <ConsistencyFlagsRenderer content={content} onChange={handleChangeImmediate} />;
     case 'worldUnderstanding': return <UnderstandingRenderer />;

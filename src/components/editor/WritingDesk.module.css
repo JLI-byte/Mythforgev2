@@ -6707,3 +6707,31 @@
 }
 
 .vnAddChoice:hover { opacity: 1; }
+
+.vnFlagsPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.6rem;
+    height: 100%;
+    overflow: auto;
+    font-size: 0.78rem;
+}
+
+.vnFlagRow {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 0.3rem;
+    align-items: center;
+}
+
+.vnFlagName {
+    border: none;
+    background: transparent;
+    font: inherit;
+    font-family: ui-monospace, monospace;
+    font-size: 0.74rem;
+    min-width: 0;
+}
+
+.vnFlagRow select { font: inherit; font-size: 0.7rem; }
