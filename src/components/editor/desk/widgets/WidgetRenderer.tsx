@@ -72,7 +72,10 @@ export const WidgetRenderer = React.memo(function WidgetRenderer({
     case 'relMap':      return <RelationshipMapRenderer content={content} onChange={handleChange} />;
     case 'draftNav':    return <DraftNavRenderer content={content} onChange={handleChange} />;
     case 'beatCard':    return <BeatCardRenderer content={content} onChange={handleChange} />;
-    case 'vnBlock':     return <VNBlockRenderer content={content} onChange={handleChange} />;
+    // Immediate, not debounced: the only thing this renderer sends back is the
+    // id of the beat it just created. Held for 800ms it would be invisible on
+    // the next render, and the card would look unseeded.
+    case 'vnBlock':     return <VNBlockRenderer content={content} onChange={handleChangeImmediate} />;
     case 'vnFlags':     return <VNFlagsRenderer />;
     case 'articleSuggestions': return <ArticleSuggestionsRenderer content={content} onChange={handleChangeImmediate} />;
     case 'consistencyFlags': return <ConsistencyFlagsRenderer content={content} onChange={handleChangeImmediate} />;

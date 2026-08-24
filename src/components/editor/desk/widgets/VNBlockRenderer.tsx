@@ -9,7 +9,7 @@
  * the graph lives on the canvas, so the map cannot drift from the story.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import type { VNBlockChoice } from '@/lib/vnBlocks';
@@ -161,31 +161,60 @@ export function VNBlockRenderer({ content, onChange }: { content: any; onChange:
             .sort((a, b) => a.order - b.order)
             .map(sc => sc.title),
     ));
-    const blocks = useWorkspaceStore(useShallow(s =>
-        s.documents
-            .filter(d => d.projectId === activeProjectId)
-            .map(d => ({ id: d.id, title: d.title })),
+    // Only documents that actually have a card on the branch map count as
+    // blocks. A visual novel project also holds ordinary documents — the
+    // "Chapter 1" created with the project, for one — and offering those as
+    // jump targets produces a choice pointing somewhere the map cannot show,
+    // which then silently draws no edge.
+    const mappedBlockIds = useWorkspaceStore(useShallow(s =>
+        (s.draftStates[activeProjectId ?? '']?.widgets ?? [])
+            .filter(w => w.type === 'vnBlock' && w.content?.blockId)
+            .map(w => w.content.blockId as string),
     ));
+
+    // Select the stored documents, then reshape outside the selector.
+    // useShallow compares array elements with Object.is, so mapping to
+    // `{ id, title }` inside it produced fresh objects on every call, made
+    // every snapshot look changed, and spun the render loop that crashed the
+    // workspace. Selecting the store's own objects keeps identities stable.
+    const projectDocs = useWorkspaceStore(useShallow(s =>
+        s.documents.filter(d => d.projectId === activeProjectId),
+    ));
+    const onMap = new Set(mappedBlockIds);
+    const blocks = projectDocs
+        .filter(d => onMap.has(d.id))
+        .map(d => ({ id: d.id, title: d.title }));
     const flags = useWorkspaceStore(useShallow(s =>
         s.projects.find(p => p.id === activeProjectId)?.vnFlags ?? [],
     ));
 
-    // A block dragged from the palette, or seeded by the method library,
-    // arrives with no beat behind it. Create one on first render so the card
-    // is never orphaned. This is why neither widget-creation path in
-    // WritingDesk needs to know about story blocks.
+    // Read through a ref so `content` is not an effect dependency. It is a new
+    // object on most renders, and depending on it re-ran the seeding effect.
+    const contentRef = useRef(content);
+    contentRef.current = content;
+
+    // Fires at most once per mounted card, enforced by a latch rather than by
+    // the dependency array. Creating the beat writes to the store, which
+    // re-renders this component immediately — but the widget's own content is
+    // persisted on a delay, so `blockId` is not visible here on the next pass.
+    // Without the latch the effect saw a still-empty blockId and seeded again,
+    // spawning documents until React gave up with "maximum update depth".
+    const seededRef = useRef(false);
+
     useEffect(() => {
-        if (blockId || !activeProjectId) return;
+        if (blockId || seededRef.current || !activeProjectId) return;
+        seededRef.current = true;
+
         const beatId = crypto.randomUUID();
         addDocument({
             id: beatId,
             projectId: activeProjectId,
-            title: content?.seedTitle || 'New Beat',
+            title: contentRef.current?.seedTitle || 'New Beat',
             content: '',
             createdAt: new Date(),
         });
-        onChange({ ...content, blockId: beatId });
-    }, [blockId, activeProjectId, content, addDocument, onChange]);
+        onChange({ ...contentRef.current, blockId: beatId });
+    }, [blockId, activeProjectId, addDocument, onChange]);
 
     if (!block) {
         return (
@@ -239,7 +268,16 @@ export function VNBlockRenderer({ content, onChange }: { content: any; onChange:
 
             const targetBlockId = card?.dataset.vnBlockId;
             if (targetBlockId && targetBlockId !== block.id) {
-                updateChoice(choiceId, { targetBlockId });
+                // Read the choices fresh rather than using the array captured
+                // when the drag began. A keystroke in another choice on this
+                // same block can commit mid-drag, and writing back the stale
+                // snapshot would silently discard it.
+                const current = useWorkspaceStore.getState()
+                    .documents.find(d => d.id === block.id)?.choices ?? [];
+                updateDocument(block.id, {
+                    choices: current.map(c =>
+                        c.id === choiceId ? { ...c, targetBlockId } : c),
+                });
             }
         };
 

@@ -24,11 +24,14 @@ const ORIGIN = 4000;
 
 export function VNEdgeLayer({ widgets }: { widgets: DeskWidget[] }) {
     const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
-    const blocks = useWorkspaceStore(useShallow(s =>
-        s.documents
-            .filter(d => d.projectId === activeProjectId && d.choices?.length)
-            .map(d => ({ id: d.id, choices: d.choices ?? [] })),
+    // Selected as stored documents, not reshaped inside the selector.
+    // useShallow compares elements with Object.is, so mapping to a new object
+    // per document makes every snapshot look changed and spins the render
+    // loop. Reshaping after selection keeps the identities stable.
+    const blockDocs = useWorkspaceStore(useShallow(s =>
+        s.documents.filter(d => d.projectId === activeProjectId && d.choices?.length),
     ));
+    const blocks = blockDocs.map(d => ({ id: d.id, choices: d.choices ?? [] }));
 
     const blockWidgets = widgets.filter(w => w.type === 'vnBlock' && w.content?.blockId);
     if (!blockWidgets.length || !blocks.length) return null;
