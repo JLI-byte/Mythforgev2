@@ -7,6 +7,8 @@
  * exactly the shape Ren'Py wants — a label, a menu, and a jump per choice.
  */
 
+import type { VNEffect, VNCondition } from './vnFlags';
+
 /** One option in a scene's menu. */
 export interface VNChoice {
     id: string;
@@ -14,10 +16,10 @@ export interface VNChoice {
     text: string;
     /** Scene this jumps to. */
     targetSceneId: string;
-    /** Flag set when this choice is taken. */
-    setsFlag?: string;
-    /** Choice is only shown when this flag is set. */
-    requiresFlag?: string;
+    /** What taking this choice does to story state. */
+    effects?: VNEffect[];
+    /** Choice is only offered when this holds. */
+    condition?: VNCondition;
 }
 
 /**
@@ -30,21 +32,6 @@ export interface VNScene {
     content: string;
     order: number;
     choices?: VNChoice[];
-}
-
-/**
- * Every flag mentioned anywhere, sorted and deduped. Ren'Py wants a `default`
- * line for each, so a value from an old save cannot leak into a new game.
- */
-export function collectFlags(scenes: VNScene[]): string[] {
-    const flags = new Set<string>();
-    for (const scene of scenes) {
-        for (const choice of scene.choices ?? []) {
-            if (choice.setsFlag) flags.add(choice.setsFlag);
-            if (choice.requiresFlag) flags.add(choice.requiresFlag);
-        }
-    }
-    return [...flags].sort();
 }
 
 export type VNIssueKind =
@@ -70,13 +57,13 @@ export function validateVisualNovel(scenes: VNScene[]): VNIssue[] {
     const issues: VNIssue[] = [];
 
     const targeted = new Set<string>();
-    const setFlags = new Set<string>();
+    const writtenFlags = new Set<string>();
     for (const scene of ordered) {
         for (const choice of scene.choices ?? []) {
             // A choice that targets its own scene doesn't make that scene
             // reachable — the scene still needs an incoming edge from elsewhere.
             if (choice.targetSceneId !== scene.id) targeted.add(choice.targetSceneId);
-            if (choice.setsFlag) setFlags.add(choice.setsFlag);
+            for (const effect of choice.effects ?? []) writtenFlags.add(effect.flagId);
         }
     }
 
@@ -90,10 +77,10 @@ export function validateVisualNovel(scenes: VNScene[]): VNIssue[] {
                     message: `“${choice.text}” points at a scene that no longer exists.`,
                 });
             }
-            if (choice.requiresFlag && !setFlags.has(choice.requiresFlag)) {
+            if (choice.condition && !writtenFlags.has(choice.condition.flagId)) {
                 issues.push({
                     kind: 'unsatisfiable-flag', sceneId: scene.id,
-                    message: `“${choice.text}” needs ${choice.requiresFlag}, which nothing sets.`,
+                    message: `“${choice.text}” depends on state that nothing sets.`,
                 });
             }
         }

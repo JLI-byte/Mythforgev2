@@ -6580,7 +6580,7 @@
 
 .choiceRow {
     display: grid;
-    grid-template-columns: 2fr 1.5fr 1fr 1fr auto;
+    grid-template-columns: 2fr 1.5fr auto;
     gap: 0.5rem;
     align-items: center;
 }

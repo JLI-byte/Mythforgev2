@@ -1,33 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { collectFlags, validateVisualNovel, type VNScene } from './visualNovel';
+import { validateVisualNovel, type VNScene } from './visualNovel';
 
 const scene = (id: string, choices: VNScene['choices'] = []): VNScene => ({
     id, title: id, content: '', order: 0, choices,
-});
-
-describe('collectFlags', () => {
-    it('returns every flag a choice sets or requires, sorted and deduped', () => {
-        const scenes = [
-            scene('a', [
-                { id: 'c1', text: 'yes', targetSceneId: 'b', setsFlag: 'agreed' },
-                { id: 'c2', text: 'no', targetSceneId: 'c', setsFlag: 'refused' },
-            ]),
-            scene('b', [
-                { id: 'c3', text: 'recall', targetSceneId: 'c', requiresFlag: 'agreed' },
-            ]),
-        ];
-        expect(collectFlags(scenes)).toEqual(['agreed', 'refused']);
-    });
-
-    it('returns an empty array when no choice touches a flag', () => {
-        expect(collectFlags([scene('a', [
-            { id: 'c1', text: 'onward', targetSceneId: 'b' },
-        ])])).toEqual([]);
-    });
-
-    it('tolerates scenes with no choices at all', () => {
-        expect(collectFlags([{ id: 'a', title: 'A', content: '', order: 0 }])).toEqual([]);
-    });
 });
 
 describe('validateVisualNovel', () => {
@@ -71,13 +46,28 @@ describe('validateVisualNovel', () => {
         expect(issues.some(i => i.kind === 'unreachable' && i.sceneId === 'island')).toBe(true);
     });
 
-    it('reports a choice requiring a flag nothing ever sets', () => {
+    it('reports a choice depending on state nothing ever sets', () => {
         const issues = validateVisualNovel([
             { id: 'a', title: 'A', content: '', order: 0, choices: [
-                { id: 'c1', text: 'Recall', targetSceneId: 'a', requiresFlag: 'never_set' },
+                { id: 'c1', text: 'Recall', targetSceneId: 'a',
+                  condition: { flagId: 'f-never', op: 'is' } },
             ] },
         ]);
         expect(issues.some(i => i.kind === 'unsatisfiable-flag')).toBe(true);
+    });
+
+    it('accepts a condition whose flag some effect writes', () => {
+        const issues = validateVisualNovel([
+            { id: 'a', title: 'A', content: '', order: 0, choices: [
+                { id: 'c1', text: 'Tell her', targetSceneId: 'b',
+                  effects: [{ flagId: 'f-truth', op: 'set' }] },
+            ] },
+            { id: 'b', title: 'B', content: '', order: 1, choices: [
+                { id: 'c2', text: 'Recall', targetSceneId: 'b',
+                  condition: { flagId: 'f-truth', op: 'is' } },
+            ] },
+        ]);
+        expect(issues.some(i => i.kind === 'unsatisfiable-flag')).toBe(false);
     });
 
     it('accepts a convergent graph — two choices, one destination', () => {

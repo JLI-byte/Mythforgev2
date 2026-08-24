@@ -78,16 +78,6 @@ function ChoicesStrip({ scene, scenes, onChange }: ChoicesStripProps) {
                             <option key={s.id} value={s.id}>{s.title}</option>
                         ))}
                     </select>
-                    <input
-                        value={choice.setsFlag ?? ''}
-                        placeholder="sets flag"
-                        onChange={e => update(choice.id, { setsFlag: e.target.value || undefined })}
-                    />
-                    <input
-                        value={choice.requiresFlag ?? ''}
-                        placeholder="needs flag"
-                        onChange={e => update(choice.id, { requiresFlag: e.target.value || undefined })}
-                    />
                     <button type="button" onClick={() => remove(choice.id)} aria-label="Remove choice">
                         ×
                     </button>
