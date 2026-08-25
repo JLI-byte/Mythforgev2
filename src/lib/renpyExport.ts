@@ -35,7 +35,7 @@ const RENPY_KEYWORDS = new Set([
  * Transliteration is out of scope; the dedupe suffix keeps the output valid,
  * just less readable if the writer hand-edits the exported file.
  */
-function toIdentifier(raw: string, fallback: string, keywordSuffix: string): string {
+export function toIdentifier(raw: string, fallback: string, keywordSuffix: string): string {
     let base = raw
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '_')
@@ -171,7 +171,7 @@ const INDENT = '    ';
  * Sorted by name then id so the same registry always yields the same
  * identifiers, whatever order the array happens to arrive in.
  */
-function buildFlagNameMap(flags: VNFlag[]): Map<string, string> {
+export function buildFlagNameMap(flags: VNFlag[]): Map<string, string> {
     const taken = new Set<string>();
     const map = new Map<string, string>();
 
