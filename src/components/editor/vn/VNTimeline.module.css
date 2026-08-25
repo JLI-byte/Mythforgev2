@@ -1,0 +1,63 @@
+.surface {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 70vh;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.9rem;
+    border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    font-size: 0.8rem;
+}
+
+.tierLabel {
+    margin-left: auto;
+    opacity: 0.5;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.68rem;
+}
+
+.zoomLabel { opacity: 0.6; min-width: 3rem; text-align: center; }
+
+.viewport {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+}
+
+.canvas {
+    position: absolute;
+    inset: 0;
+    transform-origin: 0 0;
+    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.box {
+    position: absolute;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.boxTitle {
+    padding: 0.4rem 0.7rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.story    { background: rgba(255, 255, 255, 0.02); cursor: default; }
+.season   { background: rgba(124, 92, 255, 0.10); border-color: rgba(124, 92, 255, 0.35); }
+.episode  { background: rgba(255, 255, 255, 0.05); }
+.decision { background: rgba(255, 255, 255, 0.07); border-style: dashed; }
+
+.collapsed { opacity: 0.55; }
+.collapsed:hover { opacity: 0.85; }
