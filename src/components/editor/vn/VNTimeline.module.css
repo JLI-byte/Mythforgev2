@@ -166,3 +166,9 @@
 
 .addOption:hover, .addDecision:hover { opacity: 1; }
 .addDecision { margin: 0 0.7rem 0.5rem; }
+
+.flagsDock {
+    border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    max-height: 14rem;
+    overflow: auto;
+}

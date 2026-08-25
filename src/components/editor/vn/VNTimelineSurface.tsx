@@ -22,6 +22,9 @@ import {
 import type { VNDecision } from '@/lib/vnTimeline';
 import { VNEpisodeBox } from './VNEpisodeBox';
 import { VNDecisionEditor } from './VNDecisionEditor';
+import { VNFlagsRenderer } from '@/components/editor/desk/widgets/VNFlagsRenderer';
+import { exportAsRenpy } from '@/lib/export';
+import { worldKeyForProject, worldKeyForEntity } from '@/lib/worldKey';
 import styles from './VNTimeline.module.css';
 
 const MIN_ZOOM = 0.2;
@@ -96,6 +99,12 @@ export function VNTimelineSurface() {
     ));
     const episodeChoices = episodes.map(e => ({ id: e.id, title: e.title }));
 
+    const castNames = useWorkspaceStore(useShallow(s =>
+        s.entities
+            .filter(e => worldKeyForEntity(e) === worldKeyForProject(project) && e.type === 'character')
+            .map(e => e.name),
+    ));
+
     /** Decisions live on their episode, so every edit writes the whole array. */
     const updateDecision = (episodeId: string, decisionId: string, patch: Partial<VNDecision>) => {
         const current = episodeById.get(episodeId)?.decisions ?? [];
@@ -125,6 +134,7 @@ export function VNTimelineSurface() {
     const [focus, setFocus] = useState<VNFocus | undefined>(undefined);
     const [zoom, setZoom] = useState(0.5);
     const [offset, setOffset] = useState({ x: 0, y: 0 });
+    const [showFlags, setShowFlags] = useState(false);
 
     const boxes = useMemo(
         () => layoutTimeline(seasons, episodes, focus),
@@ -210,6 +220,16 @@ export function VNTimelineSurface() {
                     Whole story
                 </button>
                 <span className={styles.tierLabel}>{tier}</span>
+                <button type="button" onClick={() => setShowFlags(v => !v)}>
+                    {showFlags ? 'Hide flags' : 'Flags'}
+                </button>
+                <button
+                    type="button"
+                    onClick={() => exportAsRenpy(
+                        seasons, episodes, castNames, project?.name ?? 'visual-novel', flags)}
+                >
+                    Export to Ren&apos;Py
+                </button>
                 <button type="button" onClick={() => setZoom(z => Math.max(MIN_ZOOM, z - 0.1))}>−</button>
                 <span className={styles.zoomLabel}>{Math.round(zoom * 100)}%</span>
                 <button type="button" onClick={() => setZoom(z => Math.min(MAX_ZOOM, z + 0.1))}>+</button>
@@ -271,6 +291,12 @@ export function VNTimelineSurface() {
                     ))}
                 </div>
             </div>
+
+            {showFlags && (
+                <div className={styles.flagsDock}>
+                    <VNFlagsRenderer />
+                </div>
+            )}
         </div>
     );
 }
