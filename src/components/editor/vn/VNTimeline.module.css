@@ -61,3 +61,36 @@
 
 .collapsed { opacity: 0.55; }
 .collapsed:hover { opacity: 0.85; }
+
+.setup {
+    margin: auto;
+    padding: 2rem;
+    max-width: 24rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.setup h2 { margin: 0; font-size: 1.15rem; }
+.setupHint { margin: 0; opacity: 0.55; font-size: 0.82rem; }
+
+.setupRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.9rem;
+}
+
+.setupRow input {
+    width: 5rem;
+    padding: 0.35rem 0.5rem;
+    font: inherit;
+}
+
+.setupGo {
+    margin-top: 0.6rem;
+    padding: 0.55rem 1rem;
+    font: inherit;
+    cursor: pointer;
+}

@@ -19,11 +19,52 @@ import {
     layoutTimeline, tierForZoom, STORY_BOX_ID,
     type VNBox, type VNEpisode, type VNFocus, type VNSeason,
 } from '@/lib/vnTimeline';
+import type { VNDecision } from '@/lib/vnTimeline';
 import styles from './VNTimeline.module.css';
 
 const MIN_ZOOM = 0.2;
 const MAX_ZOOM = 2;
 const FRAME_PAD = 48;
+
+interface SetupProps {
+    onCreate: (seasonCount: number, episodesPerSeason: number) => void;
+}
+
+/**
+ * The first thing a writer sees. Answering it lays a whole skeleton down, so
+ * they land on a populated timeline rather than an empty canvas and a question
+ * about where to start.
+ */
+function TimelineSetup({ onCreate }: SetupProps) {
+    const [seasonCount, setSeasonCount] = useState(1);
+    const [episodeCount, setEpisodeCount] = useState(6);
+
+    return (
+        <div className={styles.setup}>
+            <h2>How is this story shaped?</h2>
+            <p className={styles.setupHint}>
+                Both are editable later — this is a head start, not a commitment.
+            </p>
+
+            <label className={styles.setupRow}>
+                <span>Seasons</span>
+                <input type="number" min={1} max={20} value={seasonCount}
+                       onChange={e => setSeasonCount(Math.max(1, Number(e.target.value)))} />
+            </label>
+
+            <label className={styles.setupRow}>
+                <span>Episodes each</span>
+                <input type="number" min={1} max={40} value={episodeCount}
+                       onChange={e => setEpisodeCount(Math.max(1, Number(e.target.value)))} />
+            </label>
+
+            <button type="button" className={styles.setupGo}
+                    onClick={() => onCreate(seasonCount, episodeCount)}>
+                Build the timeline
+            </button>
+        </div>
+    );
+}
 
 export function VNTimelineSurface() {
     const viewportRef = useRef<HTMLDivElement>(null);
@@ -90,7 +131,41 @@ export function VNTimelineSurface() {
         else if (box.kind === 'episode') focusOn({ kind: 'episode', id: box.id });
     };
 
+    const updateProject = useWorkspaceStore(s => s.updateProject);
+    const addDocument = useWorkspaceStore(s => s.addDocument);
+
+    const createSkeleton = (seasonCount: number, episodesPerSeason: number) => {
+        if (!activeProjectId) return;
+
+        const newSeasons: VNSeason[] = Array.from({ length: seasonCount }, (_, i) => ({
+            id: crypto.randomUUID(),
+            title: `Season ${i + 1}`,
+            order: i,
+        }));
+
+        updateProject(activeProjectId, { seasons: newSeasons });
+
+        for (const season of newSeasons) {
+            for (let e = 0; e < episodesPerSeason; e += 1) {
+                addDocument({
+                    id: crypto.randomUUID(),
+                    projectId: activeProjectId,
+                    title: `Episode ${e + 1}`,
+                    content: '',
+                    createdAt: new Date(),
+                    seasonId: season.id,
+                    order: e,
+                    decisions: [],
+                });
+            }
+        }
+    };
+
     if (!activeProjectId) return null;
+
+    if (!seasons.length && !episodes.length) {
+        return <TimelineSetup onCreate={createSkeleton} />;
+    }
 
     return (
         <div className={styles.surface}>
