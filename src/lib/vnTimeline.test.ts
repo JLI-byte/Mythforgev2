@@ -158,14 +158,16 @@ describe('layoutTimeline', () => {
         expect(byId(boxes, 's1')!.collapsed).toBe(true);
     });
 
-    it('gathers episodes with no season into an Unsorted lane, listed first', () => {
+    it('gathers episodes with no season into an Unsorted lane, listed last', () => {
+        // Last, not first: the exporter plays unsorted episodes after every
+        // season, and the map must not disagree with the script.
         const boxes = layoutTimeline(
             [season('s1', 0)],
             [episode('orphan', undefined, 0), episode('e1', 's1', 0)],
         );
         const unsorted = byId(boxes, UNSORTED_SEASON_ID);
         expect(unsorted).toBeDefined();
-        expect(unsorted!.y).toBeLessThan(byId(boxes, 's1')!.y);
+        expect(unsorted!.y).toBeGreaterThan(byId(boxes, 's1')!.y);
         expect(byId(boxes, 'orphan')!.parentId).toBe(UNSORTED_SEASON_ID);
     });
 

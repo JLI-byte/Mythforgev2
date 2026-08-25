@@ -209,7 +209,12 @@ export function VNTimelineSurface() {
 
     if (!activeProjectId) return null;
 
-    if (!seasons.length && !episodes.length) {
+    // Gated on seasons alone, not on episodes. Creating a project already
+    // makes a "Chapter 1" document, so an episode check would mean the setup
+    // step never appeared and nobody was ever asked how many seasons they
+    // wanted. Anything that already exists lands in the Unsorted lane, which
+    // is exactly what that lane is for.
+    if (!seasons.length) {
         return <TimelineSetup onCreate={createSkeleton} />;
     }
 

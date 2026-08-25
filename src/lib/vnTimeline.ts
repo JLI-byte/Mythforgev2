@@ -120,11 +120,15 @@ export function layoutTimeline(
     const known = new Set(seasons.map(s => s.id));
     const isUnsorted = (e: VNEpisode) => !e.seasonId || !known.has(e.seasonId);
 
+    // Unsorted goes last, matching the order the exporter plays episodes in.
+    // A map that showed these first while the script played them last would be
+    // lying about the shape of the story, which is worse than either choice on
+    // its own.
     const lanes: VNSeason[] = [
-        ...(episodes.some(isUnsorted)
-            ? [{ id: UNSORTED_SEASON_ID, title: 'Unsorted', order: -1 }]
-            : []),
         ...[...seasons].sort((a, b) => a.order - b.order),
+        ...(episodes.some(isUnsorted)
+            ? [{ id: UNSORTED_SEASON_ID, title: 'Unsorted', order: Number.MAX_SAFE_INTEGER }]
+            : []),
     ];
 
     const episodesIn = (laneId: string) =>
