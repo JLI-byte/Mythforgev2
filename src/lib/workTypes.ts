@@ -67,7 +67,8 @@ export const WORK_TYPES: WorkType[] = [
         icon: '🎮',
         desc: 'Choice-driven branching stories',
         writingMode: 'visual-novel',
-        draftTypeId: 'visual-novel',
+        // No draft type: a visual novel drafts on the season timeline, not the
+        // Draft Table's method library, so nothing here would ever be shown.
         namePlaceholder: 'e.g. The Lighthouse Summer',
     },
 ];

@@ -29,8 +29,8 @@ describe('WORK_TYPES', () => {
         expect(getWorkType('lyrics')!.draftTypeId).toBeUndefined();
     });
 
-    it('sends a visual novel to the branch map draft type', () => {
-        expect(getWorkType('visual-novel')!.draftTypeId).toBe('visual-novel');
+    it('leaves a visual novel without a draft type — it drafts on the timeline', () => {
+        expect(getWorkType('visual-novel')!.draftTypeId).toBeUndefined();
     });
 
     it('gives every type a label, icon and its own name placeholder', () => {
