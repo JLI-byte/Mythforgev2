@@ -12,6 +12,7 @@ import { sanitizeChatHistories, type ChatMessage as ResearchChatMessage } from '
 import type { VNChoice } from '@/lib/visualNovel';
 import type { VNBlockChoice } from '@/lib/vnBlocks';
 import type { VNFlag } from '@/lib/vnFlags';
+import type { VNSeason, VNDecision } from '@/lib/vnTimeline';
 
 // Cover colors auto-assigned to new projects in rotation
 export const COVER_COLORS = [
@@ -109,6 +110,8 @@ export interface Project {
     brief?: ProjectBrief;
     /** Visual novel projects only: declared story state for the branch map. */
     vnFlags?: VNFlag[];
+    /** Visual novel projects only: the seasons its episodes are grouped into. */
+    seasons?: VNSeason[];
 }
 
 export interface Document {
@@ -121,6 +124,12 @@ export interface Document {
     wordCount?: number;
     /** Visual novel projects only: the decision this beat ends on. */
     choices?: VNBlockChoice[];
+    /** Visual novel projects only: the season this episode belongs to. */
+    seasonId?: string;
+    /** Visual novel projects only: position within its season. */
+    order?: number;
+    /** Visual novel projects only: the decisions made during this episode. */
+    decisions?: VNDecision[];
 }
 
 export interface Scene {
