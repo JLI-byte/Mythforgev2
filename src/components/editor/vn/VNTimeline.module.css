@@ -94,3 +94,41 @@
     font: inherit;
     cursor: pointer;
 }
+
+.counts {
+    display: flex;
+    gap: 0.6rem;
+    padding: 0 0.7rem;
+    font-size: 0.75rem;
+}
+
+.major { color: #b9a6ff; }
+.minor { color: #9ad19a; }
+
+.titleInput {
+    width: calc(100% - 1.4rem);
+    margin: 0.35rem 0.7rem 0.1rem;
+    border: none;
+    background: transparent;
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.decisionList {
+    padding: 0.2rem 0.7rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.decisionRow {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.76rem;
+}
+
+.decisionPrompt { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.optionCount { opacity: 0.45; font-size: 0.7rem; }
+.empty { margin: 0; opacity: 0.4; font-size: 0.74rem; }

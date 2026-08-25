@@ -20,6 +20,7 @@ import {
     type VNBox, type VNEpisode, type VNFocus, type VNSeason,
 } from '@/lib/vnTimeline';
 import type { VNDecision } from '@/lib/vnTimeline';
+import { VNEpisodeBox } from './VNEpisodeBox';
 import styles from './VNTimeline.module.css';
 
 const MIN_ZOOM = 0.2;
@@ -85,6 +86,9 @@ export function VNTimelineSurface() {
         order: d.order ?? 0,
         decisions: d.decisions,
     }));
+
+    const updateDocument = useWorkspaceStore(s => s.updateDocument);
+    const episodeById = new Map(episodes.map(e => [e.id, e]));
 
     const [focus, setFocus] = useState<VNFocus | undefined>(undefined);
     const [zoom, setZoom] = useState(0.5);
@@ -191,7 +195,17 @@ export function VNTimelineSurface() {
                             style={{ left: box.x, top: box.y, width: box.width, height: box.height }}
                             onClick={e => { e.stopPropagation(); onBoxClick(box); }}
                         >
-                            <div className={styles.boxTitle}>{box.title}</div>
+                            {box.kind === 'episode' ? (
+                                <VNEpisodeBox
+                                    title={box.title}
+                                    decisions={episodeById.get(box.id)?.decisions ?? []}
+                                    tier={tier}
+                                    collapsed={box.collapsed}
+                                    onTitleChange={title => updateDocument(box.id, { title })}
+                                />
+                            ) : (
+                                <div className={styles.boxTitle}>{box.title}</div>
+                            )}
                         </div>
                     ))}
                 </div>
