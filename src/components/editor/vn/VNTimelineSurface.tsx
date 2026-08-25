@@ -21,6 +21,7 @@ import {
 } from '@/lib/vnTimeline';
 import type { VNDecision } from '@/lib/vnTimeline';
 import { VNEpisodeBox } from './VNEpisodeBox';
+import { VNDecisionEditor } from './VNDecisionEditor';
 import styles from './VNTimeline.module.css';
 
 const MIN_ZOOM = 0.2;
@@ -89,6 +90,37 @@ export function VNTimelineSurface() {
 
     const updateDocument = useWorkspaceStore(s => s.updateDocument);
     const episodeById = new Map(episodes.map(e => [e.id, e]));
+
+    const flags = useWorkspaceStore(useShallow(s =>
+        s.projects.find(p => p.id === activeProjectId)?.vnFlags ?? [],
+    ));
+    const episodeChoices = episodes.map(e => ({ id: e.id, title: e.title }));
+
+    /** Decisions live on their episode, so every edit writes the whole array. */
+    const updateDecision = (episodeId: string, decisionId: string, patch: Partial<VNDecision>) => {
+        const current = episodeById.get(episodeId)?.decisions ?? [];
+        updateDocument(episodeId, {
+            decisions: current.map(d => (d.id === decisionId ? { ...d, ...patch } : d)),
+        });
+    };
+
+    const removeDecision = (episodeId: string, decisionId: string) => {
+        const current = episodeById.get(episodeId)?.decisions ?? [];
+        updateDocument(episodeId, { decisions: current.filter(d => d.id !== decisionId) });
+    };
+
+    const addDecision = (episodeId: string) => {
+        const current = episodeById.get(episodeId)?.decisions ?? [];
+        updateDocument(episodeId, {
+            decisions: [...current, {
+                id: crypto.randomUUID(),
+                kind: 'minor' as const,
+                prompt: '',
+                order: current.length,
+                options: [],
+            }],
+        });
+    };
 
     const [focus, setFocus] = useState<VNFocus | undefined>(undefined);
     const [zoom, setZoom] = useState(0.5);
@@ -195,14 +227,43 @@ export function VNTimelineSurface() {
                             style={{ left: box.x, top: box.y, width: box.width, height: box.height }}
                             onClick={e => { e.stopPropagation(); onBoxClick(box); }}
                         >
-                            {box.kind === 'episode' ? (
-                                <VNEpisodeBox
-                                    title={box.title}
-                                    decisions={episodeById.get(box.id)?.decisions ?? []}
-                                    tier={tier}
-                                    collapsed={box.collapsed}
-                                    onTitleChange={title => updateDocument(box.id, { title })}
-                                />
+                            {box.kind === 'decision' ? (() => {
+                                const episodeId = box.parentId!;
+                                const decision = episodeById.get(episodeId)?.decisions
+                                    ?.find(d => d.id === box.id);
+                                if (!decision) return null;
+                                return tier === 'decision' ? (
+                                    <VNDecisionEditor
+                                        decision={decision}
+                                        flags={flags}
+                                        episodes={episodeChoices}
+                                        onChange={patch => updateDecision(episodeId, decision.id, patch)}
+                                        onRemove={() => removeDecision(episodeId, decision.id)}
+                                    />
+                                ) : (
+                                    <div className={styles.boxTitle}>
+                                        {decision.prompt || 'Untitled decision'}
+                                    </div>
+                                );
+                            })() : box.kind === 'episode' ? (
+                                <>
+                                    <VNEpisodeBox
+                                        title={box.title}
+                                        decisions={episodeById.get(box.id)?.decisions ?? []}
+                                        tier={tier}
+                                        collapsed={box.collapsed}
+                                        onTitleChange={title => updateDocument(box.id, { title })}
+                                    />
+                                    {focus?.kind === 'episode' && focus.id === box.id && (
+                                        <button
+                                            type="button"
+                                            className={styles.addDecision}
+                                            onClick={e => { e.stopPropagation(); addDecision(box.id); }}
+                                        >
+                                            + decision
+                                        </button>
+                                    )}
+                                </>
                             ) : (
                                 <div className={styles.boxTitle}>{box.title}</div>
                             )}

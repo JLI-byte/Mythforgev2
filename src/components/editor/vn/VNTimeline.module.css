@@ -132,3 +132,37 @@
 .decisionPrompt { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .optionCount { opacity: 0.45; font-size: 0.7rem; }
 .empty { margin: 0; opacity: 0.4; font-size: 0.74rem; }
+
+.decisionEditor {
+    padding: 0.4rem 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.76rem;
+}
+
+.decisionHead { display: flex; align-items: center; gap: 0.4rem; }
+.promptInput { flex: 1; border: none; background: transparent; font: inherit; min-width: 0; }
+
+.optionRow {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 0.35rem;
+    align-items: center;
+}
+
+.optionText { border: none; background: transparent; font: inherit; min-width: 0; }
+.optionRow select, .decisionHead select { font: inherit; font-size: 0.72rem; }
+
+.addOption, .addDecision {
+    align-self: flex-start;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    opacity: 0.6;
+    font: inherit;
+    font-size: 0.74rem;
+}
+
+.addOption:hover, .addDecision:hover { opacity: 1; }
+.addDecision { margin: 0 0.7rem 0.5rem; }
