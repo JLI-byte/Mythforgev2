@@ -50,12 +50,15 @@ export function episodeLabels(
 
     for (const episode of inPlayOrder(seasons, episodes)) {
         const sKey = episode.seasonId ?? '';
-        const sNum = seasonNumber.get(sKey) ?? 0;
+        const sNum = seasonNumber.get(sKey);
         const eNum = (counters.get(sKey) ?? 0) + 1;
         counters.set(sKey, eNum);
 
         const slug = toIdentifier(episode.title, 'untitled', '_episode');
-        const base = `s${sNum}e${eNum}_${slug}`;
+        // An episode with no season gets no season prefix. Numbering it `s0`
+        // would read as a bug in the exported file, and there is no season
+        // zero to refer back to.
+        const base = sNum ? `s${sNum}e${eNum}_${slug}` : `e${eNum}_${slug}`;
 
         let label = base;
         let n = 2;
@@ -143,7 +146,10 @@ export function buildTimelineScript(
                 const guard = option.condition && identifier
                     ? ` if ${formatCondition(option.condition, identifier)}`
                     : '';
-                out.push(`${INDENT.repeat(2)}"${escapeRenpyText(option.text)}"${guard}:`);
+                // An option with no text renders as a button nobody can see or
+                // click. A visible placeholder is a bug the writer can find.
+                const label = option.text.trim() || '(unnamed option)';
+                out.push(`${INDENT.repeat(2)}"${escapeRenpyText(label)}"${guard}:`);
 
                 const body: string[] = [];
                 for (const effect of option.effects ?? []) {

@@ -39,6 +39,26 @@ describe('episodeLabels', () => {
     });
 });
 
+describe('episodeLabels — episodes with no season', () => {
+    it('drops the season prefix rather than numbering a season zero', () => {
+        const labels = episodeLabels([], [
+            { id: 'e1', title: 'Chapter 1', order: 0 },
+            { id: 'e2', title: 'Chapter 2', order: 1 },
+        ]);
+        expect(labels.get('e1')).toBe('e1_chapter_1');
+        expect(labels.get('e2')).toBe('e2_chapter_2');
+    });
+
+    it('still prefixes episodes that do have a season', () => {
+        const labels = episodeLabels([S1], [
+            { id: 'e1', title: 'Bar', seasonId: 's1', order: 0 },
+            { id: 'orphan', title: 'Stray', order: 0 },
+        ]);
+        expect(labels.get('e1')).toBe('s1e1_bar');
+        expect(labels.get('orphan')).toBe('e1_stray');
+    });
+});
+
 describe('buildTimelineScript', () => {
     const flags: VNFlag[] = [
         { id: 'f-bold', name: 'bold', kind: 'bool', initial: 0 },
@@ -148,6 +168,18 @@ describe('buildTimelineScript', () => {
             ] },
         ], [], 'X', []);
         expect(script).not.toContain('menu:');
+    });
+
+    it('gives an untitled option a visible placeholder rather than an empty button', () => {
+        const script = buildTimelineScript([S1], [
+            { id: 'e1', title: 'Bar', seasonId: 's1', order: 0, decisions: [
+                { id: 'd1', kind: 'minor', prompt: 'p', order: 0, options: [
+                    { id: 'o1', text: '   ' },
+                ] },
+            ] },
+        ], [], 'X', []);
+        expect(script).toContain('"(unnamed option)":');
+        expect(script).not.toContain('""');
     });
 
     it('emits a complete, paste-able two-season script', () => {
