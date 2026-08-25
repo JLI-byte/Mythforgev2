@@ -67,22 +67,6 @@ const CARDS_PER_ROW = 5;
  * cards stay self-contained even if the registry changes later.
  */
 export function buildMethodWidgets(method: WritingMethod, startX = 60, startY = 60): DeskWidget[] {
-    // The branch map is a graph, not a row of prompts: its beats become story
-    // blocks, which carry choices and connect to each other. A beat card
-    // cannot express an edge.
-    if (method.id === 'vn-branch-map') {
-        return method.beats.map((beat, i) => ({
-            id: crypto.randomUUID(),
-            type: 'vnBlock' as const,
-            x: startX + (i % 3) * 360,
-            y: startY + Math.floor(i / 3) * 340,
-            width: 320,
-            height: 300,
-            content: { seedTitle: beat.label },
-            dock: null,
-        }));
-    }
-
     return method.beats.map((beat, i) => ({
         id: crypto.randomUUID(),
         type: 'beatCard',

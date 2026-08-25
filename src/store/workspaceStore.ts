@@ -10,7 +10,6 @@ import type { Interview } from '@/lib/interviews/types';
 import type { ProjectBrief } from '@/lib/workSubTypes';
 import { sanitizeChatHistories, type ChatMessage as ResearchChatMessage } from '@/lib/researchChatTypes';
 import type { VNChoice } from '@/lib/visualNovel';
-import type { VNBlockChoice } from '@/lib/vnBlocks';
 import type { VNFlag } from '@/lib/vnFlags';
 import type { VNSeason, VNDecision } from '@/lib/vnTimeline';
 
@@ -122,8 +121,6 @@ export interface Document {
     createdAt: Date;
     updatedAt?: Date;
     wordCount?: number;
-    /** Visual novel projects only: the decision this beat ends on. */
-    choices?: VNBlockChoice[];
     /** Visual novel projects only: the season this episode belongs to. */
     seasonId?: string;
     /** Visual novel projects only: position within its season. */
@@ -316,7 +313,7 @@ export interface ArticleTab {
 // Writing Desk System Interfaces
 // =============================================
 
-export type DeskWidgetType = 'writingZone' | 'sticky' | 'reference' | 'image' | 'biblePinit' | 'sceneControl' | 'characterState' | 'continuity' | 'structure' | 'research' | 'progress' | 'relMap' | 'draftNav' | 'beatCard' | 'articleSuggestions' | 'consistencyFlags' | 'worldUnderstanding' | 'vnBlock' | 'vnFlags' | 'untyped';
+export type DeskWidgetType = 'writingZone' | 'sticky' | 'reference' | 'image' | 'biblePinit' | 'sceneControl' | 'characterState' | 'continuity' | 'structure' | 'research' | 'progress' | 'relMap' | 'draftNav' | 'beatCard' | 'articleSuggestions' | 'consistencyFlags' | 'worldUnderstanding' | 'vnFlags' | 'untyped';
 
 /** An object attached to the research chat as context for the next message. */
 export interface ChatAttachment {

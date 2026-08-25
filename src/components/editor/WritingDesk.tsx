@@ -13,7 +13,6 @@ import { DraftExport, collectExportBeats, ExportBeat } from './desk/DraftExport'
 import { SurfaceCanvas } from './desk/SurfaceCanvas';
 import { EmptyDeskWelcome } from './desk/EmptyDeskWelcome';
 import { WidgetRenderer } from './desk/widgets/WidgetRenderer';
-import { VNEdgeLayer } from './desk/widgets/VNEdgeLayer';
 import { chatAttachmentForWidget } from '@/lib/chatAttachmentForWidget';
 
 // ============================================================
@@ -635,7 +634,6 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
         <div className={`${styles.saveIndicator} ${isSaved ? styles.saveIndicatorActive : ''}`}>✓ Saved</div>
         
         <div ref={canvasRef} className={styles.deskCanvasInner} style={{ transform: `translate(${canvasOffset.x}px, ${canvasOffset.y}px) scale(${zoom})` }}>
-          <VNEdgeLayer widgets={canvasWidgets} />
           {/* Ghost Box (Now inside scaled layer) */}
           <div ref={drawGhostRef} className={styles.deskDrawGhost} style={{ display: 'none', position: 'absolute', pointerEvents: 'none', zIndex: 9999 }} />
           

@@ -9,8 +9,8 @@
 import { Document as MFDocument, Entity, Scene } from '@/store/workspaceStore';
 import type * as Docx from 'docx';
 import { escapeHtml, sanitizeHtml } from '@/lib/sanitize';
-import { buildRenpyScript } from '@/lib/renpyExport';
-import type { VNScene } from '@/lib/visualNovel';
+import { buildTimelineScript } from '@/lib/vnTimelineExport';
+import type { VNSeason, VNEpisode } from '@/lib/vnTimeline';
 import type { VNFlag } from '@/lib/vnFlags';
 
 /**
@@ -466,18 +466,19 @@ export function markdownToBasicHtml(md: string): string {
 }
 
 /**
- * Exports a visual novel project as a single .rpy file.
+ * Exports a visual novel's timeline as a single .rpy file.
  *
  * Ren'Py auto-loads every .rpy under game/, so this drops in alongside the
- * user's own options.rpy and screens.rpy without overwriting anything.
+ * writer's own options.rpy and screens.rpy without overwriting anything.
  */
 export function exportAsRenpy(
-    scenes: VNScene[],
+    seasons: VNSeason[],
+    episodes: VNEpisode[],
     castNames: string[],
     projectName: string,
     flags: VNFlag[] = [],
 ): void {
-    const script = buildRenpyScript(scenes, castNames, projectName, flags);
+    const script = buildTimelineScript(seasons, episodes, castNames, projectName, flags);
     const safeName = projectName?.trim() || 'visual-novel';
     downloadFile(script, `${slugify(safeName)}.rpy`, 'text/plain');
 }

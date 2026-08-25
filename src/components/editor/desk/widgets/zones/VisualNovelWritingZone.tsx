@@ -23,6 +23,7 @@ import { WritingZoneProps } from './zoneTypes';
 import { exportAsRenpy } from '@/lib/export';
 import { validateVisualNovel } from '@/lib/visualNovel';
 import type { VNChoice } from '@/lib/visualNovel';
+import type { VNSeason, VNEpisode } from '@/lib/vnTimeline';
 import { worldKeyForProject, worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../../WritingDesk.module.css';
 
@@ -91,6 +92,8 @@ function ChoicesStrip({ scene, scenes, onChange }: ChoicesStripProps) {
 
 interface ExportBarProps {
     scenes: { id: string; title: string; content: string; order: number; choices?: VNChoice[] }[];
+    seasons: VNSeason[];
+    episodes: VNEpisode[];
     castNames: string[];
     projectName: string;
 }
@@ -102,14 +105,14 @@ interface ExportBarProps {
  *
  * Warnings never block: a work in progress is always exportable.
  */
-function ExportBar({ scenes, castNames, projectName }: ExportBarProps) {
+function ExportBar({ scenes, seasons, episodes, castNames, projectName }: ExportBarProps) {
     const issues = validateVisualNovel(scenes);
 
     return (
         <div className={styles.exportBar}>
             <button
                 type="button"
-                onClick={() => exportAsRenpy(scenes, castNames, projectName)}
+                onClick={() => exportAsRenpy(seasons, episodes, castNames, projectName)}
             >
                 Export to Ren&apos;Py
             </button>
@@ -541,6 +544,14 @@ export function VisualNovelWritingZone({ content, onChange, onChangeImmediate, w
                 )}
                 <ExportBar
                     scenes={projectScenes}
+                    seasons={activeProject?.seasons ?? []}
+                    episodes={projectDocs.map(d => ({
+                        id: d.id,
+                        title: d.title,
+                        seasonId: d.seasonId,
+                        order: d.order ?? 0,
+                        decisions: d.decisions,
+                    }))}
                     castNames={castNames}
                     projectName={activeProject?.name ?? 'visual-novel'}
                 />
