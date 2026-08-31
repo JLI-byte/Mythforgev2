@@ -1,17 +1,22 @@
 name: Supabase keep-alive
 
-# Free-tier Supabase pauses a project after 7 days of inactivity.
+# Free-tier Supabase pauses a project that shows low activity over a
+# rolling 7-day window. The bar is not "one request resets a timer" --
+# the docs put it at "a few user requests to the database each day over
+# the previous week", so what matters is sustained volume, not recency.
+#
 # This runs a real (RLS-filtered, zero-row) query against Postgres every
-# 2 days so the inactivity clock never gets close to the limit.
+# hour, which clears that bar with room to spare.
 #
 # NOTE: GitHub only fires `schedule` triggers from the default branch,
-# so this file has to live on `main` to actually run.
+# so this file has to live on `main` to actually run. GitHub also
+# disables scheduled workflows after 60 days of repo inactivity.
 
 on:
   schedule:
-    # 06:00 UTC every other day. Max gap between runs is 2 days,
-    # including across month boundaries.
-    - cron: '0 6 */2 * *'
+    # Hourly. `schedule` is best-effort and GitHub drops runs under load,
+    # so this is deliberately far above the threshold rather than at it.
+    - cron: '0 * * * *'
   workflow_dispatch:
 
 jobs:
