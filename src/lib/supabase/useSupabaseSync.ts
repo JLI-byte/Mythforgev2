@@ -5,6 +5,9 @@ import { useWorkspaceStore, partializeWorkspace, type WorkspaceState } from '@/s
 import { loadWorkspace, saveWorkspace } from './workspaceSync';
 import { logger } from '@/lib/logger';
 import { migrateWorkspaceSchema } from '@/store/migrateWorkspaceSchema';
+import {
+  countContent, looksLikeWorkspace, newestContentTime, resolveWorkspaceConflict,
+} from '@/lib/workspaceConflict';
 
 const SAVE_DEBOUNCE_MS = 800;
 // After repeated save failures, stop hammering the endpoint (each attempt
@@ -15,42 +18,11 @@ const BACKOFF_MAX_MS = 5 * 60_000;
 export type SyncStatus = 'idle' | 'syncing' | 'saved' | 'error';
 
 /**
- * Returns the most recent content timestamp (ms) across a workspace blob —
- * used to decide which copy (local vs cloud) holds the newer writing.
- */
-function newestContentTime(state: Record<string, any> | null | undefined): number {
-  if (!state) return 0;
-  let newest = 0;
-  for (const key of ['projects', 'documents', 'scenes', 'entities']) {
-    const arr = state[key];
-    if (!Array.isArray(arr)) continue;
-    for (const item of arr) {
-      const t = item?.updatedAt ?? item?.createdAt;
-      if (t) {
-        const ms = new Date(t).getTime();
-        if (ms > newest) newest = ms;
-      }
-    }
-  }
-  return newest;
-}
-
-/** Cheap structural guard so we never setState a malformed/hostile cloud blob. */
-function looksLikeWorkspace(data: unknown): data is Record<string, any> {
-  if (!data || typeof data !== 'object') return false;
-  const d = data as Record<string, unknown>;
-  // Every persisted core collection, when present, must be an array.
-  return ['projects', 'documents', 'scenes', 'entities'].every(
-    k => d[k] === undefined || Array.isArray(d[k])
-  );
-}
-
-/**
  * useSupabaseSync Hook
  *
- * 1. On mount: hydrates from Supabase ONLY when the cloud copy is newer than
- *    the local copy, so a stale cloud row never silently clobbers newer local
- *    writing (the previous behavior was an unconditional overwrite).
+ * 1. On mount: hydrates from Supabase only when resolveWorkspaceConflict says
+ *    the cloud copy should win, so a stale or empty cloud row can never clobber
+ *    local writing.
  * 2. On change: debounces the store to Supabase and tracks success/failure.
  * 3. On tab hide / unload: flushes a final save so the last edits aren't lost.
  */
@@ -61,6 +33,10 @@ export function useSupabaseSync(userId: string) {
   const latestStateRef = useRef<Record<string, any> | null>(null);
   const failureCountRef = useRef(0);
   const backoffUntilRef = useRef(0);
+  // False until a cloud read actually succeeds. Guards the one write that can
+  // destroy a whole account: pushing a freshly-seeded empty workspace over real
+  // cloud content because the read failed and local looked blank.
+  const hydrationOkRef = useRef(false);
 
   const setHasHydrated = useWorkspaceStore(s => s.setHasHydrated);
 
@@ -72,20 +48,23 @@ export function useSupabaseSync(userId: string) {
       try {
         const cloud = await loadWorkspace(userId);
 
+        hydrationOkRef.current = true;
+
         if (cloud && looksLikeWorkspace(cloud.data)) {
           const localState = useWorkspaceStore.getState() as Record<string, any>;
-          const localNewest = newestContentTime(localState);
-          const cloudNewest = Math.max(newestContentTime(cloud.data), cloud.updatedAt);
-          const localHasContent =
-            Array.isArray(localState.projects) && localState.projects.length > 0;
+          const { takeCloud, reason } = resolveWorkspaceConflict(localState, cloud.data);
 
-          // Take the cloud copy only when local is empty or the cloud is newer.
-          if (!localHasContent || cloudNewest > localNewest) {
+          if (takeCloud) {
             // Cloud blobs bypass zustand's persist migrate — apply schema
             // migrations here. Idempotent, so double-migration is harmless.
             useWorkspaceStore.setState(migrateWorkspaceSchema(cloud.data));
+            logger.info(`LoreCanvas Sync: applied cloud workspace (${reason})`);
           } else {
-            logger.info('LoreCanvas Sync: local copy is newer — keeping local, skipping cloud overwrite');
+            logger.info(
+              `LoreCanvas Sync: keeping local workspace (${reason}) — ` +
+              `local ${countContent(localState)} items @ ${new Date(newestContentTime(localState)).toISOString()}, ` +
+              `cloud ${countContent(cloud.data)} items @ ${new Date(newestContentTime(cloud.data)).toISOString()}`,
+            );
           }
         } else if (cloud) {
           logger.error('LoreCanvas Sync: cloud workspace failed validation — ignoring');
@@ -131,6 +110,15 @@ export function useSupabaseSync(userId: string) {
 
     const unsubscribe = useWorkspaceStore.subscribe((state) => {
       if (isInitialLoadRef.current) return;
+
+      // Never let an empty workspace reach the cloud when we could not read what
+      // is already there — that is how a transient network failure turns into a
+      // wiped account. Real local content still syncs normally.
+      if (!hydrationOkRef.current && countContent(state as unknown as Record<string, unknown>) === 0) {
+        logger.error('LoreCanvas Sync: cloud read failed and local is empty — suppressing save to avoid overwriting cloud data');
+        return;
+      }
+
       // Sync only the persisted subset — same shape the local persist layer uses.
       latestStateRef.current = partializeWorkspace(state as WorkspaceState) as Record<string, any>;
 
