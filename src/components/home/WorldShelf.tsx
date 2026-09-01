@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from 'react';
+import React, { useId, useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { spineFraction, type Shelf } from '@/lib/worldShelves';
 import type { WorldKey } from '@/lib/worldKey';
@@ -33,6 +33,11 @@ export function WorldShelf({
 }: WorldShelfProps) {
   // Declared before any early return — hooks must run unconditionally.
   const spineRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  // Namespaced so two shelves on one page (tile and, later, the full Bookshelf)
+  // cannot collide on element ids.
+  const baseId = useId();
+  const panelId = `${baseId}-panel`;
+  const tabId = (key: WorldKey) => `${baseId}-tab-${key}`;
 
   if (shelves.length === 0) {
     return (
@@ -72,8 +77,12 @@ export function WorldShelf({
             <button
               key={shelf.key}
               ref={el => { spineRefs.current[i] = el; }}
+              id={tabId(shelf.key)}
               role="tab"
               aria-selected={isSelected}
+              aria-controls={panelId}
+              // Roving tabindex: one Tab stop for the whole shelf, arrows move within it.
+              tabIndex={isSelected ? 0 : -1}
               className={`${styles.spine} ${isSelected ? styles.spineSelected : ''}`}
               style={{
                 height: `calc(var(--shelf-h) * ${spineFraction(shelf.stories.length)})`,
@@ -89,7 +98,12 @@ export function WorldShelf({
         })}
       </div>
 
-      <div className={styles.panel}>
+      <div
+        className={styles.panel}
+        id={panelId}
+        role="tabpanel"
+        aria-labelledby={tabId(selected.key)}
+      >
         <h3 className={styles.panelName}>{selected.name}</h3>
         <p className={styles.panelMeta}>
           {plural(selected.stories.length, 'story', 'stories')}
