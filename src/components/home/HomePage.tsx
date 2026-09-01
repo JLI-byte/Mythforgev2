@@ -11,10 +11,10 @@ import {
 import { createClient } from '@/lib/supabase/client';
 import { researchScopeKey } from '@/lib/researchScope';
 import { makeNoteCard } from '@/lib/researchBoard';
-import { worldKeyForProject, worldKeyForEntity } from '@/lib/worldKey';
+import { STANDALONE_KEY, type WorldKey } from '@/lib/worldKey';
 import {
   dateKey, wordsOnDate, buildHeatmap, resolveResumeTarget, timeAgo,
-  worldCounts, attentionCounts,
+  attentionCounts,
 } from '@/lib/homeStats';
 import {
   WEEKDAY_LONG, normalizeWeekdayTargets, targetForDateKey, targetForDayIndex,
@@ -22,6 +22,8 @@ import {
 import { WritingHeatmap } from './WritingHeatmap';
 import GoalScheduleModal from './GoalScheduleModal';
 import { GoalRing } from './GoalRing';
+import { buildShelves } from '@/lib/worldShelves';
+import { WorldShelf } from './WorldShelf';
 import styles from './HomePage.module.css';
 
 /**
@@ -67,6 +69,8 @@ export default function HomePage() {
   const streakState = useWorkspaceStore(s => s.streakState);
   const researchStates = useWorkspaceStore(s => s.researchStates);
   const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
+  const worlds = useWorkspaceStore(s => s.worlds);
+  const setActiveWorldKey = useWorkspaceStore(s => s.setActiveWorldKey);
 
   const [name, setName] = useState('Author');
   const [capture, setCapture] = useState('');
@@ -127,24 +131,36 @@ export default function HomePage() {
 
   const attention = useMemo(() => attentionCounts(researchStates), [researchStates]);
 
-  // World Bible scoped to the active project's world, matching the rest of the app.
   const activeProject = projects.find(p => p.id === activeProjectId) ?? null;
-  const worldEntities = useMemo(() => {
-    if (!activeProject) return entities;
-    const key = worldKeyForProject(activeProject);
-    return entities.filter(e => worldKeyForEntity(e) === key);
-  }, [entities, activeProject]);
 
-  const world = useMemo(() => worldCounts(worldEntities), [worldEntities]);
+  // Shelves cover every world, not just the active one — the tile exists to move
+  // between worlds, so scoping it to the current one would defeat the point.
+  const shelves = useMemo(
+    () => buildShelves(worlds ?? [], projects, entities),
+    [worlds, projects, entities],
+  );
+
+  const [selectedShelfKey, setSelectedShelfKey] = useState<WorldKey | null>(null);
+
+  const openStory = (projectId: string) => {
+    setActiveProject(projectId);
+    setWorkspaceMode('desk');
+  };
+
+  const openBible = (key: WorldKey) => {
+    // The standalone shelf has no world of its own; null is its world key.
+    setActiveWorldKey(key === STANDALONE_KEY ? null : key);
+    setWorkspaceMode('worldBible');
+  };
 
   // A single article to resurface — stable per mount, not per render.
   const [spotlightIndex, setSpotlightIndex] = useState(0);
   useEffect(() => {
-    if (worldEntities.length > 0) {
-      setSpotlightIndex(Math.floor(Math.random() * worldEntities.length));
+    if (entities.length > 0) {
+      setSpotlightIndex(Math.floor(Math.random() * entities.length));
     }
-  }, [worldEntities.length]);
-  const spotlight = worldEntities[spotlightIndex] ?? null;
+  }, [entities.length]);
+  const spotlight = entities[spotlightIndex] ?? null;
 
   const recent = [...projects]
     .sort((a, b) => {
@@ -287,49 +303,27 @@ export default function HomePage() {
             <WritingHeatmap columns={heatmap} />
           </div>
 
-          {/* Needs attention */}
-          <div className={`${styles.tile} ${styles.tileAttention}`}>
-            <span className={styles.tileLabel}><AlertTriangle size={14} /> Needs attention</span>
-            {attention.flags + attention.suggestions > 0 ? (
-              <ul className={styles.attentionList}>
-                {attention.flags > 0 && (
-                  <li><strong>{attention.flags}</strong> consistency flag{attention.flags === 1 ? '' : 's'}</li>
-                )}
-                {attention.suggestions > 0 && (
-                  <li><strong>{attention.suggestions}</strong> suggested article{attention.suggestions === 1 ? '' : 's'}</li>
-                )}
-              </ul>
-            ) : (
-              <p className={styles.tileEmpty}>Nothing flagged. Ask the research assistant to review your world.</p>
-            )}
-            <button className={styles.tileLink} onClick={() => setWorkspaceMode('research')}>
-              Open Research <ArrowRight size={14} />
-            </button>
-          </div>
-
-          {/* World at a glance */}
+          {/* Your worlds — spines you open to reach the stories inside */}
           <div className={`${styles.tile} ${styles.tileWorld}`}>
             <div className={styles.tileHead}>
-              <span className={styles.tileLabel}><Globe size={14} /> Your world</span>
-              <span className={styles.tileHint}>{world.total} article{world.total === 1 ? '' : 's'}</span>
+              <span className={styles.tileLabel}><Globe size={14} /> Your worlds</span>
+              <span className={styles.tileHint}>
+                {shelves.length} {shelves.length === 1 ? 'shelf' : 'shelves'}
+              </span>
             </div>
-            {world.byType.length > 0 ? (
-              <ul className={styles.worldList}>
-                {world.byType.slice(0, 5).map(({ type, count }) => (
-                  <li key={type} className={styles.worldRow}>
-                    <span className={styles.worldType}>
-                      {ENTITY_TYPE_LABELS[type as EntityType] ?? type}
-                    </span>
-                    <span className={styles.worldCount}>{count}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className={styles.tileEmpty}>No articles yet.</p>
-            )}
-            <button className={styles.tileLink} onClick={() => setWorkspaceMode('worldBible')}>
-              Open World Bible <ArrowRight size={14} />
-            </button>
+            <WorldShelf
+              shelves={shelves}
+              size="tile"
+              selectedKey={selectedShelfKey}
+              onSelect={setSelectedShelfKey}
+              onOpenStory={openStory}
+              onOpenBible={openBible}
+              emptyAction={
+                <button className={styles.tileLink} onClick={() => setWorkspaceMode('bookshelf')}>
+                  Go to the Bookshelf <ArrowRight size={14} />
+                </button>
+              }
+            />
           </div>
 
           {/* From your world */}
@@ -350,6 +344,26 @@ export default function HomePage() {
             ) : (
               <p className={styles.tileEmpty}>Write an article and it will resurface here.</p>
             )}
+          </div>
+
+          {/* Needs attention */}
+          <div className={`${styles.tile} ${styles.tileAttention}`}>
+            <span className={styles.tileLabel}><AlertTriangle size={14} /> Needs attention</span>
+            {attention.flags + attention.suggestions > 0 ? (
+              <ul className={styles.attentionList}>
+                {attention.flags > 0 && (
+                  <li><strong>{attention.flags}</strong> consistency flag{attention.flags === 1 ? '' : 's'}</li>
+                )}
+                {attention.suggestions > 0 && (
+                  <li><strong>{attention.suggestions}</strong> suggested article{attention.suggestions === 1 ? '' : 's'}</li>
+                )}
+              </ul>
+            ) : (
+              <p className={styles.tileEmpty}>Nothing flagged. Ask the research assistant to review your world.</p>
+            )}
+            <button className={styles.tileLink} onClick={() => setWorkspaceMode('research')}>
+              Open Research <ArrowRight size={14} />
+            </button>
           </div>
 
           {/* Quick links */}

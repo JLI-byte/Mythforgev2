@@ -127,7 +127,7 @@
 .tileGoal      { grid-column: span 1; align-items: center; position: relative; }
 .tileStreak    { grid-column: span 1; }
 .tileAttention { grid-column: span 1; }
-.tileWorld     { grid-column: span 1; }
+.tileWorld     { grid-column: span 2; }
 .tileHeatmap   { grid-column: span 4; }
 .tileLore      { grid-column: span 2; }
 .tileLinks     { grid-column: span 2; }
@@ -310,10 +310,9 @@
 .heatmapLegend span:first-child { margin-right: 3px; }
 .heatmapLegend span:last-child { margin-left: 3px; }
 
-/* ── Attention + world lists ──────────────────────────── */
+/* ── Attention list ────────────────────────────────────── */
 
-.attentionList,
-.worldList {
+.attentionList {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -326,22 +325,6 @@
 .attentionList strong {
   color: var(--foreground, #f2f0ef);
   font-weight: 700;
-}
-.worldRow {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-}
-.worldType {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.worldCount {
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--foreground, #f2f0ef);
 }
 
 /* ── From your world ──────────────────────────────────── */
