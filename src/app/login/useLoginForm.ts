@@ -70,7 +70,7 @@ export function useLoginForm() {
             if (!res.ok) {
                 setError(body.error || 'Dev login failed');
             } else {
-                router.replace('/');
+                router.replace('/?view=home');
                 router.refresh();
             }
         } catch {

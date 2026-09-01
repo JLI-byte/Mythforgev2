@@ -13,7 +13,7 @@ import { BetaFeedbackPanel } from '@/components/layout/BetaFeedbackPanel';
 import { VersionHistoryPanel } from '@/components/layout/VersionHistoryPanel';
 import { ErrorBoundary } from '@/components/layout/ErrorBoundary';
 import ExportModal from '@/components/ui/ExportModal';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useWorkspaceStore, WORKSPACE_MODES, type WorkspaceMode } from '@/store/workspaceStore';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
 import ModeBar from '@/components/navigation/ModeBar';
 import DeskLighting from '@/components/theme/DeskLighting';
@@ -61,6 +61,7 @@ export default function Home() {
   const focusedArticleEntityId = useWorkspaceStore((state) => state.focusedArticleEntityId);
 
   const workspaceMode = useWorkspaceStore((state) => state.workspaceMode);
+  const setWorkspaceMode = useWorkspaceStore((state) => state.setWorkspaceMode);
 
 
   // Clamp panelWidth to a safe maximum based on current viewport.
@@ -80,6 +81,21 @@ export default function Home() {
     ? Math.min(panelWidth, maxPanelWidth)
     : panelWidth;
 
+
+  // Landing view. /auth/callback and the dev-login button send freshly signed-in
+  // writers to "/?view=home", so signing in always opens the Home dashboard
+  // instead of whichever mode the previous session left persisted.
+  // Read from window rather than useSearchParams: this page would otherwise need
+  // a Suspense boundary. The param is stripped afterwards so a later refresh
+  // keeps whatever mode the writer navigated to.
+  useEffect(() => {
+    const view = new URLSearchParams(window.location.search).get('view');
+    if (!view) return;
+    if ((WORKSPACE_MODES as readonly string[]).includes(view)) {
+      setWorkspaceMode(view as WorkspaceMode);
+    }
+    window.history.replaceState({}, '', window.location.pathname);
+  }, [setWorkspaceMode]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

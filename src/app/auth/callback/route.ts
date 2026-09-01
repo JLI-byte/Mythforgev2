@@ -16,8 +16,10 @@ export async function GET(request: Request) {
   // SECURITY: only accept same-site relative paths. A value like
   // "https://evil.com" or "//evil.com" would otherwise be an open redirect
   // that lands an authenticated user on an attacker-controlled page.
-  const rawNext = searchParams.get('next') ?? '/';
-  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/';
+  // Default landing after sign-in is the Home dashboard (?view= is read by the
+  // workspace on mount), not whatever mode the previous session persisted.
+  const rawNext = searchParams.get('next') ?? '/?view=home';
+  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/?view=home';
 
   if (code) {
     const supabase = await createClient();
