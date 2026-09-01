@@ -49,13 +49,17 @@ export function heatLevel(words: number, target: number): HeatmapCell['level'] {
 /**
  * Build a contribution grid ending on `end`, covering `weeks` full weeks and
  * aligned so each column is a Sunday-started week. Returns columns of 7 cells.
+ *
+ * `target` may be a function so a weekday schedule ("1000 on Fridays") shades
+ * each day against the goal that actually applied to it.
  */
 export function buildHeatmap(
     days: WritingDayLike[],
     end: Date,
     weeks: number,
-    target: number,
+    target: number | ((dateKey: string) => number),
 ): HeatmapCell[][] {
+    const targetFor = typeof target === 'function' ? target : () => target;
     // Totals per day first — a date can have one entry per project.
     const totals = new Map<string, number>();
     for (const d of days) {
@@ -75,7 +79,7 @@ export function buildHeatmap(
         for (let d = 0; d < 7; d++) {
             const key = dateKey(cursor);
             const words = totals.get(key) ?? 0;
-            col.push({ date: key, words, level: heatLevel(words, target) });
+            col.push({ date: key, words, level: heatLevel(words, targetFor(key)) });
             cursor.setDate(cursor.getDate() + 1);
         }
         cols.push(col);

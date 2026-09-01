@@ -1,0 +1,90 @@
+/* GoalRing — outer progress ring + inner draggable goal dial */
+
+.ringWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2px 0;
+}
+
+.ring { display: block; overflow: visible; }
+
+/* ── Outer ring: progress ─────────────────────────────── */
+
+.progressTrack { stroke: rgba(255, 255, 255, 0.11); }
+.progressFill {
+  stroke: #8ab4ff;
+  transition: stroke-dasharray 0.5s cubic-bezier(0.23, 1, 0.32, 1), stroke 0.3s ease;
+}
+.progressDone { stroke: #6ee7b7; }
+
+/* ── Inner ring: the goal dial ────────────────────────── */
+
+.dial {
+  cursor: grab;
+  outline: none;
+  touch-action: none; /* let the dial own vertical drags instead of scrolling the page */
+}
+.dialActive { cursor: grabbing; }
+
+.dialTrack { stroke: rgba(255, 255, 255, 0.13); }
+.dialFill {
+  stroke: rgba(255, 255, 255, 0.4);
+  transition: stroke 0.15s ease;
+}
+.dialHit {
+  stroke: transparent;
+  pointer-events: stroke;
+}
+.dialKnob {
+  fill: var(--foreground, #f2f0ef);
+  stroke: rgba(0, 0, 0, 0.35);
+  stroke-width: 1;
+  transition: r 0.15s ease, fill 0.15s ease;
+}
+
+.dial:hover .dialFill,
+.dialActive .dialFill { stroke: #8ab4ff; }
+.dial:hover .dialKnob { r: 7; }
+.dialActive .dialKnob { r: 8; fill: #8ab4ff; }
+
+.dial:focus-visible .dialKnob {
+  r: 8;
+  fill: #8ab4ff;
+  stroke: var(--foreground, #f2f0ef);
+  stroke-width: 2;
+}
+
+/* ── Center readout ───────────────────────────────────── */
+
+.ringCenter {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+  pointer-events: none; /* never steal a drag that starts over the numbers */
+}
+.ringValue {
+  font-size: 1.28rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.ringTarget {
+  font-size: 0.7rem;
+  color: var(--muted, #8b8b95);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.15s ease;
+}
+.ringTargetLive {
+  color: #8ab4ff;
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progressFill,
+  .dialFill,
+  .dialKnob,
+  .ringTarget { transition: none; }
+}

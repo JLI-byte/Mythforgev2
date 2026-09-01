@@ -124,7 +124,7 @@
 }
 
 .tileResume    { grid-column: span 2; grid-row: span 2; justify-content: center; gap: 6px; }
-.tileGoal      { grid-column: span 1; align-items: center; }
+.tileGoal      { grid-column: span 1; align-items: center; position: relative; }
 .tileStreak    { grid-column: span 1; }
 .tileAttention { grid-column: span 1; }
 .tileWorld     { grid-column: span 1; }
@@ -219,39 +219,28 @@
   transform: translateY(-1px);
 }
 
-/* ── Goal ring ────────────────────────────────────────── */
+/* ── Goal tile ────────────────────────────────────────── */
+/* The ring itself is styled in GoalRing.module.css. */
 
-.ringWrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 2px 0;
-}
-.ring { display: block; }
-.ringTrack { stroke: rgba(255, 255, 255, 0.11); }
-.ringFill {
-  stroke: #8ab4ff;
-  transition: stroke-dasharray 0.5s cubic-bezier(0.23, 1, 0.32, 1), stroke 0.3s ease;
-}
-.ringDone { stroke: #6ee7b7; }
-
-.ringCenter {
+.goalCog {
   position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1.1;
-}
-.ringValue {
-  font-size: 1.28rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.ringTarget {
-  font-size: 0.7rem;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  padding: 4px;
+  border: none;
+  border-radius: 7px;
   color: var(--muted, #8b8b95);
-  font-variant-numeric: tabular-nums;
+  background: none;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+.tileGoal:hover .goalCog,
+.goalCog:focus-visible {
+  opacity: 1;
+  color: var(--foreground, #f2f0ef);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 /* ── Streak ───────────────────────────────────────────── */

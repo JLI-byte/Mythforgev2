@@ -1,0 +1,197 @@
+/* GoalScheduleModal — per-weekday writing goals */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--glass-shadow);
+  color: var(--foreground, #f2f0ef);
+}
+
+/* ─── Header ─── */
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(var(--overlay-rgb), 0.06);
+}
+.title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.subtitle {
+  margin: 6px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--muted, #8b8b95);
+}
+.close {
+  flex-shrink: 0;
+  display: inline-flex;
+  padding: 5px;
+  color: var(--muted, #8b8b95);
+  background: none;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.close:hover {
+  color: var(--foreground, #f2f0ef);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Body ─── */
+
+.body { padding: 18px 24px; }
+
+.everydayRow,
+.dayRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.everydayLabel {
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.divider {
+  height: 1px;
+  margin: 16px 0;
+  background: rgba(var(--overlay-rgb), 0.08);
+}
+
+.dayList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dayLabel {
+  font-size: 0.86rem;
+  color: var(--muted, #8b8b95);
+}
+
+.field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input {
+  width: 92px;
+  padding: 6px 9px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--foreground, #f2f0ef);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.input:focus { border-color: #8ab4ff; }
+.input::placeholder { color: var(--muted, #8b8b95); font-weight: 400; opacity: 0.6; }
+.inputInvalid { border-color: #f08a8a; }
+/* Spinners crowd a field this narrow and fight the right alignment. */
+.input::-webkit-outer-spin-button,
+.input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.input { -moz-appearance: textfield; appearance: textfield; }
+
+.unit {
+  font-size: 0.78rem;
+  color: var(--muted, #8b8b95);
+}
+
+.clear {
+  display: inline-flex;
+  padding: 5px;
+  color: var(--muted, #8b8b95);
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+}
+.clear:hover:not(:disabled) {
+  color: var(--foreground, #f2f0ef);
+  background: rgba(255, 255, 255, 0.08);
+}
+.clear:disabled { opacity: 0.25; cursor: default; }
+
+/* ─── Footer ─── */
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 24px 18px;
+  border-top: 1px solid rgba(var(--overlay-rgb), 0.06);
+}
+.footerActions { display: flex; gap: 8px; }
+
+.reset,
+.cancel {
+  padding: 7px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted, #8b8b95);
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.reset:hover,
+.cancel:hover {
+  color: var(--foreground, #f2f0ef);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.save {
+  padding: 7px 18px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #0f1116;
+  background: var(--foreground, #f2f0ef);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+.save:hover:not(:disabled) { opacity: 0.85; }
+.save:disabled { opacity: 0.4; cursor: not-allowed; }

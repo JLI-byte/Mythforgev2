@@ -1,5 +1,8 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import {
+    emptyWeekdayTargets, normalizeWeekdayTargets, targetForDateKey, type WeekdayTargets,
+} from '@/lib/goalSchedule';
 import { logger } from '@/lib/logger';
 import { getStoredValue } from '@/lib/storage';
 import { worldKeyForProject, worldKeyForEntity, type WorldKey } from '@/lib/worldKey';
@@ -416,6 +419,11 @@ export interface WritingDay {
 /** User-configured goal settings */
 interface GoalConfig {
     dailyWordTarget: number;       // default: 200
+    /**
+     * Per-weekday word targets, index 0 = Sunday. null means "use dailyWordTarget".
+     * Resolve through targetForDateKey/targetForDayIndex rather than reading directly.
+     */
+    weekdayWordTargets: WeekdayTargets;
     dailyTimeTarget: number;       // minutes, default: 20
     primaryMetric: 'words' | 'time'; // default: 'words'
     writingDaysPerWeek: number;    // default: 5
@@ -488,7 +496,13 @@ export interface SocialPost {
     timestamp: string;
 }
 
-export type WorkspaceMode = 'home' | 'worldBible' | 'worldBibleEdit' | 'template' | 'desk' | 'hierarchy' | 'bookshelf' | 'research';
+// Single source of truth for the center-column modes. The rehydration guard
+// below and the ?view= landing param both check against this list, so adding a
+// mode here is all that is needed to make it valid everywhere.
+export const WORKSPACE_MODES = [
+    'home', 'worldBible', 'worldBibleEdit', 'template', 'desk', 'hierarchy', 'bookshelf', 'research',
+] as const;
+export type WorkspaceMode = typeof WORKSPACE_MODES[number];
 
 export interface WorkspaceState {
     workspaceMode: WorkspaceMode;
@@ -1304,7 +1318,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             articleTemplates: [],
             hierarchyTemplates: [],
             draftHierarchyLayout: null,
-            workspaceMode: 'bookshelf',
+            workspaceMode: 'home',
             worldBibles: {},
             activeWorldKey: null,
 
@@ -1312,6 +1326,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             writingDays: [],
             goalConfig: {
                 dailyWordTarget: 200,
+                weekdayWordTargets: emptyWeekdayTargets(),
                 dailyTimeTarget: 20,
                 primaryMetric: 'words',
                 writingDaysPerWeek: 5,
@@ -1729,7 +1744,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         };
                         // Compute goalMet based on primaryMetric
                         updated.goalMet = state.goalConfig.primaryMetric === 'words'
-                            ? updated.wordsWritten >= state.goalConfig.dailyWordTarget
+                            ? updated.wordsWritten >= targetForDateKey(state.goalConfig, today)
                             : updated.minutesWritten >= state.goalConfig.dailyTimeTarget;
                         updatedDays = state.writingDays.map(d =>
                             d.id === existing.id ? updated : d
@@ -1743,7 +1758,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                             wordsWritten: wordsAdded,
                             minutesWritten: minutesSpent,
                             goalMet: state.goalConfig.primaryMetric === 'words'
-                                ? wordsAdded >= state.goalConfig.dailyWordTarget
+                                ? wordsAdded >= targetForDateKey(state.goalConfig, today)
                                 : minutesSpent >= state.goalConfig.dailyTimeTarget,
                         };
                         updatedDays = [...state.writingDays, newDay];
@@ -1772,7 +1787,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     const updatedDays = state.writingDays.map(d => ({
                         ...d,
                         goalMet: newConfig.primaryMetric === 'words'
-                            ? d.wordsWritten >= newConfig.dailyWordTarget
+                            ? d.wordsWritten >= targetForDateKey(newConfig, d.date)
                             : d.minutesWritten >= newConfig.dailyTimeTarget,
                     }));
 
@@ -2391,6 +2406,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     if (!(state as unknown as Record<string, unknown>).goalConfig) {
                         state.goalConfig = {
                             dailyWordTarget: 200,
+                            weekdayWordTargets: emptyWeekdayTargets(),
                             dailyTimeTarget: 20,
                             primaryMetric: 'words',
                             writingDaysPerWeek: 5,
@@ -2398,6 +2414,10 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                             goalConfigured: false,
                         };
                     }
+
+                    // Weekday goal schedules arrived after goalConfig shipped.
+                    state.goalConfig.weekdayWordTargets =
+                        normalizeWeekdayTargets(state.goalConfig.weekdayWordTargets);
                     if (!(state as unknown as Record<string, unknown>).writingDays) state.writingDays = [];
                     if (!(state as unknown as Record<string, unknown>).earnedBadges) state.earnedBadges = [];
                     if (!(state as unknown as Record<string, unknown>).xpEvents) state.xpEvents = [];
@@ -2414,8 +2434,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     state.streakState = computeStreakFromDays(state.writingDays ?? []);
 
                     // Hydration/Migration: Ensure workspaceMode is initialized correctly for Sprint 99
-                    if (!['worldBible', 'worldBibleEdit', 'hierarchy', 'template', 'desk', 'bookshelf'].includes((state as any).workspaceMode)) {
-                        state.workspaceMode = 'bookshelf';
+                    if (!(WORKSPACE_MODES as readonly string[]).includes((state as any).workspaceMode)) {
+                        state.workspaceMode = 'home';
                     }
 
                     // Sprint 51: Migrate articleBlocks from order-based to x/y coordinate system

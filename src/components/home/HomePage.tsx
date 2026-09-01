@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Library, NotebookPen, Globe, LayoutTemplate, ArrowRight, Plus,
-  PenLine, Flame, AlertTriangle, Sparkles, Send, BookOpen,
+  PenLine, Flame, AlertTriangle, Sparkles, Send, BookOpen, Settings,
 } from 'lucide-react';
 import {
   useWorkspaceStore, WorkspaceMode, ENTITY_TYPE_LABELS, type EntityType,
@@ -16,7 +16,12 @@ import {
   dateKey, wordsOnDate, buildHeatmap, resolveResumeTarget, timeAgo,
   worldCounts, attentionCounts,
 } from '@/lib/homeStats';
+import {
+  WEEKDAY_LONG, normalizeWeekdayTargets, targetForDateKey, targetForDayIndex,
+} from '@/lib/goalSchedule';
 import { WritingHeatmap } from './WritingHeatmap';
+import GoalScheduleModal from './GoalScheduleModal';
+import { GoalRing } from './GoalRing';
 import styles from './HomePage.module.css';
 
 /**
@@ -44,34 +49,6 @@ const QUICK_LINKS: QuickLink[] = [
 /** Weeks of history in the heatmap — about six months. */
 const HEATMAP_WEEKS = 26;
 
-/** Progress ring for today's word goal. */
-function GoalRing({ written, target }: { written: number; target: number }) {
-  const size = 104;
-  const stroke = 9;
-  const r = (size - stroke) / 2;
-  const circ = 2 * Math.PI * r;
-  const pct = target > 0 ? Math.min(1, written / target) : 0;
-  const dash = circ * pct;
-
-  return (
-    <div className={styles.ringWrap}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className={styles.ring}>
-        <circle className={styles.ringTrack} cx={size / 2} cy={size / 2} r={r} fill="none" strokeWidth={stroke} />
-        <circle
-          className={`${styles.ringFill} ${pct >= 1 ? styles.ringDone : ''}`}
-          cx={size / 2} cy={size / 2} r={r} fill="none" strokeWidth={stroke} strokeLinecap="round"
-          strokeDasharray={`${dash} ${circ - dash}`}
-          transform={`rotate(-90 ${size / 2} ${size / 2})`}
-        />
-      </svg>
-      <div className={styles.ringCenter}>
-        <span className={styles.ringValue}>{written.toLocaleString()}</span>
-        <span className={styles.ringTarget}>of {target.toLocaleString()}</span>
-      </div>
-    </div>
-  );
-}
-
 export default function HomePage() {
   const setWorkspaceMode = useWorkspaceStore(s => s.setWorkspaceMode);
   const setActiveProject = useWorkspaceStore(s => s.setActiveProject);
@@ -79,6 +56,7 @@ export default function HomePage() {
   const setActiveScene = useWorkspaceStore(s => s.setActiveScene);
   const setSelectedEntity = useWorkspaceStore(s => s.setSelectedEntity);
   const updateResearchState = useWorkspaceStore(s => s.updateResearchState);
+  const updateGoalConfig = useWorkspaceStore(s => s.updateGoalConfig);
 
   const projects = useWorkspaceStore(s => s.projects);
   const documents = useWorkspaceStore(s => s.documents);
@@ -115,15 +93,36 @@ export default function HomePage() {
     [projects, documents, scenes],
   );
 
-  const target = goalConfig?.dailyWordTarget || 500;
+  // Today's goal, which a weekday schedule may override.
+  const todayIndex = new Date().getDay();
+  const target = targetForDayIndex(goalConfig, todayIndex);
+  const isScheduledToday =
+    typeof goalConfig?.weekdayWordTargets?.[todayIndex] === 'number';
+
+  const [schedulingGoals, setSchedulingGoals] = useState(false);
+
+  /**
+   * The dial always sets *today's* goal. If today has a scheduled override the
+   * drag edits that weekday; otherwise it edits the everyday target.
+   */
+  const setTodayTarget = (value: number) => {
+    if (isScheduledToday) {
+      const next = normalizeWeekdayTargets(goalConfig.weekdayWordTargets);
+      next[todayIndex] = value;
+      updateGoalConfig({ weekdayWordTargets: next });
+    } else {
+      updateGoalConfig({ dailyWordTarget: value });
+    }
+  };
   const todayWords = useMemo(
     () => wordsOnDate(writingDays, dateKey(new Date())),
     [writingDays],
   );
 
   const heatmap = useMemo(
-    () => buildHeatmap(writingDays, new Date(), HEATMAP_WEEKS, target),
-    [writingDays, target],
+    () => buildHeatmap(writingDays, new Date(), HEATMAP_WEEKS,
+      key => targetForDateKey(goalConfig, key)),
+    [writingDays, goalConfig],
   );
 
   const attention = useMemo(() => attentionCounts(researchStates), [researchStates]);
@@ -244,10 +243,20 @@ export default function HomePage() {
             )}
           </div>
 
-          {/* Today's goal */}
+          {/* Today's goal — drag the inner ring to set it, cog for the weekly schedule */}
           <div className={`${styles.tile} ${styles.tileGoal}`}>
-            <span className={styles.tileLabel}>Today</span>
-            <GoalRing written={todayWords} target={target} />
+            <span className={styles.tileLabel}>
+              {isScheduledToday ? WEEKDAY_LONG[todayIndex] : 'Today'}
+            </span>
+            <button
+              className={styles.goalCog}
+              onClick={() => setSchedulingGoals(true)}
+              title="Scheduled goals"
+              aria-label="Set scheduled goals"
+            >
+              <Settings size={15} />
+            </button>
+            <GoalRing written={todayWords} target={target} onCommit={setTodayTarget} />
             <p className={styles.tileFoot}>
               {todayWords >= target
                 ? 'Daily goal met'
@@ -398,6 +407,14 @@ export default function HomePage() {
           )}
         </section>
       </div>
+
+      {schedulingGoals && (
+        <GoalScheduleModal
+          config={goalConfig}
+          onSave={updateGoalConfig}
+          onClose={() => setSchedulingGoals(false)}
+        />
+      )}
     </div>
   );
 }
