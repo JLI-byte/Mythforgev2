@@ -1,0 +1,125 @@
+"use client";
+
+import React, { useRef } from 'react';
+import { ArrowRight } from 'lucide-react';
+import { spineFraction, type Shelf } from '@/lib/worldShelves';
+import type { WorldKey } from '@/lib/worldKey';
+import styles from './WorldShelf.module.css';
+
+/**
+ * A shelf of world spines, with the selected world opened beside them.
+ *
+ * Purely presentational — it takes a prepared Shelf[] and reports clicks. That
+ * is what lets the Home tile and, later, the Bookshelf page render the same
+ * component at different sizes without either owning the other's data wiring.
+ */
+
+interface WorldShelfProps {
+  shelves: Shelf[];
+  size: 'tile' | 'page';
+  selectedKey: WorldKey | null;
+  onSelect: (key: WorldKey) => void;
+  onOpenStory: (projectId: string) => void;
+  onOpenBible: (key: WorldKey) => void;
+  /** Rendered under the message when there are no shelves at all. */
+  emptyAction?: React.ReactNode;
+}
+
+/** How many covers fit before the panel starts to crowd. */
+const MAX_VISIBLE_COVERS = 6;
+
+export function WorldShelf({
+  shelves, size, selectedKey, onSelect, onOpenStory, onOpenBible, emptyAction,
+}: WorldShelfProps) {
+  // Declared before any early return — hooks must run unconditionally.
+  const spineRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  if (shelves.length === 0) {
+    return (
+      <div className={styles.empty}>
+        <p className={styles.emptyText}>
+          Your shelf is empty. Create a world and the stories you write in it live here.
+        </p>
+        {emptyAction}
+      </div>
+    );
+  }
+
+  // Selection always resolves to a real shelf, so the panel is never blank.
+  const selected = shelves.find(s => s.key === selectedKey) ?? shelves[0];
+
+  // Arrow keys walk the shelf, which is what a row of spines invites.
+  const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
+    let next: number | null = null;
+    if (e.key === 'ArrowRight') next = Math.min(shelves.length - 1, index + 1);
+    else if (e.key === 'ArrowLeft') next = Math.max(0, index - 1);
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = shelves.length - 1;
+    if (next === null) return;
+    e.preventDefault();
+    onSelect(shelves[next].key);
+    spineRefs.current[next]?.focus();
+  };
+
+  const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+  return (
+    <div className={`${styles.shelf} ${size === 'page' ? styles.sizePage : ''}`}>
+      <div className={styles.spines} role="tablist" aria-label="Your worlds">
+        {shelves.map((shelf, i) => {
+          const isSelected = shelf.key === selected.key;
+          return (
+            <button
+              key={shelf.key}
+              ref={el => { spineRefs.current[i] = el; }}
+              role="tab"
+              aria-selected={isSelected}
+              className={`${styles.spine} ${isSelected ? styles.spineSelected : ''}`}
+              style={{
+                height: `calc(var(--shelf-h) * ${spineFraction(shelf.stories.length)})`,
+                background: shelf.coverColor,
+              }}
+              title={`${shelf.name} — ${plural(shelf.stories.length, 'story', 'stories')}`}
+              onClick={() => onSelect(shelf.key)}
+              onKeyDown={e => handleKeyDown(e, i)}
+            >
+              <span className={styles.spineLabel}>{shelf.name}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className={styles.panel}>
+        <h3 className={styles.panelName}>{selected.name}</h3>
+        <p className={styles.panelMeta}>
+          {plural(selected.stories.length, 'story', 'stories')}
+          {' · '}
+          {plural(selected.articleCount, 'article', 'articles')}
+        </p>
+
+        {selected.stories.length > 0 ? (
+          <div className={styles.covers}>
+            {selected.stories.slice(0, MAX_VISIBLE_COVERS).map(story => (
+              <button
+                key={story.id}
+                className={styles.cover}
+                style={story.coverImageUrl
+                  ? { backgroundImage: `url(${story.coverImageUrl})` }
+                  : { background: story.coverColor }}
+                title={story.name}
+                aria-label={`Open ${story.name}`}
+                onClick={() => onOpenStory(story.id)}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className={styles.noStories}>No stories in this world yet.</p>
+        )}
+
+        <button className={styles.bibleLink} onClick={() => onOpenBible(selected.key)}>
+          Open world bible <ArrowRight size={13} />
+        </button>
+      </div>
+    </div>
+  );
+}
