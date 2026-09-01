@@ -3,6 +3,7 @@ import {
     buildShelves,
     spineFraction,
     STANDALONE_SHELF_NAME,
+    STANDALONE_SHELF_COLOR,
     SPINE_MIN_FRACTION,
 } from './worldShelves';
 import { STANDALONE_KEY } from './worldKey';
@@ -83,6 +84,25 @@ describe('buildShelves', () => {
 
         expect(buildShelves(worlds, projects, [])[0].stories.map(s => s.name))
             .toEqual(['Newer', 'Older']);
+    });
+
+    it('accepts Date objects as readily as ISO strings', () => {
+        const worlds = [
+            { id: 'w2', name: 'Later', createdAt: new Date('2026-05-01T00:00:00.000Z'), coverColor: '#111' },
+            { id: 'w1', name: 'Earlier', createdAt: new Date('2026-01-01T00:00:00.000Z'), coverColor: '#222' },
+        ];
+
+        expect(buildShelves(worlds, [], []).map(s => s.name)).toEqual(['Earlier', 'Later']);
+    });
+
+    it('falls back to the standalone grey when a world or project has no cover colour', () => {
+        const worlds = [{ id: 'w1', name: 'Colourless', createdAt: '2026-01-01T00:00:00.000Z' }];
+        const projects = [{ id: 'p1', name: 'Plain', worldId: 'w1', createdAt: '2026-01-01T00:00:00.000Z' }];
+
+        const shelf = buildShelves(worlds, projects, [])[0];
+
+        expect(shelf.coverColor).toBe(STANDALONE_SHELF_COLOR);
+        expect(shelf.stories[0].coverColor).toBe(STANDALONE_SHELF_COLOR);
     });
 
     it('falls back to the project createdAt when updatedAt is missing', () => {
