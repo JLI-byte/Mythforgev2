@@ -382,7 +382,12 @@
   font-size: 16px;
   line-height: 1.6;
   outline: none;
-  max-width: 800px;
+  /* In ch, not px. The cap is a reading measure, so it has to track the font:
+     the writing zone is a resizable docked widget and the desk has its own
+     font-size control, and an 800px cap would let the measure blow past 90
+     characters the moment either grew. 76ch is the width this already
+     rendered at. */
+  max-width: 76ch;
   margin: 0 auto;
   flex: 1;
   user-select: text !important;
