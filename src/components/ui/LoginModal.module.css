@@ -118,7 +118,7 @@
   align-items: center;
   gap: 12px;
   margin: 24px 0;
-  color: rgba(var(--overlay-rgb), 0.2);
+  color: var(--muted);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;

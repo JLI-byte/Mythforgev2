@@ -64,7 +64,7 @@
 
 .setupHint {
     font-size: 0.72rem;
-    color: rgba(var(--overlay-rgb), 0.4);
+    color: var(--muted);
     margin: 0.3rem 0 0.75rem 0;
 }
 

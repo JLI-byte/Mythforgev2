@@ -458,7 +458,7 @@
 }
 
 .card_markdown .cardDocCount {
-    color: rgba(var(--overlay-rgb),0.45);
+    color: var(--muted);
 }
 
 .card_markdown:hover {

@@ -175,7 +175,7 @@
 .emptyHint {
   padding: 12px;
   font-size: 12px;
-  color: rgba(var(--overlay-rgb), 0.3);
+  color: var(--muted);
   text-align: center;
   font-style: italic;
 }
@@ -278,7 +278,7 @@
 .landingSubtitle {
   font-family: 'Inter', sans-serif;
   font-size: 18px;
-  color: rgba(var(--overlay-rgb), 0.5);
+  color: var(--muted);
   max-width: 600px;
   line-height: 1.6;
 }
