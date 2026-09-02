@@ -573,26 +573,6 @@
     opacity: 0.2;
 }
 
-.shelfDeleteConfirm {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 0.7rem;
-    color: #ff6b6b;
-    background: rgba(255, 107, 107, 0.05);
-    padding: 4px 12px;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 107, 107, 0.2);
-    animation: fadeIn 0.2s ease-out;
-}
-
-.shelfDeleteConfirm button {
-    padding: 4px 10px;
-    font-size: 0.6875rem;
-    border-radius: 12px;
-}
-
 /* ── New-work step 1: what are you writing? ─────────────── */
 
 .workTypeGrid {
@@ -675,7 +655,7 @@
     }
 }
 
-/* ── Book delete (hover ✕ → in-place confirm) ───────────── */
+/* ── Book delete (hover ✕ → confirmation modal) ──────────── */
 
 .bookDeleteBtn {
     position: absolute;
@@ -705,53 +685,4 @@
 .bookDeleteBtn:hover {
     background: var(--danger, #e5484d);
     border-color: var(--danger, #e5484d);
-}
-
-.bookConfirm {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 76%;
-    z-index: 3;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 6px;
-    background: rgba(0, 0, 0, 0.82);
-    border-radius: 8px;
-}
-
-.bookConfirmText {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: #fff;
-}
-
-.bookConfirmActions {
-    display: flex;
-    gap: 5px;
-}
-
-.bookConfirmNo,
-.bookConfirmYes {
-    padding: 3px 9px;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    border-radius: 6px;
-    cursor: pointer;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-}
-
-.bookConfirmYes {
-    background: var(--danger, #e5484d);
-    border-color: var(--danger, #e5484d);
-}
-
-.bookConfirmNo:hover {
-    background: rgba(255, 255, 255, 0.2);
 }

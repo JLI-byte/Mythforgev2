@@ -63,7 +63,7 @@ export function Bookshelf() {
     const [wizardStep, setWizardStep] = useState<1 | 2 | 3>(1);
     const [editingWorldId, setEditingWorldId] = useState<string | null>(null);
     const [deletingWorldId, setDeletingWorldId] = useState<string | null>(null);
-    /** Book awaiting delete confirmation (two-step, in place on the cover). */
+    /** Book awaiting delete confirmation, shown in the same modal as a shelf delete. */
     const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
 
     /** Extra rows added per shelf beyond the default 3 (keyed by world id / 'standalone'). */
@@ -96,16 +96,19 @@ export function Bookshelf() {
 
     // ─── EFFECTS ──────────────────────────────────────────────
 
-    /** Escape key listener for closing the wizard modal */
+    /** Escape key listener for closing the wizard modal or a delete confirmation */
     useEffect(() => {
         const handleEsc = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') resetWizard();
+            if (e.key !== 'Escape') return;
+            if (isWizardOpen) resetWizard();
+            else if (deletingProjectId) setDeletingProjectId(null);
+            else if (deletingWorldId) setDeletingWorldId(null);
         };
-        if (isWizardOpen) {
+        if (isWizardOpen || deletingProjectId || deletingWorldId) {
             window.addEventListener('keydown', handleEsc);
         }
         return () => window.removeEventListener('keydown', handleEsc);
-    }, [isWizardOpen]);
+    }, [isWizardOpen, deletingProjectId, deletingWorldId]);
 
     // ─── HELPERS ──────────────────────────────────────────────
 
@@ -395,33 +398,13 @@ export function Bookshelf() {
 
                 {/* Delete lives on the slot, not the cover: the cover tilts 18°
                     on hover, which would make a button inside it hard to hit. */}
-                {isDeleting ? (
-                    <div className={styles.bookConfirm} onClick={e => e.stopPropagation()}>
-                        <span className={styles.bookConfirmText}>Delete?</span>
-                        <div className={styles.bookConfirmActions}>
-                            <button
-                                className={styles.bookConfirmNo}
-                                onClick={() => setDeletingProjectId(null)}
-                            >
-                                No
-                            </button>
-                            <button
-                                className={styles.bookConfirmYes}
-                                onClick={() => { deleteProject(p.id); setDeletingProjectId(null); }}
-                            >
-                                Yes
-                            </button>
-                        </div>
-                    </div>
-                ) : (
-                    <button
-                        className={styles.bookDeleteBtn}
-                        title={`Delete “${p.name}”`}
-                        onClick={e => { e.stopPropagation(); setDeletingProjectId(p.id); }}
-                    >
-                        <X size={14} />
-                    </button>
-                )}
+                <button
+                    className={styles.bookDeleteBtn}
+                    title={`Delete “${p.name}”`}
+                    onClick={e => { e.stopPropagation(); setDeletingProjectId(p.id); }}
+                >
+                    <X size={14} />
+                </button>
             </div>
         );
     };
@@ -483,14 +466,6 @@ export function Bookshelf() {
                                 <Trash2 size={14} />
                             </button>
                         </>
-                    )}
-
-                    {isDeleting && (
-                        <div className={styles.shelfDeleteConfirm}>
-                            <span>Delete this shelf? Stories will move to Uncategorized.</span>
-                            <button className={styles.wizardBtnSecondary} onClick={() => setDeletingWorldId(null)}>Cancel</button>
-                            <button className={styles.wizardBtnPrimary} onClick={() => { deleteWorld(worldId); setDeletingWorldId(null); }}>Delete</button>
-                        </div>
                     )}
 
                     {!isDeleting && (
@@ -837,6 +812,45 @@ export function Bookshelf() {
                                 </div>
                             </>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* ─── DELETE CONFIRMATION MODAL (shared: book or shelf) ── */}
+            {deletingProjectId && (
+                <div className={styles.wizardBackdrop} onClick={() => setDeletingProjectId(null)}>
+                    <div className={styles.wizardModal} onClick={e => e.stopPropagation()}>
+                        <h2 className={styles.wizardTitle}>
+                            Delete “{projects.find(p => p.id === deletingProjectId)?.name}”?
+                        </h2>
+                        <p className={styles.briefHint}>Its chapters and scenes go with it. This cannot be undone.</p>
+                        <div className={styles.wizardActions}>
+                            <button className={styles.wizardBtnSecondary} onClick={() => setDeletingProjectId(null)}>Cancel</button>
+                            <button
+                                className={styles.wizardBtnPrimary}
+                                onClick={() => { deleteProject(deletingProjectId); setDeletingProjectId(null); }}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {deletingWorldId && (
+                <div className={styles.wizardBackdrop} onClick={() => setDeletingWorldId(null)}>
+                    <div className={styles.wizardModal} onClick={e => e.stopPropagation()}>
+                        <h2 className={styles.wizardTitle}>Delete this shelf?</h2>
+                        <p className={styles.briefHint}>Stories will move to Uncategorized. This cannot be undone.</p>
+                        <div className={styles.wizardActions}>
+                            <button className={styles.wizardBtnSecondary} onClick={() => setDeletingWorldId(null)}>Cancel</button>
+                            <button
+                                className={styles.wizardBtnPrimary}
+                                onClick={() => { deleteWorld(deletingWorldId); setDeletingWorldId(null); }}
+                            >
+                                Delete
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
