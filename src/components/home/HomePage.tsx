@@ -224,8 +224,12 @@ export default function HomePage() {
       <div className={styles.inner}>
         <header className={styles.hero}>
           <div>
+            {/* The page is Home; the greeting is a greeting. Marking the
+                writer's own name as the page heading made a screen reader
+                announce the page as the person reading it. */}
+            <h1 className={styles.pageTitle}>Home</h1>
             <p className={styles.greeting}>{greeting},</p>
-            <h1 className={styles.name}>{name}</h1>
+            <p className={styles.name}>{name}</p>
           </div>
 
           <div className={styles.captureRow}>
@@ -234,6 +238,7 @@ export default function HomePage() {
               value={capture}
               onChange={e => setCapture(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') captureIdea(); }}
+              aria-label="Capture an idea"
               placeholder={activeProject
                 ? `Capture an idea for ${activeProject.name}…`
                 : 'Open a project to capture ideas…'}

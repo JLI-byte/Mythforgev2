@@ -24,6 +24,19 @@
   gap: 20px;
   margin-bottom: 28px;
 }
+/* Present to assistive tech, absent on screen — the visible hierarchy starts
+   at the greeting, but the document still needs a heading that names the page. */
+.pageTitle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .greeting {
   margin: 0;
   font-size: 1rem;
@@ -233,8 +246,20 @@
   background: none;
   cursor: pointer;
   opacity: 0.5;
+  position: relative;
   transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
 }
+/* The icon stays 15px; the target reaches Apple's 44pt minimum. */
+.goalCog::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+
 .tileGoal:hover .goalCog,
 .goalCog:focus-visible {
   opacity: 1;
