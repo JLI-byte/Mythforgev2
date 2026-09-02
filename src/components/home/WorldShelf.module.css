@@ -3,8 +3,8 @@
 .shelf {
   --spine-w: 34px;
   --shelf-min: 150px;
-  --cover-w: 34px;
-  --cover-h: 48px;
+  --cover-w: 58px;
+  --cover-h: 84px;
   display: flex;
   gap: 14px;
   align-items: stretch;
@@ -18,8 +18,8 @@
 .sizePage {
   --spine-w: 46px;
   --shelf-min: 260px;
-  --cover-w: 52px;
-  --cover-h: 72px;
+  --cover-w: 84px;
+  --cover-h: 122px;
 }
 
 /* Spines */
@@ -120,14 +120,34 @@
 .cover {
   width: var(--cover-w);
   height: var(--cover-h);
+  flex-shrink: 0;
   padding: 0;
   border: none;
-  border-radius: 2px 3px 3px 2px;
+  border-radius: 2px 4px 4px 2px;
   background-size: cover;
   background-position: center;
   cursor: pointer;
-  box-shadow: inset 3px 0 0 rgba(0, 0, 0, 0.3);
+  box-shadow:
+    inset 4px 0 0 rgba(0, 0, 0, 0.32),
+    inset -1px 0 0 rgba(255, 255, 255, 0.1),
+    0 2px 6px rgba(0, 0, 0, 0.35);
   transition: transform 0.15s ease;
+}
+
+/* Stories beyond what fits, so the shelf never hides work silently. */
+.coverMore {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--cover-w);
+  height: var(--cover-h);
+  flex-shrink: 0;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 2px 4px 4px 2px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted, #8b8b95);
 }
 .cover:hover { transform: translateY(-2px); }
 .cover:focus-visible { outline: 2px solid #8ab4ff; outline-offset: 2px; }

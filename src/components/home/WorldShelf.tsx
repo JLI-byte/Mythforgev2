@@ -25,8 +25,8 @@ interface WorldShelfProps {
   emptyAction?: React.ReactNode;
 }
 
-/** How many covers fit before the panel starts to crowd. */
-const MAX_VISIBLE_COVERS = 6;
+/** How many cover slots fit across the panel before it crowds. */
+const MAX_COVER_SLOTS = 5;
 
 export function WorldShelf({
   shelves, size, selectedKey, onSelect, onOpenStory, onOpenBible, emptyAction,
@@ -67,6 +67,14 @@ export function WorldShelf({
   };
 
   const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+  // When the stories outnumber the slots, give up one slot to say how many are
+  // not shown rather than truncating in silence. hiddenCount is derived from
+  // what actually rendered, so the badge and its tooltip cannot disagree.
+  const visibleStories = selected.stories.length > MAX_COVER_SLOTS
+    ? selected.stories.slice(0, MAX_COVER_SLOTS - 1)
+    : selected.stories;
+  const hiddenCount = selected.stories.length - visibleStories.length;
 
   return (
     <div className={`${styles.shelf} ${size === 'page' ? styles.sizePage : ''}`}>
@@ -113,7 +121,7 @@ export function WorldShelf({
 
         {selected.stories.length > 0 ? (
           <div className={styles.covers}>
-            {selected.stories.slice(0, MAX_VISIBLE_COVERS).map(story => (
+            {visibleStories.map(story => (
               <button
                 key={story.id}
                 className={styles.cover}
@@ -125,6 +133,14 @@ export function WorldShelf({
                 onClick={() => onOpenStory(story.id)}
               />
             ))}
+            {hiddenCount > 0 && (
+              <span
+                className={styles.coverMore}
+                title={`${plural(hiddenCount, 'more story', 'more stories')} in this world`}
+              >
+                +{hiddenCount}
+              </span>
+            )}
           </div>
         ) : (
           <p className={styles.noStories}>No stories in this world yet.</p>
