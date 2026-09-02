@@ -20,7 +20,7 @@ Regression safety net for every task: `npx tsc --noEmit --pretty false` clean, a
 
 ## Scope note
 
-Twelve tasks, largely independent. **Tasks 1–4 are the core** — they close the critical finding and three of the five significant ones, and could ship alone if the rest is deferred. Tasks 5–12 are polish and consistency.
+Thirteen tasks, largely independent. **Tasks 1–4 are the core** — they close the critical finding and three of the five significant ones, and could ship alone if the rest is deferred. Tasks 5–12 are polish and consistency; Task 13 is the regression pass.
 
 ## File Structure
 
@@ -33,7 +33,7 @@ Twelve tasks, largely independent. **Tasks 1–4 are the core** — they close t
 | `src/components/editor/WritingDesk.module.css` (modify) | Centre and widen the writing sheet. |
 | `src/components/management/Bookshelf.tsx` (modify) | Route book deletion through the modal confirm. |
 | `src/components/home/HomePage.tsx` (modify) | Heading semantics, input labels. |
-| `src/components/world/WorldBibleFolderTree.tsx` (modify) | Empty-state actions. |
+| `WorldBibleCenter/Home/Root.tsx` (modify) | Empty-strip copy. |
 | `src/components/editor/WritingDesk.tsx` (modify) | Remove the in-app splash branding. |
 
 ---
