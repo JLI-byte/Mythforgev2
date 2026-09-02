@@ -93,6 +93,9 @@ export function WorldBiblePanel({ isOpen, onClose, onTabClick, tabWidth, onTabWi
             <div
                 className={`${styles.panel} ${isOpen ? styles.open : ''}`}
                 style={{ width: panelWidth }}
+                // A closed panel is only pushed off-screen, not unmounted — without this it
+                // keeps its tab stops and stays in the accessibility tree.
+                inert={!isOpen}
             >
                 {/* panelInner clips content so it doesn't bleed when panel is closed */}
             <div className={styles.panelInner}>

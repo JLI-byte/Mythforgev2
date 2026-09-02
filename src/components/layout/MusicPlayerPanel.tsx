@@ -187,6 +187,9 @@ export function MusicPlayerPanel({
             <div
                 className={`${styles.panel} ${isOpen ? styles.open : ''}`}
                 style={{ width: panelWidth }}
+                // A closed panel is only pushed off-screen, not unmounted — without this it
+                // keeps its tab stops and stays in the accessibility tree.
+                inert={!isOpen}
             >
                 <div className={styles.panelInner} style={{ paddingRight: tabWidth }}>
                     {/* Resize handle */}
