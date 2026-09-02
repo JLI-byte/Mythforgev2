@@ -11,7 +11,7 @@ import {
 import { createClient } from '@/lib/supabase/client';
 import { researchScopeKey } from '@/lib/researchScope';
 import { makeNoteCard } from '@/lib/researchBoard';
-import { STANDALONE_KEY, type WorldKey } from '@/lib/worldKey';
+import { worldKeyForProject, worldKeyForEntity, type WorldKey } from '@/lib/worldKey';
 import {
   dateKey, wordsOnDate, buildHeatmap, resolveResumeTarget, timeAgo,
   attentionCounts,
@@ -142,25 +142,31 @@ export default function HomePage() {
 
   const [selectedShelfKey, setSelectedShelfKey] = useState<WorldKey | null>(null);
 
-  const openStory = (projectId: string) => {
-    setActiveProject(projectId);
-    setWorkspaceMode('desk');
-  };
-
   const openBible = (key: WorldKey) => {
-    // The standalone shelf has no world of its own; null is its world key.
-    setActiveWorldKey(key === STANDALONE_KEY ? null : key);
+    // Pass the shelf key straight through, standalone included. Handing the
+    // store null would read as "not chosen yet" and make setWorkspaceMode
+    // re-derive the world from the active project, quietly opening the wrong
+    // bible. STANDALONE_KEY is the value worldKeyForProject itself returns.
+    setActiveWorldKey(key);
     setWorkspaceMode('worldBible');
   };
+
+  // The spotlight stays scoped to the world the writer is in — the tile reads
+  // "From your world", singular, so it must not surface another world's lore.
+  const worldEntities = useMemo(() => {
+    if (!activeProject) return entities;
+    const key = worldKeyForProject(activeProject);
+    return entities.filter(e => worldKeyForEntity(e) === key);
+  }, [entities, activeProject]);
 
   // A single article to resurface — stable per mount, not per render.
   const [spotlightIndex, setSpotlightIndex] = useState(0);
   useEffect(() => {
-    if (entities.length > 0) {
-      setSpotlightIndex(Math.floor(Math.random() * entities.length));
+    if (worldEntities.length > 0) {
+      setSpotlightIndex(Math.floor(Math.random() * worldEntities.length));
     }
-  }, [entities.length]);
-  const spotlight = entities[spotlightIndex] ?? null;
+  }, [worldEntities.length]);
+  const spotlight = worldEntities[spotlightIndex] ?? null;
 
   const recent = [...projects]
     .sort((a, b) => {
@@ -316,7 +322,7 @@ export default function HomePage() {
               size="tile"
               selectedKey={selectedShelfKey}
               onSelect={setSelectedShelfKey}
-              onOpenStory={openStory}
+              onOpenStory={openProject}
               onOpenBible={openBible}
               emptyAction={
                 <button className={styles.tileLink} onClick={() => setWorkspaceMode('bookshelf')}>

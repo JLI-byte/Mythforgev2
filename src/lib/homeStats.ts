@@ -172,18 +172,6 @@ export function timeAgo(then: Date, now: Date = new Date()): string {
     return `${years} year${years === 1 ? '' : 's'} ago`;
 }
 
-/** Counts of World Bible entries by type, highest first, plus the total. */
-export function worldCounts(
-    entities: { type: string }[],
-): { total: number; byType: { type: string; count: number }[] } {
-    const map = new Map<string, number>();
-    for (const e of entities) map.set(e.type, (map.get(e.type) ?? 0) + 1);
-    const byType = [...map.entries()]
-        .map(([type, count]) => ({ type, count }))
-        .sort((a, b) => b.count - a.count || a.type.localeCompare(b.type));
-    return { total: entities.length, byType };
-}
-
 /**
  * Pending flags and article suggestions across every research board, so Home
  * can show one "needs attention" tally. Mirrors the widget content shapes.

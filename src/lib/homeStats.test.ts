@@ -6,7 +6,6 @@ import {
     buildHeatmap,
     resolveResumeTarget,
     timeAgo,
-    worldCounts,
     attentionCounts,
 } from './homeStats';
 
@@ -154,21 +153,6 @@ describe('timeAgo', () => {
 
     it('singularises a one-unit gap', () => {
         expect(timeAgo(new Date(2026, 5, 10, 11, 0, 0), now)).toBe('1 hour ago');
-    });
-});
-
-describe('worldCounts', () => {
-    it('counts by type, most common first', () => {
-        const r = worldCounts([
-            { type: 'character' }, { type: 'character' }, { type: 'location' },
-        ]);
-        expect(r.total).toBe(3);
-        expect(r.byType[0]).toEqual({ type: 'character', count: 2 });
-        expect(r.byType[1]).toEqual({ type: 'location', count: 1 });
-    });
-
-    it('handles an empty world', () => {
-        expect(worldCounts([])).toEqual({ total: 0, byType: [] });
     });
 });
 
