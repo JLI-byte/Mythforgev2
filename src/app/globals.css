@@ -40,10 +40,14 @@
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-serif: 'Merriweather', 'Georgia', serif;
 
-  /* RGB used for subtle hover/surface overlays (rgba(var(--overlay-rgb), a)).
-     White by default to preserve the original glass-on-dark look; the fantasy
-     family overrides it with ink (light) / warm cream (dark). */
-  --overlay-rgb: 255, 255, 255;
+  /* RGB for hover and surface overlays: rgba(var(--overlay-rgb), a). It must
+     be whatever contrasts with the ground, so it flips per theme — ink here,
+     white in the dark blocks, exactly as the fantasy family already does.
+     It was white everywhere "to preserve the original glass-on-dark look",
+     which meant white-on-white in light theme: all 259 uses measured a
+     luminance delta of exactly zero at every alpha. Every hover state,
+     divider and surface tint was invisible. */
+  --overlay-rgb: 20, 22, 28;
 
   /* Wash painted over the main content area (e.g. Bookshelf container). Dark by
      default so default themes are unchanged; fantasy goes faint so the wood
@@ -77,6 +81,8 @@ option {
      ground, measuring 3.16:1 across 37 elements on Home alone. */
   :root:not([data-theme="light"]) {
     --background: #0e0e0e;
+    /* Ink in light, white here — see the base :root note. */
+    --overlay-rgb: 255, 255, 255;
     --background-rgb: 14, 14, 14;
     --surface: #131313;
     --surface-mid: #1c1b1b;
@@ -101,6 +107,8 @@ option {
 /* Manual overrides driven by JS toggle */
 :root[data-theme="dark"] {
   --background: #0e0e0e;
+  /* Ink in light, white here — see the base :root note. */
+  --overlay-rgb: 255, 255, 255;
   --background-rgb: 14, 14, 14;
   --surface: #131313;
   --surface-mid: #1c1b1b;
