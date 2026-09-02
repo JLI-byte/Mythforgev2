@@ -97,7 +97,7 @@ export default function WorldBibleRoot({ root, onNavigate }: WorldBibleRootProps
                                     {child.label}
                                 </span>
                                 <span className={styles.subcategoryCount}>
-                                    {count > 0 ? `${count} ${count === 1 ? 'entry' : 'entries'}` : 'No entries yet'}
+                                    {count > 0 ? `${count} ${count === 1 ? 'entry' : 'entries'}` : 'Empty — open to add'}
                                 </span>
                             </button>
                         );

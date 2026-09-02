@@ -6781,3 +6781,26 @@
 }
 
 .vnEdgeArrow { fill: rgba(124, 92, 255, 0.55); }
+
+.canvasEmptyHint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 34ch;
+  text-align: center;
+  /* Must never swallow a click meant for the canvas underneath. */
+  pointer-events: none;
+}
+.canvasEmptyTitle {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+.canvasEmptyBody {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--muted);
+}

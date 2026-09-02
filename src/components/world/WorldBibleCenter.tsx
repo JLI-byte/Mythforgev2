@@ -492,7 +492,7 @@ export default function WorldBibleCenter() {
                                 <span className={styles.stripIcon}>{child.icon}</span>
                                 <span className={styles.stripName}>{child.label}</span>
                                 <span className={styles.stripMeta}>
-                                    {count > 0 ? `${count} ${count === 1 ? 'entry' : 'entries'}` : 'No entries yet'}
+                                    {count > 0 ? `${count} ${count === 1 ? 'entry' : 'entries'}` : 'Empty — open to add'}
                                 </span>
                             </span>
                         </button>

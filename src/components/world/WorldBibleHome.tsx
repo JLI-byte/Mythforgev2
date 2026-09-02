@@ -143,7 +143,7 @@ export default function WorldBibleHome({ onNavigate }: WorldBibleHomeProps) {
                             <div className={styles.categoryCenter}>
                                 <span className={styles.categoryLabel}>{root.label}</span>
                                 <span className={styles.categoryCount}>
-                                    {count > 0 ? `${count} ${count === 1 ? 'entry' : 'entries'}` : 'No entries yet'}
+                                    {count > 0 ? `${count} ${count === 1 ? 'entry' : 'entries'}` : 'Empty — open to add'}
                                 </span>
                                 <div className={styles.subcategoryPills}>
                                     {layout.roots.filter(r => r.parentId === root.id).map(child => {

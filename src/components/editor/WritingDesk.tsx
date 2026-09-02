@@ -633,7 +633,17 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
         <SurfaceCanvas ref={surfaceCanvasRef} containerRef={viewportRef} zoom={zoom} offset={canvasOffset} />
         
         <div className={`${styles.saveIndicator} ${isSaved ? styles.saveIndicatorActive : ''}`}>✓ Saved</div>
-        
+
+        {isResearch && widgets.length === 0 && (
+          <div className={styles.canvasEmptyHint}>
+            <p className={styles.canvasEmptyTitle}>Nothing on this board yet</p>
+            <p className={styles.canvasEmptyBody}>
+              Notes, clippings and links about this project, arranged however you think.
+              The assistant can read everything you put here.
+            </p>
+          </div>
+        )}
+
         <div ref={canvasRef} className={styles.deskCanvasInner} style={{ transform: `translate(${canvasOffset.x}px, ${canvasOffset.y}px) scale(${zoom})` }}>
           {/* Ghost Box (Now inside scaled layer) */}
           <div ref={drawGhostRef} className={styles.deskDrawGhost} style={{ display: 'none', position: 'absolute', pointerEvents: 'none', zIndex: 9999 }} />
