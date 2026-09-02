@@ -474,8 +474,7 @@ export function Bookshelf() {
                             <button 
                                 className={styles.deleteBtn} 
                                 onClick={() => setDeletingWorldId(worldId)}
-                                disabled={worlds.length <= 1}
-                                title={worlds.length <= 1 ? "Cannot delete your only shelf" : "Delete Shelf"}
+                                title="Delete Shelf"
                             >
                                 🗑️
                             </button>
