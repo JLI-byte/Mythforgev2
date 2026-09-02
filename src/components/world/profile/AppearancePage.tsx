@@ -24,10 +24,10 @@ export default function AppearancePage({ profile, editing, update }: PageProps) 
                 renderItem={(s, i, onItem) => (
                     <div className={styles.colorSwatch} style={{ ['--swatch' as string]: s.hex }}>
                         {editing
-                            ? <input type="color" value={s.hex} onChange={(e) => onItem({ hex: e.target.value })} />
+                            ? <input type="color" aria-label={s.name ? `${s.name} colour` : 'Palette colour'} value={s.hex} onChange={(e) => onItem({ hex: e.target.value })} />
                             : <i />}
                         {editing
-                            ? <EditableText editing value={s.name} onChange={(v) => onItem({ name: v })} />
+                            ? <EditableText editing label="Colour name" value={s.name} onChange={(v) => onItem({ name: v })} />
                             : <b>{s.name}</b>}
                         <span>{s.hex}</span>
                     </div>
@@ -45,7 +45,7 @@ export default function AppearancePage({ profile, editing, update }: PageProps) 
                     <div className={`${styles.lookItem} ${i === 0 ? styles.large : ''}`}>
                         <EditableImage editing={editing} value={l.image} onChange={(v) => onItem({ image: v })} alt={l.label} />
                         {editing
-                            ? <EditableText editing value={l.label} onChange={(v) => onItem({ label: v })} />
+                            ? <EditableText editing label="Look label" value={l.label} onChange={(v) => onItem({ label: v })} />
                             : <b>{l.label}</b>}
                         {editing
                             ? <EditableText editing value={l.value ?? ''} placeholder="detail" onChange={(v) => onItem({ value: v })} />
@@ -56,7 +56,7 @@ export default function AppearancePage({ profile, editing, update }: PageProps) 
 
             <div className={styles.appearanceBlock}>
                 <b>Visual Impression</b>
-                <EditableText as="p" multiline editing={editing} value={profile.visualImpression ?? ''}
+                <EditableText as="p" multiline editing={editing} label="Visual impression" value={profile.visualImpression ?? ''}
                     placeholder="No visual impression yet." onChange={(v) => update({ visualImpression: v })} />
             </div>
 
@@ -71,7 +71,7 @@ export default function AppearancePage({ profile, editing, update }: PageProps) 
                     <div className={styles.appearanceSection}>
                         <div className={styles.appearanceSectionHead}>
                             {editing
-                                ? <EditableText editing value={sec.label} onChange={(v) => onItem({ label: v })} />
+                                ? <EditableText editing label="Section label" value={sec.label} onChange={(v) => onItem({ label: v })} />
                                 : <b>{sec.label}</b>}
                             {editing
                                 ? <EditableText editing value={sec.note ?? ''} placeholder="note" onChange={(v) => onItem({ note: v })} />

@@ -73,6 +73,7 @@ export default function WorldBibleHome({ onNavigate }: WorldBibleHomeProps) {
                 <input
                     type="text"
                     className={styles.searchInput}
+                    aria-label="Search entries"
                     placeholder="Search entries..."
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}

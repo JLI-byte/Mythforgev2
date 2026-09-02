@@ -6,6 +6,7 @@ import { getWorldBibleConfig, SUBCATEGORY_LABELS, SUBCATEGORY_ICONS } from '@/li
 import { sanitizeLabel } from '@/lib/sanitize';
 import { worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
 import { folderMemberSet } from '@/lib/folderTree';
+import { FileText } from 'lucide-react';
 import ArticleView from './ArticleView';
 
 import styles from './WorldBibleCenter.module.css';
@@ -312,6 +313,7 @@ export default function WorldBibleCenter() {
                     <input
                         className={styles.newFolderInput}
                         autoFocus
+                        aria-label="Article title"
                         placeholder="Article title…"
                         value={draftName}
                         onChange={(e) => setDraftName(e.target.value)}
@@ -323,6 +325,7 @@ export default function WorldBibleCenter() {
                     {effectiveTypes(currentFolder).length > 1 && (
                         <select
                             className={styles.newFolderSelect}
+                            aria-label="Article category"
                             value={draftType}
                             onChange={(e) => setDraftType(e.target.value as EntityType)}
                         >
@@ -361,6 +364,7 @@ export default function WorldBibleCenter() {
                     <input
                         className={styles.newFolderInput}
                         autoFocus
+                        aria-label="Folder name"
                         placeholder="Folder name…"
                         value={draftName}
                         onChange={(e) => setDraftName(e.target.value)}
@@ -398,6 +402,7 @@ export default function WorldBibleCenter() {
                     <input
                         className={styles.newFolderInput}
                         autoFocus
+                        aria-label="Article title"
                         placeholder="Article title…"
                         value={draftName}
                         onChange={(e) => setDraftName(e.target.value)}
@@ -409,6 +414,7 @@ export default function WorldBibleCenter() {
                     {effectiveTypes(currentFolder).length > 1 && (
                         <select
                             className={styles.newFolderSelect}
+                            aria-label="Article category"
                             value={draftType}
                             onChange={(e) => setDraftType(e.target.value as EntityType)}
                         >
@@ -430,7 +436,7 @@ export default function WorldBibleCenter() {
         ) : (
             <button className={`${styles.strip} ${styles.stripNew}`} onClick={() => openCreate('article', currentFolder)}>
                 <span className={styles.stripBody}>
-                    <span className={styles.stripIcon}>📄</span>
+                    <span className={styles.stripIcon}><FileText size={32} aria-hidden="true" /></span>
                     <span className={styles.stripName}>New Article</span>
                 </span>
             </button>

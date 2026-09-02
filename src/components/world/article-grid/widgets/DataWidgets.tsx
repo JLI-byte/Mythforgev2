@@ -13,8 +13,8 @@ export function StatBlockWidget({ content, onChange }: { content: any; onChange:
     <div className={styles.statBlock}>
       {rows.map((row, i) => (
         <div key={i} className={styles.statRow}>
-          <input className={styles.statLabel} type="text" placeholder="Label" value={row.label} onChange={(e) => updateRow(i, 'label', e.target.value)} />
-          <input className={styles.statValue} type="text" placeholder="Value" value={row.value} onChange={(e) => updateRow(i, 'value', e.target.value)} />
+          <input className={styles.statLabel} type="text" aria-label={`Row ${i + 1} label`} placeholder="Label" value={row.label} onChange={(e) => updateRow(i, 'label', e.target.value)} />
+          <input className={styles.statValue} type="text" aria-label={`Row ${i + 1} value`} placeholder="Value" value={row.value} onChange={(e) => updateRow(i, 'value', e.target.value)} />
           <button className={styles.statDelete} onClick={() => onChange({ ...content, rows: rows.filter((_, j) => j !== i) })} aria-label="Remove row"><X size={14} /></button>
         </div>
       ))}
@@ -29,8 +29,8 @@ export function TableWidget({ content, onChange }: { content: any; onChange: (c:
   return (
     <div className={styles.tableWidget}>
       <table className={styles.table}>
-        <thead><tr>{headers.map((h, i) => (<th key={i}><input className={styles.tableCell} value={h} onChange={(e) => { const next = [...headers]; next[i] = e.target.value; onChange({ ...content, headers: next }); }} /></th>))}</tr></thead>
-        <tbody>{rows.map((row, ri) => (<tr key={ri}>{row.map((cell, ci) => (<td key={ci}><input className={styles.tableCell} value={cell} onChange={(e) => { const next = rows.map(r => [...r]); next[ri][ci] = e.target.value; onChange({ ...content, rows: next }); }} /></td>))}</tr>))}</tbody>
+        <thead><tr>{headers.map((h, i) => (<th key={i}><input className={styles.tableCell} aria-label={`Column ${i + 1} heading`} value={h} onChange={(e) => { const next = [...headers]; next[i] = e.target.value; onChange({ ...content, headers: next }); }} /></th>))}</tr></thead>
+        <tbody>{rows.map((row, ri) => (<tr key={ri}>{row.map((cell, ci) => (<td key={ci}><input className={styles.tableCell} aria-label={`${headers[ci] || `Column ${ci + 1}`}, row ${ri + 1}`} value={cell} onChange={(e) => { const next = rows.map(r => [...r]); next[ri][ci] = e.target.value; onChange({ ...content, rows: next }); }} /></td>))}</tr>))}</tbody>
       </table>
       <button className={styles.tableAddRow} onClick={() => onChange({ ...content, rows: [...rows, headers.map(() => '')] })}>+ Add Row</button>
     </div>
@@ -59,18 +59,18 @@ export function GalleryWidget({ content, onChange }: { content: any; onChange: (
   return (
     <div className={styles.galleryWidget}>
       <div className={styles.galleryGrid}>
-        {images.map(img => (
+        {images.map((img, i) => (
           <div key={img.id} className={styles.galleryCell}>
             <div className={styles.galleryCellImageWrap}>
               <img src={img.src} alt={img.caption} className={styles.galleryCellImage} />
               <button className={styles.galleryCellRemove} onClick={() => onChange({ ...content, images: images.filter(i => i.id !== img.id) })} title="Remove" aria-label="Remove image"><X size={12} /></button>
             </div>
-            <input className={styles.galleryCellCaption} type="text" placeholder="Caption..." value={img.caption} onChange={e => onChange({ ...content, images: images.map(i => i.id === img.id ? { ...i, caption: e.target.value } : i) })} />
+            <input className={styles.galleryCellCaption} type="text" aria-label={`Image ${i + 1} caption`} placeholder="Caption..." value={img.caption} onChange={e => onChange({ ...content, images: images.map(i => i.id === img.id ? { ...i, caption: e.target.value } : i) })} />
           </div>
         ))}
       </div>
       <button className={styles.galleryAddBtn} onClick={() => fileRef.current?.click()}>+ Add Images</button>
-      <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleFiles} />
+      <input ref={fileRef} type="file" accept="image/*" multiple aria-label="Upload gallery images" style={{ display: 'none' }} onChange={handleFiles} />
     </div>
   );
 }

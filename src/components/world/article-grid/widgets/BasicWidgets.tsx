@@ -22,10 +22,10 @@ export function TextWidget({ content, onChange }: { content: any; onChange: (c: 
 export function HeadingWidget({ content, onChange }: { content: any; onChange: (c: any) => void }) {
   return (
     <div className={styles.headingWidget}>
-      <select className={styles.headingLevel} value={content.level || 2} onChange={(e) => onChange({ ...content, level: parseInt(e.target.value) })}>
+      <select className={styles.headingLevel} aria-label="Heading level" value={content.level || 2} onChange={(e) => onChange({ ...content, level: parseInt(e.target.value) })}>
         <option value={1}>H1</option><option value={2}>H2</option><option value={3}>H3</option>
       </select>
-      <input className={styles.headingText} type="text" placeholder="Heading text..." value={content.text || ''} onChange={(e) => onChange({ ...content, text: e.target.value })} onBlur={(e) => onChange({ ...content, text: e.target.value })} />
+      <input className={styles.headingText} type="text" aria-label="Heading text" placeholder="Heading text..." value={content.text || ''} onChange={(e) => onChange({ ...content, text: e.target.value })} onBlur={(e) => onChange({ ...content, text: e.target.value })} />
     </div>
   );
 }
@@ -42,11 +42,11 @@ export function ImageWidget({ content, onChange }: { content: any; onChange: (c:
   return (
     <div className={styles.imageWidget}>
       {content.src ? (
-        <><img src={content.src} alt={content.caption || ''} className={styles.imagePreview} /><input className={styles.captionInput} type="text" placeholder="Caption..." value={content.caption || ''} onChange={(e) => onChange({ ...content, caption: e.target.value })} /></>
+        <><img src={content.src} alt={content.caption || ''} className={styles.imagePreview} /><input className={styles.captionInput} type="text" aria-label="Image caption" placeholder="Caption..." value={content.caption || ''} onChange={(e) => onChange({ ...content, caption: e.target.value })} /></>
       ) : (
         <div className={styles.imageUpload} onClick={() => fileRef.current?.click()}><span><Image size={14} /></span><span>Click to upload image</span></div>
       )}
-      <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
+      <input ref={fileRef} type="file" accept="image/*" aria-label="Upload image" style={{ display: 'none' }} onChange={handleFile} />
     </div>
   );
 }
@@ -56,10 +56,10 @@ export function DividerWidget() { return <hr className={styles.dividerWidget} />
 export function QuoteWidget({ content, onChange }: { content: any; onChange: (c: any) => void }) {
   return (
     <div className={styles.quoteWidget}>
-      <textarea className={styles.quoteText} placeholder="Quote text..." value={content.text || ''} onChange={(e) => onChange({ ...content, text: e.target.value })} />
+      <textarea className={styles.quoteText} aria-label="Quote text" placeholder="Quote text..." value={content.text || ''} onChange={(e) => onChange({ ...content, text: e.target.value })} />
       <div className={styles.quoteAttribution}>
         <span>—</span>
-        <input className={styles.quoteSource} type="text" placeholder="Attribution" value={content.attribution || ''} onChange={(e) => onChange({ ...content, attribution: e.target.value })} />
+        <input className={styles.quoteSource} type="text" aria-label="Quote attribution" placeholder="Attribution" value={content.attribution || ''} onChange={(e) => onChange({ ...content, attribution: e.target.value })} />
       </div>
     </div>
   );

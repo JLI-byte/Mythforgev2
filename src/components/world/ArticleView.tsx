@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useRef, useState } from 'react';
-import { X, Pencil } from 'lucide-react';
+import { X, Pencil, BookOpen } from 'lucide-react';
 import { useWorkspaceStore, Entity, EntityType, GalleryImage, ArticleTab } from '@/store/workspaceStore';
 import { SUBCATEGORY_LABELS, SUBCATEGORY_ICONS } from '@/lib/worldBibleNav';
 import { worldKeyForEntity, worldKeyForProject } from '@/lib/worldKey';
@@ -189,6 +189,7 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
       {editing ? (
         <input
           className={styles.gCapEdit}
+          aria-label={`Gallery image ${i + 1} caption`}
           defaultValue={img.caption}
           onChange={e => { img.caption = e.target.value; }}
           onClick={e => e.stopPropagation()}
@@ -232,9 +233,9 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
     <>
       {d.facts.map((f, i) => (
         <div key={i} className={styles.factRow}>
-          <input className={`${styles.eInput} ${styles.eInputK}`} defaultValue={f.label}
+          <input className={`${styles.eInput} ${styles.eInputK}`} aria-label={`Fact ${i + 1} label`} defaultValue={f.label}
             onChange={e => { f.label = e.target.value; }} />
-          <input className={`${styles.eInput} ${styles.eInputV}`} defaultValue={f.value}
+          <input className={`${styles.eInput} ${styles.eInputV}`} aria-label={`Fact ${i + 1} value`} defaultValue={f.value}
             onChange={e => { f.value = e.target.value; }} />
           <button className={styles.xBtn} onClick={() => { d.facts.splice(i, 1); bump(); }} aria-label="Remove fact"><X size={12} /></button>
         </div>
@@ -267,6 +268,7 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
       {editing && (
         <input
           className={styles.eInput}
+          aria-label="Add a tag"
           placeholder="＋ tag"
           style={{ width: 74 }}
           onKeyDown={e => {
@@ -326,7 +328,7 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
             {attributedWorks.map(w => (
               <button key={w.id} className={styles.relCard}
                 onClick={() => { setActiveProject(w.id); setWorkspaceMode('desk'); }}>
-                <span className={styles.relDot} style={{ background: w.coverColor || '#1f1f1e' }}>📖</span>
+                <span className={styles.relDot} style={{ background: w.coverColor || '#1f1f1e' }}><BookOpen size={16} aria-hidden="true" /></span>
                 <span>
                   <div className={styles.relName}>{w.name}</div>
                   <div className={styles.relType}>{w.writingMode}</div>
@@ -470,6 +472,7 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
         ref={fileRef}
         type="file"
         accept="image/*"
+        aria-label="Upload gallery image"
         style={{ display: 'none' }}
         onChange={e => { addImage(e.target.files?.[0] ?? null); e.target.value = ''; }}
       />

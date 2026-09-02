@@ -244,6 +244,7 @@ export default function Designer() {
             <div className={styles.vDivider} />
             <input 
               className={`${styles.templateTitleInput} ${nameError ? styles.error : ''}`}
+              aria-label="Template name"
               value={templateName}
               placeholder="Template name..."
               onChange={e => { setTemplateName(e.target.value); setNameError(false); }}

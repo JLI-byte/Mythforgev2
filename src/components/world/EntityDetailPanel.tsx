@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useId } from 'react';
 import { MessageSquare, X } from 'lucide-react';
 import styles from './EntityDetailPanel.module.css';
 import { useWorkspaceStore, EntityType, ENTITY_TYPE_LABELS } from '@/store/workspaceStore';
@@ -8,6 +8,8 @@ import { articleDocToText } from '@/lib/worldAuthoring';
 import { formatDateTime } from '@/lib/formatDate';
 
 export function EntityDetailPanel() {
+    const fieldId = useId();
+
     // Essential store hooks
     const selectedEntityId = useWorkspaceStore(state => state.selectedEntityId);
     const setSelectedEntity = useWorkspaceStore(state => state.setSelectedEntity);
@@ -133,8 +135,9 @@ export function EntityDetailPanel() {
 
                 <div className={styles.panelBody}>
                     <div className={styles.formGroup}>
-                        <label>Name</label>
+                        <label htmlFor={`${fieldId}-name`}>Name</label>
                         <input
+                            id={`${fieldId}-name`}
                             type="text"
                             value={name}
                             onChange={e => setName(e.target.value)}
@@ -144,8 +147,9 @@ export function EntityDetailPanel() {
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label>Category</label>
+                        <label htmlFor={`${fieldId}-category`}>Category</label>
                         <select
+                            id={`${fieldId}-category`}
                             value={type}
                             onChange={e => setType(e.target.value as EntityType)}
                             className={styles.select}
@@ -157,8 +161,9 @@ export function EntityDetailPanel() {
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label>Description</label>
+                        <label htmlFor={`${fieldId}-description`}>Description</label>
                         <textarea
+                            id={`${fieldId}-description`}
                             value={description}
                             onChange={e => setDescription(e.target.value)}
                             rows={8}

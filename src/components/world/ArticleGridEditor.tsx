@@ -583,6 +583,7 @@ export default function ArticleGridEditor({ entityId, hideGrid = false }: { enti
                       {renamingTabId === tab.id ? (
                         <input
                           className={styles.tabRenameInputSmall}
+                          aria-label="Page name"
                           defaultValue={tab.name}
                           autoFocus
                           onBlur={(e) => renameTab(tab.id, e.target.value)}

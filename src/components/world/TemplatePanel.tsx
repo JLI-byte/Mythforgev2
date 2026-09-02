@@ -73,6 +73,7 @@ export default function TemplatePanel({ currentBlocks, entityId, onClose }: Temp
                     
                     <input 
                         type="text"
+                        aria-label="Template name"
                         placeholder="Template Name (e.g. Character Profile)"
                         className={`${styles.nameInput} ${nameError ? styles.nameInputError : ''}`}
                         value={templateName}
@@ -83,6 +84,7 @@ export default function TemplatePanel({ currentBlocks, entityId, onClose }: Temp
                     />
                     
                     <textarea 
+                        aria-label="Template description"
                         placeholder="Optional description..."
                         className={styles.descTextarea}
                         rows={2}

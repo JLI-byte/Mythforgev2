@@ -177,6 +177,7 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                aria-label="Change entry image"
                 className={styles.hiddenInput}
                 onChange={handleImageUpload}
             />
@@ -241,6 +242,7 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
                     <div className={styles.addFieldForm}>
                         <input
                             type="text"
+                            aria-label="Field label"
                             placeholder="Label"
                             value={fieldLabel}
                             onChange={e => setFieldLabel(e.target.value)}
@@ -249,6 +251,7 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
                         />
                         <input
                             type="text"
+                            aria-label="Field value"
                             placeholder="Value"
                             value={fieldValue}
                             onChange={e => setFieldValue(e.target.value)}

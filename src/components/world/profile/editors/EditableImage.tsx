@@ -28,13 +28,14 @@ export default function EditableImage({ editing, value, onChange, className, alt
             <div className={styles.imageControls}>
                 <input
                     type="text"
+                    aria-label="Image URL"
                     value={value ?? ''}
                     placeholder="image URL"
                     onChange={(e) => onChange(e.target.value)}
                 />
                 <label className={styles.uploadBtn}>
                     ⬆
-                    <input type="file" accept="image/*" hidden onChange={onFile} />
+                    <input type="file" accept="image/*" aria-label="Upload image" hidden onChange={onFile} />
                 </label>
             </div>
         </div>

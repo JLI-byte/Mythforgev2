@@ -155,6 +155,7 @@ export default function WorldBibleFolderTree({ isDraft }: WorldBibleFolderTreePr
                     <span className={styles.folderIcon}>{folder.icon}</span>
                     <input
                         className={styles.folderName}
+                        aria-label="Folder name"
                         value={folder.label}
                         onChange={(e) => updateWorldBibleRoot(folder.id, { label: e.target.value }, isDraft)}
                         onClick={(e) => e.stopPropagation()}

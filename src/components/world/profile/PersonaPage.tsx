@@ -63,12 +63,12 @@ export default function PersonaPage({ profile, editing, update }: PageProps) {
             <div className={styles.personaNotes}>
                 <div>
                     <b>Do&rsquo;s</b>
-                    <EditableText as="p" multiline editing={editing} value={profile.dos ?? ''} placeholder="—"
+                    <EditableText as="p" multiline editing={editing} label="Do’s" value={profile.dos ?? ''} placeholder="—"
                         onChange={(v) => update({ dos: v })} />
                 </div>
                 <div>
                     <b>Don&rsquo;ts</b>
-                    <EditableText as="p" multiline editing={editing} value={profile.donts ?? ''} placeholder="—"
+                    <EditableText as="p" multiline editing={editing} label="Don’ts" value={profile.donts ?? ''} placeholder="—"
                         onChange={(v) => update({ donts: v })} />
                 </div>
             </div>

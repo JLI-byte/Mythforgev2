@@ -7,7 +7,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Camera } from 'lucide-react';
+import { X, Camera, LayoutTemplate, Type, Image as ImageIcon, BarChart3, Minus, Quote, Clock } from 'lucide-react';
 import styles from './ArticleCanvas.module.css';
 import { useWorkspaceStore, ArticleBlock, BlockType } from '@/store/workspaceStore';
 import TemplatePanel from './TemplatePanel';
@@ -233,7 +233,7 @@ export default function ArticleCanvas({ entityId, onClose }: ArticleCanvasProps)
             className={styles.templateBtn}
             onClick={() => setIsTemplatePanelOpen(p => !p)}
           >
-            🗂 Templates
+            <LayoutTemplate size={14} aria-hidden="true" /> Templates
           </button>
           <div className={styles.popoverWrapper}>
             <button
@@ -244,12 +244,12 @@ export default function ArticleCanvas({ entityId, onClose }: ArticleCanvasProps)
             </button>
             {isAddPopoverOpen && (
               <div className={styles.popover}>
-                <button onClick={() => addBlock('richtext')}>📝 Rich Text</button>
-                <button onClick={() => addBlock('image')}>🖼️ Image</button>
-                <button onClick={() => addBlock('statrow')}>📊 Stat Row</button>
-                <button onClick={() => addBlock('divider')}>➖ Divider</button>
-                <button onClick={() => addBlock('quote')}>💬 Quote</button>
-                <button onClick={() => addBlock('timeline')}>⏳ Timeline</button>
+                <button onClick={() => addBlock('richtext')}><Type size={14} aria-hidden="true" /> Rich Text</button>
+                <button onClick={() => addBlock('image')}><ImageIcon size={14} aria-hidden="true" /> Image</button>
+                <button onClick={() => addBlock('statrow')}><BarChart3 size={14} aria-hidden="true" /> Stat Row</button>
+                <button onClick={() => addBlock('divider')}><Minus size={14} aria-hidden="true" /> Divider</button>
+                <button onClick={() => addBlock('quote')}><Quote size={14} aria-hidden="true" /> Quote</button>
+                <button onClick={() => addBlock('timeline')}><Clock size={14} aria-hidden="true" /> Timeline</button>
               </div>
             )}
           </div>
@@ -403,6 +403,7 @@ function ImageBlock({ content, onChange }: {
           <img src={content.src as string} alt="Article visual" />
           <input
             type="text"
+            aria-label="Image caption"
             placeholder="Add a caption..."
             value={(content.caption as string) || ''}
             className={styles.captionInput}
@@ -414,7 +415,7 @@ function ImageBlock({ content, onChange }: {
           <Camera size={14} /> Click to upload image
         </div>
       )}
-      <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
+      <input ref={fileRef} type="file" accept="image/*" aria-label="Upload article image" style={{ display: 'none' }} onChange={handleFile} />
     </div>
   );
 }
@@ -426,11 +427,11 @@ function StatRowBlock({ content, onChange }: {
 }) {
   return (
     <div className={styles.statrowBlock}>
-      <input type="text" placeholder="Label" value={(content.label as string) || ''}
+      <input type="text" aria-label="Stat label" placeholder="Label" value={(content.label as string) || ''}
         className={styles.statLabel}
         onChange={(e) => onChange({ ...content, label: e.target.value })} />
       <div className={styles.statSeparator} />
-      <input type="text" placeholder="Value" value={(content.value as string) || ''}
+      <input type="text" aria-label="Stat value" placeholder="Value" value={(content.value as string) || ''}
         className={styles.statValue}
         onChange={(e) => onChange({ ...content, value: e.target.value })} />
     </div>
@@ -444,13 +445,13 @@ function QuoteBlock({ content, onChange }: {
 }) {
   return (
     <div className={styles.quoteBlock}>
-      <textarea placeholder="The spoken or written lore..."
+      <textarea aria-label="Quote text" placeholder="The spoken or written lore..."
         value={(content.text as string) || ''}
         className={styles.quoteText}
         onChange={(e) => onChange({ ...content, text: e.target.value })} />
       <div className={styles.quoteAttributionLine}>
         <span className={styles.emDash}>—</span>
-        <input type="text" placeholder="Attribution"
+        <input type="text" aria-label="Quote attribution" placeholder="Attribution"
           value={(content.attribution as string) || ''}
           className={styles.quoteSource}
           onChange={(e) => onChange({ ...content, attribution: e.target.value })} />
@@ -480,10 +481,10 @@ function TimelineBlock({ content, onChange }: {
           </div>
           <div className={styles.eventContent}>
             <div className={styles.eventPrimary}>
-              <input type="text" placeholder="Date" value={ev.date}
+              <input type="text" aria-label={`Event ${idx + 1} date`} placeholder="Date" value={ev.date}
                 className={styles.eventDate}
                 onChange={(e) => updateEvent(idx, { date: e.target.value })} />
-              <input type="text" placeholder="Event Title" value={ev.label}
+              <input type="text" aria-label={`Event ${idx + 1} title`} placeholder="Event Title" value={ev.label}
                 className={styles.eventLabel}
                 onChange={(e) => updateEvent(idx, { label: e.target.value })} />
               <button className={styles.removeEventBtn}
@@ -491,7 +492,7 @@ function TimelineBlock({ content, onChange }: {
                 ×
               </button>
             </div>
-            <textarea placeholder="Details..." value={ev.detail}
+            <textarea aria-label={`Event ${idx + 1} details`} placeholder="Details..." value={ev.detail}
               className={styles.eventDetail}
               onChange={(e) => updateEvent(idx, { detail: e.target.value })} />
           </div>

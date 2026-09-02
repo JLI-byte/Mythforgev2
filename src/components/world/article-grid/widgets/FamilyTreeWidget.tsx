@@ -294,6 +294,7 @@ export function FamilyTreeWidget({ content, onChange }: { content: any; onChange
         <div className={styles.familyTreeForm}>
           <select
             className={styles.familyTreeSelect}
+            aria-label="Link member to entity"
             value={newMember.entityId}
             onChange={e => setNewMember(v => ({
               ...v,
@@ -310,12 +311,14 @@ export function FamilyTreeWidget({ content, onChange }: { content: any; onChange
           </select>
           <input
             className={styles.familyTreeInput}
+            aria-label="Member name"
             placeholder="Name (required if no entity)"
             value={newMember.name}
             onChange={e => setNewMember(v => ({ ...v, name: e.target.value }))}
           />
           <select
             className={styles.familyTreeSelect}
+            aria-label="Member gender"
             value={newMember.gender}
             onChange={e => setNewMember(v => ({ ...v, gender: e.target.value as FamilyMember['gender'] }))}
           >
@@ -326,6 +329,7 @@ export function FamilyTreeWidget({ content, onChange }: { content: any; onChange
           </select>
           <input
             className={styles.familyTreeInput}
+            aria-label="Member note"
             placeholder="Note e.g. 'deceased', 'adopted' (optional)"
             value={newMember.notes}
             onChange={e => setNewMember(v => ({ ...v, notes: e.target.value }))}
@@ -342,6 +346,7 @@ export function FamilyTreeWidget({ content, onChange }: { content: any; onChange
         <div className={styles.familyTreeForm}>
           <select
             className={styles.familyTreeSelect}
+            aria-label="Parent"
             value={newEdge.parentId}
             onChange={e => setNewEdge(v => ({ ...v, parentId: e.target.value }))}
           >
@@ -350,6 +355,7 @@ export function FamilyTreeWidget({ content, onChange }: { content: any; onChange
           </select>
           <select
             className={styles.familyTreeSelect}
+            aria-label="Child"
             value={newEdge.childId}
             onChange={e => setNewEdge(v => ({ ...v, childId: e.target.value }))}
           >
@@ -358,6 +364,7 @@ export function FamilyTreeWidget({ content, onChange }: { content: any; onChange
           </select>
           <select
             className={styles.familyTreeSelect}
+            aria-label="Relationship kind"
             value={newEdge.relation}
             onChange={e => setNewEdge(v => ({ ...v, relation: e.target.value as FamilyEdge['relation'] }))}
           >

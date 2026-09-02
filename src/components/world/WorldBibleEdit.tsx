@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useId } from 'react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { getWorldBibleConfig } from '@/lib/worldBibleNav';
 import { worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
@@ -14,6 +14,7 @@ const CONFIRM_TIMEOUT_MS = 4000;
  * bible: cover identity, layout presets, and the danger zone.
  */
 export default function WorldBibleEdit() {
+    const fieldId = useId();
     const worldBibles = useWorkspaceStore(s => s.worldBibles);
     const activeWorldKey = useWorkspaceStore(s => s.activeWorldKey) ?? STANDALONE_KEY;
     const worlds = useWorkspaceStore(s => s.worlds);
@@ -65,26 +66,29 @@ export default function WorldBibleEdit() {
                     <h2 className={styles.sectionTitle}>Book identity</h2>
                     <div className={styles.identityGrid}>
                         <div className={styles.fields}>
-                            <label className={styles.field}>
+                            <label className={styles.field} htmlFor={`${fieldId}-cover-title`}>
                                 <span>Cover title</span>
                                 <input
+                                    id={`${fieldId}-cover-title`}
                                     value={cfg.coverTitle ?? ''}
                                     placeholder={defaultTitle}
                                     onChange={(e) => updateWorldBibleConfig(activeWorldKey, { coverTitle: e.target.value || undefined })}
                                 />
                             </label>
-                            <label className={styles.field}>
+                            <label className={styles.field} htmlFor={`${fieldId}-cover-subtitle`}>
                                 <span>Subtitle</span>
                                 <input
+                                    id={`${fieldId}-cover-subtitle`}
                                     value={cfg.coverSub ?? ''}
                                     placeholder="World Bible"
                                     onChange={(e) => updateWorldBibleConfig(activeWorldKey, { coverSub: e.target.value || undefined })}
                                 />
                             </label>
-                            <label className={styles.field}>
+                            <label className={styles.field} htmlFor={`${fieldId}-cover-tint`}>
                                 <span>Cover tint</span>
                                 <div className={styles.tintRow}>
                                     <input
+                                        id={`${fieldId}-cover-tint`}
                                         type="color"
                                         value={cfg.tint ?? '#34343c'}
                                         onChange={(e) => updateWorldBibleConfig(activeWorldKey, { tint: e.target.value })}

@@ -251,13 +251,13 @@ export function OrgChartWidget({ content, onChange }: { content: any; onChange: 
 
       {showAddNode && (
         <div className={styles.orgChartForm}>
-          <select className={styles.orgChartSelect} value={newNode.entityId}
+          <select className={styles.orgChartSelect} aria-label="Link node to entity" value={newNode.entityId}
             onChange={e => setNewNode(v => ({ ...v, entityId: e.target.value, label: e.target.value ? (entities.find(en => en.id === e.target.value)?.name ?? '') : v.label }))}>
             <option value="">Link entity (optional)</option>
             {worldEntities.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
           </select>
-          <input className={styles.orgChartInput} placeholder="Name *" value={newNode.label} onChange={e => setNewNode(v => ({ ...v, label: e.target.value }))} />
-          <input className={styles.orgChartInput} placeholder="Role / Title (e.g. Commander)" value={newNode.role} onChange={e => setNewNode(v => ({ ...v, role: e.target.value }))} />
+          <input className={styles.orgChartInput} aria-label="Node name" placeholder="Name *" value={newNode.label} onChange={e => setNewNode(v => ({ ...v, label: e.target.value }))} />
+          <input className={styles.orgChartInput} aria-label="Node role or title" placeholder="Role / Title (e.g. Commander)" value={newNode.role} onChange={e => setNewNode(v => ({ ...v, role: e.target.value }))} />
           <div className={styles.orgChartColorRow}>
             <span className={styles.orgChartColorLabel}>Color:</span>
             {NODE_COLORS.map(c => (
@@ -274,11 +274,11 @@ export function OrgChartWidget({ content, onChange }: { content: any; onChange: 
 
       {showAddEdge && (
         <div className={styles.orgChartForm}>
-          <select className={styles.orgChartSelect} value={newEdge.parentId} onChange={e => setNewEdge(v => ({ ...v, parentId: e.target.value }))}>
+          <select className={styles.orgChartSelect} aria-label="Parent node" value={newEdge.parentId} onChange={e => setNewEdge(v => ({ ...v, parentId: e.target.value }))}>
             <option value="">Parent node…</option>
             {nodes.map(n => <option key={n.id} value={n.id}>{n.label}{n.role ? ` (${n.role})` : ''}</option>)}
           </select>
-          <select className={styles.orgChartSelect} value={newEdge.childId} onChange={e => setNewEdge(v => ({ ...v, childId: e.target.value }))}>
+          <select className={styles.orgChartSelect} aria-label="Child node" value={newEdge.childId} onChange={e => setNewEdge(v => ({ ...v, childId: e.target.value }))}>
             <option value="">Child node…</option>
             {nodes.map(n => <option key={n.id} value={n.id}>{n.label}{n.role ? ` (${n.role})` : ''}</option>)}
           </select>

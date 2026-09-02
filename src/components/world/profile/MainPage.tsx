@@ -27,10 +27,10 @@ export default function MainPage({ profile, editing, update }: PageProps) {
                     renderItem={(f, i, onItem) => (
                         <p>
                             {editing
-                                ? <EditableText editing value={f.label} onChange={(v) => onItem({ label: v })} />
+                                ? <EditableText editing label="Dossier field label" value={f.label} onChange={(v) => onItem({ label: v })} />
                                 : <b>{f.label}</b>}
                             {editing
-                                ? <EditableText editing value={f.value} onChange={(v) => onItem({ value: v })} />
+                                ? <EditableText editing label="Dossier field value" value={f.value} onChange={(v) => onItem({ value: v })} />
                                 : <span>{f.value || '—'}</span>}
                         </p>
                     )}
@@ -39,12 +39,12 @@ export default function MainPage({ profile, editing, update }: PageProps) {
 
             <div className={styles.introCard}>
                 <b>first impression</b>
-                <EditableText as="p" multiline editing={editing} value={profile.firstImpression ?? ''}
+                <EditableText as="p" multiline editing={editing} label="First impression" value={profile.firstImpression ?? ''}
                     placeholder="No first impression yet." onChange={(v) => update({ firstImpression: v })} />
             </div>
 
             <div className={styles.text}>
-                <EditableText as="p" multiline editing={editing} value={profile.bio ?? ''}
+                <EditableText as="p" multiline editing={editing} label="Biography" value={profile.bio ?? ''}
                     placeholder="No biography yet." onChange={(v) => update({ bio: v })} />
             </div>
         </div>

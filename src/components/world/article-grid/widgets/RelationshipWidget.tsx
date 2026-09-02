@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useId } from 'react';
 import { X } from 'lucide-react';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import { worldKeyForEntity } from '@/lib/worldKey';
@@ -25,6 +25,7 @@ interface RelNode {
 }
 
 export function RelationshipWidget({ content, onChange }: { content: any; onChange: (c: any) => void }) {
+  const fieldId = useId();
   const entities = useWorkspaceStore(s => s.entities);
   const scenes = useWorkspaceStore(s => s.scenes);
   const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
@@ -359,8 +360,9 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
     <div className={styles.relationshipWidget}>
       {/* Toolbar */}
       <div className={styles.relationshipToolbar}>
-        <label className={styles.relationshipToggle}>
+        <label className={styles.relationshipToggle} htmlFor={`${fieldId}-auto-detect`}>
           <input
+            id={`${fieldId}-auto-detect`}
             type="checkbox"
             checked={autoDetect}
             onChange={e => onChange({ ...content, autoDetect: e.target.checked })}
@@ -383,6 +385,7 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
         <div className={styles.relationshipAddForm}>
           <select
             className={styles.relationshipSelect}
+            aria-label="From entity"
             value={newEdge.sourceId}
             onChange={e => setNewEdge(v => ({ ...v, sourceId: e.target.value }))}
           >
@@ -393,6 +396,7 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
           </select>
           <select
             className={styles.relationshipSelect}
+            aria-label="To entity"
             value={newEdge.targetId}
             onChange={e => setNewEdge(v => ({ ...v, targetId: e.target.value }))}
           >
@@ -403,6 +407,7 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
           </select>
           <input
             className={styles.relationshipLabelInput}
+            aria-label="Relationship label"
             placeholder="Relationship label (e.g. ally, enemy, parent)"
             value={newEdge.label}
             onChange={e => setNewEdge(v => ({ ...v, label: e.target.value }))}

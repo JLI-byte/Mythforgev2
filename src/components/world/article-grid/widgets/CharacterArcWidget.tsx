@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Smile, Target } from 'lucide-react';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../ArticleGridEditor.module.css';
@@ -275,6 +275,7 @@ export function CharacterArcWidget({ content, onChange }: { content: any; onChan
         {/* Character selector */}
         <select
           className={styles.arcSelect}
+          aria-label="Linked character"
           value={entityId}
           onChange={e => onChange({ ...content, entityId: e.target.value })}
         >
@@ -290,13 +291,13 @@ export function CharacterArcWidget({ content, onChange }: { content: any; onChan
             className={`${styles.arcModeBtn} ${mode === 'emotional' ? styles.arcModeBtnActive : ''}`}
             onClick={() => onChange({ ...content, mode: 'emotional' })}
           >
-            😮 Emotional
+            <Smile size={12} aria-hidden="true" /> Emotional
           </button>
           <button
             className={`${styles.arcModeBtn} ${mode === 'goal' ? styles.arcModeBtnActive : ''}`}
             onClick={() => onChange({ ...content, mode: 'goal' })}
           >
-            🎯 Goal
+            <Target size={12} aria-hidden="true" /> Goal
           </button>
         </div>
 
@@ -311,6 +312,7 @@ export function CharacterArcWidget({ content, onChange }: { content: any; onChan
           <span className={styles.arcStagesLabel}>Stages:</span>
           <input
             className={styles.arcStagesInput}
+            aria-label="Goal stages, comma separated"
             defaultValue={goalStages.join(', ')}
             placeholder="Unaware, Aware, Pursuing, Achieved"
             onBlur={e => updateGoalStages(e.target.value)}
@@ -324,6 +326,7 @@ export function CharacterArcWidget({ content, onChange }: { content: any; onChan
         <div className={styles.arcBeatForm}>
           <input
             className={styles.arcInput}
+            aria-label="Beat label"
             placeholder="Beat label (e.g. Ch 1, The Betrayal)"
             value={newBeat.label}
             onChange={e => setNewBeat(v => ({ ...v, label: e.target.value }))}
@@ -335,6 +338,7 @@ export function CharacterArcWidget({ content, onChange }: { content: any; onChan
               </span>
               <input
                 type="range"
+                aria-label="Emotional value"
                 min={-5} max={5} step={1}
                 className={styles.arcSlider}
                 value={newBeat.value}
@@ -347,6 +351,7 @@ export function CharacterArcWidget({ content, onChange }: { content: any; onChan
           ) : (
             <select
               className={styles.arcSelect}
+              aria-label="Goal stage"
               value={newBeat.value}
               onChange={e => setNewBeat(v => ({ ...v, value: parseInt(e.target.value) }))}
             >
@@ -357,6 +362,7 @@ export function CharacterArcWidget({ content, onChange }: { content: any; onChan
           )}
           <input
             className={styles.arcInput}
+            aria-label="Beat notes"
             placeholder="Notes (optional, shown on hover)"
             value={newBeat.notes}
             onChange={e => setNewBeat(v => ({ ...v, notes: e.target.value }))}

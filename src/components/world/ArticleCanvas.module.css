@@ -96,6 +96,9 @@
   background: none;
   border: 1px solid var(--border);
   color: var(--foreground);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 7px 12px;
   border-radius: 6px;
   cursor: pointer;
@@ -161,6 +164,9 @@
   border: none;
   color: var(--foreground);
   text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 9px 10px;
   border-radius: 5px;
   cursor: pointer;
