@@ -168,14 +168,6 @@ export default function HomePage() {
   }, [worldEntities.length]);
   const spotlight = worldEntities[spotlightIndex] ?? null;
 
-  const recent = [...projects]
-    .sort((a, b) => {
-      const at = new Date(a.updatedAt ?? a.createdAt).getTime();
-      const bt = new Date(b.updatedAt ?? b.createdAt).getTime();
-      return bt - at;
-    })
-    .slice(0, 6);
-
   // ── Actions ───────────────────────────────────────────────
   const openProject = (id: string) => {
     setActiveProject(id);
@@ -309,29 +301,6 @@ export default function HomePage() {
             <WritingHeatmap columns={heatmap} />
           </div>
 
-          {/* Your worlds — spines you open to reach the stories inside */}
-          <div className={`${styles.tile} ${styles.tileWorld}`}>
-            <div className={styles.tileHead}>
-              <span className={styles.tileLabel}><Globe size={14} /> Your worlds</span>
-              <span className={styles.tileHint}>
-                {shelves.length} {shelves.length === 1 ? 'shelf' : 'shelves'}
-              </span>
-            </div>
-            <WorldShelf
-              shelves={shelves}
-              size="tile"
-              selectedKey={selectedShelfKey}
-              onSelect={setSelectedShelfKey}
-              onOpenStory={openProject}
-              onOpenBible={openBible}
-              emptyAction={
-                <button className={styles.tileLink} onClick={() => setWorkspaceMode('bookshelf')}>
-                  Go to the Bookshelf <ArrowRight size={14} />
-                </button>
-              }
-            />
-          </div>
-
           {/* From your world */}
           <div className={`${styles.tile} ${styles.tileLore}`}>
             <span className={styles.tileLabel}><Sparkles size={14} /> From your world</span>
@@ -390,41 +359,29 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className={styles.recentSection}>
+        {/* The shelf lives out here rather than in a bento tile: books want the
+            full width, and it supersedes the old Recent projects grid. */}
+        <section className={styles.shelfSection}>
           <div className={styles.recentHead}>
-            <h2 className={styles.recentTitle}>Recent projects</h2>
+            <h2 className={styles.recentTitle}>Your worlds</h2>
             <button className={styles.recentAll} onClick={() => setWorkspaceMode('bookshelf')}>
               View all
             </button>
           </div>
 
-          {recent.length > 0 ? (
-            <div className={styles.recentGrid}>
-              {recent.map(p => (
-                <button
-                  key={p.id}
-                  className={styles.projectCard}
-                  onClick={() => openProject(p.id)}
-                >
-                  <span
-                    className={styles.projectCover}
-                    style={p.coverImageUrl
-                      ? { backgroundImage: `url(${p.coverImageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-                      : { background: p.coverColor || '#3a3a44' }}
-                  />
-                  <span className={styles.projectName}>{p.name}</span>
-                  <span className={styles.projectMode}>{p.writingMode}</span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className={styles.emptyRecent}>
-              <p className={styles.emptyText}>No projects yet.</p>
+          <WorldShelf
+            shelves={shelves}
+            size="page"
+            selectedKey={selectedShelfKey}
+            onSelect={setSelectedShelfKey}
+            onOpenStory={openProject}
+            onOpenBible={openBible}
+            emptyAction={
               <button className={styles.newBtn} onClick={() => setWorkspaceMode('bookshelf')}>
                 <Plus size={16} /> Start on the Bookshelf
               </button>
-            </div>
-          )}
+            }
+          />
         </section>
       </div>
 

@@ -2,22 +2,23 @@
 
 .shelf {
   --spine-w: 34px;
-  --shelf-min: 150px;
+  --shelf-h: 160px;
   --cover-w: 58px;
   --cover-h: 84px;
   display: flex;
   gap: 14px;
   align-items: stretch;
   min-width: 0;
-  /* Fill the tile's remaining height so the spines stand as tall as the box
-     allows, rather than floating in it at a fixed size. */
-  flex: 1;
-  min-height: var(--shelf-min);
+  /* An explicit height, not a min-height: the spines size themselves as a
+     percentage of this, and a percentage needs a definite parent to resolve
+     against. min-height alone leaves the computed height auto and collapses
+     every spine to zero. */
+  height: var(--shelf-h);
 }
 
 .sizePage {
   --spine-w: 46px;
-  --shelf-min: 260px;
+  --shelf-h: 300px;
   --cover-w: 84px;
   --cover-h: 122px;
 }
@@ -192,10 +193,19 @@
 }
 
 @media (max-width: 620px) {
-  .shelf { flex-direction: column; }
+  .shelf {
+    flex-direction: column;
+    /* Stacked, the shelf has to grow for both rows. Keeping the fixed height
+       here let the spines eat all of it and pushed the panel outside the box. */
+    height: auto;
+    --shelf-h: 200px;
+  }
+  /* The spines still need a definite height of their own for the percentage
+     spine heights to resolve. */
+  .spines { height: var(--shelf-h); }
   .panel {
     padding-left: 0;
-    padding-top: 10px;
+    padding-top: 12px;
     border-left: none;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
   }

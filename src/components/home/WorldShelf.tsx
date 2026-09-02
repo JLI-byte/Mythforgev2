@@ -25,8 +25,8 @@ interface WorldShelfProps {
   emptyAction?: React.ReactNode;
 }
 
-/** How many cover slots fit across the panel before it crowds. */
-const MAX_COVER_SLOTS = 5;
+/** How many cover slots fit across the panel before it crowds, per size. */
+const COVER_SLOTS = { tile: 5, page: 10 } as const;
 
 export function WorldShelf({
   shelves, size, selectedKey, onSelect, onOpenStory, onOpenBible, emptyAction,
@@ -71,8 +71,9 @@ export function WorldShelf({
   // When the stories outnumber the slots, give up one slot to say how many are
   // not shown rather than truncating in silence. hiddenCount is derived from
   // what actually rendered, so the badge and its tooltip cannot disagree.
-  const visibleStories = selected.stories.length > MAX_COVER_SLOTS
-    ? selected.stories.slice(0, MAX_COVER_SLOTS - 1)
+  const slots = COVER_SLOTS[size];
+  const visibleStories = selected.stories.length > slots
+    ? selected.stories.slice(0, slots - 1)
     : selected.stories;
   const hiddenCount = selected.stories.length - visibleStories.length;
 
