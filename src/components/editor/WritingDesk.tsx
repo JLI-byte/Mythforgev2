@@ -904,7 +904,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
 
           <button className={styles.zoomBtn} onClick={() => { setZoomValue(Math.min(2, zoom + 0.1)); }}>+</button>
           <div className={styles.deskFmtSep} style={{ height: '16px', margin: '0 4px' }} />
-          <button className={styles.fitBtn} style={{ background: 'transparent', color: 'var(--muted)', fontSize: '0.65rem' }} onClick={() => { setZoomValue(1); }}>100%</button>
+          <button className={styles.fitBtn} style={{ background: 'transparent', color: 'var(--muted)', fontSize: '0.6875rem' }} onClick={() => { setZoomValue(1); }}>100%</button>
           <button className={styles.fitBtn} onClick={handleFit}>Fit</button>
         </div>
 
