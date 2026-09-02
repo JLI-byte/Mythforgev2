@@ -415,6 +415,8 @@ export interface WritingDay {
     wordsWritten: number;
     minutesWritten: number;
     goalMet: boolean;
+    /** Set only by repairStreak — a purchased day that counts without words. */
+    repaired?: boolean;
 }
 
 /** User-configured goal settings */
@@ -1798,6 +1800,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         wordsWritten: 0,
                         minutesWritten: 0,
                         goalMet: true,
+                        // Marks the row as bought, so restamping the date from its
+                        // word totals cannot silently spend the repair.
+                        repaired: true,
                     };
 
                     const updatedDays = [...state.writingDays, repairedDay];

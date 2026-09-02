@@ -3,6 +3,7 @@ import {
     addDays,
     goalMetDates,
     recomputeGoalMet,
+    repairedDates,
     streakByDate,
     totalsByDate,
 } from './writingDays';
@@ -69,6 +70,33 @@ describe('recomputeGoalMet', () => {
         const days = [day('2026-05-01', 'a', 900)];
         recomputeGoalMet(days, WORDS);
         expect(days[0].goalMet).toBe(false);
+    });
+});
+
+describe('streak repairs', () => {
+    const repaired = (date: string) =>
+        ({ id: `${date}-repair`, date, projectId: '', wordsWritten: 0, minutesWritten: 0, goalMet: true, repaired: true });
+
+    it('keeps a repaired day met even though it holds no words', () => {
+        expect(recomputeGoalMet([repaired('2026-05-02')], WORDS)[0].goalMet).toBe(true);
+    });
+
+    it('does not spend the repair when the date is restamped alongside real writing', () => {
+        // The regression this guards: writing anywhere restamps every row, and a
+        // 0-word repaired day would have been rewritten to unmet.
+        const days = [repaired('2026-05-02'), day('2026-05-01', 'a', 900)];
+        const out = recomputeGoalMet(days, WORDS);
+        expect(out.find(d => d.repaired)!.goalMet).toBe(true);
+    });
+
+    it('bridges a streak across the repaired day', () => {
+        const days = [day('2026-05-01', 'a', 900), repaired('2026-05-02'), day('2026-05-03', 'a', 900)];
+        expect(streakByDate(days, WORDS).get('2026-05-03')).toBe(3);
+    });
+
+    it('reports which dates carry a repair', () => {
+        expect([...repairedDates([repaired('2026-05-02'), day('2026-05-01', 'a', 900)])])
+            .toEqual(['2026-05-02']);
     });
 });
 
