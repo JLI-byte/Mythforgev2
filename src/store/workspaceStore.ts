@@ -502,6 +502,13 @@ export interface WorkspaceState {
     workspaceMode: WorkspaceMode;
     // --- STATE FIELDS ---
     worlds: World[];
+
+    /**
+     * Set when the writer asks to start a book from somewhere that does not own
+     * the creation flow (the Home shelf), and consumed by the Bookshelf on
+     * arrival. Intentionally not persisted — a reload must not reopen the modal.
+     */
+    pendingNewStoryWorldKey: string | null;
     projects: Project[];
     documents: Document[];
     scenes: Scene[];
@@ -753,6 +760,10 @@ export interface WorkspaceState {
 
     // --- ACTIONS ---
     addWorld: (world: World) => void;
+    /** Create a world from a name alone, with the shelf wizard's defaults. Returns its id. */
+    createWorld: (name: string) => string;
+    requestNewStory: (worldKey: string | null) => void;
+    clearPendingNewStory: () => void;
     /** Update an existing world's metadata */
     updateWorld: (id: string, updates: Partial<Omit<World, 'id' | 'createdAt'>>) => void;
     /** Delete a world and reassign its projects to Uncategorized */
@@ -1257,6 +1268,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
     persist(
         (set, get) => ({
             worlds: [],
+            pendingNewStoryWorldKey: null,
             projects: [],
             documents: [],
             scenes: [],
@@ -1341,6 +1353,30 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     logger.info('World added:', world.name);
                     return { worlds: [...state.worlds, world] };
                 }),
+
+            createWorld: (name) => {
+                const world: World = {
+                    id: crypto.randomUUID(),
+                    name: name.trim(),
+                    // The same defaults the shelf wizard applies. Duplicated on
+                    // purpose while Bookshelf.tsx has uncommitted work in it;
+                    // the wizard should call this once that lands.
+                    genre: 'fantasy',
+                    tone: { darkness: 'balanced', scale: 'balanced', humor: 'balanced' },
+                    logline: '',
+                    magicExists: false,
+                    techLevel: 'medieval',
+                    timePeriod: '',
+                    coverColor: COVER_COLORS[Math.floor(Math.random() * COVER_COLORS.length)],
+                    createdAt: new Date(),
+                };
+                logger.info('World created:', world.name);
+                set((state) => ({ worlds: [...state.worlds, world] }));
+                return world.id;
+            },
+
+            requestNewStory: (worldKey) => set(() => ({ pendingNewStoryWorldKey: worldKey })),
+            clearPendingNewStory: () => set(() => ({ pendingNewStoryWorldKey: null })),
 
             updateWorld: (id, updates) =>
                 set((state) => {
