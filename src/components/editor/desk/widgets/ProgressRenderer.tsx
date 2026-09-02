@@ -108,7 +108,7 @@ export function ProgressRenderer({ content, onChange }: { content: any; onChange
             <input 
               type="number" 
               className={styles.beatTitleInput} 
-              style={{ width: '60px', fontSize: '0.65rem', padding: '0 4px', border: 'none', background: 'rgba(255,255,255,0.03)' }} 
+              style={{ width: '60px', fontSize: '0.6875rem', padding: '0 4px', border: 'none', background: 'rgba(255,255,255,0.03)' }} 
               value={localTarget} 
               onChange={e => {
                 const val = parseInt(e.target.value) || 0;

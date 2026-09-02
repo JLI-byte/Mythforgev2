@@ -111,11 +111,11 @@ export function ResearchRenderer({ content, onChange }: { content: any; onChange
                   {item.content ? (
                     <img className={styles.researchImage} src={item.content} alt="Mood" />
                   ) : (
-                    <div className={styles.researchImage} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: '0.6rem' }}>No URL provided</div>
+                    <div className={styles.researchImage} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: '0.6875rem' }}>No URL provided</div>
                   )}
                   <input 
                     className={styles.beatTitleInput} 
-                    style={{ padding: '4px 8px', fontSize: '0.65rem' }}
+                    style={{ padding: '4px 8px', fontSize: '0.6875rem' }}
                     placeholder="Image URL..."
                     value={item.content}
                     onChange={e => updateItemDebounced(item.id, { content: e.target.value })}
@@ -146,7 +146,7 @@ export function ResearchRenderer({ content, onChange }: { content: any; onChange
                       <span className={styles.researchSensoryIcon} title={s.label}>{s.icon}</span>
                       <input 
                         className={styles.beatTitleInput} 
-                        style={{ fontSize: '0.65rem', padding: 0 }}
+                        style={{ fontSize: '0.6875rem', padding: 0 }}
                         placeholder={`${s.label}...`}
                         value={item.content[s.key] || ''}
                         onChange={e => updateItemDebounced(item.id, { content: { ...item.content, [s.key]: e.target.value } })}
@@ -159,7 +159,7 @@ export function ResearchRenderer({ content, onChange }: { content: any; onChange
               <div className={styles.researchTags}>
                 <input 
                   className={styles.beatTitleInput}
-                  style={{ fontSize: '0.55rem', opacity: 0.5 }}
+                  style={{ fontSize: '0.6875rem', opacity: 0.5 }}
                   placeholder="+ Tag"
                   onKeyDown={e => {
                     if (e.key === 'Enter') {

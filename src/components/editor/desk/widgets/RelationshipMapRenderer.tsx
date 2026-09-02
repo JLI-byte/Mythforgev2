@@ -145,7 +145,7 @@ export function RelationshipMapRenderer({ content, onChange }: { content: any; o
               {char?.imageUrl ? <img src={char.imageUrl} className={styles.mapNodeAvatar} alt="" /> : <span className={styles.mapNodeIcon}>👤</span>}
               <div className={styles.mapNodeName}>{char?.name || '(Unknown)'}</div>
               <button 
-                style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '50%', width: '14px', height: '14px', fontSize: '8px', cursor: 'pointer', zIndex: 20 }}
+                style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '50%', width: '14px', height: '14px', fontSize: '0.6875rem', cursor: 'pointer', zIndex: 20 }}
                 onClick={(e) => { e.stopPropagation(); onChange({ ...content, nodes: nodes.filter((n:any) => n.charId !== node.charId), links: links.filter((l:any) => l.fromId !== node.charId && l.toId !== node.charId) }); }}
               >
                 ×

@@ -78,7 +78,7 @@ export function StructureRenderer({ content, onChange }: { content: any; onChang
     return (
       <div className={styles.structureCompact}>
         <div className={styles.actSparkline}>
-          {localBeats.length === 0 ? <span className={styles.paletteHint} style={{ fontSize: '0.6rem' }}>No structure defined</span> : 
+          {localBeats.length === 0 ? <span className={styles.paletteHint} style={{ fontSize: '0.6875rem' }}>No structure defined</span> : 
             localBeats.map((b: any) => (
               <div 
                 key={b.id} 
@@ -118,8 +118,8 @@ export function StructureRenderer({ content, onChange }: { content: any; onChang
                 
                 <div className={styles.beatCardHeader}>
                   <div className={styles.structureControls} style={{ gap: '2px', flexDirection: 'column' }}>
-                    <button className={styles.beatDragHandle} style={{ fontSize: '0.6rem', border: 'none', background: 'transparent', padding: 0 }} onClick={() => reorderItem(idx, 'up')} disabled={idx === 0}>▲</button>
-                    <button className={styles.beatDragHandle} style={{ fontSize: '0.6rem', border: 'none', background: 'transparent', padding: 0 }} onClick={() => reorderItem(idx, 'down')} disabled={idx === localBeats.length - 1}>▼</button>
+                    <button className={styles.beatDragHandle} style={{ fontSize: '0.6875rem', border: 'none', background: 'transparent', padding: 0 }} onClick={() => reorderItem(idx, 'up')} disabled={idx === 0}>▲</button>
+                    <button className={styles.beatDragHandle} style={{ fontSize: '0.6875rem', border: 'none', background: 'transparent', padding: 0 }} onClick={() => reorderItem(idx, 'down')} disabled={idx === localBeats.length - 1}>▼</button>
                   </div>
                   <span className={styles.beatTypeIcon}>{beat.type === 'act' ? '🏛️' : '🎬'}</span>
                   <input 

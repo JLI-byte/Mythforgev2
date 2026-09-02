@@ -67,7 +67,7 @@ export function ContinuityRenderer({ content, onChange }: { content: any; onChan
     return (
       <div className={styles.continuityCompact}>
         <div className={styles.continuityCompactSummary}>
-          <div className={styles.timelineTitleActive} style={{ fontSize: '0.65rem' }}>
+          <div className={styles.timelineTitleActive} style={{ fontSize: '0.6875rem' }}>
             {projectScenes[activeIndex]?.title || 'Timeline'}
           </div>
           {pendingResearch > 0 && <div className={styles.continuityResearchPill}>{pendingResearch} RESEARCH</div>}

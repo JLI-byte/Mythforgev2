@@ -118,7 +118,7 @@ export function ProjectLibraryModal({ isOpen, onClose }: ProjectLibraryModalProp
                                                 {!p.coverImageUrl && <span className={styles.coverInitials}>{p.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>}
                                             </div>
                                             <span className={styles.modeLabel} style={{ fontSize: '0.85rem', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</span>
-                                            <span className={styles.modeDesc} style={{ fontSize: '0.6rem', opacity: 0.6 }}>{p.writingMode.toUpperCase()}</span>
+                                            <span className={styles.modeDesc} style={{ fontSize: '0.6875rem', opacity: 0.6 }}>{p.writingMode.toUpperCase()}</span>
                                         </div>
                                     ))}
                             </div>
