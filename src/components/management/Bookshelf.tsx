@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useId, useState, useEffect } from 'react';
 import { X, Pencil, Trash2, Check } from 'lucide-react';
 import { useWorkspaceStore, Project, World, COVER_COLORS, WorldGenre } from '@/store/workspaceStore';
 import { STANDALONE_KEY } from '@/lib/worldKey';
@@ -33,6 +33,9 @@ const greyForId = (id: string): string => {
  * Supports organizing projects via drag-and-drop, and managing shelves via a multi-step wizard.
  */
 export function Bookshelf() {
+    // Namespaced so the wizard's field ids stay unique if this ever mounts twice.
+    const fieldId = useId();
+
     const projects = useWorkspaceStore(s => s.projects);
     const worlds = useWorkspaceStore(s => s.worlds || []);
     const updateProject = useWorkspaceStore(s => s.updateProject);
@@ -549,8 +552,9 @@ export function Bookshelf() {
                         {wizardStep === 1 && (
                             <>
                                 <div style={{ marginBottom: '16px' }}>
-                                    <label className={styles.shelfLabel}>Shelf Name</label>
-                                    <input 
+                                    <label className={styles.shelfLabel} htmlFor={`${fieldId}-shelf-name`}>Shelf Name</label>
+                                    <input
+                                        id={`${fieldId}-shelf-name`}
                                         className={styles.wizardInput}
                                         value={wizardData.name}
                                         onChange={e => setWizardData({...wizardData, name: e.target.value})}
@@ -560,8 +564,9 @@ export function Bookshelf() {
                                     />
                                 </div>
                                 <div style={{ marginBottom: '16px' }}>
-                                    <label className={styles.shelfLabel}>What is this world about?</label>
-                                    <textarea 
+                                    <label className={styles.shelfLabel} htmlFor={`${fieldId}-logline`}>What is this world about?</label>
+                                    <textarea
+                                        id={`${fieldId}-logline`}
                                         className={styles.wizardTextarea}
                                         value={wizardData.logline}
                                         onChange={e => setWizardData({...wizardData, logline: e.target.value})}
@@ -600,8 +605,9 @@ export function Bookshelf() {
                                     ))}
                                 </div>
 
-                                <label className={styles.shelfLabel}>Time Period</label>
-                                <input 
+                                <label className={styles.shelfLabel} htmlFor={`${fieldId}-period`}>Time Period</label>
+                                <input
+                                    id={`${fieldId}-period`}
                                     className={styles.wizardInput}
                                     value={wizardData.timePeriod}
                                     onChange={e => setWizardData({...wizardData, timePeriod: e.target.value})}
@@ -741,8 +747,9 @@ export function Bookshelf() {
                                     {' '}New {getWorkSubType(storySubTypeId)?.label ?? getWorkType(storyTypeId)?.label}
                                 </h2>
                                 <div style={{ marginBottom: '16px' }}>
-                                    <label className={styles.shelfLabel}>Name</label>
+                                    <label className={styles.shelfLabel} htmlFor={`${fieldId}-story-name`}>Name</label>
                                     <input
+                                        id={`${fieldId}-story-name`}
                                         className={styles.wizardInput}
                                         value={storyName}
                                         onChange={e => setStoryName(e.target.value)}
@@ -761,8 +768,9 @@ export function Bookshelf() {
                                     <div className={styles.briefFields}>
                                         {getWorkSubType(storySubTypeId)!.fields.map(f => (
                                             <div key={f.key}>
-                                                <label className={styles.shelfLabel}>{f.label}</label>
+                                                <label className={styles.shelfLabel} htmlFor={`${fieldId}-brief-${f.key}`}>{f.label}</label>
                                                 <input
+                                                    id={`${fieldId}-brief-${f.key}`}
                                                     className={styles.wizardInput}
                                                     value={storyBrief[f.key] ?? ''}
                                                     onChange={e => setStoryBrief({ ...storyBrief, [f.key]: e.target.value })}
