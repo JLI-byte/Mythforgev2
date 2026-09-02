@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import {
     emptyWeekdayTargets, normalizeWeekdayTargets, type WeekdayTargets,
 } from '@/lib/goalSchedule';
-import { recomputeGoalMet, type GoalRules } from '@/lib/writingDays';
+import { recomputeGoalMet } from '@/lib/writingDays';
 import { logger } from '@/lib/logger';
 import { getStoredValue } from '@/lib/storage';
 import { worldKeyForProject, worldKeyForEntity, type WorldKey } from '@/lib/worldKey';
@@ -1754,7 +1754,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     // 300 words in one project and 300 in another is a 600-word day.
                     // Adding words to any project can flip the whole date, so every
                     // row is restamped from the date totals.
-                    updatedDays = recomputeGoalMet(updatedDays, state.goalConfig as GoalRules);
+                    updatedDays = recomputeGoalMet(updatedDays, state.goalConfig);
 
                     // Recompute streak from updated days
                     const streakState = computeStreakFromDays(updatedDays);
@@ -1777,7 +1777,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
                     // Recompute goalMet against the new targets, judging each date
                     // on its combined total across projects.
-                    const updatedDays = recomputeGoalMet(state.writingDays, newConfig as GoalRules);
+                    const updatedDays = recomputeGoalMet(state.writingDays, newConfig);
 
                     const streakState = computeStreakFromDays(updatedDays);
 

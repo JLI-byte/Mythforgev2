@@ -16,8 +16,10 @@ export function EggPlaceholder({ size = 34, cracked = false }: { size?: number; 
       height={size * 1.24}
       viewBox="0 0 50 62"
       fill="none"
-      role="img"
-      aria-label={cracked ? 'A cracking egg' : 'An egg'}
+      // The stage name is rendered as text right beside this, so announcing the
+      // egg again would just repeat it — same call every other illustrative SVG
+      // in this codebase makes.
+      aria-hidden="true"
     >
       <ellipse cx="25" cy="34" rx="23" ry="26" fill="currentColor" opacity="0.9" />
       <ellipse cx="17" cy="24" rx="6" ry="8" fill="#fff" opacity="0.22" />

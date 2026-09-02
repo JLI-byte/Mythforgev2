@@ -20,7 +20,6 @@ import {
   WEEKDAY_LONG, normalizeWeekdayTargets, targetForDateKey, targetForDayIndex,
 } from '@/lib/goalSchedule';
 import { creatureProgress, multiplierForStreak } from '@/lib/creatureXp';
-import type { GoalRules } from '@/lib/writingDays';
 import { WritingHeatmap } from './WritingHeatmap';
 import GoalScheduleModal from './GoalScheduleModal';
 import { GoalRing } from './GoalRing';
@@ -127,7 +126,7 @@ export default function HomePage() {
   );
 
   const creature = useMemo(
-    () => creatureProgress(writingDays, goalConfig as GoalRules),
+    () => creatureProgress(writingDays, goalConfig),
     [writingDays, goalConfig],
   );
 
