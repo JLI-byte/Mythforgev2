@@ -123,7 +123,9 @@ export function WorldShelf({
   // When the stories outnumber the slots, give up one slot to say how many are
   // not shown rather than truncating in silence. hiddenCount is derived from
   // what actually rendered, so the badge and its tooltip cannot disagree.
-  const slots = COVER_SLOTS[size];
+  // The new-book slot occupies one of them, or the row wraps the moment a world
+  // fills its shelf.
+  const slots = COVER_SLOTS[size] - (onNewStory ? 1 : 0);
   const visibleStories = selected.stories.length > slots
     ? selected.stories.slice(0, slots - 1)
     : selected.stories;

@@ -73,6 +73,8 @@ export default function HomePage() {
   const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
   const worlds = useWorkspaceStore(s => s.worlds);
   const setActiveWorldKey = useWorkspaceStore(s => s.setActiveWorldKey);
+  const createWorld = useWorkspaceStore(s => s.createWorld);
+  const requestNewStory = useWorkspaceStore(s => s.requestNewStory);
 
   const [name, setName] = useState('Author');
   const [capture, setCapture] = useState('');
@@ -148,6 +150,17 @@ export default function HomePage() {
   );
 
   const [selectedShelfKey, setSelectedShelfKey] = useState<WorldKey | null>(null);
+
+  const handleCreateWorld = (name: string) => {
+    // Select what was just made, so the writer lands inside it.
+    setSelectedShelfKey(createWorld(name));
+  };
+
+  const handleNewStory = () => {
+    // The Bookshelf owns the work-type flow; hand it the shelf to file under.
+    requestNewStory(selectedShelfKey ?? shelves[0]?.key ?? null);
+    setWorkspaceMode('bookshelf');
+  };
 
   const openBible = (key: WorldKey) => {
     // Pass the shelf key straight through, standalone included. Handing the
@@ -398,6 +411,8 @@ export default function HomePage() {
             onSelect={setSelectedShelfKey}
             onOpenStory={openProject}
             onOpenBible={openBible}
+            onCreateWorld={handleCreateWorld}
+            onNewStory={handleNewStory}
             emptyAction={
               <button className={styles.newBtn} onClick={() => setWorkspaceMode('bookshelf')}>
                 <Plus size={16} /> Start on the Bookshelf

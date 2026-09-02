@@ -19,8 +19,10 @@
 .sizePage {
   --spine-w: 46px;
   --shelf-h: 300px;
-  --cover-w: 138px;
-  --cover-h: 202px;
+  /* Six slots must fit the 824px panel: 6*130 + 5*6 = 810. Sized to the space
+     rather than eyeballed, since the new-book slot takes one of them. */
+  --cover-w: 130px;
+  --cover-h: 190px;
 }
 
 /* Spines */
