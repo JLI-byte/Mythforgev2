@@ -13,9 +13,13 @@
   --surface: #f7f7f7;
   --foreground: #222222;
   --accent: #005bb5;
-  /* Text that sits ON the accent. The accent flips from a dark blue in light
-     mode to a pale lavender in dark, so a fixed white foreground fails one of
-     them — the research scope button measured 1.7:1 against it. */
+  /* Text that sits ON the accent. Every block that redefines --accent must
+     redefine this with it: the accent is a dark blue here, a pale lavender in
+     dark mode and a red or orange in the fantasy family, so one fixed
+     foreground fails at least one of them. Paired at each definition rather
+     than set once, because a block that overrides only the accent lets the
+     previous foreground leak — which is exactly what happened when explicit
+     light mode kept dark mode's near-black on a dark blue button. */
   --on-accent: #ffffff;
   --border: #eaeaea;
 
@@ -105,6 +109,7 @@ option {
   --foreground: #171717;
   --border: #e2e8f0;
   --accent: #005bb5;
+  --on-accent: #ffffff;
 
   --glass-bg: rgba(255, 255, 255, 0.75);
   --glass-blur: 24px;
@@ -132,6 +137,7 @@ option {
   --foreground: #3b2c15;
   --foreground-rgb: 59, 44, 21;
   --accent: #c8401f;
+  --on-accent: #ffffff;
   --accent-dim: #a32d12;
   --accent-rgb: 200, 64, 31;
   --border: rgba(59, 44, 21, 0.20);
@@ -162,6 +168,7 @@ option {
   --foreground: #ece0c4;
   --foreground-rgb: 236, 224, 196;
   --accent: #e0642f;
+  --on-accent: #17121f;
   --accent-dim: #c8401f;
   --accent-rgb: 224, 100, 47;
   --border: rgba(236, 224, 196, 0.14);
