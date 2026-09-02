@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
+import { LayoutGrid, List, Minimize2 } from 'lucide-react';
 import styles from '../../WritingDesk.module.css';
 
 export function ResearchRenderer({ content, onChange }: { content: any; onChange: (c: any) => void; }) {
@@ -80,10 +81,22 @@ export function ResearchRenderer({ content, onChange }: { content: any; onChange
           <button className={styles.structureBtn} onClick={() => addItem('sensory')}>+ Sensory</button>
         </div>
         <div style={{ display: 'flex', gap: '4px' }}>
-          <button className={styles.paletteControlBtn} onClick={() => onChange({ ...content, viewMode: viewMode === 'gallery' ? 'list' : 'gallery' })} title="Toggle Layout">
-            {viewMode === 'gallery' ? '📋' : '🖼️'}
+          <button
+            className={styles.paletteControlBtn}
+            onClick={() => onChange({ ...content, viewMode: viewMode === 'gallery' ? 'list' : 'gallery' })}
+            title="Toggle Layout"
+            aria-label={viewMode === 'gallery' ? 'Switch to list view' : 'Switch to gallery view'}
+          >
+            {viewMode === 'gallery' ? <List size={14} /> : <LayoutGrid size={14} />}
           </button>
-          <button className={styles.sceneControlCompactToggle} onClick={() => onChange({ ...content, isCompact: true })}>↗️</button>
+          <button
+            className={styles.sceneControlCompactToggle}
+            onClick={() => onChange({ ...content, isCompact: true })}
+            title="Collapse"
+            aria-label="Collapse"
+          >
+            <Minimize2 size={14} />
+          </button>
         </div>
       </div>
 
