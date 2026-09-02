@@ -182,11 +182,27 @@
     box-shadow: 5px -5px 10px rgba(0, 0, 0, 0.35), 0 0 12px rgba(255, 255, 255, 0.28);
 }
 
+/* Screenplays, reports and lyrics are loose sheets, not bound covers: squarer
+   letter proportions, square corners, and no spine radius. */
+.bookPaper {
+    aspect-ratio: 17 / 22;
+    border-radius: 1px;
+    overflow: hidden;
+}
+
 .bookInitials {
     font-size: 0.8rem;
     font-weight: 800;
     color: rgba(255, 255, 255, 0.85);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Initials sit in the title position on paper — dark ink, above the artwork. */
+.bookInitialsInk {
+    position: relative;
+    z-index: 1;
+    color: #26262b;
+    text-shadow: none;
 }
 
 /* + affordance for an empty slot, where a cover would sit */
@@ -332,6 +348,10 @@
     padding: 28px;
     width: 480px;
     max-width: 90vw;
+    /* The Script / Report kind step is the tallest — let it scroll rather than
+       run off a short screen. */
+    max-height: 88vh;
+    overflow-y: auto;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -617,6 +637,36 @@
     font-size: 0.76rem;
     line-height: 1.4;
     opacity: 0.65;
+}
+
+/* Seven kinds instead of four, so the cards tighten up to stay on one screen. */
+.workTypeCardCompact {
+    padding: 11px 12px;
+    gap: 2px;
+}
+.workTypeCardCompact .workTypeIcon {
+    font-size: 1.15rem;
+    margin-bottom: 2px;
+}
+.workTypeCardCompact .workTypeLabel {
+    font-size: 0.85rem;
+}
+.workTypeCardCompact .workTypeDesc {
+    font-size: 0.7rem;
+}
+
+/* The three brief questions, between the name and the start options. */
+.briefFields {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.briefHint {
+    font-size: 0.72rem;
+    line-height: 1.4;
+    opacity: 0.55;
+    margin-bottom: 10px;
 }
 
 @media (max-width: 520px) {

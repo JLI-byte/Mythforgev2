@@ -4,9 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { useWorkspaceStore, Project, World, COVER_COLORS, WorldGenre } from '@/store/workspaceStore';
 import { STANDALONE_KEY } from '@/lib/worldKey';
 import { getWorldBibleConfig } from '@/lib/worldBibleNav';
-import { WORK_TYPES, getWorkType } from '@/lib/workTypes';
+import { WORK_TYPES, getWorkType, getWorkTypeByWritingMode } from '@/lib/workTypes';
+import { getSubTypesFor, getWorkSubType, type ProjectBrief } from '@/lib/workSubTypes';
 import { getDraftType } from '@/lib/writingMethods';
 import WorldBibleBook from './WorldBibleBook';
+import WorkTypeArtwork from './WorkTypeArtwork';
 import styles from './Bookshelf.module.css';
 
 /** Diamond-lattice shelf layout: fixed columns, 3 rows of slots by default. */
@@ -46,6 +48,8 @@ export function Bookshelf() {
     const setWorkspaceMode = useWorkspaceStore(s => s.setWorkspaceMode);
     const setActiveWorldKey = useWorkspaceStore(s => s.setActiveWorldKey);
     const worldBibles = useWorkspaceStore(s => s.worldBibles);
+    const pendingNewStoryWorldKey = useWorkspaceStore(s => s.pendingNewStoryWorldKey);
+    const clearPendingNewStory = useWorkspaceStore(s => s.clearPendingNewStory);
 
     // ─── STATE BLOCKS ──────────────────────────────────────────
 
@@ -68,9 +72,15 @@ export function Bookshelf() {
     const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
     const [storyWorldId, setStoryWorldId] = useState<string | undefined>(undefined);
     const [storyName, setStoryName] = useState('');
-    /** New-work modal: pick what you're writing, then name it and choose a start. */
-    const [storyStep, setStoryStep] = useState<'type' | 'details'>('type');
+    /**
+     * New-work modal: pick what you're writing, then name it and choose a start.
+     * A Script / Report asks what KIND first — a YouTube script and a
+     * dissertation want very different research.
+     */
+    const [storyStep, setStoryStep] = useState<'type' | 'kind' | 'details'>('type');
     const [storyTypeId, setStoryTypeId] = useState<string | null>(null);
+    const [storySubTypeId, setStorySubTypeId] = useState<string | null>(null);
+    const [storyBrief, setStoryBrief] = useState<ProjectBrief>({});
 
     /** Wizard Form Data: Holds transient state for world creation/editing */
     const [wizardData, setWizardData] = useState<Partial<World>>({
@@ -247,13 +257,41 @@ export function Bookshelf() {
         setStoryWorldId(worldId);
         setStoryName('');
         setStoryTypeId(null);
+        setStorySubTypeId(null);
+        setStoryBrief({});
         setStoryStep('type');
         setIsStoryModalOpen(true);
     };
 
-    /** Step one: what kind of work this is, then on to naming it. */
+    /**
+     * Home can ask for a new book but does not own the work-type flow, so it
+     * leaves the shelf to file under here and routes over. Consume it once and
+     * clear it, or arriving here again would reopen the modal.
+     */
+    useEffect(() => {
+        if (!pendingNewStoryWorldKey) return;
+        handleCreateStory(
+            pendingNewStoryWorldKey === STANDALONE_KEY ? undefined : pendingNewStoryWorldKey,
+        );
+        clearPendingNewStory();
+        // The pending key is the only real trigger: handleCreateStory is
+        // redefined every render, so depending on it would refire this forever.
+    }, [pendingNewStoryWorldKey, clearPendingNewStory]);
+
+    /**
+     * Step one: what kind of work this is. Types with sub-types (today, just
+     * Script / Report) ask which one before naming; the rest go straight on.
+     */
     const pickWorkType = (id: string) => {
         setStoryTypeId(id);
+        setStorySubTypeId(null);
+        setStoryBrief({});
+        setStoryStep(getSubTypesFor(id).length > 0 ? 'kind' : 'details');
+    };
+
+    /** Step two, Script / Report only: which kind, then on to naming it. */
+    const pickSubType = (id: string) => {
+        setStorySubTypeId(id);
         setStoryStep('details');
     };
 
@@ -271,21 +309,32 @@ export function Bookshelf() {
         const docId = crypto.randomUUID();
         const sceneId = crypto.randomUUID();
 
+        const subType = getWorkSubType(storySubTypeId);
+        // Only keep answers that were actually filled in.
+        const brief: ProjectBrief = Object.fromEntries(
+            Object.entries(storyBrief).filter(([, v]) => v?.trim()),
+        );
+        const hasBrief = Object.keys(brief).length > 0;
+
         addProject({
             id: projectId,
             name,
             writingMode: workType.writingMode,
             coverColor: COVER_COLORS[Math.floor(Math.random() * COVER_COLORS.length)],
             worldId: storyWorldId,
-            createdAt: new Date()
+            createdAt: new Date(),
+            ...(subType ? { workSubTypeId: subType.id } : {}),
+            ...(hasBrief ? { brief } : {}),
         });
 
         // Pre-filter the Draft Table's method library to suit the work, so the
-        // writer isn't offered screenplay beats for an essay.
-        if (workType.draftTypeId) {
+        // writer isn't offered screenplay beats for an essay. The sub-type knows
+        // better than the work type — a video script isn't an article.
+        const draftTypeId = subType?.draftTypeId ?? workType.draftTypeId;
+        if (draftTypeId) {
             updateDraftState(projectId, {
-                draftTypeId: workType.draftTypeId,
-                draftFormat: getDraftType(workType.draftTypeId)?.format,
+                draftTypeId,
+                draftFormat: getDraftType(draftTypeId)?.format,
             });
         }
 
@@ -318,6 +367,10 @@ export function Bookshelf() {
     /** A book slot — greyscale cover centered inside its diamond, tilts on hover. */
     const renderDiamondBook = (p: Project) => {
         const isDeleting = deletingProjectId === p.id;
+        // A story stays a book cover; the other work types show their medium
+        // instead. A cover the writer chose always wins over either.
+        const workTypeId = getWorkTypeByWritingMode(p.writingMode)?.id;
+        const isPaper = !p.coverImageUrl && !!workTypeId && workTypeId !== 'story';
         return (
             <div
                 key={p.id}
@@ -329,14 +382,15 @@ export function Bookshelf() {
                     onDragEnd={() => setDraggedProjectId(null)}
                     onClick={() => { if (!isDeleting) handleSelectProject(p.id); }}
                     title={p.name}
-                    className={`${styles.book} ${p.id === activeProjectId ? styles.bookActive : ''}`}
+                    className={`${styles.book} ${isPaper ? styles.bookPaper : ''} ${p.id === activeProjectId ? styles.bookActive : ''}`}
                     style={{
-                        background: p.coverImageUrl ? undefined : greyForId(p.id),
+                        background: p.coverImageUrl || isPaper ? undefined : greyForId(p.id),
                         backgroundImage: p.coverImageUrl ? `url(${p.coverImageUrl})` : undefined,
                     }}
                 >
+                    {isPaper && <WorkTypeArtwork typeId={workTypeId!} />}
                     {!p.coverImageUrl && (
-                        <span className={styles.bookInitials}>
+                        <span className={`${styles.bookInitials} ${isPaper ? styles.bookInitialsInk : ''}`}>
                             {p.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                         </span>
                     )}
@@ -682,10 +736,36 @@ export function Bookshelf() {
                                     <button className={styles.wizardBtnSecondary} onClick={() => setIsStoryModalOpen(false)}>Cancel</button>
                                 </div>
                             </>
+                        ) : storyStep === 'kind' ? (
+                            <>
+                                <h2 className={styles.wizardTitle}>What kind of script or report?</h2>
+                                <p className={styles.briefHint}>
+                                    This sets the outlining methods you&apos;re offered, and tells the
+                                    research assistant what it&apos;s helping you write.
+                                </p>
+                                <div className={styles.workTypeGrid}>
+                                    {getSubTypesFor(storyTypeId).map(t => (
+                                        <button
+                                            key={t.id}
+                                            className={`${styles.workTypeCard} ${styles.workTypeCardCompact}`}
+                                            onClick={() => pickSubType(t.id)}
+                                        >
+                                            <span className={styles.workTypeIcon}>{t.icon}</span>
+                                            <span className={styles.workTypeLabel}>{t.label}</span>
+                                            <span className={styles.workTypeDesc}>{t.desc}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className={styles.wizardActions}>
+                                    <button className={styles.wizardBtnSecondary} onClick={() => setStoryStep('type')}>← Back</button>
+                                    <button className={styles.wizardBtnSecondary} onClick={() => setIsStoryModalOpen(false)}>Cancel</button>
+                                </div>
+                            </>
                         ) : (
                             <>
                                 <h2 className={styles.wizardTitle}>
-                                    {getWorkType(storyTypeId)?.icon} New {getWorkType(storyTypeId)?.label}
+                                    {getWorkSubType(storySubTypeId)?.icon ?? getWorkType(storyTypeId)?.icon}
+                                    {' '}New {getWorkSubType(storySubTypeId)?.label ?? getWorkType(storyTypeId)?.label}
                                 </h2>
                                 <div style={{ marginBottom: '16px' }}>
                                     <label className={styles.shelfLabel}>Name</label>
@@ -701,6 +781,26 @@ export function Bookshelf() {
                                         autoFocus
                                     />
                                 </div>
+
+                                {/* The brief. Optional — a writer who just wants to start can
+                                    skip straight past it to the start options. */}
+                                {getWorkSubType(storySubTypeId) && (
+                                    <div className={styles.briefFields}>
+                                        {getWorkSubType(storySubTypeId)!.fields.map(f => (
+                                            <div key={f.key}>
+                                                <label className={styles.shelfLabel}>{f.label}</label>
+                                                <input
+                                                    className={styles.wizardInput}
+                                                    value={storyBrief[f.key] ?? ''}
+                                                    onChange={e => setStoryBrief({ ...storyBrief, [f.key]: e.target.value })}
+                                                    onKeyDown={e => { if (e.key === 'Escape') setIsStoryModalOpen(false); }}
+                                                    placeholder={f.placeholder}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
                                 <label className={styles.shelfLabel}>Where do you want to begin?</label>
                                 <div className={styles.beginOptions}>
                                     <button
@@ -729,7 +829,12 @@ export function Bookshelf() {
                                     </button>
                                 </div>
                                 <div className={styles.wizardActions}>
-                                    <button className={styles.wizardBtnSecondary} onClick={() => setStoryStep('type')}>← Back</button>
+                                    <button
+                                        className={styles.wizardBtnSecondary}
+                                        onClick={() => setStoryStep(getSubTypesFor(storyTypeId).length > 0 ? 'kind' : 'type')}
+                                    >
+                                        ← Back
+                                    </button>
                                     <button className={styles.wizardBtnSecondary} onClick={() => setIsStoryModalOpen(false)}>Cancel</button>
                                 </div>
                             </>
