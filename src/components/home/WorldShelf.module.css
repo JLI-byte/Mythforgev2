@@ -221,3 +221,105 @@
 @media (prefers-reduced-motion: reduce) {
   .spine, .cover { transition: none; }
 }
+
+/* ── Creating ─────────────────────────────────────────── */
+
+.addSpine {
+  width: var(--spine-w);
+  height: calc(100% - 12px);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  border-radius: 2px 2px 1px 1px;
+  background: none;
+  color: var(--muted, #8b8b95);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, transform 0.18s ease;
+}
+.addSpine:hover {
+  color: var(--foreground, #f2f0ef);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-5px);
+}
+.addSpine:focus-visible { outline: 2px solid #8ab4ff; outline-offset: 2px; }
+
+.addCover {
+  width: var(--cover-w);
+  height: var(--cover-h);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  border-radius: 2px 4px 4px 2px;
+  background: none;
+  color: var(--muted, #8b8b95);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.addCover:hover {
+  color: var(--foreground, #f2f0ef);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+}
+.addCover:focus-visible { outline: 2px solid #8ab4ff; outline-offset: 2px; }
+
+.createForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+.createLabel {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.createHint {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--muted, #8b8b95);
+}
+.createInput {
+  width: 100%;
+  max-width: 320px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  color: var(--foreground, #f2f0ef);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.createInput:focus { border-color: #8ab4ff; }
+
+.createActions { display: flex; gap: 8px; }
+.createSave {
+  padding: 7px 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #0f1116;
+  background: var(--foreground, #f2f0ef);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.createSave:disabled { opacity: 0.4; cursor: not-allowed; }
+.createCancel {
+  padding: 7px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted, #8b8b95);
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.createCancel:hover { color: var(--foreground, #f2f0ef); }
+
+@media (prefers-reduced-motion: reduce) {
+  .addSpine, .addCover { transition: none; }
+}

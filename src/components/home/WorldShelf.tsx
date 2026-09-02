@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useId, useRef } from 'react';
-import { ArrowRight } from 'lucide-react';
+import React, { useId, useRef, useState } from 'react';
+import { ArrowRight, Plus } from 'lucide-react';
 import type { Shelf } from '@/lib/worldShelves';
 import type { WorldKey } from '@/lib/worldKey';
 import styles from './WorldShelf.module.css';
@@ -23,6 +23,10 @@ interface WorldShelfProps {
   onOpenBible: (key: WorldKey) => void;
   /** Rendered under the message when there are no shelves at all. */
   emptyAction?: React.ReactNode;
+  /** Supplied to offer world creation; omit for a read-only shelf. */
+  onCreateWorld?: (name: string) => void;
+  /** Supplied to offer book creation in the opened world. */
+  onNewStory?: () => void;
 }
 
 /** How many cover slots fit across the panel before it crowds, per size. */
@@ -30,6 +34,7 @@ const COVER_SLOTS = { tile: 5, page: 6 } as const;
 
 export function WorldShelf({
   shelves, size, selectedKey, onSelect, onOpenStory, onOpenBible, emptyAction,
+  onCreateWorld, onNewStory,
 }: WorldShelfProps) {
   // Declared before any early return — hooks must run unconditionally.
   const spineRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -38,14 +43,61 @@ export function WorldShelf({
   const baseId = useId();
   const panelId = `${baseId}-panel`;
   const tabId = (key: WorldKey) => `${baseId}-tab-${key}`;
+  const [creating, setCreating] = useState(false);
+  const [draftName, setDraftName] = useState('');
+
+  const cancelCreate = () => { setDraftName(''); setCreating(false); };
+
+  const submitWorld = () => {
+    const name = draftName.trim();
+    if (!name || !onCreateWorld) return;
+    onCreateWorld(name);
+    cancelCreate();
+  };
+
+  const createForm = (
+    <div className={styles.createForm}>
+      <p className={styles.createLabel}>Name your world</p>
+      <input
+        className={styles.createInput}
+        value={draftName}
+        autoFocus
+        placeholder="Aethel"
+        aria-label="World name"
+        onChange={e => setDraftName(e.target.value)}
+        onKeyDown={e => {
+          if (e.key === 'Enter') submitWorld();
+          if (e.key === 'Escape') cancelCreate();
+        }}
+      />
+      <p className={styles.createHint}>
+        Genre and tone get sensible defaults — refine them on the Bookshelf.
+      </p>
+      <div className={styles.createActions}>
+        <button className={styles.createSave} onClick={submitWorld} disabled={!draftName.trim()}>
+          Create
+        </button>
+        <button className={styles.createCancel} onClick={cancelCreate}>Cancel</button>
+      </div>
+    </div>
+  );
 
   if (shelves.length === 0) {
     return (
       <div className={styles.empty}>
-        <p className={styles.emptyText}>
-          Your shelf is empty. Create a world and the stories you write in it live here.
-        </p>
-        {emptyAction}
+        {creating && onCreateWorld ? createForm : (
+          <>
+            <p className={styles.emptyText}>
+              Your shelf is empty. Create a world and the stories you write in it live here.
+            </p>
+            {onCreateWorld && (
+              <button className={styles.createSave} onClick={() => setCreating(true)}>
+                Create a world
+              </button>
+            )}
+            {emptyAction}
+          </>
+        )}
       </div>
     );
   }
@@ -102,6 +154,16 @@ export function WorldShelf({
             </button>
           );
         })}
+        {onCreateWorld && (
+          <button
+            className={styles.addSpine}
+            title="New world"
+            aria-label="New world"
+            onClick={() => setCreating(true)}
+          >
+            <Plus size={16} />
+          </button>
+        )}
       </div>
 
       <div
@@ -110,43 +172,61 @@ export function WorldShelf({
         role="tabpanel"
         aria-labelledby={tabId(selected.key)}
       >
-        <h3 className={styles.panelName}>{selected.name}</h3>
-        <p className={styles.panelMeta}>
-          {plural(selected.stories.length, 'story', 'stories')}
-          {' · '}
-          {plural(selected.articleCount, 'article', 'articles')}
-        </p>
+        {creating && onCreateWorld ? createForm : (
+          <>
+            <h3 className={styles.panelName}>{selected.name}</h3>
+            <p className={styles.panelMeta}>
+              {plural(selected.stories.length, 'story', 'stories')}
+              {' · '}
+              {plural(selected.articleCount, 'article', 'articles')}
+            </p>
 
-        {selected.stories.length > 0 ? (
-          <div className={styles.covers}>
-            {visibleStories.map(story => (
-              <button
-                key={story.id}
-                className={styles.cover}
-                style={story.coverImageUrl
-                  ? { backgroundImage: `url(${story.coverImageUrl})` }
-                  : { background: story.coverColor }}
-                title={story.name}
-                aria-label={`Open ${story.name}`}
-                onClick={() => onOpenStory(story.id)}
-              />
-            ))}
-            {hiddenCount > 0 && (
-              <span
-                className={styles.coverMore}
-                title={`${plural(hiddenCount, 'more story', 'more stories')} in this world`}
-              >
-                +{hiddenCount}
-              </span>
+            {selected.stories.length === 0 && (
+              <p className={styles.noStories}>No stories in this world yet.</p>
             )}
-          </div>
-        ) : (
-          <p className={styles.noStories}>No stories in this world yet.</p>
-        )}
 
-        <button className={styles.bibleLink} onClick={() => onOpenBible(selected.key)}>
-          Open world bible <ArrowRight size={13} />
-        </button>
+            {/* The row survives an empty world so the new-book slot is still
+                reachable there — an empty shelf is exactly where you want it. */}
+            {(selected.stories.length > 0 || onNewStory) && (
+              <div className={styles.covers}>
+                {visibleStories.map(story => (
+                  <button
+                    key={story.id}
+                    className={styles.cover}
+                    style={story.coverImageUrl
+                      ? { backgroundImage: `url(${story.coverImageUrl})` }
+                      : { background: story.coverColor }}
+                    title={story.name}
+                    aria-label={`Open ${story.name}`}
+                    onClick={() => onOpenStory(story.id)}
+                  />
+                ))}
+                {hiddenCount > 0 && (
+                  <span
+                    className={styles.coverMore}
+                    title={`${plural(hiddenCount, 'more story', 'more stories')} in this world`}
+                  >
+                    +{hiddenCount}
+                  </span>
+                )}
+                {onNewStory && (
+                  <button
+                    className={styles.addCover}
+                    title={`New book in ${selected.name}`}
+                    aria-label={`New book in ${selected.name}`}
+                    onClick={onNewStory}
+                  >
+                    <Plus size={18} />
+                  </button>
+                )}
+              </div>
+            )}
+
+            <button className={styles.bibleLink} onClick={() => onOpenBible(selected.key)}>
+              Open world bible <ArrowRight size={13} />
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
