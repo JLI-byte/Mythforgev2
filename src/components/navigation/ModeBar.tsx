@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Home, Library, NotebookPen, Globe, LayoutTemplate, Telescope } from 'lucide-react';
+import { Home, Library, NotebookPen, Globe, LayoutTemplate, Telescope, Settings } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 import { useWorkspaceStore, Project, Document, Entity, Scene, World } from '@/store/workspaceStore';
 import styles from './ModeBar.module.css';
@@ -508,7 +508,7 @@ export default function ModeBar() {
           onClick={() => setShowSettings(true)}
           title="Settings"
         >
-          ⚙️
+          <Settings size={16} />
         </button>
 
         <button

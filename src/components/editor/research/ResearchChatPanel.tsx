@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ThumbsUp, ThumbsDown, X, Camera } from 'lucide-react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { worldKeyForProject, worldKeyForEntity } from '@/lib/worldKey';
 import {
@@ -787,7 +788,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                                     title="More like this"
                                     onClick={() => react(i, 'up')}
                                 >
-                                    👍
+                                    <ThumbsUp size={14} />
                                 </button>
                                 <button
                                     className={`${styles.chatReactBtn} ${m.reaction === 'down' ? styles.chatReactChosen : ''}`}
@@ -795,7 +796,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                                     title="Try a different angle"
                                     onClick={() => react(i, 'down')}
                                 >
-                                    👎
+                                    <ThumbsDown size={14} />
                                 </button>
                                 <button
                                     className={styles.researchChatAddBtn}
@@ -833,7 +834,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                     <div className={styles.chatAttachment}>
                         <span className={styles.chatAttachmentIcon}>📎</span>
                         <span className={styles.chatAttachmentLabel} title={chatAttachment.content}>{chatAttachment.label}</span>
-                        <button className={styles.chatAttachmentClear} onClick={() => setChatAttachment(null)} title="Remove attachment">✕</button>
+                        <button className={styles.chatAttachmentClear} onClick={() => setChatAttachment(null)} title="Remove attachment"><X size={13} /></button>
                     </div>
                 )}
 
@@ -842,7 +843,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={imageAttach.url} alt="Attached" className={styles.chatImageThumb} />
                         <span className={styles.chatAttachmentLabel}>Image attached</span>
-                        <button className={styles.chatAttachmentClear} onClick={() => setImageAttach(null)} title="Remove image">✕</button>
+                        <button className={styles.chatAttachmentClear} onClick={() => setImageAttach(null)} title="Remove image"><X size={13} /></button>
                     </div>
                 )}
 
@@ -871,7 +872,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                             onClick={() => fileInputRef.current?.click()}
                             title="Attach an image"
                         >
-                            📷
+                            <Camera size={14} />
                         </button>
                         {voiceSupported && (
                             <button

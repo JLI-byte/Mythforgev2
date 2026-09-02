@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
+import { Plus } from 'lucide-react';
 import { DeskWidgetType } from '@/store/workspaceStore';
 import { PALETTE_ITEMS } from './deskConstants';
 import styles from '../WritingDesk.module.css';
@@ -30,7 +31,7 @@ export function WidgetLibraryDropdown({ onSelect }: { onSelect: (type: DeskWidge
         onClick={() => setIsOpen(!isOpen)}
         title="Artifact Library"
       >
-        ➕
+        <Plus size={14} />
       </button>
 
       {isOpen && (

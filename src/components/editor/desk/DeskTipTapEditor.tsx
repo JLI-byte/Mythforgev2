@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from 'react';
+import { PenLine } from 'lucide-react';
 import { useEditor, EditorContent, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -173,7 +174,7 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
             className={`${styles.deskFmtBtn} ${editor.isActive('highlight') ? styles.deskFmtBtnActive : ''}`}
             onMouseDown={e => { e.preventDefault(); editor.chain().focus().toggleHighlight().run(); }}
             title="Highlight"
-          >🖊️</button>
+          ><PenLine size={14} /></button>
         </div>
         <span className={styles.deskFmtSep} />
         <div className={styles.deskToolbarGroup}>

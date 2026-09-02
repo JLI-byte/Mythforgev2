@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { X } from 'lucide-react';
 import {
     useWorkspaceStore,
     selectProjectWorldKey,
@@ -162,7 +163,7 @@ export function ArticleSuggestionsRenderer({ content, onChange }: RendererProps)
             <span className={styles.suggestChipType}>{ENTITY_TYPE_LABELS[s.type as EntityType] ?? s.type}</span>
             <span className={styles.suggestChipName}>{s.name}</span>
             <button className={styles.suggestChipCreate} onClick={() => createOne(s)} disabled={!canCreate} title="Create this article">＋</button>
-            <button className={styles.suggestChipDismiss} onClick={() => dismiss(s.id)} title="Dismiss">✕</button>
+            <button className={styles.suggestChipDismiss} onClick={() => dismiss(s.id)} title="Dismiss"><X size={13} /></button>
         </div>
     );
 

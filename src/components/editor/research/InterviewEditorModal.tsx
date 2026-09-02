@@ -160,7 +160,7 @@ export function InterviewEditorModal({ interview, canDelete, onSave, onDelete, o
                                 <div className={styles.interviewEditorQuestionBtns}>
                                     <button onClick={() => moveQuestion(i, -1)} disabled={i === 0} title="Move up">↑</button>
                                     <button onClick={() => moveQuestion(i, 1)} disabled={i === draft.questions.length - 1} title="Move down">↓</button>
-                                    <button onClick={() => removeQuestion(i)} disabled={draft.questions.length === 1} title="Remove">✕</button>
+                                    <button onClick={() => removeQuestion(i)} disabled={draft.questions.length === 1} title="Remove"><X size={13} /></button>
                                 </div>
                             </div>
                             <textarea

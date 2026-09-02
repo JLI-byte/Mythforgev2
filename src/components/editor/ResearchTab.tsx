@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { MessageSquare } from 'lucide-react';
 import { useWorkspaceStore, type Entity, type EntityType } from '@/store/workspaceStore';
 import { researchScopeKey, type ResearchScope } from '@/lib/researchScope';
 import { serializeBoard, makeNoteCard } from '@/lib/researchBoard';
@@ -295,7 +296,7 @@ export default function ResearchTab() {
           onClick={() => setChatCollapsed(false)}
           title="Show research assistant"
         >
-          💬
+          <MessageSquare size={14} />
         </button>
       ) : (
         <>

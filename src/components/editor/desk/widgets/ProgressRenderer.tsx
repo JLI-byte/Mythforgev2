@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { RotateCcw } from 'lucide-react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from '../../WritingDesk.module.css';
 
@@ -129,7 +130,9 @@ export function ProgressRenderer({ content, onChange }: { content: any; onChange
           <button className={`${styles.timerBtn} ${isRunning ? styles.timerBtnActive : ''}`} onClick={toggleTimer}>
             {isRunning ? '⏸️' : '▶️'}
           </button>
-          <button className={styles.timerBtn} onClick={resetTimer}>🔄</button>
+          <button className={styles.timerBtn} onClick={resetTimer} aria-label="Reset timer">
+            <RotateCcw size={14} />
+          </button>
           <button className={styles.timerBtn} onClick={() => onChange({ ...content, timerMode: content.timerMode === 'pomodoro' ? 'session' : 'pomodoro' })}>
             {content.timerMode === 'pomodoro' ? '🍅' : '⏱️'}
           </button>

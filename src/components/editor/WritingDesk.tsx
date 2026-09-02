@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { MessageSquare, Anchor, X, Image } from 'lucide-react';
 import { useWorkspaceStore, DeskWidget, DeskWidgetType } from '@/store/workspaceStore';
 import styles from './WritingDesk.module.css';
 
@@ -706,7 +707,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                         onMouseDown={e => e.stopPropagation()}
                         onClick={() => setChatAttachment(chatAttachmentForWidget({ ...w, content: liveContentRef.current[w.id] ?? w.content }))}
                       >
-                        💬
+                        <MessageSquare size={14} />
                       </button>
                     )}
                     {w.type === 'untyped' && (
@@ -719,7 +720,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                       onMouseDown={e => e.stopPropagation()}
                       onClick={() => updateDock(w.id, w.dock ? null : 'center')}
                     >
-                      ⚓
+                      <Anchor size={14} />
                     </button>
                     <button 
                       className={styles.deskHeaderBtn} 
@@ -735,7 +736,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                       onClick={() => deleteWidget(w.id)}
                       title="Close Widget"
                     >
-                      ✕
+                      <X size={14} />
                     </button>
                   </div>
                 </div>
@@ -799,7 +800,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                       onMouseDown={e => e.stopPropagation()}
                       onClick={() => setChatAttachment(chatAttachmentForWidget({ ...w, content: liveContentRef.current[w.id] ?? w.content }))}
                     >
-                      💬
+                      <MessageSquare size={14} />
                     </button>
                   )}
                   <button
@@ -808,7 +809,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                     onMouseDown={e => e.stopPropagation()}
                     onClick={() => updateDock(w.id, w.dock ? null : 'center')}
                   >
-                    ⚓
+                    <Anchor size={14} />
                   </button>
                   <button
                     className={styles.deskHeaderBtn}
@@ -824,7 +825,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                     onClick={() => deleteWidget(w.id)}
                     title="Close Widget"
                   >
-                    ✕
+                    <X size={14} />
                   </button>
                 </div>
               </div>
@@ -900,7 +901,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
         {isResearch && (
           <div className={styles.topCenterControls}>
             <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('sticky')}>📝 Note</button>
-            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('image')}>🖼️ Clipping</button>
+            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('image')}><Image size={14} /> Clipping</button>
             <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('reference')}>🔗 Link</button>
           </div>
         )}
