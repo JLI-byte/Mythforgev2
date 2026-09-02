@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { X } from 'lucide-react';
 import type { EntityType } from '@/store/workspaceStore';
 import type { Interview, InterviewQuestion } from '@/lib/interviews';
 import styles from '../WritingDesk.module.css';
@@ -89,7 +90,9 @@ export function InterviewEditorModal({ interview, canDelete, onSave, onDelete, o
             <div className={styles.interviewEditorModal} onClick={e => e.stopPropagation()}>
                 <div className={styles.interviewEditorHeader}>
                     <h2 className={styles.interviewEditorTitle}>{canDelete ? 'Edit interview' : 'New interview'}</h2>
-                    <button className={styles.interviewEditorClose} onClick={onClose} title="Close">✕</button>
+                    <button className={styles.interviewEditorClose} onClick={onClose} title="Close">
+                        <X size={18} />
+                    </button>
                 </div>
 
                 <div className={styles.interviewEditorBody}>

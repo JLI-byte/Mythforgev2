@@ -5,6 +5,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { X } from 'lucide-react';
 import { useWorkspaceStore, BlockType, ArticleBlock } from '@/store/workspaceStore';
 import styles from './TemplatePanel.module.css';
 
@@ -58,7 +59,7 @@ export default function TemplatePanel({ currentBlocks, entityId, onClose }: Temp
             <div className={styles.panelHeader}>
                 <span className={styles.panelTitle}>Article Templates</span>
                 <button className={styles.closeBtn} onClick={onClose} title="Close Panel">
-                    ✕
+                    <X size={18} />
                 </button>
             </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { X } from 'lucide-react';
 import { useWorkspaceStore, COVER_COLORS, WorldGenre, World } from '@/store/workspaceStore';
 import styles from './NewWorldModal.module.css';
 
@@ -229,7 +230,9 @@ export function NewWorldModal({ isOpen, onClose }: NewWorldModalProps) {
             {step === 2 && 'Define the Rules'}
             {step === 3 && 'Start Your Story'}
           </div>
-          <button className={styles.closeBtn} onClick={handleClose}>✕</button>
+          <button className={styles.closeBtn} onClick={handleClose} aria-label="Close">
+            <X size={18} />
+          </button>
         </div>
 
         {/* ─── Step 1: World Identity ─── */}

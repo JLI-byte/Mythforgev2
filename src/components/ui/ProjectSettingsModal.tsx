@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import styles from './NewProjectModal.module.css'; // Reusing modal base styles
 import { useWorkspaceStore, Project } from '@/store/workspaceStore';
 
@@ -73,7 +74,9 @@ export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSett
             <div className={styles.modal} style={{ maxWidth: '520px' }} onClick={e => e.stopPropagation()}>
                 <div className={styles.header}>
                     <h2 className={styles.title}>Project Settings</h2>
-                    <button className={styles.closeBtn} onClick={onClose}>✕</button>
+                    <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
+                        <X size={18} />
+                    </button>
                 </div>
 
                 <div className={styles.selectionGroup}>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useRef, useState } from 'react';
+import { X } from 'lucide-react';
 import { useWorkspaceStore, Entity, EntityType, GalleryImage, ArticleTab } from '@/store/workspaceStore';
 import { SUBCATEGORY_LABELS, SUBCATEGORY_ICONS } from '@/lib/worldBibleNav';
 import { worldKeyForEntity, worldKeyForProject } from '@/lib/worldKey';
@@ -486,7 +487,9 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
             <div className={styles.lbCap}>
               {lightbox.caption === entity.name ? entity.name : `${lightbox.caption} — ${entity.name}`}
             </div>
-            <button className={styles.lbClose} onClick={() => setLightbox(null)}>✕</button>
+            <button className={styles.lbClose} onClick={() => setLightbox(null)} aria-label="Close">
+              <X size={18} />
+            </button>
           </div>
         </div>
       )}

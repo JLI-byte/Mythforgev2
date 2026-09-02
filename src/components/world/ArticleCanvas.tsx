@@ -7,6 +7,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { X } from 'lucide-react';
 import styles from './ArticleCanvas.module.css';
 import { useWorkspaceStore, ArticleBlock, BlockType } from '@/store/workspaceStore';
 import TemplatePanel from './TemplatePanel';
@@ -252,7 +253,9 @@ export default function ArticleCanvas({ entityId, onClose }: ArticleCanvasProps)
               </div>
             )}
           </div>
-          <button className={styles.closeBtn} onClick={onClose}>✕</button>
+          <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
+            <X size={18} />
+          </button>
         </div>
       </header>
 

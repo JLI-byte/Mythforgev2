@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { X } from 'lucide-react';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import { makeSuggestionsWidget, type ArticleSuggestion } from '@/lib/articleSuggestions';
 import { makeFlagsWidget, type ConsistencyFlag } from '@/lib/consistencyFlags';
@@ -115,7 +116,9 @@ export function ChatTrays({
 
             {active && (
                 <div className={styles.chatTrayDrawer}>
-                    <button className={styles.chatTrayClose} onClick={() => setActive(null)} title="Close tray">✕</button>
+                    <button className={styles.chatTrayClose} onClick={() => setActive(null)} title="Close tray">
+                        <X size={18} />
+                    </button>
                     <div className={styles.chatTrayDrawerBody}>
                         {active === 'suggestions' && (
                             <ArticleSuggestionsRenderer content={{ suggestions }} onChange={onSuggestChange} />

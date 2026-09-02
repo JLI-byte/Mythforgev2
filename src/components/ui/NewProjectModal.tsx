@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import styles from './NewProjectModal.module.css';
 import { useWorkspaceStore, COVER_COLORS } from '@/store/workspaceStore';
 
@@ -92,7 +93,9 @@ export function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
             <div className={styles.modal} onClick={e => e.stopPropagation()}>
                 <div className={styles.header}>
                     <h2 className={styles.title}>New Project</h2>
-                    <button className={styles.closeBtn} onClick={handleClose}>✕</button>
+                    <button className={styles.closeBtn} onClick={handleClose} aria-label="Close">
+                        <X size={18} />
+                    </button>
                 </div>
 
                 {/* Cover preview */}

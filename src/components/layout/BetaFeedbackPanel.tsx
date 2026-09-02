@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import styles from './BetaFeedbackPanel.module.css';
 import { createClient } from '@/lib/supabase/client';
@@ -222,7 +223,9 @@ export function BetaFeedbackPanel({
               </div>
               <p className={styles.subtitle}>Your feedback shapes LoreCanvas.</p>
             </div>
-            <button className={styles.closeBtn} onClick={onClose}>✕</button>
+            <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
+              <X size={18} />
+            </button>
           </div>
 
           <div className={styles.content} style={{ paddingRight: tabWidth }}>

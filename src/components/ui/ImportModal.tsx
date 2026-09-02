@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
+import { X } from 'lucide-react';
 import styles from './ImportModal.module.css';
 import { useWorkspaceStore, COVER_COLORS } from '@/store/workspaceStore';
 import { sanitizeImportedHtml, markdownToBasicHtml, fetchGDriveFileContent, parseFdxToHtml } from '@/lib/export';
@@ -305,7 +306,9 @@ export function ImportModal({ isOpen, onClose }: ImportModalProps) {
                     <h2 className={styles.title}>
                         {step === 'mapping' ? 'Map World Data' : 'Import Writing'}
                     </h2>
-                    <button className={styles.closeBtn} onClick={onClose}>✕</button>
+                    <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
+                        <X size={18} />
+                    </button>
                 </div>
 
                 {step === 'source' ? (
