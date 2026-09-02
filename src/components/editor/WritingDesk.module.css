@@ -4720,7 +4720,9 @@
 .researchScopeBtnActive {
   background: var(--accent, #4a6fa5);
   border-color: var(--accent, #4a6fa5);
-  color: #fff;
+  /* Not #fff: the accent is pale in dark mode, where white on it measured
+     1.7:1. --on-accent flips with the theme. */
+  color: var(--on-accent, #fff);
 }
 
 /* ── Research board switcher (per scope) ─────────────────── */
@@ -6544,7 +6546,9 @@
   font-weight: 700;
   line-height: 1;
   color: #fff;
-  background: #d97757;
+  /* Darkened from #d97757, where white text measured 3.12:1 against a 4.5
+     requirement at this size and weight. */
+  background: #b8532c;
   border: none;
   border-radius: 10px;
   cursor: pointer;
@@ -6552,7 +6556,7 @@
 }
 
 .composerSendBtn:hover:not(:disabled) {
-  background: #c4633f;
+  background: #a04725;
 }
 
 .composerSendBtn:disabled {

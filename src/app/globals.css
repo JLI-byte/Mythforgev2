@@ -13,6 +13,10 @@
   --surface: #f7f7f7;
   --foreground: #222222;
   --accent: #005bb5;
+  /* Text that sits ON the accent. The accent flips from a dark blue in light
+     mode to a pale lavender in dark, so a fixed white foreground fails one of
+     them — the research scope button measured 1.7:1 against it. */
+  --on-accent: #ffffff;
   --border: #eaeaea;
 
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
@@ -56,6 +60,7 @@ option {
     --surface-high: #201f1f;
     --foreground: #e5e2e1;
     --accent: #d0bcff;
+    --on-accent: #17121f;
     --accent-dim: #a078ff;
     --border: rgba(255, 255, 255, 0.08);
     --muted: #958ea0;
@@ -79,6 +84,7 @@ option {
   --surface-high: #201f1f;
   --foreground: #e5e2e1;
   --accent: #d0bcff;
+  --on-accent: #17121f;
   --accent-dim: #a078ff;
   --border: rgba(255, 255, 255, 0.08);
   --muted: #958ea0;
