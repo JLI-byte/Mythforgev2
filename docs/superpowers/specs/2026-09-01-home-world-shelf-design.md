@@ -56,7 +56,6 @@ export interface ShelfStory {
   name: string;
   coverColor: string;
   coverImageUrl?: string;
-  writingMode: string;
   updatedAt: number;
 }
 
