@@ -40,6 +40,7 @@ export async function POST(request: Request) {
         attachment?: { label?: string; content?: string };
         image?: { mediaType?: string; data?: string };
         understanding?: string;
+        brief?: string;
         provider?: string;
         localModel?: string;
     };
@@ -65,6 +66,11 @@ export async function POST(request: Request) {
     const attachContent = typeof body.attachment?.content === 'string' ? body.attachment.content.slice(0, 6000) : '';
     // The assistant's own running note about this world, fed back as memory.
     const understanding = typeof body.understanding === 'string' ? body.understanding.slice(0, 4000) : '';
+    // What the writer said they were making when they created the project —
+    // format, audience, length, goal. Their own words about their own work, so
+    // it sits with the instructions rather than behind the untrusted-data
+    // boundary. Capped like the rest; the brief is three short answers.
+    const brief = typeof body.brief === 'string' ? body.brief.slice(0, 1200) : '';
 
     // Saved AI settings supply the defaults the request can override.
     const aiSettings = await resolveAISettings();
@@ -94,6 +100,7 @@ export async function POST(request: Request) {
         'You are a research and worldbuilding assistant embedded in LoreCanvas, a writing app for novelists and worldbuilders.',
         'Help the user develop, organize, and build their world. Be concise and concrete.',
         '',
+        ...(brief ? [brief, ''] : []),
         ...(understanding ? [`YOUR CURRENT UNDERSTANDING of this world (your own running note — trust it, and keep it current):\n${understanding}`, ''] : []),
         'TOOLS — only call a tool when the user explicitly asks you to create, add, save, or organize something. Never act unprompted.',
         '(The one exception is suggest_article — see PROACTIVE SUGGESTIONS below. It is non-destructive and you SHOULD call it unprompted.)',

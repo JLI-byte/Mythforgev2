@@ -18,6 +18,7 @@ import {
 import { worldKeyForProject, worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
 import { folderMemberSet } from '@/lib/folderTree';
 import { getWorldBibleConfig } from '@/lib/worldBibleNav';
+import { formatBrief } from '@/lib/workSubTypes';
 import WritingDesk from './WritingDesk';
 import { ResearchEmptyState } from './ResearchEmptyState';
 import { ResearchChatPanel, type ToolEvent } from './research/ResearchChatPanel';
@@ -101,7 +102,9 @@ export default function ResearchTab() {
     const understanding = u && (u.summary.trim() || u.preferences.trim())
       ? [u.summary.trim(), u.preferences.trim() ? `Learned preferences: ${u.preferences.trim()}` : ''].filter(Boolean).join('\n')
       : '';
-    return { board, world, understanding };
+    // What the writer told us this project is, back when they created it.
+    const brief = formatBrief(project?.workSubTypeId, project?.brief);
+    return { board, world, understanding, brief };
   }, [scopeKey]);
 
   // Apply an AI action to the store. Returns a warning string when the action
