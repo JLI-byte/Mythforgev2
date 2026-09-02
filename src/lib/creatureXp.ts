@@ -24,8 +24,13 @@ export const WORDS_PER_XP = 10;
 /** Words stop earning past this multiple of the day's target. */
 export const WORD_CAP_MULTIPLE = 2;
 
+export interface MultiplierTier {
+    minStreak: number;
+    multiplier: number;
+}
+
 /** Highest threshold first — multiplierForStreak takes the first that fits. */
-export const MULTIPLIER_TIERS: readonly { minStreak: number; multiplier: number }[] = [
+export const MULTIPLIER_TIERS: readonly MultiplierTier[] = [
     { minStreak: 30, multiplier: 3 },
     { minStreak: 14, multiplier: 2 },
     { minStreak: 7, multiplier: 1.5 },
@@ -53,12 +58,14 @@ export const CREATURE_STAGES: readonly CreatureStage[] = [
 ];
 
 /** Experience earned on one day. The cap is what keeps consistency ahead of volume. */
-export function xpForDay(input: {
+export interface DayXpInput {
     words: number;
     target: number;
     streak: number;
     goalMet: boolean;
-}): number {
+}
+
+export function xpForDay(input: DayXpInput): number {
     const { words, target, streak, goalMet } = input;
     const base = goalMet ? GOAL_BONUS : 0;
     const cap = Math.max(0, target) * WORD_CAP_MULTIPLE;
@@ -102,7 +109,9 @@ export interface CreatureProgress {
 export function creatureProgress(days: WritingDayLike[], config: GoalRules): CreatureProgress {
     const xp = totalXp(days, config);
     const stage = stageForXp(xp);
-    const index = CREATURE_STAGES.findIndex(s => s.id === stage.id);
+    // stageForXp returns a reference into CREATURE_STAGES, so identity is enough
+    // and this does not quietly depend on ids being unique.
+    const index = CREATURE_STAGES.indexOf(stage);
     const nextStage = CREATURE_STAGES[index + 1] ?? null;
 
     if (!nextStage) {

@@ -10,7 +10,18 @@ import {
 
 const WORDS = { dailyWordTarget: 500, primaryMetric: 'words' as const, dailyTimeTarget: 20 };
 
-const day = (date: string, projectId: string, wordsWritten: number, minutesWritten = 0) =>
+/** Mirrors the store's WritingDay closely enough to exercise these helpers. */
+interface Row {
+    id: string;
+    date: string;
+    projectId: string;
+    wordsWritten: number;
+    minutesWritten: number;
+    goalMet: boolean;
+    repaired?: boolean;
+}
+
+const day = (date: string, projectId: string, wordsWritten: number, minutesWritten = 0): Row =>
     ({ id: `${date}-${projectId}`, date, projectId, wordsWritten, minutesWritten, goalMet: false });
 
 describe('addDays', () => {
@@ -74,7 +85,7 @@ describe('recomputeGoalMet', () => {
 });
 
 describe('streak repairs', () => {
-    const repaired = (date: string) =>
+    const repaired = (date: string): Row =>
         ({ id: `${date}-repair`, date, projectId: '', wordsWritten: 0, minutesWritten: 0, goalMet: true, repaired: true });
 
     it('keeps a repaired day met even though it holds no words', () => {

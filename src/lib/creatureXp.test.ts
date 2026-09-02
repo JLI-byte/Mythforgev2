@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
     CREATURE_STAGES,
+    MULTIPLIER_TIERS,
     creatureProgress,
     multiplierForStreak,
     stageForXp,
@@ -71,6 +72,20 @@ describe('totalXp', () => {
         expect(totalXp([], WORDS)).toBe(0);
     });
 
+    it('rises when a backfilled day bridges two separate runs', () => {
+        // The risky path for monotonicity: the new day does not just add its own
+        // xp, it lengthens the run so 05-03's multiplier climbs 1x -> 1.25x.
+        // Two isolated days = 200; bridged into a 3-day run = 100 + 100 + 125.
+        const before = totalXp([day('2026-05-01', 'a', 500), day('2026-05-03', 'a', 500)], WORDS);
+        const after = totalXp(
+            ['2026-05-01', '2026-05-02', '2026-05-03'].map(d => day(d, 'a', 500)),
+            WORDS,
+        );
+        expect(before).toBe(200);
+        expect(after).toBe(325);
+        expect(after).toBeGreaterThan(before);
+    });
+
     it('never decreases when a day is added', () => {
         const days = ['2026-05-01', '2026-05-02'].map(d => day(d, 'a', 500));
         const before = totalXp(days, WORDS);
@@ -118,6 +133,25 @@ describe('creatureProgress', () => {
         expect(p.totalXp).toBe(0);
         expect(p.stage.id).toBe('egg');
         expect(p.fraction).toBe(0);
+    });
+});
+
+describe('MULTIPLIER_TIERS', () => {
+    it('descends by streak with a non-increasing multiplier', () => {
+        // multiplierForStreak takes the FIRST tier that fits, and the monotonic
+        // total depends on the multiplier never falling as a streak grows. Both
+        // are properties of how this array is authored, so both are asserted.
+        const streaks = MULTIPLIER_TIERS.map(t => t.minStreak);
+        expect([...streaks].sort((a, b) => b - a)).toEqual(streaks);
+
+        const multipliers = MULTIPLIER_TIERS.map(t => t.multiplier);
+        for (let i = 1; i < multipliers.length; i++) {
+            expect(multipliers[i]).toBeLessThanOrEqual(multipliers[i - 1]);
+        }
+    });
+
+    it('covers a zero streak so every day resolves to a tier', () => {
+        expect(MULTIPLIER_TIERS.at(-1)?.minStreak).toBe(0);
     });
 });
 
