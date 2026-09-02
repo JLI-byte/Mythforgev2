@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useWorkspaceStore } from '@/store/workspaceStore';
@@ -276,7 +277,7 @@ export function StoryWritingZone({ content, onChange, onChangeImmediate, widget,
       
       {!content.isCollapsed && (
         <div className={styles.binderBody}>
-          {isFocusMode && <button className={styles.focusExitPill} onClick={() => setIsFocusMode(false)}>✕ Exit Focus</button>}
+          {isFocusMode && <button className={styles.focusExitPill} onClick={() => setIsFocusMode(false)}><X size={14} /> Exit Focus</button>}
 
           <div className={styles.binderSpine} onMouseDown={e => widget.dock === null ? onDragStart(e, widget) : undefined}>
             <div className={styles.spineCoverContainer}>

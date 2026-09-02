@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { Camera } from 'lucide-react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from '../WritingDesk.module.css';
 
@@ -91,7 +92,7 @@ export function BookCoverEditor({ projectId }: { projectId: string }) {
               onChange={handleFileChange} 
             />
             <label htmlFor="cover-editor-upload" className={styles.coverEditorUploadOverlay}>
-              <span>📷 Change Cover</span>
+              <span><Camera size={14} /> Change Cover</span>
             </label>
           </div>
           {coverImageUrl && (

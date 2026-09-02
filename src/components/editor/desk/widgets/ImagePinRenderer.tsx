@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
+import { Image } from 'lucide-react';
 import styles from '../../WritingDesk.module.css';
 
 export function ImagePinRenderer({ content, onChange, onChangeImmediate }: { content: any; onChange: (c: any) => void; onChangeImmediate?: (c: any) => void; }) {
@@ -70,7 +71,7 @@ export function ImagePinRenderer({ content, onChange, onChangeImmediate }: { con
             </div>
           </div>
         </>
-      ) : <div className={styles.imagePinUpload} onClick={() => fileRef.current?.click()}><span>🖼️</span><span>Click to pin image</span></div>}
+      ) : <div className={styles.imagePinUpload} onClick={() => fileRef.current?.click()}><span><Image size={14} /></span><span>Click to pin image</span></div>}
       <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
     </div>
   );

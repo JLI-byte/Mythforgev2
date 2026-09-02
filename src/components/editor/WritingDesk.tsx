@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { MessageSquare, Anchor, X, Image } from 'lucide-react';
+import { MessageSquare, Anchor, X, Image, Settings } from 'lucide-react';
 import { useWorkspaceStore, DeskWidget, DeskWidgetType } from '@/store/workspaceStore';
 import styles from './WritingDesk.module.css';
 
@@ -671,7 +671,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                           onClick={() => updateContentImmediate(w.id, { ...w.content, showSettings: true })}
                           title="Project Settings"
                         >
-                          ⚙️ Settings
+                          <Settings size={14} /> Settings
                         </button>
 
                         <button 

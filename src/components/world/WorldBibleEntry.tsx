@@ -8,7 +8,7 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { Pencil, Check } from 'lucide-react';
+import { Pencil, Check, Camera } from 'lucide-react';
 import styles from './WorldBibleEntry.module.css';
 import { useWorkspaceStore, EntityType } from '@/store/workspaceStore';
 import { WBView, SUBCATEGORY_LABELS, SUBCATEGORY_ICONS } from '@/lib/worldBibleNav';
@@ -171,7 +171,7 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
                 className={styles.uploadBtn}
                 onClick={() => fileInputRef.current?.click()}
             >
-                📷 Change image
+                <Camera size={14} /> Change image
             </button>
             <input
                 ref={fileInputRef}

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { MessageSquare } from 'lucide-react';
 import styles from './EntityDetailPanel.module.css';
 import { useWorkspaceStore, EntityType, ENTITY_TYPE_LABELS } from '@/store/workspaceStore';
 import { articleDocToText } from '@/lib/worldAuthoring';
@@ -124,7 +125,7 @@ export function EntityDetailPanel() {
                                 border: '1px solid var(--accent, #6c8cff)', borderRadius: 999, cursor: 'pointer',
                             }}
                         >
-                            💬 Ask about this
+                            <MessageSquare size={14} /> Ask about this
                         </button>
                         <button className={styles.closeButton} onClick={() => setSelectedEntity(null)}>×</button>
                     </div>

@@ -7,7 +7,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { X } from 'lucide-react';
+import { X, Camera } from 'lucide-react';
 import styles from './ArticleCanvas.module.css';
 import { useWorkspaceStore, ArticleBlock, BlockType } from '@/store/workspaceStore';
 import TemplatePanel from './TemplatePanel';
@@ -411,7 +411,7 @@ function ImageBlock({ content, onChange }: {
         </div>
       ) : (
         <div className={styles.uploadPlaceholder} onClick={() => fileRef.current?.click()}>
-          📷 Click to upload image
+          <Camera size={14} /> Click to upload image
         </div>
       )}
       <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />

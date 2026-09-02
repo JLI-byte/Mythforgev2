@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { Pencil } from 'lucide-react';
 import { useWorkspaceStore, EntityType } from '@/store/workspaceStore';
 import { SUBCATEGORY_LABELS, SUBCATEGORY_ICONS } from '@/lib/worldBibleNav';
 import { worldKeyForEntity, worldKeyForProject } from '@/lib/worldKey';
@@ -196,7 +197,7 @@ export default function ArticleReadView({ entityId, onBack }: ArticleReadViewPro
             onClick={() => setSelectedEntity(entity.id)}
             title="Edit entity details"
           >
-            ✏️ Edit Details
+            <Pencil size={14} /> Edit Details
           </button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect } from 'react';
+import { Image } from 'lucide-react';
 import styles from '../../ArticleGridEditor.module.css';
 import { sanitizeHtml } from '@/lib/sanitize';
 
@@ -43,7 +44,7 @@ export function ImageWidget({ content, onChange }: { content: any; onChange: (c:
       {content.src ? (
         <><img src={content.src} alt={content.caption || ''} className={styles.imagePreview} /><input className={styles.captionInput} type="text" placeholder="Caption..." value={content.caption || ''} onChange={(e) => onChange({ ...content, caption: e.target.value })} /></>
       ) : (
-        <div className={styles.imageUpload} onClick={() => fileRef.current?.click()}><span>🖼️</span><span>Click to upload image</span></div>
+        <div className={styles.imageUpload} onClick={() => fileRef.current?.click()}><span><Image size={14} /></span><span>Click to upload image</span></div>
       )}
       <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
     </div>

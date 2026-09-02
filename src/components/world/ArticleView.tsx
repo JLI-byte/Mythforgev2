@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useRef, useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Pencil } from 'lucide-react';
 import { useWorkspaceStore, Entity, EntityType, GalleryImage, ArticleTab } from '@/store/workspaceStore';
 import { SUBCATEGORY_LABELS, SUBCATEGORY_ICONS } from '@/lib/worldBibleNav';
 import { worldKeyForEntity, worldKeyForProject } from '@/lib/worldKey';
@@ -390,7 +390,7 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
               title={entity.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             >{entity.isFavorite ? '⭐' : '☆'}</button>
             {!editing && (
-              <button className={styles.actionBtn} onClick={startEdit}>✏️ Edit article</button>
+              <button className={styles.actionBtn} onClick={startEdit}><Pencil size={14} /> Edit article</button>
             )}
           </div>
         </div>

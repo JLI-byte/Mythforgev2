@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { X, Pencil, Trash2 } from 'lucide-react';
+import { X, Pencil, Trash2, Check } from 'lucide-react';
 import { useWorkspaceStore, Project, World, COVER_COLORS, WorldGenre } from '@/store/workspaceStore';
 import { STANDALONE_KEY } from '@/lib/worldKey';
 import { getWorldBibleConfig } from '@/lib/worldBibleNav';
@@ -702,7 +702,7 @@ export function Bookshelf() {
                                     className={`${styles.wizardBtn} ${styles.wizardBtnPrimary}`} 
                                     onClick={handleWizardSubmit}
                                 >
-                                    {editingWorldId ? 'Save Changes' : '✓ Create Shelf'}
+                                    {editingWorldId ? 'Save Changes' : <><Check size={14} /> Create Shelf</>}
                                 </button>
                             )}
                         </div>

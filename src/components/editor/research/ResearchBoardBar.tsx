@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { X } from 'lucide-react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from '../WritingDesk.module.css';
 
@@ -91,7 +92,7 @@ export function ResearchBoardBar({ baseScopeKey, activeBoardId, onSelect }: Rese
                                 title="Delete board"
                                 role="button"
                             >
-                                ✕
+                                <X size={13} />
                             </span>
                         </>
                     )}
