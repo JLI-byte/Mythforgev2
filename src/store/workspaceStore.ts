@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import {
-    emptyWeekdayTargets, normalizeWeekdayTargets, targetForDateKey, type WeekdayTargets,
+    emptyWeekdayTargets, normalizeWeekdayTargets, type WeekdayTargets,
 } from '@/lib/goalSchedule';
+import { recomputeGoalMet, type GoalRules } from '@/lib/writingDays';
 import { logger } from '@/lib/logger';
 import { getStoredValue } from '@/lib/storage';
 import { worldKeyForProject, worldKeyForEntity, type WorldKey } from '@/lib/worldKey';
@@ -477,15 +478,6 @@ export const BADGE_DEFINITIONS = {
 /** Earned badge record — stored per user */
 interface EarnedBadge {
     badgeId: keyof typeof BADGE_DEFINITIONS;
-    earnedAt: Date;
-}
-
-/** XP event log — data layer only, not shown in UI yet */
-interface XPEvent {
-    id: string;
-    type: 'goal_met' | 'streak_milestone' | 'project_milestone' | 'first_session';
-    xp: number;
-    projectId?: string;
     earnedAt: Date;
 }
 
@@ -965,7 +957,6 @@ export interface WorkspaceState {
     goalConfig: GoalConfig;
     streakState: StreakState;
     earnedBadges: EarnedBadge[];
-    xpEvents: XPEvent[];
 
     socialHistory: SocialPost[];
     addSocialPost: (post: Omit<SocialPost, 'id' | 'timestamp'>) => void;
@@ -1341,7 +1332,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 totalWordsAllTime: 0,
             },
             earnedBadges: [],
-            xpEvents: [],
             socialHistory: [],
 
             addWorld: (world) =>
@@ -1740,12 +1730,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                             ...existing,
                             wordsWritten: existing.wordsWritten + wordsAdded,
                             minutesWritten: existing.minutesWritten + minutesSpent,
-                            goalMet: false, // recomputed below
+                            goalMet: false, // restamped from the date total below
                         };
-                        // Compute goalMet based on primaryMetric
-                        updated.goalMet = state.goalConfig.primaryMetric === 'words'
-                            ? updated.wordsWritten >= targetForDateKey(state.goalConfig, today)
-                            : updated.minutesWritten >= state.goalConfig.dailyTimeTarget;
                         updatedDays = state.writingDays.map(d =>
                             d.id === existing.id ? updated : d
                         );
@@ -1757,12 +1743,16 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                             date: today,
                             wordsWritten: wordsAdded,
                             minutesWritten: minutesSpent,
-                            goalMet: state.goalConfig.primaryMetric === 'words'
-                                ? wordsAdded >= targetForDateKey(state.goalConfig, today)
-                                : minutesSpent >= state.goalConfig.dailyTimeTarget,
+                            goalMet: false, // restamped from the date total below
                         };
                         updatedDays = [...state.writingDays, newDay];
                     }
+
+                    // Goal met is a property of the DAY, not of one project's row:
+                    // 300 words in one project and 300 in another is a 600-word day.
+                    // Adding words to any project can flip the whole date, so every
+                    // row is restamped from the date totals.
+                    updatedDays = recomputeGoalMet(updatedDays, state.goalConfig as GoalRules);
 
                     // Recompute streak from updated days
                     const streakState = computeStreakFromDays(updatedDays);
@@ -1783,13 +1773,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 set((state) => {
                     const newConfig = { ...state.goalConfig, ...updates, goalConfigured: true };
 
-                    // Recompute goalMet on existing days with new targets
-                    const updatedDays = state.writingDays.map(d => ({
-                        ...d,
-                        goalMet: newConfig.primaryMetric === 'words'
-                            ? d.wordsWritten >= targetForDateKey(newConfig, d.date)
-                            : d.minutesWritten >= newConfig.dailyTimeTarget,
-                    }));
+                    // Recompute goalMet against the new targets, judging each date
+                    // on its combined total across projects.
+                    const updatedDays = recomputeGoalMet(state.writingDays, newConfig as GoalRules);
 
                     const streakState = computeStreakFromDays(updatedDays);
 
@@ -2420,7 +2406,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         normalizeWeekdayTargets(state.goalConfig.weekdayWordTargets);
                     if (!(state as unknown as Record<string, unknown>).writingDays) state.writingDays = [];
                     if (!(state as unknown as Record<string, unknown>).earnedBadges) state.earnedBadges = [];
-                    if (!(state as unknown as Record<string, unknown>).xpEvents) state.xpEvents = [];
                     if (!(state as unknown as Record<string, unknown>).socialHistory) {
                         state.socialHistory = [];
                     }
@@ -2494,7 +2479,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 reviver: (key, value) => {
                     // Only apply Date reconstruction to arrays that contain objects
                     // with createdAt/updatedAt. Non-entity arrays (writingDays,
-                    // earnedBadges, xpEvents) are returned as-is to avoid corruption.
+                    // earnedBadges) are returned as-is to avoid corruption.
                     const DATE_ARRAY_KEYS = [
                         'worlds', 'projects', 'documents', 'scenes',
                         'entities', 'articleTemplates', 'earnedBadges',
