@@ -58,12 +58,9 @@ export function EmptyDeskWelcome() {
   return (
     <div className={styles.emptyWelcomeContainer}>
       <div className={styles.emptyWelcomeContent}>
-        <div className={styles.emptyWelcomeHeader}>
-          <div className={styles.emptyWelcomeIcon}>M</div>
-          <div>
-            <div className={styles.emptyWelcomeTitle}>LoreCanvas</div>
-            <div className={styles.emptyWelcomeSub}>BUILD WORLDS • WRITE STORIES</div>
-          </div>
+        <div>
+          <h2 className={styles.emptyWelcomeTitle}>Start writing</h2>
+          <p className={styles.launcherHint}>Pick up where you left off, or begin something new.</p>
         </div>
 
         <div className={styles.emptyWelcomeActions}>

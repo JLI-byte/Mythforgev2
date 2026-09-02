@@ -4078,6 +4078,13 @@
   margin-top: 2px;
 }
 
+.launcherHint {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
 .emptyWelcomeActions {
   display: flex;
   flex-direction: column;
