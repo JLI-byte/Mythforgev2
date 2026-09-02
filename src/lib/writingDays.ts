@@ -27,9 +27,15 @@ export interface DayTotals {
     minutes: number;
 }
 
-/** Shift a local YYYY-MM-DD key by whole days. */
+/**
+ * Shift a local YYYY-MM-DD key by whole days.
+ *
+ * Parsed by hand and guarded the way goalSchedule.dayIndexOfKey is: persisted
+ * data can be malformed, and a bad key must not silently become NaN-NaN-NaN.
+ */
 export function addDays(key: string, delta: number): string {
     const [y, m, d] = key.split('-').map(Number);
+    if (!y || !m || !d) return key;
     const dt = new Date(y, m - 1, d + delta);
     const mm = String(dt.getMonth() + 1).padStart(2, '0');
     const dd = String(dt.getDate()).padStart(2, '0');
@@ -41,9 +47,10 @@ export function totalsByDate(days: WritingDayLike[]): Map<string, DayTotals> {
     const totals = new Map<string, DayTotals>();
     for (const d of days) {
         const current = totals.get(d.date) ?? { words: 0, minutes: 0 };
-        current.words += d.wordsWritten || 0;
-        current.minutes += d.minutesWritten || 0;
-        totals.set(d.date, current);
+        totals.set(d.date, {
+            words: current.words + (d.wordsWritten || 0),
+            minutes: current.minutes + (d.minutesWritten || 0),
+        });
     }
     return totals;
 }
@@ -66,6 +73,7 @@ export function recomputeGoalMet<T extends WritingDayLike>(days: T[], config: Go
     const totals = totalsByDate(days);
     return days.map(d => ({
         ...d,
+        // The lookup always hits: totals was built from these same rows.
         goalMet: isGoalMet(totals.get(d.date) ?? { words: 0, minutes: 0 }, config, d.date),
     }));
 }
