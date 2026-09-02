@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Library, NotebookPen, Globe, LayoutTemplate, ArrowRight, Plus,
-  PenLine, Flame, AlertTriangle, Sparkles, Send, BookOpen, Settings,
+  PenLine, AlertTriangle, Sparkles, Send, BookOpen, Settings,
 } from 'lucide-react';
 import {
   useWorkspaceStore, WorkspaceMode, ENTITY_TYPE_LABELS, type EntityType,
@@ -19,11 +19,14 @@ import {
 import {
   WEEKDAY_LONG, normalizeWeekdayTargets, targetForDateKey, targetForDayIndex,
 } from '@/lib/goalSchedule';
+import { creatureProgress, multiplierForStreak } from '@/lib/creatureXp';
+import type { GoalRules } from '@/lib/writingDays';
 import { WritingHeatmap } from './WritingHeatmap';
 import GoalScheduleModal from './GoalScheduleModal';
 import { GoalRing } from './GoalRing';
 import { buildShelves } from '@/lib/worldShelves';
 import { WorldShelf } from './WorldShelf';
+import { EggPlaceholder } from './EggPlaceholder';
 import styles from './HomePage.module.css';
 
 /**
@@ -121,6 +124,11 @@ export default function HomePage() {
   const todayWords = useMemo(
     () => wordsOnDate(writingDays, dateKey(new Date())),
     [writingDays],
+  );
+
+  const creature = useMemo(
+    () => creatureProgress(writingDays, goalConfig as GoalRules),
+    [writingDays, goalConfig],
   );
 
   const heatmap = useMemo(
@@ -281,13 +289,28 @@ export default function HomePage() {
           {/* Streak */}
           <div className={`${styles.tile} ${styles.tileStreak}`}>
             <span className={styles.tileLabel}>Streak</span>
-            <div className={styles.streakValue}>
-              <Flame size={26} className={streakState.currentStreak > 0 ? styles.flameLit : styles.flameCold} />
+            <div className={styles.eggWrap}>
+              <span className={streakState.currentStreak > 0 ? styles.eggLit : styles.eggCold}>
+                <EggPlaceholder size={30} cracked={creature.stage.id !== 'egg'} />
+              </span>
               <span className={styles.streakNumber}>{streakState.currentStreak}</span>
             </div>
             <p className={styles.tileFoot}>
               day{streakState.currentStreak === 1 ? '' : 's'} · best {streakState.longestStreak}
+              {' · '}{multiplierForStreak(streakState.currentStreak)}× xp
             </p>
+
+            <div className={styles.stageRow}>
+              <span className={styles.stageName}>{creature.stage.label}</span>
+              <span className={styles.stageXp}>
+                {creature.nextStage
+                  ? `${creature.totalXp.toLocaleString()} / ${creature.nextStage.minXp.toLocaleString()} xp`
+                  : `${creature.totalXp.toLocaleString()} xp`}
+              </span>
+            </div>
+            <div className={styles.xpTrack}>
+              <div className={styles.xpFill} style={{ width: `${(creature.fraction * 100).toFixed(1)}%` }} />
+            </div>
           </div>
 
           {/* Heatmap */}

@@ -257,8 +257,49 @@
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }
-.flameLit { color: #ff9d4d; }
-.flameCold { color: rgba(255, 255, 255, 0.25); }
+.eggWrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.eggLit { color: #8ab4ff; }
+.eggCold { color: rgba(255, 255, 255, 0.28); }
+
+.stageRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+.stageName {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.stageXp {
+  font-size: 0.72rem;
+  color: var(--muted, #8b8b95);
+  font-variant-numeric: tabular-nums;
+}
+
+.xpTrack {
+  height: 5px;
+  margin-top: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+.xpFill {
+  height: 100%;
+  border-radius: 3px;
+  background: #8ab4ff;
+  transition: width 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xpFill { transition: none; }
+}
 
 /* ── Heatmap ──────────────────────────────────────────── */
 
