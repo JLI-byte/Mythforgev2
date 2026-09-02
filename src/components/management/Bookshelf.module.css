@@ -5,6 +5,17 @@
     overflow-y: auto;
     /* Same charcoal grunge backdrop as the World Bible */
     background: var(--background) url("/LoreCanvasbg.webp") center / cover no-repeat fixed;
+
+    /* That backdrop is dark in every theme, but the tokens beneath it are not:
+       in light theme --foreground resolves to near-black and the shelf label,
+       story count, "Add Story" and "New Shelf" all rendered dark-on-dark. The
+       ground here is fixed, so the tokens that describe it are pinned to their
+       dark values for this subtree and every descendant inherits them. */
+    --foreground: #e5e2e1;
+    --muted: #958ea0;
+    --border: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --overlay-rgb: 255, 255, 255;
     display: flex;
     flex-direction: column;
     gap: 20px;
