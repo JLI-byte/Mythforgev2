@@ -41,7 +41,7 @@ export function StickyNoteRenderer({ content, onChange, onChangeImmediate }: { c
           <button key={name} className={`${styles.stickyColorDot} ${color === name ? styles.stickyColorDotActive : ''}`} style={{ background: hex }} onClick={() => handleImmediate({ color: name })} />
         ))}
       </div>
-      <textarea className={styles.stickyTextarea} placeholder="Write a note..." value={localContent.text || ''} onChange={e => handleChange({ text: e.target.value })} />
+      <textarea aria-label="Note text" className={styles.stickyTextarea} placeholder="Write a note..." value={localContent.text || ''} onChange={e => handleChange({ text: e.target.value })} />
     </div>
   );
 }

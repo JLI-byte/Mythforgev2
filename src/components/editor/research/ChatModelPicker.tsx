@@ -123,6 +123,7 @@ export function ChatModelPicker({ provider, localModel, disabled, onPick }: Chat
                     <div className={styles.modelMenuFooter}>
                         <input
                             className={styles.modelMenuInput}
+                            aria-label="Local model name"
                             defaultValue={localModel}
                             placeholder="or type a model name…"
                             onKeyDown={e => {

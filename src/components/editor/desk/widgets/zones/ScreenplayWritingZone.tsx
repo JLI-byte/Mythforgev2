@@ -188,6 +188,7 @@ export function ScreenplayWritingZone({ content, onChange, onChangeImmediate, wi
         {activeDoc && (
           editingNode?.type === 'chapter' && editingNode.id === activeDoc.id ? (
             <input 
+              aria-label="Chapter title"
               className={styles.binderFullBookChapterHeaderInput}
               ref={renameInputRef}
               value={editingNode.text}
@@ -212,6 +213,7 @@ export function ScreenplayWritingZone({ content, onChange, onChangeImmediate, wi
         <div key={s.id} className={styles.binderAllScenesItem}>
           {editingNode?.type === 'scene' && editingNode.id === s.id ? (
             <input 
+              aria-label="Scene title"
               className={styles.binderAllScenesHeaderInput}
               ref={renameInputRef}
               value={editingNode.text}
@@ -243,6 +245,7 @@ export function ScreenplayWritingZone({ content, onChange, onChangeImmediate, wi
       <div className={styles.binderAllScenesItem}>
         {editingNode?.type === 'scene' && editingNode.id === activeScene.id ? (
           <input 
+            aria-label="Scene title"
             className={styles.binderAllScenesHeaderInput}
             ref={renameInputRef}
             value={editingNode.text}
@@ -356,6 +359,7 @@ export function ScreenplayWritingZone({ content, onChange, onChangeImmediate, wi
                         <div className={styles.spineSceneListHeaderMain}>Chapter {idx + 1}</div>
                         {editingNode?.type === 'chapter' && editingNode.id === doc.id ? (
                           <input 
+                            aria-label="Chapter title"
                             className={styles.spineRenameInput}
                             ref={renameInputRef}
                             value={editingNode.text}
@@ -385,6 +389,7 @@ export function ScreenplayWritingZone({ content, onChange, onChangeImmediate, wi
                           <button key={s.id} className={`${styles.binderSpineSceneTab} ${s.id === activeScene?.id ? styles.binderSpineSceneTabActive : ''}`} onClick={() => setActiveSceneId(s.id)}>
                             {editingNode?.type === 'scene' && editingNode.id === s.id ? (
                               <input 
+                                aria-label="Scene title"
                                 className={styles.spineRenameInput}
                                 ref={renameInputRef}
                                 value={editingNode.text}

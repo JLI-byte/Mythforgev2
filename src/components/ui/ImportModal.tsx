@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import React, { useState, useEffect, useId, useRef } from 'react';
+import { Cloud, FileText, Folder, Globe, X } from 'lucide-react';
 import styles from './ImportModal.module.css';
 import { useWorkspaceStore, COVER_COLORS } from '@/store/workspaceStore';
 import { sanitizeImportedHtml, markdownToBasicHtml, fetchGDriveFileContent, parseFdxToHtml } from '@/lib/export';
@@ -58,6 +58,7 @@ export function ImportModal({ isOpen, onClose }: ImportModalProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const folderInputRef = useRef<HTMLInputElement>(null);
     const entityInputRef = useRef<HTMLInputElement>(null);
+    const fieldId = useId();
 
     useEffect(() => {
         if (!isOpen) {
@@ -314,50 +315,50 @@ export function ImportModal({ isOpen, onClose }: ImportModalProps) {
                 {step === 'source' ? (
                     <div className={styles.sourceGrid}>
                         <button className={styles.sourceCard} onClick={() => fileInputRef.current?.click()} disabled={isLoading}>
-                            <span className={styles.sourceIcon}>📄</span>
+                            <span className={styles.sourceIcon} aria-hidden="true"><FileText size={36} /></span>
                             <span className={styles.sourceLabel}>Single File</span>
                             <span className={styles.sourceDesc}>.docx, .md, .fdx, .txt, .html</span>
                         </button>
                         <button className={styles.sourceCard} onClick={() => folderInputRef.current?.click()} disabled={isLoading}>
-                            <span className={styles.sourceIcon}>📁</span>
+                            <span className={styles.sourceIcon} aria-hidden="true"><Folder size={36} /></span>
                             <span className={styles.sourceLabel}>Full Folder</span>
                             <span className={styles.sourceDesc}>Obsidian / Scrivener / Research</span>
                         </button>
                         <button className={styles.sourceCard} onClick={() => entityInputRef.current?.click()} disabled={isLoading}>
-                            <span className={styles.sourceIcon}>🌍</span>
+                            <span className={styles.sourceIcon} aria-hidden="true"><Globe size={36} /></span>
                             <span className={styles.sourceLabel}>World Bible</span>
                             <span className={styles.sourceDesc}>Characters / Lore (.csv, .json)</span>
                         </button>
                         <button className={styles.sourceCard} onClick={handleGDriveImport} disabled={isLoading}>
-                            <span className={styles.sourceIcon}>☁️</span>
+                            <span className={styles.sourceIcon} aria-hidden="true"><Cloud size={36} /></span>
                             <span className={styles.sourceLabel}>Google Drive</span>
                             <span className={styles.sourceDesc}>Word / GDocs / Markdown</span>
                         </button>
-                        <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept=".docx,.md,.fdx,.txt,.html" onChange={handleLocalFile} />
-                        <input type="file" ref={folderInputRef} style={{ display: 'none' }} {...({ webkitdirectory: "" } as any)} onChange={handleFolderImport} />
-                        <input type="file" ref={entityInputRef} style={{ display: 'none' }} accept=".csv,.json" onChange={handleEntityFile} />
+                        <input type="file" ref={fileInputRef} aria-label="Choose a manuscript file" style={{ display: 'none' }} accept=".docx,.md,.fdx,.txt,.html" onChange={handleLocalFile} />
+                        <input type="file" ref={folderInputRef} aria-label="Choose a folder to import" style={{ display: 'none' }} {...({ webkitdirectory: "" } as any)} onChange={handleFolderImport} />
+                        <input type="file" ref={entityInputRef} aria-label="Choose a World Bible file" style={{ display: 'none' }} accept=".csv,.json" onChange={handleEntityFile} />
                     </div>
                 ) : step === 'mapping' ? (
                     <div className={styles.mappingWizard}>
                         <p className={styles.mappingHint}>Map your file columns to LoreCanvas entity fields.</p>
                         <div className={styles.mappingGrid}>
                             <div className={styles.mappingRow}>
-                                <label>Name (Req)</label>
-                                <select value={mapping.name} onChange={e => setMapping(m => ({ ...m, name: e.target.value }))}>
+                                <label htmlFor={`${fieldId}-map-name`}>Name (Req)</label>
+                                <select id={`${fieldId}-map-name`} value={mapping.name} onChange={e => setMapping(m => ({ ...m, name: e.target.value }))}>
                                     <option value="">Select column...</option>
                                     {headers.map(h => <option key={h} value={h}>{h}</option>)}
                                 </select>
                             </div>
                             <div className={styles.mappingRow}>
-                                <label>Type</label>
-                                <select value={mapping.type} onChange={e => setMapping(m => ({ ...m, type: e.target.value }))}>
+                                <label htmlFor={`${fieldId}-map-type`}>Type</label>
+                                <select id={`${fieldId}-map-type`} value={mapping.type} onChange={e => setMapping(m => ({ ...m, type: e.target.value }))}>
                                     <option value="">Static: Lore</option>
                                     {headers.map(h => <option key={h} value={h}>From Column: {h}</option>)}
                                 </select>
                             </div>
                             <div className={styles.mappingRow}>
-                                <label>Description</label>
-                                <select value={mapping.description} onChange={e => setMapping(m => ({ ...m, description: e.target.value }))}>
+                                <label htmlFor={`${fieldId}-map-description`}>Description</label>
+                                <select id={`${fieldId}-map-description`} value={mapping.description} onChange={e => setMapping(m => ({ ...m, description: e.target.value }))}>
                                     <option value="">None</option>
                                     {headers.map(h => <option key={h} value={h}>{h}</option>)}
                                 </select>
@@ -372,12 +373,12 @@ export function ImportModal({ isOpen, onClose }: ImportModalProps) {
                 ) : (
                     <div className={styles.metadataForm}>
                         <div className={styles.field}>
-                            <label className={styles.label}>Import Name</label>
-                            <input className={styles.input} value={title} onChange={e => setTitle(e.target.value)} placeholder="Project title..." />
+                            <label className={styles.label} htmlFor={`${fieldId}-import-name`}>Import Name</label>
+                            <input id={`${fieldId}-import-name`} className={styles.input} value={title} onChange={e => setTitle(e.target.value)} placeholder="Project title..." />
                         </div>
                         <div className={styles.field}>
-                            <label className={styles.label}>Target World</label>
-                            <select className={styles.select} value={selectedWorldId} onChange={e => setSelectedWorldId(e.target.value)}>
+                            <label className={styles.label} htmlFor={`${fieldId}-target-world`}>Target World</label>
+                            <select id={`${fieldId}-target-world`} className={styles.select} value={selectedWorldId} onChange={e => setSelectedWorldId(e.target.value)}>
                                 <option value="">Global Project (Uncategorized)</option>
                                 {worlds.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                             </select>

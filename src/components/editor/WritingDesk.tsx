@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { MessageSquare, Anchor, X, Image, Settings } from 'lucide-react';
+import { MessageSquare, Anchor, X, Image, Link2, Settings, StickyNote } from 'lucide-react';
 import { useWorkspaceStore, DeskWidget, DeskWidgetType } from '@/store/workspaceStore';
 import styles from './WritingDesk.module.css';
 
@@ -868,6 +868,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
           <input 
             type="range" 
             className={styles.zoomSlider} 
+            aria-label="Canvas zoom"
             min="0.2" 
             max="2" 
             step="0.01" 
@@ -881,6 +882,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
             <input
               autoFocus
               className={styles.zoomInput}
+              aria-label="Zoom percentage"
               value={zoomInputValue}
               onChange={(e) => setZoomInputValue(e.target.value)}
               onBlur={commitZoomInput}
@@ -910,9 +912,9 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
 
         {isResearch && (
           <div className={styles.topCenterControls}>
-            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('sticky')}>📝 Note</button>
+            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('sticky')}><StickyNote size={14} aria-hidden="true" /> Note</button>
             <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('image')}><Image size={14} /> Clipping</button>
-            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('reference')}>🔗 Link</button>
+            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('reference')}><Link2 size={14} aria-hidden="true" /> Link</button>
           </div>
         )}
 

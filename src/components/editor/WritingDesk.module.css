@@ -2399,6 +2399,9 @@
   opacity: 0.5;
   transition: opacity 0.2s;
   font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sceneControlCompactToggle:hover {
@@ -3196,6 +3199,8 @@
 .beatTypeIcon {
   font-size: 0.8rem;
   opacity: 0.8;
+  display: inline-flex;
+  align-items: center;
 }
 
 .beatTitleInput {
@@ -3681,6 +3686,9 @@
   background: none;
   border: none;
   color: var(--foreground);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .compactToggleBtn:hover {
@@ -3916,6 +3924,9 @@
 }
 
 .jumpActiveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.7rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -4137,6 +4148,9 @@
   font-size: 1.25rem;
   width: 24px;
   text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .welcomeActionLabel {

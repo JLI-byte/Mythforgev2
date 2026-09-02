@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import styles from './SpotifyPlayer.module.css';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 
@@ -12,6 +12,7 @@ export function SpotifyPlayer() {
 
     const [isEditing, setIsEditing] = useState(false);
     const [draftUrl, setDraftUrl] = useState(spotifyUrl || "");
+    const fieldId = useId();
 
     // We only want to show the input if the user is explicitly editing,
     // or if they haven't set a URL yet but they've opened the player.
@@ -93,9 +94,10 @@ export function SpotifyPlayer() {
             <div className={styles.playerContent}>
                 {showInput ? (
                     <div className={styles.inputState}>
-                        <p className={styles.helpText}>Paste a Spotify Playlist, Album, or Track link:</p>
+                        <p className={styles.helpText} id={`${fieldId}-spotify-help`}>Paste a Spotify Playlist, Album, or Track link:</p>
                         <input
                             type="text"
+                            aria-labelledby={`${fieldId}-spotify-help`}
                             value={draftUrl}
                             onChange={(e) => setDraftUrl(e.target.value)}
                             placeholder="https://open.spotify.com/playlist/..."

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useId, useState } from 'react';
 import styles from './SettingsModal.module.css';
 import type { RedactedAISettings } from '@/lib/aiSettings';
 
@@ -28,10 +28,11 @@ function SecretField({
     onClear: () => void;
     help?: string;
 }) {
+    const fieldId = useId();
     return (
         <div className={styles.aiField}>
             <div className={styles.aiFieldHead}>
-                <label className={styles.label}>{label}</label>
+                <label className={styles.label} htmlFor={fieldId}>{label}</label>
                 {status.configured ? (
                     <span className={styles.aiBadgeOk}>
                         {status.fromEnv ? 'Set via .env' : `Saved ${status.hint}`}
@@ -42,6 +43,7 @@ function SecretField({
             </div>
             <div className={styles.aiRow}>
                 <input
+                    id={fieldId}
                     type="password"
                     className={styles.aiInput}
                     placeholder={status.configured ? 'Enter a new key to replace' : placeholder}
@@ -68,6 +70,7 @@ export default function AISettingsSection() {
     const [tests, setTests] = useState<TestState>({});
     const [status, setStatus] = useState('');
     const [saving, setSaving] = useState(false);
+    const fieldId = useId();
 
     const load = useCallback(async () => {
         try {
@@ -172,8 +175,9 @@ export default function AISettingsSection() {
             </div>
             <p className={styles.aiHelp}>Which backend a new chat opens with. You can still switch per conversation.</p>
 
-            <label className={styles.label} style={{ marginTop: '0.9rem' }}>Claude model</label>
+            <label className={styles.label} style={{ marginTop: '0.9rem' }} htmlFor={`${fieldId}-claude-model`}>Claude model</label>
             <input
+                id={`${fieldId}-claude-model`}
                 className={styles.aiInput}
                 value={settings.claudeModel}
                 spellCheck={false}
@@ -233,8 +237,9 @@ export default function AISettingsSection() {
             {/* ── Local model ── */}
             <h4 className={styles.aiGroupTitle}>Local model (Ollama)</h4>
 
-            <label className={styles.label}>Server URL</label>
+            <label className={styles.label} htmlFor={`${fieldId}-ollama-url`}>Server URL</label>
             <input
+                id={`${fieldId}-ollama-url`}
                 className={styles.aiInput}
                 value={settings.ollamaBaseUrl}
                 spellCheck={false}
@@ -242,8 +247,9 @@ export default function AISettingsSection() {
                 onBlur={e => update({ ollamaBaseUrl: e.target.value })}
             />
 
-            <label className={styles.label} style={{ marginTop: '0.9rem' }}>Default model</label>
+            <label className={styles.label} style={{ marginTop: '0.9rem' }} htmlFor={`${fieldId}-local-model`}>Default model</label>
             <input
+                id={`${fieldId}-local-model`}
                 className={styles.aiInput}
                 value={settings.defaultLocalModel}
                 placeholder="e.g. mistral"
@@ -299,8 +305,9 @@ export default function AISettingsSection() {
                         </button>
                     )}
 
-                    <label className={styles.label} style={{ marginTop: '0.9rem' }}>Image model</label>
+                    <label className={styles.label} style={{ marginTop: '0.9rem' }} htmlFor={`${fieldId}-image-model`}>Image model</label>
                     <input
+                        id={`${fieldId}-image-model`}
                         className={styles.aiInput}
                         value={settings.imageModel}
                         spellCheck={false}
@@ -311,8 +318,9 @@ export default function AISettingsSection() {
                 </>
             ) : (
                 <>
-                    <label className={styles.label}>ComfyUI URL</label>
+                    <label className={styles.label} htmlFor={`${fieldId}-comfy-url`}>ComfyUI URL</label>
                     <input
+                        id={`${fieldId}-comfy-url`}
                         className={styles.aiInput}
                         value={settings.comfyuiUrl}
                         spellCheck={false}
@@ -324,8 +332,9 @@ export default function AISettingsSection() {
                         provider, and ComfyUI must be running.
                     </p>
 
-                    <label className={styles.label} style={{ marginTop: '0.9rem' }}>Diffusion model</label>
+                    <label className={styles.label} style={{ marginTop: '0.9rem' }} htmlFor={`${fieldId}-comfy-model`}>Diffusion model</label>
                     <input
+                        id={`${fieldId}-comfy-model`}
                         className={styles.aiInput}
                         value={settings.comfyModel}
                         spellCheck={false}
@@ -333,8 +342,9 @@ export default function AISettingsSection() {
                         onBlur={e => update({ comfyModel: e.target.value })}
                     />
 
-                    <label className={styles.label} style={{ marginTop: '0.9rem' }}>Text encoder</label>
+                    <label className={styles.label} style={{ marginTop: '0.9rem' }} htmlFor={`${fieldId}-comfy-clip`}>Text encoder</label>
                     <input
+                        id={`${fieldId}-comfy-clip`}
                         className={styles.aiInput}
                         value={settings.comfyClip}
                         spellCheck={false}
@@ -343,8 +353,9 @@ export default function AISettingsSection() {
                     />
                     <p className={styles.aiHelp}>Must match the model family — a FLUX.2 model needs a FLUX.2 encoder.</p>
 
-                    <label className={styles.label} style={{ marginTop: '0.9rem' }}>VAE</label>
+                    <label className={styles.label} style={{ marginTop: '0.9rem' }} htmlFor={`${fieldId}-comfy-vae`}>VAE</label>
                     <input
+                        id={`${fieldId}-comfy-vae`}
                         className={styles.aiInput}
                         value={settings.comfyVae}
                         spellCheck={false}
@@ -352,8 +363,9 @@ export default function AISettingsSection() {
                         onBlur={e => update({ comfyVae: e.target.value })}
                     />
 
-                    <label className={styles.label} style={{ marginTop: '0.9rem' }}>Steps</label>
+                    <label className={styles.label} style={{ marginTop: '0.9rem' }} htmlFor={`${fieldId}-comfy-steps`}>Steps</label>
                     <input
+                        id={`${fieldId}-comfy-steps`}
                         className={styles.aiInput}
                         type="number"
                         min={1}
@@ -363,8 +375,9 @@ export default function AISettingsSection() {
                         onBlur={e => update({ comfySteps: Number(e.target.value) })}
                     />
 
-                    <label className={styles.label} style={{ marginTop: '0.9rem' }}>Negative prompt</label>
+                    <label className={styles.label} style={{ marginTop: '0.9rem' }} htmlFor={`${fieldId}-comfy-negative`}>Negative prompt</label>
                     <textarea
+                        id={`${fieldId}-comfy-negative`}
                         className={styles.aiInput}
                         rows={2}
                         value={settings.comfyNegative}

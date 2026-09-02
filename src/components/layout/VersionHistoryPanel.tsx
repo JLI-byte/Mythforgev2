@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useId, useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronRight, X } from 'lucide-react';
+import { Camera, ChevronRight, X } from 'lucide-react';
 import styles from './VersionHistoryPanel.module.css';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import { worldKeyForEntity } from '@/lib/worldKey';
@@ -35,6 +35,7 @@ export function VersionHistoryPanel({
     onPanelWidthChange 
 }: VersionHistoryPanelProps) {
     const [mounted, setMounted] = useState(false);
+    const fieldId = useId();
     const [activeTab, setActiveTab] = useState<'scenes' | 'world'>('scenes');
     
     // Store State
@@ -223,10 +224,11 @@ export function VersionHistoryPanel({
 
                     <div className={styles.contentWrapper} style={{ paddingRight: tabWidth }}>
                         <div className={styles.selectorSection}>
-                            <label className={styles.selectLabel}>
+                            <label className={styles.selectLabel} htmlFor={`${fieldId}-version-target`}>
                                 {activeTab === 'scenes' ? 'Select Scene' : 'Select Entity'}
                             </label>
                             <select 
+                                id={`${fieldId}-version-target`}
                                 className={styles.selectInput}
                                 value={activeTab === 'scenes' ? selectedSceneId : selectedEntityId}
                                 onChange={(e) => activeTab === 'scenes' ? setSelectedSceneId(e.target.value) : setSelectedEntityId(e.target.value)}
@@ -246,7 +248,7 @@ export function VersionHistoryPanel({
 
                         <div className={styles.saveActions}>
                             <button className={styles.snapshotBtn} onClick={handleManualSave}>
-                                📸 Save Snapshot
+                                <Camera size={15} aria-hidden="true" /> Save Snapshot
                             </button>
                         </div>
 

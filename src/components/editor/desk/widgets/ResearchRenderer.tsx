@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
-import { LayoutGrid, List, Minimize2, X } from 'lucide-react';
+import { LayoutGrid, List, Maximize2, Minimize2, X } from 'lucide-react';
 import styles from '../../WritingDesk.module.css';
 
 export function ResearchRenderer({ content, onChange }: { content: any; onChange: (c: any) => void; }) {
@@ -67,7 +67,7 @@ export function ResearchRenderer({ content, onChange }: { content: any; onChange
       <div className={styles.researchCompact}>
         <span className={styles.researchSparkIcon}>✨</span>
         <span className={styles.researchSpark}>{sparkText || 'No inspirations found...'}</span>
-        <button className={styles.sceneControlCompactToggle} onClick={() => onChange({ ...content, isCompact: false })}>↙️</button>
+        <button className={styles.sceneControlCompactToggle} onClick={() => onChange({ ...content, isCompact: false })} aria-label="Expand widget"><Maximize2 size={13} /></button>
       </div>
     );
   }
@@ -114,6 +114,7 @@ export function ResearchRenderer({ content, onChange }: { content: any; onChange
                     <div className={styles.researchImage} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: '0.6875rem' }}>No URL provided</div>
                   )}
                   <input 
+                    aria-label="Image URL"
                     className={styles.beatTitleInput} 
                     style={{ padding: '4px 8px', fontSize: '0.6875rem' }}
                     placeholder="Image URL..."
@@ -125,6 +126,7 @@ export function ResearchRenderer({ content, onChange }: { content: any; onChange
 
               {item.type === 'text' && (
                 <textarea 
+                  aria-label="Research note"
                   className={styles.researchTextItem}
                   placeholder="Paste snippet or sensory note here..."
                   value={item.content}
@@ -145,6 +147,7 @@ export function ResearchRenderer({ content, onChange }: { content: any; onChange
                     <div key={s.key} className={styles.researchSensoryItem}>
                       <span className={styles.researchSensoryIcon} title={s.label}>{s.icon}</span>
                       <input 
+                        aria-label={s.label}
                         className={styles.beatTitleInput} 
                         style={{ fontSize: '0.6875rem', padding: 0 }}
                         placeholder={`${s.label}...`}
@@ -158,6 +161,7 @@ export function ResearchRenderer({ content, onChange }: { content: any; onChange
 
               <div className={styles.researchTags}>
                 <input 
+                  aria-label="Add a tag"
                   className={styles.beatTitleInput}
                   style={{ fontSize: '0.6875rem', opacity: 0.5 }}
                   placeholder="+ Tag"

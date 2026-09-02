@@ -154,6 +154,7 @@ export function InterviewEditorModal({ interview, canDelete, onSave, onDelete, o
                                 <input
                                     className={styles.interviewEditorInput}
                                     value={q.label}
+                                    aria-label="Question label"
                                     onChange={e => patchQuestion(i, { label: e.target.value })}
                                     placeholder="Short label, e.g. Core want"
                                 />
@@ -166,6 +167,7 @@ export function InterviewEditorModal({ interview, canDelete, onSave, onDelete, o
                             <textarea
                                 className={styles.interviewEditorTextarea}
                                 value={q.prompt}
+                                aria-label="Question prompt"
                                 onChange={e => patchQuestion(i, { prompt: e.target.value })}
                                 placeholder="The question to ask…"
                                 rows={2}
@@ -173,6 +175,7 @@ export function InterviewEditorModal({ interview, canDelete, onSave, onDelete, o
                             <input
                                 className={styles.interviewEditorInput}
                                 value={q.seeds}
+                                aria-label="Entity types this answer seeds"
                                 onChange={e => patchQuestion(i, { seeds: e.target.value })}
                                 placeholder="Seeds (optional) — entity types this answer creates, e.g. faction, location"
                             />

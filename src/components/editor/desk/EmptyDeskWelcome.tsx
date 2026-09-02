@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { Download, FolderOpen, Globe, Sparkles } from 'lucide-react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { NewProjectModal } from '@/components/ui/NewProjectModal';
 import { ImportModal } from '@/components/ui/ImportModal';
@@ -65,7 +66,7 @@ export function EmptyDeskWelcome() {
 
         <div className={styles.emptyWelcomeActions}>
           <button className={styles.welcomeActionBtn} onClick={() => setShowNew(true)}>
-            <span className={styles.welcomeActionIcon}>✨</span>
+            <span className={styles.welcomeActionIcon} aria-hidden="true"><Sparkles size={20} /></span>
             <span className={styles.welcomeActionLabel}>New Writing</span>
           </button>
           
@@ -76,15 +77,15 @@ export function EmptyDeskWelcome() {
 
           <div className={styles.welcomeActionGroup}>
             <button className={styles.welcomeActionBtnSecondary} onClick={() => setIsLoadOpen(!isLoadOpen)}>
-              <span className={styles.welcomeActionIcon}>📁</span>
+              <span className={styles.welcomeActionIcon} aria-hidden="true"><FolderOpen size={20} /></span>
               <span className={styles.welcomeActionLabel}>Load</span>
             </button>
             <button className={styles.welcomeActionBtnSecondary} onClick={() => setShowImport(true)}>
-              <span className={styles.welcomeActionIcon}>📥</span>
+              <span className={styles.welcomeActionIcon} aria-hidden="true"><Download size={20} /></span>
               <span className={styles.welcomeActionLabel}>Import</span>
             </button>
             <button className={styles.welcomeActionBtnSecondary} onClick={handleLoadExample} disabled={isSeeding}>
-              <span className={styles.welcomeActionIcon}>🌍</span>
+              <span className={styles.welcomeActionIcon} aria-hidden="true"><Globe size={20} /></span>
               <span className={styles.welcomeActionLabel}>{isSeeding ? 'Loading…' : 'Example World'}</span>
             </button>
           </div>

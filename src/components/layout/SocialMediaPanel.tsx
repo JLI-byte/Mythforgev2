@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useId, useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronRight, X } from 'lucide-react';
 import styles from './SocialMediaPanel.module.css';
@@ -63,6 +63,7 @@ export function SocialMediaPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
     const [activeTab, setActiveTab] = useState<SocialPlatform>('x');
     const [draftText, setDraftText] = useState('');
     const [toastMsg, setToastMsg] = useState('');
+    const fieldId = useId();
 
     const showToast = (msg: string) => {
         setToastMsg(msg);
@@ -226,7 +227,7 @@ export function SocialMediaPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
                     <div className={styles.content} style={{ paddingRight: tabWidth }}>
                         <div className={styles.composeArea}>
                             <div className={styles.composeHeader}>
-                                <span className={styles.composeTitle}>Draft Update for {platform.name}</span>
+                                <span className={styles.composeTitle} id={`${fieldId}-compose-title`}>Draft Update for {platform.name}</span>
                                 {platform.charLimit && (
                                     <span className={`${styles.charCount} ${isOverLimit ? styles.error : (charCount > platform.charLimit * 0.9 ? styles.warning : '')}`}>
                                         {charCount} / {platform.charLimit}
@@ -236,6 +237,7 @@ export function SocialMediaPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
 
                             <textarea 
                                 className={styles.textArea}
+                                aria-labelledby={`${fieldId}-compose-title`}
                                 placeholder="What's happening in your story?..."
                                 value={draftText}
                                 onChange={(e) => setDraftText(e.target.value)}

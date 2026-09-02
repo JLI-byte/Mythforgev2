@@ -107,6 +107,7 @@ export default function ScreenplayEditor({ scene, onEditorFocus }: { scene: Scen
                 </span>
                 <select
                     className={styles.toolbarSelect}
+                    aria-label="Element type"
                     value={currentType}
                     onChange={(e) => {
                         const val = e.target.value;

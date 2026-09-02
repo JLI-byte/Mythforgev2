@@ -27,8 +27,8 @@ export function ReferenceCardRenderer({ content, onChange }: { content: any; onC
 
   return (
     <div className={styles.referenceCard}>
-      <input className={styles.referenceTitle} placeholder="Title..." value={localContent.title || ''} onChange={e => handleChange({ title: e.target.value })} />
-      <textarea className={styles.referenceBody} placeholder="Notes..." value={localContent.body || ''} onChange={e => handleChange({ body: e.target.value })} />
+      <input aria-label="Reference title" className={styles.referenceTitle} placeholder="Title..." value={localContent.title || ''} onChange={e => handleChange({ title: e.target.value })} />
+      <textarea aria-label="Reference notes" className={styles.referenceBody} placeholder="Notes..." value={localContent.body || ''} onChange={e => handleChange({ body: e.target.value })} />
     </div>
   );
 }

@@ -208,6 +208,9 @@
 }
 
 .typeBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   background: var(--surface-mid, var(--surface-mid));
   border: 1px solid var(--border);
   color: var(--muted);

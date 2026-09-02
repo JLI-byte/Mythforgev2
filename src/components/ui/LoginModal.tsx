@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import { X } from 'lucide-react';
 import styles from './LoginModal.module.css';
 import { createClient } from '@/lib/supabase/client';
@@ -18,6 +18,7 @@ interface LoginModalProps {
 export default function LoginModal({ onClose }: LoginModalProps) {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const fieldId = useId();
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -92,8 +93,9 @@ export default function LoginModal({ onClose }: LoginModalProps) {
 
         <form onSubmit={handleMagicLink} className={styles.form}>
           <div className={styles.formGroup}>
-            <label className={styles.label}>Email Address</label>
+            <label className={styles.label} htmlFor={`${fieldId}-email`}>Email Address</label>
             <input 
+              id={`${fieldId}-email`}
               type="email" 
               className={styles.input} 
               placeholder="name@example.com"

@@ -44,6 +44,7 @@ export function ImagePinRenderer({ content, onChange, onChangeImmediate }: { con
           </div>
           <div className={styles.imagePinControls} onMouseDown={e => e.stopPropagation()}>
             <input
+              aria-label="Caption"
               className={styles.imagePinLabel}
               placeholder="Caption..."
               value={localLabel}
@@ -57,6 +58,7 @@ export function ImagePinRenderer({ content, onChange, onChangeImmediate }: { con
             />
             <div className={styles.imagePinRotateRow}>
               <input
+                aria-label="Rotation"
                 type="range" min={-15} max={15} step={1}
                 value={localRotation}
                 className={styles.imagePinRotateSlider}
@@ -72,7 +74,7 @@ export function ImagePinRenderer({ content, onChange, onChangeImmediate }: { con
           </div>
         </>
       ) : <div className={styles.imagePinUpload} onClick={() => fileRef.current?.click()}><span><Image size={14} /></span><span>Click to pin image</span></div>}
-      <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
+      <input ref={fileRef} type="file" aria-label="Pin an image" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
     </div>
   );
 }

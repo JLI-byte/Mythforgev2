@@ -167,6 +167,7 @@ export function ProjectSwitcher({ onClose }: ProjectSwitcherProps) {
                         <input
                             type="text"
                             autoFocus
+                            aria-label="Project name"
                             value={editProjectName}
                             onChange={e => setEditProjectName(e.target.value)}
                             onBlur={() => {
@@ -267,6 +268,7 @@ export function ProjectSwitcher({ onClose }: ProjectSwitcherProps) {
                             <input
                                 type="text"
                                 autoFocus
+                                aria-label="New project name"
                                 value={newProjectName}
                                 onChange={e => setNewProjectName(e.target.value)}
                                 placeholder="Project name..."

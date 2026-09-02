@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useId, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronRight, X } from 'lucide-react';
 import styles from './MusicPlayerPanel.module.css';
@@ -70,6 +70,7 @@ export function MusicPlayerPanel({
     const [newUrl, setNewUrl] = useState('');
     const [newName, setNewName] = useState('');
     const [toast, setToast] = useState('');
+    const fieldId = useId();
 
     useEffect(() => { setMounted(true); }, []);
 
@@ -349,19 +350,21 @@ export function MusicPlayerPanel({
                                     YouTube, Apple Music, SoundCloud, or anywhere else.
                                     It opens in your music app — no restrictions.
                                 </p>
-                                <label className={styles.addLabel}>URL</label>
+                                <label className={styles.addLabel} htmlFor={`${fieldId}-url`}>URL</label>
                                 <input
                                     className={styles.addInput}
                                     type="text"
+                                    id={`${fieldId}-url`}
                                     placeholder="https://open.spotify.com/playlist/..."
                                     value={newUrl}
                                     onChange={e => setNewUrl(e.target.value)}
                                     onKeyDown={e => { if (e.key === 'Enter') addToLibrary(); }}
                                 />
-                                <label className={styles.addLabel}>Name (optional)</label>
+                                <label className={styles.addLabel} htmlFor={`${fieldId}-name`}>Name (optional)</label>
                                 <input
                                     className={styles.addInput}
                                     type="text"
+                                    id={`${fieldId}-name`}
                                     placeholder="My writing playlist"
                                     value={newName}
                                     onChange={e => setNewName(e.target.value)}

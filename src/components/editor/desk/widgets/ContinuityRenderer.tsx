@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useId, useMemo } from 'react';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from '../../WritingDesk.module.css';
 
@@ -14,6 +15,7 @@ export function ContinuityRenderer({ content, onChange }: { content: any; onChan
   );
 
   // --- Local state for debounced text inputs ---
+  const fieldId = useId();
   const [localContent, setLocalContent] = useState(content);
   const lastPropContent = useRef(content);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -75,7 +77,7 @@ export function ContinuityRenderer({ content, onChange }: { content: any; onChan
         <div className={styles.continuityTimelineMini}>
           <div className={styles.continuityTimelineMiniFill} style={{ width: `${progress}%` }} />
         </div>
-        <button className={styles.sceneControlCompactToggle} onClick={() => updateImmediate({ isCompact: false })}>↙️</button>
+        <button className={styles.sceneControlCompactToggle} onClick={() => updateImmediate({ isCompact: false })} aria-label="Expand widget"><Maximize2 size={13} /></button>
       </div>
     );
   }
@@ -84,7 +86,7 @@ export function ContinuityRenderer({ content, onChange }: { content: any; onChan
     <div className={styles.continuity}>
       <div className={styles.sceneControlHeader}>
         <span className={styles.sceneControlLabel} style={{ color: '#fbbf24' }}>Continuity Engine</span>
-        <button className={styles.sceneControlCompactToggle} onClick={() => updateImmediate({ isCompact: true })}>↗️</button>
+        <button className={styles.sceneControlCompactToggle} onClick={() => updateImmediate({ isCompact: true })} aria-label="Collapse widget"><Minimize2 size={13} /></button>
       </div>
 
       <div className={styles.continuityScroll}>
@@ -105,8 +107,9 @@ export function ContinuityRenderer({ content, onChange }: { content: any; onChan
 
         <div className={styles.continuityRulesGrid}>
           <div className={styles.continuityRuleBox}>
-            <label className={styles.continuityRuleLabel}>Magic & World Rules</label>
+            <label className={styles.continuityRuleLabel} htmlFor={`${fieldId}-world-rules`}>Magic & World Rules</label>
             <textarea 
+              id={`${fieldId}-world-rules`}
               className={styles.continuityRuleText} 
               value={localContent.worldRules || ''} 
               onChange={e => handleChange({ worldRules: e.target.value })} 
@@ -114,8 +117,9 @@ export function ContinuityRenderer({ content, onChange }: { content: any; onChan
             />
           </div>
           <div className={styles.continuityRuleBox}>
-            <label className={styles.continuityRuleLabel}>Canon / Lore Reminders</label>
+            <label className={styles.continuityRuleLabel} htmlFor={`${fieldId}-canon-lore`}>Canon / Lore Reminders</label>
             <textarea 
+              id={`${fieldId}-canon-lore`}
               className={styles.continuityRuleText} 
               value={localContent.canonLore || ''} 
               onChange={e => handleChange({ canonLore: e.target.value })} 
@@ -129,8 +133,8 @@ export function ContinuityRenderer({ content, onChange }: { content: any; onChan
           <div className={styles.sceneChecklist}>
             {looseEnds.map((l: any) => (
               <div key={l.id} className={styles.continuityCheckItem}>
-                <input type="checkbox" checked={l.checked} onChange={() => toggleLooseEnd(l.id)} />
-                <span className={l.checked ? styles.sceneCheckDone : ''}>{l.text}</span>
+                <input type="checkbox" checked={l.checked} onChange={() => toggleLooseEnd(l.id)} aria-labelledby={`${fieldId}-loose-${l.id}`} />
+                <span id={`${fieldId}-loose-${l.id}`} className={l.checked ? styles.sceneCheckDone : ''}>{l.text}</span>
               </div>
             ))}
             <button className={styles.continuityResearchAdd} onClick={addLooseEnd}>+ Add Plot Point</button>
@@ -142,8 +146,8 @@ export function ContinuityRenderer({ content, onChange }: { content: any; onChan
           <div className={styles.sceneChecklist}>
             {researchTasks.map((t: any) => (
               <div key={t.id} className={styles.continuityCheckItem}>
-                <input type="checkbox" checked={t.checked} onChange={() => toggleResearch(t.id)} />
-                <span className={t.checked ? styles.sceneCheckDone : ''}>{t.text}</span>
+                <input type="checkbox" checked={t.checked} onChange={() => toggleResearch(t.id)} aria-labelledby={`${fieldId}-research-${t.id}`} />
+                <span id={`${fieldId}-research-${t.id}`} className={t.checked ? styles.sceneCheckDone : ''}>{t.text}</span>
               </div>
             ))}
             <button className={styles.continuityResearchAdd} onClick={addResearch}>+ Add Research Flag</button>
@@ -151,8 +155,9 @@ export function ContinuityRenderer({ content, onChange }: { content: any; onChan
         </div>
 
         <div className={styles.sceneControlSection}>
-          <label className={styles.sceneControlLabel}>Continuity Warnings</label>
+          <label className={styles.sceneControlLabel} htmlFor={`${fieldId}-warnings`}>Continuity Warnings</label>
           <textarea 
+            id={`${fieldId}-warnings`}
             className={styles.continuityRuleText} 
             style={{ minHeight: '60px', borderColor: 'rgba(248, 113, 113, 0.2)' }}
             value={localContent.warnings || ''} 

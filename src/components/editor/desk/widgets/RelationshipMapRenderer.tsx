@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { Maximize2, Minimize2, MoveHorizontal } from 'lucide-react';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../WritingDesk.module.css';
@@ -75,7 +76,7 @@ export function RelationshipMapRenderer({ content, onChange }: { content: any; o
           <span>Relationship Vectors</span>
           <span className={styles.relCompactValue}>{links.length}</span>
         </div>
-        <button className={styles.compactToggleBtn} onClick={() => onChange({ ...content, isCompact: false })}>↙️</button>
+        <button className={styles.compactToggleBtn} onClick={() => onChange({ ...content, isCompact: false })} aria-label="Expand widget"><Maximize2 size={13} /></button>
       </div>
     );
   }
@@ -86,6 +87,7 @@ export function RelationshipMapRenderer({ content, onChange }: { content: any; o
         <div className={styles.progressLabel} style={{ marginTop: 0, opacity: 0.6 }}>Relationship Map</div>
         <div style={{ display: 'flex', gap: '4px' }}>
           <select 
+            aria-label="Add a character to the map"
             className={styles.relMapInput} 
             style={{ width: '120px' }} 
             onChange={e => { if(e.target.value) { handleAddChar(e.target.value); e.target.value = ''; } }}
@@ -93,7 +95,7 @@ export function RelationshipMapRenderer({ content, onChange }: { content: any; o
             <option value="">+ Character</option>
             {characters.filter(c => !nodes.find((n:any) => n.charId === c.id)).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
-          <button className={styles.sceneControlCompactToggle} onClick={() => onChange({ ...content, isCompact: true })}>↗️</button>
+          <button className={styles.sceneControlCompactToggle} onClick={() => onChange({ ...content, isCompact: true })} aria-label="Collapse widget"><Minimize2 size={13} /></button>
         </div>
       </div>
 
@@ -157,19 +159,19 @@ export function RelationshipMapRenderer({ content, onChange }: { content: any; o
 
       <div className={styles.relMapControls}>
         <div className={styles.relControlRow}>
-          <select className={styles.relMapInput} id="rel-from">
+          <select className={styles.relMapInput} id="rel-from" aria-label="First character in the relationship">
              <option value="">Character A...</option>
              {nodes.map((n:any) => <option key={n.charId} value={n.charId}>{characters.find(c => c.id === n.charId)?.name}</option>)}
           </select>
-          <span>↔️</span>
-          <select className={styles.relMapInput} id="rel-to">
+          <span aria-hidden="true"><MoveHorizontal size={13} /></span>
+          <select className={styles.relMapInput} id="rel-to" aria-label="Second character in the relationship">
              <option value="">Character B...</option>
              {nodes.map((n:any) => <option key={n.charId} value={n.charId}>{characters.find(c => c.id === n.charId)?.name}</option>)}
           </select>
         </div>
         <div className={styles.relControlRow}>
-          <input className={styles.relMapInput} placeholder="Nature of bond (e.g. Rivals, Secrets)..." id="rel-label" />
-          <select className={styles.relMapInput} style={{ width: '80px' }} id="rel-type">
+          <input className={styles.relMapInput} placeholder="Nature of bond (e.g. Rivals, Secrets)..." id="rel-label" aria-label="Nature of the bond" />
+          <select className={styles.relMapInput} style={{ width: '80px' }} id="rel-type" aria-label="Relationship type">
              <option value="trust">Trust</option>
              <option value="conflict">Conflict</option>
           </select>

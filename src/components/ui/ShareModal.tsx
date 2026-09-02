@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useId, useState, useEffect, useRef } from 'react';
 import { Download, X } from 'lucide-react';
 import styles from './ShareModal.module.css';
 import { ShareCardOptions, generateShareCard } from '@/lib/shareCard';
@@ -18,6 +18,7 @@ export default function ShareModal({ isOpen, onClose, shareData }: ShareModalPro
     const [caption, setCaption] = useState('');
     const [isGenerating, setIsGenerating] = useState(true);
     const [copySuccess, setCopySuccess] = useState(false);
+    const fieldId = useId();
     const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // 1. Generate the initial caption based on milestone type
@@ -124,8 +125,9 @@ export default function ShareModal({ isOpen, onClose, shareData }: ShareModalPro
                     </section>
 
                     <section className={styles.captionSection}>
-                        <h3>Caption</h3>
+                        <h3 id={`${fieldId}-caption`}>Caption</h3>
                         <textarea
+                            aria-labelledby={`${fieldId}-caption`}
                             className={styles.captionArea}
                             value={caption}
                             onChange={(e) => setCaption(e.target.value)}

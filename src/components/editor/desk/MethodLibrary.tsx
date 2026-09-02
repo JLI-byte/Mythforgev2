@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
+import { BookOpen, Sparkles, X } from 'lucide-react';
 import {
     DRAFT_TYPES, getDraftType, getMethod, methodsForType,
     WRITING_METHODS, WritingMethod, MethodFamily, FAMILY_LABELS,
@@ -96,7 +96,7 @@ export function MethodLibrary({ onClose, onApply, draftTypeId, onDraftTypeChange
                                 Guided cards appear on your canvas — fill them in any order, rearrange freely.
                                 {onOpenFinder && (
                                     <>
-                                        {' '}<button className={styles.finderLink} onClick={onOpenFinder}>Not sure? ✨ Help me choose</button>
+                                        {' '}<button className={styles.finderLink} onClick={onOpenFinder}>Not sure? <Sparkles size={13} aria-hidden="true" /> Help me choose</button>
                                     </>
                                 )}
                             </p>
@@ -209,10 +209,10 @@ export function DraftTableWelcome({ onPickMethod, onFindMethod, onStartBlank }: 
                 </p>
                 <div className={styles.welcomeActions}>
                     <button className={styles.welcomePrimary} onClick={onPickMethod}>
-                        📚 Pick a Method
+                        <BookOpen size={14} aria-hidden="true" /> Pick a Method
                     </button>
                     <button className={styles.welcomePrimary} onClick={onFindMethod}>
-                        ✨ Help Me Choose
+                        <Sparkles size={14} aria-hidden="true" /> Help Me Choose
                     </button>
                     <button className={styles.welcomeSecondary} onClick={onStartBlank}>
                         Start Blank

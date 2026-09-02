@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useId, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
+import { Globe, PenLine, X } from 'lucide-react';
 import { useWorkspaceStore, DeskWidget, Document, Scene, Entity, selectProjectWorldKey } from '@/store/workspaceStore';
 import { STANDALONE_KEY } from '@/lib/worldKey';
 import styles from './MethodLibrary.module.css';
@@ -69,6 +69,7 @@ export function DraftExport({ projectId, methodName, beats, onClose }: DraftExpo
     const projectName = projects.find(p => p.id === projectId)?.name ?? 'Untitled';
     const [articleTitle, setArticleTitle] = useState(`${projectName} — Outline`);
     const [isNamingArticle, setIsNamingArticle] = useState(false);
+    const fieldId = useId();
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -174,13 +175,13 @@ export function DraftExport({ projectId, methodName, beats, onClose }: DraftExpo
                     {!isNamingArticle ? (
                         <div className={styles.finderOptions}>
                             <button className={styles.finderOption} onClick={exportToDesk}>
-                                <span className={styles.starterName}>✍️ To the Writing Desk</span>
+                                <span className={styles.starterName}><PenLine size={13} aria-hidden="true" /> To the Writing Desk</span>
                                 <span className={styles.starterTagline}>
                                     Beat groups become chapters, each beat becomes a scene with your outline text — ready to draft over.
                                 </span>
                             </button>
                             <button className={styles.finderOption} onClick={() => setIsNamingArticle(true)}>
-                                <span className={styles.starterName}>🌍 To the World Bible</span>
+                                <span className={styles.starterName}><Globe size={13} aria-hidden="true" /> To the World Bible</span>
                                 <span className={styles.starterTagline}>
                                     The outline becomes a lore article — headings and text blocks, filed in this shelf&apos;s bible.
                                 </span>
@@ -188,9 +189,10 @@ export function DraftExport({ projectId, methodName, beats, onClose }: DraftExpo
                         </div>
                     ) : (
                         <>
-                            <div className={styles.sectionLabel}>Article title</div>
+                            <div className={styles.sectionLabel} id={`${fieldId}-article-title`}>Article title</div>
                             <input
                                 className={styles.exportInput}
+                                aria-labelledby={`${fieldId}-article-title`}
                                 value={articleTitle}
                                 onChange={e => setArticleTitle(e.target.value)}
                                 onKeyDown={e => { if (e.key === 'Enter') exportToArticle(); }}

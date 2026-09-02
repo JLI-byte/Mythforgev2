@@ -39,6 +39,7 @@ export function VNDecisionEditor({ decision, flags, episodes, onChange, onRemove
             <div className={styles.decisionHead}>
                 <select
                     value={decision.kind}
+                    aria-label="Decision importance"
                     onChange={e => {
                         const kind = e.target.value as VNDecision['kind'];
                         // A minor decision cannot route, so drop any route it had.
@@ -52,6 +53,7 @@ export function VNDecisionEditor({ decision, flags, episodes, onChange, onRemove
                 </select>
 
                 <input
+                    aria-label="What is being decided"
                     className={styles.promptInput}
                     value={decision.prompt}
                     placeholder="What is being decided?"
@@ -64,6 +66,7 @@ export function VNDecisionEditor({ decision, flags, episodes, onChange, onRemove
             {decision.options.map(option => (
                 <div key={option.id} className={styles.optionRow}>
                     <input
+                        aria-label="Option text"
                         className={styles.optionText}
                         value={option.text}
                         placeholder="What the player sees"
@@ -72,6 +75,7 @@ export function VNDecisionEditor({ decision, flags, episodes, onChange, onRemove
 
                     <select
                         value={option.effects?.[0]?.flagId ?? ''}
+                        aria-label="Flag this option sets"
                         onChange={e => {
                             const flagId = e.target.value;
                             if (!flagId) return updateOption(option.id, { effects: undefined });
@@ -91,6 +95,7 @@ export function VNDecisionEditor({ decision, flags, episodes, onChange, onRemove
                     {decision.kind === 'major' && (
                         <select
                             value={option.routeToEpisodeId ?? ''}
+                            aria-label="Where this option routes"
                             title="Leave blank to rejoin and carry on"
                             onChange={e => updateOption(option.id, {
                                 routeToEpisodeId: e.target.value || undefined,

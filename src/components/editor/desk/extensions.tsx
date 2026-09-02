@@ -104,6 +104,7 @@ export const ChapterTitleNodeView = (props: NodeViewProps) => {
         <span>--- CHAPTER: </span>
         <input 
           className={styles.bookViewSeparatorInput}
+          aria-label="Chapter title"
           value={node.attrs.title}
           onMouseDown={e => e.stopPropagation()}
           onClick={e => e.stopPropagation()}
@@ -131,6 +132,7 @@ export const SceneTitleNodeView = (props: NodeViewProps) => {
         <span>--- Scene: </span>
         <input 
           className={styles.bookViewSeparatorInput}
+          aria-label="Scene title"
           value={node.attrs.title}
           onMouseDown={e => e.stopPropagation()}
           onClick={e => e.stopPropagation()}

@@ -750,6 +750,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                                     {chipEntities.length > 0 && (
                                         <select
                                             className={styles.genImageSelect}
+                                            aria-label="Set this image as an article image"
                                             value=""
                                             onChange={e => {
                                                 if (!e.target.value) return;
@@ -850,6 +851,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                 <textarea
                     ref={composerRef}
                     className={styles.chatComposerInput}
+                    aria-label="Message the research assistant"
                     placeholder={chatAttachment ? `Ask about “${chatAttachment.label}”…` : 'Message the research assistant — "/" for commands…'}
                     value={input}
                     onChange={e => { setInput(e.target.value); setCmdDismissed(false); setCmdIndex(0); autoGrow(); }}
@@ -863,6 +865,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
                         <input
                             ref={fileInputRef}
                             type="file"
+                            aria-label="Attach an image"
                             accept="image/*"
                             style={{ display: 'none' }}
                             onChange={onImageSelected}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Home, Library, NotebookPen, Globe, LayoutTemplate, Telescope, Settings } from 'lucide-react';
+import { Home, Library, LogOut, NotebookPen, Globe, LayoutTemplate, Telescope, Settings } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 import { useWorkspaceStore, Project, Document, Entity, Scene, World } from '@/store/workspaceStore';
 import styles from './ModeBar.module.css';
@@ -75,7 +75,7 @@ function UserProfilePill({ onShowLogin }: { onShowLogin: () => void }) {
             <div className={styles.dropdownEmail}>{email}</div>
           </div>
           <button className={`${styles.dropdownItem} ${styles.dropdownItemSignOut}`} onClick={handleSignOut}>
-            <span>🚪</span> Sign Out
+            <LogOut size={14} aria-hidden="true" /> Sign Out
           </button>
         </div>
       )}

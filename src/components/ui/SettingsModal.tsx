@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import { X } from 'lucide-react';
 import styles from './SettingsModal.module.css';
 import AISettingsSection from './AISettingsSection';
@@ -45,6 +45,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
 
     const [backups, setBackups] = useState(() => listDataBackups());
     const [backupMsg, setBackupMsg] = useState('');
+    const fieldId = useId();
 
     const handleCreateBackup = () => {
         const key = createManualBackup();
@@ -160,9 +161,10 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                             <h3>Writing Goals</h3>
                         </div>
                         <div className={styles.inputGroup}>
-                            <label className={styles.label}>Daily Word Target</label>
+                            <label className={styles.label} htmlFor={`${fieldId}-daily-target`}>Daily Word Target</label>
                             <input
                                 type="number"
+                                id={`${fieldId}-daily-target`}
                                 value={dailyTarget || ''}
                                 onChange={(e) => setDailyTarget(Number(e.target.value))}
                                 className={styles.input}
@@ -171,9 +173,10 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                             />
                         </div>
                         <div className={styles.inputGroup}>
-                            <label className={styles.label}>Session Word Target</label>
+                            <label className={styles.label} htmlFor={`${fieldId}-session-target`}>Session Word Target</label>
                             <input
                                 type="number"
+                                id={`${fieldId}-session-target`}
                                 value={sessionTarget || ''}
                                 onChange={(e) => setSessionTarget(Number(e.target.value))}
                                 className={styles.input}
@@ -188,8 +191,9 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                             <h3>Editor Layout</h3>
                         </div>
                         <div className={styles.inputGroup}>
-                            <label className={styles.label}>Editor width: {localWidth}px</label>
+                            <label className={styles.label} htmlFor={`${fieldId}-editor-width`}>Editor width: {localWidth}px</label>
                             <input
+                                id={`${fieldId}-editor-width`}
                                 type="range"
                                 min="500"
                                 max="1400"

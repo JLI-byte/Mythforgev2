@@ -170,6 +170,7 @@ export function CommandPalette() {
                     <input
                         ref={inputRef}
                         type="text"
+                        aria-label="Search projects and chapters"
                         className={styles.searchInput}
                         placeholder="Search projects and chapters..."
                         value={search}

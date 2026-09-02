@@ -75,6 +75,7 @@ export function BeatCardRenderer({ content, onChange }: { content: any; onChange
             )}
 
             <textarea
+                aria-label="Beat text"
                 className={styles.beatCardTextarea}
                 placeholder={localContent.placeholder || 'What happens in this beat?'}
                 value={localContent.text || ''}

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useId, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import styles from './NewProjectModal.module.css'; // Reusing modal base styles
@@ -23,6 +23,7 @@ export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSett
     const [worldId, setWorldId] = useState('');
     const [attributedEntityId, setAttributedEntityId] = useState('');
     const [coverImageUrl, setCoverImageUrl] = useState('');
+    const fieldId = useId();
 
     useEffect(() => {
         if (project && isOpen) {
@@ -80,18 +81,20 @@ export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSett
                 </div>
 
                 <div className={styles.selectionGroup}>
-                    <label className={styles.selectionLabel}>Project Title</label>
+                    <label className={styles.selectionLabel} htmlFor={`${fieldId}-title`}>Project Title</label>
                     <input 
                         className={styles.titleInput}
+                        id={`${fieldId}-title`}
                         value={name}
                         onChange={e => setName(e.target.value)}
                     />
                 </div>
 
                 <div className={styles.selectionGroup}>
-                    <label className={styles.selectionLabel}>Author Name</label>
+                    <label className={styles.selectionLabel} htmlFor={`${fieldId}-author`}>Author Name</label>
                     <input 
                         className={styles.titleInput}
+                        id={`${fieldId}-author`}
                         placeholder="Pen name..."
                         value={authorName}
                         onChange={(e) => setAuthorName(e.target.value)}
@@ -99,9 +102,10 @@ export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSett
                 </div>
 
                 <div className={styles.selectionGroup}>
-                    <label className={styles.selectionLabel}>Associated World Bible</label>
+                    <label className={styles.selectionLabel} htmlFor={`${fieldId}-world`}>Associated World Bible</label>
                     <select 
                         className={styles.worldSelect}
+                        id={`${fieldId}-world`}
                         value={worldId}
                         onChange={e => {
                             setWorldId(e.target.value);
@@ -117,9 +121,10 @@ export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSett
 
                 {worldId && (
                     <div className={styles.selectionGroup}>
-                        <label className={styles.selectionLabel}>Fictional Character Attribution</label>
+                        <label className={styles.selectionLabel} htmlFor={`${fieldId}-attribution`}>Fictional Character Attribution</label>
                         <select 
                             className={styles.worldSelect}
+                            id={`${fieldId}-attribution`}
                             value={attributedEntityId}
                             onChange={e => setAttributedEntityId(e.target.value)}
                         >
@@ -135,9 +140,10 @@ export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSett
                 )}
 
                 <div className={styles.selectionGroup}>
-                    <label className={styles.selectionLabel}>Project Description / Blurb</label>
+                    <label className={styles.selectionLabel} htmlFor={`${fieldId}-description`}>Project Description / Blurb</label>
                     <textarea 
                         className={styles.titleInput}
+                        id={`${fieldId}-description`}
                         style={{ minHeight: '80px', resize: 'vertical' }}
                         value={description}
                         onChange={e => setDescription(e.target.value)}

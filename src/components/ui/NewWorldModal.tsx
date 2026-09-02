@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useId, useState, useEffect, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { useWorkspaceStore, COVER_COLORS, WorldGenre, World } from '@/store/workspaceStore';
 import styles from './NewWorldModal.module.css';
@@ -98,6 +98,7 @@ export function NewWorldModal({ isOpen, onClose }: NewWorldModalProps) {
 
   // Step 3 — First project
   const [projectTitle, setProjectTitle] = useState('');
+  const fieldId = useId();
   const [writingMode, setWritingMode] = useState<WritingMode>('novel');
 
   const isDirty = worldName.trim().length > 0 || genre !== null;
@@ -239,10 +240,11 @@ export function NewWorldModal({ isOpen, onClose }: NewWorldModalProps) {
         {step === 1 && (
           <div className={styles.stepBody}>
             <div className={styles.fieldGroup}>
-              <label className={styles.fieldLabel}>WORLD NAME</label>
+              <label className={styles.fieldLabel} htmlFor={`${fieldId}-world-name`}>WORLD NAME</label>
               <input
                 className={styles.textInput}
                 type="text"
+                id={`${fieldId}-world-name`}
                 placeholder="e.g. The Shattered Realm, 1920s New York..."
                 value={worldName}
                 onChange={e => setWorldName(e.target.value)}
@@ -347,10 +349,11 @@ export function NewWorldModal({ isOpen, onClose }: NewWorldModalProps) {
 
             {showTimePeriod && (
               <div className={styles.fieldGroup}>
-                <label className={styles.fieldLabel}>TIME PERIOD</label>
+                <label className={styles.fieldLabel} htmlFor={`${fieldId}-time-period`}>TIME PERIOD</label>
                 <input
                   className={styles.textInput}
                   type="text"
+                  id={`${fieldId}-time-period`}
                   placeholder="e.g. 1920s, Present day, Victorian England..."
                   value={timePeriod}
                   onChange={e => setTimePeriod(e.target.value)}
@@ -360,12 +363,13 @@ export function NewWorldModal({ isOpen, onClose }: NewWorldModalProps) {
             )}
 
             <div className={styles.fieldGroup}>
-              <label className={styles.fieldLabel}>
+              <label className={styles.fieldLabel} htmlFor={`${fieldId}-logline`}>
                 LOGLINE
                 <span className={styles.optional}> — optional</span>
               </label>
               <textarea
                 className={styles.textarea}
+                id={`${fieldId}-logline`}
                 placeholder="Describe your world in one sentence..."
                 value={logline}
                 onChange={e => setLogline(e.target.value)}
@@ -387,10 +391,11 @@ export function NewWorldModal({ isOpen, onClose }: NewWorldModalProps) {
             </div>
 
             <div className={styles.fieldGroup}>
-              <label className={styles.fieldLabel}>PROJECT TITLE</label>
+              <label className={styles.fieldLabel} htmlFor={`${fieldId}-project-title`}>PROJECT TITLE</label>
               <input
                 className={styles.textInput}
                 type="text"
+                id={`${fieldId}-project-title`}
                 placeholder="What are you writing?"
                 value={projectTitle}
                 onChange={e => setProjectTitle(e.target.value)}

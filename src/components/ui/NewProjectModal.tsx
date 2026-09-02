@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useId, useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import styles from './NewProjectModal.module.css';
@@ -30,6 +30,7 @@ export function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
     const setActiveScene = useWorkspaceStore(state => state.setActiveScene);
 
     const [title, setTitle] = useState('');
+    const fieldId = useId();
     const [selectedMode, setSelectedMode] = useState<WritingMode>('novel');
     const [selectedWorldId, setSelectedWorldId] = useState<string>('');
     const [coverImageUrl, setCoverImageUrl] = useState<string>('');
@@ -149,6 +150,7 @@ export function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
                 <input
                     className={styles.titleInput}
                     type="text"
+                    aria-label="Project title"
                     placeholder="Project title..."
                     value={title}
                     onChange={e => setTitle(e.target.value)}
@@ -158,8 +160,9 @@ export function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
 
                 {/* World selector */}
                 <div className={styles.selectionGroup}>
-                    <label className={styles.selectionLabel}>Associated World</label>
+                    <label className={styles.selectionLabel} htmlFor={`${fieldId}-world`}>Associated World</label>
                     <select 
+                        id={`${fieldId}-world`}
                         className={styles.worldSelect}
                         value={selectedWorldId}
                         onChange={e => setSelectedWorldId(e.target.value)}

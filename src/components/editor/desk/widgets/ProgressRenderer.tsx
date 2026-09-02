@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { RotateCcw } from 'lucide-react';
+import { Clock, Maximize2, Minimize2, Pause, Play, RotateCcw, Timer } from 'lucide-react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from '../../WritingDesk.module.css';
 
@@ -81,7 +81,7 @@ export function ProgressRenderer({ content, onChange }: { content: any; onChange
           </svg>
           <div className={styles.compactValue}>{totalWords}</div>
         </div>
-        <button className={styles.compactToggleBtn} onClick={() => onChange({ ...content, isCompact: false })}>↙️</button>
+        <button className={styles.compactToggleBtn} onClick={() => onChange({ ...content, isCompact: false })} aria-label="Expand widget"><Maximize2 size={13} /></button>
       </div>
     );
   }
@@ -90,7 +90,7 @@ export function ProgressRenderer({ content, onChange }: { content: any; onChange
     <div className={styles.progress}>
       <div className={styles.structureHeader} style={{ marginBottom: '-10px', padding: '0 4px' }}>
         <div className={styles.progressLabel} style={{ marginTop: 0, opacity: 0.6 }}>Momentum Engine</div>
-        <button className={styles.sceneControlCompactToggle} onClick={() => onChange({ ...content, isCompact: true })}>↗️</button>
+        <button className={styles.sceneControlCompactToggle} onClick={() => onChange({ ...content, isCompact: true })} aria-label="Collapse widget"><Minimize2 size={13} /></button>
       </div>
 
       <div className={styles.progressStat}>
@@ -106,6 +106,7 @@ export function ProgressRenderer({ content, onChange }: { content: any; onChange
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <span>GOAL:</span>
             <input 
+              aria-label="Daily word goal"
               type="number" 
               className={styles.beatTitleInput} 
               style={{ width: '60px', fontSize: '0.6875rem', padding: '0 4px', border: 'none', background: 'rgba(255,255,255,0.03)' }} 
@@ -127,14 +128,14 @@ export function ProgressRenderer({ content, onChange }: { content: any; onChange
         <div className={styles.timerLabel}>{content.timerMode === 'pomodoro' ? 'POMODORO SPRINT' : 'SESSION CLOCK'}</div>
         <div className={styles.timerDisplay}>{formatTime(hours, minutes, seconds)}</div>
         <div className={styles.timerControls}>
-          <button className={`${styles.timerBtn} ${isRunning ? styles.timerBtnActive : ''}`} onClick={toggleTimer}>
-            {isRunning ? '⏸️' : '▶️'}
+          <button className={`${styles.timerBtn} ${isRunning ? styles.timerBtnActive : ''}`} onClick={toggleTimer} aria-label={isRunning ? 'Pause timer' : 'Start timer'}>
+            {isRunning ? <Pause size={14} /> : <Play size={14} />}
           </button>
           <button className={styles.timerBtn} onClick={resetTimer} aria-label="Reset timer">
             <RotateCcw size={14} />
           </button>
-          <button className={styles.timerBtn} onClick={() => onChange({ ...content, timerMode: content.timerMode === 'pomodoro' ? 'session' : 'pomodoro' })}>
-            {content.timerMode === 'pomodoro' ? '🍅' : '⏱️'}
+          <button className={styles.timerBtn} onClick={() => onChange({ ...content, timerMode: content.timerMode === 'pomodoro' ? 'session' : 'pomodoro' })} aria-label={content.timerMode === 'pomodoro' ? 'Switch to session clock' : 'Switch to pomodoro sprint'}>
+            {content.timerMode === 'pomodoro' ? <Timer size={14} /> : <Clock size={14} />}
           </button>
         </div>
       </div>

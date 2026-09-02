@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from 'react';
-import { ArrowRight, X } from 'lucide-react';
+import { useState, useRef, useEffect, useId, useMemo } from 'react';
+import { ArrowRight, Maximize2, Minimize2, X } from 'lucide-react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from '../../WritingDesk.module.css';
 
@@ -9,6 +9,7 @@ export function SceneControlRenderer({ content, onChange }: { content: any; onCh
   const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
   const scenes = useWorkspaceStore(s => s.scenes);
   const projectScenes = useMemo(() => scenes.filter(sc => sc.projectId === activeProjectId), [scenes, activeProjectId]);
+  const fieldId = useId();
 
   // --- Local state for debounced text inputs ---
   const [localContent, setLocalContent] = useState(content);
@@ -66,7 +67,7 @@ export function SceneControlRenderer({ content, onChange }: { content: any; onCh
         <div className={styles.sceneControlTensionBar} title={`Tension: ${localContent.tension || 0}%`}>
           <div className={styles.sceneControlTensionFill} style={{ width: `${localContent.tension || 0}%` }} />
         </div>
-        <button className={styles.sceneControlCompactToggle} onClick={() => updateImmediate({ isCompact: false })}>↙️</button>
+        <button className={styles.sceneControlCompactToggle} onClick={() => updateImmediate({ isCompact: false })} aria-label="Expand widget"><Maximize2 size={13} /></button>
       </div>
     );
   }
@@ -75,19 +76,21 @@ export function SceneControlRenderer({ content, onChange }: { content: any; onCh
     <div className={styles.sceneControl}>
       <div className={styles.sceneControlHeader}>
         <select 
+          aria-label="Scene status"
           className={styles.sceneControlStatus} 
           value={content.status || 'Draft'} 
           onChange={e => updateImmediate({ status: e.target.value })}
         >
           {statusOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
         </select>
-        <button className={styles.sceneControlCompactToggle} onClick={() => updateImmediate({ isCompact: true })}>↗️</button>
+        <button className={styles.sceneControlCompactToggle} onClick={() => updateImmediate({ isCompact: true })} aria-label="Collapse widget"><Minimize2 size={13} /></button>
       </div>
 
       <div className={styles.sceneControlScroll}>
         <div className={styles.sceneControlSection}>
-          <label className={styles.sceneControlLabel}>Link to Scene</label>
+          <label className={styles.sceneControlLabel} htmlFor={`${fieldId}-linked-scene`}>Link to Scene</label>
           <select 
+            id={`${fieldId}-linked-scene`}
             className={styles.sceneControlSelect} 
             value={content.linkedSceneId || ''} 
             onChange={e => updateImmediate({ linkedSceneId: e.target.value })}
@@ -98,23 +101,23 @@ export function SceneControlRenderer({ content, onChange }: { content: any; onCh
         </div>
 
         <div className={styles.sceneControlSection}>
-          <label className={styles.sceneControlLabel}>Purpose / Objective</label>
-          <textarea className={styles.sceneControlInput} value={localContent.purpose || ''} onChange={e => handleChange({ purpose: e.target.value })} placeholder="What must happen?" />
+          <label className={styles.sceneControlLabel} htmlFor={`${fieldId}-purpose`}>Purpose / Objective</label>
+          <textarea id={`${fieldId}-purpose`} className={styles.sceneControlInput} value={localContent.purpose || ''} onChange={e => handleChange({ purpose: e.target.value })} placeholder="What must happen?" />
         </div>
 
         <div className={styles.sceneControlSection}>
-          <label className={styles.sceneControlLabel}>Conflict / obstacle</label>
-          <textarea className={styles.sceneControlInput} value={localContent.conflict || ''} onChange={e => handleChange({ conflict: e.target.value })} placeholder="What stands in the way?" />
+          <label className={styles.sceneControlLabel} htmlFor={`${fieldId}-conflict`}>Conflict / obstacle</label>
+          <textarea id={`${fieldId}-conflict`} className={styles.sceneControlInput} value={localContent.conflict || ''} onChange={e => handleChange({ conflict: e.target.value })} placeholder="What stands in the way?" />
         </div>
 
         <div className={styles.sceneControlSection}>
-          <label className={styles.sceneControlLabel}>Stakes</label>
-          <textarea className={styles.sceneControlInput} value={localContent.stakes || ''} onChange={e => handleChange({ stakes: e.target.value })} placeholder="Result of failure?" />
+          <label className={styles.sceneControlLabel} htmlFor={`${fieldId}-stakes`}>Stakes</label>
+          <textarea id={`${fieldId}-stakes`} className={styles.sceneControlInput} value={localContent.stakes || ''} onChange={e => handleChange({ stakes: e.target.value })} placeholder="Result of failure?" />
         </div>
 
         <div className={styles.sceneControlSection}>
-          <label className={styles.sceneControlLabel}>Outcome / Change</label>
-          <textarea className={styles.sceneControlInput} value={localContent.outcome || ''} onChange={e => handleChange({ outcome: e.target.value })} placeholder="Valence shift..." />
+          <label className={styles.sceneControlLabel} htmlFor={`${fieldId}-outcome`}>Outcome / Change</label>
+          <textarea id={`${fieldId}-outcome`} className={styles.sceneControlInput} value={localContent.outcome || ''} onChange={e => handleChange({ outcome: e.target.value })} placeholder="Valence shift..." />
         </div>
 
         <div className={styles.sceneControlSection}>
@@ -122,8 +125,8 @@ export function SceneControlRenderer({ content, onChange }: { content: any; onCh
           <div className={styles.sceneChecklist}>
             {checklist.map((item: any) => (
               <div key={item.id} className={styles.sceneCheckItem}>
-                <input type="checkbox" checked={item.checked} onChange={() => toggleCheck(item.id)} />
-                <span className={item.checked ? styles.sceneCheckDone : ''}>{item.text}</span>
+                <input type="checkbox" checked={item.checked} onChange={() => toggleCheck(item.id)} aria-labelledby={`${fieldId}-check-${item.id}`} />
+                <span id={`${fieldId}-check-${item.id}`} className={item.checked ? styles.sceneCheckDone : ''}>{item.text}</span>
                 <button className={styles.sceneCheckRemove} onClick={() => removeCheck(item.id)} aria-label="Remove checklist item"><X size={13} /></button>
               </div>
             ))}
@@ -134,20 +137,20 @@ export function SceneControlRenderer({ content, onChange }: { content: any; onCh
         <div className={styles.sceneControlSection}>
           <label className={styles.sceneControlLabel}>Emotional Arc</label>
           <div className={styles.sceneArcRow}>
-            <input className={styles.sceneArcInput} value={localContent.emotionalArc?.start || ''} onChange={e => handleChange({ emotionalArc: { ...localContent.emotionalArc, start: e.target.value } })} placeholder="Start" />
+            <input aria-label="Emotional arc start" className={styles.sceneArcInput} value={localContent.emotionalArc?.start || ''} onChange={e => handleChange({ emotionalArc: { ...localContent.emotionalArc, start: e.target.value } })} placeholder="Start" />
             <span className={styles.sceneArcArrow} aria-hidden="true"><ArrowRight size={13} /></span>
-            <input className={styles.sceneArcInput} value={localContent.emotionalArc?.turn || ''} onChange={e => handleChange({ emotionalArc: { ...localContent.emotionalArc, turn: e.target.value } })} placeholder="Turn" />
+            <input aria-label="Emotional arc turn" className={styles.sceneArcInput} value={localContent.emotionalArc?.turn || ''} onChange={e => handleChange({ emotionalArc: { ...localContent.emotionalArc, turn: e.target.value } })} placeholder="Turn" />
             <span className={styles.sceneArcArrow} aria-hidden="true"><ArrowRight size={13} /></span>
-            <input className={styles.sceneArcInput} value={localContent.emotionalArc?.end || ''} onChange={e => handleChange({ emotionalArc: { ...localContent.emotionalArc, end: e.target.value } })} placeholder="End" />
+            <input aria-label="Emotional arc end" className={styles.sceneArcInput} value={localContent.emotionalArc?.end || ''} onChange={e => handleChange({ emotionalArc: { ...localContent.emotionalArc, end: e.target.value } })} placeholder="End" />
           </div>
         </div>
 
         <div className={styles.sceneControlSection}>
           <div className={styles.sceneControlLabelRow}>
-            <label className={styles.sceneControlLabel}>Tension</label>
+            <label className={styles.sceneControlLabel} htmlFor={`${fieldId}-tension`}>Tension</label>
             <span className={styles.sceneControlValue}>{localContent.tension || 0}%</span>
           </div>
-          <input type="range" className={styles.sceneTensionSlider} min="0" max="100" value={localContent.tension || 0} onChange={e => handleChange({ tension: parseInt(e.target.value) })} />
+          <input id={`${fieldId}-tension`} type="range" className={styles.sceneTensionSlider} min="0" max="100" value={localContent.tension || 0} onChange={e => handleChange({ tension: parseInt(e.target.value) })} />
         </div>
       </div>
     </div>

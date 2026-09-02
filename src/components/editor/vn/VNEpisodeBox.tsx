@@ -43,6 +43,7 @@ export function VNEpisodeBox({ title, decisions, tier, collapsed, onTitleChange 
         <>
             <input
                 className={styles.titleInput}
+                aria-label="Episode title"
                 value={title}
                 onClick={e => e.stopPropagation()}
                 onChange={e => onTitleChange(e.target.value)}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { ChevronDown, ChevronUp, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clapperboard, Landmark, Maximize2, Minimize2, X } from 'lucide-react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from '../../WritingDesk.module.css';
 
@@ -90,7 +90,7 @@ export function StructureRenderer({ content, onChange }: { content: any; onChang
             ))
           }
         </div>
-        <button className={styles.sceneControlCompactToggle} onClick={() => onChange({ ...content, isCompact: false })}>↙️</button>
+        <button className={styles.sceneControlCompactToggle} onClick={() => onChange({ ...content, isCompact: false })} aria-label="Expand widget"><Maximize2 size={13} /></button>
       </div>
     );
   }
@@ -102,7 +102,7 @@ export function StructureRenderer({ content, onChange }: { content: any; onChang
           <button className={styles.structureBtn} onClick={() => addItem('act')}>+ Act</button>
           <button className={styles.structureBtn} onClick={() => addItem('beat')}>+ Beat</button>
         </div>
-        <button className={styles.sceneControlCompactToggle} onClick={() => onChange({ ...content, isCompact: true })}>↗️</button>
+        <button className={styles.sceneControlCompactToggle} onClick={() => onChange({ ...content, isCompact: true })} aria-label="Collapse widget"><Minimize2 size={13} /></button>
       </div>
 
       <div className={styles.structureScroll}>
@@ -122,15 +122,16 @@ export function StructureRenderer({ content, onChange }: { content: any; onChang
                     <button className={styles.beatDragHandle} style={{ fontSize: '0.6875rem', border: 'none', background: 'transparent', padding: 0 }} onClick={() => reorderItem(idx, 'up')} disabled={idx === 0} aria-label="Move beat up"><ChevronUp size={12} /></button>
                     <button className={styles.beatDragHandle} style={{ fontSize: '0.6875rem', border: 'none', background: 'transparent', padding: 0 }} onClick={() => reorderItem(idx, 'down')} disabled={idx === localBeats.length - 1} aria-label="Move beat down"><ChevronDown size={12} /></button>
                   </div>
-                  <span className={styles.beatTypeIcon}>{beat.type === 'act' ? '🏛️' : '🎬'}</span>
+                  <span className={styles.beatTypeIcon} aria-hidden="true">{beat.type === 'act' ? <Landmark size={13} /> : <Clapperboard size={13} />}</span>
                   <input 
+                    aria-label={beat.type === 'act' ? 'Act title' : 'Beat title'}
                     className={styles.beatTitleInput} 
                     value={beat.title} 
                     onChange={e => updateItemDebounced(beat.id, { title: e.target.value })} 
                     placeholder="Beat Title..." 
                   />
                   <div className={styles.beatColorPicker} style={{ backgroundColor: beat.color }}>
-                    <input type="color" value={beat.color} onChange={e => updateItemImmediate(beat.id, { color: e.target.value })} />
+                    <input type="color" aria-label="Beat colour" value={beat.color} onChange={e => updateItemImmediate(beat.id, { color: e.target.value })} />
                   </div>
                 </div>
 
@@ -138,6 +139,7 @@ export function StructureRenderer({ content, onChange }: { content: any; onChang
                   <div className={styles.beatCardBody}>
                     <div className={styles.beatDetails}>
                       <select 
+                        aria-label="Scene linked to this beat"
                         className={styles.beatSceneSelect} 
                         value={beat.sceneId} 
                         onChange={e => updateItemImmediate(beat.id, { sceneId: e.target.value })}

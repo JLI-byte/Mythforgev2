@@ -49,11 +49,13 @@ export function VNFlagsRenderer() {
             {flags.map(flag => (
                 <div key={flag.id} className={styles.vnFlagRow}>
                     <input
+                        aria-label="Flag name"
                         className={styles.vnFlagName}
                         value={flag.name}
                         onChange={e => updateFlag(flag.id, { name: e.target.value })}
                     />
                     <select
+                        aria-label={`Kind of flag ${flag.name}`}
                         value={flag.kind}
                         onChange={e => updateFlag(flag.id, {
                             kind: e.target.value as VNFlag['kind'],
@@ -65,6 +67,7 @@ export function VNFlagsRenderer() {
                     </select>
                     <input
                         type="number"
+                        aria-label={`Starting value for ${flag.name}`}
                         className={styles.vnStateNumber}
                         value={flag.initial}
                         title="Starting value"

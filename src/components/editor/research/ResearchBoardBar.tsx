@@ -72,6 +72,7 @@ export function ResearchBoardBar({ baseScopeKey, activeBoardId, onSelect }: Rese
                     {editingId === b.id ? (
                         <input
                             className={styles.boardNameInput}
+                            aria-label="Board name"
                             value={draftName}
                             autoFocus
                             onFocus={e => e.currentTarget.select()}

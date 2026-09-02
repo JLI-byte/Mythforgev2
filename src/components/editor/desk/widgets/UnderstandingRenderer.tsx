@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import styles from '../../WritingDesk.module.css';
 
@@ -18,6 +18,7 @@ export function UnderstandingRenderer() {
     const [summary, setSummary] = useState(stored?.summary ?? '');
     const [preferences, setPreferences] = useState(stored?.preferences ?? '');
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const fieldId = useId();
     // Re-sync when the assistant updates the store (but not on our own edits).
     const lastStored = useRef(stored);
 
@@ -46,16 +47,18 @@ export function UnderstandingRenderer() {
                 <span className={styles.suggestTitle}>What I Understand</span>
             </div>
             <div className={styles.understandBody}>
-                <label className={styles.understandLabel}>The world so far</label>
+                <label className={styles.understandLabel} htmlFor={`${fieldId}-summary`}>The world so far</label>
                 <textarea
+                    id={`${fieldId}-summary`}
                     className={styles.understandArea}
                     value={summary}
                     placeholder="The assistant will keep a running summary of your world here."
                     onChange={e => { setSummary(e.target.value); persist(e.target.value, preferences); }}
                     onMouseDown={e => e.stopPropagation()}
                 />
-                <label className={styles.understandLabel}>What you like</label>
+                <label className={styles.understandLabel} htmlFor={`${fieldId}-preferences`}>What you like</label>
                 <textarea
+                    id={`${fieldId}-preferences`}
                     className={`${styles.understandArea} ${styles.understandPrefs}`}
                     value={preferences}
                     placeholder="Preferences it has picked up (tone, taste, what to avoid)."

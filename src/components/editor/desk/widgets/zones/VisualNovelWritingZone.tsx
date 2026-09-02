@@ -68,11 +68,13 @@ function ChoicesStrip({ scene, scenes, onChange }: ChoicesStripProps) {
             {choices.map(choice => (
                 <div key={choice.id} className={styles.choiceRow}>
                     <input
+                        aria-label="Choice text"
                         value={choice.text}
                         placeholder="What the player sees"
                         onChange={e => update(choice.id, { text: e.target.value })}
                     />
                     <select
+                        aria-label="Scene this choice leads to"
                         value={choice.targetSceneId}
                         onChange={e => update(choice.id, { targetSceneId: e.target.value })}
                     >
@@ -296,6 +298,7 @@ export function VisualNovelWritingZone({ content, onChange, onChangeImmediate, w
         {activeDoc && (
           editingNode?.type === 'chapter' && editingNode.id === activeDoc.id ? (
             <input
+              aria-label="Chapter title"
               className={styles.binderFullBookChapterHeaderInput}
               ref={renameInputRef}
               value={editingNode.text}
@@ -320,6 +323,7 @@ export function VisualNovelWritingZone({ content, onChange, onChangeImmediate, w
         <div key={s.id} className={styles.binderAllScenesItem}>
           {editingNode?.type === 'scene' && editingNode.id === s.id ? (
             <input
+              aria-label="Scene title"
               className={styles.binderAllScenesHeaderInput}
               ref={renameInputRef}
               value={editingNode.text}
@@ -351,6 +355,7 @@ export function VisualNovelWritingZone({ content, onChange, onChangeImmediate, w
       <div className={styles.binderAllScenesItem}>
         {editingNode?.type === 'scene' && editingNode.id === activeScene.id ? (
           <input
+            aria-label="Scene title"
             className={styles.binderAllScenesHeaderInput}
             ref={renameInputRef}
             value={editingNode.text}
@@ -464,6 +469,7 @@ export function VisualNovelWritingZone({ content, onChange, onChangeImmediate, w
                         <div className={styles.spineSceneListHeaderMain}>Chapter {idx + 1}</div>
                         {editingNode?.type === 'chapter' && editingNode.id === doc.id ? (
                           <input
+                            aria-label="Chapter title"
                             className={styles.spineRenameInput}
                             ref={renameInputRef}
                             value={editingNode.text}
@@ -493,6 +499,7 @@ export function VisualNovelWritingZone({ content, onChange, onChangeImmediate, w
                           <button key={s.id} className={`${styles.binderSpineSceneTab} ${s.id === activeScene?.id ? styles.binderSpineSceneTabActive : ''}`} onClick={() => setActiveSceneId(s.id)}>
                             {editingNode?.type === 'scene' && editingNode.id === s.id ? (
                               <input
+                                aria-label="Scene title"
                                 className={styles.spineRenameInput}
                                 ref={renameInputRef}
                                 value={editingNode.text}
