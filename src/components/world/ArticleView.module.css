@@ -661,6 +661,7 @@
 }
 .addBtn {
   display: inline-flex;
+  font-family: inherit;
   align-items: center;
   gap: 6px;
   padding: 7px 13px;

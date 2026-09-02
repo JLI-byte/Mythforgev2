@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useRef, useState } from 'react';
-import { X, Pencil, BookOpen } from 'lucide-react';
+import { X, Pencil, BookOpen, Plus } from 'lucide-react';
 import { useWorkspaceStore, Entity, EntityType, GalleryImage, ArticleTab } from '@/store/workspaceStore';
 import { SUBCATEGORY_LABELS, SUBCATEGORY_ICONS } from '@/lib/worldBibleNav';
 import { worldKeyForEntity, worldKeyForProject } from '@/lib/worldKey';
@@ -309,16 +309,16 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
       </div>
       {editing && (
         <div className={styles.relPicker}>
-          <select className={styles.relSelect} id="lc-rel-picker" defaultValue="">
+          <select className={styles.relSelect} id="lc-rel-picker" aria-label="Link an article" defaultValue="">
             <option value="" disabled>Link an article…</option>
             {relatable.map(e => (
               <option key={e.id} value={e.id}>{SUBCATEGORY_ICONS[e.type]} {e.name}</option>
             ))}
           </select>
-          <span className={styles.addBtn} onClick={() => {
+          <button type="button" className={styles.addBtn} onClick={() => {
             const sel = document.getElementById('lc-rel-picker') as HTMLSelectElement | null;
             if (sel?.value) { d.relatedIds.push(sel.value); bump(); }
-          }}>＋ Link</span>
+          }}><Plus size={12} aria-hidden="true" /> Link</button>
         </div>
       )}
       {attributedWorks.length > 0 && (
