@@ -81,6 +81,7 @@
 .captureInput:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .captureBtn {
+  position: relative;
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
@@ -94,6 +95,17 @@
   border: 1px solid rgba(255, 255, 255, 0.14);
   transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
 }
+/* 40x40 visually, 44 to the finger. */
+.captureBtn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+
 .captureBtn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.3);

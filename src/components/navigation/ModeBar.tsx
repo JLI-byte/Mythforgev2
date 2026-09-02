@@ -435,6 +435,7 @@ export default function ModeBar() {
             ref={inputRef}
             type="text"
             className={styles.searchInput}
+            aria-label="Search everything"
             placeholder="Search everything..."
             value={query}
             onChange={handleSearchChange}

@@ -134,7 +134,8 @@
   border-radius: 8px;
   padding: 0 10px;
   gap: 6px;
-  height: 32px;
+  /* Was 32: the input inside rendered a 20px-tall target. */
+  height: 40px;
   width: 240px;
   transition: border-color 0.15s, background 0.15s, width 0.2s;
 }
@@ -153,6 +154,9 @@
 
 .searchInput {
   flex: 1;
+  /* Fill the wrapper so the whole 40px band is a click target, not the 20px
+     the text line happened to occupy. */
+  height: 100%;
   background: none;
   border: none;
   outline: none;
@@ -302,6 +306,7 @@
 }
 
 .iconBtn {
+  position: relative;
   background: none;
   border: none;
   color: var(--muted);
@@ -313,6 +318,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* The icons stay small; the target reaches Apple's 44pt minimum. These
+   measured between 31x36 and 40x36. */
+.iconBtn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100%, 44px);
+  height: max(100%, 44px);
+  transform: translate(-50%, -50%);
 }
 
 .iconBtn:hover {
