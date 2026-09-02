@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useId, useRef, useState } from 'react';
-import { ArrowRight, Plus } from 'lucide-react';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { ArrowRight, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import type { Shelf } from '@/lib/worldShelves';
 import type { WorldKey } from '@/lib/worldKey';
 import styles from './WorldShelf.module.css';
@@ -29,15 +29,16 @@ interface WorldShelfProps {
   onNewStory?: () => void;
 }
 
-/** How many cover slots fit across the panel before it crowds, per size. */
-const COVER_SLOTS = { tile: 5, page: 6 } as const;
+/** How much of the visible width a chevron press travels. */
+const PAGE_FRACTION = 0.8;
 
 export function WorldShelf({
   shelves, size, selectedKey, onSelect, onOpenStory, onOpenBible, emptyAction,
   onCreateWorld, onNewStory,
 }: WorldShelfProps) {
-  // Declared before any early return — hooks must run unconditionally.
+  // Every hook runs before the early return — they must be unconditional.
   const spineRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const scrollerRef = useRef<HTMLDivElement>(null);
   // Namespaced so two shelves on one page (tile and, later, the full Bookshelf)
   // cannot collide on element ids.
   const baseId = useId();
@@ -45,6 +46,39 @@ export function WorldShelf({
   const tabId = (key: WorldKey) => `${baseId}-tab-${key}`;
   const [creating, setCreating] = useState(false);
   const [draftName, setDraftName] = useState('');
+  const [canScroll, setCanScroll] = useState({ back: false, forward: false });
+
+  // Resolved before the early return so the scroll effects can depend on it.
+  // Undefined only when there are no shelves at all, which returns below.
+  const selected = shelves.find(s => s.key === selectedKey) ?? shelves[0];
+
+  /** Which chevrons are worth showing, from where the row actually sits. */
+  const syncScroll = useCallback(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    // A pixel of slack: sub-pixel layout leaves scrollLeft fractionally short of
+    // the true end, which would strand the forward chevron permanently enabled.
+    setCanScroll({
+      back: el.scrollLeft > 1,
+      forward: el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
+    });
+  }, []);
+
+  useEffect(() => {
+    syncScroll();
+    window.addEventListener('resize', syncScroll);
+    return () => window.removeEventListener('resize', syncScroll);
+  }, [syncScroll, selected?.key, selected?.stories.length]);
+
+  const page = (direction: 1 | -1) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollBy({
+      left: direction * el.clientWidth * PAGE_FRACTION,
+      behavior: reduced ? 'auto' : 'smooth',
+    });
+  };
 
   const cancelCreate = () => { setDraftName(''); setCreating(false); };
 
@@ -82,7 +116,7 @@ export function WorldShelf({
     </div>
   );
 
-  if (shelves.length === 0) {
+  if (shelves.length === 0 || !selected) {
     return (
       <div className={styles.empty}>
         {creating && onCreateWorld ? createForm : (
@@ -102,9 +136,6 @@ export function WorldShelf({
     );
   }
 
-  // Selection always resolves to a real shelf, so the panel is never blank.
-  const selected = shelves.find(s => s.key === selectedKey) ?? shelves[0];
-
   // Arrow keys walk the shelf, which is what a row of spines invites.
   const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
     let next: number | null = null;
@@ -119,17 +150,6 @@ export function WorldShelf({
   };
 
   const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
-
-  // When the stories outnumber the slots, give up one slot to say how many are
-  // not shown rather than truncating in silence. hiddenCount is derived from
-  // what actually rendered, so the badge and its tooltip cannot disagree.
-  // The new-book slot occupies one of them, or the row wraps the moment a world
-  // fills its shelf.
-  const slots = COVER_SLOTS[size] - (onNewStory ? 1 : 0);
-  const visibleStories = selected.stories.length > slots
-    ? selected.stories.slice(0, slots - 1)
-    : selected.stories;
-  const hiddenCount = selected.stories.length - visibleStories.length;
 
   return (
     <div className={`${styles.shelf} ${size === 'page' ? styles.sizePage : ''}`}>
@@ -147,7 +167,7 @@ export function WorldShelf({
               // Roving tabindex: one Tab stop for the whole shelf, arrows move within it.
               tabIndex={isSelected ? 0 : -1}
               className={`${styles.spine} ${isSelected ? styles.spineSelected : ''}`}
-                              style={{ background: shelf.coverColor }}
+              style={{ background: shelf.coverColor }}
               title={`${shelf.name} — ${plural(shelf.stories.length, 'story', 'stories')}`}
               onClick={() => onSelect(shelf.key)}
               onKeyDown={e => handleKeyDown(e, i)}
@@ -190,27 +210,53 @@ export function WorldShelf({
             {/* The row survives an empty world so the new-book slot is still
                 reachable there — an empty shelf is exactly where you want it. */}
             {(selected.stories.length > 0 || onNewStory) && (
-              <div className={styles.covers}>
-                {visibleStories.map(story => (
+              <div className={styles.coversRow}>
+                <div
+                  className={styles.coversScroller}
+                  ref={scrollerRef}
+                  onScroll={syncScroll}
+                >
+                  {/* Every story is here. Overflow scrolls rather than truncating,
+                      and the header's "view all" is the way out to the rest. */}
+                  {selected.stories.map(story => (
+                    <button
+                      key={story.id}
+                      className={styles.cover}
+                      style={story.coverImageUrl
+                        ? { backgroundImage: `url(${story.coverImageUrl})` }
+                        : { background: story.coverColor }}
+                      title={story.name}
+                      aria-label={`Open ${story.name}`}
+                      onClick={() => onOpenStory(story.id)}
+                    />
+                  ))}
+                </div>
+
+                {/* Pointer-only, hover-revealed, and only when there is somewhere
+                    to go. Touch and trackpad users just swipe. */}
+                {canScroll.back && (
                   <button
-                    key={story.id}
-                    className={styles.cover}
-                    style={story.coverImageUrl
-                      ? { backgroundImage: `url(${story.coverImageUrl})` }
-                      : { background: story.coverColor }}
-                    title={story.name}
-                    aria-label={`Open ${story.name}`}
-                    onClick={() => onOpenStory(story.id)}
-                  />
-                ))}
-                {hiddenCount > 0 && (
-                  <span
-                    className={styles.coverMore}
-                    title={`${plural(hiddenCount, 'more story', 'more stories')} in this world`}
+                    className={`${styles.pager} ${styles.pagerBack}`}
+                    aria-label="Scroll stories back"
+                    tabIndex={-1}
+                    onClick={() => page(-1)}
                   >
-                    +{hiddenCount}
-                  </span>
+                    <ChevronLeft size={18} />
+                  </button>
                 )}
+                {canScroll.forward && (
+                  <button
+                    className={`${styles.pager} ${styles.pagerForward}`}
+                    aria-label="Scroll stories forward"
+                    tabIndex={-1}
+                    onClick={() => page(1)}
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                )}
+
+                {/* Outside the scroller on purpose: creation is chrome, and it
+                    must stay reachable however far the row has been scrolled. */}
                 {onNewStory && (
                   <button
                     className={styles.addCover}

@@ -116,17 +116,40 @@
   color: var(--muted, #8b8b95);
 }
 
-.covers {
+.coversRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  min-width: 0;
+}
+
+.coversScroller {
   display: flex;
   gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 2px;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  scroll-behavior: smooth;
+  /* The scrollbar would sit under the covers and change the row's height on
+     hover; the peeking next cover is the affordance instead. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.coversScroller::-webkit-scrollbar { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .coversScroller { scroll-behavior: auto; }
 }
 
 .cover {
   width: var(--cover-w);
   height: var(--cover-h);
   flex-shrink: 0;
+  scroll-snap-align: start;
   padding: 0;
   border: none;
   border-radius: 2px 4px 4px 2px;
@@ -139,24 +162,6 @@
     0 2px 6px rgba(0, 0, 0, 0.35);
   transition: transform 0.15s ease;
 }
-
-/* Stories beyond what fits, so the shelf never hides work silently. */
-.coverMore {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--cover-w);
-  height: var(--cover-h);
-  flex-shrink: 0;
-  border: 1px dashed rgba(255, 255, 255, 0.2);
-  border-radius: 2px 4px 4px 2px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--muted, #8b8b95);
-}
-.cover:hover { transform: translateY(-2px); }
-.cover:focus-visible { outline: 2px solid #8ab4ff; outline-offset: 2px; }
 
 .noStories {
   margin: 0;
@@ -222,6 +227,43 @@
 
 @media (prefers-reduced-motion: reduce) {
   .spine, .cover { transition: none; }
+}
+
+.pager {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  color: var(--foreground, #f2f0ef);
+  background: rgba(22, 22, 26, 0.86);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  /* Hidden until the pointer is over the row: the peeking cover already says
+     there is more, so the control only appears when it is wanted. */
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+.coversRow:hover .pager { opacity: 1; }
+.pager:hover { background: rgba(38, 38, 44, 0.95); }
+.pagerBack { left: -6px; }
+.pagerForward { right: calc(var(--cover-w) + 14px); }
+
+/* A touch device has no hover and no cursor to reveal them, and swiping is the
+   native gesture there. */
+@media (hover: none) {
+  .pager { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pager { transition: none; }
 }
 
 /* ── Creating ─────────────────────────────────────────── */
