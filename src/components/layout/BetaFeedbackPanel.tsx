@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { ChevronDown, ChevronRight, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import styles from './BetaFeedbackPanel.module.css';
 import { createClient } from '@/lib/supabase/client';
@@ -182,7 +182,7 @@ export function BetaFeedbackPanel({
           onClick={onClose}
           title="Close Feedback"
         >
-          <span className={styles.ghostTabArrow}>▸</span>
+          <span className={styles.ghostTabArrow} aria-hidden="true"><ChevronRight size={12} /></span>
         </button>,
         document.body
       )}
@@ -287,7 +287,7 @@ export function BetaFeedbackPanel({
             <div className={styles.dividerRow}>
               <div className={styles.dividerLine} />
               <button className={styles.historyToggle} onClick={() => setShowHistory(v => !v)}>
-                {showHistory ? '▾' : '▸'} {history.length} submitted
+                {showHistory ? <ChevronDown size={12} aria-hidden="true" /> : <ChevronRight size={12} aria-hidden="true" />} {history.length} submitted
               </button>
               {history.length > 0 && (
                 <button className={styles.exportBtn} onClick={handleExport}>Export</button>

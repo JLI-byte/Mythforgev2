@@ -8,7 +8,7 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { Pencil, Check, Camera } from 'lucide-react';
+import { Pencil, Check, Camera, X } from 'lucide-react';
 import styles from './WorldBibleEntry.module.css';
 import { useWorkspaceStore, EntityType } from '@/store/workspaceStore';
 import { WBView, SUBCATEGORY_LABELS, SUBCATEGORY_ICONS } from '@/lib/worldBibleNav';
@@ -257,7 +257,7 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
                         <button className={styles.addFieldConfirm} onClick={handleAddField} aria-label="Add field">
                             <Check size={14} />
                         </button>
-                        <button className={styles.addFieldCancel} onClick={() => { setAddingField(false); setFieldLabel(''); setFieldValue(''); }}>×</button>
+                        <button className={styles.addFieldCancel} onClick={() => { setAddingField(false); setFieldLabel(''); setFieldValue(''); }} aria-label="Cancel adding field"><X size={14} /></button>
                     </div>
                 )}
             </div>

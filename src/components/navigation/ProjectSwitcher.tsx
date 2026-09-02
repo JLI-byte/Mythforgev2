@@ -12,6 +12,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { Check, X } from 'lucide-react';
 import { useWorkspaceStore, COVER_COLORS, Project } from '@/store/workspaceStore';
 import { sanitizeLabel } from '@/lib/sanitize';
 import styles from './ProjectSwitcher.module.css';
@@ -121,7 +122,12 @@ export function ProjectSwitcher({ onClose }: ProjectSwitcherProps) {
         return (
             <div key={project.id} className={cardClass} style={mode === 'novel' ? { background: project.coverColor } : undefined}>
                 {/* Active badge — checkmark in top-left */}
-                {isActive && <span className={styles.activeBadge}>✓</span>}
+                {isActive && (
+                    <span className={styles.activeBadge}>
+                        <Check size={12} aria-hidden="true" />
+                        <span className={styles.srOnly}>Active project</span>
+                    </span>
+                )}
 
                 {/* ⋯ menu button — top-right, visible on hover */}
                 <div className={styles.cardMenu}>
@@ -213,7 +219,9 @@ export function ProjectSwitcher({ onClose }: ProjectSwitcherProps) {
             <div className={styles.modal} onClick={e => e.stopPropagation()}>
                 <header className={styles.header}>
                     <h3>Your Projects</h3>
-                    <button className={styles.closeBtn} onClick={onClose} aria-label="Close">×</button>
+                    <button className={styles.closeBtn} onClick={onClose} aria-label="Close projects">
+                        <X size={18} />
+                    </button>
                 </header>
 
                 {/* Scrollable body — type sections stacked vertically */}

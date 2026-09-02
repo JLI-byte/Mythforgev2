@@ -201,7 +201,8 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
         <button
           className={`${styles.xBtn} ${styles.rmImg}`}
           onClick={e => { e.stopPropagation(); d.images.splice(i, 1); bump(); }}
-        >×</button>
+          aria-label="Remove image"
+        ><X size={12} /></button>
       )}
     </div>
   );
@@ -222,7 +223,7 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
             if (currentKey === key) setActiveKey(d.tabs[0]?.id ?? 'conn');
             bump();
           }}
-        >×</span>
+        ><X size={12} /></span>
       )}
     </button>
   );
@@ -235,7 +236,7 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
             onChange={e => { f.label = e.target.value; }} />
           <input className={`${styles.eInput} ${styles.eInputV}`} defaultValue={f.value}
             onChange={e => { f.value = e.target.value; }} />
-          <button className={styles.xBtn} onClick={() => { d.facts.splice(i, 1); bump(); }}>×</button>
+          <button className={styles.xBtn} onClick={() => { d.facts.splice(i, 1); bump(); }} aria-label="Remove fact"><X size={12} /></button>
         </div>
       ))}
       <div style={{ marginTop: 10 }}>
@@ -260,7 +261,7 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
       {d.tags.map((t, i) => (
         <span key={i} className={styles.tag}>
           {t}
-          {editing && <button className={styles.xBtn} onClick={() => { d.tags.splice(i, 1); bump(); }}>×</button>}
+          {editing && <button className={styles.xBtn} onClick={() => { d.tags.splice(i, 1); bump(); }} aria-label="Remove tag"><X size={12} /></button>}
         </span>
       ))}
       {editing && (
@@ -296,7 +297,7 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
             </span>
             {editing && (
               <span className={styles.xBtn} style={{ marginLeft: 'auto' }}
-                onClick={e => { e.stopPropagation(); d.relatedIds.splice(i, 1); bump(); }}>×</span>
+                onClick={e => { e.stopPropagation(); d.relatedIds.splice(i, 1); bump(); }}><X size={12} /></span>
             )}
           </button>
         ))}

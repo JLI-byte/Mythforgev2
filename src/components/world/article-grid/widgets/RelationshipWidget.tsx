@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
+import { X } from 'lucide-react';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../ArticleGridEditor.module.css';
@@ -419,7 +420,7 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
                 return (
                   <div key={me.id} className={styles.manualEdgeItem}>
                     <span>{src} → {me.label ? `${me.label} → ` : ''}{tgt}</span>
-                    <button className={styles.manualEdgeDelete} onClick={() => removeManualEdge(me.id)}>×</button>
+                    <button className={styles.manualEdgeDelete} onClick={() => removeManualEdge(me.id)} aria-label="Remove relationship"><X size={12} /></button>
                   </div>
                 );
               })}

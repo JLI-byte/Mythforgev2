@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import { DRAFT_TYPES, getMethod } from '@/lib/writingMethods';
 import { WorkStyle, StructureAppetite, recommendMethods } from '@/lib/writingMethods/finder';
 import styles from './MethodLibrary.module.css';
@@ -62,7 +63,7 @@ export function MethodFinder({ onClose, onApply, onBrowseLibrary }: MethodFinder
     const modal = (
         <div className={styles.backdrop} onClick={onClose}>
             <div className={`${styles.modal} ${styles.finderModal}`} onClick={e => e.stopPropagation()} style={{ position: 'relative' }}>
-                <button className={styles.closeBtn} onClick={onClose} aria-label="Close method finder">×</button>
+                <button className={styles.closeBtn} onClick={onClose} aria-label="Close method finder"><X size={16} /></button>
 
                 <div className={styles.header}>
                     <h2 className={styles.title}>{showResults ? 'Your matches' : 'Find your method'}</h2>

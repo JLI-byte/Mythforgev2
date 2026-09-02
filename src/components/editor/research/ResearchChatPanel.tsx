@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ThumbsUp, ThumbsDown, X, Camera } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, X, Camera, ChevronsLeft } from 'lucide-react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { worldKeyForProject, worldKeyForEntity } from '@/lib/worldKey';
 import {
@@ -687,7 +687,7 @@ export function ResearchChatPanel({ scopeKey, getContext, onToolEvent, width, on
             <div className={styles.researchChatHeader}>
                 <div className={styles.researchChatHeaderActions}>
                     {onCollapse && (
-                        <button className={styles.chatCollapseBtn} onClick={onCollapse} title="Collapse chat">«</button>
+                        <button className={styles.chatCollapseBtn} onClick={onCollapse} title="Collapse chat" aria-label="Collapse chat"><ChevronsLeft size={16} /></button>
                     )}
                 </div>
             </div>

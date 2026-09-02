@@ -10,6 +10,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { ArrowUpDown, Star } from 'lucide-react';
 import styles from './WorldBibleHome.module.css';
 import { useWorkspaceStore, EntityType, WorldBibleRootConfig, WorldBibleLayout } from '@/store/workspaceStore';
 import {
@@ -80,11 +81,11 @@ export default function WorldBibleHome({ onNavigate }: WorldBibleHomeProps) {
                     {filteredEntities.length} {filteredEntities.length === 1 ? 'entry' : 'entries'}
                 </span>
                 {/* Sort button — UI only for now */}
-                <button className={styles.sortBtn} title="Sort">⇅</button>
+                <button className={styles.sortBtn} title="Sort" aria-label="Sort entries"><ArrowUpDown size={14} /></button>
             </div>
 
             {/* === Section 2: Favorites row === */}
-            <h4 className={styles.favoritesHeader}>⭐ Favorites</h4>
+            <h3 className={styles.favoritesHeader}><Star size={12} aria-hidden="true" /> Favorites</h3>
             <div className={styles.favoritesRow}>
                 {favorites.length > 0 ? (
                     favorites.map(entity => (

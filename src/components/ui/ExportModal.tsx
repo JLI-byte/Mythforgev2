@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { Download, X } from 'lucide-react';
 import styles from './ExportModal.module.css';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import { worldKeyForEntity } from '@/lib/worldKey';
@@ -91,7 +92,7 @@ export default function ExportModal({ onClose }: ExportModalProps) {
             <div className={styles.panel} onClick={e => e.stopPropagation()}>
                 <div className={styles.header}>
                     <h2>Export</h2>
-                    <button className={styles.closeBtn} onClick={onClose} aria-label="Close Export Modal">×</button>
+                    <button className={styles.closeBtn} onClick={onClose} aria-label="Close Export Modal"><X size={18} /></button>
                 </div>
 
                 <div className={styles.content}>
@@ -107,7 +108,7 @@ export default function ExportModal({ onClose }: ExportModalProps) {
                                 onClick={handleDocumentMarkdown}
                                 disabled={!activeDocument || isExporting}
                             >
-                                <span className={styles.icon}>↓</span>
+                                <span className={styles.icon}><Download size={16} /></span>
                                 Download Markdown (.md)
                             </button>
 
@@ -120,7 +121,7 @@ export default function ExportModal({ onClose }: ExportModalProps) {
                                     <span className={styles.spinner}></span>
                                 ) : (
                                     <>
-                                        <span className={styles.icon}>↓</span>
+                                        <span className={styles.icon}><Download size={16} /></span>
                                         Download Word (.docx)
                                     </>
                                 )}
@@ -135,7 +136,7 @@ export default function ExportModal({ onClose }: ExportModalProps) {
                                     <span className={styles.spinner}></span>
                                 ) : (
                                     <>
-                                        <span className={styles.icon}>↓</span>
+                                        <span className={styles.icon}><Download size={16} /></span>
                                         Download EPUB (.epub)
                                     </>
                                 )}
@@ -153,7 +154,7 @@ export default function ExportModal({ onClose }: ExportModalProps) {
                                     onClick={handleWorldBibleExport}
                                     disabled={!hasEntities || isExporting}
                                 >
-                                    <span className={styles.icon}>↓</span>
+                                    <span className={styles.icon}><Download size={16} /></span>
                                     Download World Bible (.md)
                                 </button>
                             </div>

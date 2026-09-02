@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
+import { X } from 'lucide-react';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../ArticleGridEditor.module.css';
@@ -382,7 +383,8 @@ export function CharacterArcWidget({ content, onChange }: { content: any; onChan
               <button
                 className={styles.arcBeatChipDelete}
                 onClick={() => removeBeat(beat.id)}
-              >×</button>
+                aria-label="Remove beat"
+              ><X size={12} /></button>
             </span>
           ))}
         </div>

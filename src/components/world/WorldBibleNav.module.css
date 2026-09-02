@@ -18,12 +18,17 @@
     background: transparent;
     border: none;
     color: var(--muted);
-    font-size: 0.85rem;
     padding: 0.2rem 0.35rem;
     cursor: pointer;
     border-radius: 4px;
     transition: color 150ms ease, opacity 150ms ease;
     line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
+    flex-shrink: 0;
 }
 
 .navBtn:hover:not(:disabled) {
@@ -63,12 +68,17 @@
 .homeBtn {
     background: transparent;
     border: none;
-    font-size: 0.85rem;
     padding: 0.2rem 0.35rem;
     cursor: pointer;
     border-radius: 4px;
     transition: opacity 150ms ease;
     line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
+    flex-shrink: 0;
 }
 
 .homeBtn:hover {

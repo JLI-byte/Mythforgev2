@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { ArrowRight, X } from 'lucide-react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from '../../WritingDesk.module.css';
 
@@ -123,7 +124,7 @@ export function SceneControlRenderer({ content, onChange }: { content: any; onCh
               <div key={item.id} className={styles.sceneCheckItem}>
                 <input type="checkbox" checked={item.checked} onChange={() => toggleCheck(item.id)} />
                 <span className={item.checked ? styles.sceneCheckDone : ''}>{item.text}</span>
-                <button className={styles.sceneCheckRemove} onClick={() => removeCheck(item.id)}>×</button>
+                <button className={styles.sceneCheckRemove} onClick={() => removeCheck(item.id)} aria-label="Remove checklist item"><X size={13} /></button>
               </div>
             ))}
             <button className={styles.sceneCheckAdd} onClick={addCheck}>+ Add Item</button>
@@ -134,9 +135,9 @@ export function SceneControlRenderer({ content, onChange }: { content: any; onCh
           <label className={styles.sceneControlLabel}>Emotional Arc</label>
           <div className={styles.sceneArcRow}>
             <input className={styles.sceneArcInput} value={localContent.emotionalArc?.start || ''} onChange={e => handleChange({ emotionalArc: { ...localContent.emotionalArc, start: e.target.value } })} placeholder="Start" />
-            <span className={styles.sceneArcArrow}>→</span>
+            <span className={styles.sceneArcArrow} aria-hidden="true"><ArrowRight size={13} /></span>
             <input className={styles.sceneArcInput} value={localContent.emotionalArc?.turn || ''} onChange={e => handleChange({ emotionalArc: { ...localContent.emotionalArc, turn: e.target.value } })} placeholder="Turn" />
-            <span className={styles.sceneArcArrow}>→</span>
+            <span className={styles.sceneArcArrow} aria-hidden="true"><ArrowRight size={13} /></span>
             <input className={styles.sceneArcInput} value={localContent.emotionalArc?.end || ''} onChange={e => handleChange({ emotionalArc: { ...localContent.emotionalArc, end: e.target.value } })} placeholder="End" />
           </div>
         </div>

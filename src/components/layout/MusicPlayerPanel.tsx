@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { ChevronRight, X } from 'lucide-react';
 import styles from './MusicPlayerPanel.module.css';
 
 interface MusicPlayerPanelProps {
@@ -179,7 +180,7 @@ export function MusicPlayerPanel({
                     onClick={onClose}
                     title="Close Music"
                 >
-                    <span className={styles.ghostTabArrow}>▸</span>
+                    <span className={styles.ghostTabArrow} aria-hidden="true"><ChevronRight size={12} /></span>
                 </button>,
                 document.body
             )}
@@ -214,7 +215,7 @@ export function MusicPlayerPanel({
                     {/* Header */}
                     <div className={styles.header} style={{ paddingRight: tabWidth }}>
                         <h2 className={styles.title}>Music & Soundscapes</h2>
-                        <button className={styles.closeBtn} onClick={onClose}>×</button>
+                        <button className={styles.closeBtn} onClick={onClose} aria-label="Close music panel"><X size={18} /></button>
                     </div>
 
                     {/* Nav tabs */}

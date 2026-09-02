@@ -217,11 +217,15 @@
   border: none;
   color: var(--muted, #888);
   cursor: pointer;
-  font-size: 1rem;
   line-height: 1;
   padding: 2px 4px;
   border-radius: 3px;
   transition: color 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
 }
 
 .widgetDelete:hover { color: #ff4d4d; }
@@ -264,7 +268,7 @@
 .statRow { display: flex; align-items: center; gap: 8px; }
 .statLabel { flex: 1; background: none; border: none; border-bottom: 1px solid var(--border); color: var(--muted, #888); font-size: 0.85rem; padding: 3px 0; outline: none; text-align: right; }
 .statValue { flex: 1.5; background: none; border: none; border-bottom: 1px solid var(--border); color: var(--foreground); font-size: 0.85rem; padding: 3px 0; outline: none; }
-.statDelete { background: none; border: none; color: var(--muted, #888); cursor: pointer; font-size: 0.9rem; padding: 2px; opacity: 0.5; }
+.statDelete { background: none; border: none; color: var(--muted, #888); cursor: pointer; padding: 2px; opacity: 0.5; display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; flex-shrink: 0; }
 .statDelete:hover { opacity: 1; color: #ff4d4d; }
 .statAdd { background: none; border: 1px dashed var(--border); color: var(--muted, #888); font-size: 0.8rem; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 4px; transition: all 0.15s; }
 .statAdd:hover { border-color: var(--accent); color: var(--foreground); }
@@ -423,7 +427,7 @@
 .galleryCell { display: flex; flex-direction: column; gap: 4px; background: var(--surface-mid, var(--surface-mid)); border-radius: 6px; overflow: hidden; border: 1px solid var(--border, #2a2929); }
 .galleryCellImageWrap { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--surface, #141313); }
 .galleryCellImage { width: 100%; height: 100%; object-fit: cover; display: block; }
-.galleryCellRemove { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,0.6); border: none; color: var(--foreground, #e8e6e3); font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.15s; }
+.galleryCellRemove { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border-radius: 50%; background: rgba(0,0,0,0.6); border: none; color: var(--foreground, #e8e6e3); cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.15s; }
 .galleryCellImageWrap:hover .galleryCellRemove { opacity: 1; }
 .galleryCellCaption { padding: 4px 8px 6px; background: transparent; border: none; outline: none; color: var(--muted, #888); font-size: 0.75rem; text-align: center; width: 100%; }
 .galleryCellCaption::placeholder { color: var(--muted, #888); opacity: 0.5; }
@@ -710,11 +714,15 @@
   border: none;
   color: var(--muted);
   cursor: pointer;
-  font-size: 0.9rem;
   padding: 0 4px;
   opacity: 0.5;
   flex-shrink: 0;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
 }
 
 .timelineEventDelete:hover {
@@ -1016,9 +1024,14 @@
   border: none;
   color: var(--muted);
   cursor: pointer;
-  font-size: 0.85rem;
   opacity: 0.5;
   padding: 0 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  flex-shrink: 0;
 }
 
 .manualEdgeDelete:hover { opacity: 1; color: #ff4d4d; }
@@ -1405,10 +1418,15 @@
   border: none;
   color: var(--muted);
   cursor: pointer;
-  font-size: 0.8rem;
   padding: 0;
   line-height: 1;
   opacity: 0.5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  flex-shrink: 0;
 }
 
 .arcBeatChipDelete:hover { opacity: 1; color: #ff4d4d; }
@@ -1741,10 +1759,15 @@
   border: none;
   color: var(--muted);
   cursor: pointer;
-  font-size: 0.9rem;
   opacity: 0.5;
   padding: 0 2px;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  flex-shrink: 0;
 }
 
 .pronEntryDelete:hover { opacity: 1; color: #ff4d4d; }

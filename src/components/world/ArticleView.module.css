@@ -643,14 +643,13 @@
   font-weight: 600;
 }
 .xBtn {
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   cursor: pointer;
   background: rgba(15, 15, 16, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: #fff;
-  font-size: 0.6875rem;
   line-height: 1;
   display: inline-flex;
   align-items: center;

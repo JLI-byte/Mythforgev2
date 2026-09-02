@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from 'lucide-react';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../ArticleGridEditor.module.css';
@@ -118,7 +119,8 @@ export function TimelineWidget({ content, onChange }: { content: any; onChange: 
                     className={styles.timelineEventDelete}
                     onClick={() => removeEvent(ev.id)}
                     title="Remove event"
-                  >×</button>
+                    aria-label="Remove event"
+                  ><X size={14} /></button>
                 </div>
               </div>
             ))}
@@ -148,7 +150,8 @@ export function TimelineWidget({ content, onChange }: { content: any; onChange: 
                     className={styles.timelineEventDelete}
                     onClick={() => removeEvent(ev.id)}
                     title="Remove event"
-                  >×</button>
+                    aria-label="Remove event"
+                  ><X size={14} /></button>
                 </div>
                 <input
                   className={styles.timelineDateInput}

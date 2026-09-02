@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
+import { Download, X } from 'lucide-react';
 import styles from './ShareModal.module.css';
 import { ShareCardOptions, generateShareCard } from '@/lib/shareCard';
 import { logger } from '@/lib/logger';
@@ -105,7 +106,7 @@ export default function ShareModal({ isOpen, onClose, shareData }: ShareModalPro
             <div className={styles.panel} onClick={e => e.stopPropagation()}>
                 <div className={styles.header}>
                     <h2>Share Milestone</h2>
-                    <button className={styles.closeBtn} onClick={onClose} aria-label="Close">×</button>
+                    <button className={styles.closeBtn} onClick={onClose} aria-label="Close"><X size={18} /></button>
                 </div>
 
                 <div className={styles.content}>
@@ -138,7 +139,7 @@ export default function ShareModal({ isOpen, onClose, shareData }: ShareModalPro
                             onClick={handleDownload}
                             disabled={isGenerating || !imageUrl}
                         >
-                            <span>↓</span> Download Image
+                            <Download size={16} /> Download Image
                         </button>
                         
                         <button 

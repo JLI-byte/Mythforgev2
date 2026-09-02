@@ -10,6 +10,7 @@
  */
 
 import React from 'react';
+import { X } from 'lucide-react';
 import type { VNDecision, VNOption } from '@/lib/vnTimeline';
 import type { VNEffect, VNFlag } from '@/lib/vnFlags';
 import styles from './VNTimeline.module.css';
@@ -57,7 +58,7 @@ export function VNDecisionEditor({ decision, flags, episodes, onChange, onRemove
                     onChange={e => onChange({ prompt: e.target.value })}
                 />
 
-                <button type="button" onClick={onRemove} aria-label="Remove decision">×</button>
+                <button type="button" className={styles.removeDecision} onClick={onRemove} aria-label="Remove decision"><X size={13} /></button>
             </div>
 
             {decision.options.map(option => (

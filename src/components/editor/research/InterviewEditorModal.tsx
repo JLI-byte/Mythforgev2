@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import type { EntityType } from '@/store/workspaceStore';
 import type { Interview, InterviewQuestion } from '@/lib/interviews';
 import styles from '../WritingDesk.module.css';
@@ -158,8 +158,8 @@ export function InterviewEditorModal({ interview, canDelete, onSave, onDelete, o
                                     placeholder="Short label, e.g. Core want"
                                 />
                                 <div className={styles.interviewEditorQuestionBtns}>
-                                    <button onClick={() => moveQuestion(i, -1)} disabled={i === 0} title="Move up">↑</button>
-                                    <button onClick={() => moveQuestion(i, 1)} disabled={i === draft.questions.length - 1} title="Move down">↓</button>
+                                    <button onClick={() => moveQuestion(i, -1)} disabled={i === 0} title="Move up" aria-label="Move up"><ArrowUp size={13} /></button>
+                                    <button onClick={() => moveQuestion(i, 1)} disabled={i === draft.questions.length - 1} title="Move down" aria-label="Move down"><ArrowDown size={13} /></button>
                                     <button onClick={() => removeQuestion(i)} disabled={draft.questions.length === 1} title="Remove"><X size={13} /></button>
                                 </div>
                             </div>

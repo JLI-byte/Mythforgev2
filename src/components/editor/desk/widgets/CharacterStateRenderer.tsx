@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { X } from 'lucide-react';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../WritingDesk.module.css';
@@ -129,7 +130,7 @@ export function CharacterStateRenderer({ content, onChange }: { content: any; on
                 <div key={r.id} className={styles.charRelItem}>
                   <div className={styles.charRelName}>{target?.name || '(Unknown)'}</div>
                   <input className={styles.charRelStatus} value={r.status} onChange={e => updateRel(r.id, e.target.value)} placeholder="Tension / Status" />
-                  <button className={styles.sceneCheckRemove} onClick={() => removeRel(r.id)}>×</button>
+                  <button className={styles.sceneCheckRemove} onClick={() => removeRel(r.id)} aria-label="Remove relationship"><X size={13} /></button>
                 </div>
               );
             })}

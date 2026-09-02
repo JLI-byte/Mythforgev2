@@ -7,7 +7,7 @@
 "use client";
 
 import React from 'react';
-import { BookOpen, Home } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, Home } from 'lucide-react';
 import styles from './WorldBibleNav.module.css';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import {
@@ -99,7 +99,7 @@ export default function WorldBibleNav({
                 disabled={!canGoBack}
                 aria-label="Go back"
             >
-                ←
+                <ArrowLeft size={16} />
             </button>
             <button
                 className={styles.navBtn}
@@ -107,7 +107,7 @@ export default function WorldBibleNav({
                 disabled={!canGoForward}
                 aria-label="Go forward"
             >
-                →
+                <ArrowRight size={16} />
             </button>
 
             {/* Breadcrumb text */}

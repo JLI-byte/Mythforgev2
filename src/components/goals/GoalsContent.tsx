@@ -13,6 +13,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
+import { ArrowUpRight, Check } from 'lucide-react';
 import styles from './GoalsContent.module.css';
 import { useWorkspaceStore, BADGE_DEFINITIONS } from '@/store/workspaceStore';
 import ShareModal from '../ui/ShareModal';
@@ -276,6 +277,7 @@ export default function GoalsContent() {
                                 <button 
                                     className={styles.streakShare}
                                     title="Share Streak"
+                                    aria-label="Share streak"
                                     onClick={() => setShareData({
                                         projectName: 'LoreCanvas',
                                         milestoneType: 'streak',
@@ -283,7 +285,7 @@ export default function GoalsContent() {
                                         milestoneLabel: 'Day Streak'
                                     })}
                                 >
-                                    ↗
+                                    <ArrowUpRight size={14} />
                                 </button>
                             )}
                         </span>
@@ -316,7 +318,7 @@ export default function GoalsContent() {
             {/* ==========================================
                 ZONE 3 — Calendar Heatmap
                ========================================== */}
-            <h4 className={styles.sectionHeader}>This Month</h4>
+            <h3 className={styles.sectionHeader}>This Month</h3>
             <div className={styles.calendarWrap}>
                 {/* Day letter headers */}
                 <div className={styles.calHeaders}>
@@ -348,7 +350,7 @@ export default function GoalsContent() {
             {/* ==========================================
                 ZONE 4 — Active Project Progress
                ========================================== */}
-            <h4 className={styles.sectionHeader}>Projects</h4>
+            <h3 className={styles.sectionHeader}>Projects</h3>
             {projects.length > 0 ? (
                 <div className={styles.projectsList}>
                     {projects.map(project => {
@@ -379,7 +381,7 @@ export default function GoalsContent() {
                                                             milestoneLabel: 'Words Written'
                                                         })}
                                                     >
-                                                        ↗
+                                                        <ArrowUpRight size={13} />
                                                     </span>
                                                 );
                                             }
@@ -413,7 +415,7 @@ export default function GoalsContent() {
                 ZONE 5 — Achievements
                ========================================== */}
             <div className={styles.achievementsHeader}>
-                <h4 className={styles.sectionHeader} style={{ padding: 0 }}>Achievements</h4>
+                <h3 className={styles.sectionHeader} style={{ padding: 0 }}>Achievements</h3>
                 <span className={styles.achievementsCount}>
                     {earnedBadges.length}/{allBadgeKeys.length} earned
                 </span>
@@ -430,12 +432,13 @@ export default function GoalsContent() {
                         >
                             {/* Earned checkmark */}
                             {isEarned && (
-                                <span className={styles.badgeCheck}>✓</span>
+                                <span className={styles.badgeCheck}><Check size={11} aria-hidden="true" /></span>
                             )}
                             {isEarned && (
                                 <button 
                                     className={styles.badgeShare}
                                     title="Share Achievement"
+                                    aria-label="Share achievement"
                                     onClick={() => setShareData({
                                         projectName: 'LoreCanvas',
                                         milestoneType: 'badge',
@@ -443,7 +446,7 @@ export default function GoalsContent() {
                                         milestoneLabel: 'Achievement Earned'
                                     })}
                                 >
-                                    ↗
+                                    <ArrowUpRight size={13} />
                                 </button>
                             )}
                             <span className={`${styles.badgeIcon} ${!isEarned ? styles.badgeIconLocked : ''}`}>

@@ -50,11 +50,16 @@
     background: transparent;
     border: none;
     color: var(--muted);
-    font-size: 0.9rem;
     padding: 0.2rem 0.35rem;
     cursor: pointer;
     border-radius: 4px;
     line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
+    flex-shrink: 0;
 }
 
 .sortBtn:hover {
@@ -73,6 +78,9 @@
     padding: 0.5rem 0.75rem 0 0.75rem;
     margin: 0;
     letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
 }
 
 .favoritesRow {

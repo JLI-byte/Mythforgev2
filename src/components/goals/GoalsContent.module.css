@@ -170,9 +170,13 @@
     margin-left: 0.5rem;
     color: var(--accent);
     cursor: pointer;
-    font-size: 0.9rem;
     opacity: 0.6;
     transition: opacity 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
 }
 
 .streakShare:hover {
@@ -402,8 +406,12 @@
     opacity: 0.4;
     cursor: pointer;
     transition: opacity 0.15s ease;
-    font-size: 0.8rem;
     color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
 }
 
 .projectShareIcon:hover {
@@ -493,9 +501,10 @@
     position: absolute;
     top: 3px;
     right: 5px;
-    font-size: 0.6875rem;
     color: #F5C842;
-    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .badgeShare {
@@ -507,9 +516,13 @@
     padding: 2px;
     color: var(--accent);
     cursor: pointer;
-    font-size: 0.8rem;
     opacity: 0;
     transition: opacity 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
 }
 
 .badgeCard:hover .badgeShare {

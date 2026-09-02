@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { ChevronRight, X } from 'lucide-react';
 import styles from './WorldBiblePanel.module.css';
 import WorldBible from '../world/WorldBible';
 
@@ -85,7 +86,7 @@ export function WorldBiblePanel({ isOpen, onClose, onTabClick, tabWidth, onTabWi
                     onClick={onClose}
                     title="Close Reference"
                 >
-                    <span className={styles.ghostTabArrow}>▸</span>
+                    <span className={styles.ghostTabArrow} aria-hidden="true"><ChevronRight size={12} /></span>
                 </button>,
                 document.body
             )}
@@ -127,7 +128,7 @@ export function WorldBiblePanel({ isOpen, onClose, onTabClick, tabWidth, onTabWi
                         aria-label="Close World Bible"
                         title="Close"
                     >
-                        &times;
+                        <X size={18} />
                     </button>
                 </div>
                 <div className={styles.contentWrapper} style={{ paddingRight: tabWidth }}>

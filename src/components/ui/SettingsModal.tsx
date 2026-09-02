@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { X } from 'lucide-react';
 import styles from './SettingsModal.module.css';
 import AISettingsSection from './AISettingsSection';
 import {
@@ -105,7 +106,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
             <div className={styles.panel} onClick={e => e.stopPropagation()}>
                 <div className={styles.header}>
                     <h2>Settings</h2>
-                    <button className={styles.closeBtn} onClick={onClose}>×</button>
+                    <button className={styles.closeBtn} onClick={onClose} aria-label="Close settings"><X size={18} /></button>
                 </div>
 
                 <div className={styles.content}>

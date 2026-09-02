@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { X } from 'lucide-react';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../ArticleGridEditor.module.css';
@@ -102,7 +103,7 @@ export function PronunciationWidget({ content, onChange }: { content: any; onCha
                     {entry.name}
                   </span>
                 )}
-                <button className={styles.pronEntryDelete} onClick={() => removeEntry(entry.id)}>×</button>
+                <button className={styles.pronEntryDelete} onClick={() => removeEntry(entry.id)} aria-label="Remove pronunciation entry"><X size={14} /></button>
               </div>
               {entry.phonetic && (
                 <div className={styles.pronEntryPhonetic}>/{entry.phonetic}/</div>

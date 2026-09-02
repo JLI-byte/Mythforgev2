@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, X } from 'lucide-react';
 import styles from './EntityDetailPanel.module.css';
 import { useWorkspaceStore, EntityType, ENTITY_TYPE_LABELS } from '@/store/workspaceStore';
 import { articleDocToText } from '@/lib/worldAuthoring';
@@ -73,7 +73,7 @@ export function EntityDetailPanel() {
                 <aside className={styles.panelContainer} onClick={e => e.stopPropagation()}>
                     <div className={styles.panelHeader}>
                         <h3>Entity Not Found</h3>
-                        <button className={styles.closeButton} onClick={() => setSelectedEntity(null)}>×</button>
+                        <button className={styles.closeButton} onClick={() => setSelectedEntity(null)} aria-label="Close panel"><X size={18} /></button>
                     </div>
                 </aside>
             </div>
@@ -127,7 +127,7 @@ export function EntityDetailPanel() {
                         >
                             <MessageSquare size={14} /> Ask about this
                         </button>
-                        <button className={styles.closeButton} onClick={() => setSelectedEntity(null)}>×</button>
+                        <button className={styles.closeButton} onClick={() => setSelectedEntity(null)} aria-label="Close panel"><X size={18} /></button>
                     </div>
                 </header>
 

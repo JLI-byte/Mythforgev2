@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import { useWorkspaceStore, DeskWidget, Document, Scene, Entity, selectProjectWorldKey } from '@/store/workspaceStore';
 import { STANDALONE_KEY } from '@/lib/worldKey';
 import styles from './MethodLibrary.module.css';
@@ -160,7 +161,7 @@ export function DraftExport({ projectId, methodName, beats, onClose }: DraftExpo
     const modal = (
         <div className={styles.backdrop} onClick={onClose}>
             <div className={`${styles.modal} ${styles.finderModal}`} onClick={e => e.stopPropagation()} style={{ position: 'relative' }}>
-                <button className={styles.closeBtn} onClick={onClose} aria-label="Close export">×</button>
+                <button className={styles.closeBtn} onClick={onClose} aria-label="Close export"><X size={16} /></button>
 
                 <div className={styles.header}>
                     <h2 className={styles.title}>Export your outline</h2>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import {
     DRAFT_TYPES, getDraftType, getMethod, methodsForType,
     WRITING_METHODS, WritingMethod, MethodFamily, FAMILY_LABELS,
@@ -61,7 +62,7 @@ export function MethodLibrary({ onClose, onApply, draftTypeId, onDraftTypeChange
     const modal = (
         <div className={styles.backdrop} onClick={onClose}>
             <div className={styles.modal} onClick={e => e.stopPropagation()} style={{ position: 'relative' }}>
-                <button className={styles.closeBtn} onClick={onClose} aria-label="Close method library">×</button>
+                <button className={styles.closeBtn} onClick={onClose} aria-label="Close method library"><X size={16} /></button>
 
                 {needsTypePick ? (
                     <>

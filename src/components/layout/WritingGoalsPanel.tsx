@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { ChevronRight, X } from 'lucide-react';
 import styles from './WritingGoalsPanel.module.css';
 import GoalsContent from '@/components/goals/GoalsContent';
 
@@ -84,7 +85,7 @@ export function WritingGoalsPanel({ isOpen, onClose, onTabClick, tabWidth, onTab
                     onClick={onClose}
                     title="Close Goals"
                 >
-                    <span className={styles.ghostTabArrow}>▸</span>
+                    <span className={styles.ghostTabArrow} aria-hidden="true"><ChevronRight size={12} /></span>
                 </button>,
                 document.body
             )}
@@ -125,7 +126,7 @@ export function WritingGoalsPanel({ isOpen, onClose, onTabClick, tabWidth, onTab
                         aria-label="Close"
                         title="Close"
                     >
-                        &times;
+                        <X size={18} />
                     </button>
                 </div>
                 <div className={styles.contentWrapper} style={{ paddingRight: tabWidth }}>

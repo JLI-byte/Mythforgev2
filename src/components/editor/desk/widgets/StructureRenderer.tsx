@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { ChevronDown, ChevronUp, X } from 'lucide-react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from '../../WritingDesk.module.css';
 
@@ -114,12 +115,12 @@ export function StructureRenderer({ content, onChange }: { content: any; onChang
 
             return (
               <div key={beat.id} className={`${styles.beatCard} ${beat.type === 'act' ? styles.beatCardAct : ''}`} style={beat.type === 'act' ? { borderColor: beat.color } : { borderLeft: `3px solid ${beat.color}` }}>
-                <button className={styles.beatRemove} onClick={() => removeItem(beat.id)}>×</button>
+                <button className={styles.beatRemove} onClick={() => removeItem(beat.id)} aria-label="Remove beat"><X size={12} /></button>
                 
                 <div className={styles.beatCardHeader}>
                   <div className={styles.structureControls} style={{ gap: '2px', flexDirection: 'column' }}>
-                    <button className={styles.beatDragHandle} style={{ fontSize: '0.6875rem', border: 'none', background: 'transparent', padding: 0 }} onClick={() => reorderItem(idx, 'up')} disabled={idx === 0}>▲</button>
-                    <button className={styles.beatDragHandle} style={{ fontSize: '0.6875rem', border: 'none', background: 'transparent', padding: 0 }} onClick={() => reorderItem(idx, 'down')} disabled={idx === localBeats.length - 1}>▼</button>
+                    <button className={styles.beatDragHandle} style={{ fontSize: '0.6875rem', border: 'none', background: 'transparent', padding: 0 }} onClick={() => reorderItem(idx, 'up')} disabled={idx === 0} aria-label="Move beat up"><ChevronUp size={12} /></button>
+                    <button className={styles.beatDragHandle} style={{ fontSize: '0.6875rem', border: 'none', background: 'transparent', padding: 0 }} onClick={() => reorderItem(idx, 'down')} disabled={idx === localBeats.length - 1} aria-label="Move beat down"><ChevronDown size={12} /></button>
                   </div>
                   <span className={styles.beatTypeIcon}>{beat.type === 'act' ? '🏛️' : '🎬'}</span>
                   <input 

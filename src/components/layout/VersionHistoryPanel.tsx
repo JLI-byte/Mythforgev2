@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { ChevronRight, X } from 'lucide-react';
 import styles from './VersionHistoryPanel.module.css';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import { worldKeyForEntity } from '@/lib/worldKey';
@@ -166,7 +167,7 @@ export function VersionHistoryPanel({
                     onClick={onClose}
                     title="Close History"
                 >
-                    <span className={styles.ghostTabArrow}>▸</span>
+                    <span className={styles.ghostTabArrow} aria-hidden="true"><ChevronRight size={12} /></span>
                 </button>,
                 document.body
             )}
@@ -202,7 +203,7 @@ export function VersionHistoryPanel({
                     
                     <div className={styles.header} style={{ paddingRight: tabWidth }}>
                         <h2 className={styles.title}>Version History</h2>
-                        <button className={styles.closeButton} onClick={onClose} aria-label="Close" title="Close">&times;</button>
+                        <button className={styles.closeButton} onClick={onClose} aria-label="Close" title="Close"><X size={18} /></button>
                     </div>
 
                     <div className={styles.tabSwitcher}>

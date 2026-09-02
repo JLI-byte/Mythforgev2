@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { ChevronRight, X } from 'lucide-react';
 import styles from './SocialMediaPanel.module.css';
 import { useWorkspaceStore, SocialPost } from '@/store/workspaceStore';
 
@@ -178,7 +179,7 @@ export function SocialMediaPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
                     onClick={onClose}
                     title="Close Panel"
                 >
-                    <span className={styles.ghostTabArrow}>▸</span>
+                    <span className={styles.ghostTabArrow} aria-hidden="true"><ChevronRight size={12} /></span>
                 </button>,
                 document.body
             )}
@@ -206,7 +207,7 @@ export function SocialMediaPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
                         <h2 className={styles.title}>
                             Social Media Hub
                         </h2>
-                        <button className={styles.closeBtn} onClick={onClose}>&times;</button>
+                        <button className={styles.closeBtn} onClick={onClose} aria-label="Close social panel"><X size={18} /></button>
                     </div>
 
                     <div className={styles.serviceBar} style={{ paddingRight: tabWidth }}>

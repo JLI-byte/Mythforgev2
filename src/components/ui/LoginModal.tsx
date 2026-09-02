@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { X } from 'lucide-react';
 import styles from './LoginModal.module.css';
 import { createClient } from '@/lib/supabase/client';
 
@@ -63,7 +64,7 @@ export default function LoginModal({ onClose }: LoginModalProps) {
   return (
     <div className={styles.backdrop} onClick={onClose}>
       <div className={styles.panel} onClick={e => e.stopPropagation()}>
-        <button className={styles.closeBtn} onClick={onClose}>×</button>
+        <button className={styles.closeBtn} onClick={onClose} aria-label="Close sign in"><X size={18} /></button>
 
         <div className={styles.header}>
           <div className={styles.logo}>📖</div>

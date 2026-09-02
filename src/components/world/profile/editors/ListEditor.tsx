@@ -1,4 +1,5 @@
 import React from 'react';
+import { X } from 'lucide-react';
 import styles from './editors.module.css';
 
 interface ListEditorProps<T> {
@@ -26,7 +27,7 @@ export default function ListEditor<T>({
             {items.map((item, i) =>
                 editing ? (
                     <div key={i} className={styles.itemWrap}>
-                        <button type="button" className={styles.removeBtn} onClick={() => remove(i)} aria-label="Remove">×</button>
+                        <button type="button" className={styles.removeBtn} onClick={() => remove(i)} aria-label="Remove item"><X size={12} /></button>
                         {renderItem(item, i, (patch) => setItem(i, patch))}
                     </div>
                 ) : (

@@ -10,6 +10,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { X } from 'lucide-react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from './ArticleGridEditor.module.css';
 import { GridWidget, WidgetType, ResizeDirection, AlignGuide } from './article-grid/gridTypes';
@@ -636,7 +637,7 @@ export default function ArticleGridEditor({ entityId, hideGrid = false }: { enti
                         Choose type
                       </button>
                     )}
-                    <button className={styles.widgetDelete} onClick={() => applyTabChangeWithHistory(deleteWidgetById(widgets, widget.id))} title="Delete widget">×</button>
+                    <button className={styles.widgetDelete} onClick={() => applyTabChangeWithHistory(deleteWidgetById(widgets, widget.id))} title="Delete widget" aria-label="Delete widget"><X size={14} /></button>
                   </div>
                 </div>
                 <div className={styles.widgetContent}>

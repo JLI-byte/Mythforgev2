@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
-import { LayoutGrid, List, Minimize2 } from 'lucide-react';
+import { LayoutGrid, List, Minimize2, X } from 'lucide-react';
 import styles from '../../WritingDesk.module.css';
 
 export function ResearchRenderer({ content, onChange }: { content: any; onChange: (c: any) => void; }) {
@@ -104,7 +104,7 @@ export function ResearchRenderer({ content, onChange }: { content: any; onChange
         <div className={viewMode === 'gallery' ? styles.moodboardGrid : styles.beatList}>
           {localItems.map((item: any) => (
             <div key={item.id} className={styles.researchCard}>
-              <button className={styles.researchRemove} onClick={() => removeItem(item.id)}>×</button>
+              <button className={styles.researchRemove} onClick={() => removeItem(item.id)} aria-label="Remove research item"><X size={12} /></button>
               
               {item.type === 'image' && (
                 <>

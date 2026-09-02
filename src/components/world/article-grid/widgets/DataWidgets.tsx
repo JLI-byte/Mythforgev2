@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef } from 'react';
+import { X } from 'lucide-react';
 import styles from '../../ArticleGridEditor.module.css';
 
 export function StatBlockWidget({ content, onChange }: { content: any; onChange: (c: any) => void }) {
@@ -14,7 +15,7 @@ export function StatBlockWidget({ content, onChange }: { content: any; onChange:
         <div key={i} className={styles.statRow}>
           <input className={styles.statLabel} type="text" placeholder="Label" value={row.label} onChange={(e) => updateRow(i, 'label', e.target.value)} />
           <input className={styles.statValue} type="text" placeholder="Value" value={row.value} onChange={(e) => updateRow(i, 'value', e.target.value)} />
-          <button className={styles.statDelete} onClick={() => onChange({ ...content, rows: rows.filter((_, j) => j !== i) })}>×</button>
+          <button className={styles.statDelete} onClick={() => onChange({ ...content, rows: rows.filter((_, j) => j !== i) })} aria-label="Remove row"><X size={14} /></button>
         </div>
       ))}
       <button className={styles.statAdd} onClick={() => onChange({ ...content, rows: [...rows, { label: '', value: '' }] })}>+ Add Row</button>
@@ -62,7 +63,7 @@ export function GalleryWidget({ content, onChange }: { content: any; onChange: (
           <div key={img.id} className={styles.galleryCell}>
             <div className={styles.galleryCellImageWrap}>
               <img src={img.src} alt={img.caption} className={styles.galleryCellImage} />
-              <button className={styles.galleryCellRemove} onClick={() => onChange({ ...content, images: images.filter(i => i.id !== img.id) })} title="Remove">×</button>
+              <button className={styles.galleryCellRemove} onClick={() => onChange({ ...content, images: images.filter(i => i.id !== img.id) })} title="Remove" aria-label="Remove image"><X size={12} /></button>
             </div>
             <input className={styles.galleryCellCaption} type="text" placeholder="Caption..." value={img.caption} onChange={e => onChange({ ...content, images: images.map(i => i.id === img.id ? { ...i, caption: e.target.value } : i) })} />
           </div>
