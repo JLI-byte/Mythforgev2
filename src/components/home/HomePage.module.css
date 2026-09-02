@@ -125,7 +125,7 @@
 
 .tileResume    { grid-column: span 2; grid-row: span 2; justify-content: center; gap: 6px; }
 .tileGoal      { grid-column: span 1; align-items: center; position: relative; }
-.tileStreak    { grid-column: span 1; }
+.tileStreak    { grid-column: span 1; min-height: 250px; }
 .tileAttention { grid-column: span 2; }
 .tileHeatmap   { grid-column: span 4; }
 .tileLore      { grid-column: span 2; }
@@ -245,7 +245,7 @@
 /* ── Streak ───────────────────────────────────────────── */
 
 .streakNumber {
-  font-size: 2.4rem;
+  font-size: 2.9rem;
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -254,10 +254,20 @@
 .eggWrap {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 18px;
+  /* The creature is the point of this tile now, so it gets the room the
+     Today tile gives its ring rather than sitting in the corner as an icon. */
+  margin: 4px 0 2px;
 }
-.eggLit { color: #8ab4ff; }
-.eggCold { color: rgba(255, 255, 255, 0.28); }
+.eggLit {
+  color: #8ab4ff;
+  /* A live streak makes the egg glow — the one cue that reads at a glance
+     from across the dashboard. */
+  filter: drop-shadow(0 0 14px rgba(138, 180, 255, 0.45));
+}
+.eggCold { color: rgba(255, 255, 255, 0.26); }
+.eggWrap svg { display: block; }
 
 .stageRow {
   display: flex;

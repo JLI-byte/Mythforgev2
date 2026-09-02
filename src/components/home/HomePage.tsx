@@ -290,7 +290,7 @@ export default function HomePage() {
             <span className={styles.tileLabel}>Streak</span>
             <div className={styles.eggWrap}>
               <span className={streakState.currentStreak > 0 ? styles.eggLit : styles.eggCold}>
-                <EggPlaceholder size={30} cracked={creature.stage.id !== 'egg'} />
+                <EggPlaceholder size={78} cracked={creature.stage.id !== 'egg'} />
               </span>
               <span className={styles.streakNumber}>{streakState.currentStreak}</span>
             </div>
