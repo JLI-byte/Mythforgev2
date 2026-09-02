@@ -35,7 +35,7 @@ export function Bookshelf() {
     const projects = useWorkspaceStore(s => s.projects);
     const worlds = useWorkspaceStore(s => s.worlds || []);
     const updateProject = useWorkspaceStore(s => s.updateProject);
-    const addWorld = useWorkspaceStore(s => s.addWorld);
+    const createWorld = useWorkspaceStore(s => s.createWorld);
     const updateWorld = useWorkspaceStore(s => s.updateWorld);
     const deleteWorld = useWorkspaceStore(s => s.deleteWorld);
     const addProject = useWorkspaceStore(s => s.addProject);
@@ -161,20 +161,15 @@ export function Bookshelf() {
                 tone: wizardData.tone,
             });
         } else {
-            // Create new shelf
-            const newWorld: World = {
-                id: crypto.randomUUID(),
-                name: wizardData.name.trim(),
-                genre: wizardData.genre || 'fantasy',
-                tone: wizardData.tone || { darkness: 'balanced', scale: 'balanced', humor: 'balanced' },
-                logline: wizardData.logline || '',
-                magicExists: false,
-                techLevel: wizardData.techLevel || 'medieval',
-                timePeriod: wizardData.timePeriod || '',
-                coverColor: COVER_COLORS[Math.floor(Math.random() * COVER_COLORS.length)],
-                createdAt: new Date()
-            };
-            addWorld(newWorld);
+            // The store owns what a world starts out as; the wizard only passes
+            // the parts it actually collected.
+            createWorld(wizardData.name, {
+                genre: wizardData.genre,
+                tone: wizardData.tone,
+                logline: wizardData.logline,
+                techLevel: wizardData.techLevel,
+                timePeriod: wizardData.timePeriod,
+            });
         }
         resetWizard();
     };

@@ -81,10 +81,17 @@ createWorld(name: string): string   // returns the new world's id
 It holds the defaults and the random cover colour, and returns the id so the
 caller can select the new shelf.
 
-**Known duplication.** The Bookshelf wizard applies these same defaults inline.
-Consolidating means editing `Bookshelf.tsx`, which this design is avoiding.
-Once the in-flight work lands, the wizard should call `createWorld` and the
-duplication disappears. Recorded here rather than left for someone to find.
+**Resolved.** The Bookshelf wizard originally applied these same defaults
+inline, and this design accepted the duplication rather than edit
+`Bookshelf.tsx` while it held uncommitted work. Once that landed, `createWorld`
+gained an optional overrides argument and the wizard now calls it, passing only
+the fields it collects. Undefined overrides are dropped, so a field the writer
+never touched keeps its default instead of clobbering it.
+
+`NewWorldModal.tsx` also builds a world by hand, but nothing mounts it — it is
+an orphaned component, not a live third path. `betaSeedData.ts` specifies every
+field deliberately for a fixed demo world, so it is not duplicating defaults
+either.
 
 ## 5. WorldShelf stays presentational
 

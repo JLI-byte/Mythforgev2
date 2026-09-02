@@ -32,6 +32,43 @@ describe('createWorld', () => {
         expect(w.createdAt).toBeInstanceOf(Date);
     });
 
+    it('prefers a supplied value over the default', () => {
+        useWorkspaceStore.getState().createWorld('Rustwater', {
+            genre: 'sci-fi',
+            techLevel: 'futuristic',
+            logline: 'A drowned city that will not stay drowned.',
+            tone: { darkness: 'dark', scale: 'epic', humor: 'serious' },
+            timePeriod: 'Far future',
+        });
+        const w = useWorkspaceStore.getState().worlds[0];
+        expect(w.genre).toBe('sci-fi');
+        expect(w.techLevel).toBe('futuristic');
+        expect(w.logline).toBe('A drowned city that will not stay drowned.');
+        expect(w.tone).toEqual({ darkness: 'dark', scale: 'epic', humor: 'serious' });
+        expect(w.timePeriod).toBe('Far future');
+    });
+
+    it('ignores undefined overrides rather than clobbering a default', () => {
+        // A wizard field the writer never touched arrives undefined.
+        useWorkspaceStore.getState().createWorld('Mirefall', {
+            genre: undefined,
+            techLevel: undefined,
+            tone: undefined,
+        });
+        const w = useWorkspaceStore.getState().worlds[0];
+        expect(w.genre).toBe('fantasy');
+        expect(w.techLevel).toBe('medieval');
+        expect(w.tone).toEqual({ darkness: 'balanced', scale: 'balanced', humor: 'balanced' });
+    });
+
+    it('still generates the id, cover colour and timestamp itself', () => {
+        const id = useWorkspaceStore.getState().createWorld('Thornwake', { genre: 'horror' });
+        const w = useWorkspaceStore.getState().worlds[0];
+        expect(w.id).toBe(id);
+        expect(COVER_COLORS).toContain(w.coverColor);
+        expect(w.createdAt).toBeInstanceOf(Date);
+    });
+
     it('keeps existing worlds', () => {
         useWorkspaceStore.getState().createWorld('First');
         useWorkspaceStore.getState().createWorld('Second');

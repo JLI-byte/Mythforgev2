@@ -760,8 +760,12 @@ export interface WorkspaceState {
 
     // --- ACTIONS ---
     addWorld: (world: World) => void;
-    /** Create a world from a name alone, with the shelf wizard's defaults. Returns its id. */
-    createWorld: (name: string) => string;
+    /**
+     * Create a world, filling anything not supplied with the standard defaults.
+     * Callers that collect more (the shelf wizard) pass overrides; callers that
+     * only have a name (the Home shelf) pass none. Returns the new id.
+     */
+    createWorld: (name: string, overrides?: Partial<Omit<World, 'id' | 'createdAt'>>) => string;
     requestNewStory: (worldKey: string | null) => void;
     clearPendingNewStory: () => void;
     /** Update an existing world's metadata */
@@ -1354,13 +1358,16 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     return { worlds: [...state.worlds, world] };
                 }),
 
-            createWorld: (name) => {
+            createWorld: (name, overrides) => {
+                // Only defined values override; a wizard field the writer never
+                // touched arrives as undefined and must not clobber its default.
+                const supplied = Object.fromEntries(
+                    Object.entries(overrides ?? {}).filter(([, v]) => v !== undefined),
+                );
                 const world: World = {
                     id: crypto.randomUUID(),
                     name: name.trim(),
-                    // The same defaults the shelf wizard applies. Duplicated on
-                    // purpose while Bookshelf.tsx has uncommitted work in it;
-                    // the wizard should call this once that lands.
+                    // The single home for what a world starts out as.
                     genre: 'fantasy',
                     tone: { darkness: 'balanced', scale: 'balanced', humor: 'balanced' },
                     logline: '',
@@ -1369,6 +1376,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     timePeriod: '',
                     coverColor: COVER_COLORS[Math.floor(Math.random() * COVER_COLORS.length)],
                     createdAt: new Date(),
+                    ...supplied,
                 };
                 logger.info('World created:', world.name);
                 set((state) => ({ worlds: [...state.worlds, world] }));
