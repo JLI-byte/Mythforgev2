@@ -196,6 +196,8 @@
   align-items: center;
   gap: 5px;
   padding: 0;
+  /* 24px hit target; the icon and text keep their own size. */
+  min-height: 24px;
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--foreground, #f2f0ef);
@@ -251,6 +253,11 @@
   top: 12px;
   right: 12px;
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 24px hit target; the icon and text keep their own size. */
+  min-width: 24px;
+  min-height: 24px;
   padding: 4px;
   border: none;
   border-radius: 7px;
@@ -482,6 +489,10 @@
 .recentAll {
   background: none;
   border: none;
+  display: inline-flex;
+  align-items: center;
+  /* 24px hit target; the icon and text keep their own size. */
+  min-height: 24px;
   color: var(--muted, #8b8b95);
   font-size: 0.85rem;
   cursor: pointer;

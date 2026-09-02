@@ -176,6 +176,8 @@
   align-items: center;
   gap: 5px;
   padding: 0;
+  /* 24px hit target; the icon and text keep their own size. */
+  min-height: 24px;
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--foreground, #f2f0ef);
