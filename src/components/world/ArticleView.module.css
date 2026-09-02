@@ -192,7 +192,7 @@
   background: rgba(208, 188, 255, 0.14);
 }
 .ghostPanel small {
-  font-size: 0.64rem;
+  font-size: 0.6875rem;
   font-weight: 700;
 }
 .heroWash {
@@ -317,7 +317,7 @@
   border-radius: 0 0 16px 0;
 }
 .railSec {
-  font-size: 0.64rem;
+  font-size: 0.6875rem;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -439,7 +439,7 @@
   font-weight: 600;
 }
 .relType {
-  font-size: 0.66rem;
+  font-size: 0.6875rem;
   color: var(--muted, #9a97a0);
   text-transform: capitalize;
 }
@@ -650,7 +650,7 @@
   background: rgba(15, 15, 16, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: #fff;
-  font-size: 0.62rem;
+  font-size: 0.6875rem;
   line-height: 1;
   display: inline-flex;
   align-items: center;

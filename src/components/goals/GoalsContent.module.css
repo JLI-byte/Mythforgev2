@@ -130,7 +130,7 @@
 }
 
 .ringTarget {
-    font-size: 0.65rem;
+    font-size: 0.6875rem;
     color: var(--muted);
 }
 
@@ -248,7 +248,7 @@
 
 .calHeaderDay {
     text-align: center;
-    font-size: 0.65rem;
+    font-size: 0.6875rem;
     color: var(--muted);
     padding: 0.15rem 0;
 }
@@ -493,7 +493,7 @@
     position: absolute;
     top: 3px;
     right: 5px;
-    font-size: 0.6rem;
+    font-size: 0.6875rem;
     color: #F5C842;
     font-weight: 700;
 }
@@ -553,7 +553,7 @@
 }
 
 .badgeDesc {
-    font-size: 0.68rem;
+    font-size: 0.6875rem;
     color: var(--muted);
     overflow: hidden;
     text-overflow: ellipsis;

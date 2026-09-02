@@ -60,7 +60,7 @@
 }
 
 .shelfLabel {
-    font-size: 0.65rem;
+    font-size: 0.6875rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -241,7 +241,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 0.6rem;
+    font-size: 0.6875rem;
     color: #fff;
     background: rgba(0, 0, 0, 0.8);
     padding: 2px 7px;
@@ -270,7 +270,7 @@
     background: rgba(255, 255, 255, 0.04);
     border: 1px dashed rgba(255, 255, 255, 0.12);
     color: rgba(255, 255, 255, 0.5);
-    font-size: 0.68rem;
+    font-size: 0.6875rem;
     padding: 4px 14px;
     border-radius: 12px;
     cursor: pointer;
@@ -436,7 +436,7 @@
 }
 
 .beginOptionDesc {
-    font-size: 0.68rem;
+    font-size: 0.6875rem;
     line-height: 1.4;
     color: rgba(var(--overlay-rgb), 0.6);
 }
@@ -589,7 +589,7 @@
 
 .shelfDeleteConfirm button {
     padding: 4px 10px;
-    font-size: 0.65rem;
+    font-size: 0.6875rem;
     border-radius: 12px;
 }
 
@@ -738,7 +738,7 @@
 .bookConfirmNo,
 .bookConfirmYes {
     padding: 3px 9px;
-    font-size: 0.68rem;
+    font-size: 0.6875rem;
     font-weight: 600;
     border-radius: 6px;
     cursor: pointer;

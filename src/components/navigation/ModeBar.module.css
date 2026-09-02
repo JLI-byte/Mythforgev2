@@ -265,7 +265,7 @@
 }
 
 .searchResultKind {
-  font-size: 0.65rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -379,7 +379,7 @@
 }
 
 .profileStatus {
-  font-size: 0.55rem;
+  font-size: 0.6875rem;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -413,7 +413,7 @@
 }
 
 .dropdownEmail {
-  font-size: 0.65rem;
+  font-size: 0.6875rem;
   color: var(--muted);
   word-break: break-all;
   margin-top: 2px;

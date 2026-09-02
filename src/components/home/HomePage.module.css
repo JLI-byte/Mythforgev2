@@ -321,7 +321,7 @@
 }
 .heatmapMonth {
   width: 11px;
-  font-size: 0.62rem;
+  font-size: 0.6875rem;
   color: var(--muted, #8b8b95);
   white-space: nowrap;
 }
@@ -348,7 +348,7 @@
   align-items: center;
   gap: 3px;
   margin-top: 2px;
-  font-size: 0.66rem;
+  font-size: 0.6875rem;
   color: var(--muted, #8b8b95);
 }
 .heatmapLegend span:first-child { margin-right: 3px; }

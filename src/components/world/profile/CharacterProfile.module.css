@@ -185,7 +185,7 @@
 .colorSwatch { text-align: center; }
 .colorSwatch i { display: block; width: 46px; height: 46px; border-radius: 8px; background: var(--swatch); border: 1px solid var(--line); }
 .colorSwatch b { display: block; font-size: 11px; margin-top: 4px; color: var(--ink); }
-.colorSwatch span { font-size: 10px; color: var(--muted); }
+.colorSwatch span { font-size: 0.6875rem; color: var(--muted); }
 
 .lookbook { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
 .lookItem { border-radius: 8px; overflow: hidden; background: var(--cream); }

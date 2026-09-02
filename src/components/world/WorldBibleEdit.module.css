@@ -24,7 +24,7 @@
     padding: 0 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.35);
 }
 .previewTitle { color: #f2f2f2; font-weight: 700; font-size: 0.95rem; text-align: center; }
-.previewSub { color: rgba(255,255,255,0.55); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; }
+.previewSub { color: rgba(255,255,255,0.55); font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; }
 
 .presetGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 .presetCard { border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }

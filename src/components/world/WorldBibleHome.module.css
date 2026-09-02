@@ -133,7 +133,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.6rem;
+    font-size: 0.6875rem;
     font-weight: 600;
     color: var(--foreground);
     overflow: hidden;
@@ -165,7 +165,7 @@
 
 .favoritePlaceholderText {
     color: var(--muted);
-    font-size: 0.6rem;
+    font-size: 0.6875rem;
 }
 
 
@@ -523,7 +523,7 @@
   background: none;
   border: none;
   color: var(--muted);
-  font-size: 0.65rem;
+  font-size: 0.6875rem;
   cursor: pointer;
   outline: none;
   max-width: 16px;
