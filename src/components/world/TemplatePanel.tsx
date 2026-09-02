@@ -5,7 +5,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 import { useWorkspaceStore, BlockType, ArticleBlock } from '@/store/workspaceStore';
 import styles from './TemplatePanel.module.css';
 
@@ -138,7 +138,7 @@ export default function TemplatePanel({ currentBlocks, entityId, onClose }: Temp
                                             onClick={() => deleteArticleTemplate(template.id)}
                                             title="Delete Template"
                                         >
-                                            🗑
+                                            <Trash2 size={14} />
                                         </button>
                                     </div>
                                 </div>

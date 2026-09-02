@@ -8,6 +8,7 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
+import { Pencil, Check } from 'lucide-react';
 import styles from './WorldBibleEntry.module.css';
 import { useWorkspaceStore, EntityType } from '@/store/workspaceStore';
 import { WBView, SUBCATEGORY_LABELS, SUBCATEGORY_ICONS } from '@/lib/worldBibleNav';
@@ -141,7 +142,7 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
                         onClick={() => setSelectedEntity(entity.id)}
                         title="Edit entity"
                     >
-                        ✏️
+                        <Pencil size={14} />
                     </button>
                     {/* Opens article in the center column — editing happens in ArticleReadView, not inline */}
                     <button
@@ -253,7 +254,9 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
                             onChange={e => setFieldValue(e.target.value)}
                             className={styles.addFieldInput}
                         />
-                        <button className={styles.addFieldConfirm} onClick={handleAddField}>✓</button>
+                        <button className={styles.addFieldConfirm} onClick={handleAddField} aria-label="Add field">
+                            <Check size={14} />
+                        </button>
                         <button className={styles.addFieldCancel} onClick={() => { setAddingField(false); setFieldLabel(''); setFieldValue(''); }}>×</button>
                     </div>
                 )}

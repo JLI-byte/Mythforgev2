@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { X, Pencil, Trash2 } from 'lucide-react';
 import { useWorkspaceStore, Project, World, COVER_COLORS, WorldGenre } from '@/store/workspaceStore';
 import { STANDALONE_KEY } from '@/lib/worldKey';
 import { getWorldBibleConfig } from '@/lib/worldBibleNav';
@@ -418,7 +419,7 @@ export function Bookshelf() {
                         title={`Delete “${p.name}”`}
                         onClick={e => { e.stopPropagation(); setDeletingProjectId(p.id); }}
                     >
-                        ✕
+                        <X size={14} />
                     </button>
                 )}
             </div>
@@ -470,13 +471,16 @@ export function Bookshelf() {
                     
                     {!isUncategorized && worldObj && !isDeleting && (
                         <>
-                            <button className={styles.editBtn} onClick={() => handleEditShelf(worldObj)} title="Edit Shelf">✏️</button>
-                            <button 
-                                className={styles.deleteBtn} 
+                            <button className={styles.editBtn} onClick={() => handleEditShelf(worldObj)} title="Edit Shelf" aria-label="Edit Shelf">
+                                <Pencil size={14} />
+                            </button>
+                            <button
+                                className={styles.deleteBtn}
                                 onClick={() => setDeletingWorldId(worldId)}
                                 title="Delete Shelf"
+                                aria-label="Delete Shelf"
                             >
-                                🗑️
+                                <Trash2 size={14} />
                             </button>
                         </>
                     )}

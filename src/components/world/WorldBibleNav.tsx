@@ -7,6 +7,7 @@
 "use client";
 
 import React from 'react';
+import { BookOpen, Home } from 'lucide-react';
 import styles from './WorldBibleNav.module.css';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import {
@@ -121,7 +122,7 @@ export default function WorldBibleNav({
                     aria-label="Export World Bible"
                     title="Export World Bible"
                 >
-                    📖
+                    <BookOpen size={16} />
                 </button>
                 <button
                     className={styles.homeBtn}
@@ -129,7 +130,7 @@ export default function WorldBibleNav({
                     aria-label="Go to World Bible home"
                     title="Home"
                 >
-                    🏠
+                    <Home size={16} />
                 </button>
             </div>
         </nav>
