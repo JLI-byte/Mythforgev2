@@ -118,19 +118,3 @@ export function buildShelves(
 
     return shelves;
 }
-
-/**
- * Spine height as a fraction of the shelf, from story count.
- *
- * The floor is high on purpose: spines should read as books standing on a
- * shelf, filling most of it, not as a sparse bar chart. Story count still
- * varies the height, but within the top fifth of the range — the encoding is a
- * hint, not a scale, and a forty-story world must not blow out the shelf.
- */
-export const SPINE_MIN_FRACTION = 0.82;
-export const SPINE_FULL_AT = 4;
-
-export function spineFraction(storyCount: number): number {
-    const reach = Math.min(1, Math.max(0, storyCount) / SPINE_FULL_AT);
-    return SPINE_MIN_FRACTION + (1 - SPINE_MIN_FRACTION) * reach;
-}

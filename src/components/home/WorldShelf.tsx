@@ -2,7 +2,7 @@
 
 import React, { useId, useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
-import { spineFraction, type Shelf } from '@/lib/worldShelves';
+import type { Shelf } from '@/lib/worldShelves';
 import type { WorldKey } from '@/lib/worldKey';
 import styles from './WorldShelf.module.css';
 
@@ -26,7 +26,7 @@ interface WorldShelfProps {
 }
 
 /** How many cover slots fit across the panel before it crowds, per size. */
-const COVER_SLOTS = { tile: 5, page: 10 } as const;
+const COVER_SLOTS = { tile: 5, page: 6 } as const;
 
 export function WorldShelf({
   shelves, size, selectedKey, onSelect, onOpenStory, onOpenBible, emptyAction,
@@ -93,10 +93,7 @@ export function WorldShelf({
               // Roving tabindex: one Tab stop for the whole shelf, arrows move within it.
               tabIndex={isSelected ? 0 : -1}
               className={`${styles.spine} ${isSelected ? styles.spineSelected : ''}`}
-              style={{
-                height: `${(spineFraction(shelf.stories.length) * 100).toFixed(2)}%`,
-                background: shelf.coverColor,
-              }}
+                              style={{ background: shelf.coverColor }}
               title={`${shelf.name} — ${plural(shelf.stories.length, 'story', 'stories')}`}
               onClick={() => onSelect(shelf.key)}
               onKeyDown={e => handleKeyDown(e, i)}

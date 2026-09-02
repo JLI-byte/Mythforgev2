@@ -1,10 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
     buildShelves,
-    spineFraction,
     STANDALONE_SHELF_NAME,
     STANDALONE_SHELF_COLOR,
-    SPINE_MIN_FRACTION,
 } from './worldShelves';
 import { STANDALONE_KEY } from './worldKey';
 
@@ -114,24 +112,5 @@ describe('buildShelves', () => {
 
         expect(buildShelves(worlds, projects, [])[0].stories[0].updatedAt)
             .toBe(new Date('2026-04-04T00:00:00.000Z').getTime());
-    });
-});
-
-describe('spineFraction', () => {
-    it('gives an empty world the shortest spine', () => {
-        expect(spineFraction(0)).toBe(SPINE_MIN_FRACTION);
-    });
-
-    it('grows with story count', () => {
-        expect(spineFraction(3)).toBeGreaterThan(spineFraction(1));
-    });
-
-    it('clamps so a huge world does not blow out the shelf', () => {
-        expect(spineFraction(6)).toBe(1);
-        expect(spineFraction(400)).toBe(1);
-    });
-
-    it('treats a negative count as empty', () => {
-        expect(spineFraction(-5)).toBe(SPINE_MIN_FRACTION);
     });
 });
