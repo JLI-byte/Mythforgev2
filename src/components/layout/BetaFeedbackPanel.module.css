@@ -194,7 +194,7 @@
   flex-direction: column;
   gap: 12px;
   scrollbar-width: thin;
-  scrollbar-color: #353534 transparent;
+  scrollbar-color: var(--muted) transparent;
 }
 .content::-webkit-scrollbar { width: 4px; }
 .content::-webkit-scrollbar-track { background: transparent; }
@@ -242,7 +242,7 @@
   font-weight: 400;
   letter-spacing: 0;
   text-transform: none;
-  color: #353534;
+  color: var(--muted);
 }
 
 .input {
@@ -258,7 +258,7 @@
   width: 100%;
   box-sizing: border-box;
 }
-.input::placeholder { color: #353534; }
+.input::placeholder { color: var(--muted); }
 .input:focus { border-color: var(--accent); }
 
 .textarea {
@@ -276,14 +276,14 @@
   width: 100%;
   box-sizing: border-box;
 }
-.textarea::placeholder { color: #353534; }
+.textarea::placeholder { color: var(--muted); }
 .textarea:focus { border-color: var(--accent); }
 
 /* Submit */
 .submitBtn {
-  background: var(--accent-dim, #a078ff);
+  background: var(--accent-dim);
   border: none;
-  color: white;
+  color: var(--on-accent);
   padding: 9px;
   border-radius: 6px;
   font-size: 0.75rem;
@@ -296,11 +296,14 @@
 }
 .submitBtn:hover:not(:disabled) { opacity: 0.85; }
 .submitBtn:disabled:not(.submitBtnSuccess) { opacity: 0.35; cursor: not-allowed; }
-.submitBtnSuccess { background: #2E8B57; cursor: default; }
+/* Success is a semantic colour, not the accent, so it carries its own
+   foreground rather than inheriting --on-accent - which flips per theme
+   and left this at 4.3:1 in both. White on this green is 6.14:1. */
+.submitBtnSuccess { background: #1F6F45; color: #fff; cursor: default; }
 
 .storageNote {
   font-size: 0.6875rem;
-  color: #353534;
+  color: var(--muted);
   line-height: 1.4;
   margin: 0;
 }
@@ -348,7 +351,7 @@
 .exportBtn:hover { color: var(--foreground); border-color: rgba(var(--overlay-rgb),0.2); }
 
 .historyList { display: flex; flex-direction: column; gap: 7px; }
-.emptyHistory { font-size: 0.75rem; color: #353534; margin: 0; text-align: center; padding: 10px 0; }
+.emptyHistory { font-size: 0.75rem; color: var(--muted); margin: 0; text-align: center; padding: 10px 0; }
 
 .historyEntry {
   background: var(--surface-mid, var(--surface-mid));
@@ -374,6 +377,6 @@
 .entryType_feature { background: rgba(208,188,255,0.15); color: #d0bcff; }
 .entryType_general { background: rgba(76,215,246,0.15); color: #4cd7f6; }
 
-.entryDate { font-size: 0.6875rem; color: #353534; }
+.entryDate { font-size: 0.6875rem; color: var(--muted); }
 .entryTitle { font-size: 0.82rem; font-weight: 600; color: var(--foreground); margin: 0; }
 .entryBody { font-size: 0.77rem; color: var(--muted); margin: 0; line-height: 1.4; }

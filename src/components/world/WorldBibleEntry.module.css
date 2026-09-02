@@ -79,7 +79,7 @@
 
 .heroBtnPinned {
     background: var(--accent);
-    color: white;
+    color: var(--on-accent);
 }
 
 

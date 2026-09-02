@@ -568,7 +568,7 @@
 .confirmBtn {
     padding: 0.4rem 0.75rem;
     background: var(--accent);
-    color: white;
+    color: var(--on-accent);
     border: none;
     border-radius: 6px;
     cursor: pointer;

@@ -106,7 +106,7 @@
 
 .serviceTabActive {
     background: var(--accent);
-    color: #fff;
+    color: var(--on-accent);
     border-color: transparent;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
@@ -212,7 +212,7 @@
 .primaryAction {
     flex: 1;
     background: var(--accent);
-    color: #fff;
+    color: var(--on-accent);
     border: none;
     border-radius: 8px;
     padding: 0.75rem;

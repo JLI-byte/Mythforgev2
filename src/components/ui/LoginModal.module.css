@@ -170,7 +170,7 @@
   background: var(--accent);
   border: none;
   border-radius: 12px;
-  color: white;
+  color: var(--on-accent);
   font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;

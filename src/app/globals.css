@@ -11,7 +11,17 @@
   --background: #fdfdfd;
   --background-rgb: 253, 253, 253;
   --surface: #f7f7f7;
+  /* Raised surfaces step away from the background, as they do in dark. */
+  --surface-mid: #efefef;
+  --surface-high: #e7e7e7;
   --foreground: #222222;
+  /* These three, and the two surfaces above, existed only in the dark block,
+     so light theme had no values for them at all and merely inherited whatever
+     the OS-dark block leaked. Chosen to clear 4.5:1 on --background, --surface
+     and --surface-mid alike, each keeping its dark partner's hue family. */
+  --muted: #66666f;
+  --secondary: #0e7490;
+  --tertiary: #a1541a;
   --accent: #005bb5;
   /* Text that sits ON the accent. Every block that redefines --accent must
      redefine this with it: the accent is a dark blue here, a pale lavender in
@@ -21,6 +31,10 @@
      previous foreground leak — which is exactly what happened when explicit
      light mode kept dark mode's near-black on a dark blue button. */
   --on-accent: #ffffff;
+  /* The accent's deeper partner, used for gradients and secondary fills.
+     Defined here too: it was only set in the dark and fantasy blocks, so
+     light theme fell through to a hardcoded purple from another palette. */
+  --accent-dim: #003d7a;
   --border: #eaeaea;
 
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
@@ -56,7 +70,12 @@ option {
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  /* Guarded so an explicit light choice beats a dark OS. Without it, this
+     block still applied under [data-theme="light"] for every token the
+     light block does not re-declare - which left --muted, --secondary,
+     --tertiary and the surface tones at their dark values on a white
+     ground, measuring 3.16:1 across 37 elements on Home alone. */
+  :root:not([data-theme="light"]) {
     --background: #0e0e0e;
     --background-rgb: 14, 14, 14;
     --surface: #131313;

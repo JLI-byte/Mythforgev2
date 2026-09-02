@@ -101,7 +101,7 @@
 
 .saveBtn {
   background: var(--accent);
-  color: white;
+  color: var(--on-accent);
   border: none;
   padding: 10px 16px;
   border-radius: 6px;
@@ -184,7 +184,7 @@
 .applyBtn {
   flex: 1;
   background: var(--accent);
-  color: white;
+  color: var(--on-accent);
   border: none;
   padding: 8px;
   border-radius: 6px;

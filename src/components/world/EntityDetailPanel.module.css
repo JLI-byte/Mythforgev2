@@ -89,7 +89,7 @@
 .saveButton {
     flex: 1;
     background: var(--accent);
-    color: white;
+    color: var(--on-accent);
     border: none;
     border-radius: 6px;
     padding: 0.6rem 1rem;

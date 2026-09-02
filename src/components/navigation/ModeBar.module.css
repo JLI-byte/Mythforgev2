@@ -374,11 +374,11 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--accent-dim, #6b4c9a));
+  background: linear-gradient(135deg, var(--accent), var(--accent-dim));
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--on-accent);
   font-weight: 700;
   font-size: 0.7rem;
 }

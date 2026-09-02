@@ -1372,7 +1372,7 @@
 
 .spineFullViewBtnActive {
   background: var(--accent);
-  color: #000;
+  color: var(--on-accent);
   border-color: var(--accent);
   box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.4);
 }
@@ -3127,7 +3127,7 @@
 
 .structureBtn:hover {
   background: var(--accent);
-  color: #000;
+  color: var(--on-accent);
 }
 
 .structureScroll {
@@ -3621,7 +3621,7 @@
 
 .timerBtnActive {
   background: var(--accent);
-  color: #000;
+  color: var(--on-accent);
   border-color: var(--accent);
   box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.3);
 }
@@ -3740,7 +3740,7 @@
   transform: translateX(-50%);
   font-size: 0.6875rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--on-accent);
   white-space: nowrap;
   background: rgba(var(--accent-rgb), 0.8);
   padding: 1px 6px;
@@ -3930,12 +3930,12 @@
 
 .jumpActiveBtn:hover {
   background: var(--accent);
-  color: #000;
+  color: var(--on-accent);
 }
 
 .addChapterBtn {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   border: none;
   width: 32px;
   height: 32px;
@@ -5016,7 +5016,7 @@
   font-size: 0.6875rem;
   font-weight: 700;
   line-height: 1;
-  color: #fff;
+  color: var(--on-accent);
   background: var(--accent, #6c8cff);
   border-radius: 8px;
 }
@@ -5514,7 +5514,7 @@
 .interviewEditorSave {
   background: var(--accent, #6c8cff);
   border-color: var(--accent, #6c8cff);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .interviewEditorSave:hover:not(:disabled) {
@@ -5573,7 +5573,7 @@
   padding: 4px 10px;
   font-size: 0.7rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--on-accent);
   background: var(--accent, #6c8cff);
   border: none;
   border-radius: 999px;
@@ -5896,7 +5896,7 @@
 .chatOptionChosen {
   background: var(--accent, #6c8cff);
   border-color: var(--accent, #6c8cff);
-  color: #fff;
+  color: var(--on-accent);
   font-weight: 600;
 }
 
@@ -5951,7 +5951,7 @@
   padding: 5px 11px;
   font-size: 0.74rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--on-accent);
   background: var(--accent, #6c8cff);
   border: none;
   border-radius: 999px;
@@ -6013,7 +6013,7 @@
 }
 
 .chatPendingApply {
-  color: #fff;
+  color: var(--on-accent);
   background: var(--accent, #6c8cff);
 }
 
@@ -6196,7 +6196,7 @@
 
 .researchChatMsgUser .researchChatMsgBody {
   background: var(--accent, #4a6fa5);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .researchChatMsgAssistant .researchChatMsgBody {

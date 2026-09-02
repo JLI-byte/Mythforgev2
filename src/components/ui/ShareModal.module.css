@@ -167,7 +167,7 @@
 .downloadBtn {
     grid-column: span 2;
     background: var(--accent);
-    color: white;
+    color: var(--on-accent);
     border: none;
 }
 

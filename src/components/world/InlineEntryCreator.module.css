@@ -133,7 +133,7 @@
 .btnSave {
     background: var(--accent);
     border: 1px solid var(--accent);
-    color: white;
+    color: var(--on-accent);
 }
 
 .btnSave:hover {

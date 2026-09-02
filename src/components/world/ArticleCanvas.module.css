@@ -108,7 +108,7 @@
 
 .addBlockBtn {
   background-color: var(--accent);
-  color: white;
+  color: var(--on-accent);
   border: none;
   padding: 7px 14px;
   border-radius: 6px;

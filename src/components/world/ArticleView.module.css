@@ -585,7 +585,7 @@
   font-weight: 700;
   cursor: pointer;
   background: var(--accent, #d0bcff);
-  color: #1a1a1a;
+  color: var(--on-accent);
 }
 .discardBtn {
   padding: 8px 16px;
