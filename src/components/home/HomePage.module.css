@@ -127,7 +127,7 @@
 .tileGoal      { grid-column: span 1; align-items: center; position: relative; }
 .tileStreak    { grid-column: span 1; }
 .tileAttention { grid-column: span 1; }
-.tileWorld     { grid-column: span 2; }
+.tileWorld     { grid-column: span 2; min-height: 230px; }
 .tileHeatmap   { grid-column: span 4; }
 .tileLore      { grid-column: span 2; }
 .tileLinks     { grid-column: span 2; }

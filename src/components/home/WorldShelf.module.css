@@ -1,31 +1,40 @@
 /* WorldShelf — world spines with the opened world beside them */
 
 .shelf {
-  --spine-w: 22px;
-  --shelf-h: 88px;
-  --cover-w: 30px;
-  --cover-h: 42px;
+  --spine-w: 34px;
+  --shelf-min: 150px;
+  --cover-w: 34px;
+  --cover-h: 48px;
   display: flex;
-  gap: 10px;
+  gap: 14px;
   align-items: stretch;
   min-width: 0;
+  /* Fill the tile's remaining height so the spines stand as tall as the box
+     allows, rather than floating in it at a fixed size. */
+  flex: 1;
+  min-height: var(--shelf-min);
 }
 
 .sizePage {
-  --spine-w: 30px;
-  --shelf-h: 150px;
-  --cover-w: 46px;
-  --cover-h: 64px;
+  --spine-w: 46px;
+  --shelf-min: 260px;
+  --cover-w: 52px;
+  --cover-h: 72px;
 }
 
 /* Spines */
 
 .spines {
   display: flex;
-  gap: 5px;
+  gap: 7px;
   align-items: flex-end;
-  height: var(--shelf-h);
+  height: 100%;
   flex-shrink: 0;
+  /* A flex item defaults to min-height:auto, so an unusually long world name
+     would stretch the shelf — and the whole tile — before its label ever
+     ellipsised. Pin the row to the height it is given. */
+  min-height: 0;
+  overflow: hidden;
 }
 
 .spine {
@@ -34,6 +43,7 @@
   border: none;
   border-radius: 2px 2px 1px 1px;
   cursor: pointer;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -51,23 +61,26 @@
 .spineSelected { transform: translateY(-6px); filter: brightness(1.22); }
 
 .spineLabel {
+  /* Absolutely positioned on purpose. In flow, a long world name grew the
+     spine, the shelf and the whole tile before it ever ellipsised; out of
+     flow it gets a definite height from the spine and simply truncates. */
+  position: absolute;
+  inset: 6px 0;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;
+  text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  /* Bound to the spine's real height, not the shelf max — a short spine must
-     still ellipsise rather than be hard-clipped by the parent's overflow. */
-  max-height: calc(100% - 12px);
   color: rgba(255, 255, 255, 0.92);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   pointer-events: none;
 }
 
-.sizePage .spineLabel { font-size: 12px; }
+.sizePage .spineLabel { font-size: 13px; }
 
 /* Opened world */
 

@@ -85,7 +85,7 @@ export function WorldShelf({
               tabIndex={isSelected ? 0 : -1}
               className={`${styles.spine} ${isSelected ? styles.spineSelected : ''}`}
               style={{
-                height: `calc(var(--shelf-h) * ${spineFraction(shelf.stories.length)})`,
+                height: `${(spineFraction(shelf.stories.length) * 100).toFixed(2)}%`,
                 background: shelf.coverColor,
               }}
               title={`${shelf.name} — ${plural(shelf.stories.length, 'story', 'stories')}`}
