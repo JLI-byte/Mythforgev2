@@ -10,6 +10,7 @@ import { worldKeyForProject, worldKeyForEntity, type WorldKey } from '@/lib/worl
 import { migrateWorkspaceSchema } from './migrateWorkspaceSchema';
 import { DEFAULT_WORLD_BIBLE_LAYOUT } from '@/lib/worldBibleNav';
 import { wouldCreateCycle, fileByType } from '@/lib/folderTree';
+import { partitionExample, SEED_WORLD_NAME } from '@/lib/exampleData';
 import type { Interview } from '@/lib/interviews/types';
 import type { ProjectBrief } from '@/lib/workSubTypes';
 import { sanitizeChatHistories, type ChatMessage as ResearchChatMessage } from '@/lib/researchChatTypes';
@@ -867,6 +868,13 @@ export interface WorkspaceState {
     toggleTypewriterMode: () => void;
 
     /**
+     * Show or hide the built-in example world. Hiding moves its records into
+     * stashedExample; showing splices them back, or seeds fresh if there is
+     * nothing stashed and nothing already present.
+     */
+    setExampleData: (on: boolean) => void;
+
+    /**
      * Toggles the distraction-free Fullscreen mode.
      */
     toggleFullscreen: () => void;
@@ -1658,6 +1666,76 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             toggleTypewriterMode: () =>
                 set((state) => ({ isTypewriterMode: !state.isTypewriterMode })),
+
+            setExampleData: (on) => {
+                const state = get();
+
+                if (on) {
+                    const stash = state.stashedExample;
+                    if (stash) {
+                        // Splice the records back exactly as they were stashed.
+                        set({
+                            worlds: [...state.worlds, ...stash.worlds],
+                            projects: [...state.projects, ...stash.projects],
+                            documents: [...state.documents, ...stash.documents],
+                            scenes: [...state.scenes, ...stash.scenes],
+                            entities: [...state.entities, ...stash.entities],
+                            stashedExample: null,
+                            exampleDataOn: true,
+                        });
+                        return;
+                    }
+                    // Nothing stashed — build it. The seeder mutates the store
+                    // through its own actions, so this runs outside set().
+                    void import('@/lib/betaSeedData').then(({ seedBetaData }) => {
+                        const worldId = seedBetaData(get());
+                        set({ exampleWorldId: worldId, exampleDataOn: true });
+                    });
+                    return;
+                }
+
+                // Off. Resolve the world by id, falling back once to the name
+                // for an example seeded before ids were recorded.
+                let worldId = state.exampleWorldId;
+                if (!worldId) {
+                    worldId = state.worlds.find(w => w.name === SEED_WORLD_NAME)?.id ?? null;
+                }
+                if (!worldId || !state.worlds.some(w => w.id === worldId)) {
+                    // Already gone — nothing to stash.
+                    set({ exampleDataOn: false });
+                    return;
+                }
+
+                const { kept, stashed } = partitionExample(
+                    {
+                        worlds: state.worlds,
+                        projects: state.projects,
+                        documents: state.documents,
+                        scenes: state.scenes,
+                        entities: state.entities,
+                    },
+                    worldId,
+                );
+
+                // A pointer into a stashed record would leave the desk holding a
+                // reference to something no longer in its array.
+                const stashedProjects = new Set(stashed.projects.map(p => p.id));
+                const stashedDocuments = new Set(stashed.documents.map(d => d.id));
+                const stashedScenes = new Set(stashed.scenes.map(s => s.id));
+
+                set({
+                    ...kept,
+                    stashedExample: stashed,
+                    exampleWorldId: worldId,
+                    exampleDataOn: false,
+                    activeProjectId: state.activeProjectId && stashedProjects.has(state.activeProjectId)
+                        ? null : state.activeProjectId,
+                    activeDocumentId: state.activeDocumentId && stashedDocuments.has(state.activeDocumentId)
+                        ? null : state.activeDocumentId,
+                    activeSceneId: state.activeSceneId && stashedScenes.has(state.activeSceneId)
+                        ? null : state.activeSceneId,
+                });
+            },
 
             toggleFullscreen: () =>
                 set((state) => ({ isFullscreen: !state.isFullscreen })),
