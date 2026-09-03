@@ -133,4 +133,15 @@ describe('setExampleData', () => {
         expect(useWorkspaceStore.getState().stashedExample!.worlds.map(w => w.id))
             .toEqual(['w-ex']);
     });
+    it('turning on with nothing stashed flips the flag immediately', () => {
+        // The seed arrives through a dynamic import, so the records land later.
+        // The flag must not wait for that, or a checkbox bound to it reads as
+        // a dead control on the first-ever seed.
+        useWorkspaceStore.setState({
+            worlds: [], projects: [], documents: [], scenes: [], entities: [],
+            exampleDataOn: false, stashedExample: null, exampleWorldId: null,
+        });
+        useWorkspaceStore.getState().setExampleData(true);
+        expect(useWorkspaceStore.getState().exampleDataOn).toBe(true);
+    });
 });

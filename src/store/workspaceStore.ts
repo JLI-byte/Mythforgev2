@@ -1687,10 +1687,22 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     }
                     // Nothing stashed — build it. The seeder mutates the store
                     // through its own actions, so this runs outside set().
-                    void import('@/lib/betaSeedData').then(({ seedBetaData }) => {
-                        const worldId = seedBetaData(get());
-                        set({ exampleWorldId: worldId, exampleDataOn: true });
-                    });
+                    //
+                    // The flag flips now rather than when the import resolves: a
+                    // checkbox bound to it would otherwise sit unticked for a beat
+                    // on the first-ever seed and read as a dead control. If the
+                    // import or the seed fails, it flips back, so the control
+                    // reflects what actually happened instead of a hopeful guess.
+                    set({ exampleDataOn: true });
+                    void import('@/lib/betaSeedData')
+                        .then(({ seedBetaData }) => {
+                            const worldId = seedBetaData(get());
+                            set({ exampleWorldId: worldId, exampleDataOn: true });
+                        })
+                        .catch((err) => {
+                            logger.error('Failed to load the example world', err);
+                            set({ exampleDataOn: false });
+                        });
                     return;
                 }
 
