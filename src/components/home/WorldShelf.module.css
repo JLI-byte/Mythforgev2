@@ -48,6 +48,9 @@
   padding: 0;
   border: none;
   border-radius: 2px 2px 1px 1px;
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
   cursor: pointer;
   position: relative;
   display: flex;

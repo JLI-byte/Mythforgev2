@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { ArrowRight, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import type { Shelf } from '@/lib/worldShelves';
 import type { WorldKey } from '@/lib/worldKey';
+import { bindingFor, coverArt, spineArt } from '@/lib/bookBindings';
 import styles from './WorldShelf.module.css';
 
 /**
@@ -167,7 +168,12 @@ export function WorldShelf({
               // Roving tabindex: one Tab stop for the whole shelf, arrows move within it.
               tabIndex={isSelected ? 0 : -1}
               className={`${styles.spine} ${isSelected ? styles.spineSelected : ''}`}
-              style={{ background: shelf.coverColor }}
+              /* The colour stays underneath the art: it shows through while the
+                 image loads, and covers the gap if the asset ever 404s. */
+              style={{
+                backgroundColor: shelf.coverColor,
+                backgroundImage: `url(${spineArt(bindingFor(shelf.coverColor, shelf.key))})`,
+              }}
               title={`${shelf.name} — ${plural(shelf.stories.length, 'story', 'stories')}`}
               onClick={() => onSelect(shelf.key)}
               onKeyDown={e => handleKeyDown(e, i)}
@@ -222,9 +228,14 @@ export function WorldShelf({
                     <button
                       key={story.id}
                       className={styles.cover}
+                      /* A cover the writer supplied always wins; otherwise the
+                         book gets its binding art rather than a flat fill. */
                       style={story.coverImageUrl
                         ? { backgroundImage: `url(${story.coverImageUrl})` }
-                        : { background: story.coverColor }}
+                        : {
+                            backgroundColor: story.coverColor,
+                            backgroundImage: `url(${coverArt(bindingFor(story.coverColor, story.id))})`,
+                          }}
                       title={story.name}
                       aria-label={`Open ${story.name}`}
                       onClick={() => onOpenStory(story.id)}
