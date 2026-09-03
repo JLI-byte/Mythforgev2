@@ -20,6 +20,12 @@
      the OS-dark block leaked. Chosen to clear 4.5:1 on --background, --surface
      and --surface-mid alike, each keeping its dark partner's hue family. */
   --muted: #66666f;
+  /* Destructive actions. Like --accent it has to flip: a red readable on
+     a white ground is not readable on a near-black one. Defined per
+     palette rather than hardcoded at the call site. Chosen against the
+     translucent modal ground, which composites to rgb(219,219,219) rather
+     than the page white - a red picked against #fff falls short there. */
+  --danger: #a81b12;
   --secondary: #0e7490;
   --tertiary: #a1541a;
   --accent: #005bb5;
@@ -93,6 +99,7 @@ option {
     --accent-dim: #a078ff;
     --border: rgba(255, 255, 255, 0.08);
     --muted: #958ea0;
+    --danger: #ff6b6d;
     --secondary: #4cd7f6;
     --tertiary: #ffb869;
 
@@ -119,6 +126,7 @@ option {
   --accent-dim: #a078ff;
   --border: rgba(255, 255, 255, 0.08);
   --muted: #958ea0;
+  --danger: #ff6b6d;
   --secondary: #4cd7f6;
   --tertiary: #ffb869;
 
@@ -169,6 +177,7 @@ option {
   --accent-rgb: 200, 64, 31;
   --border: rgba(59, 44, 21, 0.20);
   --muted: #75603f;
+  --danger: #a3301f;
   --secondary: #3d7068;
   --tertiary: #b08d2f;
   --overlay-rgb: 59, 44, 21;
@@ -200,6 +209,7 @@ option {
   --accent-rgb: 224, 100, 47;
   --border: rgba(236, 224, 196, 0.14);
   --muted: #b09a72;
+  --danger: #f08a7a;
   --secondary: #5a9b8f;
   --tertiary: #d8b15a;
   --overlay-rgb: 236, 224, 196;

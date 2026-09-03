@@ -145,6 +145,8 @@
 }
 
 .rangeInput {
+    /* 24px hit target for the thumb's track. */
+    min-height: 24px;
     width: 100%;
     margin: 0.5rem 0;
     cursor: pointer;
@@ -215,8 +217,9 @@
 
 .clearBtn {
     background: transparent;
-    color: #ff4d4f;
-    border: 1px solid #ff4d4f;
+    /* Was a fixed #ff4d4f, which measured 3.27:1 on the light modal. */
+    color: var(--danger);
+    border: 1px solid var(--danger);
     padding: 0.375rem 0.75rem;
     border-radius: 4px;
     font-size: 0.875rem;
@@ -224,7 +227,7 @@
 }
 
 .clearBtn:hover {
-    background: rgba(255, 77, 79, 0.1);
+    background: rgba(var(--overlay-rgb), 0.08);
 }
 
 .providerHeader {
@@ -395,6 +398,8 @@
 .aiCheckRow {
     display: flex;
     align-items: center;
+    /* 24px hit target: the label is what you actually click. */
+    min-height: 24px;
     gap: 0.5rem;
     margin-top: 0.8rem;
     font-size: 0.83rem;
