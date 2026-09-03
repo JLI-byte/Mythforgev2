@@ -36,6 +36,8 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
     const setSpellcheckEnabled = useWorkspaceStore((state) => state.setSpellcheckEnabled);
     const themeFamily = useWorkspaceStore((state) => state.themeFamily);
     const setThemeFamily = useWorkspaceStore((state) => state.setThemeFamily);
+    const exampleDataOn = useWorkspaceStore(s => s.exampleDataOn);
+    const setExampleData = useWorkspaceStore(s => s.setExampleData);
 
 
     const [dailyTarget, setDailyTarget] = useState(writingGoal.dailyTarget);
@@ -223,6 +225,24 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                             />
                             Browser spellcheck (turn off to stop red squiggles under fantasy names)
                         </label>
+                    </section>
+
+                    <section className={styles.section} style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
+                        <div className={styles.providerHeader}>
+                            <h3>Example Data</h3>
+                        </div>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem', cursor: 'pointer' }}>
+                            <input
+                                type="checkbox"
+                                checked={exampleDataOn}
+                                onChange={(e) => setExampleData(e.target.checked)}
+                            />
+                            Show example data (a sample world with three projects, so you can see a populated workspace)
+                        </label>
+                        <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: 'var(--muted)' }}>
+                            Turning this off puts the example away without deleting it. Anything you
+                            wrote inside it comes back when you turn it on again.
+                        </p>
                     </section>
 
                     <AISettingsSection />
