@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Download, FolderOpen, Globe, Sparkles } from 'lucide-react';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useWorkspaceStore, type Project } from '@/store/workspaceStore';
 import { NewProjectModal } from '@/components/ui/NewProjectModal';
 import { ImportModal } from '@/components/ui/ImportModal';
 import styles from '../WritingDesk.module.css';
@@ -10,6 +10,20 @@ import styles from '../WritingDesk.module.css';
 // ============================================================
 // EMPTY DESK WELCOME
 // ============================================================
+
+/**
+ * The first turn-on seeds behind a dynamic import, so projects land a tick or
+ * two later. Poll briefly rather than guess a fixed delay.
+ */
+async function waitForProjects(timeoutMs = 3000): Promise<Project[]> {
+  const started = Date.now();
+  while (Date.now() - started < timeoutMs) {
+    const projects = useWorkspaceStore.getState().projects;
+    if (projects.length > 0) return projects;
+    await new Promise(r => setTimeout(r, 50));
+  }
+  return useWorkspaceStore.getState().projects;
+}
 
 export function EmptyDeskWelcome() {
   const [showNew, setShowNew] = useState(false);
@@ -41,10 +55,11 @@ export function EmptyDeskWelcome() {
   const handleLoadExample = async () => {
     setIsSeeding(true);
     try {
-      // Dynamically imported so the 50KB example world stays out of the main bundle.
-      const { seedBetaData } = await import('@/lib/betaSeedData');
-      seedBetaData(useWorkspaceStore.getState());
-      const seeded = useWorkspaceStore.getState().projects;
+      // One piece of state, two ways in: this and the Settings toggle.
+      useWorkspaceStore.getState().setExampleData(true);
+      // The first turn-on seeds through a dynamic import, so the projects
+      // are not in the store synchronously. Wait for one to appear.
+      const seeded = await waitForProjects();
       if (seeded.length > 0) {
         const newest = [...seeded].sort((a, b) =>
           new Date(b.updatedAt ?? b.createdAt).getTime() - new Date(a.updatedAt ?? a.createdAt).getTime()
