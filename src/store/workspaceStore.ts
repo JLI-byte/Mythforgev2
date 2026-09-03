@@ -498,6 +498,15 @@ export const WORKSPACE_MODES = [
 ] as const;
 export type WorkspaceMode = typeof WORKSPACE_MODES[number];
 
+/** The example world's five collections, held aside while it is switched off. */
+export interface StashedExample {
+    worlds: World[];
+    projects: Project[];
+    documents: Document[];
+    scenes: Scene[];
+    entities: Entity[];
+}
+
 export interface WorkspaceState {
     workspaceMode: WorkspaceMode;
     // --- STATE FIELDS ---
@@ -576,6 +585,25 @@ export interface WorkspaceState {
      * Typewriter mode keeps the active line centered in the viewport.
      */
     isTypewriterMode: boolean;
+
+    /**
+     * Whether the built-in example world is currently shown. Off moves its
+     * records into stashedExample rather than deleting them.
+     */
+    exampleDataOn: boolean;
+
+    /**
+     * The example world's records while it is switched off. Holds the real
+     * records, including any edits the writer made, so toggling back on
+     * restores exactly what was there.
+     */
+    stashedExample: StashedExample | null;
+
+    /**
+     * The example world's id, recorded at seed time. Selection runs off this
+     * rather than the world's name, which the writer is free to change.
+     */
+    exampleWorldId: string | null;
 
     /**
      * Hides the UI layout framing (sidebar, etc) around the editor content.
@@ -1194,6 +1222,9 @@ export function partializeWorkspace(state: WorkspaceState) {
         themeFamily: state.themeFamily,
         isSidebarOpen: state.isSidebarOpen,
         isTypewriterMode: state.isTypewriterMode,
+        exampleDataOn: state.exampleDataOn,
+        stashedExample: state.stashedExample,
+        exampleWorldId: state.exampleWorldId,
         isFocusMode: state.isFocusMode,
         editorWidth: state.editorWidth,
         tabRailWidth: state.tabRailWidth,
@@ -1292,6 +1323,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             isExportOpen: false,
             isSpellcheckEnabled: true,
             isTypewriterMode: false,
+            exampleDataOn: false,
+            stashedExample: null,
+            exampleWorldId: null,
             activePanel: null,
             isFullscreen: false,
             isFocusMode: false,
