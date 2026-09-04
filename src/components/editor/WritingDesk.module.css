@@ -6689,3 +6689,75 @@
   line-height: 1.55;
   color: var(--muted);
 }
+
+/* ── Interview runner ───────────────────────────────────── */
+
+.interviewRunnerModal {
+  width: min(620px, 100%);
+}
+
+.interviewRunnerProgress {
+  margin-left: 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted, #999);
+}
+
+.interviewRunnerBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.interviewRunnerLabel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent, #6c8cff);
+}
+
+.interviewRunnerQuestion {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  color: var(--text, inherit);
+}
+
+.interviewRunnerNote {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--muted, #999);
+}
+
+.interviewRunnerAnswer {
+  width: 100%;
+  min-height: 150px;
+  padding: 10px 12px;
+  font: inherit;
+  line-height: 1.5;
+  color: var(--text, inherit);
+  background: var(--surface, rgba(128, 128, 128, 0.06));
+  border: 1px solid var(--border, rgba(128, 128, 128, 0.25));
+  border-radius: 8px;
+  resize: vertical;
+}
+
+.interviewRunnerAnswer:focus {
+  outline: none;
+  border-color: var(--accent, #6c8cff);
+}
+
+.interviewRunnerCount {
+  align-self: center;
+  margin-right: 6px;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted, #999);
+}
