@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useId, useState } from 'react';
+import { sendMagicLink, signInWithGoogle } from '@/lib/supabase/signIn';
 import { X } from 'lucide-react';
 import styles from './LoginModal.module.css';
-import { createClient } from '@/lib/supabase/client';
 
 interface LoginModalProps {
   onClose: () => void;
@@ -22,25 +22,23 @@ export default function LoginModal({ onClose }: LoginModalProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const supabase = createClient();
-
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setMessage(null);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    // Same invite policy as the login page. This surface used to omit
+    // shouldCreateUser entirely, which GoTrue reads as true — so it created
+    // accounts the login page refused.
+    const result = await sendMagicLink(email);
 
-    if (error) {
-      setError(error.message);
+    if (result.notInvited) {
+      setError('That email is not on the invite list yet.');
+    } else if (!result.ok) {
+      setError(result.message);
     } else {
-      setMessage('Check your email for a magic link.');
+      setMessage(result.message);
     }
     
     setIsLoading(false);
@@ -48,15 +46,10 @@ export default function LoginModal({ onClose }: LoginModalProps) {
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    const result = await signInWithGoogle();
 
-    if (error) {
-      setError(error.message);
+    if (!result.ok) {
+      setError(result.message);
       setIsLoading(false);
     }
     // Note: Sucessful OAuth will redirect the whole page
