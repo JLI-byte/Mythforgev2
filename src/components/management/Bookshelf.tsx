@@ -739,7 +739,14 @@ export function Bookshelf() {
                                             if (e.key === 'Enter') { e.preventDefault(); confirmCreateStory('template'); }
                                         }}
                                         placeholder={getWorkType(storyTypeId)?.namePlaceholder}
+                                        // Both, deliberately, and they cannot fight because
+                                        // they name the same element. data-autofocus covers a
+                                        // mount that starts here; autoFocus covers the usual
+                                        // route, where this input appears a step later — long
+                                        // after the hook's mount-time scan, which would
+                                        // otherwise leave focus on the unmounted card's body.
                                         data-autofocus
+                                        autoFocus
                                     />
                                 </div>
 
