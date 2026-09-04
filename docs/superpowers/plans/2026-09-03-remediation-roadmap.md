@@ -64,7 +64,7 @@ Removes ~2,600 lines and four work types. Everything else in this roadmap gets s
 
 ## Phase 2 — Remove AI
 
-**Plan:** to be written · **Spec:** `../specs/2026-09-03-saas-conversion-design.md` Part 1 · **Depends on:** Phase 1
+**Plan:** `2026-09-03-phase-2-remove-ai.md` · **Status:** ready to execute · **Spec:** `../specs/2026-09-03-saas-conversion-design.md` Part 1 · **Depends on:** Phase 1
 
 ~3,500 lines. Removes all three SaaS blockers at once, plus the entire billing/quota subsystem that a platform-pays AI model would otherwise have required.
 
@@ -255,6 +255,6 @@ Two absent stages from the dossier have no item because they need a product call
 - **Found already built on verification:** 1 (`D4` — the method picker already has three-tier disclosure)
 - **Deferred pending a decision:** 2 absent stages
 
-**Phase 1 is the only phase with a written plan.** The rest are scoped here and get their detailed
+**Phases 1 and 2 have written plans.** The rest are scoped here and get their detailed
 plans as they are reached, per the writing-plans scope rule — one plan per subsystem, each producing
 working software on its own.
