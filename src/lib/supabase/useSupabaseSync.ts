@@ -8,6 +8,8 @@ import { migrateWorkspaceSchema } from '@/store/migrateWorkspaceSchema';
 import {
   countContent, looksLikeWorkspace, newestContentTime, resolveWorkspaceConflict,
 } from '@/lib/workspaceConflict';
+import { isForeignWorkspace } from '@/lib/workspaceOwner';
+import { shouldSaveToCloud } from '@/lib/syncGate';
 
 const SAVE_DEBOUNCE_MS = 800;
 // After repeated save failures, stop hammering the endpoint (each attempt
@@ -45,10 +47,21 @@ export function useSupabaseSync(userId: string) {
     async function hydrate() {
       if (!userId || userId.trim() === '') return;
 
-      try {
-        const cloud = await loadWorkspace(userId);
+      const claimWorkspace = useWorkspaceStore.getState().claimWorkspace;
+      const resetWorkspace = useWorkspaceStore.getState().resetWorkspace;
 
-        hydrationOkRef.current = true;
+      try {
+        // LAYER 1 — the one that matters. Sign-out often never runs: a closed
+        // tab, a crash, an expired session, or simply a second person opening
+        // the same browser. Whatever is in localStorage is discarded here,
+        // before a single byte of it can be read, merged or uploaded.
+        const localOwner = useWorkspaceStore.getState().ownerUserId;
+        if (isForeignWorkspace(localOwner, userId)) {
+          logger.info('LoreCanvas Sync: persisted workspace belongs to another account — discarding');
+          resetWorkspace();
+        }
+
+        const cloud = await loadWorkspace(userId);
 
         if (cloud && looksLikeWorkspace(cloud.data)) {
           const localState = useWorkspaceStore.getState() as Record<string, any>;
@@ -69,10 +82,19 @@ export function useSupabaseSync(userId: string) {
         } else if (cloud) {
           logger.error('LoreCanvas Sync: cloud workspace failed validation — ignoring');
         }
+
+        // Whatever is in the store now is this user's: either it came from
+        // their cloud row, or it is local work that survived the ownership
+        // check above. Claim it BEFORE marking hydration OK, so the save gate
+        // can never see hydrated-but-unclaimed state.
+        claimWorkspace(userId);
+        hydrationOkRef.current = true;
       } catch (err) {
         // A hydration failure must not brick the session: without the finally
         // below, hasHydrated stays false and cloud saves stay disabled.
+        // hydrationOkRef stays false, so the gate still blocks an empty save.
         logger.error('LoreCanvas Sync: cloud hydration failed — continuing with local data', err);
+        claimWorkspace(userId);
       } finally {
         setHasHydrated(true);
         isInitialLoadRef.current = false;
@@ -111,11 +133,16 @@ export function useSupabaseSync(userId: string) {
     const unsubscribe = useWorkspaceStore.subscribe((state) => {
       if (isInitialLoadRef.current) return;
 
-      // Never let an empty workspace reach the cloud when we could not read what
-      // is already there — that is how a transient network failure turns into a
-      // wiped account. Real local content still syncs normally.
-      if (!hydrationOkRef.current && countContent(state as unknown as Record<string, unknown>) === 0) {
-        logger.error('LoreCanvas Sync: cloud read failed and local is empty — suppressing save to avoid overwriting cloud data');
+      // Never write state that is not provably this user's, and never let an
+      // empty workspace reach the cloud when we could not read what is already
+      // there — that is how a transient network failure wipes an account.
+      const gate = {
+        hydrationOk: hydrationOkRef.current,
+        stateOwnerUserId: (state as unknown as { ownerUserId?: string | null }).ownerUserId,
+        currentUserId: userId,
+        contentCount: countContent(state as unknown as Record<string, unknown>),
+      };
+      if (!shouldSaveToCloud(gate)) {
         return;
       }
 
