@@ -427,3 +427,24 @@ a:hover {
   height: max(100%, 44px);
   transform: translate(-50%, -50%);
 }
+
+/* ──────────────────────────────────────────────────────────────
+   Screen-reader-only text.
+
+   Clipped rather than display:none or visibility:hidden — both of
+   those take the node out of the accessibility tree, which would make
+   a live region permanently silent. Global, like .hit-target, because
+   the live regions are mounted from the root layout.
+   ────────────────────────────────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
