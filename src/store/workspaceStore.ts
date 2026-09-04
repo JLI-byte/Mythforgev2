@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { BACKUP_KEY_PREFIX, claimBackup, ownedStorageKeys } from '@/lib/workspaceOwner';
 import {
     emptyWeekdayTargets, normalizeWeekdayTargets, type WeekdayTargets,
 } from '@/lib/goalSchedule';
@@ -653,6 +654,17 @@ export interface WorkspaceState {
      */
     _hasHydrated: boolean;
 
+    /**
+     * The Supabase user id this persisted workspace belongs to, stamped on the
+     * first successful hydrate after sign-in. Persisted, so it survives a closed
+     * tab, a crash or an expired session — which is the common case, and the one
+     * a sign-out handler cannot cover.
+     *
+     * `null` means the blob predates ownership stamping. It is adopted by the
+     * next signed-in user rather than discarded, so nobody loses work on upgrade.
+     */
+    ownerUserId: string | null;
+
 
 
     /**
@@ -922,6 +934,16 @@ export interface WorkspaceState {
      */
     setHasHydrated: (state: boolean) => void;
 
+    /** Stamp this workspace for a user, and adopt their unowned local backups. */
+    claimWorkspace: (userId: string) => void;
+
+    /**
+     * Put every persisted field back to its initial value and delete the
+     * workspace and backup keys. Called on sign-out, on SIGNED_OUT, and when a
+     * different user signs in on a browser that still holds someone else's work.
+     */
+    resetWorkspace: () => void;
+
     /** Toggles the rich text toolbar visibility */
     toggleToolbarVisible: () => void;
 
@@ -1150,6 +1172,20 @@ function checkBadges(streak: StreakState, earned: EarnedBadge[]): EarnedBadge[] 
  * every keystroke. This coalesces writes to once per idle window, and flushes on
  * tab hide / unload so the final edit is never lost.
  */
+/**
+ * The localStorage key list as a plain array. Taken as a snapshot because
+ * removing keys while indexing the live object skips entries.
+ */
+function snapshotStorageKeys(): string[] {
+    const keys: string[] = [];
+    if (typeof localStorage === 'undefined') return keys;
+    for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k !== null) keys.push(k);
+    }
+    return keys;
+}
+
 const PERSIST_DEBOUNCE_MS = 1200;
 let persistTimer: ReturnType<typeof setTimeout> | null = null;
 let pendingWrite: { name: string; value: string } | null = null;
@@ -1191,6 +1227,7 @@ export const selectProjectWorldKey = (state: WorkspaceState): WorldKey =>
  */
 export function partializeWorkspace(state: WorkspaceState) {
     return {
+        ownerUserId: state.ownerUserId,
         worlds: state.worlds,
         projects: state.projects,
         documents: state.documents,
@@ -1281,7 +1318,7 @@ migrateRenamedStorageKeys();
 
 export const useWorkspaceStore = create<WorkspaceState>()(
     persist(
-        (set, get) => ({
+        (set, get, store) => ({
             worlds: [],
             pendingNewStoryWorldKey: null,
             projects: [],
@@ -1322,6 +1359,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             isHierarchyModalOpen: false,
             isHierarchyScratchMode: false,
             _hasHydrated: false,
+            ownerUserId: null,
             deskStates: {},
             draftStates: {},
             researchStates: {},
@@ -1821,6 +1859,36 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             setHasHydrated: (state) =>
                 set(() => ({ _hasHydrated: state })),
+
+            claimWorkspace: (userId) => {
+                if (!userId) return;
+                set(() => ({ ownerUserId: userId }));
+                // Backups taken before ownership existed carry no stamp, so
+                // listDataBackups would hide them from the person who made them.
+                if (typeof localStorage === 'undefined') return;
+                for (const key of snapshotStorageKeys()) {
+                    if (!key.startsWith(BACKUP_KEY_PREFIX)) continue;
+                    const raw = localStorage.getItem(key);
+                    if (raw === null) continue;
+                    const claimed = claimBackup(raw, userId);
+                    if (claimed === null) continue;
+                    try {
+                        localStorage.setItem(key, claimed);
+                    } catch {
+                        // Browser full — leaving the backup unowned is safe.
+                    }
+                }
+            },
+
+            resetWorkspace: () => {
+                // The store's own initial state is the single source of truth for
+                // "empty", so this cannot drift out of step with partialize.
+                set(partializeWorkspace(store.getInitialState()));
+                if (typeof localStorage === 'undefined') return;
+                for (const key of ownedStorageKeys(snapshotStorageKeys())) {
+                    localStorage.removeItem(key);
+                }
+            },
 
 
             setWritingGoal: (goal) =>
