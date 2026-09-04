@@ -157,7 +157,7 @@ Rebuilds the three AI-driven lore features as deterministic rules. Instant, free
 
 ## Phase 7 — First run and coming back
 
-**Plan:** `2026-09-03-phase-7-first-run.md` · **Status:** ready · **Depends on:** Phase 4
+**Plan:** `2026-09-03-phase-7-first-run.md` · **Status:** COMPLETE (4 commits) · **Depends on:** Phase 4
 
 | Item | What |
 |------|------|
