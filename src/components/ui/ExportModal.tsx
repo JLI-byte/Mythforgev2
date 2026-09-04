@@ -23,6 +23,8 @@ import {
     exportWorldBible,
 } from '@/lib/export';
 import { exportManuscriptAsEpub } from '@/lib/epub';
+import { useModalDialog } from '@/lib/useModalDialog';
+import { announce } from '@/lib/liveAnnouncer';
 
 /**
  * ExportModal — the compile step.
@@ -94,14 +96,24 @@ export default function ExportModal({ onClose }: ExportModalProps) {
         setExcludedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
     };
 
-    const runExport = async (label: string, run: (m: Manuscript) => void | Promise<void>) => {
+    const failExport = (message: string) => {
+        setExportError(message);
+        announce(`Export failed. ${message}`, 'assertive');
+    };
+
+    const runExport = async (
+        label: string,
+        done: string,
+        run: (m: Manuscript) => void | Promise<void>,
+    ) => {
         if (!target) return;
         setExportError(null);
         setIsExporting(true);
         try {
             await run(target);
+            announce(done);
         } catch (err: unknown) {
-            setExportError(err instanceof Error ? err.message : `Unknown error during ${label} export`);
+            failExport(err instanceof Error ? err.message : `Unknown error during ${label} export`);
         } finally {
             setIsExporting(false);
         }
@@ -112,19 +124,30 @@ export default function ExportModal({ onClose }: ExportModalProps) {
         setExportError(null);
         try {
             exportWorldBible(worldEntities, activeProject.name);
+            announce('World Bible downloaded.');
         } catch (err: unknown) {
-            setExportError(err instanceof Error ? err.message : 'Unknown error exporting World Bible');
+            failExport(err instanceof Error ? err.message : 'Unknown error exporting World Bible');
         }
     };
 
     const hasEntities = worldEntities.length > 0;
     const uniqueTypesCount = new Set(worldEntities.map(e => e.type)).size;
 
+    const dialogRef = useModalDialog<HTMLDivElement>(onClose);
+
     return (
-        <div className={styles.backdrop} onClick={onClose}>
-            <div className={styles.panel} onClick={e => e.stopPropagation()}>
+        <div className={styles.backdrop} onClick={onClose} role="presentation">
+            <div
+                ref={dialogRef}
+                className={styles.panel}
+                onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="export-dialog-title"
+                tabIndex={-1}
+            >
                 <div className={styles.header}>
-                    <h2>Compile &amp; Export</h2>
+                    <h2 id="export-dialog-title">Compile &amp; Export</h2>
                     <button className={styles.closeBtn} onClick={onClose} aria-label="Close Export Modal"><X size={18} /></button>
                 </div>
 
@@ -228,7 +251,7 @@ export default function ExportModal({ onClose }: ExportModalProps) {
                         <div className={styles.actionRow}>
                             <button
                                 className={styles.exportBtn}
-                                onClick={() => runExport('Markdown', m => exportManuscriptAsMarkdown(m))}
+                                onClick={() => runExport('Markdown', 'Markdown file downloaded.', m => exportManuscriptAsMarkdown(m))}
                                 disabled={!canExport}
                             >
                                 <span className={styles.icon}><Download size={16} /></span>
@@ -237,7 +260,7 @@ export default function ExportModal({ onClose }: ExportModalProps) {
 
                             <button
                                 className={styles.exportBtn}
-                                onClick={() => runExport('Word', async m => { await exportManuscriptAsDocx(m); })}
+                                onClick={() => runExport('Word', 'Word document downloaded.', async m => { await exportManuscriptAsDocx(m); })}
                                 disabled={!canExport}
                             >
                                 {isExporting ? <span className={styles.spinner}></span> : (
@@ -250,7 +273,7 @@ export default function ExportModal({ onClose }: ExportModalProps) {
 
                             <button
                                 className={styles.exportBtn}
-                                onClick={() => runExport('EPUB', m => exportManuscriptAsEpub(m, {
+                                onClick={() => runExport('EPUB', 'EPUB downloaded.', m => exportManuscriptAsEpub(m, {
                                     title: m.title,
                                     author: activeProject?.authorName || undefined,
                                 }))}

@@ -9,6 +9,7 @@ import {
     restoreDataBackup,
     createManualBackup,
 } from '@/store/workspaceStore';
+import { useModalDialog } from '@/lib/useModalDialog';
 
 interface SettingsModalProps {
     onClose: () => void;
@@ -104,11 +105,21 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
         setLocalWidth(800);
     };
 
+    const dialogRef = useModalDialog<HTMLDivElement>(onClose);
+
     return (
-        <div className={styles.backdrop} onClick={onClose}>
-            <div className={styles.panel} onClick={e => e.stopPropagation()}>
+        <div className={styles.backdrop} onClick={onClose} role="presentation">
+            <div
+                ref={dialogRef}
+                className={styles.panel}
+                onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="settings-dialog-title"
+                tabIndex={-1}
+            >
                 <div className={styles.header}>
-                    <h2>Settings</h2>
+                    <h2 id="settings-dialog-title">Settings</h2>
                     <button className={styles.closeBtn} onClick={onClose} aria-label="Close settings"><X size={18} /></button>
                 </div>
 

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useId, useRef } from 'react';
+import React, { useState, useId, useRef } from 'react';
 import { Cloud, FileText, Folder, Globe, X } from 'lucide-react';
 import styles from './ImportModal.module.css';
 import { useWorkspaceStore, COVER_COLORS } from '@/store/workspaceStore';
@@ -8,6 +8,7 @@ import { parseCSV, flattenJSON } from '@/lib/importUtils';
 import { logger } from '@/lib/logger';
 import { getWorldBibleConfig } from '@/lib/worldBibleNav';
 import { fileByType } from '@/lib/folderTree';
+import { useModalDialog } from '@/lib/useModalDialog';
 // mammoth (~1MB) is loaded on demand in the DOCX handlers below so it stays out
 // of the main app bundle — most sessions never import a Word file.
 
@@ -27,6 +28,17 @@ const MODES: { id: WritingMode; label: string; icon: string }[] = [
 ];
 
 export function ImportModal({ isOpen, onClose }: ImportModalProps) {
+    if (!isOpen) return null;
+    return <ImportModalContent onClose={onClose} />;
+}
+
+/**
+ * The open dialog. Split out from the wrapper above because useModalDialog
+ * moves focus on mount, which only means anything if the closed dialog is
+ * unmounted rather than returning null from inside the same component.
+ * Unmounting is also what now resets the wizard back to its first step.
+ */
+function ImportModalContent({ onClose }: Omit<ImportModalProps, 'isOpen'>) {
     const projects = useWorkspaceStore(state => state.projects);
     const worlds = useWorkspaceStore(state => state.worlds);
     const worldBibles = useWorkspaceStore(state => state.worldBibles);
@@ -60,21 +72,7 @@ export function ImportModal({ isOpen, onClose }: ImportModalProps) {
     const entityInputRef = useRef<HTMLInputElement>(null);
     const fieldId = useId();
 
-    useEffect(() => {
-        if (!isOpen) {
-            setStep('source');
-            setImportType('manuscript');
-            setImportData(null);
-            setRawEntities([]);
-            setHeaders([]);
-            setTitle('');
-            setSelectedWorldId('');
-            setIsLoading(false);
-            setProgress(0);
-        }
-    }, [isOpen]);
-
-    if (!isOpen) return null;
+    const dialogRef = useModalDialog<HTMLDivElement>(onClose);
 
     const handleLocalFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -301,10 +299,18 @@ export function ImportModal({ isOpen, onClose }: ImportModalProps) {
     };
 
     return (
-        <div className={styles.overlay} onClick={onClose}>
-            <div className={styles.modal} onClick={e => e.stopPropagation()}>
+        <div className={styles.overlay} onClick={onClose} role="presentation">
+            <div
+                ref={dialogRef}
+                className={styles.modal}
+                onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="import-dialog-title"
+                tabIndex={-1}
+            >
                 <div className={styles.header}>
-                    <h2 className={styles.title}>
+                    <h2 className={styles.title} id="import-dialog-title">
                         {step === 'mapping' ? 'Map World Data' : 'Import Writing'}
                     </h2>
                     <button className={styles.closeBtn} onClick={onClose} aria-label="Close">

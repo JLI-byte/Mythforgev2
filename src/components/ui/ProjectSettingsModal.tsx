@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import styles from './NewProjectModal.module.css'; // Reusing modal base styles
 import { useWorkspaceStore, Project } from '@/store/workspaceStore';
+import { useModalDialog } from '@/lib/useModalDialog';
 
 interface ProjectSettingsModalProps {
     isOpen: boolean;
@@ -12,6 +13,16 @@ interface ProjectSettingsModalProps {
 }
 
 export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSettingsModalProps) {
+    if (!isOpen) return null;
+    return <ProjectSettingsModalContent onClose={onClose} projectId={projectId} />;
+}
+
+/**
+ * The open dialog. Split out from the wrapper above because useModalDialog
+ * moves focus on mount, which only means anything if the closed dialog is
+ * unmounted rather than returning null from inside the same component.
+ */
+function ProjectSettingsModalContent({ onClose, projectId }: Omit<ProjectSettingsModalProps, 'isOpen'>) {
     const project = useWorkspaceStore(s => s.projects.find(p => p.id === projectId));
     const worlds = useWorkspaceStore(s => s.worlds);
     const entities = useWorkspaceStore(s => s.entities);
@@ -26,7 +37,7 @@ export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSett
     const fieldId = useId();
 
     useEffect(() => {
-        if (project && isOpen) {
+        if (project) {
             setName(project.name);
             setAuthorName(project.authorName || '');
             setDescription(project.description || '');
@@ -34,9 +45,11 @@ export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSett
             setAttributedEntityId(project.attributedEntityId || '');
             setCoverImageUrl(project.coverImageUrl || '');
         }
-    }, [project, isOpen]);
+    }, [project]);
 
-    if (!isOpen || !project) return null;
+    const dialogRef = useModalDialog<HTMLDivElement>(onClose);
+
+    if (!project) return null;
 
     const handleSave = () => {
         updateProject(projectId, {
@@ -71,10 +84,19 @@ export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSett
     if (typeof document === 'undefined') return null;
 
     return createPortal(
-        <div className={styles.overlay} onClick={onClose}>
-            <div className={styles.modal} style={{ maxWidth: '520px' }} onClick={e => e.stopPropagation()}>
+        <div className={styles.overlay} onClick={onClose} role="presentation">
+            <div
+                ref={dialogRef}
+                className={styles.modal}
+                style={{ maxWidth: '520px' }}
+                onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="project-settings-dialog-title"
+                tabIndex={-1}
+            >
                 <div className={styles.header}>
-                    <h2 className={styles.title}>Project Settings</h2>
+                    <h2 className={styles.title} id="project-settings-dialog-title">Project Settings</h2>
                     <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
                         <X size={18} />
                     </button>
