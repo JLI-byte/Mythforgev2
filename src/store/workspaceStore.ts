@@ -570,7 +570,7 @@ export interface WorkspaceState {
      * The currently active side panel.
      * Sprint 62: Centralized for beta feedback and future integrations.
      */
-    activePanel: 'worldBible' | 'consistency' | 'writingGoals' | 'socialMedia' | 'aiChatbot' | 'music' | 'beta' | 'versionHistory' | null;
+    activePanel: 'worldBible' | 'consistency' | 'writingGoals' | 'socialMedia' | 'aiChatbot' | 'beta' | 'versionHistory' | null;
 
     /**
      * Typewriter mode keeps the active line centered in the viewport.
@@ -655,15 +655,6 @@ export interface WorkspaceState {
      */
     _hasHydrated: boolean;
 
-    /**
-     * The URL of the Spotify playlist or track attached to the workspace.
-     */
-    spotifyUrl: string | null;
-
-    /**
-     * Whether the Spotify Mini-Player is currently expanded.
-     */
-    isSpotifyOpen: boolean;
 
 
     /**
@@ -875,11 +866,8 @@ export interface WorkspaceState {
     toggleFocusMode: () => void;
 
     /** Sets the currently active side panel */
-    setActivePanel: (activePanel: 'worldBible' | 'writingGoals' | 'socialMedia' | 'music' | 'beta' | 'versionHistory' | null) => void;
+    setActivePanel: (activePanel: 'worldBible' | 'writingGoals' | 'socialMedia' | 'beta' | 'versionHistory' | null) => void;
 
-    /** Spotify Controls */
-    setSpotifyUrl: (url: string | null) => void;
-    setSpotifyOpen: (isOpen: boolean) => void;
 
     /**
      * Customizes the max-width bounding box for the writing editor text block.
@@ -1327,8 +1315,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             activePanel: null,
             isFullscreen: false,
             isFocusMode: false,
-            spotifyUrl: null,
-            isSpotifyOpen: false,
             editorWidth: 800,
             navPanelWidth: 220,
             editorMaxWidth: null,
@@ -1761,11 +1747,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             toggleFocusMode: () =>
                 set((state) => ({ isFocusMode: !state.isFocusMode })),
 
-            setSpotifyUrl: (url) =>
-                set(() => ({ spotifyUrl: url })),
 
-            setSpotifyOpen: (isOpen) =>
-                set(() => ({ isSpotifyOpen: isOpen })),
 
             setEditorWidth: (width) =>
                 set(() => ({ editorWidth: width })),
