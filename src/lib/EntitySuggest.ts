@@ -1,26 +1,31 @@
 import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { Decoration, DecorationSet } from '@tiptap/pm/view';
+import { matchEntityTrigger, type EntityTrigger } from '@/lib/entityTrigger';
 
 export const entitySuggestPluginKey = new PluginKey('entitySuggest');
 
 export interface EntitySuggestState {
   active: boolean;
-  query: string;         // text after @ being typed
-  from: number;          // position of the @ character in doc
+  /** Which trigger opened it: '@' links an entry, '[[' offers to create one. */
+  trigger: EntityTrigger;
+  query: string;         // text after the trigger being typed
+  from: number;          // position of the trigger's first character in doc
   to: number;            // current cursor position
 }
 
 const initialState: EntitySuggestState = {
   active: false,
+  trigger: '@',
   query: '',
   from: 0,
   to: 0,
 };
 
 /**
- * EntitySuggest — TipTap extension that detects @query typing
- * and exposes plugin state for the React dropdown to read.
+ * EntitySuggest — TipTap extension that detects `@name` and `[[name` typing
+ * and exposes plugin state for the React dropdown to read. The matching itself
+ * lives in entityTrigger.ts, so it can be tested without an editor.
  */
 export const EntitySuggest = Extension.create({
   name: 'entitySuggest',
@@ -51,20 +56,16 @@ export const EntitySuggest = Extension.create({
               '\0'
             );
 
-            // Find the last @ that hasn't been closed by a space-sequence or newline
-            // We allow spaces if there are characters after the @, but two consecutive 
-            // spaces should break the sequence.
-            const match = textBefore.match(/@([\w\s]*)$/);
+            const match = matchEntityTrigger(textBefore);
             if (!match) return { ...initialState };
 
-            const query = match[1];
-            // If there's a space at the end of the query string and it's longer than 20 chars, 
-            // or if it ends with double space, kill it.
-            if (query.endsWith('  ') || (query.length > 30)) return { ...initialState };
-
-            const from = pos - query.length - 1; // position of @
-
-            return { active: true, query, from, to: pos };
+            return {
+              active: true,
+              trigger: match.trigger,
+              query: match.query,
+              from: pos - match.length,
+              to: pos,
+            };
           },
         },
 

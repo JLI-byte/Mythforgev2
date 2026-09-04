@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef, useCallback, MutableRefObject } from 'react';
+import { createPortal } from 'react-dom';
 import { Editor } from '@tiptap/react';
 import { entitySuggestPluginKey, EntitySuggestState } from '@/lib/EntitySuggest';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
@@ -14,13 +15,16 @@ interface Props {
 export default function EntitySuggestDropdown({ editorRef }: Props) {
   const entities = useWorkspaceStore(s => s.entities);
   const projectWorldKey = useWorkspaceStore(selectProjectWorldKey);
+  const openInlineCreator = useWorkspaceStore(s => s.openInlineCreator);
 
   const [pluginState, setPluginState] = useState<EntitySuggestState>({
-    active: false, query: '', from: 0, to: 0,
+    active: false, trigger: '@', query: '', from: 0, to: 0,
   });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  /** Where a [[ creation should be inserted once the modal saves. */
+  const pendingRangeRef = useRef<{ from: number; to: number } | null>(null);
 
   // Sync ref current to state to trigger effect re-runs when parent re-renders with a new editor
   const [activeEditor, setActiveEditor] = useState<Editor | null>(null);
@@ -39,8 +43,10 @@ export default function EntitySuggestDropdown({ editorRef }: Props) {
 
       if (state.active) {
         // Position the dropdown at the @ character
+        // coordsAtPos returns viewport coordinates, and the dropdown is
+        // position:fixed — adding scroll would count it twice.
         const coords = activeEditor.view.coordsAtPos(state.from);
-        setPosition({ top: coords.bottom + window.scrollY + 6, left: coords.left + window.scrollX });
+        setPosition({ top: coords.bottom + 6, left: coords.left });
       } else {
         setPosition(null);
       }
@@ -80,10 +86,65 @@ export default function EntitySuggestDropdown({ editorRef }: Props) {
     // Close dropdown by resetting plugin state
     activeEditor.view.dispatch(
       activeEditor.state.tr.setMeta(entitySuggestPluginKey, {
-        active: false, query: '', from: 0, to: 0,
+        active: false, trigger: '@', query: '', from: 0, to: 0,
       })
     );
   }, [activeEditor, pluginState]);
+
+  /** Insert an entity's name, marked, over a remembered range. */
+  const insertEntityAt = useCallback((from: number, to: number, entityId: string, entityName: string) => {
+    if (!activeEditor) return;
+    activeEditor
+      .chain()
+      .focus()
+      .deleteRange({ from, to })
+      .insertContentAt(from, {
+        type: 'text',
+        text: entityName,
+        marks: [{ type: 'entityMark', attrs: { entityId } }],
+      })
+      .run();
+  }, [activeEditor]);
+
+  /** "Create «name»" — hand off to the World Bible's inline creator. */
+  const startCreate = useCallback(() => {
+    if (!activeEditor) return;
+    // Remember the range but do not delete it: if the writer cancels, what they
+    // typed must still be there.
+    pendingRangeRef.current = { from: pluginState.from, to: pluginState.to };
+    activeEditor.view.dispatch(
+      activeEditor.state.tr.setMeta(entitySuggestPluginKey, {
+        active: false, trigger: '@', query: '', from: 0, to: 0,
+      })
+    );
+    openInlineCreator(pluginState.query.trim());
+  }, [activeEditor, pluginState.from, pluginState.to, pluginState.query, openInlineCreator]);
+
+  // The inline creator saved an entry we asked for — drop it in where [[ was.
+  useEffect(() => {
+    if (!activeEditor) return;
+
+    const onCreated = (e: Event) => {
+      const range = pendingRangeRef.current;
+      pendingRangeRef.current = null;
+      const detail = (e as CustomEvent<{ id: string; name: string }>).detail;
+      if (!range || !detail?.id) return;
+      insertEntityAt(range.from, range.to, detail.id, detail.name);
+    };
+
+    const onReturnFocus = () => {
+      // Cancelled: leave what was typed alone, just give the cursor back.
+      pendingRangeRef.current = null;
+      activeEditor.chain().focus().run();
+    };
+
+    window.addEventListener('lorecanvas:entityCreated', onCreated);
+    window.addEventListener('lorecanvas:returnFocusToEditor', onReturnFocus);
+    return () => {
+      window.removeEventListener('lorecanvas:entityCreated', onCreated);
+      window.removeEventListener('lorecanvas:returnFocusToEditor', onReturnFocus);
+    };
+  }, [activeEditor, insertEntityAt]);
 
   // Keyboard handling — arrow keys, Enter, Escape
   useEffect(() => {
@@ -101,11 +162,12 @@ export default function EntitySuggestDropdown({ editorRef }: Props) {
         e.preventDefault();
         const entity = filtered[selectedIndex];
         if (entity) selectEntity(entity.id, entity.name);
+        else if (pluginState.trigger === '[[') startCreate();
       } else if (e.key === 'Escape') {
         e.preventDefault();
         activeEditor.view.dispatch(
           activeEditor.state.tr.setMeta(entitySuggestPluginKey, {
-            active: false, query: '', from: 0, to: 0,
+            active: false, trigger: '@', query: '', from: 0, to: 0,
           })
         );
       }
@@ -115,20 +177,40 @@ export default function EntitySuggestDropdown({ editorRef }: Props) {
     const editorEl = activeEditor.view.dom;
     editorEl.addEventListener('keydown', handleKeyDown, true);
     return () => editorEl.removeEventListener('keydown', handleKeyDown, true);
-  }, [pluginState.active, filtered, selectedIndex, selectEntity, activeEditor]);
+  }, [pluginState.active, pluginState.trigger, filtered, selectedIndex, selectEntity, startCreate, activeEditor]);
 
   if (!pluginState.active || !position) return null;
 
-  return (
+  const showCreate = pluginState.trigger === '[[';
+
+  // Portalled to the body: the desk's canvas layer is transformed (which would
+  // re-anchor and scale a position:fixed child) and its viewport clips
+  // overflow. Neither can be allowed to move or crop the picker.
+  const menu = (
     <div
       ref={dropdownRef}
       className={styles.dropdown}
       style={{ top: position.top, left: position.left }}
     >
+      {showCreate && (
+        <button
+          className={styles.item}
+          onMouseDown={(e) => { e.preventDefault(); startCreate(); }}
+        >
+          <span className={styles.itemIcon}>+</span>
+          <span className={styles.itemName}>
+            {pluginState.query.trim() ? `Create "${pluginState.query.trim()}"` : 'Create a new entry'}
+          </span>
+          <span className={styles.itemType}>new</span>
+        </button>
+      )}
+
       {filtered.length === 0 ? (
-        <div className={styles.noResults}>
-          No entities match "{pluginState.query || '@'}"
-        </div>
+        !showCreate && (
+          <div className={styles.noResults}>
+            No entities match &quot;{pluginState.query || '@'}&quot;
+          </div>
+        )
       ) : (
         filtered.map((entity, i) => (
           <button
@@ -150,6 +232,8 @@ export default function EntitySuggestDropdown({ editorRef }: Props) {
       )}
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(menu, document.body) : menu;
 }
 
 function getEntityIcon(type: string): string {

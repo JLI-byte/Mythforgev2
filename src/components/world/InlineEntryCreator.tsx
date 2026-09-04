@@ -42,13 +42,12 @@ export default function InlineEntryCreator() {
     }
 
     /**
-     * Helper to close the modal and explicitly return focus to the editor
-     * without creating a tight dependency between the two components.
-     * We use a custom DOM event that WritingEditor listens for.
+     * Close the modal and hand focus back to the editor. The editor listens for
+     * this rather than being wired to the modal directly, so neither has to
+     * know the other exists.
      */
     const closeAndReturnFocus = () => {
         closeInlineCreator();
-        // Dispatch custom event right after state updates
         window.dispatchEvent(new CustomEvent('lorecanvas:returnFocusToEditor'));
     };
 
@@ -81,7 +80,11 @@ export default function InlineEntryCreator() {
         };
 
         // Save to global state and dismiss
+        // Save to global state, say what was made, and dismiss.
         addEntity(newEntity);
+        window.dispatchEvent(new CustomEvent('lorecanvas:entityCreated', {
+            detail: { id: newEntity.id, name: newEntity.name },
+        }));
         closeAndReturnFocus();
     };
 

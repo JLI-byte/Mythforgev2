@@ -13,6 +13,9 @@ import Color from '@tiptap/extension-color';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { useWritingSession, useSeedWritingBaseline } from '@/lib/useWritingSession';
 import { FontSize } from './extensions';
+import { EntityMark } from '@/lib/EntityMark';
+import { EntitySuggest } from '@/lib/EntitySuggest';
+import EntitySuggestDropdown from '../EntitySuggestDropdown';
 import { GlassDropdown } from './GlassDropdown';
 import styles from '../WritingDesk.module.css';
 
@@ -37,6 +40,8 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
       Highlight.configure({ multicolor: true }),
       Color,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      EntityMark,
+      EntitySuggest,
     ],
     content: content || '',
     immediatelyRender: false,
@@ -70,6 +75,11 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
     sceneId,
     editor ? editor.getText().split(/\s+/).filter(w => w.length > 0).length : undefined,
   );
+
+  // The suggest dropdown reads the live editor through a ref, so it survives
+  // the editor being rebuilt when the scene or the spellcheck setting changes.
+  const editorRef = useRef<Editor | null>(null);
+  useEffect(() => { editorRef.current = editor ?? null; }, [editor]);
 
   useEffect(() => {
     return () => {
@@ -234,6 +244,7 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
       <div className={styles.deskEditorBody} onClick={() => editor.chain().focus().run()}>
         <EditorContent editor={editor} />
       </div>
+      <EntitySuggestDropdown editorRef={editorRef} />
     </div>
   );
 }
