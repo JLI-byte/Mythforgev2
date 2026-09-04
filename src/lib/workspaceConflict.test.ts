@@ -89,3 +89,26 @@ describe('resolveWorkspaceConflict', () => {
         expect(resolveWorkspaceConflict(newer, freshlySavedStaleCloud).takeCloud).toBe(false);
     });
 });
+
+describe('newestContentTime with World Bibles', () => {
+    it('counts a bible edit as content', () => {
+        const state = {
+            projects: [{ id: 'p1', updatedAt: '2026-01-01T00:00:00.000Z' }],
+            worldBibles: { w1: { layout: { roots: [] }, updatedAt: '2026-06-01T00:00:00.000Z' } },
+        };
+        expect(newestContentTime(state)).toBe(new Date('2026-06-01T00:00:00.000Z').getTime());
+    });
+
+    it('ignores bibles that carry no stamp', () => {
+        const state = {
+            projects: [{ id: 'p1', updatedAt: '2026-01-01T00:00:00.000Z' }],
+            worldBibles: { w1: { layout: { roots: [] } } },
+        };
+        expect(newestContentTime(state)).toBe(new Date('2026-01-01T00:00:00.000Z').getTime());
+    });
+
+    it('survives a malformed worldBibles value', () => {
+        expect(newestContentTime({ worldBibles: 'nope' })).toBe(0);
+        expect(newestContentTime({ worldBibles: { w1: null } })).toBe(0);
+    });
+});

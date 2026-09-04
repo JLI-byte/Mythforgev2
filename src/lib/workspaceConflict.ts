@@ -38,6 +38,19 @@ export function newestContentTime(state: WorkspaceLike): number {
             if (Number.isFinite(ms) && ms > newest) newest = ms;
         }
     }
+    // World Bibles are a keyed record rather than a dated array, so they were
+    // invisible here: an afternoon restructuring a bible left the timestamp
+    // untouched and the other device's older copy won.
+    const bibles = state ? (state as Record<string, unknown>).worldBibles : undefined;
+    if (bibles && typeof bibles === 'object' && !Array.isArray(bibles)) {
+        for (const value of Object.values(bibles as Record<string, unknown>)) {
+            if (!value || typeof value !== 'object') continue;
+            const stamp = (value as { updatedAt?: unknown }).updatedAt;
+            if (stamp === undefined || stamp === null) continue;
+            const ms = new Date(stamp as string).getTime();
+            if (Number.isFinite(ms) && ms > newest) newest = ms;
+        }
+    }
     return newest;
 }
 

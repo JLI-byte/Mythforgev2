@@ -91,6 +91,12 @@ export interface WorldBibleConfig {
   coverSub?: string;
   /** Cover accent color (hex). */
   tint?: string;
+  /**
+   * ISO stamp of the last edit. An ISO string rather than a Date because the
+   * persist reviver only rebuilds Dates inside the dated content arrays, so a
+   * Date here would come back as a string anyway.
+   */
+  updatedAt?: string;
 }
 
 export interface Project {
@@ -2165,6 +2171,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                                 layout: existingLayout ?? { roots: [] },
                                 ...existingIdentity,
                                 ...patch,
+                                updatedAt: new Date().toISOString(),
                             },
                         },
                     };
@@ -2174,23 +2181,26 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 set((state) => ({
                     worldBibles: {
                         ...state.worldBibles,
-                        [key]: { ...state.worldBibles[key], layout },
+                        [key]: { ...state.worldBibles[key], layout, updatedAt: new Date().toISOString() },
                     },
                 })),
 
             applyBibleLayout: (key, layout) =>
-                set((state) => ({
-                    worldBibles: {
-                        ...state.worldBibles,
-                        [key]: { ...state.worldBibles[key], layout },
-                    },
-                    // Re-file this world's articles into the new structure by type
-                    // (covers previously-unfiled ones too; presets span all 8 types).
-                    entities: state.entities.map(e => {
-                        if (worldKeyForEntity(e) !== key) return e;
-                        return { ...e, categoryId: fileByType(layout.roots, e.type) };
-                    }),
-                })),
+                set((state) => {
+                    const stamp = new Date();
+                    return {
+                        worldBibles: {
+                            ...state.worldBibles,
+                            [key]: { ...state.worldBibles[key], layout, updatedAt: stamp.toISOString() },
+                        },
+                        // Re-file this world's articles into the new structure by type
+                        // (covers previously-unfiled ones too; presets span all 8 types).
+                        entities: state.entities.map(e => {
+                            if (worldKeyForEntity(e) !== key) return e;
+                            return { ...e, categoryId: fileByType(layout.roots, e.type), updatedAt: stamp };
+                        }),
+                    };
+                }),
 
             deleteWorldEntities: (key) =>
                 set((state) => {
