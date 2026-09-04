@@ -127,7 +127,7 @@ With four work types and the AI gone, the loop is exactly: write a manuscript, b
 
 ## Phase 5 — Lore without AI
 
-**Plan:** `2026-09-03-phase-5-lore-without-ai.md` · **Status:** ready · **Spec:** Part 2 · **Depends on:** Phase 4 for `broken-link` only
+**Plan:** `2026-09-03-phase-5-lore-without-ai.md` · **Status:** COMPLETE (6 commits) · **Spec:** Part 2 · **Depends on:** Phase 4 for `broken-link` only
 
 Rebuilds the three AI-driven lore features as deterministic rules. Instant, free, testable, and incapable of inventing a finding that is not there.
 
