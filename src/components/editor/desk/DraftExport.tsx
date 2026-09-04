@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useId, useState, useEffect } from 'react';
+import React, { useId, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Globe, PenLine, X } from 'lucide-react';
 import { useWorkspaceStore, DeskWidget, Document, Scene, Entity, selectProjectWorldKey } from '@/store/workspaceStore';
 import { STANDALONE_KEY } from '@/lib/worldKey';
+import { useModalDialog } from '@/lib/useModalDialog';
 import styles from './MethodLibrary.module.css';
 
 /** A beat card snapshot ready for export (content merged with live edits). */
@@ -71,11 +72,7 @@ export function DraftExport({ projectId, methodName, beats, onClose }: DraftExpo
     const [isNamingArticle, setIsNamingArticle] = useState(false);
     const fieldId = useId();
 
-    useEffect(() => {
-        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [onClose]);
+    const dialogRef = useModalDialog<HTMLDivElement>(onClose);
 
     const filledCount = beats.filter(b => b.text !== '').length;
 
@@ -160,12 +157,21 @@ export function DraftExport({ projectId, methodName, beats, onClose }: DraftExpo
     };
 
     const modal = (
-        <div className={styles.backdrop} onClick={onClose}>
-            <div className={`${styles.modal} ${styles.finderModal}`} onClick={e => e.stopPropagation()} style={{ position: 'relative' }}>
+        <div className={styles.backdrop} onClick={onClose} role="presentation">
+            <div
+                ref={dialogRef}
+                className={`${styles.modal} ${styles.finderModal}`}
+                onClick={e => e.stopPropagation()}
+                style={{ position: 'relative' }}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="draft-export-title"
+                tabIndex={-1}
+            >
                 <button className={styles.closeBtn} onClick={onClose} aria-label="Close export"><X size={16} /></button>
 
                 <div className={styles.header}>
-                    <h2 className={styles.title}>Export your outline</h2>
+                    <h2 id="draft-export-title" className={styles.title}>Export your outline</h2>
                     <p className={styles.subtitle}>
                         {beats.length} beat{beats.length === 1 ? '' : 's'} ({filledCount} with text) — your cards stay on the Draft Table.
                     </p>
@@ -196,6 +202,9 @@ export function DraftExport({ projectId, methodName, beats, onClose }: DraftExpo
                                 value={articleTitle}
                                 onChange={e => setArticleTitle(e.target.value)}
                                 onKeyDown={e => { if (e.key === 'Enter') exportToArticle(); }}
+                                // Not data-autofocus: this input mounts only when the
+                                // naming branch opens, long after the hook's mount-time
+                                // scan. Nothing races it, because that scan is done.
                                 autoFocus
                             />
                             <div className={styles.finderFooter}>
