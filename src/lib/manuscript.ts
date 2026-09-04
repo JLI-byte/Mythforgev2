@@ -12,6 +12,8 @@
  * the arithmetic stays testable and the module stays leaf-level.
  */
 
+import { escapeHtml } from '@/lib/sanitize';
+
 /** The structural shape of a store Document. */
 export interface ChapterLike {
     id: string;
@@ -36,6 +38,32 @@ export interface ManuscriptSection {
     html: string;
 }
 
+/** What the writer chose on the compile step. Stored on the project. */
+export interface FrontMatter {
+    titlePage: boolean;
+    contents: boolean;
+    /** Blank means the page is omitted entirely. */
+    copyright: string;
+    dedication: string;
+}
+
+export const DEFAULT_FRONT_MATTER: FrontMatter = {
+    titlePage: true,
+    contents: true,
+    copyright: '',
+    dedication: '',
+};
+
+/** A front-matter page. Generated markup only — never the writer's own HTML. */
+export interface ManuscriptPage {
+    id: string;
+    title: string;
+    /** Body markup, without the heading: the exporters add that themselves. */
+    html: string;
+    /** The same body as plain-text lines, for Markdown and DOCX. */
+    lines: string[];
+}
+
 export interface ManuscriptChapter {
     id: string;
     title: string;
@@ -50,12 +78,15 @@ export interface ManuscriptMeta {
 export interface Manuscript {
     title: string;
     author: string;
+    pages: ManuscriptPage[];
     chapters: ManuscriptChapter[];
 }
 
 export interface AssembleOptions {
     /** When given, only these chapter ids are compiled — still in book order. */
     includedChapterIds?: string[] | null;
+    /** The compile step's choices. Defaults are filled in when omitted. */
+    frontMatter?: Partial<FrontMatter> | null;
 }
 
 /** ms since epoch for a createdAt that may have come back from JSON as a string. */
@@ -89,6 +120,80 @@ export function orderSections(sections: SectionLike[], documentId: string): Sect
         .sort((a, b) => a.order - b.order);
 }
 
+/** Fills in anything a project has never set. */
+export function resolveFrontMatter(partial?: Partial<FrontMatter> | null): FrontMatter {
+    return { ...DEFAULT_FRONT_MATTER, ...(partial ?? {}) };
+}
+
+/** Free text to trimmed, non-empty lines. Front-matter text is never rich. */
+function textLines(text: string): string[] {
+    return text.split(/\n+/).map(line => line.trim()).filter(Boolean);
+}
+
+/**
+ * The pages that run before chapter one.
+ *
+ * Each is built from escaped text, so nothing a writer types into the compile
+ * step's copyright or dedication field can reach an exporter as markup.
+ */
+export function buildFrontMatterPages(
+    meta: ManuscriptMeta,
+    chapters: ManuscriptChapter[],
+    fm: FrontMatter,
+): ManuscriptPage[] {
+    const pages: ManuscriptPage[] = [];
+    const title = meta.title || 'Untitled';
+    const author = meta.author?.trim() || '';
+
+    if (fm.titlePage) {
+        pages.push({
+            id: 'front-title',
+            title,
+            html: author ? `<p>${escapeHtml(author)}</p>` : '',
+            lines: author ? [author] : [],
+        });
+    }
+
+    const copyright = textLines(fm.copyright);
+    if (copyright.length > 0) {
+        pages.push({
+            id: 'front-copyright',
+            title: 'Copyright',
+            html: copyright.map(l => `<p>${escapeHtml(l)}</p>`).join(''),
+            lines: copyright,
+        });
+    }
+
+    const dedication = textLines(fm.dedication);
+    if (dedication.length > 0) {
+        pages.push({
+            id: 'front-dedication',
+            title: 'Dedication',
+            html: dedication.map(l => `<p>${escapeHtml(l)}</p>`).join(''),
+            lines: dedication,
+        });
+    }
+
+    if (fm.contents && chapters.length > 0) {
+        const titles = chapters.map(c => c.title);
+        pages.push({
+            id: 'front-contents',
+            title: 'Contents',
+            html: `<ol>${titles.map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ol>`,
+            lines: titles,
+        });
+    }
+
+    return pages;
+}
+
+/** Words across every chapter body — what the compile step reports. */
+export function manuscriptWordCount(m: Manuscript): number {
+    return m.chapters.reduce((total, c) => total + c.sections.reduce(
+        (n, s) => n + s.html.replace(/<[^>]*>/g, ' ').split(/\s+/).filter(Boolean).length,
+        0), 0);
+}
+
 /** The whole book: every included chapter, each with its ordered sections. */
 export function assembleManuscript(
     meta: ManuscriptMeta,
@@ -111,9 +216,38 @@ export function assembleManuscript(
             })),
         }));
 
+    const resolvedTitle = meta.title || 'Untitled';
     return {
-        title: meta.title || 'Untitled',
+        title: resolvedTitle,
         author: meta.author?.trim() || '',
+        pages: buildFrontMatterPages(
+            { title: resolvedTitle, author: meta.author },
+            chapters,
+            resolveFrontMatter(options.frontMatter),
+        ),
         chapters,
     };
+}
+
+/**
+ * One chapter on its own — a manuscript of one, with no front matter.
+ *
+ * "This chapter" and "the whole book" are then the same code path with a
+ * different chapter list, so they cannot format differently.
+ */
+export function assembleChapter(
+    meta: ManuscriptMeta,
+    document: ChapterLike,
+    sections: SectionLike[],
+): Manuscript {
+    return assembleManuscript(
+        { title: document.title || meta.title, author: meta.author },
+        [document],
+        sections,
+        document.projectId,
+        {
+            frontMatter: { titlePage: false, contents: false, copyright: '', dedication: '' },
+            includedChapterIds: [document.id],
+        },
+    );
 }
