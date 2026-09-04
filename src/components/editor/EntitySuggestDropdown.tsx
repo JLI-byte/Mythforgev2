@@ -26,11 +26,15 @@ export default function EntitySuggestDropdown({ editorRef }: Props) {
   /** Where a [[ creation should be inserted once the modal saves. */
   const pendingRangeRef = useRef<{ from: number; to: number } | null>(null);
 
-  // Sync ref current to state to trigger effect re-runs when parent re-renders with a new editor
+  // Pick up a rebuilt editor so the effects below re-subscribe to it. This runs
+  // after every render deliberately: the ref can change without any state
+  // changing, so there is no dependency list that would catch it. It used to
+  // setState during render instead, which React forbids — harmless while this
+  // component was mounted nowhere, but it is on every scene now.
   const [activeEditor, setActiveEditor] = useState<Editor | null>(null);
-  if (editorRef.current !== activeEditor) {
-    setActiveEditor(editorRef.current);
-  }
+  useEffect(() => {
+    if (editorRef.current !== activeEditor) setActiveEditor(editorRef.current);
+  });
 
   // Poll plugin state on every editor transaction
   useEffect(() => {
