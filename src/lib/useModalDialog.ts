@@ -29,8 +29,11 @@ export function useModalDialog<T extends HTMLElement>(onClose: () => void) {
 
     // Held in a ref so a dialog that rebuilds its onClose every render does not
     // tear down and re-run the whole effect, stealing focus back on each keystroke.
+    // Updated in an effect, not during render: writing a ref while rendering is
+    // a React rule violation and misbehaves under concurrent rendering. The
+    // keydown handler only ever reads it at event time, long after this flushes.
     const onCloseRef = useRef(onClose);
-    onCloseRef.current = onClose;
+    useEffect(() => { onCloseRef.current = onClose; });
 
     const focusables = useCallback((): HTMLElement[] => {
         const root = ref.current;
