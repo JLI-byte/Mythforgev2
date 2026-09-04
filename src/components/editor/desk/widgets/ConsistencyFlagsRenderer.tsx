@@ -34,7 +34,7 @@ export function ConsistencyFlagsRenderer({ content, onChange }: RendererProps) {
             <div className={styles.suggestBody}>
                 {flags.length === 0 && (
                     <div className={styles.suggestEmpty}>
-                        Contradictions and gaps the assistant spots as it reviews your world will appear here. Ask it to “review my world”.
+                        Gaps and contradictions found in your world — entries with no description, broken links, duplicate names — will appear here.
                     </div>
                 )}
 

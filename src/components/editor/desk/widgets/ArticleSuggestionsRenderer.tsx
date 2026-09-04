@@ -182,7 +182,7 @@ export function ArticleSuggestionsRenderer({ content, onChange }: RendererProps)
             <div className={styles.suggestBody}>
                 {suggestions.length === 0 && (
                     <div className={styles.suggestEmpty}>
-                        As you talk with the assistant, article ideas it spots will appear here — grouped by where they’d be filed.
+                        Names that keep appearing in your prose without a World Bible entry will be suggested here.
                     </div>
                 )}
 

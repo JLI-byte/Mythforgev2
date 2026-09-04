@@ -52,7 +52,7 @@ export function UnderstandingRenderer() {
                     id={`${fieldId}-summary`}
                     className={styles.understandArea}
                     value={summary}
-                    placeholder="The assistant will keep a running summary of your world here."
+                    placeholder="Keep a running summary of your world here."
                     onChange={e => { setSummary(e.target.value); persist(e.target.value, preferences); }}
                     onMouseDown={e => e.stopPropagation()}
                 />

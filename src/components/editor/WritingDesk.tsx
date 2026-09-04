@@ -635,7 +635,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
             <p className={styles.canvasEmptyTitle}>Nothing on this board yet</p>
             <p className={styles.canvasEmptyBody}>
               Notes, clippings and links about this project, arranged however you think.
-              The assistant can read everything you put here.
+              Drag a box anywhere on the canvas to place one.
             </p>
           </div>
         )}

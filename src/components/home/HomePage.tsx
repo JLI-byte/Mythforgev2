@@ -374,7 +374,7 @@ export default function HomePage() {
                 )}
               </ul>
             ) : (
-              <p className={styles.tileEmpty}>Nothing flagged. Ask the research assistant to review your world.</p>
+              <p className={styles.tileEmpty}>Nothing flagged.</p>
             )}
             <button className={styles.tileLink} onClick={() => setWorkspaceMode('research')}>
               Open Research <ArrowRight size={14} />
