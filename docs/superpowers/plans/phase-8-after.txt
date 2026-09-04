@@ -1,0 +1,40 @@
+stylesheets: 56
+
+=== font-size (rem): 0 distinct values, 0 uses ===
+
+=== font-size (px): 0 distinct values, 0 uses ===
+
+=== spacing: padding/margin/gap literal values ===
+   3 distinct values, 4 uses
+   px values: 0 distinct (0 uses)
+   rem values: 3 distinct (4 uses)
+   most common: 6.25rem x2, 8rem x1, 9rem x1
+
+=== border-radius: 0 distinct values, 0 uses ===
+
+=== box-shadow: distinct definitions ===
+   116 distinct shadow definitions across 152 uses
+    13 x  var(--glass-shadow)
+     5 x  -3px 2px 10px rgba(var(--shadow-rgb), 0.10)
+     5 x  none
+     2 x  2px 3px 0 rgba(59, 44, 21, 0.25)
+     2 x  4px 6px 0 rgba(59, 44, 21, 0.22)
+
+=== transition durations ===
+   33 distinct, most common: 0.2s x13, 0.9s x7, 0.15s x6, 0.8s x6, 0.3s x5, 1s x4, 2s x4, 0.45s x4, 0.55s x4, 1ms x3
+
+=== token usage vs literals ===
+   var(--...) references : 7446
+   raw hex colours      : 267
+   raw rgb/rgba()       : 169
+   ratio tokens:literals = 17.08 : 1
+
+=== how many stylesheets define their own font-size scale ===
+   globals.css                                          0 distinct sizes
+   page.module.css                                      0 distinct sizes
+   fantasyLogin.module.css                              0 distinct sizes
+   standardLogin.module.css                             0 distinct sizes
+   switcher.module.css                                  0 distinct sizes
+   fantasy-scroll.css                                   0 distinct sizes
+   fantasy.module.css                                   0 distinct sizes
+   requestModal.module.css                              0 distinct sizes

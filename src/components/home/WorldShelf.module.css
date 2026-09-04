@@ -127,7 +127,12 @@
   flex: 1;
   min-width: 0;
   overflow-x: auto;
+  /* overflow-y computes to auto beside an overflow-x of auto, so the row clips
+     vertically whatever this says. The shared hover lift is 4% of the cover's
+     height — which is 6% of its width — so that much headroom is reserved
+     rather than letting a hovered cover be cut off at the top. */
   overflow-y: hidden;
+  padding-top: calc(var(--cover-w) * 0.06);
   scroll-snap-type: x proximity;
   scroll-behavior: smooth;
   /* The scrollbar would sit under the covers and change the row's height on
