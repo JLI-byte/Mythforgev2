@@ -10,6 +10,7 @@ import { getSubTypesFor, getWorkSubType, type ProjectBrief } from '@/lib/workSub
 import { planNewStory } from '@/lib/newStory';
 import { useModalDialog } from '@/lib/useModalDialog';
 import { BeginOptions } from '@/components/ui/BeginOptions';
+import { HintBubble } from '@/components/ui/HintBubble';
 import WorldBibleBook from './WorldBibleBook';
 import WorkTypeArtwork from './WorkTypeArtwork';
 import styles from './Bookshelf.module.css';
@@ -789,6 +790,8 @@ export function Bookshelf() {
                         </div>
                 </ShelfDialog>
             )}
+
+            <HintBubble surface="bookshelf" />
         </div>
     );
 }

@@ -14,6 +14,7 @@ import { DraftExport, collectExportBeats, ExportBeat } from './desk/DraftExport'
 import { SurfaceCanvas } from './desk/SurfaceCanvas';
 import { EmptyDeskWelcome } from './desk/EmptyDeskWelcome';
 import { WidgetRenderer } from './desk/widgets/WidgetRenderer';
+import { HintBubble } from '@/components/ui/HintBubble';
 import { announce } from '@/lib/liveAnnouncer';
 
 // ============================================================
@@ -641,6 +642,8 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
             </p>
           </div>
         )}
+
+        {!isResearch && <HintBubble surface="desk" />}
 
         <div ref={canvasRef} className={styles.deskCanvasInner} style={{ transform: `translate(${canvasOffset.x}px, ${canvasOffset.y}px) scale(${zoom})` }}>
           {/* Ghost Box (Now inside scaled layer) */}

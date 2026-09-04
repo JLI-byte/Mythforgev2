@@ -18,6 +18,7 @@ import styles from './GoalsContent.module.css';
 import { useWorkspaceStore, BADGE_DEFINITIONS } from '@/store/workspaceStore';
 import ShareModal from '../ui/ShareModal';
 import { ShareCardOptions } from '@/lib/shareCard';
+import { projectProgress, progressLine } from '@/lib/structuralProgress';
 
 // =============================================
 // Helper: get today's date as YYYY-MM-DD
@@ -148,6 +149,8 @@ export default function GoalsContent() {
     const writingDays = useWorkspaceStore(s => s.writingDays);
     const earnedBadges = useWorkspaceStore(s => s.earnedBadges);
     const projects = useWorkspaceStore(s => s.projects);
+    const documents = useWorkspaceStore(s => s.documents);
+    const scenes = useWorkspaceStore(s => s.scenes);
     const updateGoalConfig = useWorkspaceStore(s => s.updateGoalConfig);
 
     // Goal setup banner state
@@ -357,7 +360,10 @@ export default function GoalsContent() {
                         const projectWords = writingDays
                             .filter(d => d.projectId === project.id)
                             .reduce((sum, d) => sum + d.wordsWritten, 0);
-                        const pct = Math.min(projectWords / 50000, 1) * 100;
+                        const structure = projectProgress({
+                            projectId: project.id, documents, scenes,
+                        });
+                        const pct = structure.fraction * 100;
                         const barColor = MODE_COLORS[project.writingMode] || '#4A6FA5';
 
                         return (
@@ -399,7 +405,7 @@ export default function GoalsContent() {
                                     />
                                 </div>
                                 <span className={styles.projectPct}>
-                                    {Math.round(pct)}% of a novel&apos;s length
+                                    {progressLine(structure)}
                                 </span>
                             </div>
                         );

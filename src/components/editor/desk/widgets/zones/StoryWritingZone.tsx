@@ -20,6 +20,7 @@ import { DeskTipTapEditor } from '../../DeskTipTapEditor';
 import { BookViewEditor } from '../../BookViewEditor';
 import { BookCoverEditor } from '../../BookCoverEditor';
 import { WidgetLibraryDropdown } from '../../WidgetLibraryDropdown';
+import { HintBubble } from '@/components/ui/HintBubble';
 import { WritingZoneProps } from './zoneTypes';
 import { reconcileZoneSelection } from '@/lib/zoneSelection';
 import { announce } from '@/lib/liveAnnouncer';
@@ -476,6 +477,8 @@ export function StoryWritingZone({ content, onChange, onChangeImmediate, widget,
           </div>
         </div>
       )}
+
+      <HintBubble surface="editor" />
     </div>
   );
 

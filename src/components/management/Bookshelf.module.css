@@ -3,6 +3,8 @@
     height: 100%;
     padding: 24px;
     overflow-y: auto;
+    /* positioned ancestor for the absolutely-placed HintBubble */
+    position: relative;
     /* Same charcoal grunge backdrop as the World Bible */
     background: var(--background) url("/LoreCanvasbg.webp") center / cover no-repeat fixed;
 

@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Library, NotebookPen, Globe, LayoutTemplate, ArrowRight, Plus,
-  PenLine, AlertTriangle, Sparkles, Send, BookOpen, Settings,
+  PenLine, AlertTriangle, Sparkles, Send, BookOpen, Settings, History,
 } from 'lucide-react';
 import {
   useWorkspaceStore, WorkspaceMode, ENTITY_TYPE_LABELS, type EntityType,
@@ -20,6 +20,8 @@ import {
   WEEKDAY_LONG, normalizeWeekdayTargets, targetForDateKey, targetForDayIndex,
 } from '@/lib/goalSchedule';
 import { creatureProgress, multiplierForStreak } from '@/lib/creatureXp';
+import { summarizeSinceLastVisit } from '@/lib/sinceLastVisit';
+import { projectProgress, progressLine } from '@/lib/structuralProgress';
 import { WritingHeatmap } from './WritingHeatmap';
 import GoalScheduleModal from './GoalScheduleModal';
 import { GoalRing } from './GoalRing';
@@ -78,6 +80,7 @@ export default function HomePage() {
   const createWorld = useWorkspaceStore(s => s.createWorld);
   const requestNewStory = useWorkspaceStore(s => s.requestNewStory);
   const hasOnboarded = useWorkspaceStore(s => s.hasOnboarded);
+  const previousVisitAt = useWorkspaceStore(s => s.previousVisitAt);
 
   const [name, setName] = useState('Author');
   const [capture, setCapture] = useState('');
@@ -143,7 +146,25 @@ export default function HomePage() {
 
   const attention = useMemo(() => attentionCounts(researchStates), [researchStates]);
 
+  // What changed while the writer was gone. Silent under the absence threshold.
+  const absence = useMemo(
+    () => summarizeSinceLastVisit(
+      { projects, documents, scenes, entities, writingDays },
+      previousVisitAt,
+      new Date(),
+    ),
+    [projects, documents, scenes, entities, writingDays, previousVisitAt],
+  );
+
   const activeProject = projects.find(p => p.id === activeProjectId) ?? null;
+
+  // The open book measured in the unit it is built from, not in words.
+  const manuscript = useMemo(
+    () => (activeProject
+      ? projectProgress({ projectId: activeProject.id, documents, scenes })
+      : null),
+    [activeProject, documents, scenes],
+  );
 
   // Shelves cover every world, not just the active one — the tile exists to move
   // between worlds, so scoping it to the current one would defeat the point.
@@ -266,6 +287,39 @@ export default function HomePage() {
         </header>
 
         <section className={styles.bento}>
+          {/* While you were away — only after a real absence */}
+          {absence && absence.items.length > 0 && (
+            <div className={`${styles.tile} ${styles.tileAway}`}>
+              <span className={styles.tileLabel}>
+                <History size={14} /> While you were away
+              </span>
+              <p className={styles.awayLead}>
+                {/* timeAgo reads a gap between two stamps; measuring awayMs from
+                    the epoch gives that gap without reading the clock in render. */}
+                You were gone {timeAgo(new Date(0), new Date(absence.awayMs)).replace(' ago', '')}.
+                {absence.wordsWritten > 0
+                  ? ` ${absence.wordsWritten.toLocaleString()} words landed before you went.`
+                  : ''}
+              </p>
+              <ul className={styles.awayList}>
+                {absence.items.map(item => (
+                  <li key={`${item.kind}-${item.id}`} className={styles.awayItem}>
+                    <span className={styles.awayKind}>{item.kind}</span>
+                    <span className={styles.awayTitle}>{item.title}</span>
+                    {item.projectName && (
+                      <span className={styles.awayProject}>{item.projectName}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              {resume && (
+                <button className={styles.tileLink} onClick={resumeWriting}>
+                  Back to {resume.label} <ArrowRight size={14} />
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Resume — the hero tile */}
           <div className={`${styles.tile} ${styles.tileResume}`}>
             {resume ? (
@@ -348,6 +402,32 @@ export default function HomePage() {
               </span>
             </div>
             <WritingHeatmap columns={heatmap} />
+          </div>
+
+          {/* Structural progress — the book measured in the unit it is built from */}
+          <div className={`${styles.tile} ${styles.tileManuscript}`}>
+            <div className={styles.tileHead}>
+              <span className={styles.tileLabel}><BookOpen size={14} /> The manuscript</span>
+              {manuscript && (
+                <span className={styles.tileHint}>
+                  {manuscript.words.toLocaleString()} words
+                </span>
+              )}
+            </div>
+            {manuscript && activeProject ? (
+              <>
+                <p className={styles.manuscriptLine}>{progressLine(manuscript)}</p>
+                <div className={styles.manuscriptTrack}>
+                  <div
+                    className={styles.manuscriptFill}
+                    style={{ width: `${(manuscript.fraction * 100).toFixed(1)}%` }}
+                  />
+                </div>
+                <p className={styles.tileFoot}>{activeProject.name}</p>
+              </>
+            ) : (
+              <p className={styles.tileEmpty}>Open a book to see how much of it exists.</p>
+            )}
           </div>
 
           {/* From your world */}

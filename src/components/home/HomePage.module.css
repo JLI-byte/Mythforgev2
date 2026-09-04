@@ -528,7 +528,9 @@
 @media (max-width: 1000px) {
   .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tileResume  { grid-column: span 2; grid-row: span 1; }
+  .tileAway    { grid-column: span 2; }
   .tileHeatmap { grid-column: span 2; }
+  .tileManuscript { grid-column: span 2; }
   .tileLore    { grid-column: span 2; }
   .tileLinks   { grid-column: span 2; }
 }
@@ -540,9 +542,87 @@
   .tileGoal,
   .tileStreak,
   .tileAttention,
+  .tileAway,
   .tileHeatmap,
+  .tileManuscript,
   .tileLore,
   .tileLinks { grid-column: span 1; }
   .hero { align-items: stretch; }
   .captureRow { max-width: none; }
+}
+
+/* ── While you were away ───────────────────────────────── */
+
+.tileAway { grid-column: span 4; }
+
+.awayLead {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.awayList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.awayItem {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  min-width: 0;
+  font-size: 0.82rem;
+}
+
+.awayKind {
+  flex: none;
+  min-width: 62px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.awayTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--foreground);
+}
+
+.awayProject {
+  flex: none;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+/* ── The manuscript ────────────────────────────────────── */
+
+.tileManuscript { grid-column: span 4; }
+
+.manuscriptLine {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.manuscriptTrack {
+  height: 7px;
+  border-radius: 4px;
+  background: rgba(var(--overlay-rgb), 0.12);
+  overflow: hidden;
+}
+
+.manuscriptFill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--accent);
+  transition: width 260ms ease;
 }

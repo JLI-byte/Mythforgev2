@@ -2706,7 +2706,17 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     // WORKAROUND(migration): Migrate legacy root-level localStorage data to the new Project architecture.
                     // Root cause: Pre-Sprint 13, documents did not exist natively inside the Zustand workspace structure.
                     // Remove when: After sufficient cycles (e.g. 2 months), assuming all clients have synced.
-                    if (state.projects.length === 0 && state.scenes.length === 0 && state.entities.length === 0) {
+                    // Only when there is genuine legacy content to rescue. Without
+                    // this guard the branch fires for every BRAND-NEW writer too —
+                    // an empty workspace looks identical to a pre-Sprint-13 one —
+                    // and fabricates "My First Project" out of nothing. That made
+                    // the first-run screen unreachable, because a newcomer was
+                    // never allowed to have zero projects.
+                    const legacyTitle = getStoredValue('mythforge-document-title');
+                    const legacyContent = getStoredValue('mythforge-document-content');
+                    const hasLegacyData = Boolean(legacyTitle || legacyContent);
+
+                    if (hasLegacyData && state.projects.length === 0 && state.scenes.length === 0 && state.entities.length === 0) {
                         logger.info('Migrating legacy data to new Project architecture.');
                         const defaultProject: Project = {
                             id: crypto.randomUUID(),
@@ -2719,8 +2729,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                             id: crypto.randomUUID(),
                             projectId: defaultProject.id,
                             // Legacy pre-Sprint-13 keys — written under the old app name, never renamed
-                            title: getStoredValue('mythforge-document-title') || 'Untitled Chapter',
-                            content: getStoredValue('mythforge-document-content') || '',
+                            title: legacyTitle || 'Untitled Chapter',
+                            content: legacyContent || '',
                             createdAt: new Date()
                         };
 

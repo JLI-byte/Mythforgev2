@@ -62,6 +62,9 @@ export default function Home() {
   const workspaceMode = useWorkspaceStore((state) => state.workspaceMode);
   const setWorkspaceMode = useWorkspaceStore((state) => state.setWorkspaceMode);
 
+  const hasStoreHydrated = useWorkspaceStore((state) => state._hasHydrated);
+  const markVisit = useWorkspaceStore((state) => state.markVisit);
+
 
   // Clamp panelWidth to a safe maximum based on current viewport.
   // Prevents persisted wide-screen values from overflowing on narrow screens.
@@ -95,6 +98,13 @@ export default function Home() {
     }
     window.history.replaceState({}, '', window.location.pathname);
   }, [setWorkspaceMode]);
+
+  // Freeze what "last time" means for this page load. It has to wait for
+  // hydration: before that, lastVisitAt is still the initial null and the
+  // absence would be measured against nothing.
+  useEffect(() => {
+    if (hasStoreHydrated) markVisit();
+  }, [hasStoreHydrated, markVisit]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
