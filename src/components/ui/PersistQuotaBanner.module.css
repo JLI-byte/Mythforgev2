@@ -9,7 +9,7 @@
     align-items: flex-start;
     gap: var(--space-5);
     padding: var(--space-6) var(--space-6);
-    border-radius: 10px;
+    border-radius: var(--radius-xl);
     border: 1px solid var(--color-danger-border, #b4453a);
     background: var(--color-danger-surface, #2a1512);
     color: var(--color-danger-text, #ffd9d3);
@@ -35,7 +35,7 @@
     color: inherit;
     cursor: pointer;
     padding: var(--space-1);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
 }
 
 .dismiss:hover {

@@ -17,7 +17,7 @@
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
     box-shadow: var(--glass-shadow);
     border: 1px solid var(--glass-border);
     overflow: hidden;
@@ -65,7 +65,7 @@
     padding: var(--space-5) var(--space-6);
     background: transparent;
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     text-align: left;
 }

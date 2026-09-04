@@ -21,7 +21,7 @@
   max-height: 90vh;
   overflow-y: auto;
   border: 1px solid var(--glass-border);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -58,9 +58,9 @@
   color: var(--muted);
   background: none;
   border: none;
-  border-radius: 7px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: color 0.15s ease, background 0.15s ease;
+  transition: color var(--dur-2) var(--ease-standard), background var(--dur-2) var(--ease-standard);
 }
 .close:hover {
   color: var(--foreground, var(--surface));
@@ -119,9 +119,9 @@
   color: var(--foreground, var(--surface));
   background: rgba(var(--overlay-rgb), 0.06);
   border: 1px solid rgba(var(--overlay-rgb), 0.14);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   outline: none;
-  transition: border-color 0.15s ease;
+  transition: border-color var(--dur-2) var(--ease-standard);
   -moz-appearance: textfield;
   appearance: textfield;
 }
@@ -143,9 +143,9 @@
   color: var(--muted);
   background: none;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+  transition: color var(--dur-2) var(--ease-standard), background var(--dur-2) var(--ease-standard), opacity var(--dur-2) var(--ease-standard);
 }
 .clear:hover:not(:disabled) {
   color: var(--foreground, var(--surface));
@@ -173,9 +173,9 @@
   color: var(--muted);
   background: none;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: color 0.15s ease, background 0.15s ease;
+  transition: color var(--dur-2) var(--ease-standard), background var(--dur-2) var(--ease-standard);
 }
 .reset:hover,
 .cancel:hover {
@@ -190,9 +190,9 @@
   color: var(--background);
   background: var(--foreground, var(--surface));
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--dur-2) var(--ease-standard);
 }
 .save:hover:not(:disabled) { opacity: 0.85; }
 .save:disabled { opacity: 0.4; cursor: not-allowed; }

@@ -52,13 +52,13 @@
     background: linear-gradient(165deg, rgba(var(--overlay-rgb), 0.1) 0%, rgba(var(--overlay-rgb), 0.04) 100%);
     backdrop-filter: blur(28px) saturate(1.5);
     border: 1px solid rgba(var(--overlay-rgb), 0.14);
-    border-radius: 16px;
+    border-radius: var(--radius-2xl);
     box-shadow:
         inset 0 1px 0 rgba(var(--overlay-rgb), 0.18),
         inset 0 -1px 0 rgba(var(--shadow-rgb), 0.18),
         0 10px 38px rgba(var(--shadow-rgb), 0.35);
     /* no transform here — animating it would suppress the backdrop blur */
-    transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    transition: border-color var(--dur-4) var(--ease-standard), background-color var(--dur-4) var(--ease-standard), box-shadow var(--dur-4) var(--ease-standard);
     min-height: 100px;
 }
 
@@ -90,7 +90,7 @@
     font-size: var(--text-2xs);
     background: rgba(var(--overlay-rgb),0.08);
     padding: var(--space-1) var(--space-4);
-    border-radius: 10px;
+    border-radius: var(--radius-xl);
     color: var(--muted);
 }
 
@@ -170,7 +170,7 @@
     top: 50%;
     transform: translateX(-50%) translateY(-60%);
     aspect-ratio: 2 / 3;
-    border-radius: 3px 3px 0 0;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
     background-size: cover;
     background-position: center;
     filter: grayscale(1);
@@ -180,7 +180,7 @@
     box-shadow: 5px -5px 10px rgba(var(--shadow-rgb), 0.35);
     cursor: grab;
     user-select: none;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform var(--dur-4) var(--ease-standard), box-shadow var(--dur-4) var(--ease-standard);
     z-index: 1;
 }
 /* pen hover: the book slides up out of the pocket and tilts */
@@ -204,7 +204,7 @@
    letter proportions, square corners, and no spine radius. */
 .bookPaper {
     aspect-ratio: 17 / 22;
-    border-radius: 1px;
+    border-radius: var(--radius-xs);
     overflow: hidden;
 }
 
@@ -239,7 +239,7 @@
     line-height: 1;
     cursor: pointer;
     z-index: 1;
-    transition: color 0.2s ease;
+    transition: color var(--dur-3) var(--ease-standard);
 }
 .slotAdd::before {
     content: '+';
@@ -263,10 +263,10 @@
     color: rgba(var(--overlay-rgb), 1);
     background: rgba(var(--shadow-rgb), 0.8);
     padding: var(--space-1) var(--space-4);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.2s ease;
+    transition: opacity var(--dur-3) var(--ease-standard);
     z-index: 4;
 }
 .book:hover .bookLabel {
@@ -290,9 +290,9 @@
     color: rgba(var(--overlay-rgb), 0.5);
     font-size: var(--text-2xs);
     padding: var(--space-2) var(--space-6);
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
     cursor: pointer;
-    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    transition: color var(--dur-3) var(--ease-standard), border-color var(--dur-3) var(--ease-standard), background var(--dur-3) var(--ease-standard);
 }
 .addRowBtn:hover {
     color: rgba(var(--overlay-rgb), 1);
@@ -308,12 +308,12 @@
     background: rgba(var(--overlay-rgb), 0.09);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(var(--overlay-rgb), 0.18);
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
     color: var(--foreground, var(--surface));
     font-size: var(--text-md);
     font-weight: 700;
     cursor: pointer;
-    transition: border-color 0.2s ease, background-color 0.2s ease;
+    transition: border-color var(--dur-3) var(--ease-standard), background-color var(--dur-3) var(--ease-standard);
     box-shadow: inset 0 1px 0 rgba(var(--overlay-rgb), 0.14);
 }
 
@@ -328,9 +328,9 @@
     color: var(--muted);
     font-size: var(--text-2xs);
     padding: var(--space-2) var(--space-5);
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--dur-3) var(--ease-standard);
     margin-left: auto;
 }
 
@@ -362,7 +362,7 @@
 .wizardModal {
     background: var(--surface-mid);
     border: 1px solid rgba(var(--overlay-rgb), 0.1);
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
     padding: var(--space-8);
     width: 480px;
     max-width: 90vw;
@@ -399,11 +399,11 @@
     width: 100%;
     background: rgba(var(--overlay-rgb), 0.05);
     border: 1px solid rgba(var(--overlay-rgb), 0.1);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     padding: var(--space-5) var(--space-6);
     color: rgba(var(--overlay-rgb), 1);
     font-size: var(--text-md);
-    transition: all 0.2s ease;
+    transition: all var(--dur-3) var(--ease-standard);
 }
 
 .wizardInput:focus {
@@ -416,13 +416,13 @@
     width: 100%;
     background: rgba(var(--overlay-rgb), 0.05);
     border: 1px solid rgba(var(--overlay-rgb), 0.1);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     padding: var(--space-5) var(--space-6);
     color: rgba(var(--overlay-rgb), 1);
     font-size: var(--text-md);
     min-height: 80px;
     resize: vertical;
-    transition: all 0.2s ease;
+    transition: all var(--dur-3) var(--ease-standard);
 }
 
 .wizardTextarea:focus {
@@ -441,12 +441,12 @@
 .pill {
     background: transparent;
     border: 1px solid rgba(var(--overlay-rgb), 0.15);
-    border-radius: 20px;
+    border-radius: var(--radius-3xl);
     padding: var(--space-3) var(--space-6);
     color: rgba(var(--overlay-rgb), 0.6);
     font-size: var(--text-xs);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--dur-3) var(--ease-standard);
 }
 
 .pill:hover {
@@ -483,11 +483,11 @@
 
 .wizardBtn {
     padding: var(--space-4) var(--space-7);
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     font-size: var(--text-md);
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--dur-3) var(--ease-standard);
 }
 
 .wizardBtnPrimary {
@@ -526,7 +526,7 @@
     font-size: var(--text-sm);
     cursor: pointer;
     opacity: 0.4;
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition: opacity var(--dur-3) var(--ease-standard), transform var(--dur-3) var(--ease-standard);
     padding: var(--space-2);
     display: flex;
     align-items: center;
@@ -560,11 +560,11 @@
     gap: var(--space-2);
     text-align: left;
     padding: var(--space-6) var(--space-6);
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
     border: 1px solid rgba(var(--overlay-rgb), 0.1);
     background: rgba(var(--overlay-rgb), 0.04);
     cursor: pointer;
-    transition: all 0.18s ease;
+    transition: all var(--dur-3) var(--ease-standard);
 }
 
 .workTypeCard:hover {
@@ -643,10 +643,10 @@
     color: rgba(var(--overlay-rgb), 1);
     background: rgba(var(--shadow-rgb), 0.55);
     border: 1px solid rgba(var(--overlay-rgb), 0.25);
-    border-radius: 50%;
+    border-radius: var(--radius-full);
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.15s ease, background 0.15s ease;
+    transition: opacity var(--dur-2) var(--ease-standard), background var(--dur-2) var(--ease-standard);
 }
 
 .slot:hover .bookDeleteBtn {

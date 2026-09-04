@@ -23,12 +23,12 @@
 .addBtn {
     background: transparent;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     color: var(--muted);
     font-size: var(--text-xs);
     padding: var(--space-2) var(--space-4);
     cursor: pointer;
-    transition: all 150ms ease;
+    transition: all var(--dur-2) var(--ease-standard);
     flex-shrink: 0;
 }
 
@@ -54,9 +54,9 @@
     padding: var(--space-7) var(--space-5);
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     cursor: pointer;
-    transition: transform 150ms ease, box-shadow 150ms ease;
+    transition: transform var(--dur-2) var(--ease-standard), box-shadow var(--dur-2) var(--ease-standard);
     text-align: center;
 }
 
@@ -87,7 +87,7 @@
     padding: var(--space-4);
     background: transparent;
     border: 1px dashed var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     color: var(--muted);
     font-size: var(--text-sm);
     font-weight: 500;
@@ -108,13 +108,13 @@
     height: 180px;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     cursor: pointer;
     overflow: hidden;
     position: relative;
     display: flex;
     flex-direction: column;
-    transition: transform 150ms ease, box-shadow 150ms ease;
+    transition: transform var(--dur-2) var(--ease-standard), box-shadow var(--dur-2) var(--ease-standard);
 }
 
 .entryCard:hover {
@@ -146,10 +146,10 @@
     border: none;
     font-size: var(--text-2xs);
     padding: var(--space-1) var(--space-2);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     opacity: 0;
-    transition: opacity 150ms ease;
+    transition: opacity var(--dur-2) var(--ease-standard);
     line-height: 1;
     backdrop-filter: blur(4px);
 }
@@ -219,12 +219,12 @@
 .emptyAddBtn {
     background: transparent;
     border: 1px dashed var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     color: var(--muted);
     font-size: var(--text-sm);
     padding: var(--space-3) var(--space-5);
     cursor: pointer;
-    transition: all 150ms ease;
+    transition: all var(--dur-2) var(--ease-standard);
 }
 
 .emptyAddBtn:hover {

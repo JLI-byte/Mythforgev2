@@ -79,7 +79,7 @@
     text-decoration: none;
     font-size: var(--text-lg);
     border-bottom: 1px solid transparent;
-    transition: border-color 180ms ease;
+    transition: border-color var(--dur-3) var(--ease-standard);
 }
 
 .navSignIn:is(:hover, :focus-visible) {
@@ -125,7 +125,7 @@
     color: var(--verdigris);
     border: 1px solid var(--verdigris);
     padding: var(--space-3) var(--space-6);
-    border-radius: 2px;
+    border-radius: var(--radius-xs);
 }
 
 .heroTitle {
@@ -167,10 +167,10 @@
     color: #f6ddd2;
     background: var(--vermilion);
     border: 1px solid var(--vermilion-deep);
-    border-radius: 3px;
+    border-radius: var(--radius-sm);
     padding: var(--space-5) var(--space-8);
     box-shadow: 2px 3px 0 rgba(59, 44, 21, 0.25);
-    transition: transform 160ms ease, box-shadow 160ms ease;
+    transition: transform var(--dur-2) var(--ease-standard), box-shadow var(--dur-2) var(--ease-standard);
 }
 
 .ctaPrimary:is(:hover, :focus-visible) {
@@ -191,7 +191,7 @@
     text-decoration: none;
     border-bottom: 1px solid var(--verdigris);
     padding-bottom: var(--space-1);
-    transition: color 160ms ease;
+    transition: color var(--dur-2) var(--ease-standard);
 }
 
 .ctaSecondary:is(:hover, :focus-visible) {
@@ -370,7 +370,7 @@
     max-width: 30rem;
     background: #f9f2e0;
     border: 1px solid var(--line-faint);
-    border-radius: 2px;
+    border-radius: var(--radius-xs);
     padding: var(--space-9) var(--space-8);
     transform: rotate(-0.6deg);
     box-shadow: 3px 5px 0 rgba(59, 44, 21, 0.12);
@@ -423,7 +423,7 @@
     font-family: var(--font-garamond), serif;
     font-size: var(--text-lg);
     padding: var(--space-3) var(--space-1);
-    transition: border-color 160ms ease;
+    transition: border-color var(--dur-2) var(--ease-standard);
 }
 
 .fieldTextarea {
@@ -466,7 +466,7 @@
 }
 
 .sealButton svg {
-    transition: transform 180ms ease;
+    transition: transform var(--dur-3) var(--ease-standard);
 }
 
 .sealButton:is(:hover, :focus-visible):not(:disabled) svg {

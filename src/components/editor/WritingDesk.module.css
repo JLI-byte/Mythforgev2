@@ -51,7 +51,7 @@
   background: linear-gradient(165deg, rgba(var(--overlay-rgb), 0.16) 0%, rgba(var(--overlay-rgb), 0.07) 100%);
   backdrop-filter: blur(28px) saturate(1.5);
   border: 1px solid rgba(var(--overlay-rgb), 0.2);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   box-shadow:
     inset 0 1px 0 rgba(var(--overlay-rgb), 0.18),
     inset 0 -1px 0 rgba(var(--shadow-rgb), 0.18),
@@ -59,7 +59,7 @@
   display: flex;
   flex-direction: column;
   overflow: visible;
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow var(--dur-3) var(--ease-standard);
   user-select: none;
 }
 
@@ -130,8 +130,8 @@
   color: var(--muted);
   font-size: var(--text-sm);
   cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s;
+  border-radius: var(--radius-sm);
+  transition: all var(--dur-3);
   opacity: 0.5;
 }
 
@@ -162,7 +162,7 @@
   background: rgba(var(--accent-rgb), 0.1);
   color: var(--accent);
   padding: var(--space-1) var(--space-3);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   letter-spacing: 0.05em;
   font-weight: 800;
 }
@@ -172,12 +172,12 @@
   padding: 0 var(--space-4);
   background: rgba(var(--accent-rgb), 0.12);
   border: 1px solid rgba(var(--accent-rgb), 0.3);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   color: var(--accent);
   font-size: var(--text-2xs);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--dur-2);
   white-space: nowrap;
 }
 
@@ -215,7 +215,7 @@
   appearance: none;
   background: var(--background);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   color: var(--foreground);
   padding: var(--space-3) var(--space-5);
   font-size: var(--text-md);
@@ -243,7 +243,7 @@
 .writingZoneSelectInline {
   background: transparent;
   border: 1px solid rgba(var(--overlay-rgb), 0.1);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   color: var(--foreground);
   padding: var(--space-1) var(--space-2);
   font-size: var(--text-xs);
@@ -270,7 +270,7 @@
   background: linear-gradient(165deg, rgba(var(--overlay-rgb), 0.12) 0%, rgba(var(--overlay-rgb), 0.05) 100%);
   backdrop-filter: blur(24px) saturate(1.4);
   border: 1px solid rgba(var(--overlay-rgb), 0.16);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   box-shadow: inset 0 1px 0 rgba(var(--overlay-rgb), 0.16);
   overflow: hidden;
 }
@@ -299,13 +299,13 @@
   background: rgba(var(--overlay-rgb), 0.08);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(var(--overlay-rgb), 0.18);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--foreground);
   font-size: var(--text-xs);
   padding: var(--space-1) var(--space-2);
   cursor: pointer;
   outline: none;
-  transition: border-color 0.15s, background-color 0.15s;
+  transition: border-color var(--dur-2), background-color var(--dur-2);
 }
 
 .deskToolbarDropdown:hover {
@@ -332,9 +332,9 @@
   color: var(--muted);
   font-size: var(--text-xs);
   font-weight: 600;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--dur-2);
 }
 
 .deskFmtBtn:hover {
@@ -445,7 +445,7 @@
   flex-direction: column;
   height: 100%;
   padding: var(--space-5);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .stickyColorBar {
@@ -459,10 +459,10 @@
 .stickyColorDot {
   width: 14px;
   height: 14px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   border: 1px solid rgba(var(--overlay-rgb), 0.1);
   cursor: pointer;
-  transition: transform 0.1s ease;
+  transition: transform var(--dur-1) var(--ease-standard);
 }
 
 .stickyColorDot:hover {
@@ -524,7 +524,7 @@
   height: 100%;
   position: relative;
   overflow: hidden;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform var(--dur-4) var(--ease-spring);
 }
 
 .imagePinUpload {
@@ -536,7 +536,7 @@
   justify-content: center;
   gap: var(--space-5);
   border: 1px dashed rgba(var(--overlay-rgb), 0.1);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--muted);
   cursor: pointer;
   background: rgba(var(--overlay-rgb), 0.02);
@@ -563,7 +563,7 @@
   display: block;
   image-rendering: high-quality;
   image-rendering: -webkit-optimize-contrast;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--dur-4) var(--ease-standard);
 }
 
 .imagePinControls {
@@ -578,7 +578,7 @@
   gap: var(--space-3);
   opacity: 0;
   transform: translateY(10px);
-  transition: all 0.2s ease;
+  transition: all var(--dur-3) var(--ease-standard);
   pointer-events: none;
 }
 
@@ -612,7 +612,7 @@
   height: 4px;
   appearance: none;
   background: rgba(var(--overlay-rgb), 0.1);
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   outline: none;
 }
 
@@ -621,7 +621,7 @@
   width: 12px;
   height: 12px;
   background: var(--accent);
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   cursor: pointer;
 }
 
@@ -637,7 +637,7 @@
   background: color-mix(in srgb, var(--surface-high) 80%, transparent);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(var(--overlay-rgb), 0.14);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   padding: var(--space-2);
   gap: var(--space-2);
   box-shadow:
@@ -657,8 +657,8 @@
   color: var(--foreground);
   font-size: var(--text-lg);
   cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  border-radius: var(--radius-lg);
+  transition: all var(--dur-3) var(--ease-standard);
 }
 
 .zoomBtn:hover {
@@ -689,7 +689,7 @@
   height: 24px;
   background: rgba(var(--overlay-rgb), 0.05);
   border: 1px solid rgba(var(--overlay-rgb), 0.1);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   color: var(--foreground);
   font-size: var(--text-xs);
   font-weight: 600;
@@ -714,7 +714,7 @@
   height: 4px;
   appearance: none;
   background: rgba(var(--overlay-rgb), 0.1);
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   outline: none;
   margin: 0 var(--space-4);
   cursor: pointer;
@@ -725,10 +725,10 @@
   width: 12px;
   height: 12px;
   background: var(--accent);
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   cursor: pointer;
   box-shadow: 0 0 4px rgba(var(--shadow-rgb), 0.5);
-  transition: transform 0.1s ease;
+  transition: transform var(--dur-1) var(--ease-standard);
 }
 
 .zoomSlider::-webkit-slider-thumb:hover {
@@ -744,7 +744,7 @@
   background: var(--accent);
   color: var(--surface);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font-size: var(--text-2xs);
   font-weight: 700;
   text-transform: uppercase;
@@ -806,14 +806,14 @@
   right: 20px;
   padding: var(--space-3) var(--space-5);
   background: color-mix(in srgb, var(--surface-high) 80%, transparent);
-  border-radius: 20px;
+  border-radius: var(--radius-3xl);
   color: #a7f3d0;
   font-size: var(--text-xs);
   font-weight: 600;
   pointer-events: none;
   z-index: 200;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--dur-4) var(--ease-standard);
 }
 
 .saveIndicatorActive {
@@ -869,7 +869,7 @@
   padding: 0 var(--space-5);
   gap: var(--space-5);
   cursor: grab;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
   position: relative;
   overflow: hidden;
 }
@@ -908,7 +908,7 @@
   width: 4px;
   height: 4px;
   background: var(--foreground);
-  border-radius: 50%;
+  border-radius: var(--radius-full);
 }
 
 .dockedLeft { color: inherit; }
@@ -935,7 +935,7 @@
   height: 100%;
   width: 100%;
   overflow: hidden;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   position: relative;
   /* transparent — the frosted .deskWidget frame provides the surface */
   background-color: transparent;
@@ -1013,12 +1013,12 @@
   z-index: 10;
   background: rgba(var(--shadow-rgb), 0.5);
   border: 1px solid rgba(var(--overlay-rgb),0.15);
-  border-radius: 20px;
+  border-radius: var(--radius-3xl);
   color: var(--on-media);
   font-size: var(--text-xs);
   padding: var(--space-2) var(--space-5);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--dur-2);
 }
 
 .focusExitPill:hover {
@@ -1057,7 +1057,7 @@
   width: 130px;
   height: 174px;
   margin: 0 auto;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   object-fit: cover;
   flex-shrink: 0;
   box-shadow: 0 4px 12px rgba(var(--shadow-rgb), 0.5);
@@ -1068,7 +1068,7 @@
   width: 130px;
   height: 174px;
   margin: 0 auto;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1084,7 +1084,7 @@
   margin: var(--space-6) auto var(--space-4);
   padding: var(--space-4) var(--space-5);
   background: rgba(var(--overlay-rgb), 0.25);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   width: fit-content;
 }
 
@@ -1094,7 +1094,7 @@
   font-size: var(--text-lg);
   cursor: pointer;
   opacity: 0.7;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
   position: relative;
   display: flex;
   align-items: center;
@@ -1117,7 +1117,7 @@
   color: var(--surface);
   font-size: var(--text-2xs);
   padding: var(--space-2) var(--space-4);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -1144,7 +1144,7 @@
 .deskDrawGhost {
   border: 2px dashed var(--accent);
   background: rgba(var(--accent-rgb), 0.12);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   pointer-events: none;
   z-index: 1000;
   box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.3);
@@ -1159,14 +1159,14 @@
 .scopeSelector {
   background: rgba(var(--overlay-rgb), 0.3);
   border: 1px solid rgba(var(--accent-rgb), 0.15);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--muted);
   font-size: var(--text-2xs);
   font-weight: 800;
   padding: var(--space-1) var(--space-4);
   cursor: pointer;
   outline: none;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   opacity: 0.5;
@@ -1192,7 +1192,7 @@
   position: fixed;
   background: var(--surface-mid);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   box-shadow: 0 12px 40px rgba(var(--shadow-rgb), 0.7);
   padding: var(--space-6);
   z-index: 10000;
@@ -1230,10 +1230,10 @@
   justify-content: center;
   background: rgba(var(--overlay-rgb), 0.03);
   border: 1px solid rgba(var(--overlay-rgb), 0.08);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: var(--space-5);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
   gap: var(--space-2);
 }
 
@@ -1260,9 +1260,9 @@
   color: var(--muted);
   font-size: var(--text-2xs);
   padding: var(--space-3);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
 }
 
 .typePickerCancel:hover {
@@ -1291,13 +1291,13 @@
   background: none;
   border: none;
   padding: var(--space-2) var(--space-4);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   color: var(--muted);
   font-size: var(--text-xs);
   font-weight: 700;
   cursor: pointer !important;
   pointer-events: auto;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -1376,9 +1376,9 @@
   font-weight: 700;
   padding: var(--space-5);
   margin: 0 var(--space-6) 0 var(--space-6);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.19, 1, 0.22, 1);
+  transition: all var(--dur-3) var(--ease-out);
   width: calc(100% - 32px);
 }
 
@@ -1414,14 +1414,14 @@
   height: 40px;
   background: none;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--muted);
   font-size: var(--text-lg);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s;
+  transition: all var(--dur-2);
   flex-shrink: 0;
 }
 
@@ -1489,12 +1489,12 @@
   padding: var(--space-4);
   background: rgba(var(--overlay-rgb), 0.03);
   border: 1px dashed var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--muted);
   font-size: var(--text-xs);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1536,7 +1536,7 @@
   border-bottom: 1px solid rgba(var(--overlay-rgb), 0.05);
   color: var(--muted);
   cursor: pointer;
-  transition: color 0.15s, background 0.15s;
+  transition: color var(--dur-2), background var(--dur-2);
   text-align: left;
 }
 
@@ -1551,10 +1551,10 @@
   justify-content: center;
   width: 24px;
   height: 24px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   margin-top: calc(var(--space-1) * -1);
   flex-shrink: 0;
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--dur-2), color var(--dur-2);
 }
 
 .spineSceneListArrowContainer:hover {
@@ -1569,7 +1569,7 @@
   font-size: inherit;
   font-family: inherit;
   padding: var(--space-1) var(--space-2);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   width: 100%;
   outline: none;
   font-weight: 500;
@@ -1610,7 +1610,7 @@
   text-overflow: ellipsis;
   text-transform: none;
   letter-spacing: normal;
-  transition: color 0.15s;
+  transition: color var(--dur-2);
   cursor: pointer;
 }
 
@@ -1641,7 +1641,7 @@
   font-size: var(--text-xs);
   cursor: pointer;
   text-align: left;
-  transition: all 0.2s ease;
+  transition: all var(--dur-3) var(--ease-standard);
   width: 100%;
 }
 
@@ -1682,7 +1682,7 @@
   letter-spacing: 0.05em;
   text-align: left;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
   opacity: 0.7;
   margin-bottom: var(--space-2);
 }
@@ -1705,11 +1705,11 @@
   padding: var(--space-3);
   background: rgba(var(--overlay-rgb), 0.03);
   border: 1px dashed var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--muted);
   font-size: var(--text-2xs);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1770,7 +1770,7 @@
   font-size: var(--text-2xl);
   font-weight: 800;
   padding: var(--space-2) var(--space-4);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   outline: none;
   font-family: inherit;
   /* Above the --space scale: a page-top offset, not control rhythm. rem so it
@@ -1828,7 +1828,7 @@
   font-size: var(--text-lg);
   font-weight: 700;
   padding: var(--space-2) var(--space-4);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   outline: none;
   font-family: inherit;
   text-transform: uppercase;
@@ -1856,11 +1856,11 @@
   padding: var(--space-3) var(--space-6);
   background: none;
   border: 1px dashed var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--muted);
   cursor: pointer;
   font-size: var(--text-xs);
-  transition: all 0.15s;
+  transition: all var(--dur-2);
 }
 
 .binderEditorEmpty button:hover {
@@ -1881,7 +1881,7 @@
   cursor: pointer;
   color: var(--muted);
   font-size: var(--text-lg);
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--dur-2), color var(--dur-2);
 }
 
 .binderAddChapter:hover {
@@ -1902,7 +1902,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--dur-2), color var(--dur-2);
 }
 
 .binderNavArrow:hover {
@@ -1959,7 +1959,7 @@
   width: 280px;
   background: var(--surface-mid);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   box-shadow: 0 12px 40px rgba(var(--shadow-rgb), 0.7);
   z-index: 10000;
   display: flex;
@@ -1994,13 +1994,13 @@
 .historySaveBtn {
   background: rgba(var(--accent-rgb), 0.15);
   border: 1px solid rgba(var(--accent-rgb), 0.3);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--accent);
   font-size: var(--text-2xs);
   font-weight: 600;
   padding: var(--space-2) var(--space-5);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--dur-2);
 }
 
 .historySaveBtn:hover {
@@ -2027,7 +2027,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-5);
-  transition: background 0.15s;
+  transition: background var(--dur-2);
   border-bottom: 1px solid rgba(var(--overlay-rgb), 0.03);
 }
 
@@ -2060,7 +2060,7 @@
   background: rgba(var(--overlay-rgb), 0.08);
   color: var(--muted);
   padding: var(--space-1) var(--space-2);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
 }
 
 .historyItemMeta {
@@ -2083,11 +2083,11 @@
   justify-content: center;
   background: rgba(var(--overlay-rgb), 0.05);
   border: 1px solid rgba(var(--overlay-rgb), 0.08);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--muted);
   font-size: var(--text-md);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--dur-2);
 }
 
 .historyRestoreBtn:hover {
@@ -2141,7 +2141,7 @@
   width: 180px;
   background: var(--surface-mid);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 8px 32px rgba(var(--shadow-rgb), 0.5);
   z-index: 20000;
   padding: var(--space-3);
@@ -2170,12 +2170,12 @@
   padding: var(--space-5);
   background: none;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--muted);
   font-size: var(--text-md);
   cursor: pointer;
   text-align: left;
-  transition: all 0.15s;
+  transition: all var(--dur-2);
 }
 
 .modeOption:hover {
@@ -2214,7 +2214,7 @@
 .biblePinThumb {
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   object-fit: cover;
   border: 1px solid var(--border);
 }
@@ -2222,7 +2222,7 @@
 .biblePinThumbPlaceholder {
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   background: var(--surface-raised);
   display: flex;
   align-items: center;
@@ -2246,7 +2246,7 @@
   background: var(--accent-subtle, rgba(var(--overlay-rgb),0.08));
   color: var(--muted);
   padding: var(--space-1) var(--space-3);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   white-space: nowrap;
 }
 
@@ -2307,8 +2307,8 @@
   color: var(--muted);
   cursor: pointer;
   padding: var(--space-1) var(--space-2);
-  border-radius: 4px;
-  transition: all 0.2s;
+  border-radius: var(--radius-sm);
+  transition: all var(--dur-3);
 }
 
 .biblePinChangeBtn:hover {
@@ -2326,7 +2326,7 @@
   width: 100%;
   background: var(--input-bg, var(--background));
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: var(--space-4) var(--space-5);
   font-size: var(--text-sm);
   color: var(--foreground);
@@ -2353,7 +2353,7 @@
   border-bottom: 1px solid rgba(var(--overlay-rgb), 0.03);
   cursor: pointer;
   text-align: left;
-  transition: background 0.2s;
+  transition: background var(--dur-3);
 }
 
 .biblePinResultItem:hover {
@@ -2405,7 +2405,7 @@
 .sceneControlStatus {
   background: rgba(var(--overlay-rgb),0.05);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   color: var(--foreground);
   font-size: var(--text-2xs);
   font-weight: 600;
@@ -2420,7 +2420,7 @@
   color: var(--muted);
   cursor: pointer;
   opacity: 0.5;
-  transition: opacity 0.2s;
+  transition: opacity var(--dur-3);
   font-size: var(--text-sm);
   display: inline-flex;
   align-items: center;
@@ -2449,7 +2449,7 @@
 }
 .sceneControlScroll::-webkit-scrollbar-thumb {
   background: rgba(var(--overlay-rgb), 0.05);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
 }
 .sceneControlScroll::-webkit-scrollbar-thumb:hover {
   background: rgba(var(--overlay-rgb), 0.1);
@@ -2485,13 +2485,13 @@
 .sceneControlInput {
   background: rgba(var(--overlay-rgb), 0.2);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--foreground);
   font-size: var(--text-sm);
   padding: var(--space-4);
   width: 100%;
   outline: none;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
 }
 
 .sceneControlInput {
@@ -2559,12 +2559,12 @@
   margin-top: var(--space-2);
   background: rgba(var(--overlay-rgb),0.03);
   border: 1px dashed var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   color: var(--muted);
   font-size: var(--text-2xs);
   padding: var(--space-3);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
 }
 
 .sceneCheckAdd:hover {
@@ -2583,7 +2583,7 @@
   flex: 1;
   background: rgba(var(--overlay-rgb), 0.2);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   color: var(--foreground);
   font-size: var(--text-xs);
   padding: var(--space-3);
@@ -2604,7 +2604,7 @@
   height: 4px;
   appearance: none;
   background: rgba(var(--overlay-rgb),0.1);
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   outline: none;
   cursor: pointer;
 }
@@ -2614,7 +2614,7 @@
   width: 14px;
   height: 14px;
   background: var(--accent);
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   cursor: pointer;
   box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.4);
 }
@@ -2634,7 +2634,7 @@
   font-weight: 700;
   text-transform: uppercase;
   padding: var(--space-2) var(--space-4);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   color: var(--foreground);
   white-space: nowrap;
 }
@@ -2643,14 +2643,14 @@
   flex: 1;
   height: 6px;
   background: rgba(var(--overlay-rgb),0.05);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
 .sceneControlTensionFill {
   height: 100%;
   background: linear-gradient(to right, var(--accent), var(--danger));
-  transition: width 0.3s ease;
+  transition: width var(--dur-4) var(--ease-standard);
 }
 
 /* --- Character State Widget --- */
@@ -2676,7 +2676,7 @@
   flex: 1;
   background: rgba(var(--overlay-rgb),0.05);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   color: var(--foreground);
   font-size: var(--text-xs);
   font-weight: 600;
@@ -2704,7 +2704,7 @@
 }
 .charStateScroll::-webkit-scrollbar-thumb {
   background: rgba(var(--overlay-rgb), 0.05);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
 }
 
 .charStateHero {
@@ -2714,13 +2714,13 @@
   padding: var(--space-4);
   background: rgba(var(--overlay-rgb),0.02);
   border: 1px solid rgba(var(--overlay-rgb),0.05);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
 }
 
 .charStateAvatar {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   background: rgba(var(--accent-rgb), 0.1);
   border: 1px solid var(--accent);
   overflow: hidden;
@@ -2783,7 +2783,7 @@
 .charKnowledgeText {
   background: rgba(var(--overlay-rgb), 0.2);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   color: var(--foreground);
   font-size: var(--text-2xs);
   padding: var(--space-3);
@@ -2805,7 +2805,7 @@
   gap: var(--space-4);
   padding: var(--space-2) var(--space-4);
   background: rgba(var(--overlay-rgb),0.02);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   border: 1px solid rgba(var(--overlay-rgb),0.03);
 }
 
@@ -2833,12 +2833,12 @@
 .charRelAddSelect {
   background: rgba(var(--overlay-rgb),0.02);
   border: 1px dashed var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--muted);
   font-size: var(--text-2xs);
   padding: var(--space-3);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
   width: 100%;
   outline: none;
 }
@@ -2861,7 +2861,7 @@
 .charStateAvatarSmall {
   width: 24px;
   height: 24px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   background: rgba(var(--accent-rgb), 0.1);
   border: 1px solid var(--accent);
   overflow: hidden;
@@ -2925,7 +2925,7 @@
 }
 .continuityScroll::-webkit-scrollbar-thumb {
   background: rgba(var(--overlay-rgb), 0.05);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
 }
 
 /* Timeline Strip */
@@ -2935,7 +2935,7 @@
   gap: var(--space-2);
   padding: var(--space-5);
   background: rgba(var(--overlay-rgb), 0.15);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid rgba(var(--overlay-rgb),0.05);
 }
 
@@ -2964,7 +2964,7 @@
 .timelineDot {
   width: 12px;
   height: 12px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   border: 1px solid rgba(var(--overlay-rgb),0.2);
   background: var(--surface);
   z-index: 1;
@@ -3016,7 +3016,7 @@
 .continuityRuleText {
   background: rgba(var(--overlay-rgb), 0.2);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--foreground);
   font-size: var(--text-xs);
   padding: var(--space-4);
@@ -3038,7 +3038,7 @@
   align-items: flex-start;
   gap: var(--space-5);
   padding: var(--space-4) var(--space-5);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font-size: var(--text-xs);
   background: color-mix(in srgb, var(--danger) 5%, transparent);
   border: 1px solid color-mix(in srgb, var(--danger) 10%, transparent);
@@ -3061,7 +3061,7 @@
   margin-top: var(--space-2);
   background: transparent;
   border: 1px dashed var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   color: var(--muted);
   font-size: var(--text-2xs);
   padding: var(--space-2);
@@ -3096,14 +3096,14 @@
   background: color-mix(in srgb, var(--tertiary) 15%, transparent);
   color: var(--tertiary);
   padding: var(--space-1) var(--space-4);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   text-transform: uppercase;
 }
 
 .continuityTimelineMini {
   height: 4px;
   background: rgba(var(--overlay-rgb),0.05);
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   width: 100%;
   overflow: hidden;
 }
@@ -3111,7 +3111,7 @@
 .continuityTimelineMiniFill {
   height: 100%;
   background: var(--tertiary);
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
 }
 
 /* --- Structure Widget --- */
@@ -3145,10 +3145,10 @@
   font-size: var(--text-2xs);
   font-weight: 800;
   padding: var(--space-2) var(--space-5);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   text-transform: uppercase;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
 }
 
 .structureBtn:hover {
@@ -3174,7 +3174,7 @@
 }
 .structureScroll::-webkit-scrollbar-thumb {
   background: rgba(var(--overlay-rgb), 0.05);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
 }
 
 .beatList {
@@ -3186,13 +3186,13 @@
 .beatCard {
   background: rgba(var(--overlay-rgb),0.02);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: var(--space-5);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
   position: relative;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
 }
 
 .beatCardAct {
@@ -3258,7 +3258,7 @@
 .beatSceneSelect {
   background: rgba(var(--overlay-rgb), 0.25);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   color: var(--muted);
   font-size: var(--text-2xs);
   padding: var(--space-2);
@@ -3269,7 +3269,7 @@
 .pacingBarContainer {
   height: 4px;
   background: rgba(var(--overlay-rgb),0.05);
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   width: 100%;
   overflow: hidden;
   margin-top: var(--space-2);
@@ -3278,13 +3278,13 @@
 .pacingBarFill {
   height: 100%;
   background: var(--accent);
-  transition: width 0.3s ease;
+  transition: width var(--dur-4) var(--ease-standard);
 }
 
 .beatColorPicker {
   width: 20px;
   height: 20px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   border: 1px solid rgba(var(--overlay-rgb),0.1);
   cursor: pointer;
   padding: 0;
@@ -3343,9 +3343,9 @@
 .actSparkSeg {
   flex: 1;
   background: rgba(var(--overlay-rgb),0.05);
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   min-width: 4px;
-  transition: all 0.3s;
+  transition: all var(--dur-4);
   height: 30%;
 }
 
@@ -3382,7 +3382,7 @@
 }
 .researchScroll::-webkit-scrollbar-thumb {
   background: rgba(var(--overlay-rgb), 0.05);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
 }
 
 .moodboardGrid {
@@ -3395,12 +3395,12 @@
 .researchCard {
   background: rgba(var(--overlay-rgb), 0.03);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   position: relative;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform var(--dur-3), box-shadow var(--dur-3);
   cursor: default;
 }
 
@@ -3439,7 +3439,7 @@
   gap: var(--space-4);
   padding: var(--space-3) var(--space-4);
   background: rgba(var(--overlay-rgb), 0.15);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   border: 1px solid rgba(var(--overlay-rgb),0.03);
 }
 
@@ -3470,7 +3470,7 @@
   background: rgba(var(--accent-rgb), 0.1);
   color: var(--accent);
   padding: var(--space-1) var(--space-3);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   letter-spacing: 0.05em;
 }
 
@@ -3480,7 +3480,7 @@
   right: 6px;
   width: 24px;
   height: 24px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background: rgba(var(--overlay-rgb), 0.6);
   color: var(--foreground);
   border: 1px solid rgba(var(--overlay-rgb),0.1);
@@ -3490,7 +3490,7 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
   z-index: 2;
 }
 
@@ -3571,7 +3571,7 @@
   width: 100%;
   height: 10px;
   background: rgba(var(--overlay-rgb),0.04);
-  border-radius: 5px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   position: relative;
   border: 1px solid rgba(var(--overlay-rgb),0.02);
@@ -3580,7 +3580,7 @@
 .progressBarFill {
   height: 100%;
   background: linear-gradient(90deg, var(--accent), #ffdbb1);
-  transition: width 1.2s cubic-bezier(0.19, 1, 0.22, 1);
+  transition: width 1.2s var(--ease-out);
   box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.2);
 }
 
@@ -3596,7 +3596,7 @@
 .timer {
   background: rgba(var(--overlay-rgb), 0.25);
   border: 1px solid rgba(var(--overlay-rgb),0.05);
-  border-radius: 16px;
+  border-radius: var(--radius-2xl);
   padding: var(--space-7);
   display: flex;
   flex-direction: column;
@@ -3630,7 +3630,7 @@
 .timerBtn {
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   border: 1px solid rgba(var(--overlay-rgb),0.1);
   background: rgba(var(--overlay-rgb),0.03);
   color: var(--foreground);
@@ -3638,7 +3638,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--dur-3) var(--ease-standard);
 }
 
 .timerBtn:hover {
@@ -3741,7 +3741,7 @@
   position: absolute;
   width: 44px;
   height: 44px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   border: 2px solid var(--accent);
   background: var(--surface);
   display: flex;
@@ -3756,7 +3756,7 @@
 .mapNodeAvatar {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   object-fit: cover;
 }
 
@@ -3775,7 +3775,7 @@
   white-space: nowrap;
   background: rgba(var(--accent-rgb), 0.8);
   padding: var(--space-1) var(--space-3);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   pointer-events: none;
   letter-spacing: 0.02em;
 }
@@ -3792,7 +3792,7 @@
 
 .relLine {
   stroke-width: 2.5;
-  transition: stroke 0.3s;
+  transition: stroke var(--dur-4);
   stroke-dasharray: 6 4;
 }
 
@@ -3825,7 +3825,7 @@
   flex: 1;
   background: rgba(var(--overlay-rgb),0.05);
   border: 1px solid rgba(var(--overlay-rgb),0.08);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: var(--space-2) var(--space-4);
   font-size: var(--text-xs);
   color: var(--foreground);
@@ -3882,9 +3882,9 @@
   justify-content: space-between;
   padding: var(--space-5) var(--space-6);
   margin: var(--space-1) var(--space-5);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.19, 1, 0.22, 1);
+  transition: all var(--dur-3) var(--ease-out);
   border: 1px solid transparent;
 }
 
@@ -3926,14 +3926,14 @@
   font-family: var(--font-mono, monospace);
   background: rgba(var(--overlay-rgb),0.05);
   padding: var(--space-1) var(--space-4);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   font-weight: 700;
 }
 
 .sceneNavStatus {
   width: 10px;
   height: 10px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   flex-shrink: 0;
   border: 2px solid rgba(var(--overlay-rgb), 0.3);
 }
@@ -3957,7 +3957,7 @@
   color: var(--accent);
   background: rgba(var(--accent-rgb), 0.1);
   padding: var(--space-3) var(--space-6);
-  border-radius: 20px;
+  border-radius: var(--radius-3xl);
   border: 1px solid rgba(var(--accent-rgb), 0.2);
   cursor: pointer;
 }
@@ -3973,14 +3973,14 @@
   border: none;
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   font-size: var(--text-xl);
   font-weight: 300;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
   box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.3);
 }
 
@@ -3999,11 +3999,11 @@
   letter-spacing: 0.05em;
   padding: var(--space-4) var(--space-6);
   margin: var(--space-4) var(--space-5) var(--space-5) var(--space-5);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
   width: calc(100% - 20px);
   text-align: center;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
 }
 
 .addSceneBtnInline:hover {
@@ -4026,7 +4026,7 @@
   width: 4px;
   height: 4px;
   background: var(--muted);
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   margin: var(--space-2) 0;
 }
 
@@ -4034,9 +4034,9 @@
   width: 24px;
   height: 6px;
   background: rgba(var(--overlay-rgb),0.05);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all var(--dur-4);
 }
 
 .miniScenePill:hover {
@@ -4060,7 +4060,7 @@
 
 .modeDropdownScroll::-webkit-scrollbar-thumb {
   background: rgba(var(--overlay-rgb), 0.1);
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
 }
 
 .emptyWelcomeContainer {
@@ -4078,7 +4078,7 @@
   background: color-mix(in srgb, var(--surface) 85%, transparent);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(var(--overlay-rgb), 0.1);
-  border-radius: 24px;
+  border-radius: var(--radius-3xl);
   padding: var(--space-9);
   display: flex;
   flex-direction: column;
@@ -4103,7 +4103,7 @@
   width: 56px;
   height: 56px;
   background: var(--accent);
-  border-radius: 14px;
+  border-radius: var(--radius-2xl);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4150,10 +4150,10 @@
   padding: 0 var(--space-7);
   background: rgba(var(--overlay-rgb), 0.04);
   border: 1px solid rgba(var(--overlay-rgb), 0.08);
-  border-radius: 14px;
+  border-radius: var(--radius-2xl);
   color: var(--foreground);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--dur-3) var(--ease-standard);
 }
 
 .welcomeActionBtn:hover:not(:disabled) {
@@ -4196,10 +4196,10 @@
   gap: var(--space-5);
   background: rgba(var(--overlay-rgb), 0.02);
   border: 1px solid rgba(var(--overlay-rgb), 0.05);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   color: var(--muted);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--dur-3) var(--ease-standard);
 }
 
 .welcomeActionBtnSecondary:hover {
@@ -4212,7 +4212,7 @@
   max-height: 200px;
   overflow-y: auto;
   background: rgba(var(--overlay-rgb), 0.2);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   padding: var(--space-4);
   display: flex;
   flex-direction: column;
@@ -4234,12 +4234,12 @@
   padding: 0 var(--space-5);
   background: none;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   color: var(--muted);
   cursor: pointer;
   width: 100%;
   text-align: left;
-  transition: all 0.15s;
+  transition: all var(--dur-2);
 }
 
 .welcomeProjectItem:hover {
@@ -4250,7 +4250,7 @@
 .welcomeProjectColor {
   width: 10px;
   height: 10px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   flex-shrink: 0;
 }
 
@@ -4311,7 +4311,7 @@
 .coverEditorPreview {
   width: 100%;
   aspect-ratio: 2 / 3;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 12px 32px rgba(var(--shadow-rgb), 0.5);
   display: flex;
   align-items: center;
@@ -4337,7 +4337,7 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--dur-3) var(--ease-standard);
   cursor: pointer;
   color: white;
   font-weight: 700;
@@ -4354,11 +4354,11 @@
   color: var(--danger);
   border: 1px solid color-mix(in srgb, var(--danger) 20%, transparent);
   padding: var(--space-4);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
 }
 
 .coverEditorRemoveBtn:hover {
@@ -4390,12 +4390,12 @@
 .coverEditorField textarea {
   background: rgba(var(--overlay-rgb), 0.03);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: var(--space-5) var(--space-6);
   color: var(--foreground);
   font-size: var(--text-lg);
   outline: none;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
   font-family: inherit;
 }
 
@@ -4427,7 +4427,7 @@
   position: relative;
   width: calc(100% - 16px);
   margin: 0 var(--space-4) var(--space-5);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: 0 8px 25px rgba(var(--shadow-rgb), 0.4);
 }
@@ -4438,7 +4438,7 @@
   left: 8px;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--background) 60%, transparent);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(var(--overlay-rgb), 0.1);
@@ -4447,7 +4447,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--dur-4) var(--ease-standard);
   z-index: 10;
   font-size: var(--text-md);
 }
@@ -4485,9 +4485,9 @@
   background: rgba(var(--overlay-rgb), 0.03);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(var(--overlay-rgb), 0.08);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--dur-4) var(--ease-standard);
   gap: var(--space-5);
   box-shadow: 0 4px 15px rgba(var(--shadow-rgb), 0.2);
 }
@@ -4527,7 +4527,7 @@
   font-size: var(--text-2xs);
   font-weight: 900;
   padding: var(--space-1) var(--space-3);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: rgba(var(--overlay-rgb), 0.3);
   color: var(--muted);
   border: 1px solid rgba(var(--overlay-rgb), 0.05);
@@ -4573,7 +4573,7 @@
   outline: none;
   font-family: inherit;
   border-bottom: 1px solid transparent;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
 }
 
 .bookViewSeparatorInput:focus {
@@ -4643,7 +4643,7 @@
 .beatWidgetInfoBtn {
   width: 18px;
   height: 18px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   border: 1px solid rgba(var(--overlay-rgb), 0.2);
   background: none;
   color: var(--muted);
@@ -4652,7 +4652,7 @@
   font-family: Georgia, serif;
   line-height: 1;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--dur-2);
 }
 
 .beatWidgetInfoBtn:hover,
@@ -4709,7 +4709,7 @@
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-4) var(--space-6);
-  border-radius: 20px;
+  border-radius: var(--radius-3xl);
   border: 1px solid var(--border);
   background: var(--surface-mid);
   color: var(--foreground);
@@ -4717,7 +4717,7 @@
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 4px 16px rgba(var(--shadow-rgb), 0.3);
-  transition: all 0.2s;
+  transition: all var(--dur-3);
 }
 
 .methodPickerBtn:hover {
@@ -4730,7 +4730,7 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
-  border-radius: 20px;
+  border-radius: var(--radius-3xl);
   border: 1px solid var(--border);
   background: var(--surface-mid);
   color: var(--muted);
@@ -4738,7 +4738,7 @@
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 4px 16px rgba(var(--shadow-rgb), 0.3);
-  transition: all 0.2s;
+  transition: all var(--dur-3);
 }
 
 .clearCanvasBtn:hover {
@@ -4766,12 +4766,12 @@
 .researchScopeBtn {
   padding: var(--space-3) var(--space-6);
   font-size: var(--text-sm);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.25));
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  transition: background 150ms ease, color 150ms ease;
+  transition: background var(--dur-2) var(--ease-standard), color var(--dur-2) var(--ease-standard);
 }
 
 .researchScopeBtn:hover {
@@ -4804,13 +4804,13 @@
   flex: 0 0 auto;
   padding: var(--space-2) var(--space-5);
   font-size: var(--text-xs);
-  border-radius: 7px;
+  border-radius: var(--radius-lg);
   border: 1px solid transparent;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
   white-space: nowrap;
-  transition: background 130ms ease, color 130ms ease;
+  transition: background var(--dur-2) var(--ease-standard), color var(--dur-2) var(--ease-standard);
 }
 
 .boardTab:hover {
@@ -4833,7 +4833,7 @@
   font-size: var(--text-2xs);
   opacity: 0;
   color: var(--muted);
-  transition: opacity 120ms ease, color 120ms ease;
+  transition: opacity var(--dur-1) var(--ease-standard), color var(--dur-1) var(--ease-standard);
 }
 
 .boardTab:hover .boardTabDelete {
@@ -4852,7 +4852,7 @@
   color: var(--foreground);
   background: var(--background);
   border: 1px solid var(--accent);
-  border-radius: 5px;
+  border-radius: var(--radius-md);
   outline: none;
 }
 
@@ -4868,9 +4868,9 @@
   color: var(--muted);
   background: transparent;
   border: 1px dashed var(--border, rgba(var(--overlay-rgb), 0.35));
-  border-radius: 7px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: color 130ms ease, border-color 130ms ease;
+  transition: color var(--dur-2) var(--ease-standard), border-color var(--dur-2) var(--ease-standard);
 }
 
 .boardAddBtn:hover {
@@ -4918,7 +4918,7 @@
   color: var(--foreground);
   background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   opacity: 0.6;
 }
@@ -4957,9 +4957,9 @@
   color: var(--foreground);
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease;
+  transition: background var(--dur-1) var(--ease-standard), border-color var(--dur-1) var(--ease-standard);
 }
 
 .chatTrayTab:hover {
@@ -5003,7 +5003,7 @@
   line-height: 1;
   color: var(--on-accent);
   background: var(--accent);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .chatTrayDot {
@@ -5012,7 +5012,7 @@
   right: 0;
   width: 7px;
   height: 7px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   background: var(--accent);
 }
 
@@ -5051,7 +5051,7 @@
   color: var(--muted);
   background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   opacity: 0.7;
 }
@@ -5079,9 +5079,9 @@
   color: var(--foreground);
   background: color-mix(in srgb, var(--accent) 14%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   cursor: pointer;
-  transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+  transition: background var(--dur-2) var(--ease-standard), border-color var(--dur-2) var(--ease-standard), transform var(--dur-2) var(--ease-standard);
 }
 
 .researchBuildWorldBtn:hover:not(:disabled) {
@@ -5109,9 +5109,9 @@
   color: var(--muted);
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 7px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: background 120ms ease, color 120ms ease, opacity 120ms ease;
+  transition: background var(--dur-1) var(--ease-standard), color var(--dur-1) var(--ease-standard), opacity var(--dur-1) var(--ease-standard);
 }
 
 .creditTracker:hover {
@@ -5149,7 +5149,7 @@
   padding: var(--space-3);
   background: var(--background);
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.28));
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   box-shadow: 0 12px 32px rgba(var(--shadow-rgb), 0.4);
 }
 
@@ -5168,10 +5168,10 @@
   text-align: left;
   background: transparent;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
   color: var(--foreground);
-  transition: background 120ms ease;
+  transition: background var(--dur-1) var(--ease-standard);
 }
 
 .interviewMenuLaunch:hover {
@@ -5209,12 +5209,12 @@
   width: 30px;
   background: transparent;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
   color: var(--foreground);
   opacity: 0.5;
   font-size: var(--text-md);
-  transition: background 120ms ease, opacity 120ms ease;
+  transition: background var(--dur-1) var(--ease-standard), opacity var(--dur-1) var(--ease-standard);
 }
 
 .interviewMenuEdit:hover {
@@ -5230,7 +5230,7 @@
   background: transparent;
   border: none;
   border-top: 1px solid var(--border, rgba(var(--overlay-rgb), 0.2));
-  border-radius: 0 0 8px 8px;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   cursor: pointer;
   color: var(--accent);
   font-size: var(--text-xs);
@@ -5261,7 +5261,7 @@
   max-height: 88vh;
   background: var(--background);
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.28));
-  border-radius: 16px;
+  border-radius: var(--radius-2xl);
   box-shadow: 0 24px 64px rgba(var(--shadow-rgb), 0.5);
   overflow: hidden;
 }
@@ -5336,7 +5336,7 @@
   color: var(--foreground);
   background: var(--surface, rgba(var(--overlay-rgb), 0.06));
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.28));
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .interviewEditorTextarea {
@@ -5364,7 +5364,7 @@
   padding: var(--space-5);
   background: color-mix(in srgb, var(--foreground) 4%, transparent);
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.18));
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
 }
 
 .interviewEditorQuestionTop {
@@ -5382,7 +5382,7 @@
   justify-content: center;
   font-size: var(--text-xs);
   font-weight: 700;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--accent) 22%, transparent);
   color: var(--foreground);
 }
@@ -5401,7 +5401,7 @@
   justify-content: center;
   background: transparent;
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.22));
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   color: var(--foreground);
   opacity: 0.7;
@@ -5423,7 +5423,7 @@
   padding: var(--space-4) var(--space-5);
   background: transparent;
   border: 1px dashed var(--border, rgba(var(--overlay-rgb), 0.4));
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
   color: var(--accent);
   font-size: var(--text-xs);
@@ -5454,7 +5454,7 @@
 .interviewEditorCancel,
 .interviewEditorSave {
   padding: var(--space-4) var(--space-6);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
   font-size: var(--text-sm);
   font-weight: 600;
@@ -5500,7 +5500,7 @@
   overflow: hidden;
   background: var(--background);
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.28));
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
 }
 
 .suggestHeader {
@@ -5528,7 +5528,7 @@
   justify-content: center;
   font-size: var(--text-2xs);
   font-weight: 700;
-  border-radius: 9px;
+  border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--accent) 24%, transparent);
   color: var(--foreground);
 }
@@ -5541,7 +5541,7 @@
   color: var(--on-accent);
   background: var(--accent);
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   cursor: pointer;
 }
 
@@ -5573,7 +5573,7 @@
   gap: var(--space-3);
   padding: var(--space-4);
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.18));
-  border-radius: 9px;
+  border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--foreground) 4%, transparent);
 }
 
@@ -5607,7 +5607,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--accent) 30%, transparent);
   color: var(--foreground);
 }
@@ -5617,7 +5617,7 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
-  border-radius: 7px;
+  border-radius: var(--radius-lg);
   background: var(--background);
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.22));
   cursor: grab;
@@ -5632,7 +5632,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--accent) 18%, transparent);
   color: var(--foreground);
   opacity: 0.85;
@@ -5658,7 +5658,7 @@
   justify-content: center;
   background: transparent;
   border: none;
-  border-radius: 5px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   color: var(--foreground);
   opacity: 0.55;
@@ -5699,7 +5699,7 @@
 .suggestTarget {
   padding: var(--space-2) var(--space-4);
   font-size: var(--text-2xs);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.3));
   color: var(--foreground);
   opacity: 0.8;
@@ -5742,7 +5742,7 @@
   color: var(--foreground);
   background: color-mix(in srgb, var(--foreground) 4%, transparent);
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.25));
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .understandPrefs {
@@ -5763,7 +5763,7 @@
   padding: var(--space-4);
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.2));
   border-left: 3px solid color-mix(in srgb, var(--tertiary) 70%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--foreground) 4%, transparent);
 }
 
@@ -5803,7 +5803,7 @@
   padding: var(--space-2) var(--space-5);
   font-size: var(--text-2xs);
   font-weight: 600;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.3));
   background: transparent;
@@ -5847,9 +5847,9 @@
   color: var(--foreground);
   background: color-mix(in srgb, var(--accent) 8%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
-  border-radius: 9px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: background 130ms ease, border-color 130ms ease, transform 130ms ease;
+  transition: background var(--dur-2) var(--ease-standard), border-color var(--dur-2) var(--ease-standard), transform var(--dur-2) var(--ease-standard);
 }
 
 .chatOption:hover:not(:disabled) {
@@ -5880,9 +5880,9 @@
   background: color-mix(in srgb, var(--accent) 12%, transparent);
   border: none;
   border-bottom: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background 120ms ease;
+  transition: background var(--dur-1) var(--ease-standard);
 }
 
 .entityChip:hover {
@@ -5900,7 +5900,7 @@
 .genImageImg {
   width: 100%;
   max-width: 100%;
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.25));
   display: block;
 }
@@ -5919,7 +5919,7 @@
   color: var(--on-accent);
   background: var(--accent);
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   cursor: pointer;
 }
 
@@ -5932,7 +5932,7 @@
   color: var(--foreground);
   background: var(--surface, rgba(var(--overlay-rgb), 0.06));
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.3));
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
 }
 
@@ -5955,10 +5955,10 @@
   line-height: 1;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 7px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
   opacity: 0.55;
-  transition: opacity 120ms ease, background 120ms ease;
+  transition: opacity var(--dur-1) var(--ease-standard), background var(--dur-1) var(--ease-standard);
 }
 
 .chatReactBtn:hover:not(:disabled) {
@@ -5988,7 +5988,7 @@
   font-size: var(--text-xs);
   background: color-mix(in srgb, var(--accent) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .chatAttachmentIcon { flex: 0 0 auto; }
@@ -6011,7 +6011,7 @@
   justify-content: center;
   background: transparent;
   border: none;
-  border-radius: 5px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   color: var(--foreground);
   opacity: 0.6;
@@ -6034,7 +6034,7 @@
   font-size: var(--text-xs);
   background: color-mix(in srgb, var(--accent) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .chatImageThumb {
@@ -6042,7 +6042,7 @@
   width: 34px;
   height: 34px;
   object-fit: cover;
-  border-radius: 5px;
+  border-radius: var(--radius-md);
 }
 
 /* ── Voice dictation button ──────────────────────────────── */
@@ -6066,8 +6066,8 @@
   padding: var(--space-5) var(--space-5) var(--space-4);
   background: var(--surface-2, rgba(var(--overlay-rgb), 0.07));
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.28));
-  border-radius: 14px;
-  transition: border-color 140ms ease, box-shadow 140ms ease;
+  border-radius: var(--radius-2xl);
+  transition: border-color var(--dur-2) var(--ease-standard), box-shadow var(--dur-2) var(--ease-standard);
 }
 
 /* Slash-command palette, floating above the composer. */
@@ -6083,7 +6083,7 @@
   padding: var(--space-2);
   background: var(--background);
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.3));
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   box-shadow: 0 -8px 28px -10px rgba(var(--shadow-rgb), 0.55);
   z-index: 30;
 }
@@ -6098,7 +6098,7 @@
   color: var(--foreground);
   background: transparent;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
 }
 
@@ -6196,9 +6196,9 @@
   color: var(--foreground);
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 7px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease;
+  transition: background var(--dur-1) var(--ease-standard), border-color var(--dur-1) var(--ease-standard);
 }
 
 .modelPickerBtn:hover:not(:disabled) {
@@ -6226,7 +6226,7 @@
   flex: 0 0 auto;
   width: 6px;
   height: 6px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   background: #d97757;
 }
 
@@ -6242,7 +6242,7 @@
   padding: var(--space-3);
   background: var(--background);
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.3));
-  border-radius: 11px;
+  border-radius: var(--radius-xl);
   box-shadow: 0 -8px 28px -10px rgba(var(--shadow-rgb), 0.55);
   z-index: 40;
 }
@@ -6267,7 +6267,7 @@
   color: var(--foreground);
   background: transparent;
   border: none;
-  border-radius: 7px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
 }
 
@@ -6313,7 +6313,7 @@
   color: var(--foreground);
   background: var(--surface-2, rgba(var(--overlay-rgb), 0.08));
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.28));
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   outline: none;
 }
 
@@ -6336,7 +6336,7 @@
 
 .contextRingFill {
   stroke: var(--accent);
-  transition: stroke-dasharray 220ms ease, stroke 220ms ease;
+  transition: stroke-dasharray var(--dur-3) var(--ease-standard), stroke var(--dur-3) var(--ease-standard);
 }
 
 .contextRing_warn .contextRingFill { stroke: var(--tertiary); }
@@ -6359,10 +6359,10 @@
   color: var(--foreground);
   background: transparent;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
   opacity: 0.6;
-  transition: opacity 120ms ease, background 120ms ease;
+  transition: opacity var(--dur-1) var(--ease-standard), background var(--dur-1) var(--ease-standard);
 }
 
 .composerIconBtn:hover {
@@ -6393,9 +6393,9 @@
      requirement at this size and weight. */
   background: #b8532c;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   cursor: pointer;
-  transition: background 120ms ease, opacity 120ms ease;
+  transition: background var(--dur-1) var(--ease-standard), opacity var(--dur-1) var(--ease-standard);
 }
 
 .composerSendBtn:hover:not(:disabled) {
@@ -6507,7 +6507,7 @@
     align-items: center;
     padding: var(--space-2);
     border: 1px solid var(--border-subtle, rgba(var(--overlay-rgb), 0.1));
-    border-radius: 6px;
+    border-radius: var(--radius-md);
 }
 
 .vnChoiceText { grid-area: text; border: none; background: transparent; font: inherit; min-width: 0; }
@@ -6522,7 +6522,7 @@
     height: 12px;
     padding: 0;
     border: 2px solid rgba(124, 92, 255, 0.8);
-    border-radius: 50%;
+    border-radius: var(--radius-full);
     background: transparent;
     cursor: crosshair;
 }
@@ -6558,7 +6558,7 @@
 .vnChipCondition {
     font-size: var(--text-2xs);
     padding: var(--space-1) var(--space-3);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     white-space: nowrap;
 }
 
@@ -6703,7 +6703,7 @@
   color: var(--foreground);
   background: var(--surface, rgba(var(--overlay-rgb), 0.06));
   border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.25));
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   resize: vertical;
 }
 

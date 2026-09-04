@@ -15,7 +15,7 @@
 .setupBanner {
     background: linear-gradient(135deg, var(--surface-mid), var(--surface-high));
     border: 1px solid rgba(var(--overlay-rgb), 0.08);
-    border-radius: 10px;
+    border-radius: var(--radius-xl);
     padding: var(--space-6);
     margin: var(--space-5);
 }
@@ -43,11 +43,11 @@
     border: 1px solid rgba(var(--overlay-rgb), 0.2);
     background: transparent;
     color: rgba(var(--overlay-rgb), 0.7);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     padding: var(--space-3) var(--space-5);
     font-size: var(--text-sm);
     cursor: pointer;
-    transition: all 150ms ease;
+    transition: all var(--dur-2) var(--ease-standard);
     flex: 1;
 }
 
@@ -75,10 +75,10 @@
     font-weight: 700;
     font-size: var(--text-md);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     padding: var(--space-4);
     cursor: pointer;
-    transition: opacity 150ms ease;
+    transition: opacity var(--dur-2) var(--ease-standard);
 }
 
 .setupStartBtn:hover {
@@ -92,7 +92,7 @@
 .todayCard {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
     margin: 0 var(--space-5) var(--space-5) var(--space-5);
     padding: var(--space-6);
     display: flex;
@@ -171,7 +171,7 @@
     color: var(--accent);
     cursor: pointer;
     opacity: 0.6;
-    transition: opacity 0.15s ease;
+    transition: opacity var(--dur-2) var(--ease-standard);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -268,7 +268,7 @@
     width: 100%;
     aspect-ratio: 1;
     max-width: 28px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -377,7 +377,7 @@
 .projectCard {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     padding: var(--space-5);
 }
 
@@ -405,7 +405,7 @@
 .projectShareIcon {
     opacity: 0.4;
     cursor: pointer;
-    transition: opacity 0.15s ease;
+    transition: opacity var(--dur-2) var(--ease-standard);
     color: var(--accent);
     display: inline-flex;
     align-items: center;
@@ -427,7 +427,7 @@
 
 .progressBar {
     height: 4px;
-    border-radius: 2px;
+    border-radius: var(--radius-xs);
     background: var(--border);
     overflow: hidden;
     margin-bottom: var(--space-2);
@@ -435,8 +435,8 @@
 
 .progressFill {
     height: 100%;
-    border-radius: 2px;
-    transition: width 300ms ease;
+    border-radius: var(--radius-xs);
+    transition: width var(--dur-4) var(--ease-standard);
 }
 
 .projectPct {
@@ -479,7 +479,7 @@
 .badgeCard {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     padding: var(--space-4);
     display: flex;
     align-items: center;
@@ -517,7 +517,7 @@
     color: var(--accent);
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.15s ease;
+    transition: opacity var(--dur-2) var(--ease-standard);
     display: inline-flex;
     align-items: center;
     justify-content: center;

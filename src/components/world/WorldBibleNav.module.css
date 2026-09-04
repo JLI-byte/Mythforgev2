@@ -20,8 +20,8 @@
     color: var(--muted);
     padding: var(--space-2) var(--space-3);
     cursor: pointer;
-    border-radius: 4px;
-    transition: color 150ms ease, opacity 150ms ease;
+    border-radius: var(--radius-sm);
+    transition: color var(--dur-2) var(--ease-standard), opacity var(--dur-2) var(--ease-standard);
     line-height: 1;
     display: inline-flex;
     align-items: center;
@@ -70,8 +70,8 @@
     border: none;
     padding: var(--space-2) var(--space-3);
     cursor: pointer;
-    border-radius: 4px;
-    transition: opacity 150ms ease;
+    border-radius: var(--radius-sm);
+    transition: opacity var(--dur-2) var(--ease-standard);
     line-height: 1;
     display: inline-flex;
     align-items: center;

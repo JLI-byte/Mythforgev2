@@ -11,7 +11,7 @@
   z-index: 70;
   width: min(360px, calc(100% - 36px));
   padding: var(--space-5) var(--space-6) var(--space-5);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   border: 1px solid rgba(var(--overlay-rgb), 0.16);
   background: var(--surface-mid);
   box-shadow: 0 12px 32px rgba(var(--shadow-rgb), 0.34);
@@ -35,7 +35,7 @@
   display: flex;
   padding: var(--space-2);
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background: none;
   color: var(--muted);
   cursor: pointer;

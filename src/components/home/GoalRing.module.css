@@ -15,7 +15,7 @@
 .progressTrack { stroke: rgba(var(--overlay-rgb), 0.11); }
 .progressFill {
   stroke: var(--accent);
-  transition: stroke-dasharray 0.5s cubic-bezier(0.23, 1, 0.32, 1), stroke 0.3s ease;
+  transition: stroke-dasharray var(--dur-5) var(--ease-out), stroke var(--dur-4) var(--ease-standard);
 }
 .progressDone { stroke: #6ee7b7; }
 
@@ -31,7 +31,7 @@
 .dialTrack { stroke: rgba(var(--overlay-rgb), 0.13); }
 .dialFill {
   stroke: rgba(var(--overlay-rgb), 0.4);
-  transition: stroke 0.15s ease;
+  transition: stroke var(--dur-2) var(--ease-standard);
 }
 .dialHit {
   stroke: transparent;
@@ -41,7 +41,7 @@
   fill: var(--foreground, var(--surface));
   stroke: rgba(var(--shadow-rgb), 0.35);
   stroke-width: 1;
-  transition: r 0.15s ease, fill 0.15s ease;
+  transition: r var(--dur-2) var(--ease-standard), fill var(--dur-2) var(--ease-standard);
 }
 
 .dial:hover .dialFill,
@@ -75,7 +75,7 @@
   font-size: var(--text-2xs);
   color: var(--muted);
   font-variant-numeric: tabular-nums;
-  transition: color 0.15s ease;
+  transition: color var(--dur-2) var(--ease-standard);
 }
 .ringTargetLive {
   color: var(--accent);

@@ -28,7 +28,7 @@
     max-height: 100%;
     overflow: hidden;
     background: transparent;
-    transition: background-color 500ms ease;
+    transition: background-color var(--dur-5) var(--ease-standard);
 }
 
 /* Sidebar transitions for smooth focus mode animation */
@@ -36,7 +36,7 @@
     flex-shrink: 0;
     height: 100%;
     overflow: hidden;
-    transition: width 200ms ease, opacity 200ms ease;
+    transition: width var(--dur-3) var(--ease-standard), opacity var(--dur-3) var(--ease-standard);
 }
 
 /* Fullscreen Mode Overrides */
@@ -56,12 +56,12 @@
 .focusMode [class*="sideTabContainer"] {
     opacity: 0 !important;
     pointer-events: none !important;
-    transition: opacity 200ms ease !important;
+    transition: opacity var(--dur-3) var(--ease-standard) !important;
 }
 .focusMode [class*="panelContainer"] {
     opacity: 0 !important;
     pointer-events: none !important;
-    transition: opacity 200ms ease !important;
+    transition: opacity var(--dur-3) var(--ease-standard) !important;
 }
 
 /* Remove editor right padding when panels are hidden */
@@ -70,7 +70,7 @@
 }
 
 .toolbarContainer {
-    transition: opacity 0.3s ease;
+    transition: opacity var(--dur-4) var(--ease-standard);
 }
 
 .fullscreenMode .toolbarContainer {
@@ -123,7 +123,7 @@
     padding: var(--space-4) var(--space-6);
     background: var(--accent);
     color: var(--on-accent);
-    border-bottom-right-radius: 6px;
+    border-bottom-right-radius: var(--radius-md);
     font-size: var(--text-md);
     font-weight: 600;
     text-decoration: none;

@@ -25,7 +25,7 @@
 .panel {
     background: var(--background);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     width: 500px;
     max-width: 90vw;
     box-shadow: 0 4px 20px rgba(var(--shadow-rgb), 0.15);
@@ -132,7 +132,7 @@
     border: 1px solid var(--border);
     color: var(--foreground);
     padding: var(--space-5) var(--space-6);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     font-size: var(--text-md);
     font-weight: 500;
     cursor: pointer;
@@ -140,7 +140,7 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-4);
-    transition: background 0.2s, border-color 0.2s;
+    transition: background var(--dur-3), border-color var(--dur-3);
 }
 
 .fullWidthBtn {
@@ -167,7 +167,7 @@
     padding: var(--space-5) var(--space-6);
     background: rgba(255, 77, 79, 0.1);
     border: 1px solid var(--error);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     color: var(--error);
     font-size: var(--text-md);
 }
@@ -177,7 +177,7 @@
     width: 14px;
     border: 2px solid rgba(var(--overlay-rgb), 0.1);
     border-top: 2px solid var(--foreground);
-    border-radius: 50%;
+    border-radius: var(--radius-full);
     animation: spin 1s linear infinite;
     display: inline-block;
 }
@@ -202,10 +202,10 @@
     border: 1px solid var(--border);
     background: transparent;
     color: var(--text-secondary);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     font-size: var(--text-md);
     cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
+    transition: background var(--dur-2) var(--ease-standard), color var(--dur-2) var(--ease-standard);
 }
 
 .scopeTab:hover:not(:disabled) {
@@ -258,7 +258,7 @@
     resize: vertical;
     padding: var(--space-4);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     background: var(--surface);
     color: var(--text-primary);
     font: inherit;
@@ -276,7 +276,7 @@
     max-height: 190px;
     overflow-y: auto;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
 }
 
 .chapterRow {

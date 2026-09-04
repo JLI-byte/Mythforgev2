@@ -74,7 +74,7 @@
     width: 24rem;
     height: 9rem;
     transform: translateY(-40%);
-    border-radius: 999px;
+    border-radius: var(--radius-full);
     background: rgba(255, 255, 255, 0.45);
     filter: blur(80px);
     animation: lc-login-glow 0.9s ease-in-out 0.25s both;
@@ -124,7 +124,7 @@
     color: rgba(236, 236, 236, 0.7);
     text-decoration: none;
     font-size: var(--text-md);
-    transition: color 150ms ease;
+    transition: color var(--dur-2) var(--ease-standard);
 }
 .navBack:hover { color: #fff; }
 
@@ -146,7 +146,7 @@
     padding: clamp(1.75rem, 4vw, 2.5rem);
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(236, 236, 236, 0.12);
-    border-radius: 16px;
+    border-radius: var(--radius-2xl);
     backdrop-filter: blur(12px);
     box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.8);
     animation: lc-login-rise 0.8s ease-in-out 0.25s both;
@@ -193,9 +193,9 @@
     color: #ececec;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(236, 236, 236, 0.16);
-    border-radius: 10px;
+    border-radius: var(--radius-xl);
     outline: none;
-    transition: border-color 150ms ease, background 150ms ease;
+    transition: border-color var(--dur-2) var(--ease-standard), background var(--dur-2) var(--ease-standard);
 }
 
 .fieldInput::placeholder { color: rgba(236, 236, 236, 0.32); }
@@ -216,9 +216,9 @@
     color: #0a0a0b;
     background: #f5f5f5;
     border: none;
-    border-radius: 999px;
+    border-radius: var(--radius-full);
     cursor: pointer;
-    transition: transform 150ms ease, background 150ms ease, opacity 150ms ease;
+    transition: transform var(--dur-2) var(--ease-standard), background var(--dur-2) var(--ease-standard), opacity var(--dur-2) var(--ease-standard);
 }
 
 .submit:hover:not(:disabled) {
@@ -236,7 +236,7 @@
 .notice {
     margin-top: var(--space-6);
     padding: var(--space-5) var(--space-6);
-    border-radius: 10px;
+    border-radius: var(--radius-xl);
     font-size: var(--text-md);
     line-height: 1.5;
     text-align: center;
@@ -280,7 +280,7 @@
     color: rgba(236, 236, 236, 0.85);
     text-decoration: none;
     border-bottom: 1px solid rgba(236, 236, 236, 0.3);
-    transition: color 150ms ease, border-color 150ms ease;
+    transition: color var(--dur-2) var(--ease-standard), border-color var(--dur-2) var(--ease-standard);
 }
 
 .footnoteLink:hover {
@@ -299,9 +299,9 @@
     color: rgba(236, 236, 236, 0.6);
     background: none;
     border: 1px dashed rgba(236, 236, 236, 0.22);
-    border-radius: 10px;
+    border-radius: var(--radius-xl);
     cursor: pointer;
-    transition: background 150ms ease, color 150ms ease;
+    transition: background var(--dur-2) var(--ease-standard), color var(--dur-2) var(--ease-standard);
 }
 
 .devButton:hover:not(:disabled) {

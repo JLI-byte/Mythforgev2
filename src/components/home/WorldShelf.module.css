@@ -47,7 +47,7 @@
   height: calc(100% - 12px);
   padding: 0;
   border: none;
-  border-radius: 2px 2px 1px 1px;
+  border-radius: var(--radius-xs) var(--radius-xs) var(--radius-xs) var(--radius-xs);
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -57,7 +57,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  transition: transform 0.18s cubic-bezier(0.23, 1, 0.32, 1), filter 0.18s ease;
+  transition: transform var(--dur-3) var(--ease-out), filter var(--dur-3) var(--ease-standard);
   /* A spine is a board seen edge-on: one lit edge, one shadowed. */
   box-shadow:
     inset 2px 0 0 rgba(255, 255, 255, 0.18),
@@ -155,7 +155,7 @@
   scroll-snap-align: start;
   padding: 0;
   border: none;
-  border-radius: 2px 4px 4px 2px;
+  border-radius: var(--radius-xs) var(--radius-sm) var(--radius-sm) var(--radius-xs);
   background-size: cover;
   background-position: center;
   cursor: pointer;
@@ -163,7 +163,7 @@
     inset 4px 0 0 rgba(var(--shadow-rgb), 0.32),
     inset -1px 0 0 rgba(255, 255, 255, 0.1),
     0 2px 6px rgba(var(--shadow-rgb), 0.35);
-  transition: transform 0.15s ease;
+  transition: transform var(--dur-2) var(--ease-standard);
 }
 
 .noStories {
@@ -188,7 +188,7 @@
   border: none;
   cursor: pointer;
   opacity: 0.75;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--dur-2) var(--ease-standard);
 }
 .bibleLink:hover { opacity: 1; }
 
@@ -245,7 +245,7 @@
   height: 32px;
   padding: 0;
   border: 1px solid rgba(var(--overlay-rgb), 0.14);
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   color: var(--foreground, var(--surface));
   background: rgba(var(--background-rgb), 0.86);
   backdrop-filter: blur(8px);
@@ -254,7 +254,7 @@
      there is more, so the control only appears when it is wanted. */
   opacity: 0;
   transform: translateY(-50%);
-  transition: opacity 0.15s ease, background 0.15s ease;
+  transition: opacity var(--dur-2) var(--ease-standard), background var(--dur-2) var(--ease-standard);
 }
 .coversRow:hover .pager { opacity: 1; }
 .pager:hover { background: var(--surface-high); }
@@ -281,11 +281,11 @@
   align-items: center;
   justify-content: center;
   border: 1px dashed rgba(var(--overlay-rgb), 0.22);
-  border-radius: 2px 2px 1px 1px;
+  border-radius: var(--radius-xs) var(--radius-xs) var(--radius-xs) var(--radius-xs);
   background: none;
   color: var(--muted);
   cursor: pointer;
-  transition: color 0.15s ease, border-color 0.15s ease, transform 0.18s ease;
+  transition: color var(--dur-2) var(--ease-standard), border-color var(--dur-2) var(--ease-standard), transform var(--dur-3) var(--ease-standard);
 }
 .addSpine:hover {
   color: var(--foreground, var(--surface));
@@ -302,11 +302,11 @@
   align-items: center;
   justify-content: center;
   border: 1px dashed rgba(var(--overlay-rgb), 0.22);
-  border-radius: 2px 4px 4px 2px;
+  border-radius: var(--radius-xs) var(--radius-sm) var(--radius-sm) var(--radius-xs);
   background: none;
   color: var(--muted);
   cursor: pointer;
-  transition: color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  transition: color var(--dur-2) var(--ease-standard), border-color var(--dur-2) var(--ease-standard), transform var(--dur-2) var(--ease-standard);
 }
 .addCover:hover {
   color: var(--foreground, var(--surface));
@@ -339,9 +339,9 @@
   color: var(--foreground, var(--surface));
   background: rgba(var(--overlay-rgb), 0.06);
   border: 1px solid rgba(var(--overlay-rgb), 0.16);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   outline: none;
-  transition: border-color 0.15s ease;
+  transition: border-color var(--dur-2) var(--ease-standard);
 }
 .createInput:focus { border-color: var(--accent); }
 
@@ -353,7 +353,7 @@
   color: var(--background);
   background: var(--foreground, var(--surface));
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
 }
 .createSave:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -364,7 +364,7 @@
   color: var(--muted);
   background: none;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
 }
 .createCancel:hover { color: var(--foreground, var(--surface)); }

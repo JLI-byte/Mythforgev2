@@ -37,7 +37,7 @@
   border: none;
   color: var(--muted);
   cursor: pointer;
-  transition: color 0.25s ease;
+  transition: color var(--dur-4) var(--ease-standard);
 }
 
 .modeBtn:hover {
@@ -63,7 +63,7 @@
   border-right: 1px solid var(--glass-border, rgba(var(--overlay-rgb), 0.1));
   color: var(--muted);
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color var(--dur-3) var(--ease-standard);
 }
 .homeBtn:hover,
 .homeBtnActive {
@@ -81,9 +81,9 @@
 }
 .limelightReady {
   transition:
-    left 0.42s cubic-bezier(0.5, 0.15, 0.15, 1),
-    width 0.42s cubic-bezier(0.5, 0.15, 0.15, 1),
-    opacity 0.3s ease;
+    left var(--dur-5) cubic-bezier(0.5, 0.15, 0.15, 1),
+    width var(--dur-5) cubic-bezier(0.5, 0.15, 0.15, 1),
+    opacity var(--dur-4) var(--ease-standard);
 }
 .limelightHidden {
   opacity: 0;
@@ -96,7 +96,7 @@
   left: 12%;
   right: 12%;
   height: 2px;
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   background: #ffffff;
   box-shadow:
     0 0 10px 1px rgba(255, 255, 255, 0.85),
@@ -131,13 +131,13 @@
   align-items: center;
   background: rgba(var(--overlay-rgb), 0.06);
   border: 1px solid rgba(var(--overlay-rgb), 0.1);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 0 var(--space-5);
   gap: var(--space-3);
   /* Was 32: the input inside rendered a 20px-tall target. */
   height: 40px;
   width: 240px;
-  transition: border-color 0.15s, background 0.15s, width 0.2s;
+  transition: border-color var(--dur-2), background var(--dur-2), width var(--dur-3);
 }
 
 .searchInputWrapper:focus-within {
@@ -181,7 +181,7 @@
   padding: 0;
   opacity: 0.5;
   flex-shrink: 0;
-  transition: opacity 0.15s;
+  transition: opacity var(--dur-2);
 }
 
 .searchClear:hover { opacity: 1; }
@@ -197,7 +197,7 @@
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   box-shadow: var(--glass-shadow);
   overflow: hidden;
   z-index: 9999;
@@ -226,7 +226,7 @@
   cursor: pointer;
   text-align: left;
   width: 100%;
-  transition: background 0.1s;
+  transition: background var(--dur-1);
 }
 
 .searchResult:last-child {
@@ -313,8 +313,8 @@
   cursor: pointer;
   font-size: var(--text-lg);
   padding: var(--space-2) var(--space-4);
-  border-radius: 4px;
-  transition: background 0.15s, color 0.15s;
+  border-radius: var(--radius-sm);
+  transition: background var(--dur-2), color var(--dur-2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -352,9 +352,9 @@
   padding: var(--space-2) var(--space-5) var(--space-2) var(--space-2);
   background: rgba(var(--overlay-rgb), 0.03);
   border: 1px solid rgba(var(--overlay-rgb), 0.08);
-  border-radius: 20px;
+  border-radius: var(--radius-3xl);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--dur-3) var(--ease-standard);
 }
 
 .profilePill:hover {
@@ -365,7 +365,7 @@
 .profileAvatar {
   width: 26px;
   height: 26px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   object-fit: cover;
   border: 1px solid var(--accent);
 }
@@ -373,7 +373,7 @@
 .profileAvatarPlaceholder {
   width: 26px;
   height: 26px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   background: linear-gradient(135deg, var(--accent), var(--accent-dim));
   display: flex;
   align-items: center;
@@ -412,7 +412,7 @@
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   overflow: hidden;
   box-shadow: var(--glass-shadow);
   z-index: 1001;
@@ -448,7 +448,7 @@
   font-size: var(--text-xs);
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background var(--dur-2);
 }
 
 .dropdownItem:hover {
@@ -471,12 +471,12 @@
   padding: var(--space-3) var(--space-6);
   background: rgba(var(--accent-rgb), 0.1);
   border: 1px solid rgba(var(--accent-rgb), 0.2);
-  border-radius: 20px;
+  border-radius: var(--radius-3xl);
   color: var(--accent);
   font-size: var(--text-xs);
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--dur-3) var(--ease-standard);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }

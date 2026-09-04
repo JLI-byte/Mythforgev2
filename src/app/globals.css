@@ -555,7 +555,7 @@ a:hover {
 .entity-tag {
   border-bottom: 1px solid var(--accent);
   cursor: pointer;
-  transition: border-bottom-color 0.2s ease;
+  transition: border-bottom-color var(--dur-3) var(--ease-standard);
 }
 
 .entity-tag:hover {
@@ -571,7 +571,7 @@ a:hover {
 }
 [data-scroll="main"]::-webkit-scrollbar-thumb {
     background: var(--border);
-    border-radius: 99px;
+    border-radius: var(--radius-full);
 }
 [data-scroll="main"]::-webkit-scrollbar-thumb:hover {
     background: var(--accent);
@@ -586,8 +586,8 @@ a:hover {
   background: #0e0e0e;
 }
 ::-webkit-scrollbar-thumb {
-  background: #353534;
-  border-radius: 10px;
+  background: rgba(var(--overlay-rgb), 0.2);
+  border-radius: var(--radius-lg);
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent);
@@ -596,18 +596,18 @@ a:hover {
 /* FindReplace ProseMirror decorations — applied by custom FindReplace extension */
 .lorecanvas-search-match {
     background-color: rgba(255, 215, 0, 0.35);
-    border-radius: 2px;
+    border-radius: var(--radius-xs);
 }
 .lorecanvas-search-current {
     background-color: rgba(255, 140, 0, 0.55);
-    border-radius: 2px;
+    border-radius: var(--radius-xs);
     outline: 1px solid rgba(255, 140, 0, 0.7);
 }
 
 /* @Entity suggest — highlight the @query text while typing */
 .entity-suggest-query {
-  background: rgba(208, 188, 255, 0.15);
-  border-radius: 3px;
+  background: rgba(var(--accent-rgb), 0.15);
+  border-radius: var(--radius-xs);
   color: var(--accent);
 }
 /* ──────────────────────────────────────────────────────────────
@@ -643,7 +643,7 @@ a:hover {
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
 }
 
 /* Never strip the ring without replacing it. */

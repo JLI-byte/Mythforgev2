@@ -39,7 +39,7 @@
 .nameInput {
   width: 100%;
   padding: var(--space-5) var(--space-5);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   border: 1px solid rgba(var(--overlay-rgb), 0.14);
   background: rgba(var(--overlay-rgb), 0.05);
   color: var(--foreground);
@@ -74,5 +74,5 @@
 .escapeBtn:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }

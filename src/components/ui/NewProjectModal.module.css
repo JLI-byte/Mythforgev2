@@ -16,7 +16,7 @@
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-border);
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
     width: 100%;
     max-width: 480px;
     padding: var(--space-7);
@@ -46,7 +46,7 @@
     font-size: var(--text-lg);
     cursor: pointer;
     padding: var(--space-2) var(--space-4);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     opacity: 0.5;
 }
 
@@ -58,13 +58,13 @@
 .coverPreview {
     width: 80px;
     height: 112px;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto;
     box-shadow: 0 4px 12px rgba(var(--shadow-rgb), 0.3);
-    transition: background 300ms ease;
+    transition: background var(--dur-4) var(--ease-standard);
 }
 
 .coverInitials {
@@ -78,7 +78,7 @@
     width: 100%;
     background: var(--background);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     padding: var(--space-4) var(--space-5);
     font-size: var(--text-lg);
     color: var(--foreground);
@@ -115,7 +115,7 @@
     width: 100%;
     background: var(--background);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     padding: var(--space-4) var(--space-5);
     font-size: var(--text-lg);
     color: var(--foreground);
@@ -142,10 +142,10 @@
     padding: var(--space-5);
     background: var(--background);
     border: 2px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     cursor: pointer;
     text-align: left;
-    transition: border-color 150ms ease;
+    transition: border-color var(--dur-2) var(--ease-standard);
 }
 
 .modeCard:hover {
@@ -180,11 +180,11 @@
     background: var(--accent);
     color: var(--on-accent);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     font-size: var(--text-lg);
     font-weight: 600;
     cursor: pointer;
-    transition: opacity 150ms ease;
+    transition: opacity var(--dur-2) var(--ease-standard);
 }
 
 .createBtn:disabled {

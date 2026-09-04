@@ -69,9 +69,9 @@
   color: var(--foreground, var(--surface));
   background: rgba(var(--overlay-rgb), 0.05);
   border: 1px solid rgba(var(--overlay-rgb), 0.12);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   outline: none;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: border-color var(--dur-2) var(--ease-standard), background-color var(--dur-2) var(--ease-standard);
 }
 .captureInput::placeholder { color: var(--muted); }
 .captureInput:focus-visible {
@@ -88,12 +88,12 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   cursor: pointer;
   color: var(--foreground, var(--surface));
   background: rgba(var(--overlay-rgb), 0.08);
   border: 1px solid rgba(var(--overlay-rgb), 0.14);
-  transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+  transition: background-color var(--dur-2) var(--ease-standard), border-color var(--dur-2) var(--ease-standard), opacity var(--dur-2) var(--ease-standard);
 }
 /* 40x40 visually, 44 to the finger. */
 .captureBtn::after {
@@ -139,7 +139,7 @@
   flex-direction: column;
   gap: var(--space-5);
   padding: var(--space-6) var(--space-7);
-  border-radius: 16px;
+  border-radius: var(--radius-2xl);
   color: var(--foreground, var(--surface));
   background: rgba(var(--overlay-rgb), 0.05);
   backdrop-filter: blur(20px) saturate(1.4);
@@ -205,7 +205,7 @@
   border: none;
   cursor: pointer;
   opacity: 0.75;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--dur-2) var(--ease-standard);
 }
 .tileLink:hover { opacity: 1; }
 
@@ -230,7 +230,7 @@
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-5) var(--space-7);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   border: none;
   cursor: pointer;
   font-family: inherit;
@@ -238,7 +238,7 @@
   font-weight: 600;
   color: var(--foreground);
   background: var(--surface);
-  transition: transform 0.15s ease, background-color 0.15s ease;
+  transition: transform var(--dur-2) var(--ease-standard), background-color var(--dur-2) var(--ease-standard);
 }
 .resumeBtn:hover {
   background: var(--surface-high);
@@ -260,13 +260,13 @@
   min-height: 24px;
   padding: var(--space-2);
   border: none;
-  border-radius: 7px;
+  border-radius: var(--radius-lg);
   color: var(--muted);
   background: none;
   cursor: pointer;
   opacity: 0.5;
   position: relative;
-  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+  transition: opacity var(--dur-2) var(--ease-standard), color var(--dur-2) var(--ease-standard), background var(--dur-2) var(--ease-standard);
 }
 /* The icon stays 15px; the target reaches Apple's 44pt minimum. */
 .goalCog::after {
@@ -334,15 +334,15 @@
 .xpTrack {
   height: 5px;
   margin-top: var(--space-3);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   background: rgba(var(--overlay-rgb), 0.1);
   overflow: hidden;
 }
 .xpFill {
   height: 100%;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   background: var(--accent);
-  transition: width 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: width var(--dur-5) var(--ease-out);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -377,7 +377,7 @@
 .heatCell {
   width: 11px;
   height: 11px;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   display: block;
 }
 .heat0 { background: rgba(var(--overlay-rgb), 0.06); }
@@ -447,7 +447,7 @@
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-5) var(--space-5);
-  border-radius: 11px;
+  border-radius: var(--radius-xl);
   text-align: left;
   cursor: pointer;
   font-family: inherit;
@@ -456,7 +456,7 @@
   color: var(--foreground, var(--surface));
   background: rgba(var(--overlay-rgb), 0.045);
   border: 1px solid rgba(var(--overlay-rgb), 0.09);
-  transition: transform 0.18s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.18s, background-color 0.18s;
+  transition: transform var(--dur-3) var(--ease-out), border-color var(--dur-3), background-color var(--dur-3);
 }
 .linkBtn:hover {
   transform: translateY(-2px);
@@ -496,7 +496,7 @@
   color: var(--muted);
   font-size: var(--text-md);
   cursor: pointer;
-  transition: color 0.15s ease;
+  transition: color var(--dur-2) var(--ease-standard);
 }
 .recentAll:hover {
   color: var(--foreground, var(--surface));
@@ -509,14 +509,14 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-6);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   border: 1px solid rgba(var(--overlay-rgb), 0.16);
   background: rgba(var(--overlay-rgb), 0.07);
   color: var(--foreground, var(--surface));
   font-size: var(--text-md);
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.15s, background-color 0.15s;
+  transition: border-color var(--dur-2), background-color var(--dur-2);
 }
 .newBtn:hover {
   border-color: rgba(var(--overlay-rgb), 0.32);
@@ -615,14 +615,14 @@
 
 .manuscriptTrack {
   height: 7px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: rgba(var(--overlay-rgb), 0.12);
   overflow: hidden;
 }
 
 .manuscriptFill {
   height: 100%;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: var(--accent);
-  transition: width 260ms ease;
+  transition: width var(--dur-4) var(--ease-standard);
 }

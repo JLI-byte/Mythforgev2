@@ -61,11 +61,11 @@
     color: white;
     font-size: var(--text-md);
     padding: var(--space-2) var(--space-3);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     line-height: 1;
     backdrop-filter: blur(4px);
-    transition: background 150ms ease;
+    transition: background var(--dur-2) var(--ease-standard);
 }
 
 .heroBtn:hover {
@@ -92,7 +92,7 @@
     padding: var(--space-3) var(--space-5);
     cursor: pointer;
     text-align: center;
-    transition: color 150ms ease;
+    transition: color var(--dur-2) var(--ease-standard);
     flex-shrink: 0;
 }
 
@@ -114,7 +114,7 @@
 .typeBadge {
     display: inline-block;
     font-size: var(--text-xs);
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
     padding: var(--space-2) var(--space-4);
     font-weight: 500;
 }
@@ -160,8 +160,8 @@
     font-size: var(--text-xs);
     cursor: pointer;
     padding: var(--space-2) var(--space-3);
-    border-radius: 4px;
-    transition: color 150ms ease;
+    border-radius: var(--radius-sm);
+    transition: color var(--dur-2) var(--ease-standard);
 }
 
 .addFieldBtn:hover {
@@ -198,7 +198,7 @@
     cursor: pointer;
     padding: 0 var(--space-2);
     opacity: 0.5;
-    transition: opacity 150ms ease;
+    transition: opacity var(--dur-2) var(--ease-standard);
     line-height: 1;
 }
 
@@ -220,7 +220,7 @@
     padding: var(--space-2) var(--space-4);
     background: var(--background);
     border: 1px solid var(--border);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     color: var(--foreground);
     font-size: var(--text-xs);
     outline: none;
@@ -234,7 +234,7 @@
 .addFieldCancel {
     background: transparent;
     border: 1px solid var(--border);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     color: var(--muted);
     padding: var(--space-2) var(--space-3);
     cursor: pointer;
@@ -286,12 +286,12 @@
 .backBtn {
     background: transparent;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     color: var(--muted);
     font-size: var(--text-sm);
     padding: var(--space-3) var(--space-5);
     cursor: pointer;
-    transition: all 150ms ease;
+    transition: all var(--dur-2) var(--ease-standard);
 }
 
 .backBtn:hover {
@@ -328,7 +328,7 @@
 
 .viewerFigure img {
     width: 100%;
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     background-color: var(--surface);
 }
 
@@ -411,7 +411,7 @@
 .viewerTimelineDot {
     width: 10px;
     height: 10px;
-    border-radius: 50%;
+    border-radius: var(--radius-full);
     background-color: var(--accent);
     margin-top: var(--space-4);
     flex-shrink: 0;

@@ -24,12 +24,12 @@
   gap: var(--space-3);
   padding: var(--space-2) var(--space-4);
   border: none;
-  border-radius: 7px;
+  border-radius: var(--radius-lg);
   background: none;
   color: var(--muted);
   font-size: var(--text-md);
   cursor: pointer;
-  transition: color 0.15s, background-color 0.15s;
+  transition: color var(--dur-2), background-color var(--dur-2);
 }
 .crumb:hover {
   color: var(--foreground);
@@ -93,7 +93,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 16px;
+  border-radius: var(--radius-2xl);
   overflow: hidden;
   color: var(--foreground);
   cursor: pointer;
@@ -105,7 +105,7 @@
     inset 0 1px 0 rgba(var(--overlay-rgb), 0.22),
     inset 0 -1px 0 rgba(var(--shadow-rgb), 0.18),
     0 10px 38px rgba(var(--shadow-rgb), 0.35);
-  transition: transform 0.25s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+  transition: transform var(--dur-4) var(--ease-out), box-shadow var(--dur-4) var(--ease-standard), border-color var(--dur-4) var(--ease-standard);
 }
 .strip:hover {
   transform: translateY(-2px);
@@ -128,7 +128,7 @@
   z-index: 1;
   background: var(--surface-high);
   pointer-events: none;
-  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: transform var(--dur-5) var(--ease-out);
 }
 
 /* Column levels — pieces lean with the vertical seam */
@@ -190,7 +190,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 16px;
+  border-radius: var(--radius-2xl);
   overflow: hidden;
   color: var(--foreground);
   background: linear-gradient(165deg, rgba(var(--overlay-rgb), 0.14) 0%, rgba(var(--overlay-rgb), 0.05) 100%);
@@ -203,7 +203,7 @@
   transform-origin: 0 0;
   will-change: transform;
   pointer-events: none;
-  transition: transform 0.45s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: transform var(--dur-5) var(--ease-out);
 }
 
 /* Beat 2 — the charcoal corner pieces sweep back in from top-left and
@@ -350,7 +350,7 @@
 }
 .newFolderInput {
   padding: var(--space-4) var(--space-5);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid rgba(var(--overlay-rgb), 0.28);
   background: rgba(var(--overlay-rgb), 0.94);
   color: var(--background);
@@ -361,7 +361,7 @@
 }
 .newFolderSelect {
   padding: var(--space-4) var(--space-5);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid rgba(var(--overlay-rgb), 0.28);
   background: rgba(var(--overlay-rgb), 0.94);
   color: var(--background);
@@ -370,7 +370,7 @@
 }
 .newFolderCreate {
   padding: var(--space-4) var(--space-6);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: none;
   background: var(--accent);
   color: var(--on-accent);
@@ -420,7 +420,7 @@
   position: relative;
   aspect-ratio: 4 / 3;
   width: 100%;
-  border-radius: 16px;
+  border-radius: var(--radius-2xl);
   padding: var(--space-6);
   display: grid;
   justify-content: start;
@@ -430,7 +430,7 @@
   background: var(--surface-high);
   border: 1px solid rgba(var(--overlay-rgb), 0.1);
   box-shadow: 0 10px 30px rgba(var(--shadow-rgb), 0.35);
-  transition: transform 0.25s ease-in-out, box-shadow 0.25s ease;
+  transition: transform var(--dur-4) var(--ease-standard), box-shadow var(--dur-4) var(--ease-standard);
 }
 .previewCard:hover {
   transform: scale(1.03);
@@ -445,7 +445,7 @@
   object-fit: cover;
   pointer-events: none;
   user-select: none;
-  transition: transform 0.5s ease-in-out;
+  transition: transform var(--dur-5) var(--ease-standard);
 }
 .previewCard:hover .backdrop {
   transform: scale(1.1);
@@ -515,7 +515,7 @@
   place-items: center;
   width: 20px;
   height: 20px;
-  transition: transform 0.25s ease-in-out;
+  transition: transform var(--dur-4) var(--ease-standard);
 }
 .previewCard:hover .previewArrow {
   transform: scale(1.4);
