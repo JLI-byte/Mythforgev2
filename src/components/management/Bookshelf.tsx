@@ -8,6 +8,7 @@ import { getWorldBibleConfig } from '@/lib/worldBibleNav';
 import { WORK_TYPES, getWorkType, getWorkTypeByWritingMode } from '@/lib/workTypes';
 import { getSubTypesFor, getWorkSubType, type ProjectBrief } from '@/lib/workSubTypes';
 import { getDraftType } from '@/lib/writingMethods';
+import { useModalDialog } from '@/lib/useModalDialog';
 import WorldBibleBook from './WorldBibleBook';
 import WorkTypeArtwork from './WorkTypeArtwork';
 import styles from './Bookshelf.module.css';
@@ -96,22 +97,6 @@ export function Bookshelf() {
         tone: { darkness: 'balanced', scale: 'balanced', humor: 'balanced' },
         magicExists: false, // Hidden but required in type
     });
-
-    // ─── EFFECTS ──────────────────────────────────────────────
-
-    /** Escape key listener for closing the wizard modal or a delete confirmation */
-    useEffect(() => {
-        const handleEsc = (e: KeyboardEvent) => {
-            if (e.key !== 'Escape') return;
-            if (isWizardOpen) resetWizard();
-            else if (deletingProjectId) setDeletingProjectId(null);
-            else if (deletingWorldId) setDeletingWorldId(null);
-        };
-        if (isWizardOpen || deletingProjectId || deletingWorldId) {
-            window.addEventListener('keydown', handleEsc);
-        }
-        return () => window.removeEventListener('keydown', handleEsc);
-    }, [isWizardOpen, deletingProjectId, deletingWorldId]);
 
     // ─── HELPERS ──────────────────────────────────────────────
 
@@ -543,10 +528,9 @@ export function Bookshelf() {
 
             {/* ─── WIZARD MODAL ─────────────────────────────────────── */}
             {isWizardOpen && (
-                <div className={styles.wizardBackdrop} onClick={resetWizard}>
-                    <div className={styles.wizardModal} onClick={e => e.stopPropagation()}>
+                <ShelfDialog labelledBy={`${fieldId}-wizard-title`} onDismiss={resetWizard}>
                         <div className={styles.wizardStep}>Step {wizardStep} of 3</div>
-                        <h2 className={styles.wizardTitle}>{editingWorldId ? 'Edit Shelf' : 'Create New Shelf'}</h2>
+                        <h2 id={`${fieldId}-wizard-title`} className={styles.wizardTitle}>{editingWorldId ? 'Edit Shelf' : 'Create New Shelf'}</h2>
                         
                         {/* Step 1: Identity */}
                         {wizardStep === 1 && (
@@ -560,7 +544,7 @@ export function Bookshelf() {
                                         onChange={e => setWizardData({...wizardData, name: e.target.value})}
                                         onKeyDown={handleInputKeyDown}
                                         placeholder="e.g. My Epic Saga"
-                                        autoFocus
+                                        data-autofocus
                                     />
                                 </div>
                                 <div style={{ marginBottom: '16px' }}>
@@ -687,17 +671,15 @@ export function Bookshelf() {
                                 </button>
                             )}
                         </div>
-                    </div>
-                </div>
+                </ShelfDialog>
             )}
 
             {/* ─── NEW STORY MODAL ─────────────────────────────────── */}
             {isStoryModalOpen && (
-                <div className={styles.wizardBackdrop} onClick={() => setIsStoryModalOpen(false)}>
-                    <div className={styles.wizardModal} onClick={e => e.stopPropagation()}>
+                <ShelfDialog labelledBy={`${fieldId}-story-title`} onDismiss={() => setIsStoryModalOpen(false)}>
                         {storyStep === 'type' ? (
                             <>
-                                <h2 className={styles.wizardTitle}>What are you writing?</h2>
+                                <h2 id={`${fieldId}-story-title`} className={styles.wizardTitle}>What are you writing?</h2>
                                 <div className={styles.workTypeGrid}>
                                     {WORK_TYPES.map(t => (
                                         <button
@@ -717,7 +699,7 @@ export function Bookshelf() {
                             </>
                         ) : storyStep === 'kind' ? (
                             <>
-                                <h2 className={styles.wizardTitle}>What kind of script or report?</h2>
+                                <h2 id={`${fieldId}-story-title`} className={styles.wizardTitle}>What kind of script or report?</h2>
                                 <p className={styles.briefHint}>
                                     This sets the outlining methods you&apos;re offered, and tells the
                                     research assistant what it&apos;s helping you write.
@@ -742,7 +724,7 @@ export function Bookshelf() {
                             </>
                         ) : (
                             <>
-                                <h2 className={styles.wizardTitle}>
+                                <h2 id={`${fieldId}-story-title`} className={styles.wizardTitle}>
                                     {getWorkSubType(storySubTypeId)?.icon ?? getWorkType(storyTypeId)?.icon}
                                     {' '}New {getWorkSubType(storySubTypeId)?.label ?? getWorkType(storyTypeId)?.label}
                                 </h2>
@@ -755,10 +737,9 @@ export function Bookshelf() {
                                         onChange={e => setStoryName(e.target.value)}
                                         onKeyDown={e => {
                                             if (e.key === 'Enter') { e.preventDefault(); confirmCreateStory('template'); }
-                                            if (e.key === 'Escape') setIsStoryModalOpen(false);
                                         }}
                                         placeholder={getWorkType(storyTypeId)?.namePlaceholder}
-                                        autoFocus
+                                        data-autofocus
                                     />
                                 </div>
 
@@ -774,7 +755,6 @@ export function Bookshelf() {
                                                     className={styles.wizardInput}
                                                     value={storyBrief[f.key] ?? ''}
                                                     onChange={e => setStoryBrief({ ...storyBrief, [f.key]: e.target.value })}
-                                                    onKeyDown={e => { if (e.key === 'Escape') setIsStoryModalOpen(false); }}
                                                     placeholder={f.placeholder}
                                                 />
                                             </div>
@@ -820,15 +800,13 @@ export function Bookshelf() {
                                 </div>
                             </>
                         )}
-                    </div>
-                </div>
+                </ShelfDialog>
             )}
 
             {/* ─── DELETE CONFIRMATION MODAL (shared: book or shelf) ── */}
             {deletingProjectId && (
-                <div className={styles.wizardBackdrop} onClick={() => setDeletingProjectId(null)}>
-                    <div className={styles.wizardModal} onClick={e => e.stopPropagation()}>
-                        <h2 className={styles.wizardTitle}>
+                <ShelfDialog labelledBy={`${fieldId}-delete-book-title`} onDismiss={() => setDeletingProjectId(null)}>
+                        <h2 id={`${fieldId}-delete-book-title`} className={styles.wizardTitle}>
                             Delete “{projects.find(p => p.id === deletingProjectId)?.name}”?
                         </h2>
                         <p className={styles.briefHint}>Its chapters and scenes go with it. This cannot be undone.</p>
@@ -841,14 +819,12 @@ export function Bookshelf() {
                                 Delete
                             </button>
                         </div>
-                    </div>
-                </div>
+                </ShelfDialog>
             )}
 
             {deletingWorldId && (
-                <div className={styles.wizardBackdrop} onClick={() => setDeletingWorldId(null)}>
-                    <div className={styles.wizardModal} onClick={e => e.stopPropagation()}>
-                        <h2 className={styles.wizardTitle}>Delete this shelf?</h2>
+                <ShelfDialog labelledBy={`${fieldId}-delete-shelf-title`} onDismiss={() => setDeletingWorldId(null)}>
+                        <h2 id={`${fieldId}-delete-shelf-title`} className={styles.wizardTitle}>Delete this shelf?</h2>
                         <p className={styles.briefHint}>Stories will move to Uncategorized. This cannot be undone.</p>
                         <div className={styles.wizardActions}>
                             <button className={styles.wizardBtnSecondary} onClick={() => setDeletingWorldId(null)}>Cancel</button>
@@ -859,9 +835,41 @@ export function Bookshelf() {
                                 Delete
                             </button>
                         </div>
-                    </div>
-                </div>
+                </ShelfDialog>
             )}
+        </div>
+    );
+}
+
+/**
+ * A dialog shell: dialog semantics, focus trap, Escape, focus restore.
+ * A component rather than a hook call inside Bookshelf, because the hook's
+ * effect has to run on the dialog's OWN mount — Bookshelf itself is always
+ * mounted, so a hook called there would fire once at page load.
+ */
+function ShelfDialog({
+    labelledBy,
+    onDismiss,
+    children,
+}: {
+    labelledBy: string;
+    onDismiss: () => void;
+    children: React.ReactNode;
+}) {
+    const dialogRef = useModalDialog<HTMLDivElement>(onDismiss);
+    return (
+        <div className={styles.wizardBackdrop} onClick={onDismiss} role="presentation">
+            <div
+                ref={dialogRef}
+                className={styles.wizardModal}
+                onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={labelledBy}
+                tabIndex={-1}
+            >
+                {children}
+            </div>
         </div>
     );
 }
