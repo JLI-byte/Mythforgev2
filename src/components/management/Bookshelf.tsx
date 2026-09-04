@@ -9,6 +9,7 @@ import { WORK_TYPES, getWorkType, getWorkTypeByWritingMode } from '@/lib/workTyp
 import { getSubTypesFor, getWorkSubType, type ProjectBrief } from '@/lib/workSubTypes';
 import { planNewStory } from '@/lib/newStory';
 import { useModalDialog } from '@/lib/useModalDialog';
+import { BeginOptions } from '@/components/ui/BeginOptions';
 import WorldBibleBook from './WorldBibleBook';
 import WorkTypeArtwork from './WorkTypeArtwork';
 import styles from './Bookshelf.module.css';
@@ -667,8 +668,8 @@ export function Bookshelf() {
                             <>
                                 <h2 id={`${fieldId}-story-title`} className={styles.wizardTitle}>What kind of script or report?</h2>
                                 <p className={styles.briefHint}>
-                                    This sets the outlining methods you&apos;re offered, and tells the
-                                    research assistant what it&apos;s helping you write.
+                                    This sets the outlining methods you&apos;re offered on the
+                                    Draft Table.
                                 </p>
                                 <div className={styles.workTypeGrid}>
                                     {getSubTypesFor(storyTypeId).map(t => (
@@ -736,32 +737,10 @@ export function Bookshelf() {
                                 )}
 
                                 <label className={styles.shelfLabel}>Where do you want to begin?</label>
-                                <div className={styles.beginOptions}>
-                                    <button
-                                        className={styles.beginOption}
-                                        onClick={() => confirmCreateStory('research')}
-                                        disabled={!storyName.trim()}
-                                    >
-                                        <span className={styles.beginOptionTitle}>🔎 Research First</span>
-                                        <span className={styles.beginOptionDesc}>Gather notes and build the world with the AI assistant</span>
-                                    </button>
-                                    <button
-                                        className={styles.beginOption}
-                                        onClick={() => confirmCreateStory('template')}
-                                        disabled={!storyName.trim()}
-                                    >
-                                        <span className={styles.beginOptionTitle}>🗺️ Draft First</span>
-                                        <span className={styles.beginOptionDesc}>Outline on the Draft Table with a writing method</span>
-                                    </button>
-                                    <button
-                                        className={styles.beginOption}
-                                        onClick={() => confirmCreateStory('desk')}
-                                        disabled={!storyName.trim()}
-                                    >
-                                        <span className={styles.beginOptionTitle}>✍️ Start Writing</span>
-                                        <span className={styles.beginOptionDesc}>Jump straight in on the Writing Desk</span>
-                                    </button>
-                                </div>
+                                <BeginOptions
+                                    onChoose={confirmCreateStory}
+                                    disabled={!storyName.trim()}
+                                />
                                 <div className={styles.wizardActions}>
                                     <button
                                         className={styles.wizardBtnSecondary}

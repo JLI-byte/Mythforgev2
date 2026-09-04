@@ -24,8 +24,10 @@ import { WritingHeatmap } from './WritingHeatmap';
 import GoalScheduleModal from './GoalScheduleModal';
 import { GoalRing } from './GoalRing';
 import { buildShelves } from '@/lib/worldShelves';
+import { shouldShowFirstRun } from '@/lib/onboarding';
 import { WorldShelf } from './WorldShelf';
 import { EggPlaceholder } from './EggPlaceholder';
+import FirstRunPanel from './FirstRunPanel';
 import styles from './HomePage.module.css';
 
 /**
@@ -75,6 +77,7 @@ export default function HomePage() {
   const setActiveWorldKey = useWorkspaceStore(s => s.setActiveWorldKey);
   const createWorld = useWorkspaceStore(s => s.createWorld);
   const requestNewStory = useWorkspaceStore(s => s.requestNewStory);
+  const hasOnboarded = useWorkspaceStore(s => s.hasOnboarded);
 
   const [name, setName] = useState('Author');
   const [capture, setCapture] = useState('');
@@ -218,6 +221,12 @@ export default function HomePage() {
     setCaptured(true);
     setTimeout(() => setCaptured(false), 2400);
   };
+
+  // Placed after every hook above — an early return higher up would change the
+  // hook order between renders.
+  if (shouldShowFirstRun({ hasOnboarded, projectCount: projects.length })) {
+    return <FirstRunPanel />;
+  }
 
   return (
     <div className={styles.home}>
@@ -374,7 +383,7 @@ export default function HomePage() {
                 )}
               </ul>
             ) : (
-              <p className={styles.tileEmpty}>Nothing flagged.</p>
+              <p className={styles.tileEmpty}>Nothing flagged. Consistency checks run over your lore as you write.</p>
             )}
             <button className={styles.tileLink} onClick={() => setWorkspaceMode('research')}>
               Open Research <ArrowRight size={14} />

@@ -405,53 +405,6 @@
     border-color: var(--accent);
 }
 
-/* New-story begin choices: Draft First vs Start Writing */
-/* One per row: three side-by-side left no room for the descriptions.
-   (Grid, so .beginOption's flex:1 no longer stretches them unevenly.) */
-.beginOptions {
-    display: grid;
-    gap: 8px;
-    margin: 8px 0 16px;
-}
-
-.beginOption {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    text-align: left;
-    padding: 13px 14px;
-    border-radius: 10px;
-    border: 1px solid rgba(var(--overlay-rgb), 0.1);
-    background: rgba(var(--overlay-rgb), 0.04);
-    cursor: pointer;
-    transition: all 0.18s ease;
-}
-
-.beginOption:hover:not(:disabled) {
-    border-color: var(--accent);
-    background: rgba(var(--accent-rgb), 0.1);
-    transform: translateY(-2px);
-}
-
-.beginOption:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-}
-
-.beginOptionTitle {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #fff;
-}
-
-.beginOptionDesc {
-    font-size: 0.6875rem;
-    line-height: 1.4;
-    color: rgba(var(--overlay-rgb), 0.6);
-}
-
 .wizardTextarea {
     width: 100%;
     background: rgba(var(--overlay-rgb), 0.05);
