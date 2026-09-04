@@ -171,7 +171,7 @@ Rebuilds the three AI-driven lore features as deterministic rules. Instant, free
 
 ## Phase 8 — Design system
 
-**Plan:** `2026-09-03-phase-8-design-system.md` · **Status:** ready · **Depends on:** Phases 1, 2 and 6
+**Plan:** `2026-09-03-phase-8-design-system.md` · **Status:** COMPLETE (12 commits) · **Depends on:** Phases 1, 2 and 6
 
 Ordered internally: tokens exist before anything converts to them.
 
