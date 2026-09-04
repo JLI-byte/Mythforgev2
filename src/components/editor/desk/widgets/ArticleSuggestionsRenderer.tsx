@@ -37,10 +37,10 @@ interface Group {
 const DRAG_MIME = 'application/x-lore-suggestion';
 
 /**
- * Article Suggestions widget — the assistant drops article-worthy entities here
- * as it talks. Each suggestion is grouped under the folder it best fits (or a
- * proposed new folder, or Unfiled), can be dragged between groups to re-file,
- * and created into a real World Bible article on demand.
+ * Article Suggestions widget — names the lore check found recurring in your
+ * writing with no World Bible article yet. Each is grouped under the folder it
+ * would be filed in (or Unfiled), can be dragged between groups to re-file, and
+ * created into a real article on demand.
  */
 export function ArticleSuggestionsRenderer({ content, onChange }: RendererProps) {
     const suggestions = content.suggestions ?? [];
@@ -182,7 +182,7 @@ export function ArticleSuggestionsRenderer({ content, onChange }: RendererProps)
             <div className={styles.suggestBody}>
                 {suggestions.length === 0 && (
                     <div className={styles.suggestEmpty}>
-                        Names that keep appearing in your prose without a World Bible entry will be suggested here.
+                        Run the lore check (🔍) and names you keep using that have no article yet will appear here — drag one onto a folder to file it.
                     </div>
                 )}
 

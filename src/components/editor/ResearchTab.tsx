@@ -6,6 +6,7 @@ import { researchScopeKey, type ResearchScope } from '@/lib/researchScope';
 import WritingDesk from './WritingDesk';
 import { ResearchEmptyState } from './ResearchEmptyState';
 import { ResearchBoardBar } from './research/ResearchBoardBar';
+import { ResearchRail } from './research/ResearchRail';
 import styles from './WritingDesk.module.css';
 
 /**
@@ -30,6 +31,7 @@ export default function ResearchTab() {
 
   return (
     <div className={styles.researchLayout}>
+      <ResearchRail scopeKey={scopeKey} />
       <div className={styles.researchMain}>
         {scopeKey ? (
           <>

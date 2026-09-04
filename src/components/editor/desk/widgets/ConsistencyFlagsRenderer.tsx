@@ -15,9 +15,10 @@ const KIND_META: Record<ConsistencyFlag['kind'], { icon: string; label: string }
 };
 
 /**
- * Consistency & Gaps widget — the assistant drops flagged contradictions and
- * gaps here as it reviews the world. Each flag can be sent to the chat as a
- * question ("how do I fix this?") or dismissed.
+ * Consistency & Gaps widget — everything the lore rules found on the last run:
+ * empty descriptions, unfiled articles, articles nothing references, lonely
+ * folders, broken links and duplicate names. Each can be dismissed; running
+ * the check again rebuilds the list from the world as it stands.
  */
 export function ConsistencyFlagsRenderer({ content, onChange }: RendererProps) {
     const flags = content.flags ?? [];
@@ -34,7 +35,7 @@ export function ConsistencyFlagsRenderer({ content, onChange }: RendererProps) {
             <div className={styles.suggestBody}>
                 {flags.length === 0 && (
                     <div className={styles.suggestEmpty}>
-                        Gaps and contradictions found in your world — entries with no description, broken links, duplicate names — will appear here.
+                        Nothing flagged. Run the lore check (🔍) to look for empty descriptions, unfiled articles, broken links and duplicate names.
                     </div>
                 )}
 

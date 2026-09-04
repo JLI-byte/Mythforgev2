@@ -7,8 +7,6 @@ import styles from '../WritingDesk.module.css';
 interface InterviewMenuProps {
     /** Built-ins first, then the user's custom interviews. */
     interviews: Interview[];
-    /** Disabled while a message is streaming. */
-    disabled?: boolean;
     /** 'rail' renders a square icon button whose menu opens to the side. */
     variant?: 'button' | 'rail';
     onLaunch: (interview: Interview) => void;
@@ -21,7 +19,7 @@ interface InterviewMenuProps {
  * a row launches it; the pencil opens it in the editor (built-ins open as an
  * editable copy). A footer button creates a new one.
  */
-export function InterviewMenu({ interviews, disabled, variant = 'button', onLaunch, onNew, onEdit }: InterviewMenuProps) {
+export function InterviewMenu({ interviews, variant = 'button', onLaunch, onNew, onEdit }: InterviewMenuProps) {
     const isRail = variant === 'rail';
     const [open, setOpen] = useState(false);
     const rootRef = useRef<HTMLDivElement>(null);
@@ -48,7 +46,6 @@ export function InterviewMenu({ interviews, disabled, variant = 'button', onLaun
                     ? `${styles.chatTrayTab} ${open ? styles.chatTrayTabActive : ''}`
                     : styles.researchBuildWorldBtn}
                 onClick={() => setOpen(o => !o)}
-                disabled={disabled}
                 title="Launch a guided interview to build part of your world"
                 aria-haspopup="menu"
                 aria-expanded={open}
