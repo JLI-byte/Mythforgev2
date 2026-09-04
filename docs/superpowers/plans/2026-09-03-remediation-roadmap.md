@@ -42,7 +42,7 @@ The ordering is not by severity. It is by **what makes the next phase cheaper**:
 
 ## Phase 1 — Subtraction
 
-**Plan:** `2026-09-03-phase-1-subtraction.md` · **Status:** ready to execute
+**Plan:** `2026-09-03-phase-1-subtraction.md` · **Status:** COMPLETE (9 commits, 9,637 lines deleted — 3.7x the estimate)
 
 Removes ~2,600 lines and four work types. Everything else in this roadmap gets smaller as a result.
 
