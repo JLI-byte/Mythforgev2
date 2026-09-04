@@ -23,14 +23,30 @@ Read this before deleting anything. Several modules look AI-owned and are not.
 | `src/lib/researchBoard.ts` | `makeNoteCard` is called by `HomePage.tsx:13`, outside any AI path. Only `serializeBoard` goes |
 | `src/lib/articleSuggestions.ts` | `makeSuggestionsWidget` and `addSuggestionToWidgets` back a real desk widget with its own renderer, and `homeStats.ts` reads it. Only `serializeSuggestions` goes |
 | `src/lib/consistencyFlags.ts` | Same shape — `ConsistencyFlagsRenderer`, `WidgetRenderer`, `deskConstants`, `homeStats`. Only `serializeFlags` goes |
-| `src/components/editor/desk/widgets/ArticleSuggestionsRenderer.tsx` | Desk widget. Phase 5 feeds it from rules |
-| `src/components/editor/desk/widgets/ConsistencyFlagsRenderer.tsx` | Desk widget. Phase 5 feeds it from rules |
-| `src/lib/interviews.ts`, `InterviewEditorModal.tsx`, `InterviewMenu.tsx` | Guides are data; the authoring tool is independent of delivery. Phase 5 adds the runner |
+| `src/components/editor/desk/widgets/ArticleSuggestionsRenderer.tsx` | Code survives; **its host does not**. `WritingDesk.tsx:27,144` filters `articleSuggestions` off the board via `TRAY_WIDGET_TYPES`, so its only host was the chat trays. Unreachable until Phase 5 builds the rail |
+| `src/components/editor/desk/widgets/ConsistencyFlagsRenderer.tsx` | Same — filtered off the board by `TRAY_WIDGET_TYPES`. Unreachable until Phase 5 |
+| `src/lib/interviews.ts`, `InterviewEditorModal.tsx`, `InterviewMenu.tsx` | Guides are data and the components are sound, but **both lose their only host**: `InterviewMenu` is rendered solely by `ChatTrays.tsx:92` and `InterviewEditorModal` solely by `ResearchChatPanel.tsx:927`, both deleted here. Do not delete these files — Phase 5 gives them a new host |
 | `src/components/editor/research/ResearchBoardBar.tsx` | Board tab switcher, no AI |
 | `src/components/editor/ResearchEmptyState.tsx` | Empty state, no AI |
 | `customInterviews` in the store | The user's authored interviews. Phase 5 runs them |
 
-**Accepted consequence:** between this phase and Phase 5, the Research tab is a manual board with no interview runner, and the two suggestion boards stay empty. This is deliberate.
+**Accepted consequence — read carefully, it is larger than it first looks.** Deleting the chat also
+deletes the *only host* for three kept surfaces. Between this phase and Phase 5:
+
+- **Interviews cannot be launched or authored.** `InterviewMenu` and `InterviewEditorModal` have no
+  render site once `ChatTrays` and `ResearchChatPanel` are gone.
+- **Article Suggestions and Consistency & Gaps are unreachable**, not merely empty. `WritingDesk.tsx:27`
+  lists both in `TRAY_WIDGET_TYPES` and line 144 filters them off the board, because they were moved
+  into the chat's side trays.
+
+Phase 5 restores all three by building `ResearchRail.tsx` — the tray rail without the chat. This is a
+real regression spanning Phases 3 and 4, accepted because the product is unreleased and because
+building a host in a deletion phase would mean building it twice.
+
+**A cheaper alternative exists if that gap is unacceptable:** removing `articleSuggestions` and
+`consistencyFlags` from `TRAY_WIDGET_TYPES` (a one-line edit) lets both widgets fall back onto the
+board immediately. It does not help the interviews, which need a launcher. Take it only if someone is
+actively using those boards during Phases 3-4.
 
 ---
 
@@ -563,7 +579,18 @@ npx eslint src
 npm run build
 ```
 
-Expected: all four clean. Unused-import warnings from eslint mean a deletion left something behind — fix rather than suppress.
+Expected: `tsc` silent, tests green, `npm run build` succeeds.
+
+**Baseline:** `npx eslint src` reports **377 problems (248 errors, 129 warnings)** on the tree as it
+stands — measured, not estimated, and mostly pre-existing `no-explicit-any` in `workspaceStore.ts`.
+Clean is not achievable and is not the gate. The gate is **no increase**: deletions should move this
+number DOWN. If it rises, a deletion left something behind — fix it rather than suppressing it.
+
+```bash
+npx eslint src 2>&1 | tail -1
+```
+
+Expected: a total of 377 or lower.
 
 - [ ] **Step 6: Measure**
 
@@ -582,8 +609,8 @@ Start the dev server and confirm:
 2. Settings opens and has **no AI section**, and no empty tab where it was.
 3. The Research tab opens, shows the scope bar and board switcher, and **fills the full width** with no empty column or stray resizer.
 4. A research board still accepts cards, and existing boards still show theirs.
-5. Article Suggestions and Consistency & Gaps widgets can still be added to a desk. They are **empty** — this is expected until Phase 5.
-6. Interviews menu still lists built-ins and custom interviews. **Launching one does nothing yet** — expected until Phase 5.
+5. Article Suggestions and Consistency & Gaps are **not reachable from the board** — `TRAY_WIDGET_TYPES` still filters them and their tray host is gone. Expected until Phase 5.
+6. There is **no Interviews menu anywhere** — its only render site went with `ChatTrays`. Expected until Phase 5. Confirm `src/lib/interviews.ts`, `InterviewMenu.tsx` and `InterviewEditorModal.tsx` still exist on disk and were not deleted.
 7. The World Bible and the Writing Desk are unaffected.
 
 - [ ] **Step 8: Commit**
@@ -602,14 +629,14 @@ server-side fetch to a user-supplied URL remain anywhere in src/."
 
 - [ ] `npx tsc --noEmit` clean
 - [ ] `npx vitest run` green
-- [ ] `npx eslint src` clean
+- [ ] `npx eslint src` total is 377 or lower (it was 377 before Phase 1)
 - [ ] `npm run build` succeeds
 - [ ] `grep -rn "os.homedir\|child_process\|claude-agent-sdk" src` returns nothing
 - [ ] `find src/app/api -name route.ts` returns only `dev-login`
 - [ ] Settings has no AI section and no empty tab
 - [ ] The Research tab fills its width; boards and cards work
-- [ ] Both suggestion widgets still mount, empty
-- [ ] The Interviews menu still lists interviews
+- [ ] `InterviewMenu.tsx`, `InterviewEditorModal.tsx`, `interviews.ts`, `ArticleSuggestionsRenderer.tsx` and `ConsistencyFlagsRenderer.tsx` all still exist on disk (they are hostless, not deleted)
+- [ ] `grep -n "TRAY_WIDGET_TYPES" src/components/editor/WritingDesk.tsx` still matches — Phase 5 owns that decision, not this phase
 - [ ] ~3,500 lines deleted
 
 ---
@@ -618,6 +645,10 @@ server-side fetch to a user-supplied URL remain anywhere in src/."
 
 Stated here so the temporary gaps are not mistaken for bugs:
 
-- The Interviews menu lists interviews that cannot yet be run → `InterviewRunner`
-- Consistency & Gaps renders an empty widget → `loreRules.ts`
-- Article Suggestions renders an empty widget → `suggestArticles()`
+- **A host for all three surfaces** — `ResearchRail.tsx`, the tray rail with the chat removed. Without
+  it, `InterviewMenu`, `InterviewEditorModal`, `ArticleSuggestionsRenderer` and
+  `ConsistencyFlagsRenderer` have no render site at all.
+- The interview runner itself → `InterviewRunner`
+- Consistency & Gaps content → `loreRules.ts`
+- Article Suggestions content → `suggestArticles()`
+- A decision on `TRAY_WIDGET_TYPES`: rail-hosted, or returned to the board

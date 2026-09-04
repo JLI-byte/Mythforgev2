@@ -26,8 +26,8 @@ The Completionist walkthrough listed six uncalled store actions for removal (`R3
 
 | Action | Verified status | Disposition |
 |--------|-----------------|-------------|
-| `deleteSocialPost` | Social Media Panel exists at `src/components/layout/SocialMediaPanel.tsx` and is kept | **Keep.** Wire in Phase 7 |
-| `moveWorldBibleType` | World Bible is the kept differentiator | **Keep.** Wire in Phase 7 |
+| `deleteSocialPost` | Social Media Panel exists at `src/components/layout/SocialMediaPanel.tsx` and is kept | **Keep.** Wire in Phase 9 |
+| `moveWorldBibleType` | World Bible is the kept differentiator | **Keep.** Wire in Phase 9 |
 | `updateGlobalWidgets` | Subscribed at `WritingDesk.tsx:63` but never invoked — a dead subscription, not an unreferenced action | **Delete**, including the subscription line |
 | `setSessionWordCount` | Zero component references | **Delete** |
 | `setHoveredEntity` | Zero component references | **Delete** |
@@ -391,6 +391,30 @@ git rm src/components/editor/ScreenplayEditor.tsx
 git rm -r src/lib/screenplay
 ```
 
+- [ ] **Step 2b: Do NOT delete the entity-mention machinery it orphans**
+
+`ScreenplayEditor.tsx:14-16,33-34` is the **only** place these three are mounted:
+
+- `src/lib/EntitySuggest.ts`
+- `src/lib/EntityMark.ts`
+- `src/components/editor/EntitySuggestDropdown.tsx` (+ its `.module.css`)
+
+Deleting the screenplay editor therefore removes the `@` entity-mention feature from the product, and
+leaves those three files with no mount point. **Leave all three on disk.** The prose editor
+(`DeskTipTapEditor.tsx:31-32`) loads only `StarterKit` and `FontSize` today; Phase 4 mounts this
+machinery there with a `[[` trigger, which is what turns roadmap item `2e` from "build entity linking"
+into "rewire the entity linking that already works".
+
+Verify they survive this task:
+
+```bash
+ls src/lib/EntitySuggest.ts src/lib/EntityMark.ts src/components/editor/EntitySuggestDropdown.tsx
+```
+
+Expected: all three listed. A `tsc` pass will not complain about them — unmounted modules are not
+compile errors — so this is a manual check, and an eslint unused-export warning here is expected and
+should not be "fixed" by deleting them.
+
 - [ ] **Step 3: Remove every import and use the grep found**
 
 For each file listed in Step 1, delete the import line and the JSX or call site that used it. Where a component conditionally rendered `ScreenplayEditor` for `writingMode === 'screenplay'`, delete the whole branch — legacy screenplay projects now render the story editor by design.
@@ -410,7 +434,12 @@ git add -A
 git commit -m "refactor: delete the screenplay editor and nodes
 
 Withdrawn work type. sanitize.ts keeps data-screenplay-type in its allow-list
-so previously saved screenplay HTML is not altered on the next sanitise."
+so previously saved screenplay HTML is not altered on the next sanitise.
+
+This was also the only mount point for EntitySuggest, EntityMark and
+EntitySuggestDropdown, so @ entity mentions stop working here. All three
+modules are deliberately kept: Phase 4 mounts them in the prose editor
+with a [[ trigger."
 ```
 
 ---
@@ -766,7 +795,7 @@ git add src/store/workspaceStore.ts src/components/editor/WritingDesk.tsx
 git commit -m "refactor: delete four uncalled store actions
 
 deleteSocialPost and moveWorldBibleType are deliberately kept — the Social
-Hub and World Bible both survive Phase 1 and both are wired in Phase 7."
+Hub and World Bible both survive Phase 1 and both are wired in Phase 9."
 ```
 
 ---
@@ -867,9 +896,16 @@ Expected: PASS, with the `renpyExport`, `visualNovel` and old five-type suites g
 
 - [ ] **Step 4: Lint**
 
-Run: `npx eslint src`
+**Baseline:** `npx eslint src` reports **377 problems (248 errors, 129 warnings)** on the tree as it
+stands — measured, not estimated, and mostly pre-existing `no-explicit-any` in `workspaceStore.ts`.
+Clean is not achievable and is not the gate. The gate is **no increase**: deletions should move this
+number DOWN. If it rises, a deletion left something behind — fix it rather than suppressing it.
 
-Expected: no errors. Unused-import warnings here mean a deletion left something behind — fix them rather than suppressing them.
+```bash
+npx eslint src 2>&1 | tail -1
+```
+
+Expected: a total of 377 or lower.
 
 - [ ] **Step 5: Production build**
 
@@ -912,7 +948,7 @@ The [[ claim stays — Phase 3 implements it rather than retracting it."
 
 - [ ] `npx tsc --noEmit` clean
 - [ ] `npx vitest run` green
-- [ ] `npx eslint src` clean
+- [ ] `npx eslint src` total is 377 or lower (it was 377 before this phase)
 - [ ] `npm run build` succeeds
 - [ ] Work-type picker offers Story only
 - [ ] A legacy screenplay project opens in the story editor with its content intact

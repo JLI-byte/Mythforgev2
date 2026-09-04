@@ -84,7 +84,7 @@ Removes ~2,600 lines and four work types. Everything else in this roadmap gets s
 
 ## Phase 3 — Stop losing work, and stop leaking it between users
 
-**Plan:** to be written · **Spec:** Part 3a–3f · **Depends on:** Phase 2
+**Plan:** `2026-09-03-phase-3-isolation-and-data-safety.md` · **Status:** ready · **Spec:** Part 3a–3f · **Depends on:** Phase 2
 
 The data-safety findings, plus the five isolation defects. `T1` is the only defect in this roadmap that destroys a user's work irreversibly.
 
@@ -92,6 +92,7 @@ The data-safety findings, plus the five isolation defects. `T1` is the only defe
 |------|------|----------|
 | `T1` | **Sign-out does not clear the workspace.** Persist key is the static `'lorecanvas-workspace'`; no `resetWorkspace`, no `SIGNED_OUT` handler exists anywhere. User B on user A's browser sees A's manuscripts, and the next autosave writes them into B's cloud row — destroying B's work if they had any. Three layers: stamp `ownerUserId` in the persisted blob and discard on mismatch, clear on sign-out, clear on auth change | **CRITICAL** |
 | `T2` | Backup keys `lorecanvas-backup-*` are not user-scoped either — `listDataBackups()` offers A's backups to B, restorable in one click | HIGH |
+| `T7` | **Restoring an automatic backup empties the workspace.** Zustand hands `migrate` the bare state, not the `{state, version}` envelope, so the backup written at `workspaceStore.ts:2685` is stored bare — and `restoreDataBackup` (`:2733`) writes it straight back into the persist key. The next load hydrates nothing. Automatic backups are exactly the ones taken before a migration, so the recovery path destroys what you reach for it to recover. `createManualBackup` copies the real envelope and is unaffected. Found while planning Phase 3; in no audit or walkthrough | **CRITICAL** |
 | `T3` | **Sign-in is broken on any host but the developer's.** `auth/callback` hardcodes `https://lorecanvas.isomeric.studio`; `x-forwarded-host` is read and never used; the dev branch targets port 3000 while dev serves 4000 | HIGH |
 | `T4` | Signup gating is inconsistent — `useLoginForm` sets `shouldCreateUser: false`, `LoginModal` omits it, OAuth has no gate | HIGH |
 | `T5` | Delete the `ALLOW_DEV_LOGIN` escape hatch — one env var from an internet-reachable session as the owner | HIGH |
@@ -105,7 +106,7 @@ The data-safety findings, plus the five isolation defects. `T1` is the only defe
 
 ## Phase 4 — The core loop
 
-**Plan:** to be written · **Depends on:** Phase 1
+**Plan:** `2026-09-03-phase-4-core-loop.md` · **Status:** ready · **Depends on:** Phase 1
 
 With four work types and the AI gone, the loop is exactly: write a manuscript, build lore, link them, get a book out.
 
@@ -126,7 +127,7 @@ With four work types and the AI gone, the loop is exactly: write a manuscript, b
 
 ## Phase 5 — Lore without AI
 
-**Plan:** to be written · **Spec:** Part 2 · **Depends on:** Phase 4 for `broken-link` only
+**Plan:** `2026-09-03-phase-5-lore-without-ai.md` · **Status:** ready · **Spec:** Part 2 · **Depends on:** Phase 4 for `broken-link` only
 
 Rebuilds the three AI-driven lore features as deterministic rules. Instant, free, testable, and incapable of inventing a finding that is not there.
 
@@ -142,12 +143,12 @@ Rebuilds the three AI-driven lore features as deterministic rules. Instant, free
 
 ## Phase 6 — Accessibility
 
-**Plan:** to be written · **Depends on:** Phases 1 and 2 (fewer surfaces to fix)
+**Plan:** `2026-09-03-phase-6-accessibility.md` · **Status:** ready · **Depends on:** Phases 1 and 2 (fewer surfaces to fix)
 
 | Item | What |
 |------|------|
 | `2c` | The work-type modal gates every creation and has no `role="dialog"`, no `aria-modal`, no accessible name, no focus entry, no Escape, and sits 29 tab stops deep |
-| `2d` | Add live regions. Zero `aria-live` / `role="status"` / `role="alert"` / `<output>` in the entire product |
+| `2d` | Add live regions. Only two exist in the whole product (ErrorBoundary.tsx:47, WorldBibleBook.tsx:125) |
 | `15d` | Take the chrome out of `<main>`; add a skip link |
 | `18` | `role="dialog"` and `aria-modal` on the remaining dialogs |
 | `19` | Name the remaining unnamed controls |
@@ -156,7 +157,7 @@ Rebuilds the three AI-driven lore features as deterministic rules. Instant, free
 
 ## Phase 7 — First run and coming back
 
-**Plan:** to be written · **Depends on:** Phase 4
+**Plan:** `2026-09-03-phase-7-first-run.md` · **Status:** ready · **Depends on:** Phase 4
 
 | Item | What |
 |------|------|
@@ -170,7 +171,7 @@ Rebuilds the three AI-driven lore features as deterministic rules. Instant, free
 
 ## Phase 8 — Design system
 
-**Plan:** to be written · **Depends on:** Phases 1, 2 and 6
+**Plan:** `2026-09-03-phase-8-design-system.md` · **Status:** ready · **Depends on:** Phases 1, 2 and 6
 
 Ordered internally: tokens exist before anything converts to them.
 
@@ -191,13 +192,13 @@ Ordered internally: tokens exist before anything converts to them.
 
 ## Phase 9 — Wire what is already built
 
-**Plan:** to be written · **Depends on:** Phase 1
+**Plan:** `2026-09-03-phase-9-wire-what-exists.md` · **Status:** ready · **Depends on:** Phase 1
 
 | Item | What |
 |------|------|
-| `04c` | Plug in the finished-but-unwired store actions that survive Phases 1–2 — `checkAndAwardBadges` (so the five achievements can be earned at all), `toggleStandardFormat`, `repairStreak`, `deleteScene`, `deleteDocument`, `reorderScenes`, plus `deleteSocialPost` and `moveWorldBibleType` held back from Phase 1 |
+| `04c` | Plug in the finished-but-unwired store actions that survive Phases 1–2: `toggleStandardFormat` (note `editorMaxWidth` is read by **no component**, so the toggle is invisible until that is routed too), `repairStreak`, `deleteScene`, `deleteDocument`, `reorderScenes`, plus `deleteSocialPost` and `moveWorldBibleType` held back from Phase 1. **Correction:** badges are **not** unearnable — `recordWritingSession` calls `checkBadges` inline at `workspaceStore.ts:1931`. The narrower gap is three paths that move `streakState` without awarding: `updateGoalConfig`, `repairStreak` and `onRehydrateStorage` |
 | `04f` | Expose code blocks — the ProseMirror node already exists |
-| `15e` | Give the research "Link" card a URL field; show the add buttons on an empty board |
+| `15e` | Give the research "Link" card a URL field. **Correction:** the add buttons already render on an empty board — `WritingDesk.tsx:913` is `{isResearch && (` with no `widgets.length` term — so that half is dropped |
 | `13` | A visible resize affordance on the writing column |
 
 **Dropped, resolved by Phase 2:** `12` (Enter sends in the chat).
@@ -208,7 +209,7 @@ Ordered internally: tokens exist before anything converts to them.
 
 ## Phase 10 — Launch readiness
 
-**Plan:** to be written · **Spec:** Part 3g–3i · **Blocks launch, not development**
+**Plan:** `2026-09-03-phase-10-launch-readiness.md` · **Status:** ready · **Spec:** Part 3g–3i · **Blocks launch, not development**
 
 Phases 2 and 3 removed every blocker that used to live here. What remains is operational.
 
@@ -230,7 +231,7 @@ Cross-account data access is genuinely closed at the database. `beta_feedback` a
 | `S5` | Put the `workspaces` schema in `supabase/migrations/`. Only `beta_feedback` is version-controlled |
 | `S6` | Revoke `SELECT` on `public.workspaces` from `anon` so it leaves the GraphQL schema. RLS already blocks the rows — discoverability only |
 | `S7` | Enable leaked-password protection in Auth settings |
-| `3f` | `lazy()` the `ExportModal`; rename the duplicated `.beatCard` / `.beatCardHeader` |
+| `3f` | `lazy()` the `ExportModal` — it statically imports `epub.ts`, which statically imports `jszip`, dragging ~30 KB into the entry bundle for every user. **The `.beatCard` half moved to Phase 8**, which found 21 duplicated rule blocks across 11 stylesheets rather than the one |
 | `E1` | **Remove the Electron toolchain.** `npm uninstall electron electron-builder electron-packager concurrently wait-on cross-env`, delete the `postinstall` hook (it breaks container builds), `scripts/build-electron.js`, and the 84 MB `bin/node.exe` tracked in git. Removes ~980 of 1,184 packages and all 39 reported vulnerabilities, none of which ever reached the deployed app |
 
 ---
@@ -255,6 +256,7 @@ Two absent stages from the dossier have no item because they need a product call
 - **Found already built on verification:** 1 (`D4` — the method picker already has three-tier disclosure)
 - **Deferred pending a decision:** 2 absent stages
 
-**Phases 1 and 2 have written plans.** The rest are scoped here and get their detailed
-plans as they are reached, per the writing-plans scope rule — one plan per subsystem, each producing
-working software on its own.
+**All ten phases have written plans**, one per subsystem, each producing working software on its
+own. Together they are ~21,600 lines. Every plan was written against the source and several corrected
+the roadmap where a dossier finding did not survive checking — those corrections are recorded inline
+in the item they affect.
