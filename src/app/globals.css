@@ -65,6 +65,138 @@
   --glass-blur: 20px;
   --glass-border: rgba(255, 255, 255, 0.12);
   --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+
+  /* ========================================================================
+     SPACING - a 4px grid with a 6px half-step, because the audit found 193
+     uses of 8px, 148 of 4px and 138 of 6px: the app already thinks in fours
+     and sixes, it just spelled them 30 different ways (1,074 px-unit uses
+     across 30 distinct values). rem, not px, so a browser text-size setting
+     scales the layout with the text instead of leaving it behind.
+     ======================================================================== */
+  --space-1: 0.125rem;   /* 2px  */
+  --space-2: 0.25rem;    /* 4px  */
+  --space-3: 0.375rem;   /* 6px  */
+  --space-4: 0.5rem;     /* 8px  */
+  --space-5: 0.75rem;    /* 12px */
+  --space-6: 1rem;       /* 16px */
+  --space-7: 1.5rem;     /* 24px */
+  --space-8: 2rem;       /* 32px */
+  --space-9: 2.5rem;     /* 40px */
+  --space-10: 3rem;      /* 48px */
+  --space-11: 4rem;      /* 64px */
+  --space-12: 6rem;      /* 96px */
+
+  /* ========================================================================
+     TYPE - seven steps. The audit found 54 distinct rem sizes plus 8 px ones
+     across 951 declarations, and most of those uses sit below 1rem: this is
+     a dense tool, so the scale is dense at the bottom (11/12/13/14px) and
+     opens up only above the body size. --text-display and --text-hero are
+     deliberately NOT scale steps - they are the marketing route's fluid
+     title sizes. One seven-step scale cannot span an 11px badge and a 96px
+     hero without a 2x gap between neighbours, so the display sizes sit
+     outside the scale rather than distorting it.
+     ======================================================================== */
+  --text-2xs: 0.6875rem; /* 11px - badges, meta, counts */
+  --text-xs: 0.75rem;    /* 12px - secondary labels */
+  --text-sm: 0.8125rem;  /* 13px - dense control text */
+  --text-md: 0.875rem;   /* 14px - the app's default UI text */
+  --text-lg: 1rem;       /* 16px - manuscript body, dialog prose */
+  --text-xl: 1.25rem;    /* 20px - section headings */
+  --text-2xl: 1.5rem;    /* 24px - panel and modal titles */
+
+  --text-display: clamp(1.75rem, 1.2rem + 2.4vw, 2.5rem);
+  --text-hero: clamp(2.5rem, 1.5rem + 5vw, 6rem);
+
+  /* Line heights ride with the step rather than being restated per rule. */
+  --leading-tight: 1.2;
+  --leading-snug: 1.4;
+  --leading-normal: 1.6;
+  --leading-prose: 1.75;
+
+  /* ========================================================================
+     RADII - 21 distinct values across 554 uses collapse to seven plus a pill.
+     The three biggest clusters (4px x116, 6px x109, 8px x102) each keep their
+     own step; the long tail snaps to the nearest, ties rounding up.
+     ======================================================================== */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+  --radius-full: 999px;
+
+  /* ========================================================================
+     MOTION - 49 distinct transition durations. Two clusters carry most of it
+     (0.15s + 150ms = 178 uses, 0.2s + 200ms about 96), so the scale is built
+     around them. Keyframe animations are NOT on this scale: a 9s candle
+     flicker and a 150ms hover are not the same kind of thing. The
+     reduced-motion block below already floors both at 1ms.
+     ======================================================================== */
+  --dur-1: 100ms;
+  --dur-2: 150ms;   /* the default */
+  --dur-3: 200ms;
+  --dur-4: 300ms;
+  --dur-5: 500ms;
+
+  /* 15 distinct easings were in use; plain `ease` alone appeared hundreds of times. */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.55, 0.06, 0.68, 0.19);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ========================================================================
+     TYPEFACES. --font-manuscript is new (item 09); --font-mono had five
+     references and no definition anywhere.
+     ======================================================================== */
+  --font-manuscript: var(--font-garamond), 'Merriweather', Georgia, serif;
+  --font-mono: ui-monospace, 'JetBrains Mono', 'Courier New', monospace;
+
+  /* ========================================================================
+     Channel triplets. --accent-rgb was defined ONLY in the two fantasy
+     blocks, so its 93 references across 9 stylesheets were invalid at
+     computed-value time in both default themes - every
+     rgba(var(--accent-rgb), a) focus ring, tab tint and hover fill silently
+     dropped unless the user was in the fantasy family. Verified in the
+     browser: the token resolved to "" and the declaration painted
+     rgba(0,0,0,0). --foreground-rgb had the same hole with 5 uses.
+     ======================================================================== */
+  --accent-rgb: 0, 91, 181;        /* #005bb5 */
+  --foreground-rgb: 34, 34, 34;    /* #222222 */
+  /* Shadows are cast by light, so they stay ink in every default palette -
+     unlike --overlay-rgb, which has to contrast with the ground and flips. */
+  --shadow-rgb: 0, 0, 0;
+
+  /* Aliases for names components already reference. Defining them as aliases
+     rather than new colours keeps the palette at one source of truth. */
+  --surface-2: var(--surface-mid);
+  --surface-raised: var(--surface-mid);
+  --surface-elevated: var(--surface-high);
+  --surface-hover: rgba(var(--overlay-rgb), 0.06);
+  --border-subtle: rgba(var(--overlay-rgb), 0.08);
+  --accent-subtle: rgba(var(--accent-rgb), 0.12);
+  --accent-hover: var(--accent-dim);
+  --input-bg: var(--surface-mid);
+  --error: var(--danger);
+  --text-muted: var(--muted);
+  --text-primary: var(--foreground);
+
+  /* ========================================================================
+     ELEVATION - 118 distinct box-shadow recipes across 155 uses. Five steps
+     plus the glass shadow that already exists. Theme-dependent: the same
+     shadow that reads as depth on white is invisible on #0e0e0e, so each
+     block sets its own alphas.
+     ======================================================================== */
+  --shadow-1: 0 1px 2px rgba(var(--shadow-rgb), 0.06);
+  --shadow-2: 0 2px 6px rgba(var(--shadow-rgb), 0.10);
+  --shadow-3: 0 4px 12px rgba(var(--shadow-rgb), 0.14);
+  --shadow-4: 0 12px 32px rgba(var(--shadow-rgb), 0.18);
+  --shadow-5: 0 24px 64px rgba(var(--shadow-rgb), 0.24);
+  --shadow-ring: 0 0 0 3px rgba(var(--accent-rgb), 0.28);
+  --shadow-lg: var(--shadow-3);
+  --shadow-2xl: var(--shadow-5);
+
 }
 
 input,
@@ -108,6 +240,33 @@ option {
     --glass-blur: 24px;
     --glass-border: rgba(255, 255, 255, 0.08);
     --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+
+    --accent-rgb: 208, 188, 255;      /* #d0bcff */
+    --foreground-rgb: 229, 226, 225;  /* #e5e2e1 */
+    --shadow-rgb: 0, 0, 0;
+
+    --surface-2: var(--surface-mid);
+    --surface-raised: var(--surface-mid);
+    --surface-elevated: var(--surface-high);
+    --surface-hover: rgba(var(--overlay-rgb), 0.08);
+    --border-subtle: rgba(var(--overlay-rgb), 0.10);
+    --accent-subtle: rgba(var(--accent-rgb), 0.16);
+    --accent-hover: var(--accent-dim);
+    --input-bg: var(--surface-mid);
+    --error: var(--danger);
+    --text-muted: var(--muted);
+    --text-primary: var(--foreground);
+
+    /* Deeper and blacker than light: on #0e0e0e a 6% shadow is nothing. */
+    --shadow-1: 0 1px 2px rgba(var(--shadow-rgb), 0.30);
+    --shadow-2: 0 2px 6px rgba(var(--shadow-rgb), 0.40);
+    --shadow-3: 0 4px 12px rgba(var(--shadow-rgb), 0.50);
+    --shadow-4: 0 12px 32px rgba(var(--shadow-rgb), 0.60);
+    --shadow-5: 0 24px 64px rgba(var(--shadow-rgb), 0.70);
+    --shadow-ring: 0 0 0 3px rgba(var(--accent-rgb), 0.35);
+    --shadow-lg: var(--shadow-3);
+    --shadow-2xl: var(--shadow-5);
+
   }
 }
 
@@ -135,6 +294,33 @@ option {
   --glass-blur: 24px;
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+
+  --accent-rgb: 208, 188, 255;      /* #d0bcff */
+  --foreground-rgb: 229, 226, 225;  /* #e5e2e1 */
+  --shadow-rgb: 0, 0, 0;
+
+  --surface-2: var(--surface-mid);
+  --surface-raised: var(--surface-mid);
+  --surface-elevated: var(--surface-high);
+  --surface-hover: rgba(var(--overlay-rgb), 0.08);
+  --border-subtle: rgba(var(--overlay-rgb), 0.10);
+  --accent-subtle: rgba(var(--accent-rgb), 0.16);
+  --accent-hover: var(--accent-dim);
+  --input-bg: var(--surface-mid);
+  --error: var(--danger);
+  --text-muted: var(--muted);
+  --text-primary: var(--foreground);
+
+  /* Deeper and blacker than light: on #0e0e0e a 6% shadow is nothing. */
+  --shadow-1: 0 1px 2px rgba(var(--shadow-rgb), 0.30);
+  --shadow-2: 0 2px 6px rgba(var(--shadow-rgb), 0.40);
+  --shadow-3: 0 4px 12px rgba(var(--shadow-rgb), 0.50);
+  --shadow-4: 0 12px 32px rgba(var(--shadow-rgb), 0.60);
+  --shadow-5: 0 24px 64px rgba(var(--shadow-rgb), 0.70);
+  --shadow-ring: 0 0 0 3px rgba(var(--accent-rgb), 0.35);
+  --shadow-lg: var(--shadow-3);
+  --shadow-2xl: var(--shadow-5);
+
 }
 
 :root[data-theme="light"] {
@@ -150,6 +336,11 @@ option {
   --glass-blur: 24px;
   --glass-border: rgba(0, 0, 0, 0.05);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+
+  --accent-rgb: 0, 91, 181;
+  --foreground-rgb: 23, 23, 23;    /* matches this block's #171717 */
+  --shadow-rgb: 0, 0, 0;
+
 }
 
 /*
@@ -192,6 +383,9 @@ option {
   --glass-blur: 20px;
   --glass-border: rgba(59, 44, 21, 0.12);
   --glass-shadow: 0 8px 28px 0 rgba(59, 44, 21, 0.14);
+
+  --shadow-rgb: 59, 44, 21;   /* the parchment family casts warm ink shadows */
+
 }
 
 /* Fantasy DARK — candlelit library: aged leather, ember, gold */
@@ -224,6 +418,9 @@ option {
   --glass-blur: 24px;
   --glass-border: rgba(236, 224, 196, 0.10);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.55);
+
+  --shadow-rgb: 0, 0, 0;
+
 }
 
 /* Cartographer's-desk wood photo behind the whole app. The parchment surfaces
