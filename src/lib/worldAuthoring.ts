@@ -123,11 +123,13 @@ export function appendSectionsToDoc(existingDoc: string | undefined, sections: A
     return JSON.stringify(tabs);
 }
 
-function stripHtmlText(html: string): string {
+/** Tags out, entities decoded, blank lines collapsed. Shared with loreRules. */
+export function stripHtmlText(html: string): string {
     return html
         .replace(/<br\s*\/?>/gi, '\n')
         .replace(/<\/p>/gi, '\n\n')
         .replace(/<[^>]+>/g, '')
+        .replace(/&nbsp;/gi, ' ')
         .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
         .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&')
         .replace(/\n{3,}/g, '\n\n')
