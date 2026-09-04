@@ -15,7 +15,7 @@
     position: relative;
     width: 900px;
     height: 720px;
-    margin: 32px auto;
+    margin: var(--space-8) auto;
     overflow: hidden;
     border-radius: 22px;
     color: var(--ink);
@@ -72,7 +72,7 @@
 .content { position: absolute; left: 410px; right: 92px; top: 32px; bottom: 24px; z-index: 15; }
 .topline {
     display: grid; grid-template-columns: minmax(200px, 1fr) 90px;
-    align-items: center; gap: 10px; padding-bottom: 18px;
+    align-items: center; gap: var(--space-5); padding-bottom: var(--space-6);
     border-bottom: 1px solid var(--primaryLine);
 }
 .quote {
@@ -96,21 +96,21 @@
 
 .page { position: absolute; inset: 98px 0 0 0; }
 .pageScroll {
-    height: 565px; overflow: auto; padding-right: 22px;
+    height: 565px; overflow: auto; padding-right: var(--space-7);
     scrollbar-width: thin; scrollbar-color: var(--primary) var(--white25);
 }
 .pageScroll h1 { font: 800 30px var(--profile-serif, serif); margin: 0; color: var(--ink); }
 .pageScroll h2 {
-    font: 600 13px var(--profile-softserif, serif); margin: 2px 0 18px;
+    font: 600 13px var(--profile-softserif, serif); margin: var(--space-1) 0 var(--space-6);
     color: var(--primary); letter-spacing: 1px; text-transform: lowercase;
 }
 
-.placeholder { color: var(--muted); font-style: italic; font-size: 13px; padding: 8px 0; }
+.placeholder { color: var(--muted); font-style: italic; font-size: 13px; padding: var(--space-4) 0; }
 .dossier {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin-bottom: 18px;
+    gap: var(--space-6);
+    margin-bottom: var(--space-6);
 }
 .dossierName b, .dossierMeta b {
     display: block;
@@ -133,19 +133,19 @@
 .dossierMeta p {
     display: flex;
     justify-content: space-between;
-    gap: 8px;
-    margin: 0 0 6px;
+    gap: var(--space-4);
+    margin: 0 0 var(--space-3);
     border-bottom: 1px dotted var(--line);
-    padding-bottom: 4px;
+    padding-bottom: var(--space-2);
     font-size: 13px;
 }
 .dossierMeta span { color: var(--soft); }
 .introCard {
     background: color-mix(in srgb, var(--primary) 10%, transparent);
     border-left: 3px solid var(--primary);
-    padding: 12px 14px;
+    padding: var(--space-5) var(--space-6);
     border-radius: 6px;
-    margin-bottom: 16px;
+    margin-bottom: var(--space-6);
 }
 .introCard b {
     display: block;
@@ -153,61 +153,61 @@
     letter-spacing: 2px;
     text-transform: uppercase;
     color: var(--primary);
-    margin-bottom: 4px;
+    margin-bottom: var(--space-2);
 }
 .introCard p { margin: 0; font: 500 15px/1.5 var(--profile-softserif, serif); }
-.text p { margin: 0 0 12px; font: 400 14px/1.6 var(--profile-sans, sans-serif); color: var(--soft); }
+.text p { margin: 0 0 var(--space-5); font: 400 14px/1.6 var(--profile-sans, sans-serif); color: var(--soft); }
 
-.personaFeature { display: grid; grid-template-columns: 130px 1fr; gap: 14px; margin-bottom: 18px; align-items: center; }
+.personaFeature { display: grid; grid-template-columns: 130px 1fr; gap: var(--space-6); margin-bottom: var(--space-6); align-items: center; }
 .personaFeature img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; }
 .personaFeature b, .personaTextCard b {
     display: block; font: 700 10px var(--profile-sans, sans-serif);
     letter-spacing: 2px; text-transform: uppercase; color: var(--primary);
 }
-.personaFeature h3, .personaTextCard h3 { margin: 2px 0 6px; font: 600 18px var(--profile-softserif, serif); color: var(--ink); }
+.personaFeature h3, .personaTextCard h3 { margin: var(--space-1) 0 var(--space-3); font: 600 18px var(--profile-softserif, serif); color: var(--ink); }
 .personaFeature p, .personaTextCard p { margin: 0; font: 400 13px/1.55 var(--profile-sans, sans-serif); color: var(--soft); }
 
-.personaRow { display: grid; grid-template-columns: 1fr 130px; gap: 14px; margin-bottom: 16px; align-items: center; }
+.personaRow { display: grid; grid-template-columns: 1fr 130px; gap: var(--space-6); margin-bottom: var(--space-6); align-items: center; }
 .personaRow.reverse { grid-template-columns: 130px 1fr; }
 .personaRow.reverse .personaTextCard { order: 2; }
 .personaRow img { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; }
 
-.personaMeters { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; margin: 18px 0; }
-.meterItem b { display: block; font-size: 12px; margin-bottom: 4px; color: var(--ink); }
+.personaMeters { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5) var(--space-7); margin: var(--space-6) 0; }
+.meterItem b { display: block; font-size: 12px; margin-bottom: var(--space-2); color: var(--ink); }
 .meterItem > div { height: 6px; background: var(--white25); border-radius: 4px; overflow: hidden; }
 .meterItem > div > span { display: block; height: 100%; width: var(--level, 0%); background: linear-gradient(90deg, var(--primary), var(--gold)); }
 
-.personaNotes { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
-.personaNotes b { display: block; font: 700 10px var(--profile-sans, sans-serif); letter-spacing: 2px; text-transform: uppercase; color: var(--primary); margin-bottom: 4px; }
+.personaNotes { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-top: var(--space-6); }
+.personaNotes b { display: block; font: 700 10px var(--profile-sans, sans-serif); letter-spacing: 2px; text-transform: uppercase; color: var(--primary); margin-bottom: var(--space-2); }
 .personaNotes p { margin: 0; font-size: 13px; color: var(--soft); }
 
-.palette { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.palette { display: flex; gap: var(--space-5); margin-bottom: var(--space-6); flex-wrap: wrap; }
 .colorSwatch { text-align: center; }
 .colorSwatch i { display: block; width: 46px; height: 46px; border-radius: 8px; background: var(--swatch); border: 1px solid var(--line); }
-.colorSwatch b { display: block; font-size: 11px; margin-top: 4px; color: var(--ink); }
+.colorSwatch b { display: block; font-size: 11px; margin-top: var(--space-2); color: var(--ink); }
 .colorSwatch span { font-size: 0.6875rem; color: var(--muted); }
 
-.lookbook { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.lookbook { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: var(--space-5); margin-bottom: var(--space-6); }
 .lookItem { border-radius: 8px; overflow: hidden; background: var(--cream); }
 .lookItem img { width: 100%; height: 120px; object-fit: cover; display: block; }
 .lookItem.large img { height: 190px; }
-.lookItem b { display: block; padding: 6px 8px 0; font: 700 11px var(--profile-sans, sans-serif); color: var(--ink); }
-.lookItem span { display: block; padding: 0 8px 8px; font-size: 11px; color: var(--muted); }
+.lookItem b { display: block; padding: var(--space-3) var(--space-4) 0; font: 700 11px var(--profile-sans, sans-serif); color: var(--ink); }
+.lookItem span { display: block; padding: 0 var(--space-4) var(--space-4); font-size: 11px; color: var(--muted); }
 
-.appearanceBlock { margin-bottom: 16px; }
-.appearanceBlock b { display: block; font: 700 10px var(--profile-sans, sans-serif); letter-spacing: 2px; text-transform: uppercase; color: var(--primary); margin-bottom: 4px; }
+.appearanceBlock { margin-bottom: var(--space-6); }
+.appearanceBlock b { display: block; font: 700 10px var(--profile-sans, sans-serif); letter-spacing: 2px; text-transform: uppercase; color: var(--primary); margin-bottom: var(--space-2); }
 .appearanceBlock p { margin: 0; font: 400 14px/1.6 var(--profile-sans, sans-serif); color: var(--soft); }
 
-.appearanceSection { margin-bottom: 18px; }
-.appearanceSectionHead b { font: 600 16px var(--profile-softserif, serif); color: var(--ink); margin-right: 8px; }
+.appearanceSection { margin-bottom: var(--space-6); }
+.appearanceSectionHead b { font: 600 16px var(--profile-softserif, serif); color: var(--ink); margin-right: var(--space-4); }
 .appearanceSectionHead span { font-size: 12px; color: var(--muted); }
-.appearanceMoodboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+.appearanceMoodboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); margin-top: var(--space-4); }
 .moodItem img { width: 100%; height: 110px; object-fit: cover; border-radius: 6px; }
-.moodItem p { margin: 4px 0 0; font-size: 11px; color: var(--soft); }
+.moodItem p { margin: var(--space-2) 0 0; font-size: 11px; color: var(--soft); }
 
-.relationStack { display: grid; gap: 12px; }
-.relationCard { background: var(--cream); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
-.relationInfo { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.relationStack { display: grid; gap: var(--space-5); }
+.relationCard { background: var(--cream); border: 1px solid var(--line); border-radius: 10px; padding: var(--space-5); }
+.relationInfo { display: flex; align-items: center; gap: var(--space-5); margin-bottom: var(--space-3); }
 .relationInfo img { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; }
 .relationInfo b { display: block; font: 700 15px var(--profile-serif, serif); color: var(--ink); }
 .relationInfo span { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); }
@@ -215,15 +215,15 @@
 
 .toolbar {
     position: absolute; top: 18px; right: 84px; z-index: 45;
-    display: flex; gap: 6px;
+    display: flex; gap: var(--space-3);
 }
 .toolBtn, .toolBtnPrimary {
     font: 700 11px var(--profile-sans, sans-serif); letter-spacing: 1px;
-    text-transform: uppercase; padding: 5px 12px; border-radius: 14px;
+    text-transform: uppercase; padding: var(--space-3) var(--space-5); border-radius: 14px;
     cursor: pointer; border: 1px solid var(--primaryLine);
     background: transparent; color: var(--primary);
 }
 .toolBtnPrimary { background: var(--primary); color: var(--cream); border-color: var(--primary); }
 .toolBtn:hover { background: color-mix(in srgb, var(--primary) 8%, transparent); }
-.decorEditor { margin-top: 22px; border-top: 1px dashed var(--line); padding-top: 12px; }
+.decorEditor { margin-top: var(--space-7); border-top: 1px dashed var(--line); padding-top: var(--space-5); }
 .decorEditor img, .decorEditor .emptyImage { width: 100%; height: 90px; object-fit: cover; border-radius: 6px; }

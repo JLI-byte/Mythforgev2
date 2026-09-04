@@ -36,26 +36,26 @@
 }
 
 .header {
-  padding: 20px 24px 0;
+  padding: var(--space-7) var(--space-7) 0;
 }
 
 .title {
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--foreground);
-  margin: 0 0 4px;
+  margin: 0 0 var(--space-2);
 }
 
 .subtitle {
   font-size: 0.75rem;
   color: var(--muted);
-  margin: 0 0 14px;
+  margin: 0 0 var(--space-6);
 }
 
 .finderLink {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
   vertical-align: -3px;
   background: none;
   border: none;
@@ -97,16 +97,16 @@
 .typeGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 10px;
+  gap: var(--space-5);
 }
 
 .typeCard {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
+  gap: var(--space-2);
   text-align: left;
-  padding: 14px;
+  padding: var(--space-6);
   border-radius: 12px;
   border: 1px solid rgba(var(--overlay-rgb), 0.1);
   background: rgba(var(--overlay-rgb), 0.03);
@@ -122,14 +122,14 @@
 
 .typeIcon {
   font-size: 1.3rem;
-  margin-bottom: 2px;
+  margin-bottom: var(--space-1);
 }
 
 .typeHeader {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding-bottom: 14px;
+  gap: var(--space-4);
+  padding-bottom: var(--space-6);
   border-bottom: 1px solid rgba(var(--overlay-rgb), 0.08);
 }
 
@@ -137,7 +137,7 @@
   font-size: 0.76rem;
   font-weight: 700;
   color: var(--foreground);
-  padding: 5px 12px;
+  padding: var(--space-3) var(--space-5);
   border-radius: 14px;
   border: 1px solid var(--accent);
   background: rgba(var(--accent-rgb), 0.12);
@@ -150,7 +150,7 @@
   font-size: 0.6875rem;
   font-weight: 600;
   cursor: pointer;
-  padding: 4px 6px;
+  padding: var(--space-2) var(--space-3);
 }
 
 .typeChangeBtn:hover {
@@ -161,7 +161,7 @@
 .scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 16px 24px 24px;
+  padding: var(--space-6) var(--space-7) var(--space-7);
 }
 
 .sectionLabel {
@@ -170,23 +170,23 @@
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  margin: 4px 0 10px;
+  margin: var(--space-2) 0 var(--space-5);
 }
 
 /* Starter cards */
 .starterGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: var(--space-5);
+  margin-bottom: var(--space-7);
 }
 
 .starterCard {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--space-3);
   text-align: left;
-  padding: 13px 14px;
+  padding: var(--space-5) var(--space-6);
   border-radius: 12px;
   border: 1px solid rgba(var(--overlay-rgb), 0.1);
   background: rgba(var(--overlay-rgb), 0.03);
@@ -203,7 +203,7 @@
 .starterName {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
   font-size: 0.82rem;
   font-weight: 700;
   color: var(--foreground);
@@ -217,7 +217,7 @@
 
 .starterMeta {
   margin-top: auto;
-  padding-top: 6px;
+  padding-top: var(--space-3);
   font-size: 0.6875rem;
   color: var(--accent);
 }
@@ -225,7 +225,7 @@
 /* Browse all */
 .browseToggle {
   width: 100%;
-  padding: 10px;
+  padding: var(--space-5);
   border-radius: 10px;
   border: 1px dashed rgba(var(--overlay-rgb), 0.18);
   background: none;
@@ -242,7 +242,7 @@
 }
 
 .familyGroup {
-  margin-top: 16px;
+  margin-top: var(--space-6);
 }
 
 .familyLabel {
@@ -251,16 +251,16 @@
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  margin-bottom: 6px;
+  margin-bottom: var(--space-3);
 }
 
 .methodRow {
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: var(--space-5);
   width: 100%;
   text-align: left;
-  padding: 8px 10px;
+  padding: var(--space-4) var(--space-5);
   border-radius: 8px;
   border: 1px solid transparent;
   background: none;
@@ -295,7 +295,7 @@
 }
 
 .emptyHint {
-  padding: 16px;
+  padding: var(--space-6);
   text-align: center;
   font-size: 0.72rem;
   color: var(--muted);
@@ -310,15 +310,15 @@
 .finderOptions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .finderOption {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: var(--space-2);
   text-align: left;
-  padding: 13px 16px;
+  padding: var(--space-5) var(--space-6);
   border-radius: 12px;
   border: 1px solid rgba(var(--overlay-rgb), 0.1);
   background: rgba(var(--overlay-rgb), 0.03);
@@ -335,14 +335,14 @@
 .finderResults {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-5);
 }
 
 .finderResultCard {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 16px;
+  gap: var(--space-3);
+  padding: var(--space-6);
   border-radius: 12px;
   border: 1px solid rgba(var(--accent-rgb), 0.3);
   background: rgba(var(--accent-rgb), 0.05);
@@ -352,7 +352,7 @@
   font-size: 0.7rem;
   line-height: 1.45;
   color: var(--foreground);
-  padding: 8px 10px;
+  padding: var(--space-4) var(--space-5);
   border-radius: 8px;
   background: rgba(var(--accent-rgb), 0.1);
 }
@@ -361,15 +361,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  margin-top: 4px;
+  gap: var(--space-5);
+  margin-top: var(--space-2);
 }
 
 .finderFooter {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
-  margin-top: 14px;
+  gap: var(--space-5);
+  margin-top: var(--space-6);
 }
 
 .finderBack {
@@ -379,7 +379,7 @@
   font-size: 0.7rem;
   font-weight: 600;
   cursor: pointer;
-  padding: 6px 8px;
+  padding: var(--space-3) var(--space-4);
   border-radius: 6px;
   transition: color 0.15s;
 }
@@ -395,7 +395,7 @@
   background: rgba(var(--overlay-rgb), 0.05);
   border: 1px solid rgba(var(--overlay-rgb), 0.12);
   border-radius: 8px;
-  padding: 10px 14px;
+  padding: var(--space-5) var(--space-6);
   color: var(--foreground);
   font-size: 0.85rem;
   transition: all 0.2s;
@@ -411,18 +411,18 @@
 
 .confirmModal {
   width: min(400px, calc(100vw - 48px));
-  padding: 22px 24px;
+  padding: var(--space-7) var(--space-7);
 }
 
 .confirmActions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 6px;
+  gap: var(--space-5);
+  margin-top: var(--space-3);
 }
 
 .confirmDanger {
-  padding: 10px 20px;
+  padding: var(--space-5) var(--space-7);
   border-radius: 22px;
   border: 1px solid #e5484d;
   background: rgba(229, 72, 77, 0.14);
@@ -447,7 +447,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-4);
   pointer-events: none;
 }
 
@@ -455,7 +455,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
   pointer-events: auto;
   text-align: center;
   max-width: 420px;
@@ -472,19 +472,19 @@
   font-size: 0.78rem;
   line-height: 1.5;
   color: var(--muted);
-  margin: 0 0 14px;
+  margin: 0 0 var(--space-6);
 }
 
 .welcomeActions {
   display: flex;
-  gap: 10px;
+  gap: var(--space-5);
 }
 
 .welcomePrimary {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-7);
   border-radius: 22px;
   border: 1px solid var(--accent);
   background: rgba(var(--accent-rgb), 0.14);
@@ -501,7 +501,7 @@
 }
 
 .welcomeSecondary {
-  padding: 10px 20px;
+  padding: var(--space-5) var(--space-7);
   border-radius: 22px;
   border: 1px solid rgba(var(--overlay-rgb), 0.15);
   background: none;

@@ -4,10 +4,10 @@
     height: 36px;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    padding: 0 0.5rem;
+    padding: 0 var(--space-4);
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: var(--space-2);
     font-size: 0.78rem;
     color: var(--muted);
     flex-shrink: 0;
@@ -18,7 +18,7 @@
     background: transparent;
     border: none;
     color: var(--muted);
-    padding: 0.2rem 0.35rem;
+    padding: var(--space-2) var(--space-3);
     cursor: pointer;
     border-radius: 4px;
     transition: color 150ms ease, opacity 150ms ease;
@@ -46,7 +46,7 @@
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 0.15rem;
+    gap: var(--space-1);
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -61,14 +61,14 @@
 
 .crumbSep {
     color: var(--muted);
-    margin: 0 0.2rem;
+    margin: 0 var(--space-2);
 }
 
 /* Home button */
 .homeBtn {
     background: transparent;
     border: none;
-    padding: 0.2rem 0.35rem;
+    padding: var(--space-2) var(--space-3);
     cursor: pointer;
     border-radius: 4px;
     transition: opacity 150ms ease;
@@ -88,6 +88,6 @@
 /* Container for right-side action buttons */
 .actionGroup {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-4);
     align-items: center;
 }

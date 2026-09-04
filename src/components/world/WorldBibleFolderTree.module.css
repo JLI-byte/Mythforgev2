@@ -1,20 +1,20 @@
 /* WorldBibleFolderTree — file-explorer style Organize view (Sprint 72) */
 
 .main { width: 100%; height: 100%; overflow-y: auto; background: var(--background); }
-.treePanel { max-width: 720px; margin: 0 auto; padding: 32px 24px 80px; min-height: 100%; }
+.treePanel { max-width: 720px; margin: 0 auto; padding: var(--space-8) var(--space-7) var(--space-12); min-height: 100%; }
 .treePanel.dropTarget { outline: 2px dashed var(--accent); outline-offset: -6px; border-radius: 12px; }
 
-.header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+.header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-5); margin-bottom: var(--space-2); }
 .title { font-size: 1.4rem; font-weight: 700; color: var(--foreground); margin: 0; }
-.newFolderBtn { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--foreground); font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+.newFolderBtn { padding: var(--space-4) var(--space-6); border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--foreground); font-size: 0.85rem; font-weight: 600; cursor: pointer; }
 .newFolderBtn:hover { border-color: var(--accent); }
-.hint { color: var(--muted, #888); font-size: 0.8rem; margin: 0 0 18px; }
+.hint { color: var(--muted, #888); font-size: 0.8rem; margin: 0 0 var(--space-6); }
 
-.tree { display: flex; flex-direction: column; gap: 2px; }
+.tree { display: flex; flex-direction: column; gap: var(--space-1); }
 
 .folderRow {
-    display: flex; align-items: center; gap: 6px;
-    padding: 6px 8px; border-radius: 8px;
+    display: flex; align-items: center; gap: var(--space-3);
+    padding: var(--space-3) var(--space-4); border-radius: 8px;
     border: 1px solid transparent;
     cursor: grab;
 }
@@ -28,19 +28,19 @@
 .folderName {
     flex: 1; min-width: 0;
     border: none; background: transparent; color: var(--foreground);
-    font-size: 0.92rem; font-weight: 600; padding: 2px 4px; border-radius: 4px;
+    font-size: 0.92rem; font-weight: 600; padding: var(--space-1) var(--space-2); border-radius: 4px;
 }
 .folderName:focus { outline: 1px solid var(--accent); background: var(--background); }
-.count { flex: none; font-size: 0.72rem; color: var(--muted, #888); background: var(--background); border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; }
+.count { flex: none; font-size: 0.72rem; color: var(--muted, #888); background: var(--background); border: 1px solid var(--border); border-radius: 999px; padding: var(--space-1) var(--space-4); }
 
-.rowActions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.12s; }
+.rowActions { display: flex; gap: var(--space-1); opacity: 0; transition: opacity 0.12s; }
 .rowBtn { width: 26px; height: 22px; border: none; border-radius: 5px; background: transparent; color: var(--muted, #888); cursor: pointer; font-size: 0.85rem; line-height: 1; }
 .rowBtn:hover { background: var(--border); color: var(--foreground); }
-.rowBtnDanger { width: auto; padding: 0 8px; background: rgba(220, 80, 80, 0.15); color: #e07070; font-size: 0.72rem; font-weight: 700; }
+.rowBtnDanger { width: auto; padding: 0 var(--space-4); background: rgba(220, 80, 80, 0.15); color: #e07070; font-size: 0.72rem; font-weight: 700; }
 
 .articleRow {
-    display: flex; align-items: center; gap: 8px;
-    padding: 4px 8px; border-radius: 6px; cursor: grab;
+    display: flex; align-items: center; gap: var(--space-4);
+    padding: var(--space-2) var(--space-4); border-radius: 6px; cursor: grab;
     color: var(--foreground);
 }
 .articleRow:hover { background: var(--surface); }
@@ -48,8 +48,8 @@
 .articleIcon { flex: none; font-size: 0.8rem; }
 .articleName { flex: 1; min-width: 0; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.empty { color: var(--muted, #888); font-size: 0.88rem; padding: 18px 4px; }
+.empty { color: var(--muted, #888); font-size: 0.88rem; padding: var(--space-6) var(--space-2); }
 
-.unfiled { margin-top: 26px; border-top: 1px solid var(--border); padding-top: 14px; }
-.unfiledTitle { font-size: 0.95rem; font-weight: 700; color: var(--foreground); margin: 0 0 2px; }
-.unfiledHint { color: var(--muted, #888); font-size: 0.75rem; margin: 0 0 8px; }
+.unfiled { margin-top: var(--space-7); border-top: 1px solid var(--border); padding-top: var(--space-6); }
+.unfiledTitle { font-size: 0.95rem; font-weight: 700; color: var(--foreground); margin: 0 0 var(--space-1); }
+.unfiledHint { color: var(--muted, #888); font-size: 0.75rem; margin: 0 0 var(--space-4); }

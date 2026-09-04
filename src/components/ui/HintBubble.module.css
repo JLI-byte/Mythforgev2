@@ -10,7 +10,7 @@
   transform: translateX(-50%);
   z-index: 70;
   width: min(360px, calc(100% - 36px));
-  padding: 13px 15px 11px;
+  padding: var(--space-5) var(--space-6) var(--space-5);
   border-radius: 12px;
   border: 1px solid rgba(var(--overlay-rgb), 0.16);
   background: var(--surface-mid);
@@ -21,7 +21,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
+  gap: var(--space-5);
 }
 
 .title {
@@ -33,7 +33,7 @@
 .close {
   flex: none;
   display: flex;
-  padding: 3px;
+  padding: var(--space-2);
   border: 0;
   border-radius: 6px;
   background: none;
@@ -50,7 +50,7 @@
 }
 
 .body {
-  margin: 5px 0 9px;
+  margin: var(--space-3) 0 var(--space-4);
   font-size: 0.76rem;
   line-height: 1.55;
   color: var(--muted);

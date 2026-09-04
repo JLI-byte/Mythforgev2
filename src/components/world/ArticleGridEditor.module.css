@@ -66,7 +66,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 0 var(--space-6);
   cursor: grab;
   user-select: none;
   flex-shrink: 0;
@@ -83,7 +83,7 @@
   color: var(--muted);
   font-family: var(--font-mono);
   background: rgba(var(--overlay-rgb), 0.05);
-  padding: 4px 10px;
+  padding: var(--space-2) var(--space-5);
   border-radius: 6px;
   user-select: none;
 }
@@ -113,9 +113,9 @@
 .tabBarSmall {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-1);
   flex: 1;
-  margin-left: 16px;
+  margin-left: var(--space-6);
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -123,7 +123,7 @@
 .tabBarSmall::-webkit-scrollbar { display: none; }
 
 .tabSmall {
-  padding: 6px 14px;
+  padding: var(--space-3) var(--space-6);
   background: transparent;
   border-radius: 6px;
   color: var(--muted);
@@ -155,7 +155,7 @@
   color: var(--muted);
   font-size: 18px;
   cursor: pointer;
-  padding: 4px 10px;
+  padding: var(--space-2) var(--space-5);
   transition: color 0.2s;
 }
 
@@ -169,7 +169,7 @@
   border-radius: 4px;
   color: #fff;
   font-size: 12px;
-  padding: 2px 6px;
+  padding: var(--space-1) var(--space-3);
   width: 80px;
   outline: none;
 }
@@ -204,7 +204,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 10px;
+  padding: 0 var(--space-5);
   cursor: move;
   user-select: none;
   flex-shrink: 0;
@@ -218,7 +218,7 @@
   color: var(--muted, #888);
   cursor: pointer;
   line-height: 1;
-  padding: 2px 4px;
+  padding: var(--space-1) var(--space-2);
   border-radius: 3px;
   transition: color 0.15s;
   display: inline-flex;
@@ -233,7 +233,7 @@
 .widgetContent {
   flex: 1;
   overflow: auto;
-  padding: 12px;
+  padding: var(--space-5);
 }
 
 /* ---- Resize handles ---- */
@@ -251,34 +251,34 @@
 /* ---- Widget content styles ---- */
 .textWidget { min-height: 60px; outline: none; color: var(--foreground); font-size: 0.95rem; line-height: 1.65; }
 .textWidget:empty::before { content: attr(data-placeholder); color: var(--muted, #888); font-style: italic; pointer-events: none; }
-.headingWidget { display: flex; align-items: center; gap: 8px; }
-.headingLevel { background: var(--background); border: 1px solid var(--border); color: var(--foreground); border-radius: 4px; padding: 4px 6px; font-size: 0.8rem; cursor: pointer; flex-shrink: 0; }
+.headingWidget { display: flex; align-items: center; gap: var(--space-4); }
+.headingLevel { background: var(--background); border: 1px solid var(--border); color: var(--foreground); border-radius: 4px; padding: var(--space-2) var(--space-3); font-size: 0.8rem; cursor: pointer; flex-shrink: 0; }
 .headingText { flex: 1; background: none; border: none; color: var(--foreground); font-size: 1.4rem; font-weight: 700; outline: none; }
-.imageWidget { display: flex; flex-direction: column; gap: 8px; }
+.imageWidget { display: flex; flex-direction: column; gap: var(--space-4); }
 .imagePreview { width: 100%; height: auto; object-fit: contain; border-radius: 6px; display: block; }
-.imageUpload { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 40px; border: 2px dashed var(--border); border-radius: 8px; cursor: pointer; color: var(--muted, #888); font-size: 0.9rem; transition: border-color 0.15s, color 0.15s; }
+.imageUpload { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-4); padding: var(--space-9); border: 2px dashed var(--border); border-radius: 8px; cursor: pointer; color: var(--muted, #888); font-size: 0.9rem; transition: border-color 0.15s, color 0.15s; }
 .imageUpload:hover { border-color: var(--accent); color: var(--foreground); }
-.captionInput { background: none; border: none; border-bottom: 1px solid var(--border); color: var(--muted, #888); font-size: 0.82rem; text-align: center; padding: 4px; outline: none; width: 100%; }
-.dividerWidget { border: none; height: 2px; background: var(--border); margin: 10px 0; border-radius: 2px; }
-.quoteWidget { border-left: 3px solid var(--accent); padding-left: 14px; display: flex; flex-direction: column; gap: 8px; }
+.captionInput { background: none; border: none; border-bottom: 1px solid var(--border); color: var(--muted, #888); font-size: 0.82rem; text-align: center; padding: var(--space-2); outline: none; width: 100%; }
+.dividerWidget { border: none; height: 2px; background: var(--border); margin: var(--space-5) 0; border-radius: 2px; }
+.quoteWidget { border-left: 3px solid var(--accent); padding-left: var(--space-6); display: flex; flex-direction: column; gap: var(--space-4); }
 .quoteText { background: none; border: none; color: var(--foreground); font-size: 1.05rem; font-style: italic; line-height: 1.6; resize: none; outline: none; width: 100%; min-height: 60px; font-family: inherit; }
-.quoteAttribution { display: flex; align-items: center; gap: 6px; color: var(--muted, #888); font-size: 0.85rem; }
+.quoteAttribution { display: flex; align-items: center; gap: var(--space-3); color: var(--muted, #888); font-size: 0.85rem; }
 .quoteSource { background: none; border: none; color: var(--muted, #888); font-size: 0.85rem; outline: none; flex: 1; }
-.statBlock { display: flex; flex-direction: column; gap: 6px; }
-.statRow { display: flex; align-items: center; gap: 8px; }
-.statLabel { flex: 1; background: none; border: none; border-bottom: 1px solid var(--border); color: var(--muted, #888); font-size: 0.85rem; padding: 3px 0; outline: none; text-align: right; }
-.statValue { flex: 1.5; background: none; border: none; border-bottom: 1px solid var(--border); color: var(--foreground); font-size: 0.85rem; padding: 3px 0; outline: none; }
-.statDelete { background: none; border: none; color: var(--muted, #888); cursor: pointer; padding: 2px; opacity: 0.5; display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; flex-shrink: 0; }
+.statBlock { display: flex; flex-direction: column; gap: var(--space-3); }
+.statRow { display: flex; align-items: center; gap: var(--space-4); }
+.statLabel { flex: 1; background: none; border: none; border-bottom: 1px solid var(--border); color: var(--muted, #888); font-size: 0.85rem; padding: var(--space-2) 0; outline: none; text-align: right; }
+.statValue { flex: 1.5; background: none; border: none; border-bottom: 1px solid var(--border); color: var(--foreground); font-size: 0.85rem; padding: var(--space-2) 0; outline: none; }
+.statDelete { background: none; border: none; color: var(--muted, #888); cursor: pointer; padding: var(--space-1); opacity: 0.5; display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; flex-shrink: 0; }
 .statDelete:hover { opacity: 1; color: #ff4d4d; }
-.statAdd { background: none; border: 1px dashed var(--border); color: var(--muted, #888); font-size: 0.8rem; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 4px; transition: all 0.15s; }
+.statAdd { background: none; border: 1px dashed var(--border); color: var(--muted, #888); font-size: 0.8rem; padding: var(--space-3) var(--space-5); border-radius: 4px; cursor: pointer; margin-top: var(--space-2); transition: all 0.15s; }
 .statAdd:hover { border-color: var(--accent); color: var(--foreground); }
-.tableWidget { display: flex; flex-direction: column; gap: 8px; overflow-x: auto; }
+.tableWidget { display: flex; flex-direction: column; gap: var(--space-4); overflow-x: auto; }
 .table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
 .table th, .table td { border: 1px solid var(--border); padding: 0; }
 .table th { background: var(--background); }
-.tableCell { width: 100%; background: none; border: none; padding: 8px 10px; color: var(--foreground); outline: none; font-family: inherit; font-size: 0.88rem; }
+.tableCell { width: 100%; background: none; border: none; padding: var(--space-4) var(--space-5); color: var(--foreground); outline: none; font-family: inherit; font-size: 0.88rem; }
 .table th .tableCell { font-weight: 600; }
-.tableAddRow { background: none; border: 1px dashed var(--border); color: var(--muted, #888); font-size: 0.8rem; padding: 5px 10px; border-radius: 4px; cursor: pointer; align-self: flex-start; transition: all 0.15s; }
+.tableAddRow { background: none; border: 1px dashed var(--border); color: var(--muted, #888); font-size: 0.8rem; padding: var(--space-3) var(--space-5); border-radius: 4px; cursor: pointer; align-self: flex-start; transition: all 0.15s; }
 .tableAddRow:hover { border-color: var(--accent); color: var(--foreground); }
 
 /* ---- Zoom controls ---- */
@@ -288,7 +288,7 @@
   left: 16px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
   z-index: 50;
 }
 
@@ -298,7 +298,7 @@
   color: var(--muted, #888);
   font-size: 0.78rem;
   font-weight: 600;
-  padding: 4px 10px;
+  padding: var(--space-2) var(--space-5);
   border-radius: 20px;
   cursor: pointer;
   user-select: none;
@@ -314,7 +314,7 @@
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.06em;
-  padding: 4px 10px;
+  padding: var(--space-2) var(--space-5);
   border-radius: 20px;
   cursor: pointer;
   user-select: none;
@@ -329,8 +329,8 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 2px;
-  padding: 6px 8px 0;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4) 0;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -343,8 +343,8 @@
 .tab {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
   border-radius: 6px 6px 0 0;
   border: 1px solid transparent;
   border-bottom: none;
@@ -362,11 +362,11 @@
 .tabActive { color: var(--foreground); background: var(--background); border-color: var(--border); border-bottom-color: var(--background); }
 .tabActive::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--accent); border-radius: 2px 2px 0 0; }
 .tabName { font-size: 0.82rem; font-weight: 500; }
-.tabDelete { background: none; border: none; color: var(--muted, #888); cursor: pointer; font-size: 0.9rem; line-height: 1; padding: 0 2px; opacity: 0; transition: opacity 0.15s, color 0.15s; border-radius: 3px; }
+.tabDelete { background: none; border: none; color: var(--muted, #888); cursor: pointer; font-size: 0.9rem; line-height: 1; padding: 0 var(--space-1); opacity: 0; transition: opacity 0.15s, color 0.15s; border-radius: 3px; }
 .tab:hover .tabDelete { opacity: 1; }
 .tabDelete:hover { color: #ff4d4d; }
-.tabRenameInput { background: var(--background); border: 1px solid var(--accent); border-radius: 4px; color: var(--foreground); font-size: 0.82rem; padding: 2px 6px; outline: none; width: 100px; }
-.tabAdd { background: none; border: none; color: var(--muted, #888); cursor: pointer; font-size: 0.8rem; padding: 6px 10px; border-radius: 6px; white-space: nowrap; transition: color 0.15s, background 0.15s; flex-shrink: 0; }
+.tabRenameInput { background: var(--background); border: 1px solid var(--accent); border-radius: 4px; color: var(--foreground); font-size: 0.82rem; padding: var(--space-1) var(--space-3); outline: none; width: 100px; }
+.tabAdd { background: none; border: none; color: var(--muted, #888); cursor: pointer; font-size: 0.8rem; padding: var(--space-3) var(--space-5); border-radius: 6px; white-space: nowrap; transition: color 0.15s, background 0.15s; flex-shrink: 0; }
 .tabAdd:hover { color: var(--foreground); background: var(--background); }
 
 /* ── Width Preset Toolbar ───────────────────────────────── */
@@ -374,8 +374,8 @@
 .widthToolbar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -388,12 +388,12 @@
   color: var(--muted, #888);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  margin-right: 2px;
+  margin-right: var(--space-1);
   flex-shrink: 0;
 }
 
 .widthPresetBtn {
-  padding: 3px 10px;
+  padding: var(--space-2) var(--space-5);
   background: var(--background);
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -414,7 +414,7 @@
 }
 
 .widthCurrentLabel {
-  margin-left: 4px;
+  margin-left: var(--space-2);
   font-size: 0.72rem;
   color: var(--muted, #888);
   font-variant-numeric: tabular-nums;
@@ -423,15 +423,15 @@
 /* ── Gallery Widget ─────────────────────────────────────── */
 
 .galleryWidget { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-.galleryGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; flex: 1; overflow-y: auto; padding: 8px; }
-.galleryCell { display: flex; flex-direction: column; gap: 4px; background: var(--surface-mid, var(--surface-mid)); border-radius: 6px; overflow: hidden; border: 1px solid var(--border, #2a2929); }
+.galleryGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); flex: 1; overflow-y: auto; padding: var(--space-4); }
+.galleryCell { display: flex; flex-direction: column; gap: var(--space-2); background: var(--surface-mid, var(--surface-mid)); border-radius: 6px; overflow: hidden; border: 1px solid var(--border, #2a2929); }
 .galleryCellImageWrap { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--surface, #141313); }
 .galleryCellImage { width: 100%; height: 100%; object-fit: cover; display: block; }
 .galleryCellRemove { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border-radius: 50%; background: rgba(0,0,0,0.6); border: none; color: var(--foreground, #e8e6e3); cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.15s; }
 .galleryCellImageWrap:hover .galleryCellRemove { opacity: 1; }
-.galleryCellCaption { padding: 4px 8px 6px; background: transparent; border: none; outline: none; color: var(--muted, #888); font-size: 0.75rem; text-align: center; width: 100%; }
+.galleryCellCaption { padding: var(--space-2) var(--space-4) var(--space-3); background: transparent; border: none; outline: none; color: var(--muted, #888); font-size: 0.75rem; text-align: center; width: 100%; }
 .galleryCellCaption::placeholder { color: var(--muted, #888); opacity: 0.5; }
-.galleryAddBtn { margin: 4px 8px 8px; padding: 6px; background: var(--surface-mid, var(--surface-mid)); border: 1px dashed var(--border, #2a2929); border-radius: 6px; color: var(--muted, #888); font-size: 0.8rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; text-align: center; }
+.galleryAddBtn { margin: var(--space-2) var(--space-4) var(--space-4); padding: var(--space-3); background: var(--surface-mid, var(--surface-mid)); border: 1px dashed var(--border, #2a2929); border-radius: 6px; color: var(--muted, #888); font-size: 0.8rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; text-align: center; }
 .galleryAddBtn:hover { border-color: var(--accent, #c9a84c); color: var(--foreground, #e8e6e3); }
 
 /* ── Draw Ghost ─────────────────────────────────────────── */
@@ -454,7 +454,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 14px;
+  padding: var(--space-6);
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
   z-index: 1000;
   min-width: 260px;
@@ -466,23 +466,23 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--muted);
-  margin-bottom: 10px;
+  margin-bottom: var(--space-5);
   text-align: center;
 }
 
 .typePickerGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  margin-bottom: 10px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
 }
 
 .typePickerBtn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 8px 4px;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-2);
   background: var(--background);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -506,7 +506,7 @@
 
 .typePickerCancel {
   width: 100%;
-  padding: 6px;
+  padding: var(--space-3);
   background: none;
   border: 1px dashed var(--border);
   border-radius: 6px;
@@ -536,7 +536,7 @@
   font-size: 0.78rem;
   color: var(--muted);
   text-align: center;
-  padding: 12px;
+  padding: var(--space-5);
 }
 
 .chooseTypeBtn {
@@ -546,7 +546,7 @@
   color: var(--background);
   font-size: 0.72rem;
   font-weight: 700;
-  padding: 3px 8px;
+  padding: var(--space-2) var(--space-4);
   cursor: pointer;
   transition: opacity 0.15s;
   flex-shrink: 0;
@@ -557,13 +557,13 @@
 .widgetDragBarLeft {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .widgetDragBarRight {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 /* ── Alignment Guides ───────────────────────────────── */
@@ -598,7 +598,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  gap: 8px;
+  gap: var(--space-4);
   overflow: hidden;
 }
 
@@ -616,7 +616,7 @@
   color: var(--muted);
   font-size: 0.75rem;
   font-weight: 600;
-  padding: 3px 8px;
+  padding: var(--space-2) var(--space-4);
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
 }
@@ -632,7 +632,7 @@
   border-radius: 4px;
   color: var(--muted);
   font-size: 0.78rem;
-  padding: 3px 10px;
+  padding: var(--space-2) var(--space-5);
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -666,8 +666,8 @@
   letter-spacing: 0.04em;
   outline: none;
   width: 100%;
-  padding: 2px 0;
-  margin-bottom: 4px;
+  padding: var(--space-1) 0;
+  margin-bottom: var(--space-2);
 }
 
 .timelineLabelInput {
@@ -678,8 +678,8 @@
   font-weight: 600;
   outline: none;
   width: 100%;
-  padding: 2px 0;
-  margin-bottom: 4px;
+  padding: var(--space-1) 0;
+  margin-bottom: var(--space-2);
 }
 
 .timelineDescInput {
@@ -693,8 +693,8 @@
   width: 100%;
   resize: none;
   font-family: inherit;
-  padding: 4px 0;
-  margin-bottom: 4px;
+  padding: var(--space-2) 0;
+  margin-bottom: var(--space-2);
 }
 
 .timelineEntitySelect {
@@ -703,7 +703,7 @@
   border-radius: 4px;
   color: var(--muted);
   font-size: 0.72rem;
-  padding: 2px 6px;
+  padding: var(--space-1) var(--space-3);
   outline: none;
   width: 100%;
   cursor: pointer;
@@ -714,7 +714,7 @@
   border: none;
   color: var(--muted);
   cursor: pointer;
-  padding: 0 4px;
+  padding: 0 var(--space-2);
   opacity: 0.5;
   flex-shrink: 0;
   line-height: 1;
@@ -737,7 +737,7 @@
   overflow-x: auto;
   overflow-y: hidden;
   position: relative;
-  padding: 16px 0;
+  padding: var(--space-6) 0;
 }
 
 .timelineSpine {
@@ -786,10 +786,10 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 8px;
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .timelineCardAbove {
@@ -808,12 +808,12 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding-right: 4px;
+  padding-right: var(--space-2);
 }
 
 .timelineVertEvent {
   display: flex;
-  gap: 12px;
+  gap: var(--space-5);
   min-height: 80px;
 }
 
@@ -831,7 +831,7 @@
   color: var(--accent);
   text-align: center;
   letter-spacing: 0.03em;
-  margin-bottom: 6px;
+  margin-bottom: var(--space-3);
   word-break: break-word;
 }
 
@@ -849,7 +849,7 @@
   width: 2px;
   flex: 1;
   background: var(--border);
-  margin-top: 4px;
+  margin-top: var(--space-2);
 }
 
 .timelineVertCard {
@@ -857,17 +857,17 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 8px 10px;
+  padding: var(--space-4) var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  margin-bottom: 12px;
+  gap: var(--space-1);
+  margin-bottom: var(--space-5);
 }
 
 .timelineVertCardHeader {
   display: flex;
   align-items: flex-start;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .timelineVertCardHeader .timelineLabelInput {
@@ -887,8 +887,8 @@
 .relationshipToolbar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 8px;
+  gap: var(--space-5);
+  padding: var(--space-3) var(--space-4);
   background: var(--background);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -897,7 +897,7 @@
 .relationshipToggle {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-3);
   font-size: 0.75rem;
   color: var(--muted);
   cursor: pointer;
@@ -922,7 +922,7 @@
   border-radius: 4px;
   color: var(--muted);
   font-size: 0.75rem;
-  padding: 3px 8px;
+  padding: var(--space-2) var(--space-4);
   cursor: pointer;
   transition: all 0.15s;
   flex-shrink: 0;
@@ -936,8 +936,8 @@
 .relationshipAddForm {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 8px;
+  gap: var(--space-3);
+  padding: var(--space-4);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -949,7 +949,7 @@
   border-radius: 4px;
   color: var(--foreground);
   font-size: 0.78rem;
-  padding: 4px 6px;
+  padding: var(--space-2) var(--space-3);
   outline: none;
   width: 100%;
   cursor: pointer;
@@ -961,14 +961,14 @@
   border-radius: 4px;
   color: var(--foreground);
   font-size: 0.78rem;
-  padding: 4px 8px;
+  padding: var(--space-2) var(--space-4);
   outline: none;
   width: 100%;
 }
 
 .relationshipAddFormBtns {
   display: flex;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .relationshipConfirmBtn {
@@ -979,7 +979,7 @@
   color: var(--background);
   font-size: 0.78rem;
   font-weight: 700;
-  padding: 5px;
+  padding: var(--space-3);
   cursor: pointer;
   transition: opacity 0.15s;
 }
@@ -993,7 +993,7 @@
   border-radius: 4px;
   color: var(--muted);
   font-size: 0.78rem;
-  padding: 5px;
+  padding: var(--space-3);
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -1003,9 +1003,9 @@
 .manualEdgeList {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
   border-top: 1px solid var(--border);
-  padding-top: 6px;
+  padding-top: var(--space-3);
 }
 
 .manualEdgeItem {
@@ -1016,7 +1016,7 @@
   color: var(--muted);
   background: var(--background);
   border-radius: 4px;
-  padding: 3px 6px;
+  padding: var(--space-2) var(--space-3);
 }
 
 .manualEdgeDelete {
@@ -1025,7 +1025,7 @@
   color: var(--muted);
   cursor: pointer;
   opacity: 0.5;
-  padding: 0 2px;
+  padding: 0 var(--space-1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1052,12 +1052,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: var(--space-3);
   font-size: 0.82rem;
   color: var(--muted);
   font-style: italic;
   text-align: center;
-  padding: 20px;
+  padding: var(--space-7);
 }
 
 /* ── Family Tree Widget ──────────────────────────────── */
@@ -1072,8 +1072,8 @@
 .familyTreeToolbar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   background: var(--background);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -1086,7 +1086,7 @@
   border-radius: 4px;
   color: var(--muted);
   font-size: 0.75rem;
-  padding: 3px 8px;
+  padding: var(--space-2) var(--space-4);
   cursor: pointer;
   transition: all 0.15s;
   flex-shrink: 0;
@@ -1108,7 +1108,7 @@
   border-radius: 4px;
   color: #ff4d4d;
   font-size: 0.72rem;
-  padding: 3px 8px;
+  padding: var(--space-2) var(--space-4);
   cursor: pointer;
   transition: all 0.15s;
   flex-shrink: 0;
@@ -1128,8 +1128,8 @@
 .familyTreeForm {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 8px;
+  gap: var(--space-3);
+  padding: var(--space-4);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -1141,7 +1141,7 @@
   border-radius: 4px;
   color: var(--foreground);
   font-size: 0.78rem;
-  padding: 4px 6px;
+  padding: var(--space-2) var(--space-3);
   outline: none;
   width: 100%;
   cursor: pointer;
@@ -1153,14 +1153,14 @@
   border-radius: 4px;
   color: var(--foreground);
   font-size: 0.78rem;
-  padding: 4px 8px;
+  padding: var(--space-2) var(--space-4);
   outline: none;
   width: 100%;
 }
 
 .familyTreeFormBtns {
   display: flex;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .familyTreeConfirmBtn {
@@ -1171,7 +1171,7 @@
   color: var(--background);
   font-size: 0.78rem;
   font-weight: 700;
-  padding: 5px;
+  padding: var(--space-3);
   cursor: pointer;
   transition: opacity 0.15s;
 }
@@ -1185,7 +1185,7 @@
   border-radius: 4px;
   color: var(--muted);
   font-size: 0.78rem;
-  padding: 5px;
+  padding: var(--space-3);
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -1213,8 +1213,8 @@
 .arcToolbar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   background: var(--background);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -1227,7 +1227,7 @@
   border-radius: 4px;
   color: var(--foreground);
   font-size: 0.75rem;
-  padding: 3px 6px;
+  padding: var(--space-2) var(--space-3);
   outline: none;
   cursor: pointer;
   flex: 1;
@@ -1249,8 +1249,8 @@
   font-size: 0.72rem;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
@@ -1269,7 +1269,7 @@
   border-radius: 4px;
   color: var(--muted);
   font-size: 0.75rem;
-  padding: 3px 8px;
+  padding: var(--space-2) var(--space-4);
   cursor: pointer;
   transition: all 0.15s;
   flex-shrink: 0;
@@ -1280,8 +1280,8 @@
 .arcStagesRow {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -1302,14 +1302,14 @@
   color: var(--foreground);
   font-size: 0.75rem;
   outline: none;
-  padding: 2px 0;
+  padding: var(--space-1) 0;
 }
 
 .arcBeatForm {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 8px;
+  gap: var(--space-3);
+  padding: var(--space-4);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -1321,7 +1321,7 @@
   border-radius: 4px;
   color: var(--foreground);
   font-size: 0.78rem;
-  padding: 4px 8px;
+  padding: var(--space-2) var(--space-4);
   outline: none;
   width: 100%;
 }
@@ -1329,7 +1329,7 @@
 .arcSliderRow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .arcSliderLabel {
@@ -1354,7 +1354,7 @@
 
 .arcBeatFormBtns {
   display: flex;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .arcConfirmBtn {
@@ -1365,7 +1365,7 @@
   color: var(--background);
   font-size: 0.78rem;
   font-weight: 700;
-  padding: 5px;
+  padding: var(--space-3);
   cursor: pointer;
   transition: opacity 0.15s;
 }
@@ -1379,7 +1379,7 @@
   border-radius: 4px;
   color: var(--muted);
   font-size: 0.78rem;
-  padding: 5px;
+  padding: var(--space-3);
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -1389,8 +1389,8 @@
 .arcBeatList {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  padding: 4px 8px;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -1401,13 +1401,13 @@
 .arcBeatChip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
   background: var(--background);
   border: 1px solid var(--border);
   border-radius: 12px;
   font-size: 0.7rem;
   color: var(--muted);
-  padding: 2px 6px 2px 8px;
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-4);
   white-space: nowrap;
 }
 
@@ -1453,8 +1453,8 @@
 .orgChartToolbar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   background: var(--background);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -1467,7 +1467,7 @@
   border-radius: 4px;
   color: var(--muted);
   font-size: 0.75rem;
-  padding: 3px 8px;
+  padding: var(--space-2) var(--space-4);
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -1481,7 +1481,7 @@
   border-radius: 4px;
   color: #ff4d4d;
   font-size: 0.72rem;
-  padding: 3px 8px;
+  padding: var(--space-2) var(--space-4);
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -1498,8 +1498,8 @@
 .orgChartForm {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 8px;
+  gap: var(--space-3);
+  padding: var(--space-4);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -1511,7 +1511,7 @@
   border-radius: 4px;
   color: var(--foreground);
   font-size: 0.78rem;
-  padding: 4px 6px;
+  padding: var(--space-2) var(--space-3);
   outline: none;
   width: 100%;
   cursor: pointer;
@@ -1523,7 +1523,7 @@
   border-radius: 4px;
   color: var(--foreground);
   font-size: 0.78rem;
-  padding: 4px 8px;
+  padding: var(--space-2) var(--space-4);
   outline: none;
   width: 100%;
 }
@@ -1531,7 +1531,7 @@
 .orgChartColorRow {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .orgChartColorLabel {
@@ -1556,7 +1556,7 @@
 
 .orgChartFormBtns {
   display: flex;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .orgChartConfirmBtn {
@@ -1567,7 +1567,7 @@
   color: var(--background);
   font-size: 0.78rem;
   font-weight: 700;
-  padding: 5px;
+  padding: var(--space-3);
   cursor: pointer;
   transition: opacity 0.15s;
 }
@@ -1581,7 +1581,7 @@
   border-radius: 4px;
   color: var(--muted);
   font-size: 0.78rem;
-  padding: 5px;
+  padding: var(--space-3);
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -1608,7 +1608,7 @@
 .pronToolbar {
   display: flex;
   align-items: center;
-  padding: 6px 10px;
+  padding: var(--space-3) var(--space-5);
   background: var(--background);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -1629,7 +1629,7 @@
   border-radius: 4px;
   color: var(--muted);
   font-size: 0.75rem;
-  padding: 3px 8px;
+  padding: var(--space-2) var(--space-4);
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -1639,8 +1639,8 @@
 .pronForm {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 8px;
+  gap: var(--space-3);
+  padding: var(--space-4);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -1652,7 +1652,7 @@
   border-radius: 4px;
   color: var(--foreground);
   font-size: 0.78rem;
-  padding: 4px 6px;
+  padding: var(--space-2) var(--space-3);
   outline: none;
   width: 100%;
   cursor: pointer;
@@ -1664,12 +1664,12 @@
   border-radius: 4px;
   color: var(--foreground);
   font-size: 0.78rem;
-  padding: 4px 8px;
+  padding: var(--space-2) var(--space-4);
   outline: none;
   width: 100%;
 }
 
-.pronFormBtns { display: flex; gap: 6px; }
+.pronFormBtns { display: flex; gap: var(--space-3); }
 
 .pronConfirmBtn {
   flex: 1;
@@ -1679,7 +1679,7 @@
   color: var(--background);
   font-size: 0.78rem;
   font-weight: 700;
-  padding: 5px;
+  padding: var(--space-3);
   cursor: pointer;
   transition: opacity 0.15s;
 }
@@ -1693,7 +1693,7 @@
   border-radius: 4px;
   color: var(--muted);
   font-size: 0.78rem;
-  padding: 5px;
+  padding: var(--space-3);
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -1706,31 +1706,31 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-4);
   font-size: 0.82rem;
   color: var(--muted);
   font-style: italic;
   text-align: center;
-  padding: 20px;
+  padding: var(--space-7);
 }
 
 .pronList {
   flex: 1;
   overflow-y: auto;
-  padding: 6px 8px;
+  padding: var(--space-3) var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .pronEntry {
   background: var(--background);
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 8px 10px;
+  padding: var(--space-4) var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .pronEntryHeader {
@@ -1763,7 +1763,7 @@
   color: var(--muted);
   cursor: pointer;
   opacity: 0.5;
-  padding: 0 2px;
+  padding: 0 var(--space-1);
   line-height: 1;
   display: inline-flex;
   align-items: center;
@@ -1808,7 +1808,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 5px 8px;
+  padding: var(--space-3) var(--space-4);
   background: var(--background);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -1824,7 +1824,7 @@
 .syllableToggle {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
   font-size: 0.72rem;
   color: var(--muted);
   cursor: pointer;
@@ -1842,7 +1842,7 @@
   line-height: 1.6;
   outline: none;
   resize: none;
-  padding: 10px;
+  padding: var(--space-5);
   font-family: inherit;
   min-height: 80px;
 }
@@ -1850,8 +1850,8 @@
 .syllableBreakdown {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  padding: 6px 8px;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
   background: var(--surface);
   border-top: 1px solid var(--border);
   max-height: 100px;
@@ -1861,11 +1861,11 @@
 .syllableWord {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-1);
   background: var(--background);
   border: 1px solid var(--border);
   border-radius: 4px;
-  padding: 2px 5px;
+  padding: var(--space-1) var(--space-3);
 }
 
 .syllableWordText {
@@ -1893,8 +1893,8 @@
 .lyricToolbar {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 8px;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
   background: var(--background);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -1903,7 +1903,7 @@
 .lyricToggle {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
   font-size: 0.72rem;
   color: var(--muted);
   cursor: pointer;
@@ -1919,7 +1919,7 @@
   border-radius: 4px;
   color: var(--muted);
   font-size: 0.72rem;
-  padding: 2px 8px;
+  padding: var(--space-1) var(--space-4);
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -1929,7 +1929,7 @@
 .lyricBody {
   flex: 1;
   overflow-y: auto;
-  padding: 8px;
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -1938,7 +1938,7 @@
 .lyricStanza {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .lyricStanzaDivider {
@@ -1948,7 +1948,7 @@
 .lyricLine {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .lyricRhymeLabel {
@@ -1970,7 +1970,7 @@
   font-size: 0.9rem;
   line-height: 1.6;
   outline: none;
-  padding: 2px 4px;
+  padding: var(--space-1) var(--space-2);
   font-family: inherit;
   transition: border-color 0.15s;
 }
@@ -1993,13 +1993,13 @@
   border: none;
   color: var(--muted);
   font-size: 0.7rem;
-  padding: 2px 4px;
+  padding: var(--space-1) var(--space-2);
   cursor: pointer;
   opacity: 0.4;
   text-align: left;
   transition: opacity 0.15s;
   align-self: flex-start;
-  margin-left: 20px;
+  margin-left: var(--space-7);
 }
 
 .lyricAddLineBtn:hover { opacity: 1; }
@@ -2015,7 +2015,7 @@
 }
 
 .sceneCardHeader {
-  padding: 8px 10px 6px;
+  padding: var(--space-4) var(--space-5) var(--space-3);
   flex-shrink: 0;
   border-bottom: 1px solid var(--border);
 }
@@ -2028,7 +2028,7 @@
   font-size: 1rem;
   font-weight: 700;
   outline: none;
-  margin-bottom: 6px;
+  margin-bottom: var(--space-3);
   font-family: inherit;
 }
 
@@ -2036,7 +2036,7 @@
 
 .sceneCardColorRow {
   display: flex;
-  gap: 5px;
+  gap: var(--space-3);
 }
 
 .sceneCardColorDot {
@@ -2054,15 +2054,15 @@
 .sceneCardBody {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 10px;
+  padding: var(--space-4) var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .sceneCardRow {
   display: flex;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .sceneCardRow .sceneCardField { flex: 1; }
@@ -2070,7 +2070,7 @@
 .sceneCardField {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .sceneCardLabel {
@@ -2088,7 +2088,7 @@
   color: var(--foreground);
   font-size: 0.82rem;
   outline: none;
-  padding: 2px 0;
+  padding: var(--space-1) 0;
   width: 100%;
   font-family: inherit;
 }
@@ -2106,7 +2106,7 @@
   width: 100%;
   font-family: inherit;
   line-height: 1.5;
-  padding: 2px 0;
+  padding: var(--space-1) 0;
 }
 
 .sceneCardTextarea::placeholder { color: var(--muted); opacity: 0.5; }

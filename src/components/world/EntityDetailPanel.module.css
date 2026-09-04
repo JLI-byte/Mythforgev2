@@ -34,30 +34,30 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem;
+    padding: var(--space-7);
     border-bottom: 1px solid var(--border);
 }
 
 .panelBody {
     flex: 1;
     overflow-y: auto;
-    padding: 1.5rem;
+    padding: var(--space-7);
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: var(--space-7);
 }
 
 .panelFooter {
-    padding: 1rem 1.5rem;
+    padding: var(--space-6) var(--space-7);
     border-top: 1px solid var(--border);
     display: flex;
-    gap: 0.75rem;
+    gap: var(--space-5);
 }
 
 .formGroup {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: var(--space-3);
 }
 
 .formGroup label {
@@ -75,7 +75,7 @@
     color: var(--foreground);
     border: 1px solid var(--border);
     border-radius: 6px;
-    padding: 0.5rem 0.75rem;
+    padding: var(--space-4) var(--space-5);
     font-size: 0.95rem;
     width: 100%;
     box-sizing: border-box;
@@ -92,7 +92,7 @@
     color: var(--on-accent);
     border: none;
     border-radius: 6px;
-    padding: 0.6rem 1rem;
+    padding: var(--space-4) var(--space-6);
     cursor: pointer;
     font-weight: 600;
     font-size: 0.95rem;
@@ -103,7 +103,7 @@
     color: #ef4444;
     border: 1px solid #ef4444;
     border-radius: 6px;
-    padding: 0.6rem 1rem;
+    padding: var(--space-4) var(--space-6);
     cursor: pointer;
     font-size: 0.95rem;
 }
@@ -125,10 +125,10 @@
 .metadataFields {
     font-size: 0.8rem;
     color: var(--muted);
-    margin-top: 0.5rem;
+    margin-top: var(--space-4);
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--space-2);
 }
 
 .idLabel {
@@ -139,7 +139,7 @@
 .confirmDeleteContainer {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--space-4);
     width: 100%;
 }
 
@@ -151,7 +151,7 @@
 
 .confirmDeleteActions {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-4);
 }
 
 .confirmDeleteButton {
@@ -160,7 +160,7 @@
     color: white;
     border: none;
     border-radius: 6px;
-    padding: 0.5rem;
+    padding: var(--space-4);
     cursor: pointer;
     font-weight: 600;
 }
@@ -170,7 +170,7 @@
     background: transparent;
     border: 1px solid var(--border);
     border-radius: 6px;
-    padding: 0.5rem;
+    padding: var(--space-4);
     cursor: pointer;
     color: var(--foreground);
 }

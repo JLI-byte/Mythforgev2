@@ -1,7 +1,7 @@
 .firstRun {
   display: flex;
   justify-content: center;
-  padding: clamp(32px, 8vh, 96px) 24px;
+  padding: clamp(32px, 8vh, 96px) var(--space-7);
 }
 
 .inner {
@@ -10,14 +10,14 @@
 }
 
 .title {
-  margin: 0 0 10px;
+  margin: 0 0 var(--space-5);
   font-size: 1.9rem;
   font-weight: 700;
   color: var(--foreground);
 }
 
 .sub {
-  margin: 0 0 28px;
+  margin: 0 0 var(--space-8);
   font-size: 0.9rem;
   line-height: 1.65;
   color: var(--muted);
@@ -26,7 +26,7 @@
 .nameLabel,
 .beginLabel {
   display: block;
-  margin: 0 0 6px;
+  margin: 0 0 var(--space-3);
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -34,11 +34,11 @@
   color: var(--muted);
 }
 
-.beginLabel { margin-top: 24px; }
+.beginLabel { margin-top: var(--space-7); }
 
 .nameInput {
   width: 100%;
-  padding: 11px 13px;
+  padding: var(--space-5) var(--space-5);
   border-radius: 10px;
   border: 1px solid rgba(var(--overlay-rgb), 0.14);
   background: rgba(var(--overlay-rgb), 0.05);
@@ -54,8 +54,8 @@
 .escapeRow {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-top: 4px;
+  gap: var(--space-6);
+  margin-top: var(--space-2);
 }
 
 .escapeBtn {

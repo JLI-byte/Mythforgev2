@@ -11,7 +11,7 @@
 .inner {
   max-width: 1120px;
   margin: 0 auto;
-  padding: clamp(32px, 5vh, 72px) 32px 64px;
+  padding: clamp(32px, 5vh, 72px) var(--space-8) var(--space-11);
 }
 
 /* ── Hero + quick capture ─────────────────────────────── */
@@ -21,8 +21,8 @@
   align-items: flex-end;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 20px;
-  margin-bottom: 28px;
+  gap: var(--space-7);
+  margin-bottom: var(--space-8);
 }
 /* Present to assistive tech, absent on screen — the visible hierarchy starts
    at the greeting, but the document still needs a heading that names the page. */
@@ -30,7 +30,7 @@
   position: absolute;
   width: 1px;
   height: 1px;
-  margin: -1px;
+  margin: calc(var(--space-1) * -1);
   padding: 0;
   overflow: hidden;
   clip-path: inset(50%);
@@ -44,7 +44,7 @@
   letter-spacing: 0.01em;
 }
 .name {
-  margin: 4px 0 0;
+  margin: var(--space-2) 0 0;
   font-size: clamp(2rem, 1.4rem + 2.4vw, 3rem);
   font-weight: 800;
   line-height: 1.05;
@@ -56,14 +56,14 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
   flex: 1 1 320px;
   max-width: 460px;
 }
 .captureInput {
   flex: 1 1 auto;
   min-width: 0;
-  padding: 11px 14px;
+  padding: var(--space-5) var(--space-6);
   font-family: inherit;
   font-size: 0.9rem;
   color: var(--foreground, #f2f0ef);
@@ -130,15 +130,15 @@
 .bento {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-  margin-bottom: 48px;
+  gap: var(--space-6);
+  margin-bottom: var(--space-10);
 }
 
 .tile {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 18px 20px;
+  gap: var(--space-5);
+  padding: var(--space-6) var(--space-7);
   border-radius: 16px;
   color: var(--foreground, #f2f0ef);
   background: rgba(255, 255, 255, 0.05);
@@ -148,7 +148,7 @@
   min-width: 0;
 }
 
-.tileResume    { grid-column: span 2; grid-row: span 2; justify-content: center; gap: 6px; }
+.tileResume    { grid-column: span 2; grid-row: span 2; justify-content: center; gap: var(--space-3); }
 .tileGoal      { grid-column: span 1; align-items: center; position: relative; }
 .tileStreak    { grid-column: span 1; min-height: 250px; }
 .tileAttention { grid-column: span 2; }
@@ -159,7 +159,7 @@
 .tileLabel {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
   font-size: 0.74rem;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -171,7 +171,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 10px;
+  gap: var(--space-5);
 }
 .tileHint {
   font-size: 0.75rem;
@@ -194,7 +194,7 @@
   margin-top: auto;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-3);
   padding: 0;
   /* 24px hit target; the icon and text keep their own size. */
   min-height: 24px;
@@ -212,7 +212,7 @@
 /* ── Resume tile ──────────────────────────────────────── */
 
 .resumeTitle {
-  margin: 6px 0 0;
+  margin: var(--space-3) 0 0;
   font-size: clamp(1.3rem, 1rem + 1.1vw, 1.85rem);
   font-weight: 700;
   line-height: 1.2;
@@ -225,11 +225,11 @@
 }
 .resumeBtn {
   align-self: flex-start;
-  margin-top: 16px;
+  margin-top: var(--space-6);
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 11px 20px;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-7);
   border-radius: 999px;
   border: none;
   cursor: pointer;
@@ -258,7 +258,7 @@
   /* 24px hit target; the icon and text keep their own size. */
   min-width: 24px;
   min-height: 24px;
-  padding: 4px;
+  padding: var(--space-2);
   border: none;
   border-radius: 7px;
   color: var(--muted, #8b8b95);
@@ -299,10 +299,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 18px;
+  gap: var(--space-6);
   /* The creature is the point of this tile now, so it gets the room the
      Today tile gives its ring rather than sitting in the corner as an icon. */
-  margin: 4px 0 2px;
+  margin: var(--space-2) 0 var(--space-1);
 }
 .eggLit {
   color: #8ab4ff;
@@ -317,8 +317,8 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 8px;
-  margin-top: 8px;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
 }
 .stageName {
   font-size: 0.82rem;
@@ -333,7 +333,7 @@
 
 .xpTrack {
   height: 5px;
-  margin-top: 6px;
+  margin-top: var(--space-3);
   border-radius: 3px;
   background: rgba(255, 255, 255, 0.1);
   overflow: hidden;
@@ -354,13 +354,13 @@
 .heatmapWrap {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--space-3);
   overflow-x: auto;
 }
 .heatmapMonths,
 .heatmapGrid {
   display: flex;
-  gap: 3px;
+  gap: var(--space-2);
   min-width: max-content;
 }
 .heatmapMonth {
@@ -372,7 +372,7 @@
 .heatmapCol {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: var(--space-2);
 }
 .heatCell {
   width: 11px;
@@ -390,13 +390,13 @@
 .heatmapLegend {
   display: flex;
   align-items: center;
-  gap: 3px;
-  margin-top: 2px;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
   font-size: 0.6875rem;
   color: var(--muted, #8b8b95);
 }
-.heatmapLegend span:first-child { margin-right: 3px; }
-.heatmapLegend span:last-child { margin-left: 3px; }
+.heatmapLegend span:first-child { margin-right: var(--space-2); }
+.heatmapLegend span:last-child { margin-left: var(--space-2); }
 
 /* ── Attention list ────────────────────────────────────── */
 
@@ -406,7 +406,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-3);
   font-size: 0.86rem;
   color: var(--muted, #8b8b95);
 }
@@ -418,7 +418,7 @@
 /* ── From your world ──────────────────────────────────── */
 
 .loreName {
-  margin: 2px 0 0;
+  margin: var(--space-1) 0 0;
   font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -440,13 +440,13 @@
 .linkGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: var(--space-4);
 }
 .linkBtn {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  padding: 11px 13px;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-5);
   border-radius: 11px;
   text-align: left;
   cursor: pointer;
@@ -469,7 +469,7 @@
 /* Sits outside the bento: the shelf reads as furniture in the room, not as
    one more card among the stats. */
 .shelfSection {
-  margin-bottom: 56px;
+  margin-bottom: var(--space-11);
 }
 
 /* ── Recent projects ──────────────────────────────────── */
@@ -478,7 +478,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: var(--space-6);
 }
 .recentTitle {
   margin: 0;
@@ -507,8 +507,8 @@
 .newBtn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 9px 16px;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6);
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: rgba(255, 255, 255, 0.07);
@@ -536,7 +536,7 @@
 }
 
 @media (max-width: 620px) {
-  .inner { padding-left: 18px; padding-right: 18px; }
+  .inner { padding-left: var(--space-6); padding-right: var(--space-6); }
   .bento { grid-template-columns: minmax(0, 1fr); }
   .tileResume,
   .tileGoal,
@@ -565,8 +565,8 @@
 .awayList {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin: 4px 0 0;
+  gap: var(--space-3);
+  margin: var(--space-2) 0 0;
   padding: 0;
   list-style: none;
 }
@@ -574,7 +574,7 @@
 .awayItem {
   display: flex;
   align-items: baseline;
-  gap: 9px;
+  gap: var(--space-4);
   min-width: 0;
   font-size: 0.82rem;
 }

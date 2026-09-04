@@ -86,13 +86,13 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 0.4rem;
-    margin-bottom: 2rem;
+    gap: var(--space-3);
+    margin-bottom: var(--space-8);
 }
 
 .brandMark {
     color: var(--sepia);
-    margin-bottom: 0.4rem;
+    margin-bottom: var(--space-3);
 }
 
 .brandName {
@@ -115,7 +115,7 @@
 .form {
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
+    gap: var(--space-6);
 }
 
 .fieldLabel {
@@ -123,7 +123,7 @@
     font-style: italic;
     font-size: 0.98rem;
     color: var(--sepia-soft);
-    margin-bottom: 0.35rem;
+    margin-bottom: var(--space-3);
 }
 
 .fieldInput {
@@ -135,7 +135,7 @@
     color: var(--sepia);
     font-family: var(--font-garamond), serif;
     font-size: 1.08rem;
-    padding: 0.4rem 0.1rem;
+    padding: var(--space-3) var(--space-1);
     transition: border-color 160ms ease;
 }
 
@@ -150,7 +150,7 @@
 }
 
 .submit {
-    margin-top: 0.4rem;
+    margin-top: var(--space-3);
     width: 100%;
     background: var(--vermilion);
     color: #f6ddd2;
@@ -159,7 +159,7 @@
     font-family: var(--font-garamond), serif;
     font-weight: 600;
     font-size: 1.05rem;
-    padding: 0.85rem;
+    padding: var(--space-5);
     cursor: pointer;
     box-shadow: 2px 3px 0 rgba(59, 44, 21, 0.25);
     transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
@@ -183,8 +183,8 @@
 /* ---------- Notices ---------- */
 
 .notice {
-    margin-top: 1.4rem;
-    padding: 0.9rem 1rem;
+    margin-top: var(--space-7);
+    padding: var(--space-6) var(--space-6);
     border-radius: 3px;
     font-size: 0.95rem;
     text-align: center;
@@ -217,7 +217,7 @@
 }
 
 .footnote {
-    margin-top: 2rem;
+    margin-top: var(--space-8);
     text-align: center;
     font-size: 0.95rem;
     color: var(--sepia-soft);
@@ -238,7 +238,7 @@
 /* ---------- Dev-only button ---------- */
 
 .devButton {
-    margin-top: 1.5rem;
+    margin-top: var(--space-7);
     width: 100%;
     background: none;
     border: 1px dashed color-mix(in oklch, var(--verdigris), transparent 40%);
@@ -247,7 +247,7 @@
     font-family: var(--font-garamond), serif;
     font-style: italic;
     font-size: 0.95rem;
-    padding: 0.7rem;
+    padding: var(--space-5);
     cursor: pointer;
     transition: background 160ms ease;
 }

@@ -3,7 +3,7 @@
     background: rgba(255, 255, 255, 0.7);
     border: 1px solid var(--primaryLine, rgba(132, 34, 43, 0.42));
     border-radius: 6px;
-    padding: 4px 8px;
+    padding: var(--space-2) var(--space-4);
     color: var(--ink, #171411);
     font: inherit;
 }
@@ -13,15 +13,15 @@
 .imageWrap { position: relative; }
 .imageControls {
     position: absolute; inset: auto 0 0 0;
-    display: flex; gap: 4px; padding: 4px;
+    display: flex; gap: var(--space-2); padding: var(--space-2);
     background: rgba(0, 0, 0, 0.45);
 }
 .imageControls input[type="text"] {
-    flex: 1; min-width: 0; font-size: 11px; padding: 2px 4px;
+    flex: 1; min-width: 0; font-size: 11px; padding: var(--space-1) var(--space-2);
     border: none; border-radius: 4px;
 }
 .uploadBtn {
-    font-size: 11px; padding: 2px 6px; border: none; border-radius: 4px;
+    font-size: 11px; padding: var(--space-1) var(--space-3); border: none; border-radius: 4px;
     background: var(--gold, #bb8d59); color: #fff; cursor: pointer;
 }
 .emptyImage {
@@ -30,7 +30,7 @@
     color: var(--muted, #9d8675); font-size: 11px;
 }
 
-.rangeRow { display: flex; align-items: center; gap: 8px; }
+.rangeRow { display: flex; align-items: center; gap: var(--space-4); }
 .rangeRow input[type="range"] { flex: 1; accent-color: var(--primary, #84222b); }
 .meterLabelInput { width: 100%; font: inherit; border: none; background: transparent; color: var(--ink, #171411); }
 
@@ -43,7 +43,7 @@
     display: inline-flex; align-items: center; justify-content: center;
 }
 .addBtn {
-    margin-top: 8px; padding: 4px 12px; border-radius: 14px;
+    margin-top: var(--space-4); padding: var(--space-2) var(--space-5); border-radius: 14px;
     border: 1px dashed var(--primaryLine, rgba(132, 34, 43, 0.42));
     background: transparent; color: var(--primary, #84222b);
     font-size: 12px; cursor: pointer;

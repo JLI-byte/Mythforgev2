@@ -78,8 +78,8 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 0 8px;
-  gap: 8px;
+  padding: 0 var(--space-4);
+  gap: var(--space-4);
   cursor: move;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
@@ -113,7 +113,7 @@
 .deskHeaderControls {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
   margin-left: auto;
   flex-shrink: 0;
   z-index: 10;
@@ -157,11 +157,11 @@
 }
 
 .headerStateBadge {
-  margin-left: 8px;
+  margin-left: var(--space-4);
   font-size: 0.6875rem;
   background: rgba(var(--accent-rgb), 0.1);
   color: var(--accent);
-  padding: 1px 6px;
+  padding: var(--space-1) var(--space-3);
   border-radius: 4px;
   letter-spacing: 0.05em;
   font-weight: 800;
@@ -169,7 +169,7 @@
 
 .deskTypePickerTrigger {
   height: 20px;
-  padding: 0 8px;
+  padding: 0 var(--space-4);
   background: rgba(var(--accent-rgb), 0.12);
   border: 1px solid rgba(var(--accent-rgb), 0.3);
   border-radius: 4px;
@@ -203,10 +203,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: var(--space-7);
   color: var(--muted);
   text-align: center;
-  gap: 12px;
+  gap: var(--space-5);
 }
 
 .writingZoneSelect {
@@ -217,7 +217,7 @@
   border: 1px solid var(--border);
   border-radius: 4px;
   color: var(--foreground);
-  padding: 6px 12px;
+  padding: var(--space-3) var(--space-5);
   font-size: 0.85rem;
   cursor: pointer;
 }
@@ -233,8 +233,8 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 0 8px;
-  gap: 8px;
+  padding: 0 var(--space-4);
+  gap: var(--space-4);
   background: var(--background);
   border-bottom: 1px solid var(--border);
   font-size: 0.75rem;
@@ -245,7 +245,7 @@
   border: 1px solid rgba(var(--overlay-rgb), 0.1);
   border-radius: 4px;
   color: var(--foreground);
-  padding: 2px 4px;
+  padding: var(--space-1) var(--space-2);
   font-size: 0.72rem;
   cursor: pointer;
 }
@@ -281,8 +281,8 @@
   flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
-  padding: 4px 8px;
-  gap: 4px;
+  padding: var(--space-2) var(--space-4);
+  gap: var(--space-2);
   background: rgba(255, 255, 255, 0.07);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   flex-shrink: 0;
@@ -291,7 +291,7 @@
 .deskToolbarGroup {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .deskToolbarDropdown {
@@ -302,7 +302,7 @@
   border-radius: 6px;
   color: var(--foreground);
   font-size: 0.72rem;
-  padding: 2px 4px;
+  padding: var(--space-1) var(--space-2);
   cursor: pointer;
   outline: none;
   transition: border-color 0.15s, background-color 0.15s;
@@ -323,7 +323,7 @@
 .deskFmtBtn {
   height: 24px;
   min-width: 24px;
-  padding: 0 6px;
+  padding: 0 var(--space-3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -362,14 +362,14 @@
   width: 1px;
   height: 16px;
   background: var(--border);
-  margin: 0 4px;
+  margin: 0 var(--space-2);
   opacity: 0.5;
 }
 
 .deskEditorBody {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: var(--space-7);
   /* transparent — the frosted wrapper provides the surface */
   background: transparent;
   user-select: text !important;
@@ -437,15 +437,15 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 10px;
+  padding: var(--space-5);
   border-radius: 4px;
 }
 
 .stickyColorBar {
   display: flex;
   flex-direction: row;
-  gap: 6px;
-  margin-bottom: 8px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
   flex-shrink: 0;
 }
 
@@ -483,8 +483,8 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 12px;
-  gap: 8px;
+  padding: var(--space-5);
+  gap: var(--space-4);
 }
 
 .referenceTitle {
@@ -495,7 +495,7 @@
   font-weight: 700;
   font-size: 0.85rem;
   outline: none;
-  padding-bottom: 6px;
+  padding-bottom: var(--space-3);
 }
 
 .referenceBody {
@@ -527,7 +527,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: var(--space-5);
   border: 1px dashed rgba(var(--overlay-rgb), 0.1);
   border-radius: 6px;
   color: var(--muted);
@@ -565,10 +565,10 @@
   left: 0;
   right: 0;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-  padding: 12px 10px 8px;
+  padding: var(--space-5) var(--space-5) var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-3);
   opacity: 0;
   transform: translateY(10px);
   transition: all 0.2s ease;
@@ -595,7 +595,7 @@
 
 .imagePinRotateRow {
   width: 100%;
-  padding: 0 10px;
+  padding: 0 var(--space-5);
   display: flex;
   align-items: center;
 }
@@ -631,8 +631,8 @@
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 12px;
-  padding: 4px;
-  gap: 4px;
+  padding: var(--space-2);
+  gap: var(--space-2);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.12),
     0 4px 16px rgba(0, 0, 0, 0.3);
@@ -674,7 +674,7 @@
 .zoomValueEditable {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .zoomInput {
@@ -688,7 +688,7 @@
   font-weight: 600;
   text-align: center;
   outline: none;
-  padding: 0 2px;
+  padding: 0 var(--space-1);
 }
 
 .zoomInput:focus {
@@ -709,7 +709,7 @@
   background: rgba(var(--overlay-rgb), 0.1);
   border-radius: 2px;
   outline: none;
-  margin: 0 8px;
+  margin: 0 var(--space-4);
   cursor: pointer;
 }
 
@@ -729,7 +729,7 @@
 }
 
 .fitBtn {
-  padding: 0 10px;
+  padding: 0 var(--space-5);
   height: 24px;
   display: flex;
   align-items: center;
@@ -743,7 +743,7 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   cursor: pointer;
-  margin-left: 4px;
+  margin-left: var(--space-2);
 }
 
 .fitBtnActive {
@@ -797,7 +797,7 @@
   position: absolute;
   top: 20px;
   right: 20px;
-  padding: 6px 12px;
+  padding: var(--space-3) var(--space-5);
   background: rgba(40, 40, 40, 0.8);
   border-radius: 20px;
   color: #a7f3d0;
@@ -859,8 +859,8 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
-  padding: 0 12px;
-  gap: 12px;
+  padding: 0 var(--space-5);
+  gap: var(--space-5);
   cursor: grab;
   transition: all 0.2s;
   position: relative;
@@ -892,7 +892,7 @@
   top: 50%;
   transform: translate(-50%, -50%);
   display: flex;
-  gap: 3px;
+  gap: var(--space-2);
   opacity: 0.3;
   pointer-events: none;
 }
@@ -1009,7 +1009,7 @@
   border-radius: 20px;
   color: rgba(var(--overlay-rgb),0.8);
   font-size: 0.72rem;
-  padding: 4px 12px;
+  padding: var(--space-2) var(--space-5);
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -1030,8 +1030,8 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  padding: 16px 0;
-  gap: 8px;
+  padding: var(--space-6) 0;
+  gap: var(--space-4);
   cursor: move;
   user-select: none;
 }
@@ -1073,9 +1073,9 @@
 .spineActionMenu {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin: 16px auto 8px;
-  padding: 8px 12px;
+  gap: var(--space-5);
+  margin: var(--space-6) auto var(--space-4);
+  padding: var(--space-4) var(--space-5);
   background: rgba(0,0,0,0.25);
   border-radius: 12px;
   width: fit-content;
@@ -1092,7 +1092,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
+  padding: var(--space-2);
 }
 
 .spineActionBtn:hover {
@@ -1109,7 +1109,7 @@
   background: var(--accent);
   color: var(--surface);
   font-size: 0.6875rem;
-  padding: 3px 8px;
+  padding: var(--space-2) var(--space-4);
   border-radius: 4px;
   font-weight: 800;
   text-transform: uppercase;
@@ -1146,7 +1146,7 @@
 .deskTitleBarRight {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .scopeSelector {
@@ -1156,7 +1156,7 @@
   color: var(--muted);
   font-size: 0.6875rem;
   font-weight: 800;
-  padding: 2px 8px;
+  padding: var(--space-1) var(--space-4);
   cursor: pointer;
   outline: none;
   transition: all 0.2s;
@@ -1187,7 +1187,7 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
-  padding: 16px;
+  padding: var(--space-6);
   z-index: 10000;
   width: 280px;
   transform: translate(-50%, -50%);
@@ -1205,15 +1205,15 @@
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-5);
   text-align: center;
 }
 
 .typePickerGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
 }
 
 .typePickerBtn {
@@ -1224,10 +1224,10 @@
   background: rgba(var(--overlay-rgb), 0.03);
   border: 1px solid rgba(var(--overlay-rgb), 0.08);
   border-radius: 8px;
-  padding: 12px;
+  padding: var(--space-5);
   cursor: pointer;
   transition: all 0.2s;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .typePickerBtn:hover {
@@ -1252,7 +1252,7 @@
   border: 1px solid rgba(var(--overlay-rgb), 0.1);
   color: var(--muted);
   font-size: 0.7rem;
-  padding: 6px;
+  padding: var(--space-3);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
@@ -1276,14 +1276,14 @@
 .headerToolbar {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
   height: 100%;
 }
 
 .headerToolBtn {
   background: none;
   border: none;
-  padding: 4px 8px;
+  padding: var(--space-2) var(--space-4);
   border-radius: 4px;
   color: var(--muted);
   font-size: 0.75rem;
@@ -1293,7 +1293,7 @@
   transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -1323,10 +1323,10 @@
 }
 
 .spineChapterInfo {
-  padding: 20px 16px 12px 16px;
+  padding: var(--space-7) var(--space-6) var(--space-5) var(--space-6);
   text-align: center;
   border-bottom: 1px solid var(--border);
-  margin-bottom: 12px;
+  margin-bottom: var(--space-5);
   background: rgba(0,0,0,0.1);
 }
 
@@ -1336,7 +1336,7 @@
   color: var(--foreground);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-5);
   line-height: 1.2;
 }
 
@@ -1346,7 +1346,7 @@
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: var(--muted);
-  margin-bottom: 4px;
+  margin-bottom: var(--space-2);
 }
 
 .spineChapterTitle {
@@ -1361,14 +1361,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-4);
   background: rgba(var(--overlay-rgb), 0.03);
   border: 1px solid var(--border);
   color: var(--foreground);
   font-size: 0.75rem;
   font-weight: 700;
-  padding: 10px;
-  margin: 0 16px 0 16px;
+  padding: var(--space-5);
+  margin: 0 var(--space-6) 0 var(--space-6);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.19, 1, 0.22, 1);
@@ -1398,8 +1398,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding-bottom: 4px;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
 }
 
 .spineControlBtn {
@@ -1478,8 +1478,8 @@
 }
 
 .spineAddChapterBtn {
-  margin: 16px;
-  padding: 8px;
+  margin: var(--space-6);
+  padding: var(--space-4);
   background: rgba(var(--overlay-rgb), 0.03);
   border: 1px dashed var(--border);
   border-radius: 6px;
@@ -1491,7 +1491,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .spineAddChapterBtn:hover {
@@ -1521,9 +1521,9 @@
 .spineSceneListHeader {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: var(--space-4);
   width: 100%;
-  padding: 12px 16px;
+  padding: var(--space-5) var(--space-6);
   background: none;
   border: none;
   border-bottom: 1px solid rgba(var(--overlay-rgb), 0.05);
@@ -1545,7 +1545,7 @@
   width: 24px;
   height: 24px;
   border-radius: 4px;
-  margin-top: -2px;
+  margin-top: calc(var(--space-1) * -1);
   flex-shrink: 0;
   transition: background 0.15s, color 0.15s;
 }
@@ -1561,12 +1561,12 @@
   color: var(--foreground);
   font-size: inherit;
   font-family: inherit;
-  padding: 2px 4px;
+  padding: var(--space-1) var(--space-2);
   border-radius: 4px;
   width: 100%;
   outline: none;
   font-weight: 500;
-  margin-top: 2px;
+  margin-top: var(--space-1);
 }
 
 .spineRenameInput:focus {
@@ -1597,7 +1597,7 @@
   font-size: 0.6875rem;
   font-weight: 500;
   color: var(--muted);
-  margin-top: 2px;
+  margin-top: var(--space-1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1618,7 +1618,7 @@
 .binderSceneList {
   display: flex;
   flex-direction: column;
-  padding: 0 0 8px 0;
+  padding: 0 0 var(--space-4) 0;
 }
 
 .binderSceneList::-webkit-scrollbar { display: none; }
@@ -1626,7 +1626,7 @@
 .binderSpineSceneTab {
   display: flex;
   flex-direction: column;
-  padding: 8px 16px 8px 28px;
+  padding: var(--space-4) var(--space-6) var(--space-4) var(--space-8);
   background: none;
   border: none;
   border-left: 3px solid transparent;
@@ -1659,12 +1659,12 @@
 .binderSpineSceneMeta {
   font-size: 0.6875rem;
   opacity: 0.5;
-  margin-top: 2px;
+  margin-top: var(--space-1);
 }
 
 .binderSpineChapterTab {
   width: 100%;
-  padding: 8px 16px;
+  padding: var(--space-4) var(--space-6);
   background: none;
   border: none;
   border-left: 3px solid transparent;
@@ -1677,7 +1677,7 @@
   cursor: pointer;
   transition: all 0.2s;
   opacity: 0.7;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-2);
 }
 
 .binderSpineChapterTab:hover {
@@ -1694,8 +1694,8 @@
 }
 
 .binderAddSceneBtn {
-  margin: 12px 16px 12px 28px;
-  padding: 6px;
+  margin: var(--space-5) var(--space-6) var(--space-5) var(--space-8);
+  padding: var(--space-3);
   background: rgba(var(--overlay-rgb), 0.03);
   border: 1px dashed var(--border);
   border-radius: 6px;
@@ -1706,7 +1706,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .binderAddSceneBtn:hover {
@@ -1727,10 +1727,10 @@
 .binderAllScenesContainer {
   flex: 1;
   overflow-y: auto;
-  padding: 60px 20px;
+  padding: var(--space-11) var(--space-7);
   display: flex;
   flex-direction: column;
-  gap: 80px;
+  gap: var(--space-12);
   /* translucent charcoal keeps manuscript contrast while the frost shows */
   background: rgba(25, 25, 24, 0.3);
   scroll-behavior: smooth;
@@ -1740,8 +1740,10 @@
   font-size: 1.4rem;
   font-weight: 800;
   color: var(--foreground);
-  margin: 100px auto 40px auto;
-  padding-bottom: 16px;
+  /* Above the --space scale: a page-top offset, not control rhythm. rem so it
+     still tracks a browser text-size setting. */
+  margin: 6.25rem auto var(--space-9) auto;
+  padding-bottom: var(--space-6);
   border-bottom: 2px solid var(--border);
   letter-spacing: -0.01em;
   text-align: center;
@@ -1751,7 +1753,7 @@
 }
 
 .binderFullBookChapterHeader:first-child {
-  margin-top: 40px;
+  margin-top: var(--space-9);
 }
 
 .binderFullBookChapterHeaderInput {
@@ -1760,18 +1762,20 @@
   color: var(--foreground);
   font-size: 1.4rem;
   font-weight: 800;
-  padding: 4px 8px;
+  padding: var(--space-2) var(--space-4);
   border-radius: 4px;
   outline: none;
   font-family: inherit;
-  margin: 100px auto 40px auto;
+  /* Above the --space scale: a page-top offset, not control rhythm. rem so it
+     still tracks a browser text-size setting. */
+  margin: 6.25rem auto var(--space-9) auto;
   max-width: 850px;
   width: 100%;
   text-align: center;
 }
 
 .binderFullBookChapterHeaderInput:first-child {
-  margin-top: 40px;
+  margin-top: var(--space-9);
 }
 
 .binderFullBookChapterHeaderInput:focus {
@@ -1781,7 +1785,7 @@
 .binderAllScenesItem {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-6);
   max-width: 850px;
   margin: 0 auto;
   width: 100%;
@@ -1793,12 +1797,12 @@
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  padding-bottom: 12px;
+  padding-bottom: var(--space-5);
   border-bottom: 1px solid var(--border);
   opacity: 0.4;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-5);
   cursor: pointer;
 }
 
@@ -1816,13 +1820,13 @@
   color: var(--muted);
   font-size: 1.0rem;
   font-weight: 700;
-  padding: 4px 8px;
+  padding: var(--space-2) var(--space-4);
   border-radius: 4px;
   outline: none;
   font-family: inherit;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-5);
   width: 100%;
 }
 
@@ -1836,13 +1840,13 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: var(--space-5);
   color: var(--muted);
   font-size: 0.82rem;
 }
 
 .binderEditorEmpty button {
-  padding: 6px 14px;
+  padding: var(--space-3) var(--space-6);
   background: none;
   border: 1px dashed var(--border);
   border-radius: 6px;
@@ -1911,7 +1915,7 @@
   text-transform: uppercase;
   letter-spacing: 0.07em;
   color: var(--muted);
-  padding: 0 10px;
+  padding: 0 var(--space-5);
   white-space: nowrap;
   flex-shrink: 0;
   border-right: 1px solid var(--border);
@@ -1964,7 +1968,7 @@
 }
 
 .historyDropdownHeader {
-  padding: 12px 16px;
+  padding: var(--space-5) var(--space-6);
   background: rgba(var(--overlay-rgb), 0.03);
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -1987,7 +1991,7 @@
   color: var(--accent);
   font-size: 0.7rem;
   font-weight: 600;
-  padding: 4px 10px;
+  padding: var(--space-2) var(--space-5);
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -2000,11 +2004,11 @@
 .historyList {
   max-height: 400px;
   overflow-y: auto;
-  padding: 8px 0;
+  padding: var(--space-4) 0;
 }
 
 .historyEmpty {
-  padding: 32px 16px;
+  padding: var(--space-8) var(--space-6);
   text-align: center;
   color: var(--muted);
   font-size: 0.8rem;
@@ -2012,10 +2016,10 @@
 }
 
 .historyItem {
-  padding: 10px 16px;
+  padding: var(--space-5) var(--space-6);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-5);
   transition: background 0.15s;
   border-bottom: 1px solid rgba(var(--overlay-rgb), 0.03);
 }
@@ -2033,10 +2037,10 @@
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--foreground);
-  margin-bottom: 2px;
+  margin-bottom: var(--space-1);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2048,7 +2052,7 @@
   text-transform: uppercase;
   background: rgba(var(--overlay-rgb), 0.08);
   color: var(--muted);
-  padding: 1px 4px;
+  padding: var(--space-1) var(--space-2);
   border-radius: 3px;
 }
 
@@ -2061,7 +2065,7 @@
 .historyItemActions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .historyRestoreBtn, .historyDeleteBtn {
@@ -2099,8 +2103,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px 0;
-  gap: 12px;
+  padding: var(--space-5) 0;
+  gap: var(--space-5);
   flex-shrink: 0;
 }
 
@@ -2108,7 +2112,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .binderToolbarSep {
@@ -2133,30 +2137,30 @@
   border-radius: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   z-index: 20000;
-  padding: 6px;
+  padding: var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-1);
   animation: dropdownIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .modeDropdownHeader {
-  padding: 8px 10px;
+  padding: var(--space-4) var(--space-5);
   font-size: 0.7rem;
   font-weight: 700;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-bottom: 1px solid rgba(var(--overlay-rgb), 0.05);
-  margin-bottom: 4px;
+  margin-bottom: var(--space-2);
 }
 
 .modeOption {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-5);
   width: 100%;
-  padding: 10px;
+  padding: var(--space-5);
   background: none;
   border: none;
   border-radius: 6px;
@@ -2194,8 +2198,8 @@
 .biblePinHeader {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-5);
   border-bottom: 1px solid var(--border);
   background: rgba(var(--overlay-rgb), 0.02);
 }
@@ -2234,7 +2238,7 @@
   font-size: 0.6875rem;
   background: var(--accent-subtle, rgba(var(--overlay-rgb),0.08));
   color: var(--muted);
-  padding: 2px 6px;
+  padding: var(--space-1) var(--space-3);
   border-radius: 999px;
   white-space: nowrap;
 }
@@ -2242,29 +2246,29 @@
 .biblePinSub {
   font-size: 0.7rem;
   color: var(--muted);
-  padding: 4px 12px;
+  padding: var(--space-2) var(--space-5);
   background: rgba(var(--overlay-rgb), 0.01);
 }
 
 .biblePinBody {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 12px;
+  padding: var(--space-4) var(--space-5);
 }
 
 .biblePinDesc {
   font-size: 0.78rem;
   line-height: 1.5;
   color: var(--text);
-  margin-bottom: 12px;
+  margin-bottom: var(--space-5);
   white-space: pre-wrap;
 }
 
 .biblePinFieldRow {
   display: flex;
-  gap: 6px;
+  gap: var(--space-3);
   font-size: 0.72rem;
-  padding: 3px 0;
+  padding: var(--space-2) 0;
   border-bottom: 1px solid rgba(var(--overlay-rgb), 0.03);
 }
 
@@ -2282,7 +2286,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 12px;
+  padding: var(--space-3) var(--space-5);
   border-top: 1px solid var(--border);
   font-size: 0.6875rem;
   color: var(--muted);
@@ -2295,7 +2299,7 @@
   font-size: 0.6875rem;
   color: var(--muted);
   cursor: pointer;
-  padding: 2px 4px;
+  padding: var(--space-1) var(--space-2);
   border-radius: 4px;
   transition: all 0.2s;
 }
@@ -2306,7 +2310,7 @@
 }
 
 .biblePinSearchWrap {
-  padding: 12px;
+  padding: var(--space-5);
   border-bottom: 1px solid var(--border);
   background: rgba(var(--overlay-rgb), 0.02);
 }
@@ -2316,7 +2320,7 @@
   background: var(--input-bg, var(--background));
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 8px 10px;
+  padding: var(--space-4) var(--space-5);
   font-size: 0.8rem;
   color: var(--foreground);
   outline: none;
@@ -2335,8 +2339,8 @@
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-5);
   background: transparent;
   border: none;
   border-bottom: 1px solid rgba(var(--overlay-rgb), 0.03);
@@ -2362,13 +2366,13 @@
 }
 
 .biblePinEmpty {
-  padding: 24px 16px;
+  padding: var(--space-7) var(--space-6);
   text-align: center;
   color: var(--muted);
   font-size: 0.8rem;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-5);
   align-items: center;
 }
 
@@ -2385,7 +2389,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
+  padding: var(--space-4) var(--space-5);
   background: rgba(0,0,0,0.2);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -2398,7 +2402,7 @@
   color: var(--foreground);
   font-size: 0.7rem;
   font-weight: 600;
-  padding: 2px 6px;
+  padding: var(--space-1) var(--space-3);
   cursor: pointer;
   outline: none;
 }
@@ -2423,10 +2427,10 @@
 .sceneControlScroll {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-6);
 }
 
 /* Custom Scrollbar for Scene Control */
@@ -2447,7 +2451,7 @@
 .sceneControlSection {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .sceneControlLabel {
@@ -2477,7 +2481,7 @@
   border-radius: 6px;
   color: var(--foreground);
   font-size: 0.8rem;
-  padding: 8px;
+  padding: var(--space-4);
   width: 100%;
   outline: none;
   transition: all 0.2s;
@@ -2499,16 +2503,16 @@
 .sceneChecklist {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .sceneCheckItem {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
   font-size: 0.8rem;
   color: var(--foreground);
-  padding: 4px 0;
+  padding: var(--space-2) 0;
 }
 
 .sceneCheckItem input[type="checkbox"] {
@@ -2531,7 +2535,7 @@
   cursor: pointer;
   opacity: 0.3;
   font-size: 1rem;
-  padding: 0 4px;
+  padding: 0 var(--space-2);
   min-width: 24px;
   min-height: 24px;
   display: inline-flex;
@@ -2545,13 +2549,13 @@
 }
 
 .sceneCheckAdd {
-  margin-top: 4px;
+  margin-top: var(--space-2);
   background: rgba(var(--overlay-rgb),0.03);
   border: 1px dashed var(--border);
   border-radius: 4px;
   color: var(--muted);
   font-size: 0.7rem;
-  padding: 6px;
+  padding: var(--space-3);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -2565,7 +2569,7 @@
 .sceneArcRow {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .sceneArcInput {
@@ -2575,7 +2579,7 @@
   border-radius: 4px;
   color: var(--foreground);
   font-size: 0.75rem;
-  padding: 6px;
+  padding: var(--space-3);
   text-align: center;
   outline: none;
 }
@@ -2612,8 +2616,8 @@
 .sceneControlCompact {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 12px;
+  gap: var(--space-5);
+  padding: 0 var(--space-5);
   height: 100%;
   background: var(--surface);
 }
@@ -2622,7 +2626,7 @@
   font-size: 0.6875rem;
   font-weight: 700;
   text-transform: uppercase;
-  padding: 3px 8px;
+  padding: var(--space-2) var(--space-4);
   border-radius: 12px;
   color: var(--foreground);
   white-space: nowrap;
@@ -2655,7 +2659,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
+  padding: var(--space-4) var(--space-5);
   background: rgba(0,0,0,0.2);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -2669,19 +2673,19 @@
   color: var(--foreground);
   font-size: 0.72rem;
   font-weight: 600;
-  padding: 4px 8px;
+  padding: var(--space-2) var(--space-4);
   cursor: pointer;
   outline: none;
-  margin-right: 8px;
+  margin-right: var(--space-4);
 }
 
 .charStateScroll {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-6);
 }
 
 /* Custom Scrollbar */
@@ -2699,8 +2703,8 @@
 .charStateHero {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px;
+  gap: var(--space-5);
+  padding: var(--space-4);
   background: rgba(var(--overlay-rgb),0.02);
   border: 1px solid rgba(var(--overlay-rgb),0.05);
   border-radius: 12px;
@@ -2734,7 +2738,7 @@
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--foreground);
-  margin-bottom: 2px;
+  margin-bottom: var(--space-1);
 }
 
 .charStateEmotionInput {
@@ -2744,7 +2748,7 @@
   color: var(--accent);
   font-size: 0.7rem;
   font-weight: 600;
-  padding: 2px 0;
+  padding: var(--space-1) 0;
   width: 100%;
   outline: none;
 }
@@ -2752,13 +2756,13 @@
 .charKnowledgeGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .charKnowledgeCol {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .charKnowledgeLabel {
@@ -2775,7 +2779,7 @@
   border-radius: 4px;
   color: var(--foreground);
   font-size: 0.7rem;
-  padding: 6px;
+  padding: var(--space-3);
   min-height: 70px;
   resize: none;
   font-family: inherit;
@@ -2785,14 +2789,14 @@
 .charRelList {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .charRelItem {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 8px;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-4);
   background: rgba(var(--overlay-rgb),0.02);
   border-radius: 6px;
   border: 1px solid rgba(var(--overlay-rgb),0.03);
@@ -2816,7 +2820,7 @@
   color: var(--muted);
   font-size: 0.6875rem;
   outline: none;
-  padding: 1px 0;
+  padding: var(--space-1) 0;
 }
 
 .charRelAddSelect {
@@ -2825,7 +2829,7 @@
   border-radius: 6px;
   color: var(--muted);
   font-size: 0.6875rem;
-  padding: 6px;
+  padding: var(--space-3);
   cursor: pointer;
   transition: all 0.2s;
   width: 100%;
@@ -2841,8 +2845,8 @@
 .charStateCompact {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 12px;
+  gap: var(--space-5);
+  padding: 0 var(--space-5);
   height: 100%;
   background: var(--surface);
 }
@@ -2899,10 +2903,10 @@
 .continuityScroll {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-6);
 }
 
 /* Custom Scrollbar */
@@ -2921,8 +2925,8 @@
 .timelineStrip {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 12px;
+  gap: var(--space-2);
+  padding: var(--space-5);
   background: rgba(0,0,0,0.15);
   border-radius: 8px;
   border: 1px solid rgba(var(--overlay-rgb),0.05);
@@ -2931,7 +2935,7 @@
 .timelineItem {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-5);
   position: relative;
   min-height: 24px;
 }
@@ -2984,13 +2988,13 @@
 .continuityRulesGrid {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-5);
 }
 
 .continuityRuleBox {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .continuityRuleLabel {
@@ -3008,7 +3012,7 @@
   border-radius: 6px;
   color: var(--foreground);
   font-size: 0.75rem;
-  padding: 8px;
+  padding: var(--space-4);
   min-height: 70px;
   resize: vertical;
   font-family: inherit;
@@ -3019,14 +3023,14 @@
 .continuityWarningList {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .continuityWarningItem {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding: 8px 10px;
+  gap: var(--space-5);
+  padding: var(--space-4) var(--space-5);
   border-radius: 6px;
   font-size: 0.72rem;
   background: rgba(248, 113, 113, 0.05);
@@ -3037,9 +3041,9 @@
 .continuityCheckItem {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
   font-size: 0.72rem;
-  padding: 2px 0;
+  padding: var(--space-1) 0;
 }
 
 .continuityCheckItem input {
@@ -3047,13 +3051,13 @@
 }
 
 .continuityResearchAdd {
-  margin-top: 4px;
+  margin-top: var(--space-2);
   background: transparent;
   border: 1px dashed var(--border);
   border-radius: 4px;
   color: var(--muted);
   font-size: 0.6875rem;
-  padding: 4px;
+  padding: var(--space-2);
   cursor: pointer;
   width: 100%;
 }
@@ -3068,9 +3072,9 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 12px;
+  padding: 0 var(--space-5);
   height: 100%;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .continuityCompactSummary {
@@ -3084,7 +3088,7 @@
   font-weight: 800;
   background: rgba(251, 191, 36, 0.15);
   color: #fbbf24;
-  padding: 2px 8px;
+  padding: var(--space-1) var(--space-4);
   border-radius: 10px;
   text-transform: uppercase;
 }
@@ -3116,7 +3120,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
+  padding: var(--space-4) var(--space-5);
   background: rgba(0,0,0,0.2);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -3124,7 +3128,7 @@
 
 .structureControls {
   display: flex;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .structureBtn {
@@ -3133,7 +3137,7 @@
   color: var(--accent);
   font-size: 0.6875rem;
   font-weight: 800;
-  padding: 4px 10px;
+  padding: var(--space-2) var(--space-5);
   border-radius: 4px;
   cursor: pointer;
   text-transform: uppercase;
@@ -3148,10 +3152,10 @@
 .structureScroll {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-5);
 }
 
 /* Custom Scrollbar */
@@ -3169,17 +3173,17 @@
 .beatList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .beatCard {
   background: rgba(var(--overlay-rgb),0.02);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 12px;
+  padding: var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-4);
   position: relative;
   transition: all 0.2s;
 }
@@ -3187,13 +3191,13 @@
 .beatCardAct {
   background: rgba(var(--accent-rgb), 0.05);
   border-left: 3px solid var(--accent);
-  margin-top: 8px;
+  margin-top: var(--space-4);
 }
 
 .beatCardHeader {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .beatDragHandle {
@@ -3224,7 +3228,7 @@
   font-size: 0.75rem;
   font-weight: 700;
   outline: none;
-  padding: 2px 0;
+  padding: var(--space-1) 0;
 }
 
 .beatTitleInput:focus {
@@ -3234,14 +3238,14 @@
 .beatCardBody {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 12px;
+  gap: var(--space-5);
   align-items: end;
 }
 
 .beatDetails {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .beatSceneSelect {
@@ -3250,7 +3254,7 @@
   border-radius: 4px;
   color: var(--muted);
   font-size: 0.6875rem;
-  padding: 4px;
+  padding: var(--space-2);
   outline: none;
   width: 100%;
 }
@@ -3261,7 +3265,7 @@
   border-radius: 2px;
   width: 100%;
   overflow: hidden;
-  margin-top: 4px;
+  margin-top: var(--space-2);
 }
 
 .pacingBarFill {
@@ -3298,7 +3302,7 @@
   font-size: 0.7rem;
   cursor: pointer;
   opacity: 0.3;
-  padding: 2px;
+  padding: var(--space-1);
   min-width: 24px;
   min-height: 24px;
   display: inline-flex;
@@ -3315,15 +3319,15 @@
 .structureCompact {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 16px;
+  gap: var(--space-5);
+  padding: 0 var(--space-6);
   height: 100%;
   background: var(--surface);
 }
 
 .actSparkline {
   display: flex;
-  gap: 4px;
+  gap: var(--space-2);
   flex: 1;
   height: 14px;
   align-items: flex-end;
@@ -3356,10 +3360,10 @@
 .researchScroll {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-6);
 }
 
 /* Custom Scrollbar */
@@ -3377,7 +3381,7 @@
 .moodboardGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 12px;
+  gap: var(--space-5);
   width: 100%;
 }
 
@@ -3408,7 +3412,7 @@
 }
 
 .researchTextItem {
-  padding: 12px;
+  padding: var(--space-5);
   font-size: 0.72rem;
   color: var(--foreground);
   line-height: 1.5;
@@ -3418,15 +3422,15 @@
 .researchSensoryGrid {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 10px;
+  gap: var(--space-3);
+  padding: var(--space-5);
 }
 
 .researchSensoryItem {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 6px 8px;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
   background: rgba(0,0,0,0.15);
   border-radius: 6px;
   border: 1px solid rgba(var(--overlay-rgb),0.03);
@@ -3447,8 +3451,8 @@
 .researchTags {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  padding: 8px 10px;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
   border-top: 1px solid rgba(var(--overlay-rgb),0.03);
 }
 
@@ -3458,7 +3462,7 @@
   text-transform: uppercase;
   background: rgba(var(--accent-rgb), 0.1);
   color: var(--accent);
-  padding: 2px 6px;
+  padding: var(--space-1) var(--space-3);
   border-radius: 4px;
   letter-spacing: 0.05em;
 }
@@ -3497,8 +3501,8 @@
 .researchCompact {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 16px;
+  gap: var(--space-5);
+  padding: 0 var(--space-6);
   height: 100%;
 }
 
@@ -3525,8 +3529,8 @@
   flex-direction: column;
   height: 100%;
   background-color: var(--surface);
-  padding: 20px;
-  gap: 20px;
+  padding: var(--space-7);
+  gap: var(--space-7);
   overflow-y: auto;
 }
 
@@ -3549,11 +3553,11 @@
   color: var(--muted);
   letter-spacing: 0.15em;
   font-weight: 700;
-  margin-top: 4px;
+  margin-top: var(--space-2);
 }
 
 .progressBarGroup {
-  margin-top: 8px;
+  margin-top: var(--space-4);
 }
 
 .progressBarContainer {
@@ -3578,7 +3582,7 @@
   justify-content: space-between;
   font-size: 0.6875rem;
   color: var(--muted);
-  margin-top: 8px;
+  margin-top: var(--space-4);
   font-weight: 500;
 }
 
@@ -3586,11 +3590,11 @@
   background: rgba(0,0,0,0.25);
   border: 1px solid rgba(var(--overlay-rgb),0.05);
   border-radius: 16px;
-  padding: 20px;
+  padding: var(--space-7);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-6);
   box-shadow: inset 0 1px 1px rgba(var(--overlay-rgb),0.02);
 }
 
@@ -3613,7 +3617,7 @@
 
 .timerControls {
   display: flex;
-  gap: 12px;
+  gap: var(--space-5);
 }
 
 .timerBtn {
@@ -3655,7 +3659,7 @@
   font-size: 0.75rem;
   color: var(--accent);
   text-align: center;
-  padding: 12px;
+  padding: var(--space-5);
   border-top: 1px solid rgba(var(--overlay-rgb),0.04);
   margin-top: auto;
   font-weight: 500;
@@ -3763,7 +3767,7 @@
   color: var(--on-accent);
   white-space: nowrap;
   background: rgba(var(--accent-rgb), 0.8);
-  padding: 1px 6px;
+  padding: var(--space-1) var(--space-3);
   border-radius: 4px;
   pointer-events: none;
   letter-spacing: 0.02em;
@@ -3795,18 +3799,18 @@
 }
 
 .relMapControls {
-  padding: 12px;
+  padding: var(--space-5);
   background: rgba(0,0,0,0.25);
   border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-4);
   backdrop-filter: blur(10px);
 }
 
 .relControlRow {
   display: flex;
-  gap: 6px;
+  gap: var(--space-3);
   align-items: center;
 }
 
@@ -3815,7 +3819,7 @@
   background: rgba(var(--overlay-rgb),0.05);
   border: 1px solid rgba(var(--overlay-rgb),0.08);
   border-radius: 6px;
-  padding: 4px 8px;
+  padding: var(--space-2) var(--space-4);
   font-size: 0.72rem;
   color: var(--foreground);
 }
@@ -3825,8 +3829,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 16px;
-  gap: 6px;
+  padding: 0 var(--space-6);
+  gap: var(--space-3);
 }
 
 .relCompactStat {
@@ -3853,7 +3857,7 @@
 }
 
 .draftNavSearch {
-  padding: 12px;
+  padding: var(--space-5);
   background: rgba(0,0,0,0.25);
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(10px);
@@ -3862,15 +3866,15 @@
 .draftNavList {
   flex: 1;
   overflow-y: auto;
-  padding: 12px 4px;
+  padding: var(--space-5) var(--space-2);
 }
 
 .sceneNavItem {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  margin: 2px 10px;
+  padding: var(--space-5) var(--space-6);
+  margin: var(--space-1) var(--space-5);
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.19, 1, 0.22, 1);
@@ -3900,13 +3904,13 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding-right: 12px;
+  padding-right: var(--space-5);
 }
 
 .sceneNavMeta {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-5);
 }
 
 .sceneNavWordCount {
@@ -3914,7 +3918,7 @@
   color: var(--muted);
   font-family: var(--font-mono, monospace);
   background: rgba(var(--overlay-rgb),0.05);
-  padding: 2px 8px;
+  padding: var(--space-1) var(--space-4);
   border-radius: 12px;
   font-weight: 700;
 }
@@ -3928,7 +3932,7 @@
 }
 
 .draftNavFooter {
-  padding: 12px 16px;
+  padding: var(--space-5) var(--space-6);
   background: rgba(0,0,0,0.15);
   border-top: 1px solid var(--border);
   display: flex;
@@ -3938,14 +3942,14 @@
 .jumpActiveBtn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
   font-size: 0.7rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--accent);
   background: rgba(var(--accent-rgb), 0.1);
-  padding: 6px 16px;
+  padding: var(--space-3) var(--space-6);
   border-radius: 20px;
   border: 1px solid rgba(var(--accent-rgb), 0.2);
   cursor: pointer;
@@ -3986,8 +3990,8 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 8px 16px;
-  margin: 8px 10px 12px 10px;
+  padding: var(--space-4) var(--space-6);
+  margin: var(--space-4) var(--space-5) var(--space-5) var(--space-5);
   border-radius: 8px;
   cursor: pointer;
   width: calc(100% - 20px);
@@ -4004,10 +4008,10 @@
 /* Compact mode */
 .draftNavCompact {
   height: 100%;
-  padding: 16px 8px;
+  padding: var(--space-6) var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-5);
   align-items: center;
 }
 
@@ -4016,7 +4020,7 @@
   height: 4px;
   background: var(--muted);
   border-radius: 50%;
-  margin: 4px 0;
+  margin: var(--space-2) 0;
 }
 
 .miniScenePill {
@@ -4068,10 +4072,10 @@
   backdrop-filter: blur(20px);
   border: 1px solid rgba(var(--overlay-rgb), 0.1);
   border-radius: 24px;
-  padding: 40px;
+  padding: var(--space-9);
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: var(--space-8);
   box-shadow: 0 32px 64px rgba(0, 0, 0, 0.6);
   pointer-events: auto;
   animation: welcomeFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
@@ -4085,7 +4089,7 @@
 .emptyWelcomeHeader {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: var(--space-7);
 }
 
 .emptyWelcomeIcon {
@@ -4115,11 +4119,11 @@
   letter-spacing: 0.12em;
   color: var(--accent);
   opacity: 0.8;
-  margin-top: 2px;
+  margin-top: var(--space-1);
 }
 
 .launcherHint {
-  margin-top: 6px;
+  margin-top: var(--space-3);
   font-size: 0.85rem;
   line-height: 1.5;
   color: var(--muted);
@@ -4128,15 +4132,15 @@
 .emptyWelcomeActions {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-5);
 }
 
 .welcomeActionBtn {
   height: 52px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 0 24px;
+  gap: var(--space-6);
+  padding: 0 var(--space-7);
   background: rgba(var(--overlay-rgb), 0.04);
   border: 1px solid rgba(var(--overlay-rgb), 0.08);
   border-radius: 14px;
@@ -4173,8 +4177,8 @@
 .welcomeActionGroup {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 4px;
+  gap: var(--space-5);
+  margin-top: var(--space-2);
 }
 
 .welcomeActionBtnSecondary {
@@ -4182,7 +4186,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: var(--space-5);
   background: rgba(var(--overlay-rgb), 0.02);
   border: 1px solid rgba(var(--overlay-rgb), 0.05);
   border-radius: 12px;
@@ -4202,10 +4206,10 @@
   overflow-y: auto;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 12px;
-  padding: 8px;
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
   border: 1px solid rgba(var(--overlay-rgb), 0.05);
   animation: listDown 0.3s ease;
 }
@@ -4219,8 +4223,8 @@
   height: 36px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 12px;
+  gap: var(--space-5);
+  padding: 0 var(--space-5);
   background: none;
   border: none;
   border-radius: 8px;
@@ -4256,7 +4260,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 60px 40px;
+  padding: var(--space-11) var(--space-9);
   background: var(--surface);
   overflow-y: auto;
   animation: fadeIn 0.4s ease-out;
@@ -4264,7 +4268,7 @@
 
 .coverEditorHeader {
   max-width: 900px;
-  margin: 0 auto 48px auto;
+  margin: 0 auto var(--space-10) auto;
   width: 100%;
 }
 
@@ -4272,7 +4276,7 @@
   font-size: 2.2rem;
   font-weight: 800;
   color: var(--foreground);
-  margin-bottom: 8px;
+  margin-bottom: var(--space-4);
   letter-spacing: -0.02em;
 }
 
@@ -4285,7 +4289,7 @@
 .coverEditorGrid {
   display: grid;
   grid-template-columns: 280px 1fr;
-  gap: 60px;
+  gap: var(--space-11);
   max-width: 900px;
   margin: 0 auto;
   width: 100%;
@@ -4294,7 +4298,7 @@
 .coverEditorSidebar {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-6);
 }
 
 .coverEditorPreview {
@@ -4342,7 +4346,7 @@
   background: rgba(255, 59, 48, 0.1);
   color: #ff3b30;
   border: 1px solid rgba(255, 59, 48, 0.2);
-  padding: 8px;
+  padding: var(--space-4);
   border-radius: 6px;
   font-size: 0.8rem;
   font-weight: 600;
@@ -4357,13 +4361,13 @@
 .coverEditorForm {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-7);
 }
 
 .coverEditorField {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .coverEditorField label {
@@ -4380,7 +4384,7 @@
   background: rgba(var(--overlay-rgb), 0.03);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 12px 16px;
+  padding: var(--space-5) var(--space-6);
   color: var(--foreground);
   font-size: 1rem;
   outline: none;
@@ -4400,7 +4404,7 @@
   font-size: 0.75rem;
   color: var(--muted);
   opacity: 0.6;
-  margin-top: 4px;
+  margin-top: var(--space-2);
 }
 
 @keyframes fadeIn {
@@ -4415,7 +4419,7 @@
 .spineCoverContainer {
   position: relative;
   width: calc(100% - 16px);
-  margin: 0 8px 12px;
+  margin: 0 var(--space-4) var(--space-5);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
@@ -4469,15 +4473,15 @@
   display: flex;
   align-items: center;
   width: calc(100% - 16px);
-  margin: 0 8px 12px;
-  padding: 10px 14px;
+  margin: 0 var(--space-4) var(--space-5);
+  padding: var(--space-5) var(--space-6);
   background: rgba(var(--overlay-rgb), 0.03);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(var(--overlay-rgb), 0.08);
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  gap: 12px;
+  gap: var(--space-5);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
@@ -4515,7 +4519,7 @@
 .spineBookModeStatus {
   font-size: 0.6875rem;
   font-weight: 900;
-  padding: 2px 6px;
+  padding: var(--space-1) var(--space-3);
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.3);
   color: var(--muted);
@@ -4529,12 +4533,12 @@
 }
 
 .bookViewChapterSeparator {
-  margin: 60px 0 30px;
+  margin: var(--space-11) 0 var(--space-8);
   position: relative;
 }
 
 .bookViewSceneSeparator {
-  margin: 30px 0;
+  margin: var(--space-8) 0;
   position: relative;
 }
 
@@ -4542,7 +4546,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: var(--space-5);
   color: var(--accent);
   font-family: var(--font-mono);
   font-size: 0.75rem;
@@ -4584,15 +4588,15 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 8px;
-  padding: 10px 12px 6px;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-5) var(--space-3);
   border-bottom: 1px solid rgba(var(--overlay-rgb), 0.08);
 }
 
 .beatWidgetTitles {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-1);
   min-width: 0;
   flex: 1;
 }
@@ -4619,7 +4623,7 @@
 .beatWidgetMeta {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
   flex-shrink: 0;
 }
 
@@ -4652,7 +4656,7 @@
 }
 
 .beatWidgetGuidance {
-  padding: 8px 12px;
+  padding: var(--space-4) var(--space-5);
   font-size: 0.7rem;
   line-height: 1.45;
   color: var(--muted);
@@ -4667,7 +4671,7 @@
   border: none;
   outline: none;
   resize: none;
-  padding: 10px 12px;
+  padding: var(--space-5) var(--space-5);
   font-size: 0.78rem;
   line-height: 1.5;
   color: var(--foreground);
@@ -4690,14 +4694,14 @@
   z-index: 60;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .methodPickerBtn {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 8px 14px;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
   border-radius: 20px;
   border: 1px solid var(--border);
   background: var(--surface-mid);
@@ -4717,8 +4721,8 @@
 .clearCanvasBtn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
   border-radius: 20px;
   border: 1px solid var(--border);
   background: var(--surface-mid);
@@ -4746,14 +4750,14 @@
 
 .researchScopeBar {
   display: flex;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
   flex: 0 0 auto;
   border-bottom: 1px solid var(--border, rgba(128, 128, 128, 0.2));
 }
 
 .researchScopeBtn {
-  padding: 6px 14px;
+  padding: var(--space-3) var(--space-6);
   font-size: 0.8rem;
   border-radius: 8px;
   border: 1px solid var(--border, rgba(128, 128, 128, 0.25));
@@ -4779,8 +4783,8 @@
 .boardBar {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 10px;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
   flex: 0 0 auto;
   overflow-x: auto;
   border-bottom: 1px solid var(--border, rgba(128, 128, 128, 0.2));
@@ -4789,9 +4793,9 @@
 .boardTab {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
   flex: 0 0 auto;
-  padding: 4px 10px;
+  padding: var(--space-2) var(--space-5);
   font-size: 0.75rem;
   border-radius: 7px;
   border: 1px solid transparent;
@@ -4836,7 +4840,7 @@
 
 .boardNameInput {
   width: 96px;
-  padding: 1px 4px;
+  padding: var(--space-1) var(--space-2);
   font-size: 0.75rem;
   color: var(--text, inherit);
   background: var(--background, #17171c);
@@ -4927,8 +4931,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 10px 0;
+  gap: var(--space-3);
+  padding: var(--space-5) 0;
   background: var(--surface, rgba(128, 128, 128, 0.04));
   border-right: 1px solid var(--border, rgba(128, 128, 128, 0.2));
   z-index: 6;
@@ -4973,7 +4977,7 @@
 .chatTrayDivider {
   width: 18px;
   height: 1px;
-  margin: 3px 0;
+  margin: var(--space-2) 0;
   background: var(--border, rgba(128, 128, 128, 0.3));
 }
 
@@ -4983,7 +4987,7 @@
   right: -4px;
   min-width: 15px;
   height: 15px;
-  padding: 0 3px;
+  padding: 0 var(--space-2);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -5013,7 +5017,7 @@
   width: 340px;
   max-width: 60vw;
   z-index: 20;
-  padding: 8px;
+  padding: var(--space-4);
   background: var(--surface, rgba(20, 20, 26, 0.98));
   border-right: 1px solid var(--border, rgba(128, 128, 128, 0.2));
   box-shadow: 8px 0 24px -12px rgba(0, 0, 0, 0.5);
@@ -5061,8 +5065,8 @@
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 11px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--text, inherit);
@@ -5091,8 +5095,8 @@
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 3px 6px;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
   font-size: 0.7rem;
   font-variant-numeric: tabular-nums;
   color: var(--muted, #999);
@@ -5135,7 +5139,7 @@
   width: 280px;
   max-height: 60vh;
   overflow-y: auto;
-  padding: 6px;
+  padding: var(--space-3);
   background: var(--background, #141418);
   border: 1px solid var(--border, rgba(128, 128, 128, 0.28));
   border-radius: 12px;
@@ -5145,15 +5149,15 @@
 .interviewMenuRow {
   display: flex;
   align-items: stretch;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .interviewMenuLaunch {
   flex: 1 1 auto;
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 8px 9px;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-4);
   text-align: left;
   background: transparent;
   border: none;
@@ -5176,7 +5180,7 @@
 .interviewMenuText {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: var(--space-1);
   min-width: 0;
 }
 
@@ -5213,8 +5217,8 @@
 
 .interviewMenuNew {
   width: 100%;
-  margin-top: 4px;
-  padding: 8px 9px;
+  margin-top: var(--space-2);
+  padding: var(--space-4) var(--space-4);
   text-align: left;
   background: transparent;
   border: none;
@@ -5238,7 +5242,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: var(--space-7);
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(2px);
 }
@@ -5260,7 +5264,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px;
+  padding: var(--space-6) var(--space-6);
   border-bottom: 1px solid var(--border, rgba(128, 128, 128, 0.2));
 }
 
@@ -5285,21 +5289,21 @@
 .interviewEditorBody {
   flex: 1 1 auto;
   overflow-y: auto;
-  padding: 16px 18px;
+  padding: var(--space-6) var(--space-6);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-5);
 }
 
 .interviewEditorMeta {
   display: flex;
-  gap: 10px;
+  gap: var(--space-5);
 }
 
 .interviewEditorField {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--space-3);
 }
 
 .interviewEditorLabel {
@@ -5321,7 +5325,7 @@
   width: 100%;
   font-family: inherit;
   font-size: 0.82rem;
-  padding: 8px 10px;
+  padding: var(--space-4) var(--space-5);
   color: var(--text, inherit);
   background: var(--surface, rgba(128, 128, 128, 0.06));
   border: 1px solid var(--border, rgba(128, 128, 128, 0.28));
@@ -5343,14 +5347,14 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-top: 4px;
+  margin-top: var(--space-2);
 }
 
 .interviewEditorQuestion {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 10px;
+  gap: var(--space-3);
+  padding: var(--space-5);
   background: color-mix(in srgb, var(--text, #888) 4%, transparent);
   border: 1px solid var(--border, rgba(128, 128, 128, 0.18));
   border-radius: 10px;
@@ -5359,7 +5363,7 @@
 .interviewEditorQuestionTop {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .interviewEditorQuestionNum {
@@ -5379,7 +5383,7 @@
 .interviewEditorQuestionBtns {
   flex: 0 0 auto;
   display: flex;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .interviewEditorQuestionBtns button {
@@ -5409,7 +5413,7 @@
 
 .interviewEditorAddQ {
   align-self: flex-start;
-  padding: 7px 12px;
+  padding: var(--space-4) var(--space-5);
   background: transparent;
   border: 1px dashed var(--border, rgba(128, 128, 128, 0.4));
   border-radius: 8px;
@@ -5428,21 +5432,21 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 12px 18px;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-6);
   border-top: 1px solid var(--border, rgba(128, 128, 128, 0.2));
 }
 
 .interviewEditorActionsRight {
   margin-left: auto;
   display: flex;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .interviewEditorDelete,
 .interviewEditorCancel,
 .interviewEditorSave {
-  padding: 8px 16px;
+  padding: var(--space-4) var(--space-6);
   border-radius: 8px;
   cursor: pointer;
   font-size: 0.8rem;
@@ -5496,8 +5500,8 @@
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 9px 11px;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
   border-bottom: 1px solid var(--border, rgba(128, 128, 128, 0.2));
 }
 
@@ -5511,7 +5515,7 @@
   flex: 0 0 auto;
   min-width: 18px;
   height: 18px;
-  padding: 0 5px;
+  padding: 0 var(--space-3);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -5524,7 +5528,7 @@
 
 .suggestCreateAll {
   margin-left: auto;
-  padding: 4px 10px;
+  padding: var(--space-2) var(--space-5);
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--on-accent);
@@ -5541,14 +5545,14 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding: 8px;
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .suggestEmpty {
-  padding: 14px 10px;
+  padding: var(--space-6) var(--space-5);
   font-size: 0.74rem;
   line-height: 1.5;
   opacity: 0.6;
@@ -5559,8 +5563,8 @@
 .suggestGroup {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 7px;
+  gap: var(--space-3);
+  padding: var(--space-4);
   border: 1px solid var(--border, rgba(128, 128, 128, 0.18));
   border-radius: 9px;
   background: color-mix(in srgb, var(--text, #888) 4%, transparent);
@@ -5575,7 +5579,7 @@
 .suggestGroupHead {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--text, inherit);
@@ -5591,7 +5595,7 @@
 .suggestNewBadge {
   flex: 0 0 auto;
   margin-left: auto;
-  padding: 1px 6px;
+  padding: var(--space-1) var(--space-3);
   font-size: 0.6875rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -5604,8 +5608,8 @@
 .suggestChip {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 6px 5px 8px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
   border-radius: 7px;
   background: var(--background, #1e1e24);
   border: 1px solid var(--border, rgba(128, 128, 128, 0.22));
@@ -5616,7 +5620,7 @@
 
 .suggestChipType {
   flex: 0 0 auto;
-  padding: 1px 6px;
+  padding: var(--space-1) var(--space-3);
   font-size: 0.6875rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -5667,14 +5671,14 @@
 .suggestChipCreate:disabled { opacity: 0.25; cursor: default; }
 
 .suggestTargets {
-  margin-top: 2px;
-  padding-top: 8px;
+  margin-top: var(--space-1);
+  padding-top: var(--space-4);
   border-top: 1px dashed var(--border, rgba(128, 128, 128, 0.25));
 }
 
 .suggestTargetsHint {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: var(--space-3);
   font-size: 0.6875rem;
   opacity: 0.55;
 }
@@ -5682,11 +5686,11 @@
 .suggestTargetsRow {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
 .suggestTarget {
-  padding: 3px 8px;
+  padding: var(--space-2) var(--space-4);
   font-size: 0.6875rem;
   border-radius: 999px;
   border: 1px solid var(--border, rgba(128, 128, 128, 0.3));
@@ -5705,10 +5709,10 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding: 10px;
+  padding: var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .understandLabel {
@@ -5727,7 +5731,7 @@
   font-family: inherit;
   font-size: 0.78rem;
   line-height: 1.5;
-  padding: 8px;
+  padding: var(--space-4);
   color: var(--text, inherit);
   background: color-mix(in srgb, var(--text, #888) 4%, transparent);
   border: 1px solid var(--border, rgba(128, 128, 128, 0.25));
@@ -5748,8 +5752,8 @@
 .flagRow {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 8px;
+  gap: var(--space-3);
+  padding: var(--space-4);
   border: 1px solid var(--border, rgba(128, 128, 128, 0.2));
   border-left: 3px solid color-mix(in srgb, #e5a24a 70%, transparent);
   border-radius: 8px;
@@ -5763,7 +5767,7 @@
 .flagHead {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .flagIcon { flex: 0 0 auto; font-size: 0.8rem; }
@@ -5784,12 +5788,12 @@
 
 .flagActions {
   display: flex;
-  gap: 5px;
+  gap: var(--space-3);
 }
 
 .flagAsk,
 .flagDismiss {
-  padding: 3px 10px;
+  padding: var(--space-2) var(--space-5);
   font-size: 0.7rem;
   font-weight: 600;
   border-radius: 6px;
@@ -5809,10 +5813,10 @@
 
 /* ── Chat option cards (ask_options) ─────────────────────── */
 .chatOptions {
-  margin-top: 8px;
+  margin-top: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .chatOptionsPrompt {
@@ -5825,12 +5829,12 @@
 .chatOptionsList {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--space-3);
 }
 
 .chatOption {
   text-align: left;
-  padding: 8px 11px;
+  padding: var(--space-4) var(--space-5);
   font-size: 0.78rem;
   font-weight: 500;
   color: var(--text, inherit);
@@ -5862,8 +5866,8 @@
 /* ── Inline entity chips in assistant replies ────────────── */
 .entityChip {
   display: inline;
-  padding: 0 3px;
-  margin: 0 -1px;
+  padding: 0 var(--space-2);
+  margin: 0 calc(var(--space-1) * -1);
   font: inherit;
   color: var(--accent, #6c8cff);
   background: color-mix(in srgb, var(--accent, #6c8cff) 12%, transparent);
@@ -5880,10 +5884,10 @@
 
 /* ── Generated images in chat ────────────────────────────── */
 .genImage {
-  margin-top: 8px;
+  margin-top: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-3);
 }
 
 .genImageImg {
@@ -5897,12 +5901,12 @@
 .genImageActions {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-3);
   align-items: center;
 }
 
 .genImageBtn {
-  padding: 5px 11px;
+  padding: var(--space-3) var(--space-5);
   font-size: 0.74rem;
   font-weight: 600;
   color: var(--on-accent);
@@ -5915,7 +5919,7 @@
 .genImageBtn:hover { filter: brightness(1.08); }
 
 .genImageSelect {
-  padding: 5px 8px;
+  padding: var(--space-3) var(--space-4);
   font-size: 0.72rem;
   font-family: inherit;
   color: var(--text, inherit);
@@ -5929,8 +5933,8 @@
 .chatMsgActions {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-top: 6px;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
 }
 
 .chatReactBtn {
@@ -5971,9 +5975,9 @@
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin: 0 0 4px;
-  padding: 6px 8px;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-2);
+  padding: var(--space-3) var(--space-4);
   font-size: 0.74rem;
   background: color-mix(in srgb, var(--accent, #6c8cff) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent, #6c8cff) 40%, transparent);
@@ -6017,9 +6021,9 @@
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 0 0 4px;
-  padding: 6px 8px;
+  gap: var(--space-4);
+  margin: 0 0 var(--space-2);
+  padding: var(--space-3) var(--space-4);
   font-size: 0.74rem;
   background: color-mix(in srgb, var(--accent, #6c8cff) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent, #6c8cff) 40%, transparent);
@@ -6050,9 +6054,9 @@
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin: 8px 10px 10px;
-  padding: 10px 10px 8px;
+  gap: var(--space-2);
+  margin: var(--space-4) var(--space-5) var(--space-5);
+  padding: var(--space-5) var(--space-5) var(--space-4);
   background: var(--surface-2, rgba(128, 128, 128, 0.07));
   border: 1px solid var(--border, rgba(128, 128, 128, 0.28));
   border-radius: 14px;
@@ -6069,7 +6073,7 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  padding: 4px;
+  padding: var(--space-2);
   background: var(--background, #17171c);
   border: 1px solid var(--border, rgba(128, 128, 128, 0.3));
   border-radius: 12px;
@@ -6080,8 +6084,8 @@
 .commandItem {
   display: flex;
   align-items: baseline;
-  gap: 7px;
-  padding: 7px 9px;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-4);
   font-size: 0.78rem;
   text-align: left;
   color: var(--text, inherit);
@@ -6133,7 +6137,7 @@
   min-height: 24px;
   max-height: 200px;
   overflow-y: auto;
-  padding: 2px 2px 0;
+  padding: var(--space-1) var(--space-1) 0;
   resize: none;
   border: none;
   outline: none;
@@ -6153,16 +6157,16 @@
 .chatComposerTools {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 /* Model picker + balance + context ring, pushed right beside Send. */
 .composerMeta {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
   margin-left: auto;
-  margin-right: 8px;
+  margin-right: var(--space-4);
   min-width: 0;
 }
 
@@ -6177,9 +6181,9 @@
 .modelPickerBtn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-3);
   max-width: 150px;
-  padding: 3px 7px;
+  padding: var(--space-2) var(--space-4);
   font-size: 0.72rem;
   line-height: 1;
   color: var(--text, inherit);
@@ -6228,7 +6232,7 @@
   right: 0;
   max-height: 300px;
   overflow-y: auto;
-  padding: 5px;
+  padding: var(--space-3);
   background: var(--background, #17171c);
   border: 1px solid var(--border, rgba(128, 128, 128, 0.3));
   border-radius: 11px;
@@ -6237,7 +6241,7 @@
 }
 
 .modelMenuGroup {
-  padding: 6px 8px 3px;
+  padding: var(--space-3) var(--space-4) var(--space-2);
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -6249,8 +6253,8 @@
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 6px 8px;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
   font-size: 0.76rem;
   text-align: left;
   color: var(--text, inherit);
@@ -6283,21 +6287,21 @@
 }
 
 .modelMenuEmpty {
-  padding: 6px 9px 8px;
+  padding: var(--space-3) var(--space-4) var(--space-4);
   font-size: 0.7rem;
   line-height: 1.4;
   color: var(--muted, #999);
 }
 
 .modelMenuFooter {
-  padding: 5px 4px 2px;
-  margin-top: 3px;
+  padding: var(--space-3) var(--space-2) var(--space-1);
+  margin-top: var(--space-2);
   border-top: 1px solid var(--border, rgba(128, 128, 128, 0.2));
 }
 
 .modelMenuInput {
   width: 100%;
-  padding: 5px 7px;
+  padding: var(--space-3) var(--space-4);
   font-size: 0.72rem;
   color: var(--text, inherit);
   background: var(--surface-2, rgba(128, 128, 128, 0.08));
@@ -6312,7 +6316,7 @@
 .contextRing {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
   flex: 0 0 auto;
   font-size: 0.6875rem;
   color: var(--muted, #999);
@@ -6407,10 +6411,10 @@
 
 .choicesStrip {
     border-top: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.12));
-    padding: 0.75rem 1rem;
+    padding: var(--space-5) var(--space-6);
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--space-4);
 }
 
 .choicesEmpty {
@@ -6422,20 +6426,20 @@
 .choiceRow {
     display: grid;
     grid-template-columns: 2fr 1.5fr auto;
-    gap: 0.5rem;
+    gap: var(--space-4);
     align-items: center;
 }
 
 .exportBar {
-    padding: 0.75rem 1rem;
+    padding: var(--space-5) var(--space-6);
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--space-4);
 }
 
 .exportIssues {
     margin: 0;
-    padding-left: 1.1rem;
+    padding-left: var(--space-6);
     font-size: 0.8rem;
     opacity: 0.75;
 }
@@ -6449,7 +6453,7 @@
 }
 
 .vnBlockHeader {
-    padding: 0.5rem 0.6rem;
+    padding: var(--space-4) var(--space-4);
     border-bottom: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.12));
 }
 
@@ -6466,11 +6470,11 @@
 .vnBlockScenes {
     opacity: 0.55;
     font-size: 0.72rem;
-    margin-top: 0.15rem;
+    margin-top: var(--space-1);
 }
 
 .vnBlockMissing {
-    padding: 0.75rem;
+    padding: var(--space-5);
     opacity: 0.6;
     font-size: 0.78rem;
 }
@@ -6478,8 +6482,8 @@
 .vnBlockChoices {
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
-    padding: 0.4rem 0.6rem 0.6rem;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4) var(--space-4);
 }
 
 .vnBlockEmpty {
@@ -6492,15 +6496,15 @@
     display: grid;
     grid-template-columns: 1fr auto auto;
     grid-template-areas: "text remove dot" "chips chips chips" "target target target" "state state state";
-    gap: 0.25rem 0.4rem;
+    gap: var(--space-2) var(--space-3);
     align-items: center;
-    padding: 0.3rem;
+    padding: var(--space-2);
     border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.1));
     border-radius: 6px;
 }
 
 .vnChoiceText { grid-area: text; border: none; background: transparent; font: inherit; min-width: 0; }
-.vnChoiceChips { grid-area: chips; display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.vnChoiceChips { grid-area: chips; display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .vnChoiceTarget { grid-area: target; font: inherit; font-size: 0.74rem; min-width: 0; }
 .vnChoiceRemove { grid-area: remove; border: none; background: transparent; cursor: pointer; opacity: 0.5; }
 .vnChoiceRemove:hover { opacity: 1; }
@@ -6527,13 +6531,13 @@
     grid-area: state;
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+    gap: var(--space-1);
 }
 
 .vnStateRow {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: var(--space-2);
     font-size: 0.7rem;
     opacity: 0.85;
 }
@@ -6546,7 +6550,7 @@
 .vnChipEffect,
 .vnChipCondition {
     font-size: 0.6875rem;
-    padding: 0.08rem 0.35rem;
+    padding: var(--space-1) var(--space-3);
     border-radius: 4px;
     white-space: nowrap;
 }
@@ -6562,7 +6566,7 @@
     opacity: 0.6;
     font: inherit;
     font-size: 0.74rem;
-    padding: 0.15rem 0;
+    padding: var(--space-1) 0;
 }
 
 .vnAddChoice:hover { opacity: 1; }
@@ -6570,8 +6574,8 @@
 .vnFlagsPanel {
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
-    padding: 0.6rem;
+    gap: var(--space-2);
+    padding: var(--space-4);
     height: 100%;
     overflow: auto;
     font-size: 0.78rem;
@@ -6580,7 +6584,7 @@
 .vnFlagRow {
     display: grid;
     grid-template-columns: 1fr auto auto auto;
-    gap: 0.3rem;
+    gap: var(--space-2);
     align-items: center;
 }
 
@@ -6625,7 +6629,7 @@
   pointer-events: none;
 }
 .canvasEmptyTitle {
-  margin: 0 0 0.4rem;
+  margin: 0 0 var(--space-3);
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--foreground);
@@ -6644,7 +6648,7 @@
 }
 
 .interviewRunnerProgress {
-  margin-left: 10px;
+  margin-left: var(--space-5);
   font-size: 0.75rem;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
@@ -6656,8 +6660,8 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 20px;
+  gap: var(--space-5);
+  padding: var(--space-7);
   overflow-y: auto;
 }
 
@@ -6686,7 +6690,7 @@
 .interviewRunnerAnswer {
   width: 100%;
   min-height: 150px;
-  padding: 10px 12px;
+  padding: var(--space-5) var(--space-5);
   font: inherit;
   line-height: 1.5;
   color: var(--text, inherit);
@@ -6703,7 +6707,7 @@
 
 .interviewRunnerCount {
   align-self: center;
-  margin-right: 6px;
+  margin-right: var(--space-3);
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
   color: var(--muted, #999);

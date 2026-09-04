@@ -7,7 +7,7 @@
     width: 320px;
     background: var(--background);
     border-radius: 8px;
-    padding: 1.25rem;
+    padding: var(--space-7);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
     border: 1px solid var(--border);
     z-index: 50;
@@ -32,7 +32,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 0.75rem;
+    margin-bottom: var(--space-5);
 }
 
 .previewHeader h4 {
@@ -48,12 +48,12 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     background: var(--border);
-    padding: 0.2rem 0.5rem;
+    padding: var(--space-2) var(--space-4);
     border-radius: 12px;
     color: #666;
     white-space: nowrap;
     flex-shrink: 0;
-    margin-left: 0.75rem;
+    margin-left: var(--space-5);
 }
 
 @media (prefers-color-scheme: dark) {

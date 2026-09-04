@@ -6,7 +6,7 @@
   --cover-w: 58px;
   --cover-h: 84px;
   display: flex;
-  gap: 14px;
+  gap: var(--space-6);
   align-items: stretch;
   min-width: 0;
   /* An explicit height, not a min-height: the spines size themselves as a
@@ -29,7 +29,7 @@
 
 .spines {
   display: flex;
-  gap: 7px;
+  gap: var(--space-4);
   align-items: flex-end;
   height: 100%;
   flex-shrink: 0;
@@ -98,8 +98,8 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding-left: 12px;
+  gap: var(--space-3);
+  padding-left: var(--space-5);
   border-left: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -123,14 +123,14 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 2px;
+  gap: var(--space-4);
+  margin-top: var(--space-1);
   min-width: 0;
 }
 
 .coversScroller {
   display: flex;
-  gap: 6px;
+  gap: var(--space-3);
   flex: 1;
   min-width: 0;
   overflow-x: auto;
@@ -177,7 +177,7 @@
   margin-top: auto;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-3);
   padding: 0;
   /* 24px hit target; the icon and text keep their own size. */
   min-height: 24px;
@@ -197,7 +197,7 @@
 .empty {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-4);
   align-items: flex-start;
 }
 .emptyText {
@@ -224,7 +224,7 @@
   .spines { height: var(--shelf-h); }
   .panel {
     padding-left: 0;
-    padding-top: 12px;
+    padding-top: var(--space-5);
     border-left: none;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
@@ -318,7 +318,7 @@
 .createForm {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-5);
   align-items: flex-start;
 }
 .createLabel {
@@ -334,7 +334,7 @@
 .createInput {
   width: 100%;
   max-width: 320px;
-  padding: 8px 10px;
+  padding: var(--space-4) var(--space-5);
   font-size: 0.9rem;
   color: var(--foreground, #f2f0ef);
   background: rgba(255, 255, 255, 0.06);
@@ -345,9 +345,9 @@
 }
 .createInput:focus { border-color: #8ab4ff; }
 
-.createActions { display: flex; gap: 8px; }
+.createActions { display: flex; gap: var(--space-4); }
 .createSave {
-  padding: 7px 16px;
+  padding: var(--space-4) var(--space-6);
   font-size: 0.8rem;
   font-weight: 600;
   color: #0f1116;
@@ -358,7 +358,7 @@
 }
 .createSave:disabled { opacity: 0.4; cursor: not-allowed; }
 .createCancel {
-  padding: 7px 12px;
+  padding: var(--space-4) var(--space-5);
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--muted, #8b8b95);

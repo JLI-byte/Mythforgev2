@@ -32,7 +32,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 0.75rem;
+    padding: var(--space-5);
     background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
     display: flex;
     align-items: flex-end;
@@ -51,7 +51,7 @@
     top: 8px;
     right: 8px;
     display: flex;
-    gap: 0.35rem;
+    gap: var(--space-3);
     z-index: 2;
 }
 
@@ -60,7 +60,7 @@
     border: none;
     color: white;
     font-size: 0.85rem;
-    padding: 0.25rem 0.35rem;
+    padding: var(--space-2) var(--space-3);
     border-radius: 4px;
     cursor: pointer;
     line-height: 1;
@@ -89,7 +89,7 @@
     border: none;
     color: var(--muted);
     font-size: 0.78rem;
-    padding: 0.4rem 0.75rem;
+    padding: var(--space-3) var(--space-5);
     cursor: pointer;
     text-align: center;
     transition: color 150ms ease;
@@ -107,7 +107,7 @@
 
 /* ======== Info section ======== */
 .infoSection {
-    padding: 0.75rem;
+    padding: var(--space-5);
 }
 
 /* Type badge pill */
@@ -115,7 +115,7 @@
     display: inline-block;
     font-size: 0.72rem;
     border-radius: 12px;
-    padding: 0.2rem 0.6rem;
+    padding: var(--space-2) var(--space-4);
     font-weight: 500;
 }
 
@@ -123,7 +123,7 @@
     font-size: 0.88rem;
     line-height: 1.6;
     color: var(--foreground);
-    margin: 0.75rem 0 0 0;
+    margin: var(--space-5) 0 0 0;
     white-space: pre-wrap;
 }
 
@@ -131,20 +131,20 @@
     font-size: 0.85rem;
     color: var(--muted);
     font-style: italic;
-    margin: 0.75rem 0 0 0;
+    margin: var(--space-5) 0 0 0;
 }
 
 
 /* ======== Custom fields section ======== */
 .fieldsSection {
-    padding: 0 0.75rem;
+    padding: 0 var(--space-5);
 }
 
 .fieldsHeader {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-4);
 }
 
 .fieldsTitle {
@@ -159,7 +159,7 @@
     color: var(--muted);
     font-size: 0.75rem;
     cursor: pointer;
-    padding: 0.2rem 0.4rem;
+    padding: var(--space-2) var(--space-3);
     border-radius: 4px;
     transition: color 150ms ease;
 }
@@ -172,8 +172,8 @@
 .fieldRow {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.3rem 0;
+    gap: var(--space-4);
+    padding: var(--space-2) 0;
     border-bottom: 1px solid var(--border);
 }
 
@@ -196,7 +196,7 @@
     color: var(--muted);
     font-size: 0.85rem;
     cursor: pointer;
-    padding: 0 0.25rem;
+    padding: 0 var(--space-2);
     opacity: 0.5;
     transition: opacity 150ms ease;
     line-height: 1;
@@ -211,13 +211,13 @@
 .addFieldForm {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
-    margin-top: 0.35rem;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
 }
 
 .addFieldInput {
     flex: 1;
-    padding: 0.3rem 0.5rem;
+    padding: var(--space-2) var(--space-4);
     background: var(--background);
     border: 1px solid var(--border);
     border-radius: 4px;
@@ -236,7 +236,7 @@
     border: 1px solid var(--border);
     border-radius: 4px;
     color: var(--muted);
-    padding: 0.2rem 0.4rem;
+    padding: var(--space-2) var(--space-3);
     cursor: pointer;
     line-height: 1;
     display: inline-flex;
@@ -261,11 +261,11 @@
 /* ======== Metadata footer ======== */
 .metaFooter {
     border-top: 1px solid var(--border);
-    padding: 0.75rem;
-    margin-top: 1rem;
+    padding: var(--space-5);
+    margin-top: var(--space-6);
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+    gap: var(--space-1);
     font-size: 0.72rem;
     color: var(--muted);
     flex-shrink: 0;
@@ -278,8 +278,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
-    padding: 3rem 1rem;
+    gap: var(--space-5);
+    padding: var(--space-10) var(--space-6);
     color: var(--muted);
 }
 
@@ -289,7 +289,7 @@
     border-radius: 6px;
     color: var(--muted);
     font-size: 0.82rem;
-    padding: 0.4rem 0.8rem;
+    padding: var(--space-3) var(--space-5);
     cursor: pointer;
     transition: all 150ms ease;
 }
@@ -303,8 +303,8 @@
 .articleViewer {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
-    padding: 1rem 0;
+    gap: var(--space-8);
+    padding: var(--space-6) 0;
 }
 
 .viewerBlock {
@@ -318,7 +318,7 @@
 }
 
 .viewerRichtext p {
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-6);
 }
 
 .viewerFigure {
@@ -336,15 +336,15 @@
     font-size: 0.8rem;
     color: var(--muted);
     text-align: center;
-    margin-top: 0.5rem;
+    margin-top: var(--space-4);
     font-style: italic;
 }
 
 .viewerStatRow {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 0.5rem 0;
+    gap: var(--space-6);
+    padding: var(--space-4) 0;
     border-bottom: 1px solid var(--border);
 }
 
@@ -367,20 +367,20 @@
     border: none;
     height: 1px;
     background: linear-gradient(to right, transparent, var(--border), transparent);
-    margin: 1rem 0;
+    margin: var(--space-6) 0;
 }
 
 .viewerQuote {
-    padding-left: 1.5rem;
+    padding-left: var(--space-7);
     border-left: 3px solid var(--accent);
-    margin: 1rem 0;
+    margin: var(--space-6) 0;
 }
 
 .viewerQuote p {
     font-size: 1.1rem;
     font-style: italic;
     color: var(--foreground);
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-4);
     line-height: 1.5;
 }
 
@@ -398,7 +398,7 @@
 
 .viewerTimelineEvent {
     display: flex;
-    gap: 1rem;
+    gap: var(--space-6);
 }
 
 .viewerTimelineSidebar {
@@ -413,7 +413,7 @@
     height: 10px;
     border-radius: 50%;
     background-color: var(--accent);
-    margin-top: 0.5rem;
+    margin-top: var(--space-4);
     flex-shrink: 0;
 }
 
@@ -430,14 +430,14 @@
 
 .viewerEventContent {
     flex-grow: 1;
-    padding-bottom: 2rem;
+    padding-bottom: var(--space-8);
 }
 
 .viewerEventHeader {
     display: flex;
     align-items: baseline;
-    gap: 0.75rem;
-    margin-bottom: 0.25rem;
+    gap: var(--space-5);
+    margin-bottom: var(--space-2);
 }
 
 .viewerEventDate {
