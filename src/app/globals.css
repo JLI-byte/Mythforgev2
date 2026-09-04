@@ -66,6 +66,9 @@
   --glass-border: rgba(255, 255, 255, 0.12);
   --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
 
+  --manuscript-ink: var(--foreground);
+
+
   /* ========================================================================
      ON-MEDIA and ON-FILL. These do not follow the theme, deliberately.
      A caption over a user's photograph needs a dark scrim and white ink
@@ -168,7 +171,6 @@
      TYPEFACES. --font-manuscript is new (item 09); --font-mono had five
      references and no definition anywhere.
      ======================================================================== */
-  --font-manuscript: var(--font-garamond), 'Merriweather', Georgia, serif;
   --font-mono: ui-monospace, 'JetBrains Mono', 'Courier New', monospace;
 
   /* ========================================================================
@@ -259,6 +261,9 @@ option {
     --glass-border: rgba(255, 255, 255, 0.08);
     --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
 
+    --manuscript-ink: var(--foreground);
+
+
     --success: #2ec27e;
     --favourite: #ffc800;
 
@@ -316,6 +321,9 @@ option {
   --glass-blur: 24px;
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+
+  --manuscript-ink: var(--foreground);
+
 
   --success: #2ec27e;
   --favourite: #ffc800;
@@ -410,6 +418,9 @@ option {
   --glass-border: rgba(59, 44, 21, 0.12);
   --glass-shadow: 0 8px 28px 0 rgba(59, 44, 21, 0.14);
 
+  --manuscript-ink: #2c2113;   /* ink on the parchment sheet */
+
+
   --shadow-rgb: 59, 44, 21;   /* the parchment family casts warm ink shadows */
 
 }
@@ -444,6 +455,9 @@ option {
   --glass-blur: 24px;
   --glass-border: rgba(236, 224, 196, 0.10);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.55);
+
+  --manuscript-ink: #2c2113;   /* ink on the parchment sheet */
+
 
   --shadow-rgb: 0, 0, 0;
 
@@ -499,14 +513,12 @@ option {
 :root[data-theme-family="fantasy"] [data-scroll="main"] {
   font-family: var(--font-garamond), 'Merriweather', Georgia, serif;
 }
+/* The face, size and leading now come from --font-manuscript and the type
+   scale, which apply in every theme. The family only needs its own ink: the
+   fantasy manuscript page is a parchment sheet in both modes, so the writing
+   stays dark even in the candlelit dark palette. */
 :root[data-theme-family="fantasy"] .ProseMirror {
-  font-family: var(--font-garamond), 'Merriweather', Georgia, serif;
-  font-size: var(--text-lg);
-  line-height: var(--leading-prose);
-}
-:root[data-theme-family="fantasy"] .ProseMirror {
-  /* Dark ink in both modes — the manuscript page is a parchment sheet either way. */
-  color: #2c2113;
+  color: var(--manuscript-ink);
 }
 
 * {
@@ -516,6 +528,12 @@ option {
 }
 
 body {
+  /* --font-manuscript lives HERE, not on :root. next/font sets --font-garamond
+     via a className on <body>, so a :root declaration referencing it computes
+     to guaranteed-invalid and the manuscript silently fell back to Inter.
+     A custom property is resolved where it is DECLARED, not where it is used. */
+  --font-manuscript: var(--font-garamond), 'Merriweather', Georgia, serif;
+
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);

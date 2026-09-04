@@ -378,9 +378,13 @@
 }
 
 .deskEditorContent {
+  /* The manuscript is not chrome. It gets the book face in every theme, not
+     only in the fantasy family, and it is the one surface in the app that is
+     read rather than operated. */
+  font-family: var(--font-manuscript);
   color: var(--foreground);
   font-size: var(--text-lg);
-  line-height: 1.6;
+  line-height: var(--leading-prose);
   outline: none;
   /* In ch, not px. The cap is a reading measure, so it has to track the font:
      the writing zone is a resizable docked widget and the desk has its own
@@ -402,9 +406,12 @@
   margin-bottom: 1.25em;
 }
 
+/* Three distinct steps. The type codemod snapped h1 and h2 to the same token
+   because both measured above the scale's top, which flattened the manuscript's
+   own heading hierarchy into one size. */
 .deskEditorContent h1 { font-size: var(--text-display); margin: 1.5em 0 0.5em; color: var(--foreground); }
-.deskEditorContent h2 { font-size: var(--text-display); margin: 1.5em 0 0.5em; color: var(--foreground); }
-.deskEditorContent h3 { font-size: var(--text-2xl); margin: 1.2em 0 0.5em; color: var(--foreground); }
+.deskEditorContent h2 { font-size: var(--text-2xl); margin: 1.5em 0 0.5em; color: var(--foreground); }
+.deskEditorContent h3 { font-size: var(--text-xl); margin: 1.2em 0 0.5em; color: var(--foreground); }
 
 .deskEditorContent blockquote {
   border-left: 3px solid var(--accent);
