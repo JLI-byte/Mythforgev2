@@ -164,13 +164,16 @@ export default function Home() {
 
 
   return (
-    <main
+    <div
       className={`${styles.workspace} ${isFullscreen ? styles.fullscreenMode : ''} ${isFocusMode ? styles.focusMode : ''}`}
     >
+      <a href="#main-content" className={styles.skipLink}>Skip to the writing area</a>
       <DeskLighting />
       <ModeBar />
       <div className={styles.workspaceRow}>
-        <div
+        <main
+          id="main-content"
+          tabIndex={-1}
           className={styles.editorContainer}
           style={{
             paddingRight: tabRailWidth + 8,
@@ -204,9 +207,9 @@ export default function Home() {
               </Suspense>
             </ErrorBoundary>
           </div>
-        </div>
+        </main>
 
-        {/* 
+        {/*
           Right-edge panels & filing cabinet tabs
           Fixed to the right edge. Does not shift the editor.
         */}
@@ -272,7 +275,7 @@ export default function Home() {
         <HoverPreview />
         <PersistQuotaBanner />
       </div>
-    </main>
+    </div>
   );
 }
 

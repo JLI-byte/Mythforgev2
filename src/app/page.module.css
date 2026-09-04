@@ -112,3 +112,25 @@
     direction: ltr; /* Reset text direction */
     width: 100%;
 }
+
+/* Skip link. The first tab stop on the page and hidden until it has focus,
+   because it is the one control that only exists for the keyboard. */
+.skipLink {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10000;
+    padding: 0.5rem 0.875rem;
+    background: var(--accent);
+    color: var(--on-accent);
+    border-bottom-right-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transform: translateY(-150%);
+}
+
+.skipLink:focus,
+.skipLink:focus-visible {
+    transform: translateY(0);
+}
