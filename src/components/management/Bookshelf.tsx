@@ -7,7 +7,7 @@ import { STANDALONE_KEY } from '@/lib/worldKey';
 import { getWorldBibleConfig } from '@/lib/worldBibleNav';
 import { WORK_TYPES, getWorkType, getWorkTypeByWritingMode } from '@/lib/workTypes';
 import { getSubTypesFor, getWorkSubType, type ProjectBrief } from '@/lib/workSubTypes';
-import { getDraftType } from '@/lib/writingMethods';
+import { planNewStory } from '@/lib/newStory';
 import { useModalDialog } from '@/lib/useModalDialog';
 import WorldBibleBook from './WorldBibleBook';
 import WorkTypeArtwork from './WorkTypeArtwork';
@@ -288,64 +288,30 @@ export function Bookshelf() {
      * Table (outline first), or the Writing Desk (straight into prose).
      */
     const confirmCreateStory = (destination: 'template' | 'desk' | 'research') => {
-        const name = storyName.trim();
-        const workType = getWorkType(storyTypeId);
-        if (!name || !workType) return;
-
-        const projectId = crypto.randomUUID();
-        const docId = crypto.randomUUID();
-        const sceneId = crypto.randomUUID();
-
-        const subType = getWorkSubType(storySubTypeId);
-        // Only keep answers that were actually filled in.
-        const brief: ProjectBrief = Object.fromEntries(
-            Object.entries(storyBrief).filter(([, v]) => v?.trim()),
-        );
-        const hasBrief = Object.keys(brief).length > 0;
-
-        addProject({
-            id: projectId,
-            name,
-            writingMode: workType.writingMode,
-            coverColor: COVER_COLORS[Math.floor(Math.random() * COVER_COLORS.length)],
+        const plan = planNewStory({
+            name: storyName,
+            workTypeId: storyTypeId ?? '',
+            subTypeId: storySubTypeId,
+            brief: storyBrief,
             worldId: storyWorldId,
-            createdAt: new Date(),
-            ...(subType ? { workSubTypeId: subType.id } : {}),
-            ...(hasBrief ? { brief } : {}),
+            coverColor: COVER_COLORS[Math.floor(Math.random() * COVER_COLORS.length)],
+            ids: {
+                projectId: crypto.randomUUID(),
+                documentId: crypto.randomUUID(),
+                sceneId: crypto.randomUUID(),
+            },
+            now: new Date(),
         });
+        if (!plan) return;
 
-        // Pre-filter the Draft Table's method library to suit the work, so the
-        // writer isn't offered screenplay beats for an essay. The sub-type knows
-        // better than the work type — a video script isn't an article.
-        const draftTypeId = subType?.draftTypeId ?? workType.draftTypeId;
-        if (draftTypeId) {
-            updateDraftState(projectId, {
-                draftTypeId,
-                draftFormat: getDraftType(draftTypeId)?.format,
-            });
-        }
-
-        addDocument({
-            id: docId,
-            projectId,
-            title: 'Chapter 1',
-            content: '',
-            createdAt: new Date()
-        });
-
-        addScene({
-            id: sceneId,
-            documentId: docId,
-            projectId,
-            title: 'Scene 1',
-            content: '',
-            order: 0,
-            createdAt: new Date()
-        });
+        addProject(plan.project);
+        if (plan.draftState) updateDraftState(plan.project.id, plan.draftState);
+        addDocument(plan.document);
+        addScene(plan.scene);
 
         setIsStoryModalOpen(false);
         setStoryName('');
-        setActiveProject(projectId);
+        setActiveProject(plan.project.id);
         setWorkspaceMode(destination);
     };
 
