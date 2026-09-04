@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, lazy, Suspense } from 'react';
+import PersistQuotaBanner from '@/components/ui/PersistQuotaBanner';
 import styles from './page.module.css';
 import { WorldBiblePanel } from '@/components/layout/WorldBiblePanel';
 import { WritingGoalsPanel } from '@/components/layout/WritingGoalsPanel';
@@ -269,6 +270,7 @@ export default function Home() {
           rect bounding boxes.
         */}
         <HoverPreview />
+        <PersistQuotaBanner />
       </div>
     </main>
   );

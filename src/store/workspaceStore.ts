@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, type PersistStorage, type StorageValue } from 'zustand/middleware';
 import { BACKUP_KEY_PREFIX, claimBackup, ownedStorageKeys, readBackupOwner } from '@/lib/workspaceOwner';
+import { describePersistFailure } from '@/lib/persistQuota';
 import {
     emptyWeekdayTargets, normalizeWeekdayTargets, type WeekdayTargets,
 } from '@/lib/goalSchedule';
@@ -665,6 +666,14 @@ export interface WorkspaceState {
      */
     ownerUserId: string | null;
 
+    /**
+     * Set when a local save fails, cleared when one succeeds. Deliberately NOT
+     * in partializeWorkspace — persisting the "we could not persist" flag would
+     * be its own joke, and it must not survive a reload that fixed the problem.
+     */
+    persistError: string | null;
+    setPersistError: (message: string | null) => void;
+
 
 
     /**
@@ -1237,11 +1246,32 @@ function flushPersist() {
     if (!pendingWrite) return;
     const { name, value } = pendingWrite;
     pendingWrite = null;
+    let serialized: string;
     try {
-        localStorage.setItem(name, JSON.stringify(value));
-    } catch {
-        /* quota — Task 7 surfaces this */
+        serialized = JSON.stringify(value);
+    } catch (err) {
+        reportPersistOutcome(describePersistFailure(err, 0));
+        return;
     }
+    try {
+        localStorage.setItem(name, serialized);
+        reportPersistOutcome(null);
+    } catch (err) {
+        reportPersistOutcome(describePersistFailure(err, serialized.length));
+    }
+}
+
+/**
+ * Record the outcome of a local save, but only when it changed.
+ *
+ * Writing to the store schedules another persist, which on a full browser fails
+ * again — so an unconditional set() here would spin forever. Comparing first
+ * makes the second and every later failure a no-op.
+ */
+function reportPersistOutcome(message: string | null) {
+    const state = useWorkspaceStore.getState();
+    if (state.persistError === message) return;
+    state.setPersistError(message);
 }
 
 /**
@@ -1427,6 +1457,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             isHierarchyScratchMode: false,
             _hasHydrated: false,
             ownerUserId: null,
+            persistError: null,
             deskStates: {},
             draftStates: {},
             researchStates: {},
@@ -1926,6 +1957,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             setHasHydrated: (state) =>
                 set(() => ({ _hasHydrated: state })),
+
+            setPersistError: (message) => set(() => ({ persistError: message })),
 
             claimWorkspace: (userId) => {
                 if (!userId) return;
