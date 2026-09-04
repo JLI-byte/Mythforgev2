@@ -3,10 +3,10 @@
 /**
  * StoryWritingZone — the writing zone for a story — novels and prose.
  *
- * One of four sibling zones, cloned from the original story-only writing zone
- * so each medium can diverge without disturbing the others. Reached when a
- * project's writingMode is 'novel'; see WritingZoneRenderer for the
- * dispatch. Identical to its siblings until this medium needs it otherwise.
+ * The only zone. Four siblings were deleted in Phase 1: three were clones of
+ * this file differing by a doc comment and a function name, and the fourth
+ * served a withdrawn work type. Reached for writingMode 'novel', and by
+ * fallback for anything else; see WritingZoneRenderer for the dispatch.
  */
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
@@ -15,7 +15,6 @@ import { createPortal } from 'react-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { ProjectSettingsModal } from '@/components/ui/ProjectSettingsModal';
-import ScreenplayEditor from '@/components/editor/ScreenplayEditor';
 import { BinderMode } from '../../deskConstants';
 import { DeskTipTapEditor } from '../../DeskTipTapEditor';
 import { BookViewEditor } from '../../BookViewEditor';
@@ -232,9 +231,7 @@ export function StoryWritingZone({ content, onChange, onChangeImmediate, widget,
               {s.title}
             </div>
           )}
-          {activeProject?.writingMode === 'screenplay'
-            ? <ScreenplayEditor key={s.id} scene={s} />
-            : <DeskTipTapEditor key={s.id} sceneId={s.id} content={s.content} onUpdate={(html, count) => updateScene(s.id, { content: html, wordCount: count })} onFocus={noopFocus} />}
+          <DeskTipTapEditor key={s.id} sceneId={s.id} content={s.content} onUpdate={(html, count) => updateScene(s.id, { content: html, wordCount: count })} onFocus={noopFocus} />
         </div>
       ))}
       <button className={styles.binderAddSceneBtn} onClick={handleAddScene}>+ Add Another Scene</button>
@@ -264,9 +261,7 @@ export function StoryWritingZone({ content, onChange, onChangeImmediate, widget,
             {activeScene.title}
           </div>
         )}
-        {activeProject?.writingMode === 'screenplay'
-          ? <ScreenplayEditor key={activeScene.id} scene={activeScene} />
-          : <DeskTipTapEditor key={activeScene.id} sceneId={activeScene.id} content={activeScene.content} onUpdate={(html, count) => updateScene(activeScene.id, { content: html, wordCount: count })} onFocus={noopFocus} />}
+        <DeskTipTapEditor key={activeScene.id} sceneId={activeScene.id} content={activeScene.content} onUpdate={(html, count) => updateScene(activeScene.id, { content: html, wordCount: count })} onFocus={noopFocus} />
       </div>
     </div>
   ) : (
