@@ -64,7 +64,7 @@ Removes ~2,600 lines and four work types. Everything else in this roadmap gets s
 
 ## Phase 2 — Remove AI
 
-**Plan:** `2026-09-03-phase-2-remove-ai.md` · **Status:** ready to execute · **Spec:** `../specs/2026-09-03-saas-conversion-design.md` Part 1 · **Depends on:** Phase 1
+**Plan:** `2026-09-03-phase-2-remove-ai.md` · **Status:** COMPLETE (8 commits, 5,477 lines deleted) · **Spec:** `../specs/2026-09-03-saas-conversion-design.md` Part 1 · **Depends on:** Phase 1
 
 ~3,500 lines. Removes all three SaaS blockers at once, plus the entire billing/quota subsystem that a platform-pays AI model would otherwise have required.
 
