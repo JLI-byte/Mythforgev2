@@ -143,7 +143,7 @@ Rebuilds the three AI-driven lore features as deterministic rules. Instant, free
 
 ## Phase 6 — Accessibility
 
-**Plan:** `2026-09-03-phase-6-accessibility.md` · **Status:** ready · **Depends on:** Phases 1 and 2 (fewer surfaces to fix)
+**Plan:** `2026-09-03-phase-6-accessibility.md` · **Status:** COMPLETE (9 commits) · **Depends on:** Phases 1 and 2 (fewer surfaces to fix)
 
 | Item | What |
 |------|------|
