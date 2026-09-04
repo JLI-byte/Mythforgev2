@@ -98,9 +98,16 @@ export function exportAsMarkdown(document: MFDocument, scenes: Scene[]): void {
  * @param {string} projectName - The name of the project context.
  * @returns {Promise<void>} 
  */
-export async function exportAsDocx(document: MFDocument, scenes: Scene[]): Promise<Blob> {
+/**
+ * Builds the .docx as a `docx` Document, without touching the DOM.
+ *
+ * Split out of exportAsDocx so the output can be opened and inspected in a
+ * test: URL.createObjectURL does not exist in jsdom, so anything that
+ * downloads cannot be called from one.
+ */
+export async function buildDocxDocument(document: MFDocument, scenes: Scene[]): Promise<Docx.Document> {
     // Loaded on demand — keeps the ~500KB docx library out of the main app bundle.
-    const { Document: DocxDocument, Paragraph, TextRun, Packer } = await import('docx');
+    const { Document: DocxDocument, Paragraph, TextRun } = await import('docx');
     const title = document.title || 'Untitled Document';
     const parser = new DOMParser();
 
@@ -216,7 +223,17 @@ export async function exportAsDocx(document: MFDocument, scenes: Scene[]): Promi
         }
     });
 
-    const blob = await Packer.toBlob(docxApp);
+    return docxApp;
+}
+
+/**
+ * Exports a single Document as a rich .docx file formatted to standard
+ * manuscript requirements, and triggers the browser download.
+ */
+export async function exportAsDocx(document: MFDocument, scenes: Scene[]): Promise<Blob> {
+    const { Packer } = await import('docx');
+    const title = document.title || 'Untitled Document';
+    const blob = await Packer.toBlob(await buildDocxDocument(document, scenes));
     const url = URL.createObjectURL(blob);
     const a = window.document.createElement('a');
     a.href = url;

@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import JSZip from 'jszip';
 import { buildEpubZip } from './epub';
 import type { Document as MFDocument, Scene } from '@/store/workspaceStore';
 
@@ -51,5 +52,42 @@ describe('buildEpubZip', () => {
         const zip = await buildEpubZip(doc, [], { title: 'Empty', identifier: 'fixed-id' });
         const opf = await zip.file('OEBPS/content.opf')!.async('string');
         expect(opf).toContain('<itemref');
+    });
+});
+
+describe('the EPUB binary', () => {
+    it('puts mimetype first and stores it uncompressed', async () => {
+        const zip = await buildEpubZip(doc, [scene('s1', 'One', 0, '<p>a</p>')],
+            { title: 'My Book', identifier: 'fixed-id' });
+        const bytes = await zip.generateAsync({ type: 'uint8array', mimeType: 'application/epub+zip' });
+        const head = new TextDecoder('latin1').decode(bytes.subarray(0, 38));
+
+        // EPUB 3 §4.1.2: the first entry must be `mimetype`, stored, unencrypted.
+        // Reading it out of the local file header is what epubcheck does.
+        // ZIP local file header signature is the four bytes PK.
+        expect(head.slice(0, 4)).toBe('PK');
+        expect(bytes[8]).toBe(0);   // compression method, low byte  — 0 = stored
+        expect(bytes[9]).toBe(0);   // compression method, high byte
+        expect(head.slice(30, 38)).toBe('mimetype');
+    });
+
+    it('has a spine where every itemref resolves to a file in the archive', async () => {
+        const zip = await buildEpubZip(doc, [
+            scene('s1', 'One', 0, '<p>a</p>'),
+            scene('s2', 'Two', 1, '<p>b</p>'),
+        ], { title: 'My Book', identifier: 'fixed-id' });
+        const reread = await JSZip.loadAsync(await zip.generateAsync({ type: 'uint8array' }));
+        const opf = await reread.file('OEBPS/content.opf')!.async('string');
+
+        const hrefById = new Map<string, string>();
+        for (const m of opf.matchAll(/<item id="([^"]+)" href="([^"]+)"/g)) hrefById.set(m[1], m[2]);
+        const idrefs = [...opf.matchAll(/<itemref idref="([^"]+)"\/>/g)].map(m => m[1]);
+
+        expect(idrefs.length).toBe(2);
+        for (const id of idrefs) {
+            const href = hrefById.get(id);
+            expect(href, `spine references unknown manifest id ${id}`).toBeTruthy();
+            expect(reread.file(`OEBPS/${href}`), `missing OEBPS/${href}`).not.toBeNull();
+        }
     });
 });
