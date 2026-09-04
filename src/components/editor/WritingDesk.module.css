@@ -4572,7 +4572,7 @@
 
 /* ── Beat Card (Draft Table writing methods) ─────────────── */
 
-.beatCard {
+.beatWidget {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -4580,7 +4580,7 @@
   overflow: hidden;
 }
 
-.beatCardHeader {
+.beatWidgetHeader {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -4589,7 +4589,7 @@
   border-bottom: 1px solid rgba(var(--overlay-rgb), 0.08);
 }
 
-.beatCardTitles {
+.beatWidgetTitles {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -4597,7 +4597,7 @@
   flex: 1;
 }
 
-.beatCardGroup {
+.beatWidgetGroup {
   font-size: 0.6875rem;
   font-weight: 700;
   color: var(--accent);
@@ -4605,7 +4605,7 @@
   letter-spacing: 0.08em;
 }
 
-.beatCardLabel {
+.beatWidgetLabel {
   background: none;
   border: none;
   outline: none;
@@ -4616,20 +4616,20 @@
   padding: 0;
 }
 
-.beatCardMeta {
+.beatWidgetMeta {
   display: flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
 }
 
-.beatCardStep {
+.beatWidgetStep {
   font-size: 0.6875rem;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
 
-.beatCardInfoBtn {
+.beatWidgetInfoBtn {
   width: 18px;
   height: 18px;
   border-radius: 50%;
@@ -4644,14 +4644,14 @@
   transition: all 0.15s;
 }
 
-.beatCardInfoBtn:hover,
-.beatCardInfoBtnActive {
+.beatWidgetInfoBtn:hover,
+.beatWidgetInfoBtnActive {
   border-color: var(--accent);
   color: var(--accent);
   background: rgba(var(--accent-rgb), 0.1);
 }
 
-.beatCardGuidance {
+.beatWidgetGuidance {
   padding: 8px 12px;
   font-size: 0.7rem;
   line-height: 1.45;
@@ -4660,7 +4660,7 @@
   border-bottom: 1px solid rgba(var(--accent-rgb), 0.12);
 }
 
-.beatCardTextarea {
+.beatWidgetTextarea {
   flex: 1;
   width: 100%;
   background: none;
@@ -4674,7 +4674,7 @@
   font-family: inherit;
 }
 
-.beatCardTextarea::placeholder {
+.beatWidgetTextarea::placeholder {
   color: var(--muted);
   opacity: 0.55;
   font-style: italic;
@@ -5923,71 +5923,6 @@
   border: 1px solid var(--border, rgba(128, 128, 128, 0.3));
   border-radius: 8px;
   cursor: pointer;
-}
-
-/* ── Preview-before-apply cards ──────────────────────────── */
-.chatPending {
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  font-size: 0.76rem;
-  color: var(--text, inherit);
-  background: color-mix(in srgb, #e5a24a 12%, transparent);
-  border: 1px solid color-mix(in srgb, #e5a24a 40%, transparent);
-  border-radius: 9px;
-}
-
-.chatPendingResolved {
-  opacity: 0.7;
-  background: color-mix(in srgb, var(--text, #888) 6%, transparent);
-  border-color: var(--border, rgba(128, 128, 128, 0.25));
-}
-
-.chatPendingLabel {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.chatPendingBtns {
-  flex: 0 0 auto;
-  display: flex;
-  gap: 5px;
-}
-
-.chatPendingApply,
-.chatPendingDiscard {
-  padding: 4px 10px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  border-radius: 7px;
-  cursor: pointer;
-  border: 1px solid transparent;
-}
-
-.chatPendingApply {
-  color: var(--on-accent);
-  background: var(--accent, #6c8cff);
-}
-
-.chatPendingApply:hover { filter: brightness(1.08); }
-
-.chatPendingDiscard {
-  color: var(--text, inherit);
-  background: transparent;
-  border-color: var(--border, rgba(128, 128, 128, 0.35));
-}
-
-.chatPendingDiscard:hover {
-  background: color-mix(in srgb, var(--text, #888) 10%, transparent);
-}
-
-.chatPendingStatus {
-  flex: 0 0 auto;
-  font-size: 0.72rem;
-  font-weight: 600;
-  opacity: 0.85;
 }
 
 /* ── Message action row (reactions + add to board) ───────── */

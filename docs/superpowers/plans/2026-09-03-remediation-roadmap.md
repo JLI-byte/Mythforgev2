@@ -231,7 +231,8 @@ Cross-account data access is genuinely closed at the database. `beta_feedback` a
 | `S5` | Put the `workspaces` schema in `supabase/migrations/`. Only `beta_feedback` is version-controlled |
 | `S6` | Revoke `SELECT` on `public.workspaces` from `anon` so it leaves the GraphQL schema. RLS already blocks the rows — discoverability only |
 | `S7` | Enable leaked-password protection in Auth settings |
-| `3f` | `lazy()` the `ExportModal` — it statically imports `epub.ts`, which statically imports `jszip`, dragging ~30 KB into the entry bundle for every user. **The `.beatCard` half moved to Phase 8**, which found 21 duplicated rule blocks across 11 stylesheets rather than the one |
+| `3f` | `lazy()` the `ExportModal` — it statically imports `epub.ts`, which statically imports `jszip`, dragging ~30 KB into the entry bundle for every user. **The `.beatCard` half moved to Phase 8 Task 2 and is done.** The "21 duplicated rule blocks across 11 stylesheets" figure was a measurement artifact: the grep behind it matches only the last selector of a multi-selector rule, so every `.a,
+.b {` shared block looked like a duplicate `.b`. Four were real |
 | `E1` | **Remove the Electron toolchain.** `npm uninstall electron electron-builder electron-packager concurrently wait-on cross-env`, delete the `postinstall` hook (it breaks container builds), `scripts/build-electron.js`, and the 84 MB `bin/node.exe` tracked in git. Removes ~980 of 1,184 packages and all 39 reported vulnerabilities, none of which ever reached the deployed app |
 
 ---

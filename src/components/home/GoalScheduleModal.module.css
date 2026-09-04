@@ -122,6 +122,8 @@
   border-radius: 8px;
   outline: none;
   transition: border-color 0.15s ease;
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 .input:focus { border-color: #8ab4ff; }
 .input::placeholder { color: var(--muted, #8b8b95); font-weight: 400; opacity: 0.6; }
@@ -129,7 +131,6 @@
 /* Spinners crowd a field this narrow and fight the right alignment. */
 .input::-webkit-outer-spin-button,
 .input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.input { -moz-appearance: textfield; appearance: textfield; }
 
 .unit {
   font-size: 0.78rem;
