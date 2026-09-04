@@ -47,6 +47,10 @@ function UserProfilePill({ onShowLogin }: { onShowLogin: () => void }) {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+    // Layer 2. The store reset also sweeps lorecanvas-workspace and every
+    // lorecanvas-backup-* key, so nothing of this account is left on the
+    // machine for whoever sits down next.
+    useWorkspaceStore.getState().resetWorkspace();
     window.location.href = '/login';
   };
 

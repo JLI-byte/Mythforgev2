@@ -37,6 +37,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
     const setThemeFamily = useWorkspaceStore((state) => state.setThemeFamily);
     const exampleDataOn = useWorkspaceStore(s => s.exampleDataOn);
     const setExampleData = useWorkspaceStore(s => s.setExampleData);
+    const ownerUserId = useWorkspaceStore(s => s.ownerUserId);
 
 
     const [dailyTarget, setDailyTarget] = useState(writingGoal.dailyTarget);
@@ -44,13 +45,13 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
 
     const [localWidth, setLocalWidth] = useState(editorWidth);
 
-    const [backups, setBackups] = useState(() => listDataBackups());
+    const [backups, setBackups] = useState(() => listDataBackups(ownerUserId));
     const [backupMsg, setBackupMsg] = useState('');
     const fieldId = useId();
 
     const handleCreateBackup = () => {
         const key = createManualBackup();
-        setBackups(listDataBackups());
+        setBackups(listDataBackups(ownerUserId));
         setBackupMsg(key ? 'Backup created.' : 'Nothing to back up yet.');
         setTimeout(() => setBackupMsg(''), 3000);
     };

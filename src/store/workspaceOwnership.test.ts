@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { partializeWorkspace, useWorkspaceStore } from './workspaceStore';
+import { listDataBackups, partializeWorkspace, useWorkspaceStore } from './workspaceStore';
 import { BACKUP_KEY_PREFIX, WORKSPACE_STORAGE_KEY, readBackupOwner } from '@/lib/workspaceOwner';
 
 describe('workspace ownership', () => {
@@ -66,5 +66,38 @@ describe('workspace ownership', () => {
         expect(localStorage.getItem(WORKSPACE_STORAGE_KEY)).toBeNull();
         expect(localStorage.getItem(`${BACKUP_KEY_PREFIX}v4-1700000000000`)).toBeNull();
         expect(localStorage.getItem('lorecanvas-beta-feedback')).toBe('[]');
+    });
+});
+
+describe('listDataBackups', () => {
+    beforeEach(() => localStorage.clear());
+
+    it('offers only the signed-in user their own backups', () => {
+        localStorage.setItem(`${BACKUP_KEY_PREFIX}v4-1700000000000`,
+            JSON.stringify({ state: { ownerUserId: 'user-a' }, version: 4 }));
+        localStorage.setItem(`${BACKUP_KEY_PREFIX}v4-1700000009999`,
+            JSON.stringify({ state: { ownerUserId: 'user-b' }, version: 4 }));
+
+        const keys = listDataBackups('user-a').map(b => b.key);
+        expect(keys).toEqual([`${BACKUP_KEY_PREFIX}v4-1700000000000`]);
+    });
+
+    it('hides unowned backups rather than offering them to whoever is here now', () => {
+        localStorage.setItem(`${BACKUP_KEY_PREFIX}v3-1700000000000`, JSON.stringify({ projects: [] }));
+        expect(listDataBackups('user-a')).toEqual([]);
+    });
+
+    it('offers nothing at all when nobody is signed in', () => {
+        localStorage.setItem(`${BACKUP_KEY_PREFIX}v4-1700000000000`,
+            JSON.stringify({ state: { ownerUserId: 'user-a' }, version: 4 }));
+        expect(listDataBackups('')).toEqual([]);
+    });
+
+    it('still sorts newest first', () => {
+        const owned = () => JSON.stringify({ state: { ownerUserId: 'user-a' }, version: 4 });
+        localStorage.setItem(`${BACKUP_KEY_PREFIX}v4-1700000000000`, owned());
+        localStorage.setItem(`${BACKUP_KEY_PREFIX}v4-1700000009999`, owned());
+        expect(listDataBackups('user-a').map(b => b.timestamp))
+            .toEqual([1700000009999, 1700000000000]);
     });
 });

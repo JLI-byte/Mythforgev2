@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import { useWorkspaceStore } from '@/store/workspaceStore';
 import { createClient } from '@/lib/supabase/client';
 import { useSupabaseSync } from '@/lib/supabase/useSupabaseSync';
 
@@ -35,6 +36,11 @@ export function SupabaseSyncProvider({ children }: { children: React.ReactNode }
         setUserId(session.user.id);
       } else {
         setUserId(null);
+      }
+      // Layer 3. Covers the sign-outs that never go through the profile menu:
+      // an expired refresh token, a revoked session, a sign-out in another tab.
+      if (event === 'SIGNED_OUT') {
+        useWorkspaceStore.getState().resetWorkspace();
       }
     });
 

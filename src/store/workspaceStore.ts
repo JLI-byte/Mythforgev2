@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { BACKUP_KEY_PREFIX, claimBackup, ownedStorageKeys } from '@/lib/workspaceOwner';
+import { BACKUP_KEY_PREFIX, claimBackup, ownedStorageKeys, readBackupOwner } from '@/lib/workspaceOwner';
 import {
     emptyWeekdayTargets, normalizeWeekdayTargets, type WeekdayTargets,
 } from '@/lib/goalSchedule';
@@ -2727,17 +2727,23 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 );
 
 /**
- * Returns a list of available backup snapshots in localStorage,
- * sorted newest-first. Each entry has a key and a timestamp.
+ * The signed-in user's backup snapshots, newest first.
+ *
+ * Backups are stamped with their owner (see `claimWorkspace`). An unstamped
+ * backup is hidden rather than offered: on a shared browser, "restore" on
+ * somebody else's snapshot is a one-click way to take their manuscripts.
  */
-export function listDataBackups(): { key: string; timestamp: number; version: number }[] {
+export function listDataBackups(
+    ownerUserId: string | null,
+): { key: string; timestamp: number; version: number }[] {
     const backups: { key: string; timestamp: number; version: number }[] = [];
     if (typeof localStorage === 'undefined') return [];
-    for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (!k?.startsWith('lorecanvas-backup-')) continue;
+    if (!ownerUserId) return [];
+    for (const k of snapshotStorageKeys()) {
+        if (!k.startsWith(BACKUP_KEY_PREFIX)) continue;
+        if (readBackupOwner(localStorage.getItem(k)) !== ownerUserId) continue;
         // Key format: lorecanvas-backup-v{version}-{timestamp}
-        const parts = k.replace('lorecanvas-backup-', '').split('-');
+        const parts = k.replace(BACKUP_KEY_PREFIX, '').split('-');
         const versionStr = parts[0].replace('v', '');
         const version = parseInt(versionStr) || 0;
         const timestamp = parseInt(parts[1]) || 0;
