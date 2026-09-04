@@ -17,7 +17,6 @@ import { useWorkspaceStore, WORKSPACE_MODES, type WorkspaceMode } from '@/store/
 import { CommandPalette } from '@/components/navigation/CommandPalette';
 import ModeBar from '@/components/navigation/ModeBar';
 import DeskLighting from '@/components/theme/DeskLighting';
-import { DraftSurface } from '@/components/editor/vn/DraftSurface';
 
 // Center-column modes are code-split: only the active one is downloaded/parsed,
 // instead of bundling all five (WritingDesk, ArticleGrid, etc.) into first paint.
@@ -192,7 +191,7 @@ export default function Home() {
                 ) : workspaceMode === 'worldBibleEdit' ? (
                   <WorldBibleEdit />
                 ) : workspaceMode === 'template' ? (
-                  <DraftSurface />
+                  <WritingDesk variant="draft" />
                 ) : workspaceMode === 'hierarchy' ? (
                   <WorldBibleFolderTree />
                 ) : workspaceMode === 'bookshelf' ? (

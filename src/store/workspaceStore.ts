@@ -15,9 +15,6 @@ import type { Interview } from '@/lib/interviews/types';
 import type { ProjectBrief } from '@/lib/workSubTypes';
 import { normaliseBackupPayload } from '@/lib/backupEnvelope';
 import { sanitizeChatHistories, type ChatMessage as ResearchChatMessage } from '@/lib/researchChatTypes';
-import type { VNChoice } from '@/lib/visualNovel';
-import type { VNFlag } from '@/lib/vnFlags';
-import type { VNSeason, VNDecision } from '@/lib/vnTimeline';
 
 // Cover colors auto-assigned to new projects in rotation
 export const COVER_COLORS = [
@@ -113,10 +110,6 @@ export interface Project {
     workSubTypeId?: string;
     /** Audience, length and goal, answered when the project was created. */
     brief?: ProjectBrief;
-    /** Visual novel projects only: declared story state for the branch map. */
-    vnFlags?: VNFlag[];
-    /** Visual novel projects only: the seasons its episodes are grouped into. */
-    seasons?: VNSeason[];
 }
 
 export interface Document {
@@ -131,8 +124,6 @@ export interface Document {
     seasonId?: string;
     /** Visual novel projects only: position within its season. */
     order?: number;
-    /** Visual novel projects only: the decisions made during this episode. */
-    decisions?: VNDecision[];
 }
 
 export interface Scene {
@@ -145,8 +136,6 @@ export interface Scene {
     createdAt: Date;
     updatedAt?: Date;
     wordCount?: number;
-    /** Visual novel projects only: the choices that lead out of this scene. */
-    choices?: VNChoice[];
 }
 
 export type BlockType = 'richtext' | 'image' | 'statrow' | 'divider' | 'quote' | 'timeline';
@@ -319,7 +308,7 @@ export interface ArticleTab {
 // Writing Desk System Interfaces
 // =============================================
 
-export type DeskWidgetType = 'writingZone' | 'sticky' | 'reference' | 'image' | 'biblePinit' | 'sceneControl' | 'characterState' | 'continuity' | 'structure' | 'research' | 'progress' | 'relMap' | 'draftNav' | 'beatCard' | 'articleSuggestions' | 'consistencyFlags' | 'worldUnderstanding' | 'vnFlags' | 'untyped';
+export type DeskWidgetType = 'writingZone' | 'sticky' | 'reference' | 'image' | 'biblePinit' | 'sceneControl' | 'characterState' | 'continuity' | 'structure' | 'research' | 'progress' | 'relMap' | 'draftNav' | 'beatCard' | 'articleSuggestions' | 'consistencyFlags' | 'worldUnderstanding' | 'untyped';
 
 /** An object attached to the research chat as context for the next message. */
 export interface ChatAttachment {

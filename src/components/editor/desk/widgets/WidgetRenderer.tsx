@@ -20,7 +20,6 @@ import { ArticleSuggestionsRenderer } from './ArticleSuggestionsRenderer';
 import { ConsistencyFlagsRenderer } from './ConsistencyFlagsRenderer';
 import { UnderstandingRenderer } from './UnderstandingRenderer';
 import { UntypedWidgetRenderer } from './UntypedWidgetRenderer';
-import { VNFlagsRenderer } from './VNFlagsRenderer';
 
 // ============================================================
 // WIDGET RENDERERS
@@ -71,7 +70,6 @@ export const WidgetRenderer = React.memo(function WidgetRenderer({
     case 'relMap':      return <RelationshipMapRenderer content={content} onChange={handleChange} />;
     case 'draftNav':    return <DraftNavRenderer content={content} onChange={handleChange} />;
     case 'beatCard':    return <BeatCardRenderer content={content} onChange={handleChange} />;
-    case 'vnFlags':     return <VNFlagsRenderer />;
     case 'articleSuggestions': return <ArticleSuggestionsRenderer content={content} onChange={handleChangeImmediate} />;
     case 'consistencyFlags': return <ConsistencyFlagsRenderer content={content} onChange={handleChangeImmediate} />;
     case 'worldUnderstanding': return <UnderstandingRenderer />;
