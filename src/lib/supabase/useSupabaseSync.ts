@@ -39,6 +39,9 @@ export function useSupabaseSync(userId: string) {
   // destroy a whole account: pushing a freshly-seeded empty workspace over real
   // cloud content because the read failed and local looked blank.
   const hydrationOkRef = useRef(false);
+  // The server stamp of the row this client last read or wrote. Zero means we
+  // have never seen a row, which is the only case where a blind upsert is safe.
+  const remoteUpdatedAtRef = useRef(0);
 
   const setHasHydrated = useWorkspaceStore(s => s.setHasHydrated);
 
@@ -62,6 +65,7 @@ export function useSupabaseSync(userId: string) {
         }
 
         const cloud = await loadWorkspace(userId);
+        remoteUpdatedAtRef.current = cloud?.updatedAt ?? 0;
 
         if (cloud && looksLikeWorkspace(cloud.data)) {
           const localState = useWorkspaceStore.getState() as Record<string, any>;
@@ -111,23 +115,46 @@ export function useSupabaseSync(userId: string) {
     const flush = async () => {
       const state = latestStateRef.current;
       if (!state) return false;
-      const ok = await saveWorkspace(userId, state);
-      if (ok) {
+      const result = await saveWorkspace(userId, state, remoteUpdatedAtRef.current);
+
+      if (result.ok) {
+        remoteUpdatedAtRef.current = result.updatedAt;
         failureCountRef.current = 0;
         backoffUntilRef.current = 0;
-      } else {
-        failureCountRef.current += 1;
-        const wait = Math.min(
-          BACKOFF_MAX_MS,
-          BACKOFF_BASE_MS * 2 ** (failureCountRef.current - 1),
-        );
-        backoffUntilRef.current = Date.now() + wait;
-        if (failureCountRef.current === 3) {
-          logger.error('LoreCanvas Sync: repeated save failures — backing off retries');
-        }
+        setStatus('saved');
+        return true;
       }
-      setStatus(ok ? 'saved' : 'error');
-      return ok;
+
+      if (result.conflict) {
+        // Somebody else wrote this row. Re-read it and let the same rules that
+        // run on hydrate decide, instead of retrying the write that just lost.
+        const cloud = await loadWorkspace(userId);
+        remoteUpdatedAtRef.current = cloud?.updatedAt ?? 0;
+        if (cloud && looksLikeWorkspace(cloud.data)) {
+          const localState = useWorkspaceStore.getState() as Record<string, any>;
+          const { takeCloud, reason } = resolveWorkspaceConflict(localState, cloud.data);
+          if (takeCloud) {
+            useWorkspaceStore.setState(migrateWorkspaceSchema(cloud.data));
+            logger.info(`LoreCanvas Sync: adopted the newer cloud workspace after a write conflict (${reason})`);
+          } else {
+            logger.info(`LoreCanvas Sync: keeping local after a write conflict (${reason}) — will retry`);
+          }
+        }
+        setStatus('syncing');
+        return false;
+      }
+
+      failureCountRef.current += 1;
+      const wait = Math.min(
+        BACKOFF_MAX_MS,
+        BACKOFF_BASE_MS * 2 ** (failureCountRef.current - 1),
+      );
+      backoffUntilRef.current = Date.now() + wait;
+      if (failureCountRef.current === 3) {
+        logger.error('LoreCanvas Sync: repeated save failures — backing off retries');
+      }
+      setStatus('error');
+      return false;
     };
 
     const unsubscribe = useWorkspaceStore.subscribe((state) => {
