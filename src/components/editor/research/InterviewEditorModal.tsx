@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import type { EntityType } from '@/store/workspaceStore';
 import type { Interview, InterviewQuestion } from '@/lib/interviews';
+import { useModalDialog } from '@/lib/useModalDialog';
 import styles from '../WritingDesk.module.css';
 
 interface InterviewEditorModalProps {
@@ -36,6 +37,8 @@ const TARGET_OPTIONS: { value: EntityType | ''; label: string }[] = [
  */
 export function InterviewEditorModal({ interview, canDelete, onSave, onDelete, onClose }: InterviewEditorModalProps) {
     const [draft, setDraft] = useState<Interview>(interview);
+    const fieldId = useId();
+    const dialogRef = useModalDialog<HTMLDivElement>(onClose);
 
     const patch = (updates: Partial<Interview>) => setDraft(d => ({ ...d, ...updates }));
 
@@ -86,20 +89,29 @@ export function InterviewEditorModal({ interview, canDelete, onSave, onDelete, o
     };
 
     return (
-        <div className={styles.interviewEditorBackdrop} onClick={onClose}>
-            <div className={styles.interviewEditorModal} onClick={e => e.stopPropagation()}>
+        <div className={styles.interviewEditorBackdrop} onClick={onClose} role="presentation">
+            <div
+                ref={dialogRef}
+                className={styles.interviewEditorModal}
+                onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="interview-editor-title"
+                tabIndex={-1}
+            >
                 <div className={styles.interviewEditorHeader}>
-                    <h2 className={styles.interviewEditorTitle}>{canDelete ? 'Edit interview' : 'New interview'}</h2>
-                    <button className={styles.interviewEditorClose} onClick={onClose} title="Close">
+                    <h2 id="interview-editor-title" className={styles.interviewEditorTitle}>{canDelete ? 'Edit interview' : 'New interview'}</h2>
+                    <button className={styles.interviewEditorClose} onClick={onClose} aria-label="Close interview editor">
                         <X size={18} />
                     </button>
                 </div>
 
                 <div className={styles.interviewEditorBody}>
                     <div className={styles.interviewEditorMeta}>
-                        <label className={styles.interviewEditorField} style={{ flex: '0 0 64px' }}>
+                        <label htmlFor={`${fieldId}-icon`} className={styles.interviewEditorField} style={{ flex: '0 0 64px' }}>
                             <span className={styles.interviewEditorLabel}>Icon</span>
                             <input
+                                id={`${fieldId}-icon`}
                                 className={styles.interviewEditorInput}
                                 value={draft.icon}
                                 onChange={e => patch({ icon: e.target.value })}
@@ -107,21 +119,23 @@ export function InterviewEditorModal({ interview, canDelete, onSave, onDelete, o
                                 placeholder="📝"
                             />
                         </label>
-                        <label className={styles.interviewEditorField} style={{ flex: '1 1 auto' }}>
+                        <label htmlFor={`${fieldId}-title`} className={styles.interviewEditorField} style={{ flex: '1 1 auto' }}>
                             <span className={styles.interviewEditorLabel}>Title</span>
                             <input
+                                id={`${fieldId}-title`}
                                 className={styles.interviewEditorInput}
                                 value={draft.title}
                                 onChange={e => patch({ title: e.target.value })}
                                 placeholder="e.g. Villain, Guild, Battle"
-                                autoFocus
+                                data-autofocus
                             />
                         </label>
                     </div>
 
-                    <label className={styles.interviewEditorField}>
+                    <label htmlFor={`${fieldId}-tagline`} className={styles.interviewEditorField}>
                         <span className={styles.interviewEditorLabel}>Tagline</span>
                         <input
+                            id={`${fieldId}-tagline`}
                             className={styles.interviewEditorInput}
                             value={draft.tagline}
                             onChange={e => patch({ tagline: e.target.value })}
@@ -129,9 +143,10 @@ export function InterviewEditorModal({ interview, canDelete, onSave, onDelete, o
                         />
                     </label>
 
-                    <label className={styles.interviewEditorField}>
+                    <label htmlFor={`${fieldId}-target`} className={styles.interviewEditorField}>
                         <span className={styles.interviewEditorLabel}>Creates</span>
                         <select
+                            id={`${fieldId}-target`}
                             className={styles.interviewEditorInput}
                             value={draft.targetType ?? ''}
                             onChange={e => patch({ targetType: (e.target.value || undefined) as EntityType | undefined })}

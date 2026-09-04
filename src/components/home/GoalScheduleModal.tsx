@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { X, RotateCcw } from 'lucide-react';
 import {
     WEEKDAY_LONG, emptyWeekdayTargets, normalizeWeekdayTargets,
     type GoalTargetConfig, type WeekdayTargets,
 } from '@/lib/goalSchedule';
+import { useModalDialog } from '@/lib/useModalDialog';
 import styles from './GoalScheduleModal.module.css';
 
 /**
@@ -31,11 +32,7 @@ export default function GoalScheduleModal({ config, onSave, onClose }: GoalSched
         normalizeWeekdayTargets(config.weekdayWordTargets).map(v => (v === null ? '' : String(v))),
     );
 
-    useEffect(() => {
-        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-        document.addEventListener('keydown', onKey);
-        return () => document.removeEventListener('keydown', onKey);
-    }, [onClose]);
+    const dialogRef = useModalDialog<HTMLDivElement>(onClose);
 
     const everydayValue = Number.parseInt(everyday, 10);
     const isEverydayValid = Number.isFinite(everydayValue) && everydayValue > 0;
@@ -66,11 +63,13 @@ export default function GoalScheduleModal({ config, onSave, onClose }: GoalSched
     return (
         <div className={styles.overlay} onClick={onClose} role="presentation">
             <div
+                ref={dialogRef}
                 className={styles.modal}
                 onClick={e => e.stopPropagation()}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="goal-schedule-title"
+                tabIndex={-1}
             >
                 <header className={styles.header}>
                     <div>
@@ -96,6 +95,7 @@ export default function GoalScheduleModal({ config, onSave, onClose }: GoalSched
                                 value={everyday}
                                 onChange={e => setEveryday(e.target.value)}
                                 aria-label="Everyday word goal"
+                                data-autofocus
                             />
                             <span className={styles.unit}>words</span>
                         </span>

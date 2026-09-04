@@ -18,6 +18,7 @@ import {
     type Interview,
     type InterviewAnswer,
 } from '@/lib/interviews';
+import { useModalDialog } from '@/lib/useModalDialog';
 import styles from '../WritingDesk.module.css';
 
 interface InterviewRunnerProps {
@@ -52,6 +53,8 @@ export function InterviewRunner({ interview, onClose, onCreated }: InterviewRunn
     const worldKey = useWorkspaceStore(selectProjectWorldKey);
     const worldBibles = useWorkspaceStore(s => s.worldBibles);
     const addEntity = useWorkspaceStore(s => s.addEntity);
+
+    const dialogRef = useModalDialog<HTMLDivElement>(onClose);
 
     const trimmedName = name.trim();
     const isNameStep = step === 0;
@@ -91,20 +94,22 @@ export function InterviewRunner({ interview, onClose, onCreated }: InterviewRunn
     };
 
     return (
-        <div className={styles.interviewEditorBackdrop} onClick={onClose}>
+        <div className={styles.interviewEditorBackdrop} onClick={onClose} role="presentation">
             <div
+                ref={dialogRef}
                 className={`${styles.interviewEditorModal} ${styles.interviewRunnerModal}`}
                 onClick={e => e.stopPropagation()}
                 role="dialog"
                 aria-modal="true"
                 aria-label={`${interview.title} interview`}
+                tabIndex={-1}
             >
                 <div className={styles.interviewEditorHeader}>
                     <h2 className={styles.interviewEditorTitle}>
                         {interview.icon} {interview.title}
                         <span className={styles.interviewRunnerProgress}>{step + 1} of {totalSteps}</span>
                     </h2>
-                    <button className={styles.interviewEditorClose} onClick={onClose} title="Close">
+                    <button className={styles.interviewEditorClose} onClick={onClose} aria-label="Close interview">
                         <X size={18} />
                     </button>
                 </div>
@@ -122,7 +127,7 @@ export function InterviewRunner({ interview, onClose, onCreated }: InterviewRunn
                                 onChange={e => setName(e.target.value)}
                                 placeholder={`Name your ${interview.title.toLowerCase()}`}
                                 aria-label="Article name"
-                                autoFocus
+                                data-autofocus
                             />
                             {!interview.targetType && (
                                 <p className={styles.interviewRunnerNote}>
@@ -141,6 +146,7 @@ export function InterviewRunner({ interview, onClose, onCreated }: InterviewRunn
                                 placeholder="As much or as little as you like — Skip if you would rather not answer."
                                 aria-label={questions[step - 1].label || 'Answer'}
                                 rows={6}
+                                data-autofocus
                                 autoFocus
                             />
                         </>
