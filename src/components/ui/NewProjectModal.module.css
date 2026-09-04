@@ -1,7 +1,7 @@
 .overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(var(--overlay-rgb), 0.4);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     z-index: 1001;
@@ -63,7 +63,7 @@
     align-items: center;
     justify-content: center;
     margin: 0 auto;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px rgba(var(--shadow-rgb), 0.3);
     transition: background 300ms ease;
 }
 
@@ -153,7 +153,7 @@
 }
 
 .modeCardActive {
-    border-color: var(--accent, #4A6FA5);
+    border-color: var(--accent);
     background: var(--surface);
 }
 
@@ -177,7 +177,7 @@
 .createBtn {
     width: 100%;
     padding: var(--space-5);
-    background: var(--accent, #4A6FA5);
+    background: var(--accent);
     color: var(--on-accent);
     border: none;
     border-radius: 8px;

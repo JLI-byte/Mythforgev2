@@ -1,6 +1,14 @@
 /*
  * Login page — Minimalist theme (the default), matching StandardLanding:
  * near-black surface, animated dot field, lamp glow, sans type, pill CTA.
+ *
+ * PINNED ART DIRECTION - do not convert these literals to theme tokens.
+ * /login and /welcome never set data-theme or data-theme-family (only the
+ * authenticated app root in src/app/page.tsx does), so every semantic token
+ * here resolves to the visitor's OS colour scheme, not to this page's ground.
+ * The page pins its own near-black palette, so the whites below must stay
+ * white: rgba(var(--overlay-rgb), a) flips to ink under a light-preference
+ * OS and the lamp turns into a dark smudge on a dark page.
  */
 
 .page {

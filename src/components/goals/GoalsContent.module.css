@@ -13,7 +13,7 @@
    ZONE 1 — Goal Setup Banner
    ======================================== */
 .setupBanner {
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    background: linear-gradient(135deg, var(--surface-mid), var(--surface-high));
     border: 1px solid rgba(var(--overlay-rgb), 0.08);
     border-radius: 10px;
     padding: var(--space-6);
@@ -23,7 +23,7 @@
 .setupTitle {
     font-size: var(--text-lg);
     font-weight: 600;
-    color: white;
+    color: var(--foreground);
     margin: 0 0 var(--space-2) 0;
 }
 
@@ -56,9 +56,9 @@
 }
 
 .setupOptionSelected {
-    background: white;
-    color: #1a1a2e;
-    border-color: white;
+    background: var(--foreground);
+    color: var(--background);
+    border-color: var(--foreground);
     font-weight: 600;
 }
 

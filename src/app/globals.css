@@ -67,6 +67,24 @@
   --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
 
   /* ========================================================================
+     ON-MEDIA and ON-FILL. These do not follow the theme, deliberately.
+     A caption over a user's photograph needs a dark scrim and white ink
+     whether the app is light or dark - binding it to --foreground is what
+     made the article hero's inactive tabs go dark-on-dark-scrim in light
+     theme. Likewise white is the readable ink on a saturated --danger or
+     --success fill in both palettes.
+     ======================================================================== */
+  --media-rgb: 15, 15, 16;
+  --on-media: #ffffff;
+  --on-fill: #ffffff;
+
+  /* Success and favourite had no token at all, so components hardcoded a
+     green and a gold - and hardcoded the DARK theme's version of each. */
+  --success: #0f7a4d;
+  --favourite: #b8860b;
+
+
+  /* ========================================================================
      SPACING - a 4px grid with a 6px half-step, because the audit found 193
      uses of 8px, 148 of 4px and 138 of 6px: the app already thinks in fours
      and sixes, it just spelled them 30 different ways (1,074 px-unit uses
@@ -241,6 +259,10 @@ option {
     --glass-border: rgba(255, 255, 255, 0.08);
     --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
 
+    --success: #2ec27e;
+    --favourite: #ffc800;
+
+
     --accent-rgb: 208, 188, 255;      /* #d0bcff */
     --foreground-rgb: 229, 226, 225;  /* #e5e2e1 */
     --shadow-rgb: 0, 0, 0;
@@ -294,6 +316,10 @@ option {
   --glass-blur: 24px;
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+
+  --success: #2ec27e;
+  --favourite: #ffc800;
+
 
   --accent-rgb: 208, 188, 255;      /* #d0bcff */
   --foreground-rgb: 229, 226, 225;  /* #e5e2e1 */

@@ -4,6 +4,9 @@
  * fantasy-scroll.css (global, scoped to html[data-lc-landing='fantasy']).
  */
 
+/* Pinned parchment palette - see fantasyLogin.module.css. Deliberately literal:
+   this route sets no data-theme-family, so semantic tokens would track the
+   visitor's OS colour scheme instead of the page's fixed parchment ground. */
 .page {
     --parchment: #f3e8cf;
     --parchment-deep: #e9dcba;

@@ -12,11 +12,16 @@
        in light theme --foreground resolves to near-black and the shelf label,
        story count, "Add Story" and "New Shelf" all rendered dark-on-dark. The
        ground here is fixed, so the tokens that describe it are pinned to their
-       dark values for this subtree and every descendant inherits them. */
-    --foreground: #e5e2e1;
-    --muted: #958ea0;
-    --border: rgba(255, 255, 255, 0.08);
-    --glass-border: rgba(255, 255, 255, 0.08);
+       dark values for this subtree and every descendant inherits them.
+
+       A custom property that references itself is invalid at computed-value
+       time, so `--foreground: var(--foreground)` pinned nothing at all and the
+       bug this paragraph describes was still live. --overlay-rgb IS pinned
+       white just below, so both are derived from it instead. */
+    --foreground: rgb(var(--overlay-rgb));
+    --muted: rgba(var(--overlay-rgb), 0.62);
+    --border: rgba(var(--overlay-rgb), 0.08);
+    --glass-border: rgba(var(--overlay-rgb), 0.08);
     --overlay-rgb: 255, 255, 255;
     display: flex;
     flex-direction: column;
@@ -34,7 +39,7 @@
 .title {
     font-size: var(--text-2xl);
     font-weight: 800;
-    color: #fff;
+    color: rgba(var(--overlay-rgb), 1);
     letter-spacing: -0.01em;
 }
 
@@ -44,26 +49,26 @@
     gap: var(--space-4);
     padding: var(--space-5) var(--space-6);
     /* frosted white glass panel — matches the World Bible strips */
-    background: linear-gradient(165deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.04) 100%);
+    background: linear-gradient(165deg, rgba(var(--overlay-rgb), 0.1) 0%, rgba(var(--overlay-rgb), 0.04) 100%);
     backdrop-filter: blur(28px) saturate(1.5);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(var(--overlay-rgb), 0.14);
     border-radius: 16px;
     box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.18),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.18),
-        0 10px 38px rgba(0, 0, 0, 0.35);
+        inset 0 1px 0 rgba(var(--overlay-rgb), 0.18),
+        inset 0 -1px 0 rgba(var(--shadow-rgb), 0.18),
+        0 10px 38px rgba(var(--shadow-rgb), 0.35);
     /* no transform here — animating it would suppress the backdrop blur */
     transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
     min-height: 100px;
 }
 
 .shelfActive {
-    background: linear-gradient(165deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.07) 100%);
-    border-color: rgba(255, 255, 255, 0.34);
+    background: linear-gradient(165deg, rgba(var(--overlay-rgb), 0.16) 0%, rgba(var(--overlay-rgb), 0.07) 100%);
+    border-color: rgba(var(--overlay-rgb), 0.34);
     box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.28),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.18),
-        0 16px 44px rgba(0, 0, 0, 0.45);
+        inset 0 1px 0 rgba(var(--overlay-rgb), 0.28),
+        inset 0 -1px 0 rgba(var(--shadow-rgb), 0.18),
+        0 16px 44px rgba(var(--shadow-rgb), 0.45);
 }
 
 .shelfHeader {
@@ -172,7 +177,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 5px -5px 10px rgba(0, 0, 0, 0.35);
+    box-shadow: 5px -5px 10px rgba(var(--shadow-rgb), 0.35);
     cursor: grab;
     user-select: none;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -181,7 +186,7 @@
 /* pen hover: the book slides up out of the pocket and tilts */
 .book:hover {
     transform: translateX(-40%) translateY(-78%) rotate(18deg);
-    box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.5);
+    box-shadow: 8px 8px 16px rgba(var(--shadow-rgb), 0.5);
 }
 
 /* Active project: light up its pocket instead of boxing the cover. */
@@ -192,7 +197,7 @@
     background: #3c3c3a;
 }
 .bookActive {
-    box-shadow: 5px -5px 10px rgba(0, 0, 0, 0.35), 0 0 12px rgba(255, 255, 255, 0.28);
+    box-shadow: 5px -5px 10px rgba(var(--shadow-rgb), 0.35), 0 0 12px rgba(var(--overlay-rgb), 0.28);
 }
 
 /* Screenplays, reports and lyrics are loose sheets, not bound covers: squarer
@@ -206,8 +211,8 @@
 .bookInitials {
     font-size: var(--text-sm);
     font-weight: 800;
-    color: rgba(255, 255, 255, 0.85);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    color: rgba(var(--overlay-rgb), 0.85);
+    text-shadow: 0 1px 2px rgba(var(--shadow-rgb), 0.5);
 }
 
 /* Initials sit in the title position on paper — dark ink, above the artwork. */
@@ -229,7 +234,7 @@
     appearance: none;
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.25);
+    color: rgba(var(--overlay-rgb), 0.25);
     font-size: var(--text-2xl);
     line-height: 1;
     cursor: pointer;
@@ -240,7 +245,7 @@
     content: '+';
 }
 .slotAdd:hover {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(var(--overlay-rgb), 0.6);
 }
 
 /* full name, shown on hover so the lattice stays clean */
@@ -255,8 +260,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: var(--text-2xs);
-    color: #fff;
-    background: rgba(0, 0, 0, 0.8);
+    color: rgba(var(--overlay-rgb), 1);
+    background: rgba(var(--shadow-rgb), 0.8);
     padding: var(--space-1) var(--space-4);
     border-radius: 4px;
     opacity: 0;
@@ -280,9 +285,9 @@
 
 .addRowBtn {
     appearance: none;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px dashed rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 0.5);
+    background: rgba(var(--overlay-rgb), 0.04);
+    border: 1px dashed rgba(var(--overlay-rgb), 0.12);
+    color: rgba(var(--overlay-rgb), 0.5);
     font-size: var(--text-2xs);
     padding: var(--space-2) var(--space-6);
     border-radius: 12px;
@@ -290,9 +295,9 @@
     transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 .addRowBtn:hover {
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.08);
+    color: rgba(var(--overlay-rgb), 1);
+    border-color: rgba(var(--overlay-rgb), 0.3);
+    background: rgba(var(--overlay-rgb), 0.08);
 }
 
 .actionBtn {
@@ -300,21 +305,21 @@
     align-items: center;
     gap: var(--space-4);
     padding: var(--space-5) var(--space-6);
-    background: rgba(255, 255, 255, 0.09);
+    background: rgba(var(--overlay-rgb), 0.09);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(var(--overlay-rgb), 0.18);
     border-radius: 12px;
-    color: var(--foreground, #f2f0ef);
+    color: var(--foreground, var(--surface));
     font-size: var(--text-md);
     font-weight: 700;
     cursor: pointer;
     transition: border-color 0.2s ease, background-color 0.2s ease;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    box-shadow: inset 0 1px 0 rgba(var(--overlay-rgb), 0.14);
 }
 
 .actionBtn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.36);
+    background: rgba(var(--overlay-rgb), 0.15);
+    border-color: rgba(var(--overlay-rgb), 0.36);
 }
 
 .addStoryBtn {
@@ -331,7 +336,7 @@
 
 .addStoryBtn:hover {
     background: rgba(var(--overlay-rgb), 0.1);
-    color: #fff;
+    color: rgba(var(--overlay-rgb), 1);
     border-color: rgba(var(--overlay-rgb), 0.2);
 }
 
@@ -340,7 +345,7 @@
 .wizardBackdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(var(--shadow-rgb), 0.7);
     backdrop-filter: blur(4px);
     z-index: 2000;
     display: flex;
@@ -365,7 +370,7 @@
        run off a short screen. */
     max-height: 88vh;
     overflow-y: auto;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 50px rgba(var(--shadow-rgb), 0.5);
     animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -386,7 +391,7 @@
 .wizardTitle {
     font-size: var(--text-lg);
     font-weight: 700;
-    color: #fff;
+    color: rgba(var(--overlay-rgb), 1);
     margin: 0 0 var(--space-7) 0;
 }
 
@@ -396,7 +401,7 @@
     border: 1px solid rgba(var(--overlay-rgb), 0.1);
     border-radius: 6px;
     padding: var(--space-5) var(--space-6);
-    color: #fff;
+    color: rgba(var(--overlay-rgb), 1);
     font-size: var(--text-md);
     transition: all 0.2s ease;
 }
@@ -413,7 +418,7 @@
     border: 1px solid rgba(var(--overlay-rgb), 0.1);
     border-radius: 6px;
     padding: var(--space-5) var(--space-6);
-    color: #fff;
+    color: rgba(var(--overlay-rgb), 1);
     font-size: var(--text-md);
     min-height: 80px;
     resize: vertical;
@@ -446,13 +451,13 @@
 
 .pill:hover {
     border-color: rgba(var(--overlay-rgb), 0.3);
-    color: #fff;
+    color: rgba(var(--overlay-rgb), 1);
 }
 
 .pillActive {
-    background: rgba(255, 255, 255, 0.14);
-    border-color: rgba(255, 255, 255, 0.5);
-    color: #fff;
+    background: rgba(var(--overlay-rgb), 0.14);
+    border-color: rgba(var(--overlay-rgb), 0.5);
+    color: rgba(var(--overlay-rgb), 1);
 }
 
 .toneRow {
@@ -510,7 +515,7 @@
 .wizardBtnSecondary:hover {
     background: rgba(var(--overlay-rgb), 0.05);
     border-color: rgba(var(--overlay-rgb), 0.3);
-    color: #fff;
+    color: rgba(var(--overlay-rgb), 1);
 }
 
 /* --- Shelf Action Buttons --- */
@@ -635,9 +640,9 @@
     justify-content: center;
     font-size: var(--text-2xs);
     line-height: 1;
-    color: #fff;
-    background: rgba(0, 0, 0, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: rgba(var(--overlay-rgb), 1);
+    background: rgba(var(--shadow-rgb), 0.55);
+    border: 1px solid rgba(var(--overlay-rgb), 0.25);
     border-radius: 50%;
     cursor: pointer;
     opacity: 0;
@@ -649,6 +654,6 @@
 }
 
 .bookDeleteBtn:hover {
-    background: var(--danger, #e5484d);
-    border-color: var(--danger, #e5484d);
+    background: var(--danger);
+    border-color: var(--danger);
 }

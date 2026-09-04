@@ -1,3 +1,8 @@
+/*
+ * Request-access modal, on the pinned near-black landing - do not tokenise.
+ * See standard.module.css: this route sets no data-theme, so tokens would
+ * follow the visitor's OS scheme instead of the page's own ground.
+ */
 .backdrop {
     position: fixed;
     inset: 0;

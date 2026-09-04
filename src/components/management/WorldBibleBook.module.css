@@ -23,7 +23,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    color: rgba(255, 255, 255, 0.45);
+    color: rgba(var(--foreground-rgb), 0.45);
 }
 
 .book {
@@ -169,7 +169,7 @@
     transform: rotateX(90deg) rotateZ(90deg) translateZ(80px) translateX(-2px) translateY(-78px);
 }
 .hardcoverFront li:last-child:before {
-    box-shadow: 0px 0px 30px 5px #111;
+    box-shadow: 0px 0px 30px 5px rgba(var(--shadow-rgb), 0.95);
     transform: rotateX(90deg) rotateZ(90deg) translateZ(-140px) translateX(-2px) translateY(-78px);
 }
 
@@ -194,7 +194,7 @@
     transform: rotateX(90deg) rotateZ(90deg) translateZ(80px) translateX(2px) translateY(-78px);
 }
 .hardcoverBack li:last-child:before {
-    box-shadow: 10px -1px 80px 20px rgba(0, 0, 0, 0.55);
+    box-shadow: 10px -1px 80px 20px rgba(var(--shadow-rgb), 0.55);
     transform: rotateX(90deg) rotateZ(90deg) translateZ(-140px) translateX(2px) translateY(-78px);
 }
 
@@ -230,7 +230,7 @@
     transform: rotateX(90deg) rotateZ(90deg) translateZ(8px) translateX(2px) translateY(-6px);
 }
 .bookSpine li:last-child:before {
-    box-shadow: 5px -1px 100px 40px rgba(0, 0, 0, 0.2);
+    box-shadow: 5px -1px 100px 40px rgba(var(--shadow-rgb), 0.2);
     transform: rotateX(90deg) rotateZ(90deg) translateZ(-210px) translateX(2px) translateY(-6px);
 }
 
@@ -311,7 +311,7 @@
     font-weight: 700;
     text-align: center;
     letter-spacing: 0.03em;
-    text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.25);
+    text-shadow: -1px -1px 0 rgba(var(--shadow-rgb), 0.25);
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -326,7 +326,7 @@
     letter-spacing: 0.22em;
     text-transform: uppercase;
     text-align: center;
-    text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.2);
+    text-shadow: -1px -1px 0 rgba(var(--shadow-rgb), 0.2);
 }
 
 /* page-side action selector, revealed when the book opens */

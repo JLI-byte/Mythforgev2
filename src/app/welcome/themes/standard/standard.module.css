@@ -1,3 +1,9 @@
+/*
+ * Minimalist landing - PINNED ART DIRECTION, do not tokenise these literals.
+ * This route never sets data-theme/data-theme-family, so semantic tokens track
+ * the visitor's OS scheme rather than this page's pinned near-black ground.
+ * The lamp and glass tints must stay white regardless of the visitor's theme.
+ */
 .page {
     position: relative;
     min-height: 100vh;

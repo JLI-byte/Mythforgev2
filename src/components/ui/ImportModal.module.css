@@ -1,7 +1,7 @@
 .overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(var(--overlay-rgb), 0.7);
     backdrop-filter: blur(8px);
     z-index: 2000;
     display: flex;
@@ -11,14 +11,14 @@
 }
 
 .modal {
-    background: #121212;
+    background: var(--surface);
     border: 1px solid rgba(var(--overlay-rgb), 0.1);
     border-radius: 16px;
     width: 100%;
     max-width: 520px;
     padding: var(--space-8);
     position: relative;
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 24px 64px rgba(var(--shadow-rgb), 0.6);
 }
 
 .header {
@@ -32,13 +32,13 @@
     font-size: var(--text-xl);
     font-weight: 700;
     margin: 0;
-    color: #e5e2e1;
+    color: var(--foreground);
 }
 
 .closeBtn {
     background: none;
     border: none;
-    color: #958ea0;
+    color: var(--muted);
     font-size: var(--text-lg);
     cursor: pointer;
     padding: var(--space-4);
@@ -46,7 +46,7 @@
 }
 
 .closeBtn:hover {
-    color: #e5e2e1;
+    color: var(--foreground);
 }
 
 .sourceGrid {
@@ -73,7 +73,7 @@
 
 .sourceCard:hover:not(:disabled) {
     background: rgba(var(--overlay-rgb), 0.06);
-    border-color: #a078ff;
+    border-color: var(--accent-dim);
     transform: translateY(-2px);
 }
 
@@ -92,12 +92,12 @@
 .sourceLabel {
     font-size: var(--text-lg);
     font-weight: 700;
-    color: #e5e2e1;
+    color: var(--foreground);
 }
 
 .sourceDesc {
     font-size: var(--text-xs);
-    color: #958ea0;
+    color: var(--muted);
 }
 
 .metadataForm,
@@ -108,7 +108,7 @@
 }
 
 .mappingHint {
-    color: #958ea0;
+    color: var(--muted);
     font-size: var(--text-md);
     margin-bottom: var(--space-4);
     text-align: center;
@@ -136,15 +136,15 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #958ea0;
+    color: var(--muted);
 }
 
 .mappingRow select {
-    background: #1a1a1a;
+    background: var(--input-bg);
     border: 1px solid rgba(var(--overlay-rgb), 0.1);
     border-radius: 8px;
     padding: var(--space-5) var(--space-6);
-    color: #e5e2e1;
+    color: var(--foreground);
     font-size: var(--text-md);
     outline: none;
     cursor: pointer;
@@ -152,7 +152,7 @@
 }
 
 .mappingRow select:focus {
-    border-color: #a078ff;
+    border-color: var(--accent-dim);
 }
 
 .field {
@@ -166,15 +166,15 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #958ea0;
+    color: var(--muted);
 }
 
 .input {
-    background: #1a1a1a;
+    background: var(--input-bg);
     border: 1px solid rgba(var(--overlay-rgb), 0.1);
     border-radius: 8px;
     padding: var(--space-5) var(--space-6);
-    color: #e5e2e1;
+    color: var(--foreground);
     font-size: var(--text-lg);
     font-family: inherit;
     outline: none;
@@ -182,15 +182,15 @@
 }
 
 .input:focus {
-    border-color: #a078ff;
+    border-color: var(--accent-dim);
 }
 
 .select {
-    background: #1a1a1a;
+    background: var(--input-bg);
     border: 1px solid rgba(var(--overlay-rgb), 0.1);
     border-radius: 8px;
     padding: var(--space-5) var(--space-6);
-    color: #e5e2e1;
+    color: var(--foreground);
     font-size: var(--text-lg);
     font-family: inherit;
     outline: none;
@@ -204,7 +204,7 @@
 }
 
 .modeItem {
-    background: #1a1a1a;
+    background: var(--surface-mid);
     border: 1px solid rgba(var(--overlay-rgb), 0.05);
     border-radius: 8px;
     padding: var(--space-5);
@@ -213,7 +213,7 @@
     gap: var(--space-5);
     font-size: var(--text-md);
     font-weight: 600;
-    color: #958ea0;
+    color: var(--muted);
     cursor: pointer;
     transition: all 0.2s;
     text-align: left;
@@ -221,9 +221,9 @@
 }
 
 .modeItemActive {
-    background: rgba(160, 120, 255, 0.1);
-    border-color: #a078ff;
-    color: #d0bcff;
+    background: rgba(var(--accent-rgb), 0.1);
+    border-color: var(--accent-dim);
+    color: var(--accent);
 }
 
 .modeIconSmall {
@@ -231,7 +231,7 @@
 }
 
 .importBtn {
-    background: #a078ff;
+    background: var(--accent-dim);
     color: white;
     border: none;
     border-radius: 8px;
@@ -252,21 +252,21 @@
 .loaderOverlay {
     position: absolute;
     inset: 0;
-    background: rgba(18, 18, 18, 0.8);
+    background: rgba(var(--background-rgb), 0.8);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: var(--space-6);
     border-radius: 16px;
-    color: #958ea0;
+    color: var(--muted);
 }
 
 .spinner {
     width: 32px;
     height: 32px;
-    border: 3px solid rgba(160, 120, 255, 0.2);
-    border-top-color: #a078ff;
+    border: 3px solid rgba(var(--accent-rgb), 0.2);
+    border-top-color: var(--accent-dim);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }

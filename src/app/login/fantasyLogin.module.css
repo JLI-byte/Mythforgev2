@@ -4,6 +4,9 @@
  * with wax. Reuses the fantasy theme's fonts and SVG art.
  */
 
+/* Pinned parchment palette. These mirror the app's fantasy-light tokens but
+   must stay literal: /login sets no data-theme-family, so var(--foreground) &c
+   would resolve to the visitor's OS scheme and light-on-parchment under dark. */
 .page {
     --parchment: #f3e8cf;
     --sepia: #3b2c15;

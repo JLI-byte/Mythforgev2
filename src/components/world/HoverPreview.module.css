@@ -8,7 +8,7 @@
     background: var(--background);
     border-radius: 8px;
     padding: var(--space-7);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 10px 40px rgba(var(--shadow-rgb), 0.12);
     border: 1px solid var(--border);
     z-index: 50;
 
@@ -50,27 +50,15 @@
     background: var(--border);
     padding: var(--space-2) var(--space-4);
     border-radius: 12px;
-    color: #666;
+    color: var(--muted);
     white-space: nowrap;
     flex-shrink: 0;
     margin-left: var(--space-5);
 }
 
-@media (prefers-color-scheme: dark) {
-    .entityTypeBadge {
-        color: #ccc;
-    }
-}
-
 .previewDescription {
     font-size: var(--text-md);
     line-height: 1.6;
-    color: #555;
+    color: var(--muted);
     margin: 0;
-}
-
-@media (prefers-color-scheme: dark) {
-    .previewDescription {
-        color: #aaa;
-    }
 }

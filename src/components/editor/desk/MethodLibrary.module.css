@@ -7,7 +7,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(var(--overlay-rgb), 0.55);
   backdrop-filter: blur(4px);
   animation: backdropIn 0.15s ease-out;
 }
@@ -25,7 +25,7 @@
   background: var(--surface-mid);
   border: 1px solid var(--border);
   border-radius: 16px;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 24px 80px rgba(var(--shadow-rgb), 0.7);
   overflow: hidden;
   animation: modalIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -424,9 +424,9 @@
 .confirmDanger {
   padding: var(--space-5) var(--space-7);
   border-radius: 22px;
-  border: 1px solid #e5484d;
+  border: 1px solid var(--danger);
   background: rgba(229, 72, 77, 0.14);
-  color: #e5484d;
+  color: var(--danger);
   font-size: var(--text-xs);
   font-weight: 700;
   cursor: pointer;

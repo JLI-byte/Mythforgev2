@@ -207,7 +207,7 @@
 
 .categoryCard:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(var(--shadow-rgb), 0.15);
 }
 
 .categoryCardStatic {
@@ -324,7 +324,7 @@
 
 .scratchBtn {
     background: none;
-    border: 1px solid rgba(208, 188, 255, 0.2);
+    border: 1px solid rgba(var(--accent-rgb), 0.2);
     border-radius: 6px;
     color: var(--muted);
     font-size: var(--text-xs);
@@ -338,7 +338,7 @@
 .scratchBtn:hover {
     border-color: var(--accent);
     color: var(--foreground);
-    background: rgba(208, 188, 255, 0.05);
+    background: rgba(var(--accent-rgb), 0.05);
 }
 
 /* ── Customize modal ─────────────────────────────────── */
@@ -346,7 +346,7 @@
 .customizeBackdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(var(--overlay-rgb), 0.6);
   backdrop-filter: blur(4px);
   z-index: 9999;
   display: flex;
@@ -364,7 +364,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 24px 80px rgba(var(--shadow-rgb), 0.7);
 }
 
 .customizeHeader {
@@ -471,7 +471,7 @@
   gap: var(--space-2);
   width: 180px;
   z-index: 100;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 24px rgba(var(--shadow-rgb), 0.4);
 }
 
 .iconPickerBtn {
@@ -518,8 +518,8 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  background: rgba(208, 188, 255, 0.1);
-  border: 1px solid rgba(208, 188, 255, 0.2);
+  background: rgba(var(--accent-rgb), 0.1);
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
   border-radius: 12px;
   font-size: var(--text-xs);
   color: var(--foreground);
@@ -565,7 +565,7 @@
   transition: opacity 0.15s;
 }
 
-.customizeRemoveBtn:hover { opacity: 1; color: #ff4d4d; }
+.customizeRemoveBtn:hover { opacity: 1; color: var(--danger); }
 
 .customizeAddCategoryBtn {
   margin: 0 var(--space-6) var(--space-5);
@@ -593,16 +593,16 @@
 
 .customizeResetBtn {
   background: none;
-  border: 1px solid rgba(255, 77, 77, 0.3);
+  border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
   border-radius: 6px;
-  color: rgba(255, 77, 77, 0.7);
+  color: color-mix(in srgb, var(--danger) 70%, transparent);
   font-size: var(--text-xs);
   padding: var(--space-3) var(--space-5);
   cursor: pointer;
   transition: all 0.15s;
 }
 
-.customizeResetBtn:hover { border-color: #ff4d4d; color: #ff4d4d; }
+.customizeResetBtn:hover { border-color: var(--danger); color: var(--danger); }
 
 .customizeFooterRight {
   display: flex;

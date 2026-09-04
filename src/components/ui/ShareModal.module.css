@@ -4,7 +4,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(var(--overlay-rgb), 0.7);
     backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
@@ -84,7 +84,7 @@
 .previewContainer {
     width: 100%;
     aspect-ratio: 1200 / 630;
-    background: #111;
+    background: var(--surface-mid);
     border-radius: var(--radius-md);
     overflow: hidden;
     border: 1px solid var(--border);
@@ -183,7 +183,7 @@
 }
 
 .shareBtnX:hover:not(:disabled) {
-    background: #222222;
+    background: var(--foreground);
 }
 
 .shareBtnBluesky {

@@ -36,7 +36,7 @@
 .beginOptionTitle {
     font-size: var(--text-md);
     font-weight: 700;
-    color: #fff;
+    color: var(--foreground);
 }
 
 .beginOptionDesc {

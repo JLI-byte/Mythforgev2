@@ -2,7 +2,7 @@
     position: fixed;
     inset: 0;
     z-index: 200;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(var(--overlay-rgb), 0.3);
 }
 
 .panelContainer {
@@ -16,7 +16,7 @@
     z-index: 201;
     display: flex;
     flex-direction: column;
-    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.2);
+    box-shadow: -4px 0 24px rgba(var(--shadow-rgb), 0.2);
     animation: slideInFromRight 0.25s ease forwards;
 }
 
@@ -100,8 +100,8 @@
 
 .deleteButton {
     background: transparent;
-    color: #ef4444;
-    border: 1px solid #ef4444;
+    color: var(--danger);
+    border: 1px solid var(--danger);
     border-radius: 6px;
     padding: var(--space-4) var(--space-6);
     cursor: pointer;
@@ -145,7 +145,7 @@
 
 .confirmDeleteText {
     font-size: var(--text-md);
-    color: #ef4444;
+    color: var(--danger);
     font-weight: 600;
 }
 
@@ -156,7 +156,7 @@
 
 .confirmDeleteButton {
     flex: 1;
-    background: #ef4444;
+    background: var(--danger);
     color: white;
     border: none;
     border-radius: 6px;

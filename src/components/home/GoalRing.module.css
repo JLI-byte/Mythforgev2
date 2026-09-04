@@ -12,9 +12,9 @@
 
 /* ── Outer ring: progress ─────────────────────────────── */
 
-.progressTrack { stroke: rgba(255, 255, 255, 0.11); }
+.progressTrack { stroke: rgba(var(--overlay-rgb), 0.11); }
 .progressFill {
-  stroke: #8ab4ff;
+  stroke: var(--accent);
   transition: stroke-dasharray 0.5s cubic-bezier(0.23, 1, 0.32, 1), stroke 0.3s ease;
 }
 .progressDone { stroke: #6ee7b7; }
@@ -28,9 +28,9 @@
 }
 .dialActive { cursor: grabbing; }
 
-.dialTrack { stroke: rgba(255, 255, 255, 0.13); }
+.dialTrack { stroke: rgba(var(--overlay-rgb), 0.13); }
 .dialFill {
-  stroke: rgba(255, 255, 255, 0.4);
+  stroke: rgba(var(--overlay-rgb), 0.4);
   transition: stroke 0.15s ease;
 }
 .dialHit {
@@ -38,21 +38,21 @@
   pointer-events: stroke;
 }
 .dialKnob {
-  fill: var(--foreground, #f2f0ef);
-  stroke: rgba(0, 0, 0, 0.35);
+  fill: var(--foreground, var(--surface));
+  stroke: rgba(var(--shadow-rgb), 0.35);
   stroke-width: 1;
   transition: r 0.15s ease, fill 0.15s ease;
 }
 
 .dial:hover .dialFill,
-.dialActive .dialFill { stroke: #8ab4ff; }
+.dialActive .dialFill { stroke: var(--accent); }
 .dial:hover .dialKnob { r: 7; }
-.dialActive .dialKnob { r: 8; fill: #8ab4ff; }
+.dialActive .dialKnob { r: 8; fill: var(--accent); }
 
 .dial:focus-visible .dialKnob {
   r: 8;
-  fill: #8ab4ff;
-  stroke: var(--foreground, #f2f0ef);
+  fill: var(--accent);
+  stroke: var(--foreground, var(--surface));
   stroke-width: 2;
 }
 
@@ -73,12 +73,12 @@
 }
 .ringTarget {
   font-size: var(--text-2xs);
-  color: var(--muted, #8b8b95);
+  color: var(--muted);
   font-variant-numeric: tabular-nums;
   transition: color 0.15s ease;
 }
 .ringTargetLive {
-  color: #8ab4ff;
+  color: var(--accent);
   font-weight: 700;
 }
 

@@ -13,7 +13,7 @@
     border: 1px solid var(--color-danger-border, #b4453a);
     background: var(--color-danger-surface, #2a1512);
     color: var(--color-danger-text, #ffd9d3);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 12px 32px rgba(var(--shadow-rgb), 0.35);
     font-size: var(--text-md);
     line-height: 1.5;
 }
@@ -39,7 +39,7 @@
 }
 
 .dismiss:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(var(--overlay-rgb), 0.12);
 }
 
 .dismiss:focus-visible {

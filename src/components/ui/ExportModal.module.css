@@ -4,7 +4,7 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(var(--overlay-rgb), 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -28,7 +28,7 @@
     border-radius: 8px;
     width: 500px;
     max-width: 90vw;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 20px rgba(var(--shadow-rgb), 0.15);
     display: flex;
     flex-direction: column;
     animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -166,16 +166,16 @@
     margin-top: var(--space-6);
     padding: var(--space-5) var(--space-6);
     background: rgba(255, 77, 79, 0.1);
-    border: 1px solid var(--error, #ff4d4f);
+    border: 1px solid var(--error);
     border-radius: 4px;
-    color: var(--error, #ff4d4f);
+    color: var(--error);
     font-size: var(--text-md);
 }
 
 .spinner {
     height: 14px;
     width: 14px;
-    border: 2px solid rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(var(--overlay-rgb), 0.1);
     border-top: 2px solid var(--foreground);
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -222,7 +222,7 @@
 .scopeTabActive:hover:not(:disabled) {
     background: var(--accent);
     border-color: var(--accent);
-    color: #ffffff;
+    color: var(--on-accent);
 }
 
 .compileGrid {

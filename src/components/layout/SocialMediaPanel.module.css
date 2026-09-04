@@ -68,7 +68,7 @@
 
 .closeBtn:hover {
     color: var(--foreground);
-    background: rgba(128,128,128,0.1);
+    background: rgba(var(--overlay-rgb), 0.1);
 }
 
 .serviceBar {
@@ -108,7 +108,7 @@
     background: var(--accent);
     color: var(--on-accent);
     border-color: transparent;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 12px rgba(var(--shadow-rgb), 0.2);
 }
 
 .serviceIcon {
@@ -135,7 +135,7 @@
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: var(--space-7);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 15px rgba(var(--shadow-rgb), 0.05);
 }
 
 .composeHeader {
@@ -158,8 +158,8 @@
     color: var(--muted);
 }
 
-.charCount.warning { color: #f59e0b; }
-.charCount.error { color: #ef4444; }
+.charCount.warning { color: var(--tertiary); }
+.charCount.error { color: var(--danger); }
 
 .textArea {
     width: 100%;
@@ -241,7 +241,7 @@
 }
 
 .secondaryAction:hover {
-    background: rgba(128,128,128,0.05);
+    background: rgba(var(--overlay-rgb), 0.05);
 }
 
 .loginBridge {
@@ -410,8 +410,8 @@
 }
 
 .toast {
-  background: rgba(208, 188, 255, 0.15);
-  border: 1px solid rgba(208, 188, 255, 0.3);
+  background: rgba(var(--accent-rgb), 0.15);
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
   border-radius: 6px;
   color: var(--accent);
   font-size: var(--text-xs);
