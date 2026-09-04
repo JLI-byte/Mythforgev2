@@ -106,7 +106,7 @@ The data-safety findings, plus the five isolation defects. `T1` is the only defe
 
 ## Phase 4 — The core loop
 
-**Plan:** `2026-09-03-phase-4-core-loop.md` · **Status:** ready · **Depends on:** Phase 1
+**Plan:** `2026-09-03-phase-4-core-loop.md` · **Status:** COMPLETE (13 commits) · **Depends on:** Phase 1
 
 With four work types and the AI gone, the loop is exactly: write a manuscript, build lore, link them, get a book out.
 
