@@ -73,26 +73,6 @@ function slugify(text: string): string {
 }
 
 /**
- * Exports a single Document as a .md file.
- * 
- * @param {MFDocument} document - The LoreCanvas document to serialize.
- * @param {string} projectName - The name of the project context, usually unused in markdown but required for standard signature.
- */
-export function exportAsMarkdown(document: MFDocument, scenes: Scene[]): void {
-    const title = document.title || 'Untitled Document';
-    let finalMarkdown = `# ${title}\n\n`;
-
-    const orderedScenes = [...scenes].sort((a, b) => a.order - b.order);
-
-    orderedScenes.forEach((scene) => {
-        finalMarkdown += `## ${scene.title}\n\n`;
-        finalMarkdown += `${htmlToMarkdown(scene.content)}\n\n`;
-    });
-
-    downloadFile(finalMarkdown, `${slugify(title)}.md`, 'text/markdown');
-}
-
-/**
  * The whole manuscript as Markdown: front-matter pages, then every chapter and
  * its sections. Pure — the download wrapper below is separate, so this is
  * testable without a DOM download.
@@ -174,153 +154,6 @@ function htmlToDocxParagraphs(
     });
 
     return out;
-}
-
-/**
- * Builds the .docx as a `docx` Document, without touching the DOM.
- *
- * Split out of exportAsDocx so the output can be opened and inspected in a
- * test: URL.createObjectURL does not exist in jsdom, so anything that
- * downloads cannot be called from one.
- */
-export async function buildDocxDocument(document: MFDocument, scenes: Scene[]): Promise<Docx.Document> {
-    // Loaded on demand — keeps the ~500KB docx library out of the main app bundle.
-    const { Document: DocxDocument, Paragraph, TextRun } = await import('docx');
-    const title = document.title || 'Untitled Document';
-    const parser = new DOMParser();
-
-    const docxParagraphs: Docx.Paragraph[] = [
-        new Paragraph({
-            text: title,
-            heading: "Heading1",
-            spacing: { after: 400 }, // Creates breathing room after title
-        })
-    ];
-
-    const orderedScenes = [...scenes].sort((a, b) => a.order - b.order);
-
-    orderedScenes.forEach((scene) => {
-        docxParagraphs.push(new Paragraph({
-            text: scene.title,
-            heading: "Heading2"
-        }));
-
-        const doc = parser.parseFromString(scene.content, 'text/html');
-        const pElements = Array.from(doc.querySelectorAll('p'));
-
-        pElements.forEach(pNode => {
-            // If it's an empty line breaker
-            if (!pNode.textContent?.trim()) {
-                docxParagraphs.push(new Paragraph({ text: "" }));
-                return;
-            }
-
-            const runs: Docx.TextRun[] = [];
-            pNode.childNodes.forEach(child => {
-                if (child.nodeType === Node.TEXT_NODE) {
-                    if (child.textContent) {
-                        runs.push(new TextRun({ text: child.textContent }));
-                    }
-                } else if (child.nodeType === Node.ELEMENT_NODE) {
-                    const element = child as HTMLElement;
-                    const textContent = element.textContent || '';
-
-                    // Track style derivations
-                    const isBold = element.tagName === 'STRONG' || element.tagName === 'B';
-                    const isItalic = element.tagName === 'EM' || element.tagName === 'I';
-
-                    // Entity spans inherently lack visual decorators on export, they just become plain text.
-                    runs.push(new TextRun({
-                        text: textContent,
-                        bold: isBold,
-                        italics: isItalic
-                    }));
-                }
-            });
-
-            docxParagraphs.push(new Paragraph({
-                children: runs,
-            }));
-        });
-    });
-
-    const docxApp = new DocxDocument({
-        sections: [
-            {
-                properties: {
-                    page: {
-                        margin: {
-                            top: 1440,    // 1 inch = 1440 twips
-                            right: 1440,
-                            bottom: 1440,
-                            left: 1440,
-                        },
-                    },
-                },
-                children: docxParagraphs,
-            },
-        ],
-        styles: {
-            default: {
-                document: {
-                    run: {
-                        font: "Times New Roman",
-                        size: 24, // 12pt (value is half-points)
-                    },
-                    paragraph: {
-                        spacing: {
-                            line: 360, // 1.5 line spacing (240 is single)
-                            before: 120,
-                            after: 120,
-                        },
-                    }
-                },
-                heading1: {
-                    run: {
-                        font: "Times New Roman",
-                        size: 48, // 24pt
-                        bold: true,
-                        color: "000000"
-                    }
-                },
-                heading2: {
-                    run: {
-                        font: "Times New Roman",
-                        size: 32, // 16pt
-                        bold: true,
-                        color: "000000"
-                    },
-                    paragraph: {
-                        spacing: {
-                            before: 240,
-                            after: 120
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    return docxApp;
-}
-
-/**
- * Exports a single Document as a rich .docx file formatted to standard
- * manuscript requirements, and triggers the browser download.
- */
-export async function exportAsDocx(document: MFDocument, scenes: Scene[]): Promise<Blob> {
-    const { Packer } = await import('docx');
-    const title = document.title || 'Untitled Document';
-    const blob = await Packer.toBlob(await buildDocxDocument(document, scenes));
-    const url = URL.createObjectURL(blob);
-    const a = window.document.createElement('a');
-    a.href = url;
-    a.download = `${slugify(title)}.docx`;
-    window.document.body.appendChild(a);
-    a.click();
-    window.document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    return blob;
 }
 
 /**
@@ -428,20 +261,6 @@ export function exportWorldBible(entities: Entity[], projectName: string): void 
     });
 
     downloadFile(output, `${slugify(safeProjectName)}-world-bible.md`, 'text/markdown');
-}
-
-/**
- * Builds the Markdown content for a document and its scenes without triggering a download.
- */
-export function buildMarkdownContent(document: MFDocument, scenes: Scene[]): string {
-  const title = document.title || 'Untitled Document';
-  let finalMarkdown = `# ${title}\n\n`;
-  const orderedScenes = [...scenes].sort((a, b) => a.order - b.order);
-  orderedScenes.forEach((scene) => {
-    finalMarkdown += `## ${scene.title}\n\n`;
-    finalMarkdown += `${htmlToMarkdown(scene.content)}\n\n`;
-  });
-  return finalMarkdown;
 }
 
 /**
