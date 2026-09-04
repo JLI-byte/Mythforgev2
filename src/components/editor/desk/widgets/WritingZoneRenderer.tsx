@@ -4,10 +4,11 @@
  * WritingZoneRenderer — hands the desk's centre widget to the writing zone
  * built for the project's medium.
  *
- * The zone used to be one story-shaped component. It's now five siblings under
- * ./zones, one per work type, so a screenplay's binder can stop pretending to
- * be a book without breaking novels. They start as identical clones; each is
- * customised on its own.
+ * There is one zone. Four siblings were deleted in Phase 1: three were clones
+ * of this one differing by four lines each, and the fourth served a withdrawn
+ * work type. The dispatch is kept because it is the seam a genuinely different
+ * second format would arrive through, and because legacy projects still carry
+ * withdrawn writingMode values that must land somewhere.
  *
  * This file stays the only thing WidgetRenderer knows about, so the dispatch
  * can change without touching the desk.
@@ -18,18 +19,10 @@ import { useWorkspaceStore } from '@/store/workspaceStore';
 import { getWorkTypeByWritingMode } from '@/lib/workTypes';
 import { WritingZoneProps } from './zones/zoneTypes';
 import { StoryWritingZone } from './zones/StoryWritingZone';
-import { ScreenplayWritingZone } from './zones/ScreenplayWritingZone';
-import { ReportWritingZone } from './zones/ReportWritingZone';
-import { LyricsWritingZone } from './zones/LyricsWritingZone';
-import { VisualNovelWritingZone } from './zones/VisualNovelWritingZone';
 
 /** Work type id → the zone written for it. */
 const ZONES: Record<string, React.ComponentType<WritingZoneProps>> = {
     'story': StoryWritingZone,
-    'screenplay': ScreenplayWritingZone,
-    'script-report': ReportWritingZone,
-    'lyrics': LyricsWritingZone,
-    'visual-novel': VisualNovelWritingZone,
 };
 
 /**
