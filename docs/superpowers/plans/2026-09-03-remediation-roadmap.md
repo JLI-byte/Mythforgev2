@@ -84,7 +84,7 @@ Removes ~2,600 lines and four work types. Everything else in this roadmap gets s
 
 ## Phase 3 — Stop losing work, and stop leaking it between users
 
-**Plan:** `2026-09-03-phase-3-isolation-and-data-safety.md` · **Status:** 12 of 14 tasks COMPLETE (Task 5 was already shipped; Task 8b conditional-upsert and Task 13 export-verification outstanding) · **Spec:** Part 3a–3f · **Depends on:** Phase 2
+**Plan:** `2026-09-03-phase-3-isolation-and-data-safety.md` · **Status:** COMPLETE (13 commits; Task 5 was already shipped before Phase 1) · **Spec:** Part 3a–3f · **Depends on:** Phase 2
 
 The data-safety findings, plus the five isolation defects. `T1` is the only defect in this roadmap that destroys a user's work irreversibly.
 
