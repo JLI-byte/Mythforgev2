@@ -5,6 +5,7 @@ import { ArrowRight, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import type { Shelf } from '@/lib/worldShelves';
 import type { WorldKey } from '@/lib/worldKey';
 import { bindingFor, coverArt, spineArt } from '@/lib/bookBindings';
+import book from '@/components/ui/bookSurface.module.css';
 import styles from './WorldShelf.module.css';
 
 /**
@@ -167,7 +168,7 @@ export function WorldShelf({
               aria-controls={panelId}
               // Roving tabindex: one Tab stop for the whole shelf, arrows move within it.
               tabIndex={isSelected ? 0 : -1}
-              className={`${styles.spine} ${isSelected ? styles.spineSelected : ''}`}
+              className={`${book.spine} ${styles.spine} ${isSelected ? styles.spineSelected : ''}`}
               /* The colour stays underneath the art: it shows through while the
                  image loads, and covers the gap if the asset ever 404s. */
               style={{
@@ -227,7 +228,7 @@ export function WorldShelf({
                   {selected.stories.map(story => (
                     <button
                       key={story.id}
-                      className={styles.cover}
+                      className={`${book.cover} ${styles.cover}`}
                       /* A cover the writer supplied always wins; otherwise the
                          book gets its binding art rather than a flat fill. */
                       style={story.coverImageUrl
@@ -270,7 +271,7 @@ export function WorldShelf({
                     must stay reachable however far the row has been scrolled. */}
                 {onNewStory && (
                   <button
-                    className={styles.addCover}
+                    className={`${book.slot} ${styles.addCover}`}
                     title={`New book in ${selected.name}`}
                     aria-label={`New book in ${selected.name}`}
                     onClick={onNewStory}

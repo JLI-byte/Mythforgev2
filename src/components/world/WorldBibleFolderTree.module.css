@@ -48,7 +48,6 @@
 .articleIcon { flex: none; font-size: var(--text-sm); }
 .articleName { flex: 1; min-width: 0; font-size: var(--text-md); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.empty { color: var(--muted); font-size: var(--text-md); padding: var(--space-6) var(--space-2); }
 
 .unfiled { margin-top: var(--space-7); border-top: 1px solid var(--border); padding-top: var(--space-6); }
 .unfiledTitle { font-size: var(--text-lg); font-weight: 700; color: var(--foreground); margin: 0 0 var(--space-1); }

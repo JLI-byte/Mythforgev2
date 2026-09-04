@@ -97,30 +97,6 @@
   margin-top: var(--space-6);
 }
 
-.emptyState {
-  text-align: center;
-  padding: var(--space-12) 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-7);
-  background: var(--surface);
-  border-radius: var(--radius-xl);
-  border: 2px dashed var(--border);
-}
-
-.emptyIcon {
-  font-size: var(--text-hero);
-  opacity: 0.5;
-}
-
-.emptyText {
-  color: var(--muted);
-  font-size: var(--text-lg);
-  max-width: 300px;
-  margin-bottom: var(--space-4);
-}
-
 .writeBtn {
   background: var(--accent);
   color: var(--on-accent);
@@ -162,13 +138,6 @@
   background: var(--background);
   color: var(--foreground);
   box-shadow: 0 1px 3px rgba(var(--shadow-rgb), 0.2);
-}
-
-.emptyHint {
-  font-size: var(--text-md);
-  color: var(--muted);
-  margin: 0;
-  text-align: center;
 }
 
 /* ── Tab bar ──────────────────────────────────────────── */
@@ -222,33 +191,6 @@
   flex: 1;
   overflow-y: auto;
   padding: var(--space-7);
-}
-
-.mentionsEmpty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-11) var(--space-7);
-  gap: var(--space-5);
-  text-align: center;
-}
-
-.mentionsEmptyIcon {
-  font-size: var(--text-display);
-  opacity: 0.4;
-}
-
-.mentionsEmptyText {
-  font-size: var(--text-lg);
-  color: var(--foreground);
-  margin: 0;
-}
-
-.mentionsEmptyHint {
-  font-size: var(--text-sm);
-  color: var(--muted);
-  margin: 0;
 }
 
 .mentionsCount {

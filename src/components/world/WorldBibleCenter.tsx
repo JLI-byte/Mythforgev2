@@ -8,6 +8,7 @@ import { worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
 import { folderMemberSet } from '@/lib/folderTree';
 import { FileText } from 'lucide-react';
 import ArticleView from './ArticleView';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 import styles from './WorldBibleCenter.module.css';
 
@@ -458,9 +459,7 @@ export default function WorldBibleCenter() {
                         {looseArticles.map(entity => renderCard(entity, UNCAT_COLOR))}
                     </div>
                 ) : (
-                    <div className={styles.emptyState}>
-                        <p className={styles.emptyText}>Nothing here.</p>
-                    </div>
+                    <EmptyState title="Nothing here." />
                 )}
             </div>
         );

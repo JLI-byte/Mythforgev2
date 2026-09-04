@@ -3,8 +3,9 @@
 .shelf {
   --spine-w: 34px;
   --shelf-h: 160px;
-  --cover-w: 58px;
-  --cover-h: 84px;
+  /* Width only: the cover's height follows the 2:3 book proportion that
+     bookSurface decides. 56 lands on the 84 this used to hardcode. */
+  --cover-w: 56px;
   display: flex;
   gap: var(--space-6);
   align-items: stretch;
@@ -19,10 +20,9 @@
 .sizePage {
   --spine-w: 46px;
   --shelf-h: 300px;
-  /* Six slots must fit the 824px panel: 6*130 + 5*6 = 810. Sized to the space
+  /* Six slots must fit the 824px panel: 6*128 + 5*6 = 798. Sized to the space
      rather than eyeballed, since the new-book slot takes one of them. */
-  --cover-w: 130px;
-  --cover-h: 190px;
+  --cover-w: 128px;
 }
 
 /* Spines */
@@ -41,31 +41,24 @@
 }
 
 .spine {
-  width: var(--spine-w);
   /* Every spine is the same height — books on a shelf, not a bar chart. The
      12px it gives up is the room the selected one rises into. */
-  height: calc(100% - 12px);
+  --spine-h: calc(100% - 12px);
+  /* A 6px fore-edge radius reads as a rounded box on something this narrow. */
+  --book-fore-radius: var(--radius-xs);
   padding: 0;
   border: none;
-  border-radius: var(--radius-xs) var(--radius-xs) var(--radius-xs) var(--radius-xs);
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
   cursor: pointer;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  transition: transform var(--dur-3) var(--ease-out), filter var(--dur-3) var(--ease-standard);
-  /* A spine is a board seen edge-on: one lit edge, one shadowed. */
-  box-shadow:
-    inset 2px 0 0 rgba(255, 255, 255, 0.18),
-    inset -2px 0 0 rgba(var(--shadow-rgb), 0.28);
 }
 
+/* The rise is local: it has to stay smaller than the selected spine's, which
+   is the thing it is telling you about. */
 .spine:hover { transform: translateY(-5px); filter: brightness(1.12); }
-.spine:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .spineSelected { transform: translateY(-12px); filter: brightness(1.2); }
 
@@ -149,21 +142,12 @@
 }
 
 .cover {
-  width: var(--cover-w);
-  height: var(--cover-h);
+  --book-w: var(--cover-w);
   flex-shrink: 0;
   scroll-snap-align: start;
   padding: 0;
   border: none;
-  border-radius: var(--radius-xs) var(--radius-sm) var(--radius-sm) var(--radius-xs);
-  background-size: cover;
-  background-position: center;
   cursor: pointer;
-  box-shadow:
-    inset 4px 0 0 rgba(var(--shadow-rgb), 0.32),
-    inset -1px 0 0 rgba(255, 255, 255, 0.1),
-    0 2px 6px rgba(var(--shadow-rgb), 0.35);
-  transition: transform var(--dur-2) var(--ease-standard);
 }
 
 .noStories {
@@ -216,8 +200,7 @@
     --shelf-h: 200px;
     /* Full-size covers fit one per row on a phone, which turns six stories
        into a very long scroll. Two per row reads as a shelf. */
-    --cover-w: 92px;
-    --cover-h: 134px;
+    --cover-w: 90px;
   }
   /* The spines still need a definite height of their own for the percentage
      spine heights to resolve. */
@@ -228,10 +211,6 @@
     border-left: none;
     border-top: 1px solid rgba(var(--overlay-rgb), 0.1);
   }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .spine, .cover { transition: none; }
 }
 
 .pager {
@@ -295,25 +274,18 @@
 .addSpine:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .addCover {
-  width: var(--cover-w);
-  height: var(--cover-h);
+  --book-w: var(--cover-w);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px dashed rgba(var(--overlay-rgb), 0.22);
-  border-radius: var(--radius-xs) var(--radius-sm) var(--radius-sm) var(--radius-xs);
-  background: none;
   color: var(--muted);
   cursor: pointer;
-  transition: color var(--dur-2) var(--ease-standard), border-color var(--dur-2) var(--ease-standard), transform var(--dur-2) var(--ease-standard);
 }
 .addCover:hover {
   color: var(--foreground, var(--surface));
-  border-color: rgba(var(--overlay-rgb), 0.4);
   transform: translateY(-2px);
 }
-.addCover:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .createForm {
   display: flex;
@@ -370,5 +342,6 @@
 .createCancel:hover { color: var(--foreground, var(--surface)); }
 
 @media (prefers-reduced-motion: reduce) {
-  .addSpine, .addCover { transition: none; }
+  .addSpine { transition: none; }
+  .addCover:hover { transform: none; }
 }

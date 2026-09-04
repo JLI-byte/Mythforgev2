@@ -642,18 +642,6 @@
   color: var(--foreground);
 }
 
-.timelineEmpty {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--text-sm);
-  color: var(--muted);
-  font-style: italic;
-  border: 2px dashed var(--border);
-  border-radius: var(--radius-md);
-}
-
 /* ── Shared inputs ── */
 
 .timelineDateInput {
@@ -1045,20 +1033,6 @@
 }
 
 .relationshipCanvas:active { cursor: grabbing; }
-
-.relationshipEmpty {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-  font-size: var(--text-sm);
-  color: var(--muted);
-  font-style: italic;
-  text-align: center;
-  padding: var(--space-7);
-}
 
 /* ── Family Tree Widget ──────────────────────────────── */
 
@@ -1699,20 +1673,6 @@
 }
 
 .pronCancelBtn:hover { color: var(--foreground); }
-
-.pronEmpty {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-4);
-  font-size: var(--text-sm);
-  color: var(--muted);
-  font-style: italic;
-  text-align: center;
-  padding: var(--space-7);
-}
 
 .pronList {
   flex: 1;

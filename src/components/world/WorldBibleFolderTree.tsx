@@ -6,6 +6,7 @@ import { useWorkspaceStore, EntityType, WorldBibleRootConfig } from '@/store/wor
 import { getWorldBibleConfig } from '@/lib/worldBibleNav';
 import { worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
 import { folderMemberSet } from '@/lib/folderTree';
+import { EmptyState } from '@/components/ui/EmptyState';
 import styles from './WorldBibleFolderTree.module.css';
 
 const CONFIRM_TIMEOUT_MS = 4000;
@@ -220,7 +221,7 @@ export default function WorldBibleFolderTree({ isDraft }: WorldBibleFolderTreePr
                 <div className={styles.tree}>
                     {topFolders.map(f => renderFolder(f, 0))}
                     {topFolders.length === 0 && (
-                        <p className={styles.empty}>No folders yet — create one to get started.</p>
+                        <EmptyState title="No folders yet — create one to get started." />
                     )}
                 </div>
 

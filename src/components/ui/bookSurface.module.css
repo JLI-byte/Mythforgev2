@@ -1,0 +1,148 @@
+/*
+ * bookSurface — one book.
+ *
+ * There used to be four independent answers to "what does a book look like in
+ * this app": the Bookshelf's diamond-pocket cover, the WorldShelf's spine, the
+ * WorldShelf's cover and the World Bible's 3D hardcover. They disagreed about
+ * the two things a reader notices before anything else — the proportion, and
+ * which side the light comes from. The WorldShelf was the clearest symptom: its
+ * spines were lit down the spine edge and its covers were lit down the
+ * fore-edge, one row above the other.
+ *
+ * Decided here, once:
+ *
+ *   Proportion  2:3, a trade paperback. The Bookshelf already used it; the
+ *               World Bible's 160x220 was 1:1.375 and the WorldShelf's covers
+ *               were whatever --cover-w and --cover-h happened to be.
+ *   Light       Lit down the spine edge, shadowed at the fore-edge. One recipe,
+ *               one direction, on every book-shaped surface.
+ *   Corners     Square at the spine, rounded at the fore-edge — which way a
+ *               book opens.
+ *   Colour      Covers are shown in full colour everywhere. The Bookshelf used
+ *               to grayscale(1) them while the WorldShelf, two clicks away,
+ *               showed the same books in colour. The covers are the writer's;
+ *               desaturating them is the shelf overruling the author.
+ *
+ * Callers override by SETTING A VARIABLE, never by re-declaring the property.
+ * Two class names on one element leave the winner to stylesheet order, and
+ * stylesheet order is not something a component should have to reason about.
+ *
+ *   --book-w             cover width — any length or percentage
+ *   --book-ratio         cover proportion, default 2 / 3
+ *   --book-spine-radius  corner radius on the spine edge
+ *   --book-fore-radius   corner radius on the fore-edge
+ *   --book-drop          the shadow the book casts on what it stands on
+ *   --book-hover-lift    the hover transform, default translateY(-4%)
+ *   --spine-w            spine width
+ *   --spine-h            spine height, default 100%
+ *
+ * What is NOT here: motion. Three of the four books have their own meaningful
+ * gesture — the Bookshelf's cover slides out of its diamond pocket and tilts,
+ * the WorldShelf's spine rises out of the shelf by less than the selected one
+ * does, the World Bible turns its pages. Those say different things and are not
+ * the same problem. The shared hover is a default the first two override.
+ */
+
+/* The four radii. */
+.corners {
+    border-start-start-radius: var(--book-spine-radius, var(--radius-xs));
+    border-end-start-radius: var(--book-spine-radius, var(--radius-xs));
+    border-start-end-radius: var(--book-fore-radius, var(--radius-md));
+    border-end-end-radius: var(--book-fore-radius, var(--radius-md));
+}
+
+/* The lit board, without a size — so the World Bible's 3D front face can wear
+   the same light as the flat thumbnails without inheriting their geometry. */
+.face {
+    composes: corners;
+
+    /* A book board is a painted object, not a themed surface: the highlight
+       along its spine edge is specular white in every theme, the way the
+       WorldShelf's spine already drew it. The shadow side stays themed, since
+       a shadow is a shadow and the parchment family casts a warm one. */
+    --book-sheen: 255, 255, 255;
+
+    /* Lit at the spine, shadowed at the fore-edge, lifted off the shelf.
+       --book-drop is its own layer so a caller can change how high the book
+       sits without restating the first two. */
+    box-shadow:
+        inset 3px 0 0 rgba(var(--book-sheen), 0.16),
+        inset -1px 0 0 rgba(var(--shadow-rgb), 0.24),
+        var(--book-drop, 0 0 0 transparent);
+}
+
+/* The footprint. Callers set --book-w; the height follows the proportion. */
+.proportion {
+    width: var(--book-w, 6rem);
+    aspect-ratio: var(--book-ratio, 2 / 3);
+}
+
+/* The cover face, seen flat on. */
+.cover {
+    composes: face;
+    composes: proportion;
+    --book-drop: var(--shadow-2);
+    background-size: cover;
+    background-position: center;
+    transition: transform var(--dur-3) var(--ease-out),
+                box-shadow var(--dur-3) var(--ease-out);
+}
+
+/* Lifting a book off the shelf. */
+.cover:hover {
+    --book-drop: var(--shadow-4);
+    transform: var(--book-hover-lift, translateY(-4%));
+}
+
+/* The same book seen edge-on. Height matches the shelf it stands in. */
+.spine {
+    composes: face;
+    /* A shelved spine is touching its neighbours — nothing to cast onto. */
+    --book-drop: 0 0 0 transparent;
+    width: var(--spine-w, 1.5rem);
+    height: var(--spine-h, 100%);
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: transform var(--dur-3) var(--ease-out),
+                filter var(--dur-3) var(--ease-out),
+                box-shadow var(--dur-3) var(--ease-out);
+}
+
+/* An empty place on a shelf — the same footprint and the same corners, drawn
+   as absence. No spine light: there is no board there to catch any. */
+.slot {
+    composes: corners;
+    composes: proportion;
+    border: 1px dashed var(--border-subtle);
+    background: transparent;
+    transition: border-color var(--dur-2) var(--ease-standard),
+                background var(--dur-2) var(--ease-standard),
+                color var(--dur-2) var(--ease-standard),
+                transform var(--dur-2) var(--ease-standard);
+}
+
+.slot:hover {
+    border-color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.06);
+}
+
+/* An outline rather than a ring, because these surfaces already spend their
+   box-shadow on the board's own light. */
+.cover:focus-visible,
+.spine:focus-visible,
+.slot:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cover,
+    .spine,
+    .slot {
+        transition: none;
+    }
+    .cover:hover {
+        transform: none;
+    }
+}

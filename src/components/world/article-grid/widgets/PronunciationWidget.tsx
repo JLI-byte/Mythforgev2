@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../ArticleGridEditor.module.css';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 interface PronunciationEntry {
   id: string;
@@ -81,10 +82,7 @@ export function PronunciationWidget({ content, onChange }: { content: any; onCha
       )}
 
       {entries.length === 0 && !showAdd ? (
-        <div className={styles.pronEmpty}>
-          <span>🗣️</span>
-          <span>Add entries to build your pronunciation guide</span>
-        </div>
+        <EmptyState icon="🗣️" title="Add entries to build your pronunciation guide" />
       ) : (
         <div className={styles.pronList}>
           {entries.map(entry => (

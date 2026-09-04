@@ -24,6 +24,7 @@ import { HintBubble } from '@/components/ui/HintBubble';
 import { WritingZoneProps } from './zoneTypes';
 import { reconcileZoneSelection } from '@/lib/zoneSelection';
 import { announce } from '@/lib/liveAnnouncer';
+import { EmptyState } from '@/components/ui/EmptyState';
 import styles from '../../../WritingDesk.module.css';
 
 export function StoryWritingZone({ content, onChange, onChangeImmediate, widget, onDragStart, onDeleteWidget, onDockChange, onManualSave, onAddAtCenter }: WritingZoneProps) {
@@ -301,7 +302,7 @@ export function StoryWritingZone({ content, onChange, onChangeImmediate, widget,
       </div>
     </div>
   ) : (
-    <div className={styles.binderEditorEmpty}><span>No scenes yet</span><button onClick={handleAddScene}>Add Scene</button></div>
+    <EmptyState title="No scenes yet" action={{ label: 'Add Scene', onClick: handleAddScene }} />
   );
 
   const ui = (

@@ -10,6 +10,7 @@ import { NewProjectModal } from '../ui/NewProjectModal';
 import { ProjectLibraryModal } from '../ui/ProjectLibraryModal';
 import LoginModal from '../ui/LoginModal';
 import { createClient } from '@/lib/supabase/client';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 // ── User Profile Component ─────────────────────────────
 
@@ -463,9 +464,7 @@ export default function ModeBar() {
         {isOpen && (
           <div ref={dropdownRef} className={styles.searchDropdown}>
             {results.length === 0 ? (
-              <div className={styles.searchEmpty}>
-                No results for &quot;{query}&quot;
-              </div>
+              <EmptyState title={<>No results for &quot;{query}&quot;</>} />
             ) : (
               results.map((result, i) => (
                 <button

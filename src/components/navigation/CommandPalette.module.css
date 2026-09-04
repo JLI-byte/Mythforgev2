@@ -51,12 +51,6 @@
     padding: var(--space-4);
 }
 
-.emptyState {
-    padding: var(--space-8);
-    text-align: center;
-    color: var(--muted);
-}
-
 .listItem {
     display: flex;
     align-items: center;

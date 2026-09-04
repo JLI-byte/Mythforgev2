@@ -207,14 +207,6 @@
   overflow-y: auto;
 }
 
-.searchEmpty {
-  padding: var(--space-7) var(--space-6);
-  font-size: var(--text-sm);
-  color: var(--muted);
-  text-align: center;
-  font-style: italic;
-}
-
 .searchResult {
   display: flex;
   align-items: flex-start;

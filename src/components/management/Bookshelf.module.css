@@ -162,31 +162,24 @@
 }
 
 /* the cover (the pen's img): rises out of the pocket, bottom tucked behind
-   the lip. 44% + translateY(-60%) keeps the bottom corners under the band. */
+   the lip. 44% + translateY(-60%) keeps the bottom corners under the band.
+   Proportion, corners, spine light and shadow come from bookSurface; what is
+   local here is the pocket — the absolute placement inside the diamond and the
+   tilt that slides the cover out of it. */
 .book {
+    --book-w: 44%;
+    /* The pocket's gesture, handed to the shared hover rule. */
+    --book-hover-lift: translateX(-40%) translateY(-78%) rotate(18deg);
     position: absolute;
-    width: 44%;
     left: 50%;
     top: 50%;
     transform: translateX(-50%) translateY(-60%);
-    aspect-ratio: 2 / 3;
-    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-    background-size: cover;
-    background-position: center;
-    filter: grayscale(1);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 5px -5px 10px rgba(var(--shadow-rgb), 0.35);
     cursor: grab;
     user-select: none;
-    transition: transform var(--dur-4) var(--ease-standard), box-shadow var(--dur-4) var(--ease-standard);
     z-index: 1;
-}
-/* pen hover: the book slides up out of the pocket and tilts */
-.book:hover {
-    transform: translateX(-40%) translateY(-78%) rotate(18deg);
-    box-shadow: 8px 8px 16px rgba(var(--shadow-rgb), 0.5);
 }
 
 /* Active project: light up its pocket instead of boxing the cover. */
@@ -196,15 +189,17 @@
 .slot:has(.bookActive)::after {
     background: #3c3c3a;
 }
-.bookActive {
-    box-shadow: 5px -5px 10px rgba(var(--shadow-rgb), 0.35), 0 0 12px rgba(var(--overlay-rgb), 0.28);
+/* Doubled class on purpose: this has to beat bookSurface's own --book-drop,
+   and which file wins a specificity tie is a bundler detail. */
+.book.bookActive {
+    --book-drop: var(--shadow-3), 0 0 12px rgba(var(--overlay-rgb), 0.28);
 }
 
 /* Screenplays, reports and lyrics are loose sheets, not bound covers: squarer
-   letter proportions, square corners, and no spine radius. */
+   letter proportions, and no rounded fore-edge because there is no board. */
 .bookPaper {
-    aspect-ratio: 17 / 22;
-    border-radius: var(--radius-xs);
+    --book-ratio: 17 / 22;
+    --book-fore-radius: var(--radius-xs);
     overflow: hidden;
 }
 

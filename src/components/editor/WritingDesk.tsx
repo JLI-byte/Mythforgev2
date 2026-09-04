@@ -16,6 +16,7 @@ import { EmptyDeskWelcome } from './desk/EmptyDeskWelcome';
 import { WidgetRenderer } from './desk/widgets/WidgetRenderer';
 import { HintBubble } from '@/components/ui/HintBubble';
 import { announce } from '@/lib/liveAnnouncer';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 // ============================================================
 // MAIN COMPONENT
@@ -634,13 +635,12 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
         <div className={`${styles.saveIndicator} ${isSaved ? styles.saveIndicatorActive : ''}`}>✓ Saved</div>
 
         {isResearch && widgets.length === 0 && (
-          <div className={styles.canvasEmptyHint}>
-            <p className={styles.canvasEmptyTitle}>Nothing on this board yet</p>
-            <p className={styles.canvasEmptyBody}>
-              Notes, clippings and links about this project, arranged however you think.
-              Drag a box anywhere on the canvas to place one.
-            </p>
-          </div>
+          <EmptyState
+            className={styles.canvasEmptyHint}
+            title="Nothing on this board yet"
+            hint={<>Notes, clippings and links about this project, arranged however you think.
+              Drag a box anywhere on the canvas to place one.</>}
+          />
         )}
 
         {!isResearch && <HintBubble surface="desk" />}

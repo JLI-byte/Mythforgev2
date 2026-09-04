@@ -13,6 +13,7 @@ import { BeginOptions } from '@/components/ui/BeginOptions';
 import { HintBubble } from '@/components/ui/HintBubble';
 import WorldBibleBook from './WorldBibleBook';
 import WorkTypeArtwork from './WorkTypeArtwork';
+import book from '@/components/ui/bookSurface.module.css';
 import styles from './Bookshelf.module.css';
 
 /** Diamond-lattice shelf layout: fixed columns, 3 rows of slots by default. */
@@ -319,7 +320,7 @@ export function Bookshelf() {
 
     // ─── RENDERING ─────────────────────────────────────────
 
-    /** A book slot — greyscale cover centered inside its diamond, tilts on hover. */
+    /** A book slot — the shared book surface, centered inside its diamond. */
     const renderDiamondBook = (p: Project) => {
         const isDeleting = deletingProjectId === p.id;
         // A story stays a book cover; the other work types show their medium
@@ -337,7 +338,7 @@ export function Bookshelf() {
                     onDragEnd={() => setDraggedProjectId(null)}
                     onClick={() => { if (!isDeleting) handleSelectProject(p.id); }}
                     title={p.name}
-                    className={`${styles.book} ${isPaper ? styles.bookPaper : ''} ${p.id === activeProjectId ? styles.bookActive : ''}`}
+                    className={`${book.cover} ${styles.book} ${isPaper ? styles.bookPaper : ''} ${p.id === activeProjectId ? styles.bookActive : ''}`}
                     style={{
                         background: p.coverImageUrl || isPaper ? undefined : greyForId(p.id),
                         backgroundImage: p.coverImageUrl ? `url(${p.coverImageUrl})` : undefined,

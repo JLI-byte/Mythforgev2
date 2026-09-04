@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../ArticleGridEditor.module.css';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 interface RelEdge {
   id: string;
@@ -436,10 +437,10 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
 
       {/* Graph canvas */}
       {worldEntities.length === 0 ? (
-        <div className={styles.relationshipEmpty}>
-          <span>No entities in this world yet.</span>
-          <span>Add entities to the World Bible to see them here.</span>
-        </div>
+        <EmptyState
+          title="No entities in this world yet."
+          hint="Add entities to the World Bible to see them here."
+        />
       ) : (
         <canvas
           ref={canvasRef}

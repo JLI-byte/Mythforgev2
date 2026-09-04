@@ -7,7 +7,6 @@
   background-color: var(--background);
 }
 
-
 .deskViewport {
   flex: 1;
   position: relative;
@@ -1507,7 +1506,6 @@
   background: rgba(var(--accent-rgb), 0.05);
 }
 
-
 /* Active chapter */
 .binderChapterActive {
   flex: 1;
@@ -1579,7 +1577,6 @@
 .spineRenameInput:focus {
   border-color: var(--accent);
 }
-
 
 .spineSceneListArrow {
   font-size: var(--text-2xs);
@@ -1839,33 +1836,6 @@
 
 .binderAllScenesHeaderInput:focus {
   border-color: var(--accent);
-}
-
-.binderEditorEmpty {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-5);
-  color: var(--muted);
-  font-size: var(--text-sm);
-}
-
-.binderEditorEmpty button {
-  padding: var(--space-3) var(--space-6);
-  background: none;
-  border: 1px dashed var(--border);
-  border-radius: var(--radius-md);
-  color: var(--muted);
-  cursor: pointer;
-  font-size: var(--text-xs);
-  transition: all var(--dur-2);
-}
-
-.binderEditorEmpty button:hover {
-  border-color: var(--accent);
-  color: var(--foreground);
 }
 
 /* Add chapter button */
@@ -4884,7 +4854,6 @@
   position: relative;
 }
 
-
 /* ── Research Tab two-column layout + AI chat ───────────── */
 .researchLayout {
   display: flex;
@@ -6415,7 +6384,6 @@
   background: #26a86c;
 }
 
-
 .choicesStrip {
     border-top: 1px solid var(--border-subtle, rgba(var(--overlay-rgb), 0.12));
     padding: var(--space-5) var(--space-6);
@@ -6634,18 +6602,6 @@
   text-align: center;
   /* Must never swallow a click meant for the canvas underneath. */
   pointer-events: none;
-}
-.canvasEmptyTitle {
-  margin: 0 0 var(--space-3);
-  font-size: var(--text-lg);
-  font-weight: 600;
-  color: var(--foreground);
-}
-.canvasEmptyBody {
-  margin: 0;
-  font-size: var(--text-sm);
-  line-height: 1.55;
-  color: var(--muted);
 }
 
 /* ── Interview runner ───────────────────────────────────── */

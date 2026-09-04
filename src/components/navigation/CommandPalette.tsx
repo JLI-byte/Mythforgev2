@@ -15,6 +15,7 @@ import { useWorkspaceStore, COVER_COLORS } from '@/store/workspaceStore';
 import { sanitizeLabel } from '@/lib/sanitize';
 import { useModalDialog } from '@/lib/useModalDialog';
 import styles from './CommandPalette.module.css';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 interface SearchItem {
     id: string;
@@ -198,7 +199,7 @@ function CommandPaletteContent() {
                                 )}
                             </div>
                         ) : (
-                            <div className={styles.emptyState}>No results found</div>
+                            <EmptyState title="No results found" />
                         )
                     ) : (
                         filteredItems.map((item, index) => (

@@ -19,6 +19,7 @@ import { useWorkspaceStore, BADGE_DEFINITIONS } from '@/store/workspaceStore';
 import ShareModal from '../ui/ShareModal';
 import { ShareCardOptions } from '@/lib/shareCard';
 import { projectProgress, progressLine } from '@/lib/structuralProgress';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 // =============================================
 // Helper: get today's date as YYYY-MM-DD
@@ -412,9 +413,7 @@ export default function GoalsContent() {
                     })}
                 </div>
             ) : (
-                <p className={styles.emptyState}>
-                    Start a project to track your progress
-                </p>
+                <EmptyState title="Start a project to track your progress" />
             )}
 
             {/* ==========================================

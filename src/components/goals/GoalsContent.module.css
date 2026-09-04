@@ -8,7 +8,6 @@
     padding-bottom: var(--space-6);
 }
 
-
 /* ========================================
    ZONE 1 — Goal Setup Banner
    ======================================== */
@@ -84,7 +83,6 @@
 .setupStartBtn:hover {
     opacity: 0.9;
 }
-
 
 /* ========================================
    ZONE 2 — Today Card (hero)
@@ -221,7 +219,6 @@
     color: var(--muted);
 }
 
-
 /* ========================================
    Shared section header
    ======================================== */
@@ -234,7 +231,6 @@
     text-transform: uppercase;
     letter-spacing: 0.03em;
 }
-
 
 /* ========================================
    ZONE 3 — Calendar Heatmap
@@ -362,7 +358,6 @@
     flex-shrink: 0;
 }
 
-
 /* ========================================
    ZONE 4 — Project Progress
    ======================================== */
@@ -443,16 +438,6 @@
     font-size: var(--text-2xs);
     color: var(--muted);
 }
-
-.emptyState {
-    font-size: var(--text-sm);
-    color: var(--muted);
-    font-style: italic;
-    text-align: center;
-    padding: var(--space-6) var(--space-5);
-    margin: 0;
-}
-
 
 /* ========================================
    ZONE 5 — Achievements

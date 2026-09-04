@@ -585,20 +585,3 @@
   gap: var(--space-4);
 }
 
-/* --- Shared --- */
-
-.emptyState {
-  text-align: center;
-  padding: var(--space-11) 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-.emptyText {
-  font-size: var(--text-lg);
-  color: var(--foreground);
-  font-weight: 600;
-  margin: 0;
-}
