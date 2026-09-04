@@ -15,6 +15,7 @@ import { wouldCreateCycle, fileByType } from '@/lib/folderTree';
 import { partitionExample, SEED_WORLD_NAME } from '@/lib/exampleData';
 import type { Interview } from '@/lib/interviews/types';
 import type { ProjectBrief } from '@/lib/workSubTypes';
+import { resolveFrontMatter, type FrontMatter } from '@/lib/manuscript';
 import { normaliseBackupPayload } from '@/lib/backupEnvelope';
 
 // Cover colors auto-assigned to new projects in rotation
@@ -112,6 +113,8 @@ export interface Project {
     attributedEntityId?: string;
     description?: string;
     authorName?: string;
+    /** Compile-step choices: title page, copyright, dedication, contents. */
+    frontMatter?: FrontMatter;
     worldBibleLayout?: WorldBibleLayout;
     /** Which kind of script or report this is (see WORK_SUB_TYPES). */
     workSubTypeId?: string;
@@ -1321,6 +1324,14 @@ if (typeof window !== 'undefined') {
 /** WorldKey of the ACTIVE PROJECT's shelf — for desk/editor surfaces. */
 export const selectProjectWorldKey = (state: WorkspaceState): WorldKey =>
     worldKeyForProject(state.projects.find(p => p.id === state.activeProjectId));
+
+/**
+ * The active project's front-matter choices, with defaults filled in. Every
+ * reader goes through here, so a project saved before the compile step existed
+ * still gets a title page and a contents list.
+ */
+export const selectProjectFrontMatter = (state: WorkspaceState): FrontMatter =>
+    resolveFrontMatter(state.projects.find(p => p.id === state.activeProjectId)?.frontMatter);
 
 /**
  * The persisted/synced subset of workspace state. Shared by the local persist
