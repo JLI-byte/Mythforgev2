@@ -14,7 +14,6 @@ import { partitionExample, SEED_WORLD_NAME } from '@/lib/exampleData';
 import type { Interview } from '@/lib/interviews/types';
 import type { ProjectBrief } from '@/lib/workSubTypes';
 import { normaliseBackupPayload } from '@/lib/backupEnvelope';
-import { sanitizeChatHistories, type ChatMessage as ResearchChatMessage } from '@/lib/researchChatTypes';
 
 // Cover colors auto-assigned to new projects in rotation
 export const COVER_COLORS = [
@@ -642,7 +641,6 @@ export interface WorkspaceState {
      * An object the user attached to the research chat as context for their next
      * message ("Ask about this", or a passage dragged in). Transient; not persisted.
      */
-    chatAttachment: ChatAttachment | null;
 
     /** Whether the World Bible Hierarchy Designer modal is open */
     isHierarchyModalOpen: boolean;
@@ -739,7 +737,6 @@ export interface WorkspaceState {
      * survives collapsing the panel, switching tabs, and reloads. Persisted in
      * sanitized form (capped length, generated images dropped).
      */
-    chatHistories: Record<string, ResearchChatMessage[]>;
 
     /** User-authored research-chat interview skills (built-ins live in the registry). */
     customInterviews: Interview[];
@@ -886,7 +883,6 @@ export interface WorkspaceState {
     setSelectedEntity: (id: string | null) => void;
 
     /** Attach (or clear) an object as context for the next research-chat message. */
-    setChatAttachment: (attachment: ChatAttachment | null) => void;
 
     /** Hierarchy Canvas Management */
     addWorldBibleRoot: (root: WorldBibleRootConfig, isDraft?: boolean) => void;
@@ -962,7 +958,6 @@ export interface WorkspaceState {
     deleteResearchBoard: (baseScopeKey: string, boardId: string) => void;
 
     /** Replace a board's chat conversation (the panel mirrors its state here). */
-    setChatHistory: (scopeKey: string, messages: ResearchChatMessage[]) => void;
 
     /** Custom interview skills — add, update in place, or remove by id. */
     addInterview: (interview: Interview) => void;
@@ -1240,7 +1235,6 @@ export function partializeWorkspace(state: WorkspaceState) {
         researchStates: state.researchStates,
         customBoards: state.customBoards,
         // Persist conversations in shrunk form: capped length, image data dropped.
-        chatHistories: sanitizeChatHistories(state.chatHistories),
         customInterviews: state.customInterviews,
         worldUnderstanding: state.worldUnderstanding,
         worldBibles: state.worldBibles,
@@ -1325,7 +1319,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             panelWidth: 480,
             articleZoneWidth: 680,
             selectedEntityId: null,
-            chatAttachment: null,
             isHierarchyModalOpen: false,
             isHierarchyScratchMode: false,
             _hasHydrated: false,
@@ -1333,7 +1326,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             draftStates: {},
             researchStates: {},
             customBoards: {},
-            chatHistories: {},
             customInterviews: [],
             worldUnderstanding: {},
             writingGoal: { dailyTarget: 0, sessionTarget: 0 },
@@ -1788,8 +1780,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             setSelectedEntity: (id) =>
                 set(() => ({ selectedEntityId: id })),
 
-            setChatAttachment: (attachment) =>
-                set(() => ({ chatAttachment: attachment })),
 
             setHierarchyModal: (open, scratch = false) =>
                 set(() => ({ 
@@ -2395,18 +2385,12 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     // Drop the deleted board's canvas state and chat history too.
                     const boardKey = `${baseScopeKey}::${boardId}`;
                     const { [boardKey]: _removed, ...restStates } = state.researchStates;
-                    const { [boardKey]: _removedChat, ...restChats } = state.chatHistories;
                     return {
                         customBoards: { ...state.customBoards, [baseScopeKey]: nextBoards },
                         researchStates: restStates,
-                        chatHistories: restChats,
                     };
                 }),
 
-            setChatHistory: (scopeKey, messages) =>
-                set((state) => ({
-                    chatHistories: { ...state.chatHistories, [scopeKey]: messages },
-                })),
 
             addInterview: (interview) =>
                 set((state) => ({ customInterviews: [...state.customInterviews, interview] })),
@@ -2606,9 +2590,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     // Custom research boards arrived later too.
                     if (!state.customBoards || typeof state.customBoards !== 'object') {
                         state.customBoards = {};
-                    }
-                    if (!state.chatHistories || typeof state.chatHistories !== 'object') {
-                        state.chatHistories = {};
                     }
                     if (!state.worldUnderstanding || typeof state.worldUnderstanding !== 'object') {
                         state.worldUnderstanding = {};

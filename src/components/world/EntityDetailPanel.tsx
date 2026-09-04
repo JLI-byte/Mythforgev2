@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useId } from 'react';
-import { MessageSquare, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import styles from './EntityDetailPanel.module.css';
 import { useWorkspaceStore, EntityType, ENTITY_TYPE_LABELS } from '@/store/workspaceStore';
-import { articleDocToText } from '@/lib/worldAuthoring';
 import { formatDateTime } from '@/lib/formatDate';
 
 export function EntityDetailPanel() {
@@ -16,7 +15,6 @@ export function EntityDetailPanel() {
     const entities = useWorkspaceStore(state => state.entities);
     const updateEntity = useWorkspaceStore(state => state.updateEntity);
     const deleteEntity = useWorkspaceStore(state => state.deleteEntity);
-    const setChatAttachment = useWorkspaceStore(state => state.setChatAttachment);
     const setWorkspaceMode = useWorkspaceStore(state => state.setWorkspaceMode);
 
     // Derive the active entity directly from the current store projection
@@ -97,38 +95,12 @@ export function EntityDetailPanel() {
         setSelectedEntity(null);
     };
 
-    // Attach this article to the research chat and jump there, so the user can
-    // ask the assistant about it without describing it.
-    const handleAskAbout = () => {
-        const body = articleDocToText(selectedEntity.articleDoc);
-        const content = [
-            `${selectedEntity.name} (${ENTITY_TYPE_LABELS[selectedEntity.type]})`,
-            selectedEntity.description?.trim(),
-            body,
-        ].filter(Boolean).join('\n\n');
-        setChatAttachment({ kind: 'entity', entityId: selectedEntity.id, label: selectedEntity.name, content });
-        setSelectedEntity(null);
-        setWorkspaceMode('research');
-    };
-
     return (
         <div className={styles.panelBackdrop} onClick={() => setSelectedEntity(null)}>
             <aside className={styles.panelContainer} onClick={e => e.stopPropagation()}>
                 <header className={styles.panelHeader}>
                     <h3>Edit Entity</h3>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <button
-                            onClick={handleAskAbout}
-                            title="Ask the research assistant about this article"
-                            style={{
-                                display: 'inline-flex', alignItems: 'center', gap: 5,
-                                padding: '5px 11px', fontSize: '0.74rem', fontWeight: 600,
-                                color: 'var(--accent, #6c8cff)', background: 'transparent',
-                                border: '1px solid var(--accent, #6c8cff)', borderRadius: 999, cursor: 'pointer',
-                            }}
-                        >
-                            <MessageSquare size={14} /> Ask about this
-                        </button>
                         <button className={styles.closeButton} onClick={() => setSelectedEntity(null)} aria-label="Close panel"><X size={18} /></button>
                     </div>
                 </header>

@@ -1,7 +1,6 @@
 "use client";
 
 import React from 'react';
-import { useWorkspaceStore } from '@/store/workspaceStore';
 import type { ConsistencyFlag } from '@/lib/consistencyFlags';
 import styles from '../../WritingDesk.module.css';
 
@@ -22,14 +21,8 @@ const KIND_META: Record<ConsistencyFlag['kind'], { icon: string; label: string }
  */
 export function ConsistencyFlagsRenderer({ content, onChange }: RendererProps) {
     const flags = content.flags ?? [];
-    const setChatAttachment = useWorkspaceStore(s => s.setChatAttachment);
 
     const dismiss = (id: string) => onChange({ flags: flags.filter(f => f.id !== id) });
-
-    const ask = (f: ConsistencyFlag) => {
-        const content = `${KIND_META[f.kind].label}: ${f.summary}${f.detail ? `\n${f.detail}` : ''}`;
-        setChatAttachment({ kind: 'text', label: f.summary, content });
-    };
 
     return (
         <div className={styles.suggestWidget}>
@@ -53,7 +46,6 @@ export function ConsistencyFlagsRenderer({ content, onChange }: RendererProps) {
                         </div>
                         {f.detail && <div className={styles.flagDetail}>{f.detail}</div>}
                         <div className={styles.flagActions}>
-                            <button className={styles.flagAsk} onClick={() => ask(f)} title="Ask the assistant about this in chat">Ask</button>
                             <button className={styles.flagDismiss} onClick={() => dismiss(f.id)} title="Dismiss">Dismiss</button>
                         </div>
                     </div>
