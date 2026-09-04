@@ -13,6 +13,7 @@ import { wouldCreateCycle, fileByType } from '@/lib/folderTree';
 import { partitionExample, SEED_WORLD_NAME } from '@/lib/exampleData';
 import type { Interview } from '@/lib/interviews/types';
 import type { ProjectBrief } from '@/lib/workSubTypes';
+import { normaliseBackupPayload } from '@/lib/backupEnvelope';
 import { sanitizeChatHistories, type ChatMessage as ResearchChatMessage } from '@/lib/researchChatTypes';
 import type { VNChoice } from '@/lib/visualNovel';
 import type { VNFlag } from '@/lib/vnFlags';
@@ -2734,7 +2735,16 @@ export function restoreDataBackup(backupKey: string): boolean {
     try {
         const raw = localStorage.getItem(backupKey);
         if (!raw) return false;
-        localStorage.setItem('lorecanvas-workspace', raw);
+        // Automatic backups are taken inside persist's migrate(), which receives
+        // the BARE state rather than the { state, version } envelope. Writing one
+        // back verbatim left zustand with nothing to hydrate, so restoring an
+        // automatic backup emptied the workspace. Normalise first.
+        const payload = normaliseBackupPayload(raw, backupKey);
+        if (!payload) {
+            logger.error('LoreCanvas: backup is unreadable, refusing to restore', backupKey);
+            return false;
+        }
+        localStorage.setItem('lorecanvas-workspace', payload);
         return true;
     } catch (e) {
         logger.error('LoreCanvas: restore failed', e);
