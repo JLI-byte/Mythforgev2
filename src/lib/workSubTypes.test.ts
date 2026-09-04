@@ -41,11 +41,17 @@ describe('WORK_SUB_TYPES', () => {
 });
 
 describe('getSubTypesFor', () => {
-    it('asks the extra question only for Script / Report', () => {
-        expect(getSubTypesFor('script-report')).toHaveLength(WORK_SUB_TYPES.length);
-        for (const t of WORK_TYPES.filter(t => t.id !== 'script-report')) {
+    it('asks the extra question for no surviving work type — Script / Report was withdrawn', () => {
+        // 'script-report' was the only type with sub-types, and Phase 1 withdrew
+        // it along with the academic path. The machinery still answers, but
+        // nothing reaches it any more.
+        for (const t of WORK_TYPES) {
             expect(getSubTypesFor(t.id), t.id).toEqual([]);
         }
+    });
+
+    it('still answers for the withdrawn id, so old persisted briefs stay readable', () => {
+        expect(getSubTypesFor('script-report')).toHaveLength(WORK_SUB_TYPES.length);
     });
 
     it('returns nothing for unknown, null or missing ids', () => {
