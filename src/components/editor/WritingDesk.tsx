@@ -60,7 +60,6 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
   // Draft and Research are blank canvases — global desk widgets don't bleed on.
   const globalWidgetsRaw = useWorkspaceStore(s => s.globalWidgets);
   const globalWidgets = (isDraft || isResearch) ? NO_GLOBAL_WIDGETS : globalWidgetsRaw;
-  const updateGlobalWidgets = useWorkspaceStore(s => s.updateGlobalWidgets);
   // Research only: "Ask the AI about this" attaches a board element to the chat.
   const setChatAttachment = useWorkspaceStore(s => s.setChatAttachment);
 
