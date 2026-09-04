@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { persist, type PersistStorage, type StorageValue } from 'zustand/middleware';
 import { BACKUP_KEY_PREFIX, claimBackup, ownedStorageKeys, readBackupOwner } from '@/lib/workspaceOwner';
 import {
     emptyWeekdayTargets, normalizeWeekdayTargets, type WeekdayTargets,
@@ -1186,26 +1186,93 @@ function snapshotStorageKeys(): string[] {
     return keys;
 }
 
+const DATE_ARRAY_KEYS = [
+    'worlds', 'projects', 'documents', 'scenes',
+    'entities', 'articleTemplates', 'earnedBadges',
+    'sceneSnapshots', 'entitySnapshots',
+];
+
+/**
+ * Rebuild native Date objects on the way in. Only arrays that actually contain
+ * dated records are touched — writingDays and earnedBadges would be corrupted
+ * by a blanket reviver. Hoisted out of createJSONStorage so the debounced
+ * adapter can own the parse itself.
+ */
+function reviveDates(key: string, value: unknown): unknown {
+    if (DATE_ARRAY_KEYS.includes(key) && Array.isArray(value)) {
+        return value.map((item: Record<string, unknown>) => {
+            if (typeof item !== 'object' || item === null) return item;
+            return {
+                ...item,
+                ...(item.createdAt ? { createdAt: new Date(item.createdAt as string) } : {}),
+                ...(item.updatedAt ? { updatedAt: new Date(item.updatedAt as string) } : {}),
+                ...(item.earnedAt  ? { earnedAt:  new Date(item.earnedAt  as string) } : {}),
+            };
+        });
+    }
+    return value;
+}
+
+// zustand widens the persisted generic to migrate()'s return type, so the
+// storage adapter is typed against the raw blob, not the partialized shape.
+type PersistedWorkspace = Record<string, unknown>;
+
 const PERSIST_DEBOUNCE_MS = 1200;
 let persistTimer: ReturnType<typeof setTimeout> | null = null;
-let pendingWrite: { name: string; value: string } | null = null;
+let pendingWrite: { name: string; value: StorageValue<PersistedWorkspace> } | null = null;
+
+/**
+ * Drop the queued local save without writing it. Used by restoreDataBackup,
+ * which writes the persist key directly and then reloads: a queued write would
+ * otherwise flush on pagehide and overwrite the restored blob with the state
+ * the user just replaced.
+ */
+export function cancelPendingPersist(): void {
+    if (persistTimer) { clearTimeout(persistTimer); persistTimer = null; }
+    pendingWrite = null;
+}
 
 function flushPersist() {
     if (persistTimer) { clearTimeout(persistTimer); persistTimer = null; }
-    if (pendingWrite) {
-        try { localStorage.setItem(pendingWrite.name, pendingWrite.value); } catch { /* quota */ }
-        pendingWrite = null;
+    if (!pendingWrite) return;
+    const { name, value } = pendingWrite;
+    pendingWrite = null;
+    try {
+        localStorage.setItem(name, JSON.stringify(value));
+    } catch {
+        /* quota — Task 7 surfaces this */
     }
 }
 
-const debouncedLocalStorage = {
-    getItem: (name: string): string | null => localStorage.getItem(name),
-    setItem: (name: string, value: string): void => {
+/**
+ * Debounced localStorage adapter.
+ *
+ * zustand's persist middleware writes on every `set()`. With the full workspace
+ * that is a multi-megabyte JSON.stringify on every keystroke. The debounce sits
+ * ABOVE the serialise — the adapter holds the state object and stringifies once
+ * per idle window — and flushes on tab hide / unload so the final edit is never
+ * lost. Using createJSONStorage here would serialise before the adapter ever saw
+ * the value, which is the bug this replaces.
+ */
+const debouncedJSONStorage: PersistStorage<PersistedWorkspace> = {
+    getItem: (name) => {
+        const raw = localStorage.getItem(name);
+        if (raw === null) return null;
+        try {
+            return JSON.parse(raw, reviveDates) as StorageValue<PersistedWorkspace>;
+        } catch {
+            return null;
+        }
+    },
+    setItem: (name, value) => {
         pendingWrite = { name, value };
         if (persistTimer) clearTimeout(persistTimer);
         persistTimer = setTimeout(flushPersist, PERSIST_DEBOUNCE_MS);
     },
-    removeItem: (name: string): void => localStorage.removeItem(name),
+    removeItem: (name) => {
+        cancelPendingPersist();
+        localStorage.removeItem(name);
+    },
 };
 
 if (typeof window !== 'undefined') {
@@ -2669,30 +2736,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             // Intercept JSON deserialization to properly reconstruct native JavaScript `Date` objects.
             // Writes go through a debounced adapter so editing doesn't serialize the
             // full workspace on every keystroke (flushes on tab hide / unload).
-            storage: createJSONStorage(() => debouncedLocalStorage, {
-                reviver: (key, value) => {
-                    // Only apply Date reconstruction to arrays that contain objects
-                    // with createdAt/updatedAt. Non-entity arrays (writingDays,
-                    // earnedBadges) are returned as-is to avoid corruption.
-                    const DATE_ARRAY_KEYS = [
-                        'worlds', 'projects', 'documents', 'scenes',
-                        'entities', 'articleTemplates', 'earnedBadges',
-                        'sceneSnapshots', 'entitySnapshots',
-                    ];
-                    if (DATE_ARRAY_KEYS.includes(key) && Array.isArray(value)) {
-                        return value.map((item: Record<string, unknown>) => {
-                            if (typeof item !== 'object' || item === null) return item;
-                            return {
-                                ...item,
-                                ...(item.createdAt ? { createdAt: new Date(item.createdAt as string) } : {}),
-                                ...(item.updatedAt ? { updatedAt: new Date(item.updatedAt as string) } : {}),
-                                ...(item.earnedAt  ? { earnedAt:  new Date(item.earnedAt  as string) } : {}),
-                            };
-                        });
-                    }
-                    return value;
-                },
-            }),
+            storage: debouncedJSONStorage,
             /**
              * Schema Versioning and Migration logic (Sprint 68)
              * version: 2 — Introduced targeted reviver and automatic backups.
@@ -2770,6 +2814,9 @@ export function restoreDataBackup(backupKey: string): boolean {
             logger.error('LoreCanvas: backup is unreadable, refusing to restore', backupKey);
             return false;
         }
+        // The caller reloads straight after this. A queued local save would
+        // flush on pagehide and overwrite what we just restored.
+        cancelPendingPersist();
         localStorage.setItem('lorecanvas-workspace', payload);
         return true;
     } catch (e) {

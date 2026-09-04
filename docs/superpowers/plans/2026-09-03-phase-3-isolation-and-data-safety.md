@@ -1042,7 +1042,17 @@ offer one writer a one-click restore of another writer's manuscripts."
 
 ---
 
-## Task 5: Automatic backups restore as an empty workspace
+## Task 5: Automatic backups restore as an empty workspace — ALREADY DONE
+
+**Status: shipped before Phase 1, in commit 83da32d.** The fix is
+`src/lib/backupEnvelope.ts` (`normaliseBackupPayload`), wired into
+`restoreDataBackup`, with 11 tests in `backupEnvelope.test.ts`. It differs from
+the design below in one way, deliberately: the version comes from the backup
+key (`lorecanvas-backup-v{n}-{ts}`) rather than being passed in, so the
+migration chain replays from the version the snapshot was actually taken at.
+Skip this task.
+
+## Original design (superseded)
 
 **Files:**
 - Modify: `src/lib/workspaceOwner.ts`, `src/lib/workspaceOwner.test.ts`
