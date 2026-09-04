@@ -190,4 +190,117 @@
     100% {
         transform: rotate(360deg);
     }
+}.scopeTabs {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.scopeTab {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.scopeTab:hover:not(:disabled) {
+    background: var(--surface);
+    color: var(--text-primary);
+}
+
+.scopeTab:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.scopeTabActive,
+.scopeTabActive:hover:not(:disabled) {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #ffffff;
+}
+
+.compileGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.compileToggle {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.compileField {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 0.75rem;
+}
+
+.compileField label {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.compileField textarea {
+    width: 100%;
+    resize: vertical;
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 0.85rem;
+}
+
+.compileField textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+.chapterList {
+    display: flex;
+    flex-direction: column;
+    max-height: 190px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+
+.chapterRow {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.chapterRow:not(:last-child) {
+    border-bottom: 1px solid var(--border);
+}
+
+.chapterIndex {
+    min-width: 1.5rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.chapterTitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
