@@ -1,6 +1,11 @@
 /* VersionHistoryPanel — slide-out panel, fixed right edge */
 /* Glassmorphism — Sprint 98 */
 .panel {
+    /* The user drags .panelResizeHandle, so this panel's width is set by them
+       and is independent of the viewport's. Its children must size against the
+       panel, not the window — a viewport media query cannot see this width. */
+    container-type: inline-size;
+    container-name: panel;
     position: fixed;
     top: 48px;
     right: 0;
@@ -375,4 +380,45 @@
 
 .panelResizeHandle:hover {
     background: rgba(var(--overlay-rgb), 0.25);
+}
+
+/* The panel drags down to 300px and .contentWrapper carries an inline
+   paddingRight equal to the side tab (44–120px), so a snapshot row can be left
+   with ~130px. Three rows here are hard flex rows with no wrap: the header,
+   .itemMeta (date + time + word count) and .itemActions (Restore + Delete).
+   Below 24rem they are allowed to wrap and the padding is pulled in. */
+@container panel (max-width: 24rem) {
+    .header {
+        padding: var(--space-5) var(--space-5);
+        gap: var(--space-4);
+    }
+
+    .title {
+        font-size: var(--text-sm);
+    }
+
+    .tabSwitcher,
+    .selectorSection,
+    .saveActions,
+    .listTitle,
+    .snapshotItem {
+        padding-left: var(--space-5);
+        padding-right: var(--space-5);
+    }
+
+    /* Date, time and word count no longer fit on one line. */
+    .itemMeta {
+        flex-wrap: wrap;
+        gap: var(--space-2) var(--space-4);
+    }
+
+    /* Restore and Delete sit side by side down to about 130px; below that they
+       stack rather than shrinking past a comfortable tap target. */
+    .itemActions {
+        flex-wrap: wrap;
+    }
+
+    .actionBtn {
+        flex: 1 1 auto;
+    }
 }

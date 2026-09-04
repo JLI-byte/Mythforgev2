@@ -2,6 +2,11 @@
 /* Closed: translates right keeping 44px tab visible. Open: fully visible. */
 /* Glassmorphism — Sprint 98 */
 .panel {
+    /* The user drags .panelResizeHandle, so this panel's width is set by them
+       and is independent of the viewport's. Its children must size against the
+       panel, not the window — a viewport media query cannot see this width. */
+    container-type: inline-size;
+    container-name: panel;
     position: fixed;
     top: 48px;
     right: 0;
@@ -192,4 +197,18 @@
 
 .panelResizeHandle:hover {
     background: rgba(var(--overlay-rgb), 0.25);
+}
+/* The panel drags down to 300px, and .header carries an inline paddingRight
+   equal to the side tab (44–120px), so its usable row can fall to ~160px.
+   Below 24rem the padding is pulled in and the title steps down so
+   "World Bible" and the close button stay on one line. */
+@container panel (max-width: 24rem) {
+    .header {
+        padding: var(--space-5) var(--space-5);
+        gap: var(--space-4);
+    }
+
+    .title {
+        font-size: var(--text-sm);
+    }
 }

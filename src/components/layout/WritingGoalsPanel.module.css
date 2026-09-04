@@ -1,6 +1,11 @@
 /* WritingGoalsPanel — slide-out panel, fixed right edge */
 /* Glassmorphism — Sprint 98 */
 .panel {
+    /* The user drags .panelResizeHandle, so this panel's width is set by them
+       and is independent of the viewport's. Its children must size against the
+       panel, not the window — a viewport media query cannot see this width. */
+    container-type: inline-size;
+    container-name: panel;
     position: fixed;
     top: 48px;
     right: 0;
@@ -193,4 +198,17 @@
 
 .panelResizeHandle:hover {
     background: rgba(var(--overlay-rgb), 0.25);
+}
+/* Same squeeze as the World Bible drawer: at 300px with a 120px side tab the
+   header row has ~160px to hold a title and a close button. Below 24rem the
+   padding tightens and the title steps down rather than wrapping. */
+@container panel (max-width: 24rem) {
+    .header {
+        padding: var(--space-5) var(--space-5);
+        gap: var(--space-4);
+    }
+
+    .title {
+        font-size: var(--text-sm);
+    }
 }
