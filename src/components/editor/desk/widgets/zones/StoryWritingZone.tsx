@@ -21,6 +21,7 @@ import { BookViewEditor } from '../../BookViewEditor';
 import { BookCoverEditor } from '../../BookCoverEditor';
 import { WidgetLibraryDropdown } from '../../WidgetLibraryDropdown';
 import { WritingZoneProps } from './zoneTypes';
+import { reconcileZoneSelection } from '@/lib/zoneSelection';
 import styles from '../../../WritingDesk.module.css';
 
 export function StoryWritingZone({ content, onChange, onChangeImmediate, widget, onDragStart, onDeleteWidget, onDockChange, onManualSave, onAddAtCenter }: WritingZoneProps) {
@@ -29,6 +30,10 @@ export function StoryWritingZone({ content, onChange, onChangeImmediate, widget,
   const addDocument = useWorkspaceStore(s => s.addDocument);
   const addScene = useWorkspaceStore(s => s.addScene);
   const updateDocument = useWorkspaceStore(s => s.updateDocument);
+  const storeActiveDocumentId = useWorkspaceStore(s => s.activeDocumentId);
+  const storeActiveSceneId = useWorkspaceStore(s => s.activeSceneId);
+  const setActiveDocument = useWorkspaceStore(s => s.setActiveDocument);
+  const setActiveScene = useWorkspaceStore(s => s.setActiveScene);
   const [editingNode, setEditingNode] = useState<{ type: 'chapter' | 'scene', id: string, text: string } | null>(null);
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
@@ -94,15 +99,28 @@ export function StoryWritingZone({ content, onChange, onChangeImmediate, widget,
   const showSettings = content.showSettings || false;
 
   const activeDocId = content.documentId || projectDocs[0]?.id || '';
+  /**
+   * Open a chapter. The store is told as well as the widget, so Export and the
+   * breadcrumb name the chapter the writer is actually looking at.
+   * setActiveDocument picks that chapter's first scene for the store; 'all' and
+   * 'cover' stay the binder's own view, not the store's.
+   */
+  const selectChapter = (docId: string, sceneId: string) => {
+    (onChangeImmediate ?? onChange)({ ...content, documentId: docId, sceneId });
+    setActiveDocument(docId);
+    if (sceneId && sceneId !== 'all' && sceneId !== 'cover') setActiveScene(sceneId);
+  };
+
   const setActiveDocId = (id: string) => {
     const firstScene = projectScenes.filter(s => s.documentId === id).sort((a, b) => a.order - b.order)[0];
-    (onChangeImmediate ?? onChange)({ ...content, documentId: id, sceneId: firstScene?.id || '' });
+    selectChapter(id, firstScene?.id || '');
   };
 
   const isBookMode = content.viewType === 'book';
   const activeSceneId = content.sceneId || 'all';
 
   const setActiveSceneId = (id: string) => {
+    if (id && id !== 'all' && id !== 'cover') setActiveScene(id);
     // If book mode is active, clicking a scene scrolls instead of switching view
     if (isBookMode && id !== 'book' && id !== 'cover') {
       (onChangeImmediate ?? onChange)({ ...content, sceneId: id });
@@ -130,6 +148,22 @@ export function StoryWritingZone({ content, onChange, onChangeImmediate, widget,
     if (!activeDocId && projectDocs.length > 0) setActiveDocId(projectDocs[0].id);
     else if (activeDocId && !activeSceneId && docScenes.length > 0) setActiveSceneId(docScenes[0].id);
   }, [activeProjectId, activeDocId, activeSceneId]);
+
+  // Something outside the binder opened a chapter — the Draft Table's outline
+  // export, the command palette, Home's "resume where you left off". Follow it,
+  // so the writer lands on what they just made instead of the chapter they left.
+  useEffect(() => {
+    const next = reconcileZoneSelection(
+      { documentId: activeDocId, sceneId: activeSceneId },
+      { documentId: storeActiveDocumentId, sceneId: storeActiveSceneId },
+      projectScenes,
+      projectDocs.map(d => d.id),
+    );
+    if (next) {
+      (onChangeImmediate ?? onChange)({ ...content, documentId: next.documentId, sceneId: next.sceneId });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeActiveDocumentId, storeActiveSceneId, activeDocId, activeSceneId, projectScenes, projectDocs]);
 
   useEffect(() => {
     if (!isFocusMode) return;
@@ -164,7 +198,7 @@ export function StoryWritingZone({ content, onChange, onChangeImmediate, widget,
     addDocument({ id: nid, projectId: activeProjectId, title: `Chapter ${projectDocs.length + 1}`, content: '', createdAt: new Date() });
     const sid = crypto.randomUUID();
     addScene({ id: sid, documentId: nid, projectId: activeProjectId, title: 'Scene 1', content: '', order: 0, createdAt: new Date() });
-    onChange({ ...content, documentId: nid, sceneId: sid });
+    selectChapter(nid, sid);
   };
 
   const handleAddScene = () => {
@@ -330,16 +364,14 @@ export function StoryWritingZone({ content, onChange, onChangeImmediate, widget,
                   <div key={doc.id} className={styles.spineSceneListGroup}>
                     <button 
                       className={`${styles.spineSceneListHeader} ${isDocActive ? styles.spineSceneListHeaderActive : ''}`} 
-                      onClick={() => {
-                        (onChangeImmediate ?? onChange)({ ...content, documentId: doc.id, sceneId: 'all' });
-                      }}
+                      onClick={() => selectChapter(doc.id, 'all')}
                     >
                       <div 
                         className={styles.spineSceneListArrowContainer}
                         onClick={(e) => {
                           e.stopPropagation();
                           if (!isDocActive) {
-                            (onChangeImmediate ?? onChange)({ ...content, documentId: doc.id, sceneId: scenes[0]?.id || '' });
+                            selectChapter(doc.id, scenes[0]?.id || '');
                             setIsSceneListCollapsed(false);
                           } else {
                             setIsSceneListCollapsed(prev => !prev);
