@@ -251,3 +251,37 @@ export function assembleChapter(
         },
     );
 }
+
+/**
+ * A word-processor block, independent of any library. Keeping the layout
+ * decisions — what is a heading, what starts a new page — in a plain value
+ * means they can be tested without loading the DOCX writer.
+ */
+export type DocxBlock =
+    | { kind: 'heading1'; text: string; pageBreakBefore: boolean }
+    | { kind: 'heading2'; text: string }
+    | { kind: 'text'; text: string }
+    | { kind: 'body'; html: string };
+
+/** The manuscript as an ordered run of word-processor blocks. */
+export function manuscriptDocxOutline(manuscript: Manuscript): DocxBlock[] {
+    const blocks: DocxBlock[] = [];
+    let started = false;
+
+    manuscript.pages.forEach(page => {
+        blocks.push({ kind: 'heading1', text: page.title, pageBreakBefore: started });
+        started = true;
+        page.lines.forEach(line => blocks.push({ kind: 'text', text: line }));
+    });
+
+    manuscript.chapters.forEach(chapter => {
+        blocks.push({ kind: 'heading1', text: chapter.title, pageBreakBefore: started });
+        started = true;
+        chapter.sections.forEach(section => {
+            blocks.push({ kind: 'heading2', text: section.title });
+            blocks.push({ kind: 'body', html: section.html });
+        });
+    });
+
+    return blocks;
+}

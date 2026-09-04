@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
     orderChapters, orderSections, assembleManuscript,
     resolveFrontMatter, DEFAULT_FRONT_MATTER, buildFrontMatterPages,
-    manuscriptWordCount, assembleChapter,
+    manuscriptWordCount, assembleChapter, manuscriptDocxOutline,
     type ChapterLike, type SectionLike,
 } from './manuscript';
 
@@ -179,5 +179,40 @@ describe('manuscriptWordCount', () => {
             ],
         };
         expect(manuscriptWordCount(m)).toBe(3);
+    });
+});
+
+describe('manuscriptDocxOutline', () => {
+    const build = () => assembleManuscript(
+        { title: 'My Book', author: 'Jane Roe' },
+        [
+            chapter('a', 'Chapter One', '2026-01-01T00:00:00Z'),
+            chapter('b', 'Chapter Two', '2026-02-01T00:00:00Z'),
+        ],
+        [
+            section('s1', 'a', 'Opening', 0, '<p>alpha</p>'),
+            section('s2', 'b', 'Only', 0, '<p>beta</p>'),
+        ],
+        'p1',
+        { frontMatter: { dedication: 'For Ada' } },
+    );
+
+    it('starts each front-matter page and each chapter on its own page', () => {
+        const outline = manuscriptDocxOutline(build());
+        const breaks = outline
+            .filter(b => b.kind === 'heading1' && b.pageBreakBefore)
+            .map(b => (b as { text: string }).text);
+        expect(breaks).toEqual(['Dedication', 'Contents', 'Chapter One', 'Chapter Two']);
+    });
+
+    it('does not break before the very first page', () => {
+        const outline = manuscriptDocxOutline(build());
+        expect(outline[0]).toEqual({ kind: 'heading1', text: 'My Book', pageBreakBefore: false });
+    });
+
+    it('gives every section a heading and a body', () => {
+        const outline = manuscriptDocxOutline(build());
+        expect(outline).toContainEqual({ kind: 'heading2', text: 'Opening' });
+        expect(outline).toContainEqual({ kind: 'body', html: '<p>alpha</p>' });
     });
 });
