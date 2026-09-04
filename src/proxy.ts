@@ -48,8 +48,25 @@ export async function proxy(request: NextRequest) {
     const { data } = await supabase.auth.getUser();
     user = data.user;
   } catch (error) {
-    console.warn('[proxy] auth check failed, passing request through:', error);
-    return response;
+    // Fail CLOSED. Passing an unauthenticated request through on a Supabase
+    // hiccup handed the app shell to whoever asked. A transient outage showing
+    // a sign-in page is correct; showing the app is not.
+    //
+    // Public paths are exempt, or an outage would bounce /welcome to /welcome
+    // forever.
+    console.warn('[proxy] auth check failed, refusing the request:', error);
+    const path = request.nextUrl.pathname;
+    const publicOnOutage =
+      path.startsWith('/login')
+      || path.startsWith('/welcome')
+      || path.startsWith('/auth/callback')
+      || path.startsWith('/api/dev-login')
+      || path.startsWith('/_next')
+      || path.includes('.');
+    if (publicOnOutage) return response;
+    const url = request.nextUrl.clone();
+    url.pathname = '/welcome';
+    return NextResponse.redirect(url);
   }
 
   // Route protection logic

@@ -24,12 +24,10 @@ export function useLoginForm() {
     const router = useRouter();
 
     const supabase = createClient();
-    // Dev login also shows in local production builds when explicitly opted in
-    // at build time (NEXT_PUBLIC_ALLOW_DEV_LOGIN=1) — the API route still 404s
-    // unless the server is started with ALLOW_DEV_LOGIN=1.
-    const isDev =
-        process.env.NODE_ENV === 'development' ||
-        process.env.NEXT_PUBLIC_ALLOW_DEV_LOGIN === '1';
+    // Development only. The opt-in build flag is gone: the API route is gated
+    // on NODE_ENV alone, so showing the button anywhere else would offer a
+    // control that always 404s.
+    const isDev = process.env.NODE_ENV === 'development';
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
