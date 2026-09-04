@@ -9,6 +9,7 @@ import { recomputeGoalMet } from '@/lib/writingDays';
 import { logger } from '@/lib/logger';
 import { getStoredValue } from '@/lib/storage';
 import { worldKeyForProject, worldKeyForEntity, type WorldKey } from '@/lib/worldKey';
+import { normalizeDismissedHints, normalizeVisitStamp } from '@/lib/onboarding';
 import { migrateWorkspaceSchema } from './migrateWorkspaceSchema';
 import { DEFAULT_WORLD_BIBLE_LAYOUT } from '@/lib/worldBibleNav';
 import { wouldCreateCycle, fileByType } from '@/lib/folderTree';
@@ -607,6 +608,30 @@ export interface WorkspaceState {
     exampleWorldId: string | null;
 
     /**
+     * Whether this writer has been through first run. Set the moment they own
+     * a book — by creating one, importing one, or loading the example world.
+     * Per-user: it rides inside the persisted workspace blob so an account
+     * switch discards it along with everything else.
+     */
+    hasOnboarded: boolean;
+
+    /**
+     * Ids of contextual hints this writer has closed. Holds the '*' sentinel
+     * (HINTS_ALL_DISMISSED) when they asked not to be shown any more.
+     */
+    dismissedHints: string[];
+
+    /** ISO timestamp of the start of the CURRENT visit. Persisted. */
+    lastVisitAt: string | null;
+
+    /**
+     * The value lastVisitAt held when this page load began — what "away since"
+     * means for the whole session. Transient: derived once by markVisit() and
+     * never persisted, or the digest would reset itself on every save.
+     */
+    previousVisitAt: string | null;
+
+    /**
      * Hides the UI layout framing (sidebar, etc) around the editor content.
      */
     isFullscreen: boolean;
@@ -881,6 +906,19 @@ export interface WorkspaceState {
      * nothing stashed and nothing already present.
      */
     setExampleData: (on: boolean) => void;
+
+    /** Mark first run complete. Idempotent. */
+    completeOnboarding: () => void;
+
+    /** Close one hint by id, or every hint with HINTS_ALL_DISMISSED. */
+    dismissHint: (id: string) => void;
+
+    /**
+     * Freeze the previous visit stamp and start a new one. Called once per page
+     * load, after hydration. Calling it again in the same load is a no-op, so
+     * a remount cannot erase the absence the writer has not read yet.
+     */
+    markVisit: () => void;
 
     /**
      * Toggles the distraction-free Fullscreen mode.
@@ -1357,6 +1395,9 @@ export function partializeWorkspace(state: WorkspaceState) {
         exampleDataOn: state.exampleDataOn,
         stashedExample: state.stashedExample,
         exampleWorldId: state.exampleWorldId,
+        hasOnboarded: state.hasOnboarded,
+        dismissedHints: state.dismissedHints,
+        lastVisitAt: state.lastVisitAt,
         isFocusMode: state.isFocusMode,
         editorWidth: state.editorWidth,
         tabRailWidth: state.tabRailWidth,
@@ -1457,6 +1498,10 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             exampleDataOn: false,
             stashedExample: null,
             exampleWorldId: null,
+            hasOnboarded: false,
+            dismissedHints: [],
+            lastVisitAt: null,
+            previousVisitAt: null,
             activePanel: null,
             isFullscreen: false,
             isFocusMode: false,
@@ -1582,7 +1627,12 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             addProject: (project) =>
                 set((state) => {
                     logger.info('Project added:', project.name);
-                    return { projects: [...state.projects, project] };
+                    // Owning a book is what ends first run, however it happened —
+                    // created, imported, or seeded from the example world.
+                    return {
+                        projects: [...state.projects, project],
+                        ...(state.hasOnboarded ? {} : { hasOnboarded: true }),
+                    };
                 }),
 
             updateProject: (id, updates) =>
@@ -1756,6 +1806,27 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 set((state) => {
                     logger.info('Entity added:', entity.name);
                     return { entities: [...state.entities, entity] };
+                }),
+
+            completeOnboarding: () =>
+                set((state) => (state.hasOnboarded ? {} : { hasOnboarded: true })),
+
+            dismissHint: (id) =>
+                set((state) => (
+                    state.dismissedHints.includes(id)
+                        ? {}
+                        : { dismissedHints: [...state.dismissedHints, id] }
+                )),
+
+            markVisit: () =>
+                set((state) => {
+                    // Once per page load. previousVisitAt is null only before
+                    // the first call, so a second call finds it set and stops.
+                    if (state.previousVisitAt !== null) return {};
+                    return {
+                        previousVisitAt: state.lastVisitAt,
+                        lastVisitAt: new Date().toISOString(),
+                    };
                 }),
 
             setHoveredEntity: (id) =>
@@ -2783,6 +2854,16 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     if (!state.worldUnderstanding || typeof state.worldUnderstanding !== 'object') {
                         state.worldUnderstanding = {};
                     }
+                    // First-run state arrived after the persisted schema shipped.
+                    if (typeof state.hasOnboarded !== 'boolean') {
+                        // An existing writer with work is not a newcomer.
+                        state.hasOnboarded = state.projects.length > 0;
+                    }
+                    state.dismissedHints = normalizeDismissedHints(state.dismissedHints);
+                    state.lastVisitAt = normalizeVisitStamp(state.lastVisitAt);
+                    // Never restored: it is derived per page load by markVisit().
+                    state.previousVisitAt = null;
+
                     state.setHasHydrated(true);
                 }
             },
