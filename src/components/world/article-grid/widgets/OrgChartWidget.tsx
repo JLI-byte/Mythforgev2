@@ -260,9 +260,12 @@ export function OrgChartWidget({ content, onChange }: { content: any; onChange: 
           <input className={styles.orgChartInput} aria-label="Node role or title" placeholder="Role / Title (e.g. Commander)" value={newNode.role} onChange={e => setNewNode(v => ({ ...v, role: e.target.value }))} />
           <div className={styles.orgChartColorRow}>
             <span className={styles.orgChartColorLabel}>Color:</span>
-            {NODE_COLORS.map(c => (
+            {NODE_COLORS.map((c, i) => (
               <button key={c} className={`${styles.orgChartColorSwatch} ${newNode.color === c ? styles.orgChartColorSwatchActive : ''}`}
-                style={{ background: c }} onClick={() => setNewNode(v => ({ ...v, color: c }))} />
+                style={{ background: c }}
+                aria-label={`Node colour ${i + 1} of ${NODE_COLORS.length}`}
+                aria-pressed={newNode.color === c}
+                onClick={() => setNewNode(v => ({ ...v, color: c }))} />
             ))}
           </div>
           <div className={styles.orgChartFormBtns}>

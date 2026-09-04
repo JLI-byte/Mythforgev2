@@ -44,11 +44,13 @@ export function SceneCardWidget({ content, onChange }: { content: any; onChange:
           onChange={e => onChange({ ...content, title: e.target.value })}
         />
         <div className={styles.sceneCardColorRow}>
-          {CARD_COLORS.map(c => (
+          {CARD_COLORS.map((c, i) => (
             <button
               key={c}
               className={`${styles.sceneCardColorDot} ${color === c ? styles.sceneCardColorDotActive : ''}`}
               style={{ background: c }}
+              aria-label={`Card colour ${i + 1} of ${CARD_COLORS.length}`}
+              aria-pressed={color === c}
               onClick={() => onChange({ ...content, color: c })}
             />
           ))}

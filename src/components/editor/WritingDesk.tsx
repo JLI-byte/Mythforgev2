@@ -14,6 +14,7 @@ import { DraftExport, collectExportBeats, ExportBeat } from './desk/DraftExport'
 import { SurfaceCanvas } from './desk/SurfaceCanvas';
 import { EmptyDeskWelcome } from './desk/EmptyDeskWelcome';
 import { WidgetRenderer } from './desk/widgets/WidgetRenderer';
+import { announce } from '@/lib/liveAnnouncer';
 
 // ============================================================
 // MAIN COMPONENT
@@ -104,6 +105,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
     updateDeskState(stateKey, { widgets: next });
     if (!silentUI) {
       setIsSaved(true);
+      announce('Desk saved');
       setTimeout(() => setIsSaved(false), 2000);
     }
   }, [stateKey, updateDeskState]);
@@ -839,7 +841,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
         </div>
         
         <div className={styles.deskZoomControls}>
-          <button className={styles.zoomBtn} onClick={() => { setZoomValue(Math.max(0.2, zoom - 0.1)); }}>−</button>
+          <button className={styles.zoomBtn} aria-label="Zoom out" onClick={() => { setZoomValue(Math.max(0.2, zoom - 0.1)); }}>−</button>
           
           <input 
             type="range" 
@@ -868,21 +870,22 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
               }}
             />
           ) : (
-            <span 
-              className={styles.zoomValue} 
+            <button
+              type="button"
+              className={styles.zoomValue}
               onClick={() => {
                 setZoomInputValue(Math.round(zoom * 100).toString());
                 setIsEditingZoom(true);
               }}
-              title="Click to type zoom %"
+              aria-label={`Zoom is ${Math.round(zoom * 100)} percent. Activate to type a value.`}
             >
               {Math.round(zoom * 100)}%
-            </span>
+            </button>
           )}
 
-          <button className={styles.zoomBtn} onClick={() => { setZoomValue(Math.min(2, zoom + 0.1)); }}>+</button>
+          <button className={styles.zoomBtn} aria-label="Zoom in" onClick={() => { setZoomValue(Math.min(2, zoom + 0.1)); }}>+</button>
           <div className={styles.deskFmtSep} style={{ height: '16px', margin: '0 4px' }} />
-          <button className={styles.fitBtn} style={{ background: 'transparent', color: 'var(--muted)', fontSize: '0.6875rem' }} onClick={() => { setZoomValue(1); }}>100%</button>
+          <button className={styles.fitBtn} aria-label="Reset zoom to 100%" style={{ background: 'transparent', color: 'var(--muted)', fontSize: '0.6875rem' }} onClick={() => { setZoomValue(1); }}>100%</button>
           <button className={styles.fitBtn} onClick={handleFit}>Fit</button>
         </div>
 

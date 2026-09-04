@@ -22,6 +22,7 @@ import { BookCoverEditor } from '../../BookCoverEditor';
 import { WidgetLibraryDropdown } from '../../WidgetLibraryDropdown';
 import { WritingZoneProps } from './zoneTypes';
 import { reconcileZoneSelection } from '@/lib/zoneSelection';
+import { announce } from '@/lib/liveAnnouncer';
 import styles from '../../../WritingDesk.module.css';
 
 export function StoryWritingZone({ content, onChange, onChangeImmediate, widget, onDragStart, onDeleteWidget, onDockChange, onManualSave, onAddAtCenter }: WritingZoneProps) {
@@ -313,37 +314,47 @@ export function StoryWritingZone({ content, onChange, onChangeImmediate, widget,
 
           <div className={styles.binderSpine} onMouseDown={e => widget.dock === null ? onDragStart(e, widget) : undefined}>
             <div className={styles.spineCoverContainer}>
-              {activeProject?.coverImageUrl ? (
-                <img 
-                  src={activeProject.coverImageUrl} 
-                  className={styles.spineCoverImg} 
-                  onClick={() => setActiveSceneId('cover')}
-                  title="Book Information"
-                />
-              ) : (
-                <div 
-                  className={styles.spineCoverPlaceholder} 
-                  style={{ background: activeProject?.coverColor || 'var(--surface)' }}
-                  onClick={() => setActiveSceneId('cover')}
-                  title="Book Information"
-                >
-                  <span className={styles.spineCoverInitials}>{activeProject?.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?'}</span>
-                </div>
-              )}
-              
-              <button 
+              <button
+                type="button"
+                className={styles.spineCoverButton}
+                onClick={() => setActiveSceneId('cover')}
+                aria-label="Book information"
+              >
+                {activeProject?.coverImageUrl ? (
+                  <img
+                    src={activeProject.coverImageUrl}
+                    className={styles.spineCoverImg}
+                    alt=""
+                  />
+                ) : (
+                  <div
+                    className={styles.spineCoverPlaceholder}
+                    style={{ background: activeProject?.coverColor || 'var(--surface)' }}
+                  >
+                    <span className={styles.spineCoverInitials} aria-hidden="true">{activeProject?.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?'}</span>
+                  </div>
+                )}
+              </button>
+
+              <button
                 className={styles.spineSaveBtn}
                 data-status={content.saveStatus}
+                aria-label={content.saveStatus === 'saved' ? 'Saved' : 'Save now'}
                 onClick={() => {
                   (onChangeImmediate ?? onChange)({ ...content, saveStatus: 'saving' });
                   onManualSave?.();
                   setTimeout(() => {
                     (onChangeImmediate ?? onChange)({ ...content, saveStatus: 'saved' });
+                    announce(
+                      activeScene
+                        ? `Saved. ${(activeScene.wordCount ?? 0).toLocaleString()} words in ${activeScene.title}.`
+                        : 'Saved.',
+                    );
                     setTimeout(() => (onChangeImmediate ?? onChange)({ ...content, saveStatus: null }), 2000);
                   }, 500);
                 }}
               >
-                {content.saveStatus === 'saved' ? '✔️' : '💾'}
+                <span aria-hidden="true">{content.saveStatus === 'saved' ? '✔️' : '💾'}</span>
               </button>
             </div>
 

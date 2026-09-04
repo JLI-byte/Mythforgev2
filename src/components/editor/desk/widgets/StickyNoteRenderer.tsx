@@ -38,7 +38,14 @@ export function StickyNoteRenderer({ content, onChange, onChangeImmediate }: { c
     <div className={styles.stickyNote} style={{ background: STICKY_COLORS[color] }}>
       <div className={styles.stickyColorBar}>
         {Object.entries(STICKY_COLORS).map(([name, hex]) => (
-          <button key={name} className={`${styles.stickyColorDot} ${color === name ? styles.stickyColorDotActive : ''}`} style={{ background: hex }} onClick={() => handleImmediate({ color: name })} />
+          <button
+            key={name}
+            className={`${styles.stickyColorDot} ${color === name ? styles.stickyColorDotActive : ''}`}
+            style={{ background: hex }}
+            aria-label={`${name} note`}
+            aria-pressed={color === name}
+            onClick={() => handleImmediate({ color: name })}
+          />
         ))}
       </div>
       <textarea aria-label="Note text" className={styles.stickyTextarea} placeholder="Write a note..." value={localContent.text || ''} onChange={e => handleChange({ text: e.target.value })} />

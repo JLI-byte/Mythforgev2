@@ -451,6 +451,7 @@ export default function ModeBar() {
           {query && (
             <button
               className={styles.searchClear}
+              aria-label="Clear search"
               onMouseDown={e => { e.preventDefault(); setQuery(''); setResults([]); setIsOpen(false); }}
             >
               ×

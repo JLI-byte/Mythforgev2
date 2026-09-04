@@ -126,8 +126,8 @@ export function BookViewEditor({ activeSceneId }: { activeSceneId?: string }) {
     <div className={styles.deskEditorWrapper}>
       <div className={styles.deskEditorToolbar}>
         <div className={styles.deskToolbarGroup}>
-          <button className={styles.deskFmtBtn} onClick={() => editor.chain().focus().toggleBold().run()}>B</button>
-          <button className={styles.deskFmtBtn} onClick={() => editor.chain().focus().toggleItalic().run()}>I</button>
+          <button className={styles.deskFmtBtn} aria-label="Bold" onClick={() => editor.chain().focus().toggleBold().run()}>B</button>
+          <button className={styles.deskFmtBtn} aria-label="Italic" onClick={() => editor.chain().focus().toggleItalic().run()}>I</button>
         </div>
       </div>
       <div className={styles.deskEditorBody}>
