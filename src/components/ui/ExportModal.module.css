@@ -56,7 +56,7 @@
 
 .header h2 {
     margin: 0;
-    font-size: 1rem;
+    font-size: var(--text-lg);
     font-weight: 500;
     color: var(--foreground);
 }
@@ -65,7 +65,7 @@
     background: transparent;
     border: none;
     color: var(--muted);
-    font-size: 1.25rem;
+    font-size: var(--text-xl);
     cursor: pointer;
     line-height: 1;
     padding: var(--space-2);
@@ -104,14 +104,14 @@
 .section h3,
 .sectionDivider h3 {
     margin: 0;
-    font-size: 0.875rem;
+    font-size: var(--text-md);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--muted);
 }
 
 .subtext {
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     color: var(--muted);
     margin: 0;
 }
@@ -133,7 +133,7 @@
     color: var(--foreground);
     padding: var(--space-5) var(--space-6);
     border-radius: 6px;
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     font-weight: 500;
     cursor: pointer;
     display: flex;
@@ -157,7 +157,7 @@
 }
 
 .icon {
-    font-size: 1rem;
+    font-size: var(--text-lg);
     display: inline-flex;
     align-items: center;
 }
@@ -169,7 +169,7 @@
     border: 1px solid var(--error, #ff4d4f);
     border-radius: 4px;
     color: var(--error, #ff4d4f);
-    font-size: 0.85rem;
+    font-size: var(--text-md);
 }
 
 .spinner {
@@ -203,7 +203,7 @@
     background: transparent;
     color: var(--text-secondary);
     border-radius: 6px;
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
 }
@@ -236,7 +236,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     color: var(--text-primary);
     cursor: pointer;
 }
@@ -249,7 +249,7 @@
 }
 
 .compileField label {
-    font-size: 0.78rem;
+    font-size: var(--text-xs);
     color: var(--text-secondary);
 }
 
@@ -262,7 +262,7 @@
     background: var(--surface);
     color: var(--text-primary);
     font: inherit;
-    font-size: 0.85rem;
+    font-size: var(--text-md);
 }
 
 .compileField textarea:focus-visible {
@@ -284,7 +284,7 @@
     align-items: center;
     gap: var(--space-4);
     padding: var(--space-3) var(--space-4);
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     color: var(--text-primary);
     cursor: pointer;
 }

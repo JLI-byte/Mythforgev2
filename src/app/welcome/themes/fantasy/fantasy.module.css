@@ -20,7 +20,7 @@
     background-color: var(--parchment);
     color: var(--sepia);
     font-family: var(--font-garamond), Georgia, serif;
-    font-size: 1.06rem;
+    font-size: var(--text-lg);
     overflow-x: clip;
 }
 
@@ -64,7 +64,7 @@
     align-items: center;
     gap: var(--space-4);
     font-family: var(--font-fell), serif;
-    font-size: 1.25rem;
+    font-size: var(--text-xl);
     color: var(--sepia);
     letter-spacing: 0.02em;
 }
@@ -74,7 +74,7 @@
     font-style: italic;
     color: var(--verdigris);
     text-decoration: none;
-    font-size: 1rem;
+    font-size: var(--text-lg);
     border-bottom: 1px solid transparent;
     transition: border-color 180ms ease;
 }
@@ -116,7 +116,7 @@
 
 .heroBadge {
     font-family: var(--font-garamond), serif;
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--verdigris);
@@ -159,7 +159,7 @@
 .ctaPrimary {
     font-family: var(--font-garamond), serif;
     font-weight: 600;
-    font-size: 1.05rem;
+    font-size: var(--text-lg);
     text-decoration: none;
     color: #f6ddd2;
     background: var(--vermilion);
@@ -183,7 +183,7 @@
 .ctaSecondary {
     font-family: var(--font-garamond), serif;
     font-style: italic;
-    font-size: 1.05rem;
+    font-size: var(--text-lg);
     color: var(--verdigris);
     text-decoration: none;
     border-bottom: 1px solid var(--verdigris);
@@ -203,7 +203,7 @@
     transform: translateX(-50%);
     font-family: var(--font-garamond), serif;
     font-style: italic;
-    font-size: 0.92rem;
+    font-size: var(--text-md);
     color: var(--sepia-soft);
     display: flex;
     flex-direction: column;
@@ -222,7 +222,7 @@
 
 .journeyKicker {
     text-align: center;
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     letter-spacing: 0.24em;
     text-transform: uppercase;
     color: var(--sepia-soft);
@@ -302,12 +302,12 @@
 .stopName {
     font-family: var(--font-fell), serif;
     font-weight: 400;
-    font-size: 1.7rem;
+    font-size: var(--text-display);
     margin: 0;
 }
 
 .stopFeature {
-    font-size: 0.82rem;
+    font-size: var(--text-sm);
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--verdigris);
@@ -341,7 +341,7 @@
 .marginaliaNote {
     font-family: var(--font-fell), serif;
     font-style: italic;
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
 }
 
 /* ---------- The Letter ---------- */
@@ -387,7 +387,7 @@
 
 .letterSalutation {
     font-family: var(--font-fell), serif;
-    font-size: 1.25rem;
+    font-size: var(--text-xl);
     margin: 0 0 var(--space-3);
 }
 
@@ -404,7 +404,7 @@
 .fieldLabel {
     display: block;
     font-style: italic;
-    font-size: 0.98rem;
+    font-size: var(--text-lg);
     color: var(--sepia-soft);
     margin-bottom: var(--space-3);
 }
@@ -418,7 +418,7 @@
     border-radius: 0;
     color: var(--sepia);
     font-family: var(--font-garamond), serif;
-    font-size: 1.08rem;
+    font-size: var(--text-lg);
     padding: var(--space-3) var(--space-1);
     transition: border-color 160ms ease;
 }
@@ -458,7 +458,7 @@
     cursor: pointer;
     font-family: var(--font-garamond), serif;
     font-weight: 600;
-    font-size: 1.1rem;
+    font-size: var(--text-lg);
     color: var(--sepia);
 }
 
@@ -503,7 +503,7 @@
 .letterSuccessTitle {
     font-family: var(--font-fell), serif;
     font-weight: 400;
-    font-size: 1.6rem;
+    font-size: var(--text-2xl);
     margin: 0;
 }
 
@@ -514,7 +514,7 @@
     text-align: center;
     font-style: italic;
     color: var(--sepia-soft);
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
 }
 
 .footerLink {

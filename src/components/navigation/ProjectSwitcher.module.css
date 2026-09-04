@@ -42,7 +42,7 @@
 
 .header h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: var(--text-lg);
     font-weight: 600;
     color: var(--foreground);
     font-family: var(--font-sans);
@@ -88,7 +88,7 @@
 
 .sectionHeader {
     margin: 0 0 var(--space-5) 0;
-    font-size: 0.9rem;
+    font-size: var(--text-md);
     font-weight: 600;
     color: var(--muted);
     font-family: var(--font-sans);
@@ -164,7 +164,7 @@
     background: rgba(0,0,0,0.3);
     border: none;
     color: white;
-    font-size: 1rem;
+    font-size: var(--text-lg);
     padding: var(--space-1) var(--space-3);
     cursor: pointer;
     border-radius: 4px;
@@ -198,7 +198,7 @@
     border: none;
     text-align: left;
     padding: var(--space-4) var(--space-5);
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     color: var(--foreground);
     border-radius: 4px;
     cursor: pointer;
@@ -243,7 +243,7 @@
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     line-height: 1.3;
     word-break: break-word;
 }
@@ -255,7 +255,7 @@
     left: 0;
     right: 0;
     text-align: center;
-    font-size: 0.6875rem;
+    font-size: var(--text-2xs);
     opacity: 0.5;
     pointer-events: none;
 }
@@ -263,7 +263,7 @@
 /* Doc count — pinned to bottom via flex flow */
 .cardDocCount {
     margin-top: auto;
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
     opacity: 0.7;
     position: relative;
     z-index: 1;
@@ -291,13 +291,13 @@
     border: 1px solid var(--accent);
     color: var(--foreground);
     border-radius: 4px;
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     outline: none;
     text-align: center;
 }
 
 .cardDeleteText {
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     color: var(--foreground);
     font-weight: 600;
 }
@@ -364,13 +364,13 @@
 .card_screenplay .cardTitle {
     font-family: var(--font-mono, monospace);
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: var(--text-md);
     color: var(--surface-mid);
 }
 
 .card_screenplay .cardDecor {
     font-family: monospace;
-    font-size: 0.6875rem;
+    font-size: var(--text-2xs);
     color: #999;
     opacity: 1;
 }
@@ -407,14 +407,14 @@
 .card_poetry .cardTitle {
     font-family: var(--font-serif);
     font-style: italic;
-    font-size: 0.9rem;
+    font-size: var(--text-md);
     color: #3d2b1f;
     padding: var(--space-4) 0;
 }
 
 .card_poetry .cardDecor {
     color: #c8b89a;
-    font-size: 0.7rem;
+    font-size: var(--text-2xs);
     opacity: 1;
 }
 
@@ -436,7 +436,7 @@
 .card_markdown::before {
     content: '#';
     position: absolute;
-    font-size: 5rem;
+    font-size: var(--text-hero);
     color: var(--foreground);
     opacity: 0.08;
     bottom: 8px;
@@ -450,7 +450,7 @@
 
 .card_markdown .cardTitle {
     font-family: var(--font-mono, monospace);
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     font-weight: 600;
     color: var(--foreground);
     position: relative;
@@ -511,7 +511,7 @@
     border: 1px solid var(--border);
     border-radius: 6px;
     color: var(--muted);
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     cursor: pointer;
     transition: all 150ms ease;
     text-align: center;
@@ -536,7 +536,7 @@
     color: var(--foreground);
     border: 1px solid var(--border);
     border-radius: 6px;
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     box-sizing: border-box;
 }
 
@@ -558,7 +558,7 @@
     color: var(--muted);
     cursor: pointer;
     border-radius: 4px;
-    font-size: 0.85rem;
+    font-size: var(--text-md);
 }
 
 .cancelBtn:hover {
@@ -573,7 +573,7 @@
     border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
-    font-size: 0.85rem;
+    font-size: var(--text-md);
 }
 
 .confirmBtn:disabled {
@@ -587,7 +587,7 @@
     color: white;
     border: none;
     border-radius: 4px;
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     cursor: pointer;
 }
 

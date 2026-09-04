@@ -37,7 +37,7 @@
 
 .sideStar {
     position: absolute; left: 31px; top: 36px; z-index: 8;
-    color: var(--gold); font-size: 30px;
+    color: var(--gold); font-size: var(--text-display);
 }
 .sideQuote {
     position: absolute; left: 32px; top: 110px; z-index: 8;
@@ -47,7 +47,7 @@
 }
 .sideCaption { position: absolute; left: 34px; bottom: 35px; z-index: 8; color: var(--cream); }
 .sideCaption b { display: block; font: 800 15px var(--profile-serif, serif); }
-.sideCaption span { font-size: 11px; color: var(--muted); }
+.sideCaption span { font-size: var(--text-2xs); color: var(--muted); }
 
 .decor { position: absolute; pointer-events: none; object-fit: cover; z-index: 7; border-radius: 8px; opacity: 0.92; }
 .decor:nth-of-type(1) { width: 150px; height: 150px; left: 250px; top: -30px; transform: rotate(-8deg); }
@@ -105,7 +105,7 @@
     color: var(--primary); letter-spacing: 1px; text-transform: lowercase;
 }
 
-.placeholder { color: var(--muted); font-style: italic; font-size: 13px; padding: var(--space-4) 0; }
+.placeholder { color: var(--muted); font-style: italic; font-size: var(--text-sm); padding: var(--space-4) 0; }
 .dossier {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -122,7 +122,7 @@
 .dossierName span {
     display: block;
     font-family: var(--profile-script, cursive);
-    font-size: 48px;
+    font-size: var(--text-hero);
     line-height: 0.8;
     font-weight: 400;
     color: color-mix(in srgb, var(--ink) 88%, var(--primary));
@@ -137,7 +137,7 @@
     margin: 0 0 var(--space-3);
     border-bottom: 1px dotted var(--line);
     padding-bottom: var(--space-2);
-    font-size: 13px;
+    font-size: var(--text-sm);
 }
 .dossierMeta span { color: var(--soft); }
 .introCard {
@@ -173,26 +173,26 @@
 .personaRow img { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; }
 
 .personaMeters { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5) var(--space-7); margin: var(--space-6) 0; }
-.meterItem b { display: block; font-size: 12px; margin-bottom: var(--space-2); color: var(--ink); }
+.meterItem b { display: block; font-size: var(--text-xs); margin-bottom: var(--space-2); color: var(--ink); }
 .meterItem > div { height: 6px; background: var(--white25); border-radius: 4px; overflow: hidden; }
 .meterItem > div > span { display: block; height: 100%; width: var(--level, 0%); background: linear-gradient(90deg, var(--primary), var(--gold)); }
 
 .personaNotes { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-top: var(--space-6); }
 .personaNotes b { display: block; font: 700 10px var(--profile-sans, sans-serif); letter-spacing: 2px; text-transform: uppercase; color: var(--primary); margin-bottom: var(--space-2); }
-.personaNotes p { margin: 0; font-size: 13px; color: var(--soft); }
+.personaNotes p { margin: 0; font-size: var(--text-sm); color: var(--soft); }
 
 .palette { display: flex; gap: var(--space-5); margin-bottom: var(--space-6); flex-wrap: wrap; }
 .colorSwatch { text-align: center; }
 .colorSwatch i { display: block; width: 46px; height: 46px; border-radius: 8px; background: var(--swatch); border: 1px solid var(--line); }
-.colorSwatch b { display: block; font-size: 11px; margin-top: var(--space-2); color: var(--ink); }
-.colorSwatch span { font-size: 0.6875rem; color: var(--muted); }
+.colorSwatch b { display: block; font-size: var(--text-2xs); margin-top: var(--space-2); color: var(--ink); }
+.colorSwatch span { font-size: var(--text-2xs); color: var(--muted); }
 
 .lookbook { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: var(--space-5); margin-bottom: var(--space-6); }
 .lookItem { border-radius: 8px; overflow: hidden; background: var(--cream); }
 .lookItem img { width: 100%; height: 120px; object-fit: cover; display: block; }
 .lookItem.large img { height: 190px; }
 .lookItem b { display: block; padding: var(--space-3) var(--space-4) 0; font: 700 11px var(--profile-sans, sans-serif); color: var(--ink); }
-.lookItem span { display: block; padding: 0 var(--space-4) var(--space-4); font-size: 11px; color: var(--muted); }
+.lookItem span { display: block; padding: 0 var(--space-4) var(--space-4); font-size: var(--text-2xs); color: var(--muted); }
 
 .appearanceBlock { margin-bottom: var(--space-6); }
 .appearanceBlock b { display: block; font: 700 10px var(--profile-sans, sans-serif); letter-spacing: 2px; text-transform: uppercase; color: var(--primary); margin-bottom: var(--space-2); }
@@ -200,17 +200,17 @@
 
 .appearanceSection { margin-bottom: var(--space-6); }
 .appearanceSectionHead b { font: 600 16px var(--profile-softserif, serif); color: var(--ink); margin-right: var(--space-4); }
-.appearanceSectionHead span { font-size: 12px; color: var(--muted); }
+.appearanceSectionHead span { font-size: var(--text-xs); color: var(--muted); }
 .appearanceMoodboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); margin-top: var(--space-4); }
 .moodItem img { width: 100%; height: 110px; object-fit: cover; border-radius: 6px; }
-.moodItem p { margin: var(--space-2) 0 0; font-size: 11px; color: var(--soft); }
+.moodItem p { margin: var(--space-2) 0 0; font-size: var(--text-2xs); color: var(--soft); }
 
 .relationStack { display: grid; gap: var(--space-5); }
 .relationCard { background: var(--cream); border: 1px solid var(--line); border-radius: 10px; padding: var(--space-5); }
 .relationInfo { display: flex; align-items: center; gap: var(--space-5); margin-bottom: var(--space-3); }
 .relationInfo img { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; }
 .relationInfo b { display: block; font: 700 15px var(--profile-serif, serif); color: var(--ink); }
-.relationInfo span { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); }
+.relationInfo span { font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: 1px; color: var(--primary); }
 .relationText { margin: 0; font: 400 13px/1.5 var(--profile-sans, sans-serif); color: var(--soft); }
 
 .toolbar {

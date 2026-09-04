@@ -124,7 +124,7 @@
     background: var(--accent);
     color: var(--on-accent);
     border-bottom-right-radius: 6px;
-    font-size: 0.875rem;
+    font-size: var(--text-md);
     font-weight: 600;
     text-decoration: none;
     transform: translateY(-150%);

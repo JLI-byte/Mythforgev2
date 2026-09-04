@@ -33,7 +33,7 @@
 }
 
 .title {
-    font-size: 1.1rem;
+    font-size: var(--text-lg);
     font-weight: 600;
     margin: 0;
     color: var(--foreground);
@@ -43,7 +43,7 @@
     background: none;
     border: none;
     color: var(--foreground);
-    font-size: 1rem;
+    font-size: var(--text-lg);
     cursor: pointer;
     padding: var(--space-2) var(--space-4);
     border-radius: 4px;
@@ -68,7 +68,7 @@
 }
 
 .coverInitials {
-    font-size: 1.8rem;
+    font-size: var(--text-display);
     font-weight: 700;
     color: rgba(var(--overlay-rgb), 0.9);
 }
@@ -80,7 +80,7 @@
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: var(--space-4) var(--space-5);
-    font-size: 1rem;
+    font-size: var(--text-lg);
     color: var(--foreground);
     outline: none;
     box-sizing: border-box;
@@ -104,7 +104,7 @@
 }
 
 .selectionLabel {
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     font-weight: 600;
     color: var(--muted);
     letter-spacing: 0.02em;
@@ -117,7 +117,7 @@
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: var(--space-4) var(--space-5);
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     color: var(--foreground);
     outline: none;
     font-family: inherit;
@@ -158,17 +158,17 @@
 }
 
 .modeIcon {
-    font-size: 1.2rem;
+    font-size: var(--text-xl);
 }
 
 .modeLabel {
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     font-weight: 600;
     color: var(--foreground);
 }
 
 .modeDesc {
-    font-size: 0.7rem;
+    font-size: var(--text-2xs);
     color: var(--foreground);
     opacity: 0.55;
     line-height: 1.3;
@@ -181,7 +181,7 @@
     color: var(--on-accent);
     border: none;
     border-radius: 8px;
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     font-weight: 600;
     cursor: pointer;
     transition: opacity 150ms ease;

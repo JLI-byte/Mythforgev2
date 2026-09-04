@@ -475,8 +475,8 @@ option {
 }
 :root[data-theme-family="fantasy"] .ProseMirror {
   font-family: var(--font-garamond), 'Merriweather', Georgia, serif;
-  font-size: 1.18rem;
-  line-height: 1.75;
+  font-size: var(--text-lg);
+  line-height: var(--leading-prose);
 }
 :root[data-theme-family="fantasy"] .ProseMirror {
   /* Dark ink in both modes — the manuscript page is a parchment sheet either way. */

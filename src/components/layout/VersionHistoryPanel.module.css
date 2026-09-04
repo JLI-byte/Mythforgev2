@@ -96,7 +96,7 @@
 
 .ghostTabArrow {
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: var(--text-2xs);
   opacity: 0.5;
   display: inline-flex;
   align-items: center;
@@ -107,7 +107,7 @@
     writing-mode: vertical-rl;
     text-orientation: mixed;
     transform: rotate(180deg);
-    font-size: 0.7rem;
+    font-size: var(--text-2xs);
     font-weight: 500;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -126,7 +126,7 @@
 }
 
 .title {
-    font-size: 0.9rem;
+    font-size: var(--text-md);
     font-weight: 600;
     color: var(--foreground);
     margin: 0;
@@ -137,7 +137,7 @@
     border: none;
     cursor: pointer;
     color: var(--muted);
-    font-size: 1.2rem;
+    font-size: var(--text-xl);
     line-height: 1;
     padding: var(--space-2) var(--space-3);
     border-radius: 4px;
@@ -175,7 +175,7 @@
     background: transparent;
     border: none;
     padding: var(--space-3) var(--space-2);
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     font-weight: 500;
     color: var(--muted);
     cursor: pointer;
@@ -198,7 +198,7 @@
 }
 
 .selectLabel {
-    font-size: 0.7rem;
+    font-size: var(--text-2xs);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--muted);
@@ -211,7 +211,7 @@
     color: var(--foreground);
     padding: var(--space-4);
     border-radius: 6px;
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     outline: none;
 }
 
@@ -228,7 +228,7 @@
     border: none;
     padding: var(--space-5);
     border-radius: 6px;
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     font-weight: 500;
     cursor: pointer;
     display: flex;
@@ -248,7 +248,7 @@
 
 .listTitle {
     padding: var(--space-5) var(--space-6);
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     font-weight: 600;
     color: var(--muted);
     background: var(--background);
@@ -278,7 +278,7 @@
 }
 
 .snapshotLabel {
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     font-weight: 500;
     color: var(--foreground);
     flex: 1;
@@ -290,7 +290,7 @@
 .autoPill {
     background: rgba(128, 128, 128, 0.15);
     color: var(--muted);
-    font-size: 0.6875rem;
+    font-size: var(--text-2xs);
     padding: var(--space-1) var(--space-3);
     border-radius: 4px;
     text-transform: uppercase;
@@ -298,7 +298,7 @@
 }
 
 .itemMeta {
-    font-size: 0.7rem;
+    font-size: var(--text-2xs);
     color: var(--muted);
     display: flex;
     align-items: center;
@@ -317,7 +317,7 @@
     color: var(--foreground);
     padding: var(--space-2) var(--space-4);
     border-radius: 4px;
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -341,7 +341,7 @@
     padding: var(--space-9) var(--space-7);
     text-align: center;
     color: var(--muted);
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     font-style: italic;
 }
 

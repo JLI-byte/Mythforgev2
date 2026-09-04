@@ -40,14 +40,14 @@
 }
 
 .title {
-  font-size: 1.05rem;
+  font-size: var(--text-lg);
   font-weight: 700;
   color: var(--foreground);
   margin: 0 0 var(--space-2);
 }
 
 .subtitle {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--muted);
   margin: 0 0 var(--space-6);
 }
@@ -61,7 +61,7 @@
   border: none;
   padding: 0;
   color: var(--accent);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   font-weight: 600;
   cursor: pointer;
 }
@@ -80,7 +80,7 @@
   border: none;
   background: none;
   color: var(--muted);
-  font-size: 1rem;
+  font-size: var(--text-lg);
   cursor: pointer;
   transition: all 0.15s;
   display: flex;
@@ -121,7 +121,7 @@
 }
 
 .typeIcon {
-  font-size: 1.3rem;
+  font-size: var(--text-xl);
   margin-bottom: var(--space-1);
 }
 
@@ -134,7 +134,7 @@
 }
 
 .typeHeaderLabel {
-  font-size: 0.76rem;
+  font-size: var(--text-xs);
   font-weight: 700;
   color: var(--foreground);
   padding: var(--space-3) var(--space-5);
@@ -147,7 +147,7 @@
   background: none;
   border: none;
   color: var(--muted);
-  font-size: 0.6875rem;
+  font-size: var(--text-2xs);
   font-weight: 600;
   cursor: pointer;
   padding: var(--space-2) var(--space-3);
@@ -165,7 +165,7 @@
 }
 
 .sectionLabel {
-  font-size: 0.6875rem;
+  font-size: var(--text-2xs);
   font-weight: 700;
   color: var(--muted);
   text-transform: uppercase;
@@ -204,13 +204,13 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-3);
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   font-weight: 700;
   color: var(--foreground);
 }
 
 .starterTagline {
-  font-size: 0.6875rem;
+  font-size: var(--text-2xs);
   line-height: 1.4;
   color: var(--muted);
 }
@@ -218,7 +218,7 @@
 .starterMeta {
   margin-top: auto;
   padding-top: var(--space-3);
-  font-size: 0.6875rem;
+  font-size: var(--text-2xs);
   color: var(--accent);
 }
 
@@ -230,7 +230,7 @@
   border: 1px dashed rgba(var(--overlay-rgb), 0.18);
   background: none;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
@@ -246,7 +246,7 @@
 }
 
 .familyLabel {
-  font-size: 0.6875rem;
+  font-size: var(--text-2xs);
   font-weight: 700;
   color: var(--accent);
   text-transform: uppercase;
@@ -274,21 +274,21 @@
 }
 
 .methodRowName {
-  font-size: 0.76rem;
+  font-size: var(--text-xs);
   font-weight: 600;
   color: var(--foreground);
   white-space: nowrap;
 }
 
 .methodRowTagline {
-  font-size: 0.6875rem;
+  font-size: var(--text-2xs);
   color: var(--muted);
   line-height: 1.35;
 }
 
 .methodRowBeats {
   margin-left: auto;
-  font-size: 0.6875rem;
+  font-size: var(--text-2xs);
   color: var(--muted);
   white-space: nowrap;
   flex-shrink: 0;
@@ -297,7 +297,7 @@
 .emptyHint {
   padding: var(--space-6);
   text-align: center;
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   color: var(--muted);
 }
 
@@ -349,7 +349,7 @@
 }
 
 .finderWhy {
-  font-size: 0.7rem;
+  font-size: var(--text-2xs);
   line-height: 1.45;
   color: var(--foreground);
   padding: var(--space-4) var(--space-5);
@@ -376,7 +376,7 @@
   background: none;
   border: none;
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: var(--text-2xs);
   font-weight: 600;
   cursor: pointer;
   padding: var(--space-3) var(--space-4);
@@ -397,7 +397,7 @@
   border-radius: 8px;
   padding: var(--space-5) var(--space-6);
   color: var(--foreground);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   transition: all 0.2s;
 }
 
@@ -427,7 +427,7 @@
   border: 1px solid #e5484d;
   background: rgba(229, 72, 77, 0.14);
   color: #e5484d;
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.18s;
@@ -462,14 +462,14 @@
 }
 
 .welcomeTitle {
-  font-size: 1.4rem;
+  font-size: var(--text-2xl);
   font-weight: 700;
   color: var(--foreground);
   margin: 0;
 }
 
 .welcomeSub {
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   line-height: 1.5;
   color: var(--muted);
   margin: 0 0 var(--space-6);
@@ -489,7 +489,7 @@
   border: 1px solid var(--accent);
   background: rgba(var(--accent-rgb), 0.14);
   color: var(--accent);
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.18s;
@@ -506,7 +506,7 @@
   border: 1px solid rgba(var(--overlay-rgb), 0.15);
   background: none;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.18s;

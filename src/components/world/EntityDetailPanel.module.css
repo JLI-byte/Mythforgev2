@@ -61,7 +61,7 @@
 }
 
 .formGroup label {
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -76,7 +76,7 @@
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: var(--space-4) var(--space-5);
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     width: 100%;
     box-sizing: border-box;
 }
@@ -95,7 +95,7 @@
     padding: var(--space-4) var(--space-6);
     cursor: pointer;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
 }
 
 .deleteButton {
@@ -105,7 +105,7 @@
     border-radius: 6px;
     padding: var(--space-4) var(--space-6);
     cursor: pointer;
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
 }
 
 .closeButton {
@@ -123,7 +123,7 @@
 }
 
 .metadataFields {
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     color: var(--muted);
     margin-top: var(--space-4);
     display: flex;
@@ -144,7 +144,7 @@
 }
 
 .confirmDeleteText {
-    font-size: 0.9rem;
+    font-size: var(--text-md);
     color: #ef4444;
     font-weight: 600;
 }

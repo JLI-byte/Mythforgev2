@@ -23,7 +23,7 @@
 .searchInput {
     flex: 1;
     max-width: 60%;
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -42,7 +42,7 @@
 
 .entryCount {
     color: var(--muted);
-    font-size: 0.78rem;
+    font-size: var(--text-xs);
     white-space: nowrap;
 }
 
@@ -72,7 +72,7 @@
    Section 2 — Favorites row
    ======================================== */
 .favoritesHeader {
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
     font-weight: 600;
     color: var(--muted);
     padding: var(--space-4) var(--space-5) 0 var(--space-5);
@@ -131,7 +131,7 @@
 }
 
 .favoriteIcon {
-    font-size: 1.2rem;
+    font-size: var(--text-xl);
     line-height: 1;
 }
 
@@ -141,7 +141,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.6875rem;
+    font-size: var(--text-2xs);
     font-weight: 600;
     color: var(--foreground);
     overflow: hidden;
@@ -167,13 +167,13 @@
 
 .favoritePlaceholderIcon {
     color: var(--muted);
-    font-size: 1.2rem;
+    font-size: var(--text-xl);
     line-height: 1;
 }
 
 .favoritePlaceholderText {
     color: var(--muted);
-    font-size: 0.6875rem;
+    font-size: var(--text-2xs);
 }
 
 
@@ -229,7 +229,7 @@
 }
 
 .categoryIcon {
-    font-size: 2.5rem;
+    font-size: var(--text-display);
     line-height: 1;
 }
 
@@ -245,13 +245,13 @@
 }
 
 .categoryLabel {
-    font-size: 1.1rem;
+    font-size: var(--text-lg);
     font-weight: 700;
     color: var(--foreground);
 }
 
 .categoryCount {
-    font-size: 0.78rem;
+    font-size: var(--text-xs);
     color: var(--muted);
 }
 
@@ -263,7 +263,7 @@
 }
 
 .subcategoryPill {
-    font-size: 0.7rem;
+    font-size: var(--text-2xs);
     color: var(--muted);
     white-space: nowrap;
 }
@@ -275,7 +275,7 @@
     align-items: center;
     justify-content: center;
     color: var(--muted);
-    font-size: 1.2rem;
+    font-size: var(--text-xl);
     flex-shrink: 0;
 }
 
@@ -291,7 +291,7 @@
     border: 1px dashed var(--border);
     border-radius: 6px;
     color: var(--muted);
-    font-size: 0.82rem;
+    font-size: var(--text-sm);
     font-weight: 500;
     cursor: pointer;
     transition: all 150ms ease;
@@ -310,7 +310,7 @@
   border: 1px dashed var(--border);
   border-radius: 6px;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   padding: var(--space-2) var(--space-5);
   cursor: pointer;
   transition: all 0.15s;
@@ -327,7 +327,7 @@
     border: 1px solid rgba(208, 188, 255, 0.2);
     border-radius: 6px;
     color: var(--muted);
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
     padding: var(--space-2) var(--space-5);
     cursor: pointer;
     transition: all 0.15s;
@@ -377,7 +377,7 @@
 }
 
 .customizeTitle {
-  font-size: 1rem;
+  font-size: var(--text-lg);
   font-weight: 700;
   color: var(--foreground);
   margin: 0;
@@ -387,7 +387,7 @@
   background: none;
   border: none;
   color: var(--muted);
-  font-size: 1.4rem;
+  font-size: var(--text-2xl);
   cursor: pointer;
   line-height: 1;
   padding: 0 var(--space-2);
@@ -397,7 +397,7 @@
 .customizeClose:hover { color: var(--foreground); }
 
 .customizeHint {
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   color: var(--muted);
   padding: var(--space-5) var(--space-7);
   margin: 0;
@@ -429,7 +429,7 @@
 
 .customizeDragHandle {
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   opacity: 0.4;
   cursor: grab;
   flex-shrink: 0;
@@ -446,7 +446,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
-  font-size: 1.1rem;
+  font-size: var(--text-lg);
   width: 34px;
   height: 34px;
   cursor: pointer;
@@ -478,7 +478,7 @@
   background: none;
   border: 1px solid transparent;
   border-radius: 4px;
-  font-size: 1.1rem;
+  font-size: var(--text-lg);
   width: 30px;
   height: 30px;
   cursor: pointer;
@@ -496,7 +496,7 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   color: var(--foreground);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   font-weight: 600;
   padding: var(--space-3) var(--space-5);
   outline: none;
@@ -521,7 +521,7 @@
   background: rgba(208, 188, 255, 0.1);
   border: 1px solid rgba(208, 188, 255, 0.2);
   border-radius: 12px;
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   color: var(--foreground);
   padding: var(--space-1) var(--space-3) var(--space-1) var(--space-4);
   white-space: nowrap;
@@ -531,7 +531,7 @@
   background: none;
   border: none;
   color: var(--muted);
-  font-size: 0.6875rem;
+  font-size: var(--text-2xs);
   cursor: pointer;
   outline: none;
   max-width: 16px;
@@ -546,7 +546,7 @@
   border: 1px dashed var(--border);
   border-radius: 8px;
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: var(--text-2xs);
   padding: var(--space-1) var(--space-2);
   cursor: pointer;
   outline: none;
@@ -556,7 +556,7 @@
   background: none;
   border: none;
   color: var(--muted);
-  font-size: 1rem;
+  font-size: var(--text-lg);
   cursor: pointer;
   opacity: 0.4;
   flex-shrink: 0;
@@ -573,7 +573,7 @@
   border: 1px dashed var(--border);
   border-radius: 6px;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   padding: var(--space-4);
   cursor: pointer;
   transition: all 0.15s;
@@ -596,7 +596,7 @@
   border: 1px solid rgba(255, 77, 77, 0.3);
   border-radius: 6px;
   color: rgba(255, 77, 77, 0.7);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   padding: var(--space-3) var(--space-5);
   cursor: pointer;
   transition: all 0.15s;
@@ -614,7 +614,7 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   padding: var(--space-4) var(--space-6);
   cursor: pointer;
   transition: all 0.15s;
@@ -627,7 +627,7 @@
   border: none;
   border-radius: 6px;
   color: var(--background);
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   font-weight: 700;
   padding: var(--space-4) var(--space-6);
   cursor: pointer;

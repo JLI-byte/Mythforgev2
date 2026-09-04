@@ -107,7 +107,7 @@
 .brand {
     font-weight: 600;
     letter-spacing: 0.02em;
-    font-size: 1.1rem;
+    font-size: var(--text-lg);
     color: #ececec;
     text-decoration: none;
 }
@@ -115,7 +115,7 @@
 .navBack {
     color: rgba(236, 236, 236, 0.7);
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: var(--text-md);
     transition: color 150ms ease;
 }
 .navBack:hover { color: #fff; }
@@ -151,14 +151,14 @@
 
 .title {
     margin: 0;
-    font-size: 1.9rem;
+    font-size: var(--text-display);
     font-weight: 600;
     letter-spacing: -0.02em;
 }
 
 .sub {
     margin: var(--space-4) 0 var(--space-8);
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     line-height: 1.55;
     color: rgba(236, 236, 236, 0.62);
 }
@@ -171,7 +171,7 @@
 }
 
 .fieldLabel {
-    font-size: 0.82rem;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: rgba(236, 236, 236, 0.72);
     margin-bottom: var(--space-4);
@@ -181,7 +181,7 @@
     width: 100%;
     padding: var(--space-5) var(--space-6);
     font-family: inherit;
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     color: #ececec;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(236, 236, 236, 0.16);
@@ -203,7 +203,7 @@
     width: 100%;
     padding: var(--space-5) var(--space-7);
     font-family: inherit;
-    font-size: 0.98rem;
+    font-size: var(--text-lg);
     font-weight: 600;
     color: #0a0a0b;
     background: #f5f5f5;
@@ -229,7 +229,7 @@
     margin-top: var(--space-6);
     padding: var(--space-5) var(--space-6);
     border-radius: 10px;
-    font-size: 0.88rem;
+    font-size: var(--text-md);
     line-height: 1.5;
     text-align: center;
     border: 1px solid rgba(236, 236, 236, 0.14);
@@ -264,7 +264,7 @@
 .footnote {
     margin: var(--space-7) 0 0;
     text-align: center;
-    font-size: 0.88rem;
+    font-size: var(--text-md);
     color: rgba(236, 236, 236, 0.55);
 }
 
@@ -287,7 +287,7 @@
     width: 100%;
     padding: var(--space-5);
     font-family: inherit;
-    font-size: 0.86rem;
+    font-size: var(--text-md);
     color: rgba(236, 236, 236, 0.6);
     background: none;
     border: 1px dashed rgba(236, 236, 236, 0.22);
@@ -311,7 +311,7 @@
     z-index: 1;
     text-align: center;
     padding: var(--space-7);
-    font-size: 0.82rem;
+    font-size: var(--text-sm);
     color: rgba(236, 236, 236, 0.5);
 }
 

@@ -29,7 +29,7 @@
 }
 
 .title {
-    font-size: 1.25rem;
+    font-size: var(--text-xl);
     font-weight: 700;
     margin: 0;
     color: #e5e2e1;
@@ -39,7 +39,7 @@
     background: none;
     border: none;
     color: #958ea0;
-    font-size: 1.1rem;
+    font-size: var(--text-lg);
     cursor: pointer;
     padding: var(--space-4);
     transition: color 0.2s;
@@ -83,20 +83,20 @@
 }
 
 .sourceIcon {
-    font-size: 2.5rem;
+    font-size: var(--text-display);
     display: inline-flex;
     align-items: center;
     justify-content: center;
 }
 
 .sourceLabel {
-    font-size: 1rem;
+    font-size: var(--text-lg);
     font-weight: 700;
     color: #e5e2e1;
 }
 
 .sourceDesc {
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     color: #958ea0;
 }
 
@@ -109,7 +109,7 @@
 
 .mappingHint {
     color: #958ea0;
-    font-size: 0.9rem;
+    font-size: var(--text-md);
     margin-bottom: var(--space-4);
     text-align: center;
 }
@@ -132,7 +132,7 @@
 }
 
 .mappingRow label {
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -145,7 +145,7 @@
     border-radius: 8px;
     padding: var(--space-5) var(--space-6);
     color: #e5e2e1;
-    font-size: 0.9rem;
+    font-size: var(--text-md);
     outline: none;
     cursor: pointer;
     transition: border-color 0.2s;
@@ -162,7 +162,7 @@
 }
 
 .label {
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -175,7 +175,7 @@
     border-radius: 8px;
     padding: var(--space-5) var(--space-6);
     color: #e5e2e1;
-    font-size: 1rem;
+    font-size: var(--text-lg);
     font-family: inherit;
     outline: none;
     transition: border-color 0.2s;
@@ -191,7 +191,7 @@
     border-radius: 8px;
     padding: var(--space-5) var(--space-6);
     color: #e5e2e1;
-    font-size: 1rem;
+    font-size: var(--text-lg);
     font-family: inherit;
     outline: none;
     cursor: pointer;
@@ -211,7 +211,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-5);
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     font-weight: 600;
     color: #958ea0;
     cursor: pointer;
@@ -227,7 +227,7 @@
 }
 
 .modeIconSmall {
-    font-size: 1.1rem;
+    font-size: var(--text-lg);
 }
 
 .importBtn {
@@ -236,7 +236,7 @@
     border: none;
     border-radius: 8px;
     padding: var(--space-6);
-    font-size: 0.9rem;
+    font-size: var(--text-md);
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.1em;

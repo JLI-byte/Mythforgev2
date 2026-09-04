@@ -27,7 +27,7 @@
   border-radius: 7px;
   background: none;
   color: var(--muted, #888);
-  font-size: 0.9rem;
+  font-size: var(--text-md);
   cursor: pointer;
   transition: color 0.15s, background-color 0.15s;
 }
@@ -44,7 +44,7 @@
   background: none;
 }
 .crumbIcon {
-  font-size: 0.95rem;
+  font-size: var(--text-lg);
   line-height: 1;
 }
 .crumbSep {
@@ -166,17 +166,17 @@
   text-align: center;
 }
 .stripIcon {
-  font-size: 2rem;
+  font-size: var(--text-display);
   line-height: 1;
 }
 .stripIcon svg { display: block; }
 .stripName {
-  font-size: 1.05rem;
+  font-size: var(--text-lg);
   font-weight: 700;
   letter-spacing: 0.02em;
 }
 .stripMeta {
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   opacity: 0.85;
 }
 
@@ -354,7 +354,7 @@
   border: 1px solid rgba(255, 255, 255, 0.28);
   background: rgba(255, 255, 255, 0.94);
   color: #1a1a1a;
-  font-size: 0.9rem;
+  font-size: var(--text-md);
 }
 .newFolderInput:focus {
   outline: 2px solid var(--accent);
@@ -365,7 +365,7 @@
   border: 1px solid rgba(255, 255, 255, 0.28);
   background: rgba(255, 255, 255, 0.94);
   color: #1a1a1a;
-  font-size: 0.9rem;
+  font-size: var(--text-md);
   cursor: pointer;
 }
 .newFolderCreate {
@@ -375,7 +375,7 @@
   background: var(--accent);
   color: var(--on-accent);
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   cursor: pointer;
 }
 .newFolderCreate:disabled {
@@ -387,7 +387,7 @@
   border: none;
   background: transparent;
   color: rgba(255, 255, 255, 0.75);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   cursor: pointer;
 }
 .newFolderCancel:hover {
@@ -456,7 +456,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3.4rem;
+  font-size: var(--text-hero);
   opacity: 0.45;
   pointer-events: none;
 }
@@ -485,12 +485,12 @@
   text-transform: uppercase;
   font-weight: 600;
   letter-spacing: 0.1em;
-  font-size: 0.6875rem;
+  font-size: var(--text-2xs);
   opacity: 0.55;
   color: #fff;
 }
 .previewTitle {
-  font-size: 1.1rem;
+  font-size: var(--text-lg);
   font-weight: 700;
   color: #fff;
   line-height: 1.2;
@@ -500,7 +500,7 @@
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: var(--space-4);
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   line-height: 1.35;
   color: rgba(255, 255, 255, 0.85);
 }
@@ -552,11 +552,11 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-4);
-  font-size: 0.9rem;
+  font-size: var(--text-md);
   font-weight: 700;
 }
 .previewNewPlus {
-  font-size: 2rem;
+  font-size: var(--text-display);
   line-height: 1;
 }
 .previewNewActive {
@@ -597,7 +597,7 @@
 }
 
 .emptyText {
-  font-size: 1rem;
+  font-size: var(--text-lg);
   color: var(--foreground);
   font-weight: 600;
   margin: 0;

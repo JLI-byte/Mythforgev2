@@ -23,7 +23,7 @@
 }
 
 .entityName {
-  font-size: 2.5rem;
+  font-size: var(--text-display);
   font-weight: 700;
   margin: var(--space-7) 0 var(--space-4);
   color: var(--foreground);
@@ -33,7 +33,7 @@
   display: inline-block;
   padding: var(--space-2) var(--space-5);
   border-radius: 12px;
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -57,13 +57,13 @@
 }
 
 .entityMetaName {
-  font-size: 1rem;
+  font-size: var(--text-lg);
   font-weight: 700;
   color: var(--foreground);
 }
 
 .entityMetaBadge {
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   font-weight: 600;
   padding: var(--space-1) var(--space-4);
   border-radius: 10px;
@@ -81,7 +81,7 @@
   background: var(--surface);
   color: var(--foreground);
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: var(--text-lg);
   font-weight: 500;
   transition: all 0.2s ease;
 }
@@ -110,13 +110,13 @@
 }
 
 .emptyIcon {
-  font-size: 3.5rem;
+  font-size: var(--text-hero);
   opacity: 0.5;
 }
 
 .emptyText {
   color: var(--muted, #888);
-  font-size: 1.1rem;
+  font-size: var(--text-lg);
   max-width: 300px;
   margin-bottom: var(--space-4);
 }
@@ -153,7 +153,7 @@
   border-radius: 6px;
   color: var(--muted, #888);
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: var(--text-md);
   font-weight: 500;
   transition: all 0.15s;
 }
@@ -165,7 +165,7 @@
 }
 
 .emptyHint {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--muted, #888);
   margin: 0;
   text-align: center;
@@ -191,7 +191,7 @@
   border: none;
   border-bottom: 2px solid transparent;
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   font-weight: 500;
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
@@ -210,7 +210,7 @@
 .tabCount {
   background: var(--accent);
   color: var(--background);
-  font-size: 0.7rem;
+  font-size: var(--text-2xs);
   font-weight: 700;
   padding: var(--space-1) var(--space-3);
   border-radius: 10px;
@@ -235,24 +235,24 @@
 }
 
 .mentionsEmptyIcon {
-  font-size: 2rem;
+  font-size: var(--text-display);
   opacity: 0.4;
 }
 
 .mentionsEmptyText {
-  font-size: 0.95rem;
+  font-size: var(--text-lg);
   color: var(--foreground);
   margin: 0;
 }
 
 .mentionsEmptyHint {
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   color: var(--muted);
   margin: 0;
 }
 
 .mentionsCount {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -292,23 +292,23 @@
 }
 
 .mentionDocTitle {
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   font-weight: 700;
   color: var(--foreground);
 }
 
 .mentionSep {
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   color: var(--muted);
 }
 
 .mentionSceneTitle {
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   color: var(--muted);
 }
 
 .mentionExcerpt {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--muted);
   line-height: 1.6;
   margin: 0;
@@ -333,7 +333,7 @@
 }
 
 .worksSectionTitle {
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -381,7 +381,7 @@
 }
 
 .workCardName {
-  font-size: 0.88rem;
+  font-size: var(--text-md);
   font-weight: 600;
   color: var(--foreground);
   white-space: nowrap;
@@ -390,6 +390,6 @@
 }
 
 .workCardMode {
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   color: var(--muted);
 }

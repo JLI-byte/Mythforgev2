@@ -22,7 +22,7 @@
     background-color: var(--parchment);
     color: var(--sepia);
     font-family: var(--font-garamond), Georgia, serif;
-    font-size: 1.06rem;
+    font-size: var(--text-lg);
     position: relative;
     overflow: hidden;
 }
@@ -98,7 +98,7 @@
 .brandName {
     font-family: var(--font-fell), serif;
     font-weight: 400;
-    font-size: 2rem;
+    font-size: var(--text-display);
     letter-spacing: 0.01em;
     margin: 0;
 }
@@ -107,7 +107,7 @@
     font-style: italic;
     color: var(--sepia-soft);
     margin: 0;
-    font-size: 1rem;
+    font-size: var(--text-lg);
 }
 
 /* ---------- Form ---------- */
@@ -121,7 +121,7 @@
 .fieldLabel {
     display: block;
     font-style: italic;
-    font-size: 0.98rem;
+    font-size: var(--text-lg);
     color: var(--sepia-soft);
     margin-bottom: var(--space-3);
 }
@@ -134,7 +134,7 @@
     border-radius: 0;
     color: var(--sepia);
     font-family: var(--font-garamond), serif;
-    font-size: 1.08rem;
+    font-size: var(--text-lg);
     padding: var(--space-3) var(--space-1);
     transition: border-color 160ms ease;
 }
@@ -158,7 +158,7 @@
     border-radius: 3px;
     font-family: var(--font-garamond), serif;
     font-weight: 600;
-    font-size: 1.05rem;
+    font-size: var(--text-lg);
     padding: var(--space-5);
     cursor: pointer;
     box-shadow: 2px 3px 0 rgba(59, 44, 21, 0.25);
@@ -186,7 +186,7 @@
     margin-top: var(--space-7);
     padding: var(--space-6) var(--space-6);
     border-radius: 3px;
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     text-align: center;
     line-height: 1.5;
     border: 1px solid var(--line-faint);
@@ -219,7 +219,7 @@
 .footnote {
     margin-top: var(--space-8);
     text-align: center;
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     color: var(--sepia-soft);
 }
 
@@ -246,7 +246,7 @@
     border-radius: 3px;
     font-family: var(--font-garamond), serif;
     font-style: italic;
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     padding: var(--space-5);
     cursor: pointer;
     transition: background 160ms ease;

@@ -39,7 +39,7 @@
 
 .greeting {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--text-lg);
   color: var(--muted, #8b8b95);
   letter-spacing: 0.01em;
 }
@@ -65,7 +65,7 @@
   min-width: 0;
   padding: var(--space-5) var(--space-6);
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: var(--text-md);
   color: var(--foreground, #f2f0ef);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -116,7 +116,7 @@
   position: absolute;
   top: calc(100% + 7px);
   right: 0;
-  font-size: 0.76rem;
+  font-size: var(--text-xs);
   color: #6ee7b7;
   animation: lc-toast 0.2s ease-out;
 }
@@ -160,7 +160,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-3);
-  font-size: 0.74rem;
+  font-size: var(--text-xs);
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -174,17 +174,17 @@
   gap: var(--space-5);
 }
 .tileHint {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--muted, #8b8b95);
 }
 .tileFoot {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--muted, #8b8b95);
 }
 .tileEmpty {
   margin: 0;
-  font-size: 0.84rem;
+  font-size: var(--text-sm);
   line-height: 1.5;
   color: var(--muted, #8b8b95);
 }
@@ -198,7 +198,7 @@
   padding: 0;
   /* 24px hit target; the icon and text keep their own size. */
   min-height: 24px;
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--foreground, #f2f0ef);
   background: none;
@@ -220,7 +220,7 @@
 }
 .resumeMeta {
   margin: 0;
-  font-size: 0.86rem;
+  font-size: var(--text-md);
   color: var(--muted, #8b8b95);
 }
 .resumeBtn {
@@ -234,7 +234,7 @@
   border: none;
   cursor: pointer;
   font-family: inherit;
-  font-size: 0.94rem;
+  font-size: var(--text-lg);
   font-weight: 600;
   color: #14141a;
   background: #f2f0ef;
@@ -289,7 +289,7 @@
 /* ── Streak ───────────────────────────────────────────── */
 
 .streakNumber {
-  font-size: 2.9rem;
+  font-size: var(--text-hero);
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -321,12 +321,12 @@
   margin-top: var(--space-4);
 }
 .stageName {
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 .stageXp {
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   color: var(--muted, #8b8b95);
   font-variant-numeric: tabular-nums;
 }
@@ -365,7 +365,7 @@
 }
 .heatmapMonth {
   width: 11px;
-  font-size: 0.6875rem;
+  font-size: var(--text-2xs);
   color: var(--muted, #8b8b95);
   white-space: nowrap;
 }
@@ -392,7 +392,7 @@
   align-items: center;
   gap: var(--space-2);
   margin-top: var(--space-1);
-  font-size: 0.6875rem;
+  font-size: var(--text-2xs);
   color: var(--muted, #8b8b95);
 }
 .heatmapLegend span:first-child { margin-right: var(--space-2); }
@@ -407,7 +407,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  font-size: 0.86rem;
+  font-size: var(--text-md);
   color: var(--muted, #8b8b95);
 }
 .attentionList strong {
@@ -419,13 +419,13 @@
 
 .loreName {
   margin: var(--space-1) 0 0;
-  font-size: 1.15rem;
+  font-size: var(--text-xl);
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 .loreDesc {
   margin: 0;
-  font-size: 0.86rem;
+  font-size: var(--text-md);
   line-height: 1.5;
   color: var(--muted, #8b8b95);
   display: -webkit-box;
@@ -451,7 +451,7 @@
   text-align: left;
   cursor: pointer;
   font-family: inherit;
-  font-size: 0.86rem;
+  font-size: var(--text-md);
   font-weight: 600;
   color: var(--foreground, #f2f0ef);
   background: rgba(255, 255, 255, 0.045);
@@ -482,7 +482,7 @@
 }
 .recentTitle {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: var(--text-lg);
   font-weight: 700;
   color: var(--foreground, #f2f0ef);
 }
@@ -494,7 +494,7 @@
   /* 24px hit target; the icon and text keep their own size. */
   min-height: 24px;
   color: var(--muted, #8b8b95);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   cursor: pointer;
   transition: color 0.15s ease;
 }
@@ -513,7 +513,7 @@
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: rgba(255, 255, 255, 0.07);
   color: var(--foreground, #f2f0ef);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   font-weight: 600;
   cursor: pointer;
   transition: border-color 0.15s, background-color 0.15s;
@@ -557,7 +557,7 @@
 
 .awayLead {
   margin: 0;
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   line-height: 1.5;
   color: var(--muted);
 }
@@ -576,13 +576,13 @@
   align-items: baseline;
   gap: var(--space-4);
   min-width: 0;
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
 }
 
 .awayKind {
   flex: none;
   min-width: 62px;
-  font-size: 0.62rem;
+  font-size: var(--text-2xs);
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -598,7 +598,7 @@
 
 .awayProject {
   flex: none;
-  font-size: 0.7rem;
+  font-size: var(--text-2xs);
   color: var(--muted);
 }
 
@@ -608,7 +608,7 @@
 
 .manuscriptLine {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: var(--text-lg);
   font-weight: 600;
   color: var(--foreground);
 }

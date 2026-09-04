@@ -67,12 +67,12 @@
   pointer-events: none; /* never steal a drag that starts over the numbers */
 }
 .ringValue {
-  font-size: 1.28rem;
+  font-size: var(--text-xl);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 .ringTarget {
-  font-size: 0.7rem;
+  font-size: var(--text-2xs);
   color: var(--muted, #8b8b95);
   font-variant-numeric: tabular-nums;
   transition: color 0.15s ease;

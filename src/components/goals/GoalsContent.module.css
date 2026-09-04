@@ -21,14 +21,14 @@
 }
 
 .setupTitle {
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     font-weight: 600;
     color: white;
     margin: 0 0 var(--space-2) 0;
 }
 
 .setupSubtext {
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     color: rgba(var(--overlay-rgb), 0.6);
     margin: 0 0 var(--space-5) 0;
 }
@@ -45,7 +45,7 @@
     color: rgba(var(--overlay-rgb), 0.7);
     border-radius: 6px;
     padding: var(--space-3) var(--space-5);
-    font-size: 0.82rem;
+    font-size: var(--text-sm);
     cursor: pointer;
     transition: all 150ms ease;
     flex: 1;
@@ -63,7 +63,7 @@
 }
 
 .setupHint {
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
     color: var(--muted);
     margin: var(--space-2) 0 var(--space-5) 0;
 }
@@ -73,7 +73,7 @@
     background: #F5C842;
     color: var(--surface-mid);
     font-weight: 700;
-    font-size: 0.88rem;
+    font-size: var(--text-md);
     border: none;
     border-radius: 8px;
     padding: var(--space-4);
@@ -123,14 +123,14 @@
 }
 
 .ringWords {
-    font-size: 1.1rem;
+    font-size: var(--text-lg);
     font-weight: 700;
     color: var(--foreground);
     line-height: 1.1;
 }
 
 .ringTarget {
-    font-size: 0.6875rem;
+    font-size: var(--text-2xs);
     color: var(--muted);
 }
 
@@ -151,14 +151,14 @@
 }
 
 .streakNumber {
-    font-size: 1.8rem;
+    font-size: var(--text-display);
     font-weight: 800;
     color: var(--foreground);
     line-height: 1;
 }
 
 .streakLabel {
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
     color: var(--muted);
     line-height: 1;
 }
@@ -185,13 +185,13 @@
 
 .goalMet {
     color: #22c55e;
-    font-size: 0.82rem;
+    font-size: var(--text-sm);
     font-weight: 500;
 }
 
 .goalRemaining {
     color: var(--muted);
-    font-size: 0.82rem;
+    font-size: var(--text-sm);
 }
 
 /* Right: session info */
@@ -210,14 +210,14 @@
 }
 
 .sessionNumber {
-    font-size: 1.1rem;
+    font-size: var(--text-lg);
     font-weight: 600;
     color: var(--foreground);
     line-height: 1.1;
 }
 
 .sessionLabel {
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
     color: var(--muted);
 }
 
@@ -226,7 +226,7 @@
    Shared section header
    ======================================== */
 .sectionHeader {
-    font-size: 0.78rem;
+    font-size: var(--text-xs);
     font-weight: 600;
     color: var(--muted);
     margin: 0;
@@ -252,7 +252,7 @@
 
 .calHeaderDay {
     text-align: center;
-    font-size: 0.6875rem;
+    font-size: var(--text-2xs);
     color: var(--muted);
     padding: var(--space-1) 0;
 }
@@ -277,7 +277,7 @@
 }
 
 .calDayNum {
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
     color: var(--muted);
     line-height: 1;
     opacity: 1;
@@ -352,7 +352,7 @@
     padding: var(--space-3) 0 0;
     width: 100%;
     box-sizing: border-box;
-    font-size: 0.78rem;
+    font-size: var(--text-xs);
     color: var(--muted);
     overflow: visible;
 }
@@ -389,7 +389,7 @@
 }
 
 .projectName {
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     font-weight: 600;
     color: var(--foreground);
     overflow: hidden;
@@ -419,7 +419,7 @@
 }
 
 .projectWords {
-    font-size: 0.78rem;
+    font-size: var(--text-xs);
     color: var(--muted);
     flex-shrink: 0;
     margin-left: var(--space-4);
@@ -440,12 +440,12 @@
 }
 
 .projectPct {
-    font-size: 0.7rem;
+    font-size: var(--text-2xs);
     color: var(--muted);
 }
 
 .emptyState {
-    font-size: 0.82rem;
+    font-size: var(--text-sm);
     color: var(--muted);
     font-style: italic;
     text-align: center;
@@ -465,7 +465,7 @@
 }
 
 .achievementsCount {
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
     color: var(--muted);
 }
 
@@ -535,7 +535,7 @@
 
 /* Badge icon */
 .badgeIcon {
-    font-size: 1.5rem;
+    font-size: var(--text-2xl);
     line-height: 1;
     flex-shrink: 0;
 }
@@ -553,7 +553,7 @@
 }
 
 .badgeName {
-    font-size: 0.78rem;
+    font-size: var(--text-xs);
     font-weight: 600;
     color: var(--foreground);
     overflow: hidden;
@@ -566,7 +566,7 @@
 }
 
 .badgeDesc {
-    font-size: 0.6875rem;
+    font-size: var(--text-2xs);
     color: var(--muted);
     overflow: hidden;
     text-overflow: ellipsis;

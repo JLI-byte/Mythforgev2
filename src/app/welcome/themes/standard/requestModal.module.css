@@ -31,7 +31,7 @@
     background: none;
     border: none;
     color: rgba(236, 236, 236, 0.6);
-    font-size: 1.5rem;
+    font-size: var(--text-2xl);
     line-height: 1;
     cursor: pointer;
 }
@@ -41,13 +41,13 @@
 
 .title {
     margin: 0 0 var(--space-4);
-    font-size: 1.5rem;
+    font-size: var(--text-2xl);
     font-weight: 600;
 }
 
 .intro {
     margin: 0 0 var(--space-7);
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     line-height: 1.5;
     color: rgba(236, 236, 236, 0.7);
 }
@@ -59,7 +59,7 @@
 }
 
 .label {
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     color: rgba(236, 236, 236, 0.7);
     margin-top: var(--space-4);
 }
@@ -73,7 +73,7 @@
     padding: var(--space-4) var(--space-5);
     color: #ececec;
     font-family: inherit;
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
 }
 .input:focus,
 .textarea:focus {
@@ -94,7 +94,7 @@
     color: #0a0a0b;
     padding: var(--space-5) var(--space-7);
     border-radius: 999px;
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     font-weight: 600;
     font-family: inherit;
 }
@@ -112,11 +112,11 @@
 
 .note {
     margin: var(--space-6) 0 0;
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     color: rgba(236, 236, 236, 0.7);
 }
 .error {
     margin: var(--space-6) 0 0;
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     color: #ff9b8a;
 }

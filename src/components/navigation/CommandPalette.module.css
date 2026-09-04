@@ -36,7 +36,7 @@
     background: transparent;
     border: none;
     color: var(--foreground);
-    font-size: 1.25rem;
+    font-size: var(--text-xl);
     font-family: var(--font-sans);
     outline: none;
 }
@@ -77,7 +77,7 @@
 .itemMain {
     font-weight: 500;
     color: var(--foreground);
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
 }
 
 .listItem.selected .itemMain {
@@ -85,7 +85,7 @@
 }
 
 .itemSub {
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     color: var(--muted);
 }
 

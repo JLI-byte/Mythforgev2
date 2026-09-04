@@ -41,13 +41,13 @@
 
 .modalHeader h3 {
     margin: 0 0 var(--space-2) 0;
-    font-size: 1.25rem;
+    font-size: var(--text-xl);
     color: var(--foreground);
 }
 
 .hintText {
     color: #777;
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     margin: 0;
 }
 
@@ -64,7 +64,7 @@
 }
 
 .formGroup label {
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     font-weight: 500;
     color: var(--foreground);
 }
@@ -73,7 +73,7 @@
 .formGroup select,
 .formGroup textarea {
     font-family: var(--font-sans);
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     padding: var(--space-4) var(--space-5);
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -111,7 +111,7 @@
 
 .formActions button {
     font-family: var(--font-sans);
-    font-size: 0.9rem;
+    font-size: var(--text-md);
     font-weight: 500;
     padding: var(--space-4) var(--space-6);
     border-radius: 6px;
