@@ -1,6 +1,25 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* ──────────────────────────────────────────────────────────────
+   Cascade order.
+
+   Tailwind goes into a layer; everything else in this file, and every
+   CSS Module, stays unlayered. Unlayered rules beat ANY layer regardless
+   of specificity, so this one line stops a Tailwind utility from ever
+   out-specifying app CSS — which is the whole practical benefit here.
+
+   The rest of this file is deliberately NOT layered. The plan proposed a
+   trailing `a11y` layer "so the accessibility floor beats everything
+   without needing !important", but that is backwards: Next injects CSS
+   Modules unlayered, and unlayered wins over every layer. Putting the
+   focus ring in a layer would make it WEAKER than any module rule, not
+   stronger. :focus-visible below is already designed as a floor that a
+   component with a better ring may override on specificity, and it does
+   that correctly today.
+   ────────────────────────────────────────────────────────────── */
+@layer tailwind {
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+}
 
 /* 
  * Global Styles for LoreCanvas
