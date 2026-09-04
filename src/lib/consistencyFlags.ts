@@ -55,10 +55,3 @@ export function addFlagToWidgets(widgets: DeskWidget[], flag: ConsistencyFlag): 
     return widgets.map(w => (w.id === widget.id ? next : w));
 }
 
-/** The pending flags, for the assistant's context so it won't repeat them. */
-export function serializeFlags(widgets: DeskWidget[]): string {
-    const widget = widgets.find(w => w.type === 'consistencyFlags');
-    const list: ConsistencyFlag[] = widget?.content?.flags ?? [];
-    if (!list.length) return '';
-    return list.map(f => `- [${f.kind}] ${f.summary}`).join('\n');
-}
