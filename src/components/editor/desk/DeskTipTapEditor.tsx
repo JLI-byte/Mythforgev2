@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { PenLine } from 'lucide-react';
 import { useEditor, EditorContent, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -29,6 +29,9 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
   const lastSavedContentRef = useRef<string>(content || '');
   const trackSession = useWritingSession();
   const isSpellcheckEnabled = useWorkspaceStore(s => s.isSpellcheckEnabled);
+  const isStandardFormat = useWorkspaceStore(s => s.isStandardFormat);
+  const editorMaxWidth = useWorkspaceStore(s => s.editorMaxWidth);
+  const toggleStandardFormat = useWorkspaceStore(s => s.toggleStandardFormat);
 
   const editor = useEditor({
     extensions: [
@@ -245,9 +248,20 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
             onMouseDown={e => { e.preventDefault(); editor.chain().focus().unsetAllMarks().clearNodes().run(); }}
             title="Clear Formatting"
           >Ø</button>
+          <button
+            className={`${styles.deskFmtBtn} ${isStandardFormat ? styles.deskFmtBtnActive : ''}`}
+            onMouseDown={e => { e.preventDefault(); toggleStandardFormat(); }}
+            title="Standard manuscript format — 12pt monospace, double-spaced, indented paragraphs"
+            aria-label="Standard manuscript format"
+            aria-pressed={isStandardFormat}
+          >MS</button>
         </div>
       </div>
-      <div className={styles.deskEditorBody} onClick={() => editor.chain().focus().run()}>
+      <div
+        className={`${styles.deskEditorBody} ${isStandardFormat ? styles.deskEditorBodyStandard : ''}`}
+        style={{ '--desk-measure': editorMaxWidth ? `${editorMaxWidth}px` : '76ch' } as React.CSSProperties}
+        onClick={() => editor.chain().focus().run()}
+      >
         <EditorContent editor={editor} />
       </div>
       <EntitySuggestDropdown editorRef={editorRef} />
