@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { ChevronRight, X } from 'lucide-react';
 import styles from './SocialMediaPanel.module.css';
 import { useWorkspaceStore, SocialPost } from '@/store/workspaceStore';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 interface SocialMediaPanelProps {
     isOpen: boolean;
@@ -72,6 +73,7 @@ export function SocialMediaPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
     
     const socialHistory = useWorkspaceStore(state => state.socialHistory);
     const addSocialPost = useWorkspaceStore(state => state.addSocialPost);
+    const deleteSocialPost = useWorkspaceStore(state => state.deleteSocialPost);
     const streakState = useWorkspaceStore(state => state.streakState);
     const sessionWordCount = useWorkspaceStore(state => state.sessionWordCount);
     const projects = useWorkspaceStore(state => state.projects);
@@ -278,13 +280,27 @@ export function SocialMediaPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
                         <div className={styles.historySection}>
                             <h3 className={styles.historyTitle}>Recent Updates</h3>
                             {socialHistory.length === 0 ? (
-                                <div className={styles.bridgeHint}>No posts shared yet.</div>
+                                <EmptyState
+                                    title="No posts shared yet."
+                                    hint="Draft an update above and it will be logged here."
+                                />
                             ) : (
                                 socialHistory.map(post => (
                                     <div key={post.id} className={styles.historyItem}>
                                         <div className={styles.historyHeader}>
                                             <span className={styles.historyPlatform}>{post.platform}</span>
                                             <span className={styles.historyDate}>{new Date(post.timestamp).toLocaleDateString()}</span>
+                                            {/* No confirm step: this row is a local note that something was
+                                                shared, not the writing itself. The post stays on the platform. */}
+                                            <button
+                                                type="button"
+                                                className={styles.historyDelete}
+                                                title="Remove from history"
+                                                aria-label={`Remove the ${post.platform} update of ${new Date(post.timestamp).toLocaleDateString()} from history`}
+                                                onClick={() => deleteSocialPost(post.id)}
+                                            >
+                                                <X size={14} aria-hidden="true" />
+                                            </button>
                                         </div>
                                         <div className={styles.historyContent}>{post.content}</div>
                                     </div>

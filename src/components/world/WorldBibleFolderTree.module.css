@@ -52,3 +52,24 @@
 .unfiled { margin-top: var(--space-7); border-top: 1px solid var(--border); padding-top: var(--space-6); }
 .unfiledTitle { font-size: var(--text-lg); font-weight: 700; color: var(--foreground); margin: 0 0 var(--space-1); }
 .unfiledHint { color: var(--muted); font-size: var(--text-xs); margin: 0 0 var(--space-4); }
+
+/* A folder's claim over an entity type — what fileByType matches and what
+   WorldBibleCenter offers when creating an article here. Draggable onto
+   another folder row; the drop handler refuses a same-folder drop. */
+.typeChips { display: flex; flex-wrap: wrap; gap: var(--space-1); flex: 0 1 auto; min-width: 0; }
+
+.typeChip {
+    font-size: var(--text-2xs);
+    line-height: 1;
+    color: var(--muted);
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    padding: var(--space-2) var(--space-3);
+    cursor: grab;
+    white-space: nowrap;
+    transition: border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out);
+}
+
+.typeChip:hover { border-color: var(--accent); color: var(--foreground); }
+.typeChip:active { cursor: grabbing; }

@@ -293,8 +293,9 @@
 
 .historyHeader {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
+    gap: var(--space-3);
 }
 
 .historyPlatform {
@@ -314,6 +315,36 @@
     color: var(--foreground);
     line-height: 1.4;
     white-space: pre-wrap;
+}
+
+/* Dimmed rather than hidden at rest: a hover-only control is invisible but
+   still tappable on touch, where there is no hover to reveal it. */
+.historyDelete {
+    margin-left: auto;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-1);
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--muted);
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity var(--dur-1) var(--ease-out), background var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out);
+}
+
+.historyItem:hover .historyDelete,
+.historyDelete:focus-visible {
+    opacity: 1;
+}
+
+.historyDelete:hover {
+    background: color-mix(in srgb, var(--danger) 15%, transparent);
+    color: var(--danger);
+    opacity: 1;
 }
 
 /* Glassmorphism — Sprint 98 */
