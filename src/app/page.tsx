@@ -12,7 +12,6 @@ import { EntityDetailPanel } from '@/components/world/EntityDetailPanel';
 import { BetaFeedbackPanel } from '@/components/layout/BetaFeedbackPanel';
 import { VersionHistoryPanel } from '@/components/layout/VersionHistoryPanel';
 import { ErrorBoundary } from '@/components/layout/ErrorBoundary';
-import ExportModal from '@/components/ui/ExportModal';
 import { useWorkspaceStore, WORKSPACE_MODES, type WorkspaceMode } from '@/store/workspaceStore';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
 import ModeBar from '@/components/navigation/ModeBar';
@@ -27,6 +26,9 @@ const WritingDesk = lazy(() => import('@/components/editor/WritingDesk'));
 const Bookshelf = lazy(() => import('@/components/management/Bookshelf').then(m => ({ default: m.Bookshelf })));
 const HomePage = lazy(() => import('@/components/home/HomePage'));
 const ResearchTab = lazy(() => import('@/components/editor/ResearchTab'));
+// ExportModal reaches jszip through @/lib/epub. Split so the EPUB writer is
+// downloaded when a writer actually opens Export, not on first paint.
+const ExportModal = lazy(() => import('@/components/ui/ExportModal'));
 
 /**
  * Main Workspace View
@@ -270,7 +272,11 @@ export default function Home() {
         />
 
         {/* Global modal overlays */}
-        {isExportOpen && <ExportModal onClose={() => setExportOpen(false)} />}
+        {isExportOpen && (
+          <Suspense fallback={null}>
+            <ExportModal onClose={() => setExportOpen(false)} />
+          </Suspense>
+        )}
         <InlineEntryCreator />
         <EntityDetailPanel />
         <CommandPalette />
