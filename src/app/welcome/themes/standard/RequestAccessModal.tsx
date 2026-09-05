@@ -128,6 +128,12 @@ export default function RequestAccessModal({ onClose }: RequestAccessModalProps)
                                 This email is already on the list.
                             </p>
                         )}
+                        {result === "throttled" && (
+                            <p className={styles.note}>
+                                We&apos;ve had a lot of requests in the last hour. Try again shortly —
+                                your details were not lost.
+                            </p>
+                        )}
                         {result === "error" && (
                             <p className={styles.error}>
                                 Something went wrong — try again in a minute.

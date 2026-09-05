@@ -33,6 +33,12 @@ describe('submitBetaRequest', () => {
         expect(result).toBe('duplicate');
     });
 
+    it('returns throttled when the insert trigger raises PT429', async () => {
+        insertMock.mockResolvedValue({ error: { code: 'PT429' } });
+        const result = await submitBetaRequest({ name: '', email: 'a@b.c', reason: '' });
+        expect(result).toBe('throttled');
+    });
+
     it('returns error on any other failure', async () => {
         insertMock.mockResolvedValue({ error: { code: 'PGRST301' } });
         const result = await submitBetaRequest({ name: '', email: 'a@b.c', reason: '' });

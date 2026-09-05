@@ -6,11 +6,14 @@ export interface BetaRequestFields {
     reason: string;
 }
 
-export type BetaRequestResult = 'done' | 'duplicate' | 'error';
+export type BetaRequestResult = 'done' | 'duplicate' | 'throttled' | 'error';
 
 /**
  * Inserts a beta access request into public.beta_requests.
  * 23505 (unique_violation) means this email already requested access.
+ * PT429 is raised by the beta_requests_throttle trigger. PostgREST maps a
+ * PTnnn SQLSTATE onto the HTTP status, so a throttled insert really does come
+ * back as a 429 rather than a generic failure.
  */
 export async function submitBetaRequest(
     fields: BetaRequestFields,
@@ -22,5 +25,7 @@ export async function submitBetaRequest(
         reason: fields.reason.trim() || null,
     });
     if (!error) return 'done';
-    return error.code === '23505' ? 'duplicate' : 'error';
+    if (error.code === '23505') return 'duplicate';
+    if (error.code === 'PT429') return 'throttled';
+    return 'error';
 }

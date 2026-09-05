@@ -222,6 +222,12 @@ export default function FantasyLanding() {
                                         you&apos;re on the list.
                                     </p>
                                 )}
+                                {result === 'throttled' && (
+                                    <p className={styles.letterNote}>
+                                        The ledger is being written in faster than the scribe can
+                                        rule lines. Try again shortly — nothing was lost.
+                                    </p>
+                                )}
                                 {result === 'error' && (
                                     <p className={styles.letterError}>
                                         The raven was lost to a storm — please try again in a minute.
