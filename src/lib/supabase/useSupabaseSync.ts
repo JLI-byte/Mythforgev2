@@ -144,6 +144,16 @@ export function useSupabaseSync(userId: string) {
         return false;
       }
 
+      if (result.tooLarge) {
+        // Not a transient failure, so it must not enter the retry backoff: the
+        // workspace is over the cloud limit and will be over it on the next
+        // attempt too. Backing off would then delay the FIRST successful sync
+        // after the writer shrinks it by up to five minutes. The banner has
+        // already told them what to do; local saving is untouched.
+        setStatus('error');
+        return false;
+      }
+
       failureCountRef.current += 1;
       const wait = Math.min(
         BACKOFF_MAX_MS,
