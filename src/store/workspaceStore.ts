@@ -2157,7 +2157,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     };
                 }),
 
-            updateGoalConfig: (updates) =>
+            updateGoalConfig: (updates) => {
                 set((state) => {
                     const newConfig = { ...state.goalConfig, ...updates, goalConfigured: true };
 
@@ -2172,9 +2172,14 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         writingDays: updatedDays,
                         streakState,
                     };
-                }),
+                });
+                // Dropping the target can flip past days to met, which can complete a
+                // streak or cross a word threshold. Awarding here keeps every path
+                // that moves streakState going through one place.
+                get().checkAndAwardBadges();
+            },
 
-            repairStreak: (date) =>
+            repairStreak: (date) => {
                 set((state) => {
                     if (state.goalConfig.streakRepairsAvailable <= 0) return {};
 
@@ -2202,12 +2207,17 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         },
                         streakState,
                     };
-                }),
+                });
+                // A bought day can be the one that completes a run, so the badge
+                // has to be checked against the streak the repair just produced.
+                get().checkAndAwardBadges();
+            },
 
             computeStreakState: () => {
                 const state = get();
                 const streakState = computeStreakFromDays(state.writingDays);
                 set({ streakState });
+                get().checkAndAwardBadges();
                 return streakState;
             },
 
@@ -2816,6 +2826,14 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
                     // Recompute streak on rehydration (streakState is never persisted)
                     state.streakState = computeStreakFromDays(state.writingDays ?? []);
+
+                    // Badges are persisted but streakState is not, so a workspace that
+                    // crossed a threshold on another device arrives here unawarded.
+                    // checkBadges is pure and filters against what is already earned.
+                    state.earnedBadges = [
+                        ...state.earnedBadges,
+                        ...checkBadges(state.streakState, state.earnedBadges),
+                    ];
 
                     // Hydration/Migration: Ensure workspaceMode is initialized correctly for Sprint 99
                     if (!(WORKSPACE_MODES as readonly string[]).includes((state as any).workspaceMode)) {

@@ -6675,3 +6675,77 @@
   font-variant-numeric: tabular-nums;
   color: var(--muted);
 }
+
+/* ── The docked writing column's resize grip ─────────────────
+   .deskResizeHandle was background: transparent with no :hover, :active or
+   parent-hover rule anywhere in this stylesheet, so the only signal a writer
+   ever got was the cursor changing — after they had already found a 10px band
+   they had no reason to aim at. The column was resizable and looked fixed.
+
+   Scoped to .dockedWidget so the eight FLOATING handles stay clean: a floating
+   widget already reads as a movable object, and eight painted grips would be
+   noise. Matches .dockedHandleDots, the drag affordance already on this same
+   widget, and the transparent-plus-hover pattern every side panel's
+   .panelResizeHandle already uses. */
+.dockedWidget > .deskResizeE::after,
+.dockedWidget > .deskResizeW::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: var(--space-9);
+  max-height: 40%;
+  border-radius: var(--radius-xs);
+  background: var(--foreground);
+  opacity: 0.22;
+  transition: opacity var(--dur-2) var(--ease-standard),
+              background var(--dur-2) var(--ease-standard),
+              width var(--dur-2) var(--ease-standard);
+}
+
+.dockedWidget > .deskResizeE:hover::after,
+.dockedWidget > .deskResizeW:hover::after,
+.dockedWidget > .deskResizeE:active::after,
+.dockedWidget > .deskResizeW:active::after {
+  width: 3px;
+  opacity: 1;
+  background: var(--accent);
+}
+
+/* ── Code in the manuscript ──────────────────────────────────
+   StarterKit registers codeBlock, but nothing referenced it: no toolbar item,
+   no command, and no rule here. .deskEditorContent styled p, h1-h3, blockquote,
+   ul, ol, li and hr and nothing for pre or code, so a block reached by the
+   ``` input rule rendered as plain prose. The manuscript face is a serif, so
+   code has to opt out of it explicitly. */
+.deskEditorContent pre {
+  margin: 1.25em 0;
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: rgba(var(--overlay-rgb), 0.05);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  overflow-x: auto;
+  white-space: pre;
+  tab-size: 2;
+}
+
+/* The <code> inside a <pre> must not take the inline treatment twice. */
+.deskEditorContent pre code {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: inherit;
+}
+
+.deskEditorContent code {
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-xs);
+  background: rgba(var(--overlay-rgb), 0.08);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}

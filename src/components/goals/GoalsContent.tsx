@@ -16,6 +16,7 @@ import React, { useState, useMemo } from 'react';
 import { ArrowUpRight, Check } from 'lucide-react';
 import styles from './GoalsContent.module.css';
 import { useWorkspaceStore, BADGE_DEFINITIONS } from '@/store/workspaceStore';
+import { ConfirmDialog } from '@/components/editor/desk/MethodLibrary';
 import ShareModal from '../ui/ShareModal';
 import { ShareCardOptions } from '@/lib/shareCard';
 import { projectProgress, progressLine } from '@/lib/structuralProgress';
@@ -153,6 +154,7 @@ export default function GoalsContent() {
     const documents = useWorkspaceStore(s => s.documents);
     const scenes = useWorkspaceStore(s => s.scenes);
     const updateGoalConfig = useWorkspaceStore(s => s.updateGoalConfig);
+    const repairStreak = useWorkspaceStore(s => s.repairStreak);
 
     // Goal setup banner state
     const [selectedTarget, setSelectedTarget] = useState(200);
@@ -160,6 +162,9 @@ export default function GoalsContent() {
 
     // Share Modal state
     const [shareData, setShareData] = useState<ShareCardOptions | null>(null);
+
+    // The calendar day a repair is armed against, or null.
+    const [repairDate, setRepairDate] = useState<string | null>(null);
 
     // Today's stats
     const today = getToday();
@@ -197,6 +202,22 @@ export default function GoalsContent() {
         ...allBadgeKeys.filter(k => earnedIds.has(k)),
         ...allBadgeKeys.filter(k => !earnedIds.has(k)),
     ];
+
+    const repairsLeft = goalConfig.streakRepairsAvailable;
+
+    /**
+     * A repair buys back a past day that was missed. Today is still winnable and
+     * the future has not happened, so neither is offered — and a day that already
+     * counts would spend the repair for nothing.
+     *
+     * The store guards none of this, and this component is its only caller.
+     */
+    const canRepair = (day: CalendarDay): boolean =>
+        repairsLeft > 0 &&
+        day.dayNum > 0 &&
+        !day.isFuture &&
+        !day.isToday &&
+        !(dayStatsMap[day.date]?.goalMet ?? false);
 
     /** Get calendar day CSS class based on writing stats */
     const getDayClass = (day: CalendarDay): string => {
@@ -332,22 +353,44 @@ export default function GoalsContent() {
                 </div>
                 {/* Day grid */}
                 <div className={styles.calGrid}>
-                    {calendarGrid.map((day, i) => (
-                        <div
-                            key={i}
-                            className={getDayClass(day)}
-                            title={day.date ? `${day.date}: ${dayStatsMap[day.date]?.wordsWritten ?? 0} words` : ''}
-                        >
-                            {day.dayNum > 0 && (
+                    {calendarGrid.map((day, i) => {
+                        const words = day.date ? (dayStatsMap[day.date]?.wordsWritten ?? 0) : 0;
+                        if (!canRepair(day)) {
+                            return (
+                                <div
+                                    key={i}
+                                    className={getDayClass(day)}
+                                    title={day.date ? `${day.date}: ${words} words` : ''}
+                                >
+                                    {day.dayNum > 0 && (
+                                        <span className={styles.calDayNum}>{day.dayNum}</span>
+                                    )}
+                                </div>
+                            );
+                        }
+                        return (
+                            <button
+                                key={i}
+                                type="button"
+                                className={`${getDayClass(day)} ${styles.calDayRepairable}`}
+                                title={`${day.date}: ${words} words — repair this day`}
+                                aria-label={`Repair ${day.date}, ${words} words written`}
+                                onClick={() => setRepairDate(day.date)}
+                            >
                                 <span className={styles.calDayNum}>{day.dayNum}</span>
-                            )}
-                        </div>
-                    ))}
+                            </button>
+                        );
+                    })}
                 </div>
                 {/* Stats below calendar */}
                 <div className={styles.calStats}>
                     <span>🔥 {streakState.currentStreak} day streak</span>
                     <span>⭐ Best: {streakState.longestStreak} days</span>
+                    <span className={styles.repairCount}>
+                        {repairsLeft > 0
+                            ? `🛠 ${repairsLeft} repair${repairsLeft === 1 ? '' : 's'} — click a missed day`
+                            : '🛠 No repairs left'}
+                    </span>
                 </div>
             </div>
 
@@ -477,6 +520,16 @@ export default function GoalsContent() {
                     milestoneLabel: ''
                 }}
             />
+
+            {repairDate && (
+                <ConfirmDialog
+                    title="Repair this day?"
+                    body={`${repairDate} will count toward your streak. This spends one of your ${repairsLeft} repair${repairsLeft === 1 ? '' : 's'} and cannot be undone.`}
+                    confirmLabel="Spend a repair"
+                    onConfirm={() => { repairStreak(repairDate); setRepairDate(null); }}
+                    onCancel={() => setRepairDate(null)}
+                />
+            )}
         </div>
     );
 }

@@ -837,8 +837,22 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                 />
               </div>
               )}
-              <div className={`${styles.deskResizeHandle} ${styles.deskResizeE}`} onMouseDown={e => handleResizeStart(e, w, 'e')} />
-              <div className={`${styles.deskResizeHandle} ${styles.deskResizeW}`} onMouseDown={e => handleResizeStart(e, w, 'w')} />
+              <div
+                className={`${styles.deskResizeHandle} ${styles.deskResizeE}`}
+                onMouseDown={e => handleResizeStart(e, w, 'e')}
+                role="separator"
+                aria-orientation="vertical"
+                aria-label="Drag to widen or narrow the writing column"
+                title="Drag to resize"
+              />
+              <div
+                className={`${styles.deskResizeHandle} ${styles.deskResizeW}`}
+                onMouseDown={e => handleResizeStart(e, w, 'w')}
+                role="separator"
+                aria-orientation="vertical"
+                aria-label="Drag to widen or narrow the writing column"
+                title="Drag to resize"
+              />
             </div>
           ))}
         </div>

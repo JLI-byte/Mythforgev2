@@ -120,12 +120,14 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
               { value: 'h2', label: 'Heading 2' },
               { value: 'h3', label: 'Heading 3' },
               { value: 'blockquote', label: 'Quote' },
+              { value: 'codeBlock', label: 'Code' },
             ]}
             value={
               editor.isActive('heading', { level: 1 }) ? 'h1' :
               editor.isActive('heading', { level: 2 }) ? 'h2' :
               editor.isActive('heading', { level: 3 }) ? 'h3' :
-              editor.isActive('blockquote') ? 'blockquote' : 'p'
+              editor.isActive('blockquote') ? 'blockquote' :
+              editor.isActive('codeBlock') ? 'codeBlock' : 'p'
             }
             onChange={val => {
               if (val === 'p') editor.chain().focus().setParagraph().run();
@@ -133,6 +135,10 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
               if (val === 'h2') editor.chain().focus().toggleHeading({ level: 2 }).run();
               if (val === 'h3') editor.chain().focus().toggleHeading({ level: 3 }).run();
               if (val === 'blockquote') editor.chain().focus().toggleBlockquote().run();
+              // StarterKit registers codeBlock already; it had no way in and no
+              // styling, so it was reachable only by a ``` input rule nobody
+              // could discover, and rendered unstyled if you found it.
+              if (val === 'codeBlock') editor.chain().focus().toggleCodeBlock().run();
             }}
           />
           <GlassDropdown

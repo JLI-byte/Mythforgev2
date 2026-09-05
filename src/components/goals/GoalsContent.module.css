@@ -341,6 +341,28 @@
     outline-offset: -1px;
 }
 
+/* A missed past day the writer can buy back. Styled as an affordance, not a
+   state: the heatmap colour still says what happened, the dashed ring says it
+   is actionable. A plain hover would be invisible until the pointer arrives. */
+.calDayRepairable {
+    border: 1px dashed rgba(var(--overlay-rgb), 0.45);
+    cursor: pointer;
+    padding: 0;
+    font: inherit;
+    transition: border-color var(--dur-2) var(--ease-standard),
+                background var(--dur-2) var(--ease-standard);
+}
+
+.calDayRepairable:hover,
+.calDayRepairable:focus-visible {
+    border-color: var(--accent);
+    background: var(--accent-subtle);
+}
+
+.repairCount {
+    color: var(--muted);
+}
+
 /* Stats below calendar */
 .calStats {
     display: flex;
