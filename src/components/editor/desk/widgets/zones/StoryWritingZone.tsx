@@ -20,6 +20,7 @@ import { DeskTipTapEditor } from '../../DeskTipTapEditor';
 import { BookViewEditor } from '../../BookViewEditor';
 import { BookCoverEditor } from '../../BookCoverEditor';
 import { WidgetLibraryDropdown } from '../../WidgetLibraryDropdown';
+import { ConfirmDialog } from '../../MethodLibrary';
 import { HintBubble } from '@/components/ui/HintBubble';
 import { WritingZoneProps } from './zoneTypes';
 import { reconcileZoneSelection } from '@/lib/zoneSelection';
@@ -33,11 +34,19 @@ export function StoryWritingZone({ content, onChange, onChangeImmediate, widget,
   const addDocument = useWorkspaceStore(s => s.addDocument);
   const addScene = useWorkspaceStore(s => s.addScene);
   const updateDocument = useWorkspaceStore(s => s.updateDocument);
+  const deleteScene = useWorkspaceStore(s => s.deleteScene);
+  const deleteDocument = useWorkspaceStore(s => s.deleteDocument);
+  const reorderScenes = useWorkspaceStore(s => s.reorderScenes);
   const storeActiveDocumentId = useWorkspaceStore(s => s.activeDocumentId);
   const storeActiveSceneId = useWorkspaceStore(s => s.activeSceneId);
   const setActiveDocument = useWorkspaceStore(s => s.setActiveDocument);
   const setActiveScene = useWorkspaceStore(s => s.setActiveScene);
   const [editingNode, setEditingNode] = useState<{ type: 'chapter' | 'scene', id: string, text: string } | null>(null);
+  // The scene a delete is armed against, or null. A scene holding prose is
+  // gated by the desk's ConfirmDialog; an empty one is deleted outright.
+  const [pendingSceneDelete, setPendingSceneDelete] = useState<{ id: string; documentId: string; title: string } | null>(null);
+  // A chapter delete is always gated: it cascades to every scene inside it.
+  const [pendingChapterDelete, setPendingChapterDelete] = useState<{ id: string; title: string } | null>(null);
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
 
@@ -142,6 +151,83 @@ export function StoryWritingZone({ content, onChange, onChangeImmediate, widget,
       viewType: nextMode ? 'book' : 'standard',
       sceneId: targetSceneId
     });
+  };
+
+  /** A chapter's scenes in spine order. */
+  const scenesOf = (documentId: string) =>
+    projectScenes.filter(s => s.documentId === documentId).sort((a, b) => a.order - b.order);
+
+  /**
+   * Swap a scene with its neighbour. reorderScenes restamps order from list
+   * position rather than swapping, so it has to be handed the chapter's
+   * COMPLETE id list — a partial list leaves duplicate order values behind.
+   */
+  const moveScene = (documentId: string, sceneId: string, delta: -1 | 1) => {
+    const ordered = scenesOf(documentId).map(s => s.id);
+    const from = ordered.indexOf(sceneId);
+    const to = from + delta;
+    if (from < 0 || to < 0 || to >= ordered.length) return;
+    const next = [...ordered];
+    [next[from], next[to]] = [next[to], next[from]];
+    reorderScenes(documentId, next);
+    announce(`Moved ${delta === -1 ? 'up' : 'down'} to position ${to + 1} of ${ordered.length}.`);
+  };
+
+  /** A scene with no prose in it — nothing is lost by deleting it unprompted. */
+  const isSceneEmpty = (s: { content: string; wordCount?: number }) =>
+    (s.wordCount ?? 0) === 0 && s.content.replace(/<[^>]*>/g, '').trim() === '';
+
+  /**
+   * Delete a scene, then hand the widget's own pointer somewhere valid. The
+   * store moves activeSceneId, but this zone tracks its scene in widget
+   * content, so a stale id would survive the delete.
+   */
+  const removeScene = (documentId: string, sceneId: string, title: string) => {
+    const ordered = scenesOf(documentId);
+    const index = ordered.findIndex(s => s.id === sceneId);
+    const survivor = ordered[index + 1] ?? ordered[index - 1] ?? null;
+
+    deleteScene(sceneId);
+    if (content.sceneId === sceneId) {
+      (onChangeImmediate ?? onChange)({ ...content, sceneId: survivor?.id ?? 'all' });
+    }
+    announce(`Deleted scene ${title}.`);
+  };
+
+  /**
+   * Empty scenes go straight away; anything with prose in it arms the dialog.
+   * The store has no undo, so the only recovery from a mistaken delete is
+   * retyping the scene — which costs nothing when the scene was blank.
+   */
+  const requestSceneDelete = (documentId: string, s: { id: string; title: string; content: string; wordCount?: number }) => {
+    if (isSceneEmpty(s)) removeScene(documentId, s.id, s.title);
+    else setPendingSceneDelete({ id: s.id, documentId, title: s.title });
+  };
+
+  const confirmSceneDelete = () => {
+    if (!pendingSceneDelete) return;
+    removeScene(pendingSceneDelete.documentId, pendingSceneDelete.id, pendingSceneDelete.title);
+    setPendingSceneDelete(null);
+  };
+
+  /**
+   * Delete a chapter and land the widget on a surviving one. The store nulls
+   * the global pointers; this zone keeps its own documentId in widget content,
+   * so it has to choose the replacement itself.
+   */
+  const confirmChapterDelete = () => {
+    if (!pendingChapterDelete) return;
+    const survivor = projectDocs.find(d => d.id !== pendingChapterDelete.id) ?? null;
+    const survivorScene = survivor ? scenesOf(survivor.id)[0] : undefined;
+
+    deleteDocument(pendingChapterDelete.id);
+    (onChangeImmediate ?? onChange)({
+      ...content,
+      documentId: survivor?.id ?? '',
+      sceneId: survivorScene?.id ?? 'all',
+    });
+    announce(`Deleted chapter ${pendingChapterDelete.title}.`);
+    setPendingChapterDelete(null);
   };
 
   const docScenes = projectScenes.filter(s => s.documentId === activeDocId).sort((a, b) => a.order - b.order);
@@ -423,35 +509,74 @@ export function StoryWritingZone({ content, onChange, onChangeImmediate, widget,
                       </div>
                     </button>
 
+                    {isDocActive && projectDocs.length > 1 && (
+                      <button
+                        type="button"
+                        className={styles.spineChapterDeleteBtn}
+                        title="Delete chapter"
+                        aria-label={`Delete chapter ${idx + 1}, ${doc.title}`}
+                        onClick={() => setPendingChapterDelete({ id: doc.id, title: doc.title })}
+                      >
+                        <span aria-hidden="true">×</span> Delete chapter
+                      </button>
+                    )}
+
                     {(isDocActive && !isSceneListCollapsed) && (
                       <div className={styles.binderSceneList} onMouseDown={e => e.stopPropagation()}>
-                        {scenes.map(s => (
-                          <button key={s.id} className={`${styles.binderSpineSceneTab} ${s.id === activeScene?.id ? styles.binderSpineSceneTabActive : ''}`} onClick={() => setActiveSceneId(s.id)}>
-                            {editingNode?.type === 'scene' && editingNode.id === s.id ? (
-                              <input 
-                                aria-label="Scene title"
-                                className={styles.spineRenameInput}
-                                ref={renameInputRef}
-                                value={editingNode.text}
-                                onChange={e => setEditingNode({ ...editingNode, text: e.target.value })}
-                                onKeyDown={e => { 
-                                  if (e.key === 'Enter') { updateScene(s.id, { title: editingNode.text }); setEditingNode(null); }
-                                  else if (e.key === 'Escape') setEditingNode(null);
-                                }}
-                                onClick={e => e.stopPropagation()}
-                                onDoubleClick={e => e.stopPropagation()}
-                              />
-                            ) : (
-                              <span 
-                                className={styles.binderSpineSceneTitle}
-                                onDoubleClick={() => setEditingNode({ type: 'scene', id: s.id, text: s.title })}
-                                title="Double-click to rename"
-                              >
-                                {s.title}
-                              </span>
-                            )}
-                            <span className={styles.binderSpineSceneMeta}>{s.wordCount || 0} words</span>
-                          </button>
+                        {scenes.map((s, sIdx) => (
+                          <div key={s.id} className={styles.binderSpineSceneRow}>
+                            <button className={`${styles.binderSpineSceneTab} ${s.id === activeScene?.id ? styles.binderSpineSceneTabActive : ''}`} onClick={() => setActiveSceneId(s.id)}>
+                              {editingNode?.type === 'scene' && editingNode.id === s.id ? (
+                                <input
+                                  aria-label="Scene title"
+                                  className={styles.spineRenameInput}
+                                  ref={renameInputRef}
+                                  value={editingNode.text}
+                                  onChange={e => setEditingNode({ ...editingNode, text: e.target.value })}
+                                  onKeyDown={e => {
+                                    if (e.key === 'Enter') { updateScene(s.id, { title: editingNode.text }); setEditingNode(null); }
+                                    else if (e.key === 'Escape') setEditingNode(null);
+                                  }}
+                                  onClick={e => e.stopPropagation()}
+                                  onDoubleClick={e => e.stopPropagation()}
+                                />
+                              ) : (
+                                <span
+                                  className={styles.binderSpineSceneTitle}
+                                  onDoubleClick={() => setEditingNode({ type: 'scene', id: s.id, text: s.title })}
+                                  title="Double-click to rename"
+                                >
+                                  {s.title}
+                                </span>
+                              )}
+                              <span className={styles.binderSpineSceneMeta}>{s.wordCount || 0} words</span>
+                            </button>
+                            <div className={styles.spineSceneActions}>
+                              <button
+                                type="button"
+                                className={styles.spineSceneActionBtn}
+                                title="Move scene up"
+                                aria-label={`Move ${s.title} up`}
+                                disabled={sIdx === 0}
+                                onClick={() => moveScene(doc.id, s.id, -1)}
+                              ><span aria-hidden="true">▲</span></button>
+                              <button
+                                type="button"
+                                className={styles.spineSceneActionBtn}
+                                title="Move scene down"
+                                aria-label={`Move ${s.title} down`}
+                                disabled={sIdx === scenes.length - 1}
+                                onClick={() => moveScene(doc.id, s.id, 1)}
+                              ><span aria-hidden="true">▼</span></button>
+                              <button
+                                type="button"
+                                className={`${styles.spineSceneActionBtn} ${styles.spineSceneActionDanger}`}
+                                title="Delete scene"
+                                aria-label={`Delete ${s.title}`}
+                                onClick={() => requestSceneDelete(doc.id, s)}
+                              ><span aria-hidden="true">×</span></button>
+                            </div>
+                          </div>
                         ))}
                         <button className={styles.binderAddSceneBtn} onClick={() => {
                           const nid = crypto.randomUUID();
@@ -489,6 +614,24 @@ export function StoryWritingZone({ content, onChange, onChangeImmediate, widget,
     <>
       {isFocusMode && typeof document !== 'undefined' ? createPortal(ui, document.body) : ui}
       {activeProjectId && <ProjectSettingsModal isOpen={showSettings} onClose={() => (onChangeImmediate ?? onChange)({ ...content, showSettings: false })} projectId={activeProjectId} />}
+      {pendingSceneDelete && (
+        <ConfirmDialog
+          title="Delete this scene?"
+          body={`“${pendingSceneDelete.title}” and everything written in it will be removed. This cannot be undone.`}
+          confirmLabel="Delete Scene"
+          onConfirm={confirmSceneDelete}
+          onCancel={() => setPendingSceneDelete(null)}
+        />
+      )}
+      {pendingChapterDelete && (
+        <ConfirmDialog
+          title="Delete this chapter?"
+          body={`“${pendingChapterDelete.title}” and every scene inside it will be removed. This cannot be undone.`}
+          confirmLabel="Delete Chapter"
+          onConfirm={confirmChapterDelete}
+          onCancel={() => setPendingChapterDelete(null)}
+        />
+      )}
     </>
   );
 }

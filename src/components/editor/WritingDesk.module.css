@@ -6843,3 +6843,96 @@
   color: var(--accent);
   background: rgba(var(--accent-rgb), 0.12);
 }
+
+/* --- Scene and chapter row controls (spine) -------------------------------
+   The scene row is a wrapper, not the button: a delete button cannot legally
+   nest inside the select button it sits on. Actions reveal on row hover, and
+   on :focus-within so the keyboard path stays reachable. */
+
+.binderSpineSceneRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.binderSpineSceneRow .binderSpineSceneTab {
+  flex: 1;
+  min-width: 0;
+}
+
+.spineSceneActions {
+  display: flex;
+  flex: none;
+  gap: var(--space-1);
+  padding-right: var(--space-3);
+  opacity: 0;
+  transition: opacity var(--dur-1) var(--ease-standard);
+}
+
+.binderSpineSceneRow:hover .spineSceneActions,
+.spineSceneActions:focus-within {
+  opacity: 1;
+}
+
+.spineSceneActionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-6);
+  height: var(--space-6);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--text-2xs);
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--dur-1) var(--ease-standard),
+              color var(--dur-1) var(--ease-standard);
+}
+
+.spineSceneActionBtn:hover:not(:disabled),
+.spineSceneActionBtn:focus-visible:not(:disabled) {
+  background: rgba(var(--overlay-rgb), 0.12);
+  color: var(--foreground);
+}
+
+.spineSceneActionBtn:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.spineSceneActionDanger:hover:not(:disabled),
+.spineSceneActionDanger:focus-visible:not(:disabled) {
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger);
+}
+
+/* Sits under the open chapter's header rather than inside it — the header is a
+   button and cannot legally contain another. Only shown on the open chapter,
+   so the spine does not become a row of delete buttons. */
+.spineChapterDeleteBtn {
+  display: block;
+  width: 100%;
+  margin: var(--space-1) 0 var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--text-2xs);
+  text-align: left;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity var(--dur-1) var(--ease-standard),
+              background var(--dur-1) var(--ease-standard),
+              color var(--dur-1) var(--ease-standard);
+}
+
+.spineChapterDeleteBtn:hover,
+.spineChapterDeleteBtn:focus-visible {
+  opacity: 1;
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger);
+}
