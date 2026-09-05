@@ -192,7 +192,7 @@ Ordered internally: tokens exist before anything converts to them.
 
 ## Phase 9 — Wire what is already built
 
-**Plan:** `2026-09-03-phase-9-wire-what-exists.md` · **Status:** ready · **Depends on:** Phase 1
+**Plan:** `2026-09-03-phase-9-wire-what-exists.md` · **Status:** COMPLETE (5 commits) · **Depends on:** Phase 1
 
 | Item | What |
 |------|------|
