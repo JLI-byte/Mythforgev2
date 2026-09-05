@@ -209,7 +209,7 @@ Ordered internally: tokens exist before anything converts to them.
 
 ## Phase 10 — Launch readiness
 
-**Plan:** `2026-09-03-phase-10-launch-readiness.md` · **Status:** ready · **Spec:** Part 3g–3i · **Blocks launch, not development**
+**Plan:** `2026-09-03-phase-10-launch-readiness.md` · **Status:** COMPLETE (3 commits; S7 needs a dashboard toggle) · **Spec:** Part 3g–3i · **Blocks launch, not development**
 
 Phases 2 and 3 removed every blocker that used to live here. What remains is operational.
 
