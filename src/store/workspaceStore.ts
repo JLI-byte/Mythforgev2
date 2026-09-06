@@ -496,7 +496,7 @@ export interface SocialPost {
 // below and the ?view= landing param both check against this list, so adding a
 // mode here is all that is needed to make it valid everywhere.
 export const WORKSPACE_MODES = [
-    'home', 'worldBible', 'worldBibleEdit', 'template', 'desk', 'hierarchy', 'bookshelf', 'research',
+    'home', 'worldBible', 'worldBibleEdit', 'template', 'desk', 'hierarchy', 'bookshelf',
 ] as const;
 export type WorkspaceMode = typeof WORKSPACE_MODES[number];
 

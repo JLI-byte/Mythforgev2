@@ -3,7 +3,7 @@
 import React from 'react';
 import styles from './BeginOptions.module.css';
 
-export type BeginDestination = 'research' | 'template' | 'desk';
+export type BeginDestination = 'template' | 'desk';
 
 interface BeginOptionsProps {
     onChoose: (destination: BeginDestination) => void;
@@ -11,7 +11,7 @@ interface BeginOptionsProps {
 }
 
 /**
- * The three ways into a new book. Shown twice: on step three of the Bookshelf's
+ * The two ways into a new book. Shown twice: on step three of the Bookshelf's
  * new-work wizard, and on Home when the workspace is empty. It is the only
  * place in the app that maps the modes onto what a writer actually wants to do
  * next, which is exactly why a newcomer should not have to find it inside a
@@ -20,16 +20,6 @@ interface BeginOptionsProps {
 export function BeginOptions({ onChoose, disabled = false }: BeginOptionsProps) {
     return (
         <div className={styles.beginOptions}>
-            <button
-                className={styles.beginOption}
-                onClick={() => onChoose('research')}
-                disabled={disabled}
-            >
-                <span className={styles.beginOptionTitle}>🔎 Research First</span>
-                <span className={styles.beginOptionDesc}>
-                    Gather notes, clippings and links on a board before you write a word
-                </span>
-            </button>
             <button
                 className={styles.beginOption}
                 onClick={() => onChoose('template')}

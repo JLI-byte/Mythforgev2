@@ -3,18 +3,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Library, NotebookPen, Globe, LayoutTemplate, ArrowRight, Plus,
-  PenLine, AlertTriangle, Sparkles, Send, BookOpen, Settings, History,
+  PenLine, Sparkles, Send, BookOpen, Settings, History,
 } from 'lucide-react';
 import {
   useWorkspaceStore, WorkspaceMode, ENTITY_TYPE_LABELS, type EntityType,
 } from '@/store/workspaceStore';
 import { createClient } from '@/lib/supabase/client';
-import { researchScopeKey } from '@/lib/researchScope';
 import { makeNoteCard } from '@/lib/researchBoard';
 import { worldKeyForProject, worldKeyForEntity, type WorldKey } from '@/lib/worldKey';
 import {
   dateKey, wordsOnDate, buildHeatmap, resolveResumeTarget, timeAgo,
-  attentionCounts,
 } from '@/lib/homeStats';
 import {
   WEEKDAY_LONG, normalizeWeekdayTargets, targetForDateKey, targetForDayIndex,
@@ -36,9 +34,9 @@ import styles from './HomePage.module.css';
  * HomePage — the logged-in home base the top-bar Home button lands on.
  *
  * A bento dashboard over data the app already tracks: where to resume writing,
- * today's goal, the writing streak and day heatmap, pending research flags,
- * World Bible size, and a quick-capture box that drops an idea straight onto
- * the project's research board.
+ * today's goal, the writing streak and day heatmap, World Bible size, and a
+ * quick-capture box that drops an idea straight onto the project's writing
+ * desk.
  */
 
 interface QuickLink {
@@ -63,7 +61,7 @@ export default function HomePage() {
   const setActiveDocument = useWorkspaceStore(s => s.setActiveDocument);
   const setActiveScene = useWorkspaceStore(s => s.setActiveScene);
   const setSelectedEntity = useWorkspaceStore(s => s.setSelectedEntity);
-  const updateResearchState = useWorkspaceStore(s => s.updateResearchState);
+  const updateDeskState = useWorkspaceStore(s => s.updateDeskState);
   const updateGoalConfig = useWorkspaceStore(s => s.updateGoalConfig);
 
   const projects = useWorkspaceStore(s => s.projects);
@@ -73,7 +71,6 @@ export default function HomePage() {
   const writingDays = useWorkspaceStore(s => s.writingDays);
   const goalConfig = useWorkspaceStore(s => s.goalConfig);
   const streakState = useWorkspaceStore(s => s.streakState);
-  const researchStates = useWorkspaceStore(s => s.researchStates);
   const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
   const worlds = useWorkspaceStore(s => s.worlds);
   const setActiveWorldKey = useWorkspaceStore(s => s.setActiveWorldKey);
@@ -143,8 +140,6 @@ export default function HomePage() {
       key => targetForDateKey(goalConfig, key)),
     [writingDays, goalConfig],
   );
-
-  const attention = useMemo(() => attentionCounts(researchStates), [researchStates]);
 
   // What changed while the writer was gone. Silent under the absence threshold.
   const absence = useMemo(
@@ -231,13 +226,13 @@ export default function HomePage() {
     setWorkspaceMode('worldBible');
   };
 
-  // Quick capture drops the idea on the active project's default research board.
+  // Quick capture drops the idea on the active project's writing desk. It used
+  // to land on the research board, which no longer has a screen to open.
   const captureIdea = () => {
     const text = capture.trim();
-    const scopeKey = researchScopeKey('project', activeProject);
-    if (!text || !scopeKey) return;
-    const current = useWorkspaceStore.getState().researchStates[scopeKey]?.widgets ?? [];
-    updateResearchState(scopeKey, { widgets: [...current, makeNoteCard(text, current.length)] });
+    if (!text || !activeProject) return;
+    const current = useWorkspaceStore.getState().deskStates[activeProject.id]?.widgets ?? [];
+    updateDeskState(activeProject.id, { widgets: [...current, makeNoteCard(text, current.length)] });
     setCapture('');
     setCaptured(true);
     setTimeout(() => setCaptured(false), 2400);
@@ -278,11 +273,11 @@ export default function HomePage() {
               className={styles.captureBtn}
               onClick={captureIdea}
               disabled={!activeProject || !capture.trim()}
-              title="Send to the research board"
+              title="Send to the writing desk"
             >
               <Send size={15} />
             </button>
-            {captured && <span className={styles.captureToast}>Added to your research board</span>}
+            {captured && <span className={styles.captureToast}>Added to your writing desk</span>}
           </div>
         </header>
 
@@ -448,26 +443,6 @@ export default function HomePage() {
             ) : (
               <p className={styles.tileEmpty}>Write an article and it will resurface here.</p>
             )}
-          </div>
-
-          {/* Needs attention */}
-          <div className={`${styles.tile} ${styles.tileAttention}`}>
-            <span className={styles.tileLabel}><AlertTriangle size={14} /> Needs attention</span>
-            {attention.flags + attention.suggestions > 0 ? (
-              <ul className={styles.attentionList}>
-                {attention.flags > 0 && (
-                  <li><strong>{attention.flags}</strong> consistency flag{attention.flags === 1 ? '' : 's'}</li>
-                )}
-                {attention.suggestions > 0 && (
-                  <li><strong>{attention.suggestions}</strong> suggested article{attention.suggestions === 1 ? '' : 's'}</li>
-                )}
-              </ul>
-            ) : (
-              <p className={styles.tileEmpty}>Nothing flagged. Consistency checks run over your lore as you write.</p>
-            )}
-            <button className={styles.tileLink} onClick={() => setWorkspaceMode('research')}>
-              Open Research <ArrowRight size={14} />
-            </button>
           </div>
 
           {/* Quick links */}

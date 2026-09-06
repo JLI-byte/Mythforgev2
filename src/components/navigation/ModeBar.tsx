@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Home, Library, LogOut, NotebookPen, Globe, LayoutTemplate, Telescope, Settings } from 'lucide-react';
+import { Home, Library, LogOut, NotebookPen, Globe, LayoutTemplate, Settings } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 import { useWorkspaceStore, Project, Document, Entity, Scene, World } from '@/store/workspaceStore';
 import styles from './ModeBar.module.css';
@@ -215,7 +215,6 @@ function computeResults(
 /** Top-bar tabs the limelight indicator tracks. */
 const MODE_TABS = [
   { mode: 'bookshelf', label: 'Bookshelf', Icon: Library },
-  { mode: 'research', label: 'Research', Icon: Telescope },
   { mode: 'template', label: 'Draft Table', Icon: LayoutTemplate },
   { mode: 'desk', label: 'Writing Desk', Icon: NotebookPen },
   { mode: 'worldBible', label: 'World Bible', Icon: Globe },

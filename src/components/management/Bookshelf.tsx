@@ -287,10 +287,10 @@ export function Bookshelf() {
 
     /**
      * Creates the story with its first chapter + scene, then routes to the
-     * chosen starting point: the Research Table (gather first), the Draft
-     * Table (outline first), or the Writing Desk (straight into prose).
+     * chosen starting point: the Draft Table (outline first) or the Writing
+     * Desk (straight into prose).
      */
-    const confirmCreateStory = (destination: 'template' | 'desk' | 'research') => {
+    const confirmCreateStory = (destination: 'template' | 'desk') => {
         const plan = planNewStory({
             name: storyName,
             workTypeId: storyTypeId ?? '',

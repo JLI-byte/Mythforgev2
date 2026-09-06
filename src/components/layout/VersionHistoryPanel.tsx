@@ -122,7 +122,7 @@ export function VersionHistoryPanel({
                     style={{
                         width: tabWidth,
                         right: isOpen ? panelWidth : 0,
-                        top: 568, // rail slots are 130px: WB 48, Goals 178, Social 308, Music 438, History 568
+                        top: 438, // rail slots are 130px: WB 48, Goals 178, Social 308, History 438
                         transition: 'right 280ms ease-in-out',
                     }}
                     onClick={onTabClick}
@@ -162,7 +162,7 @@ export function VersionHistoryPanel({
                     style={{
                         width: tabWidth,
                         height: 130,
-                        top: 568,
+                        top: 438,
                         right: 0,
                     }}
                     onClick={onClose}
