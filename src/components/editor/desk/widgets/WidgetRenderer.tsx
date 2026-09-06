@@ -20,6 +20,7 @@ import { ArticleSuggestionsRenderer } from './ArticleSuggestionsRenderer';
 import { ConsistencyFlagsRenderer } from './ConsistencyFlagsRenderer';
 import { UnderstandingRenderer } from './UnderstandingRenderer';
 import { UntypedWidgetRenderer } from './UntypedWidgetRenderer';
+import { BoardCardRenderer } from './BoardCardRenderer';
 
 // ============================================================
 // WIDGET RENDERERS
@@ -36,11 +37,13 @@ export interface WidgetRendererProps {
   triggerSave: () => void;
   viewportRef: React.RefObject<HTMLDivElement | null>;
   onAddAtCenter: (type: DeskWidgetType) => void;
+  /** Research boards only: open a nested board from its card. */
+  onOpenBoard?: (boardId: string) => void;
 }
 
 export const WidgetRenderer = React.memo(function WidgetRenderer({
   widget, updateContentImmediate, updateContentSilent,
-  handleDragStart, deleteWidget, updateWidgets, widgetsRef, triggerSave, viewportRef, onAddAtCenter, onDockChange
+  handleDragStart, deleteWidget, updateWidgets, widgetsRef, triggerSave, viewportRef, onAddAtCenter, onOpenBoard, onDockChange
 }: WidgetRendererProps & { onDockChange: (dock: DeskWidget['dock']) => void }) {
   // Stable per-widget callbacks — recreated only when widget.id changes.
   // widget.content seeds each renderer's local useState on mount / external update.
@@ -73,6 +76,7 @@ export const WidgetRenderer = React.memo(function WidgetRenderer({
     case 'articleSuggestions': return <ArticleSuggestionsRenderer content={content} onChange={handleChangeImmediate} />;
     case 'consistencyFlags': return <ConsistencyFlagsRenderer content={content} onChange={handleChangeImmediate} />;
     case 'worldUnderstanding': return <UnderstandingRenderer />;
+    case 'board':       return <BoardCardRenderer content={content} onOpenBoard={onOpenBoard} />;
     case 'untyped':     return <UntypedWidgetRenderer />;
     default:            return null;
   }

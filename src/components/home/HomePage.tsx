@@ -9,8 +9,8 @@ import {
   useWorkspaceStore, WorkspaceMode, ENTITY_TYPE_LABELS, type EntityType,
 } from '@/store/workspaceStore';
 import { createClient } from '@/lib/supabase/client';
-import { researchScopeKey } from '@/lib/researchScope';
 import { makeNoteCard } from '@/lib/researchBoard';
+import { rootBoardIdFor } from '@/lib/research/boardTree';
 import { worldKeyForProject, worldKeyForEntity, type WorldKey } from '@/lib/worldKey';
 import {
   dateKey, wordsOnDate, buildHeatmap, resolveResumeTarget, timeAgo,
@@ -38,7 +38,7 @@ import styles from './HomePage.module.css';
  * A bento dashboard over data the app already tracks: where to resume writing,
  * today's goal, the writing streak and day heatmap, pending research flags,
  * World Bible size, and a quick-capture box that drops an idea straight onto
- * the project's research board.
+ * the project's unsorted notes.
  */
 
 interface QuickLink {
@@ -231,14 +231,16 @@ export default function HomePage() {
     setWorkspaceMode('worldBible');
   };
 
-  // Quick capture drops the idea on the active project's default research
-  // board — the Workshop's first stage, reachable again.
+  // Quick capture lands in the project root board's unsorted tray — the whole
+  // point of the tray is that capturing costs no decision about placement.
   const captureIdea = () => {
     const text = capture.trim();
-    const scopeKey = researchScopeKey('project', activeProject);
-    if (!text || !scopeKey) return;
-    const current = useWorkspaceStore.getState().researchStates[scopeKey]?.widgets ?? [];
-    updateResearchState(scopeKey, { widgets: [...current, makeNoteCard(text, current.length)] });
+    if (!text || !activeProject) return;
+    const s = useWorkspaceStore.getState();
+    const boardId = rootBoardIdFor(s.researchBoards, activeProject.id);
+    if (!boardId) return;
+    const current = s.researchStates[boardId]?.unsorted ?? [];
+    updateResearchState(boardId, { unsorted: [...current, makeNoteCard(text, current.length)] });
     setCapture('');
     setCaptured(true);
     setTimeout(() => setCaptured(false), 2400);
@@ -279,11 +281,11 @@ export default function HomePage() {
               className={styles.captureBtn}
               onClick={captureIdea}
               disabled={!activeProject || !capture.trim()}
-              title="Send to the research board"
+              title="Send to your unsorted notes"
             >
               <Send size={15} />
             </button>
-            {captured && <span className={styles.captureToast}>Added to your research board</span>}
+            {captured && <span className={styles.captureToast}>Added to your unsorted notes</span>}
           </div>
         </header>
 

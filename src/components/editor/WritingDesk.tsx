@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Anchor, X, Image, Link2, Settings, StickyNote } from 'lucide-react';
+import { Anchor, X, FolderTree, Image, Link2, Settings, StickyNote } from 'lucide-react';
 import { useWorkspaceStore, DeskWidget, DeskWidgetType } from '@/store/workspaceStore';
 import styles from './WritingDesk.module.css';
 
@@ -34,11 +34,13 @@ interface WritingDeskProps {
    *  'draft' = the Draft Table: a blank per-project canvas, no Writing Zone.
    *  'research' = the Research Table: a blank canvas keyed by scopeKey. */
   variant?: 'desk' | 'draft' | 'research';
-  /** Research variant only: composite scope key (`project:<id>` | `world:<key>`). */
+  /** Research variant only: the board id whose canvas this is. */
   scopeKey?: string | null;
+  /** Research variant only: open a nested board. */
+  onOpenBoard?: (boardId: string) => void;
 }
 
-export default function WritingDesk({ variant = 'desk', scopeKey = null }: WritingDeskProps) {
+export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenBoard }: WritingDeskProps) {
   const isDraft = variant === 'draft';
   const isResearch = variant === 'research';
   const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
@@ -553,7 +555,16 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
     if (!viewportRef.current) return;
     const vW = viewportRef.current.clientWidth, vH = viewportRef.current.clientHeight, dims = DEFAULT_DIMS[type];
     const wx = (vW / 2 - canvasOffsetRef.current.x) / zoomRef.current - dims.w / 2, wy = (vH / 2 - canvasOffsetRef.current.y) / zoomRef.current - dims.h / 2;
-    const nw: DeskWidget = { id: crypto.randomUUID(), type, x: wx, y: wy, width: dims.w, height: dims.h, content: {}, dock: type === 'writingZone' ? 'center' : null };
+    // A board card is a pointer. Register the board it points at, or the card
+    // renders as "This board was deleted" the moment it appears.
+    let content: Record<string, unknown> = {};
+    if (type === 'board' && isResearch && stateKey && activeProjectId) {
+      const newId = useWorkspaceStore.getState()
+        .createResearchBoard('New board', stateKey, activeProjectId);
+      content = { boardId: newId };
+    }
+
+    const nw: DeskWidget = { id: crypto.randomUUID(), type, x: wx, y: wy, width: dims.w, height: dims.h, content, dock: type === 'writingZone' ? 'center' : null };
     updateWidgets([...widgetsRef.current, nw]); setSelectedId(nw.id);
   };
 
@@ -754,6 +765,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                   triggerSave={triggerSave}
                   viewportRef={viewportRef}
                   onAddAtCenter={addAtCenter}
+                  onOpenBoard={onOpenBoard}
                   onDockChange={(dock) => updateDock(w.id, dock)}
                 />
               </div>
@@ -833,6 +845,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                   triggerSave={triggerSave}
                   viewportRef={viewportRef}
                   onAddAtCenter={addAtCenter}
+                  onOpenBoard={onOpenBoard}
                   onDockChange={(dock) => updateDock(w.id, dock)}
                 />
               </div>
@@ -911,6 +924,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
             <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('sticky')}><StickyNote size={14} aria-hidden="true" /> Note</button>
             <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('image')}><Image size={14} /> Clipping</button>
             <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('reference')}><Link2 size={14} aria-hidden="true" /> Link</button>
+            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('board')}><FolderTree size={14} aria-hidden="true" /> Board</button>
           </div>
         )}
 

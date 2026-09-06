@@ -11,6 +11,8 @@ import { getStoredValue } from '@/lib/storage';
 import { worldKeyForProject, worldKeyForEntity, type WorldKey } from '@/lib/worldKey';
 import { normalizeDismissedHints, normalizeVisitStamp } from '@/lib/onboarding';
 import { coerceStage, resolveLegacyMode, DEFAULT_STAGE, type DeskStage } from '@/lib/deskStages';
+import { buildRegistry } from '@/lib/research/boardMigration';
+import { descendantIds, canMove, type BoardRegistry } from '@/lib/research/boardTree';
 import { migrateWorkspaceSchema } from './migrateWorkspaceSchema';
 import { DEFAULT_WORLD_BIBLE_LAYOUT } from '@/lib/worldBibleNav';
 import { wouldCreateCycle, fileByType } from '@/lib/folderTree';
@@ -320,7 +322,7 @@ export interface ArticleTab {
 // Writing Desk System Interfaces
 // =============================================
 
-export type DeskWidgetType = 'writingZone' | 'sticky' | 'reference' | 'image' | 'biblePinit' | 'sceneControl' | 'characterState' | 'continuity' | 'structure' | 'research' | 'progress' | 'relMap' | 'draftNav' | 'beatCard' | 'articleSuggestions' | 'consistencyFlags' | 'worldUnderstanding' | 'untyped';
+export type DeskWidgetType = 'writingZone' | 'sticky' | 'reference' | 'image' | 'biblePinit' | 'sceneControl' | 'characterState' | 'continuity' | 'structure' | 'research' | 'progress' | 'relMap' | 'draftNav' | 'beatCard' | 'articleSuggestions' | 'consistencyFlags' | 'worldUnderstanding' | 'board' | 'untyped';
 
 /** An object attached to the research chat as context for the next message. */
 export interface ChatAttachment {
@@ -351,6 +353,10 @@ export interface DeskState {
   widgets: DeskWidget[];
   zoom: number;
   canvasOffset: { x: number; y: number };
+  /** Research boards only: the inbox anything dropped on the board lands in.
+   *  A card here keeps its size and content; its x/y mean nothing until it is
+   *  dragged out, which is the moment they are set. */
+  unsorted?: DeskWidget[];
   /** Draft Table only: the writing method currently applied to this canvas ('blank' = started without one). */
   methodId?: string;
   /** Draft Table only: what's being drafted — filters the method library. */
@@ -791,6 +797,10 @@ export interface WorkspaceState {
      */
     customBoards: Record<string, ResearchBoard[]>;
 
+    /** Every research board, by id, with its place in the tree. Derived from
+     *  the legacy keys on first rehydration — see lib/research/boardMigration. */
+    researchBoards: BoardRegistry;
+
     /**
      * Research-chat conversations, keyed by board scope key — so the chat
      * survives collapsing the panel, switching tabs, and reloads. Persisted in
@@ -1033,12 +1043,12 @@ export interface WorkspaceState {
 
     /** Research Table Actions — parallel canvas keyed by composite scope key. */
     updateResearchState: (scopeKey: string, updates: Partial<DeskState>) => void;
+    createResearchBoard: (name: string, parentId: string, projectId: string) => string;
+    renameResearchBoard: (boardId: string, name: string) => void;
+    deleteResearchBoard: (boardId: string) => void;
+    moveResearchBoard: (boardId: string, newParentId: string | null) => void;
     pinEntityToDesk: (projectId: string, entityId: string) => void;
 
-    /** Research boards within a scope — add returns the new board's id. */
-    addResearchBoard: (baseScopeKey: string, name: string) => string;
-    renameResearchBoard: (baseScopeKey: string, boardId: string, name: string) => void;
-    deleteResearchBoard: (baseScopeKey: string, boardId: string) => void;
 
     /** Replace a board's chat conversation (the panel mirrors its state here). */
 
@@ -1432,6 +1442,7 @@ export function partializeWorkspace(state: WorkspaceState) {
         draftStates: state.draftStates,
         researchStates: state.researchStates,
         customBoards: state.customBoards,
+        researchBoards: state.researchBoards,
         // Persist conversations in shrunk form: capped length, image data dropped.
         customInterviews: state.customInterviews,
         worldUnderstanding: state.worldUnderstanding,
@@ -1530,6 +1541,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             draftStates: {},
             researchStates: {},
             customBoards: {},
+            researchBoards: {},
             customInterviews: [],
             worldUnderstanding: {},
             writingGoal: { dailyTarget: 0, sessionTarget: 0 },
@@ -2256,6 +2268,47 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
             setDeskStage: (stage) => set(() => ({ deskStage: stage })),
 
+            createResearchBoard: (name, parentId, projectId) => {
+                const id = crypto.randomUUID();
+                set(state => ({
+                    researchBoards: {
+                        ...state.researchBoards,
+                        [id]: { id, name, parentId, projectId },
+                    },
+                }));
+                return id;
+            },
+
+            renameResearchBoard: (boardId, name) => set(state => {
+                const node = state.researchBoards[boardId];
+                if (!node) return {};
+                return { researchBoards: { ...state.researchBoards, [boardId]: { ...node, name } } };
+            }),
+
+            deleteResearchBoard: (boardId) => set(state => {
+                // The subtree goes too — an orphaned child can never be reached,
+                // because the only way down is through its parent's board card.
+                const doomed = new Set([boardId, ...descendantIds(state.researchBoards, boardId)]);
+                const researchBoards: BoardRegistry = {};
+                for (const [id, node] of Object.entries(state.researchBoards)) {
+                    if (!doomed.has(id)) researchBoards[id] = node;
+                }
+                const researchStates = { ...state.researchStates };
+                for (const id of doomed) delete researchStates[id];
+                return { researchBoards, researchStates };
+            }),
+
+            moveResearchBoard: (boardId, newParentId) => set(state => {
+                const node = state.researchBoards[boardId];
+                if (!node || !canMove(state.researchBoards, boardId, newParentId)) return {};
+                return {
+                    researchBoards: {
+                        ...state.researchBoards,
+                        [boardId]: { ...node, parentId: newParentId },
+                    },
+                };
+            }),
+
             setActiveWorldKey: (key) => set(() => ({ activeWorldKey: key })),
 
             updateWorldBibleConfig: (key, patch) =>
@@ -2637,40 +2690,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     };
                 }),
 
-            addResearchBoard: (baseScopeKey, name) => {
-                const id = crypto.randomUUID();
-                set((state) => ({
-                    customBoards: {
-                        ...state.customBoards,
-                        [baseScopeKey]: [...(state.customBoards[baseScopeKey] ?? []), { id, name }],
-                    },
-                }));
-                return id;
-            },
-
-            renameResearchBoard: (baseScopeKey, boardId, name) =>
-                set((state) => ({
-                    customBoards: {
-                        ...state.customBoards,
-                        [baseScopeKey]: (state.customBoards[baseScopeKey] ?? []).map(b =>
-                            b.id === boardId ? { ...b, name } : b,
-                        ),
-                    },
-                })),
-
-            deleteResearchBoard: (baseScopeKey, boardId) =>
-                set((state) => {
-                    const nextBoards = (state.customBoards[baseScopeKey] ?? []).filter(b => b.id !== boardId);
-                    // Drop the deleted board's canvas state and chat history too.
-                    const boardKey = `${baseScopeKey}::${boardId}`;
-                    const { [boardKey]: _removed, ...restStates } = state.researchStates;
-                    return {
-                        customBoards: { ...state.customBoards, [baseScopeKey]: nextBoards },
-                        researchStates: restStates,
-                    };
-                }),
-
-
             addInterview: (interview) =>
                 set((state) => ({ customInterviews: [...state.customInterviews, interview] })),
 
@@ -2850,6 +2869,15 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     const migrated = resolveLegacyMode(state.workspaceMode);
                     state.workspaceMode = migrated.mode as WorkspaceMode;
                     state.deskStage = migrated.stage ?? coerceStage(state.deskStage);
+
+                    // Boards could not nest before this. Derive the registry from
+                    // the keys researchStates already has — no board data moves.
+                    if (!state.researchBoards || Object.keys(state.researchBoards).length === 0) {
+                        state.researchBoards = buildRegistry(
+                            state.researchStates ?? {},
+                            state.customBoards ?? {},
+                        );
+                    }
 
                     // Hydration/Migration: Ensure workspaceMode is initialized correctly for Sprint 99
                     if (!(WORKSPACE_MODES as readonly string[]).includes((state as any).workspaceMode)) {

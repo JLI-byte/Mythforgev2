@@ -1,59 +1,67 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
-import { researchScopeKey } from '@/lib/researchScope';
+import { rootBoardIdFor } from '@/lib/research/boardTree';
+import { fromTray } from '@/lib/research/unsorted';
 import WritingDesk from './WritingDesk';
 import { ResearchEmptyState } from './ResearchEmptyState';
-import { ResearchBoardBar } from './research/ResearchBoardBar';
+import { BoardBreadcrumbs } from './research/BoardBreadcrumbs';
+import { UnsortedTray } from './research/UnsortedTray';
 import { ResearchRail } from './research/ResearchRail';
 import styles from './WritingDesk.module.css';
 
 /**
- * Research Tab — the Workshop's first stage. A spatial board of notes,
- * clippings and links for the active project.
+ * Research Tab — the Workshop's first stage.
  *
- * The board is keyed by scope, and world-scoped boards still exist in the
- * store, but the scope is pinned to the project here: the This Project / This
- * World switcher was removed, and reaching a world's research will be built a
- * different way.
- *
- * This used to be an AI chat panel beside the board, and the chat was the only
- * thing that could put a card on it. Phase 2 removed the chat; the board is
- * unchanged, and its cards are ordinary desk widgets added from the toolbar.
+ * A tree of boards. The writer opens a board card to go down and a breadcrumb
+ * to come back up; every board carries its own unsorted tray, so capturing
+ * something never requires deciding where it belongs first.
  */
 export default function ResearchTab() {
-  const activeProject = useWorkspaceStore(s =>
-    s.projects.find(p => p.id === s.activeProjectId) ?? null
-  );
-  // Within the project's base key the writer can pick a board.
-  // null = the default "Main" board, which reuses the base key.
-  const baseScopeKey = researchScopeKey('project', activeProject);
-  const [activeBoardId, setActiveBoardId] = useState<string | null>(null);
-  useEffect(() => { setActiveBoardId(null); }, [baseScopeKey]);
-  const scopeKey = activeBoardId && baseScopeKey ? `${baseScopeKey}::${activeBoardId}` : baseScopeKey;
+    const activeProject = useWorkspaceStore(s =>
+        s.projects.find(p => p.id === s.activeProjectId) ?? null
+    );
+    const registry = useWorkspaceStore(s => s.researchBoards);
+    const updateResearchState = useWorkspaceStore(s => s.updateResearchState);
+    const rootId = activeProject ? rootBoardIdFor(registry, activeProject.id) : null;
 
-  return (
-    <div className={styles.researchLayout}>
-      <ResearchRail scopeKey={scopeKey} />
-      <div className={styles.researchMain}>
-        {scopeKey ? (
-          <>
-            {baseScopeKey && (
-              <ResearchBoardBar
-                baseScopeKey={baseScopeKey}
-                activeBoardId={activeBoardId}
-                onSelect={setActiveBoardId}
-              />
-            )}
-            <div className={styles.researchCanvasHost}>
-              <WritingDesk variant="research" scopeKey={scopeKey} />
+    const [openBoardId, setOpenBoardId] = useState<string | null>(null);
+    // Changing project drops you back at that project's root.
+    useEffect(() => { setOpenBoardId(null); }, [activeProject?.id]);
+
+    const canvasHostRef = useRef<HTMLDivElement>(null);
+    const boardId = openBoardId ?? rootId;
+
+    /** Tray -> canvas. Screen point in, canvas point out. */
+    const handleDragOut = (widgetId: string, at: { x: number; y: number }) => {
+        if (!boardId) return;
+        const state = useWorkspaceStore.getState().researchStates[boardId];
+        if (!state) return;
+
+        const host = canvasHostRef.current?.getBoundingClientRect();
+        const zoom = state.zoom ?? 1;
+        const offset = state.canvasOffset ?? { x: 0, y: 0 };
+        const point = host
+            ? { x: (at.x - host.left - offset.x) / zoom, y: (at.y - host.top - offset.y) / zoom }
+            : { x: 80, y: 80 };   // dropped outside the canvas: park it top-left
+
+        const next = fromTray(state, widgetId, point);
+        updateResearchState(boardId, { widgets: next.widgets, unsorted: next.unsorted });
+    };
+
+    if (!boardId) return <ResearchEmptyState />;
+
+    return (
+        <div className={styles.researchLayout}>
+            <ResearchRail scopeKey={boardId} />
+            <div className={styles.researchMain}>
+                <BoardBreadcrumbs boardId={boardId} onNavigate={setOpenBoardId} />
+                <div className={styles.researchCanvasHost} ref={canvasHostRef}>
+                    <WritingDesk variant="research" scopeKey={boardId} onOpenBoard={setOpenBoardId} />
+                </div>
             </div>
-          </>
-        ) : (
-          <ResearchEmptyState />
-        )}
-      </div>
-    </div>
-  );
+            <UnsortedTray boardId={boardId} onDragOut={handleDragOut} />
+        </div>
+    );
 }
