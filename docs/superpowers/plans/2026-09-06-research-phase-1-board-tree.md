@@ -1,5 +1,8 @@
 # Research Phase 1 — The Board Tree Implementation Plan
 
+> **Status: complete.** Shipped 2026-09-06. 683 tests, tsc clean, build
+> compiles, eslint at the 223 baseline.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development
 > (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use
 > checkbox (`- [ ]`) syntax for tracking.
@@ -42,7 +45,7 @@ Current state to be aware of:
 - Create: `src/lib/research/boardTree.ts`
 - Test: `src/lib/research/boardTree.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -133,12 +136,12 @@ describe('canMove', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `npx vitest run src/lib/research/boardTree.test.ts`
 Expected: FAIL — `Failed to resolve import "./boardTree"`.
 
-- [ ] **Step 3: Write the module**
+- [x] **Step 3: Write the module**
 
 ```ts
 /**
@@ -227,12 +230,12 @@ export function canMove(reg: BoardRegistry, boardId: string, targetParentId: str
 }
 ```
 
-- [ ] **Step 4: Run it and watch it pass**
+- [x] **Step 4: Run it and watch it pass**
 
 Run: `npx vitest run src/lib/research/boardTree.test.ts`
 Expected: PASS, 15 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/research/boardTree.ts src/lib/research/boardTree.test.ts
@@ -250,7 +253,7 @@ git commit -m "feat: research board tree — registry, breadcrumbs, descendants"
 This is the only irreversible step in the phase. It reads `researchStates` keys and
 `customBoards` names and produces the registry. It writes no board content.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -306,12 +309,12 @@ describe('buildRegistry', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `npx vitest run src/lib/research/boardMigration.test.ts`
 Expected: FAIL — `Failed to resolve import "./boardMigration"`.
 
-- [ ] **Step 3: Write the module**
+- [x] **Step 3: Write the module**
 
 ```ts
 /**
@@ -383,12 +386,12 @@ export function buildRegistry(
 }
 ```
 
-- [ ] **Step 4: Run it and watch it pass**
+- [x] **Step 4: Run it and watch it pass**
 
 Run: `npx vitest run src/lib/research/boardMigration.test.ts`
 Expected: PASS, 7 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/research/boardMigration.ts src/lib/research/boardMigration.test.ts
@@ -403,7 +406,7 @@ git commit -m "feat: derive the research board registry from legacy keys"
 - Create: `src/lib/research/unsorted.ts`
 - Test: `src/lib/research/unsorted.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -463,12 +466,12 @@ describe('trayCount', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `npx vitest run src/lib/research/unsorted.test.ts`
 Expected: FAIL — `Failed to resolve import "./unsorted"`.
 
-- [ ] **Step 3: Write the module**
+- [x] **Step 3: Write the module**
 
 ```ts
 /**
@@ -528,12 +531,12 @@ export function fromTray(
 }
 ```
 
-- [ ] **Step 4: Run it and watch it pass**
+- [x] **Step 4: Run it and watch it pass**
 
 Run: `npx vitest run src/lib/research/unsorted.test.ts`
 Expected: PASS, 8 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/research/unsorted.ts src/lib/research/unsorted.test.ts
@@ -547,7 +550,7 @@ git commit -m "feat: unsorted tray move rules"
 **Files:**
 - Modify: `src/store/workspaceStore.ts`
 
-- [ ] **Step 1: Add the state field and the widget type**
+- [x] **Step 1: Add the state field and the widget type**
 
 At the `DeskWidgetType` union (line ~323) add `'board'`:
 
@@ -576,7 +579,7 @@ import { buildRegistry } from '@/lib/research/boardMigration';
 import type { BoardRegistry, ResearchBoardNode } from '@/lib/research/boardTree';
 ```
 
-- [ ] **Step 2: Add the actions**
+- [x] **Step 2: Add the actions**
 
 Declare them beside `updateResearchState`:
 
@@ -634,7 +637,7 @@ subtree with it, or the registry keeps orphans that `breadcrumbFor` will not res
 
 Add `descendantIds` and `canMove` to the boardTree import.
 
-- [ ] **Step 3: Initialise and persist**
+- [x] **Step 3: Initialise and persist**
 
 In the initial state, beside `customBoards: {}`:
 
@@ -648,7 +651,7 @@ In `partialize`, beside `customBoards`:
         researchBoards: state.researchBoards,
 ```
 
-- [ ] **Step 4: Migrate on rehydration**
+- [x] **Step 4: Migrate on rehydration**
 
 In `onRehydrateStorage`, after the workspace-mode migration added in `40250f3`:
 
@@ -663,7 +666,7 @@ In `onRehydrateStorage`, after the workspace-mode migration added in `40250f3`:
                     }
 ```
 
-- [ ] **Step 5: Typecheck and commit**
+- [x] **Step 5: Typecheck and commit**
 
 ```bash
 npx tsc --noEmit
@@ -682,7 +685,7 @@ Expected: `tsc` exits 0.
 - Modify: `src/components/editor/desk/widgets/WidgetRenderer.tsx:59`
 - Modify: `src/components/editor/desk/deskConstants.ts`
 
-- [ ] **Step 1: Add the card's dimensions and palette entry**
+- [x] **Step 1: Add the card's dimensions and palette entry**
 
 In `deskConstants.ts`, in `DEFAULT_DIMS`:
 
@@ -696,7 +699,7 @@ In `PALETTE_ITEMS`:
   { type: 'board',       icon: '🗂️', label: 'Board' },
 ```
 
-- [ ] **Step 2: Write the renderer**
+- [x] **Step 2: Write the renderer**
 
 ```tsx
 "use client";
@@ -748,7 +751,7 @@ export function BoardCardRenderer({ content, onOpenBoard }: Props) {
 }
 ```
 
-- [ ] **Step 3: Write its stylesheet**
+- [x] **Step 3: Write its stylesheet**
 
 Create `src/components/editor/desk/widgets/BoardCardRenderer.module.css`:
 
@@ -768,7 +771,7 @@ Create `src/components/editor/desk/widgets/BoardCardRenderer.module.css`:
 .missing { padding: var(--space-4); font-size: var(--text-xs); color: var(--muted); }
 ```
 
-- [ ] **Step 4: Register it**
+- [x] **Step 4: Register it**
 
 In `WidgetRenderer.tsx`, beside the other cases:
 
@@ -780,7 +783,7 @@ In `WidgetRenderer.tsx`, beside the other cases:
 to `WidgetRenderer`'s props interface and to the `<WidgetRenderer ... />` call site in
 `WritingDesk.tsx:756`.
 
-- [ ] **Step 5: Typecheck and commit**
+- [x] **Step 5: Typecheck and commit**
 
 ```bash
 npx tsc --noEmit
@@ -796,7 +799,7 @@ git commit -m "feat: nested board card"
 - Create: `src/components/editor/research/BoardBreadcrumbs.tsx`
 - Create: `src/components/editor/research/BoardBreadcrumbs.module.css`
 
-- [ ] **Step 1: Write the component**
+- [x] **Step 1: Write the component**
 
 ```tsx
 "use client";
@@ -839,7 +842,7 @@ export function BoardBreadcrumbs({ boardId, onNavigate }: Props) {
 }
 ```
 
-- [ ] **Step 2: Write its stylesheet**
+- [x] **Step 2: Write its stylesheet**
 
 ```css
 .crumbs {
@@ -859,7 +862,7 @@ export function BoardBreadcrumbs({ boardId, onNavigate }: Props) {
 .sep { color: var(--muted); opacity: 0.5; }
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/editor/research/BoardBreadcrumbs.tsx src/components/editor/research/BoardBreadcrumbs.module.css
@@ -874,7 +877,7 @@ git commit -m "feat: board breadcrumbs"
 - Create: `src/components/editor/research/UnsortedTray.tsx`
 - Create: `src/components/editor/research/UnsortedTray.module.css`
 
-- [ ] **Step 1: Write the component**
+- [x] **Step 1: Write the component**
 
 ```tsx
 "use client";
@@ -927,7 +930,7 @@ export function UnsortedTray({ boardId, onDragOut }: Props) {
 }
 ```
 
-- [ ] **Step 2: Write its stylesheet**
+- [x] **Step 2: Write its stylesheet**
 
 ```css
 .tray {
@@ -957,7 +960,7 @@ export function UnsortedTray({ boardId, onDragOut }: Props) {
 @media (max-width: 900px) { .tray { display: none; } }
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/editor/research/UnsortedTray.tsx src/components/editor/research/UnsortedTray.module.css
@@ -974,7 +977,7 @@ git commit -m "feat: unsorted tray panel"
 
 The one-level board bar is replaced by breadcrumbs plus board cards on the canvas.
 
-- [ ] **Step 1: Rewrite ResearchTab**
+- [x] **Step 1: Rewrite ResearchTab**
 
 ```tsx
 "use client";
@@ -1026,18 +1029,18 @@ export default function ResearchTab() {
 }
 ```
 
-- [ ] **Step 2: Delete the old board bar**
+- [x] **Step 2: Delete the old board bar**
 
 ```bash
 git rm src/components/editor/research/ResearchBoardBar.tsx
 ```
 
-- [ ] **Step 3: Remove its orphaned CSS**
+- [x] **Step 3: Remove its orphaned CSS**
 
 Delete the `.boardBar` and `.boardTab` rule blocks from
 `src/components/editor/WritingDesk.module.css` (they begin near line 4760).
 
-- [ ] **Step 4: Typecheck and commit**
+- [x] **Step 4: Typecheck and commit**
 
 ```bash
 npx tsc --noEmit
@@ -1052,7 +1055,7 @@ git commit -m "feat: ResearchTab navigates the board tree"
 **Files:**
 - Modify: `src/components/editor/WritingDesk.tsx`
 
-- [ ] **Step 1: Accept and thread `onOpenBoard`**
+- [x] **Step 1: Accept and thread `onOpenBoard`**
 
 Add to `WritingDeskProps`:
 
@@ -1063,7 +1066,7 @@ Add to `WritingDeskProps`:
 
 Pass it to `WidgetRenderer` at the existing call site (line ~756).
 
-- [ ] **Step 2: Make the Board tool create a board and its card together**
+- [x] **Step 2: Make the Board tool create a board and its card together**
 
 Extend `addAtCenter` so a `board` widget also registers a node:
 
@@ -1087,7 +1090,7 @@ Extend `addAtCenter` so a `board` widget also registers a node:
   };
 ```
 
-- [ ] **Step 3: Add the six-item tool rail for the research variant**
+- [x] **Step 3: Add the six-item tool rail for the research variant**
 
 Replace the three-button `isResearch` block near line 909 with the full toolbar:
 
@@ -1105,7 +1108,7 @@ Replace the three-button `isResearch` block near line 909 with the full toolbar:
 Import `FolderTree` from `lucide-react`. Column and Line arrive in Phase 2 — do not add dead
 buttons for them.
 
-- [ ] **Step 4: Wire the tray's drag-out**
+- [x] **Step 4: Wire the tray's drag-out**
 
 Task 8 left `onDragOut` as a no-op. Implement it in `ResearchTab.tsx`, which owns the board id.
 The drop point arrives in screen coordinates and has to be converted to canvas coordinates,
@@ -1136,7 +1139,7 @@ Import `fromTray` from `@/lib/research/unsorted` and `useRef` from React, put
 `ref={canvasHostRef}` on the `researchCanvasHost` div, and pass `onDragOut={handleDragOut}` to
 `<UnsortedTray />`.
 
-- [ ] **Step 5: Typecheck, run the suite, commit**
+- [x] **Step 5: Typecheck, run the suite, commit**
 
 ```bash
 npx tsc --noEmit
@@ -1157,7 +1160,7 @@ Expected: `tsc` exits 0; every test passes.
 Quick capture currently drops a card onto the root board's canvas at a staggered position. The
 tray is where an uncategorised idea belongs.
 
-- [ ] **Step 1: Rewrite `captureIdea`**
+- [x] **Step 1: Rewrite `captureIdea`**
 
 ```tsx
   // Quick capture lands in the project root board's unsorted tray — the whole
@@ -1179,7 +1182,7 @@ tray is where an uncategorised idea belongs.
 Import `rootBoardIdFor` from `@/lib/research/boardTree`, and drop the now-unused
 `researchScopeKey` import.
 
-- [ ] **Step 2: Update the toast and the button title**
+- [x] **Step 2: Update the toast and the button title**
 
 ```tsx
 title="Send to your unsorted notes"
@@ -1189,7 +1192,7 @@ title="Send to your unsorted notes"
 {captured && <span className={styles.captureToast}>Added to your unsorted notes</span>}
 ```
 
-- [ ] **Step 3: Typecheck and commit**
+- [x] **Step 3: Typecheck and commit**
 
 ```bash
 npx tsc --noEmit
@@ -1201,7 +1204,7 @@ git commit -m "feat: quick capture lands in the unsorted tray"
 
 ## Task 11: Verify in the browser
 
-- [ ] **Step 1: Confirm the migration ran**
+- [x] **Step 1: Confirm the migration ran**
 
 Open the app, then in the console:
 
@@ -1213,7 +1216,7 @@ console.log(Object.values(s.researchBoards));
 Expected: one node per existing `researchStates` key that starts with `project:`. Every root has
 `parentId: null`. No `world:` key appears.
 
-- [ ] **Step 2: Confirm no board data moved**
+- [x] **Step 2: Confirm no board data moved**
 
 ```js
 const s = JSON.parse(localStorage.getItem('lorecanvas-workspace')).state;
@@ -1222,17 +1225,17 @@ console.log(Object.keys(s.researchStates));
 
 Expected: exactly the same keys as before the upgrade.
 
-- [ ] **Step 3: Walk the tree**
+- [x] **Step 3: Walk the tree**
 
 In the Research stage: click **Board**, double-click the new card to go down, confirm the
 breadcrumb reads `Main › New board`, click `Main` to come back up.
 
-- [ ] **Step 4: Fill the tray**
+- [x] **Step 4: Fill the tray**
 
 From Home, capture an idea. Go to Research. Expected: the tray count reads 1 and the note is in
 it, not on the canvas.
 
-- [ ] **Step 5: Full check and final commit**
+- [x] **Step 5: Full check and final commit**
 
 ```bash
 npx tsc --noEmit
