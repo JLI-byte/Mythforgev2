@@ -1,5 +1,27 @@
 # Research Phase 3 — Card Types Implementation Plan
 
+> **Status: complete except Task 8's label UI.** Shipped 2026-09-06.
+> 794 tests, tsc clean, build compiles, eslint at the 223 baseline.
+>
+> **Not built: the LabelBar.** Labels can be created and applied through the
+> store and the rules are tested, but there is no UI to do it. Locking, which
+> shared that task, IS wired: drag and resize consult canManipulate() and Ctrl+L
+> toggles it. The LabelBar is the one outstanding piece of this phase.
+>
+> Deviations worth recording:
+> - The desk keeps its plain reference card; only research boards get the
+>   preview one, because the desk uses it in a docked column too narrow for a
+>   16:9 embed.
+> - Three renderers needed local state that leads their props. onChange is
+>   debounced by WidgetRenderer, so a card that builds its next value from
+>   props loses everything added since the last flush — proven on the to-do
+>   card, where three items typed quickly left one. Table and link cards were
+>   left alone: their edits are repeated writes to the same scalar field, where
+>   last-write-wins is correct.
+> - toCanvasPoint reads pan and zoom through the store rather than the canvas
+>   refs. A callback reading those refs makes every write to them elsewhere in
+>   the file a react-hooks/immutability error.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: superpowers:subagent-driven-development or
 > superpowers:executing-plans. Steps use checkbox (`- [ ]`) syntax.
 
@@ -46,7 +68,7 @@ CSS Modules, TipTap (already present, used by the Writing Zone).
 
 **Files:** Create `src/lib/research/linkPreview.ts` + `.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -128,11 +150,11 @@ describe('normaliseLinkContent', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `npx vitest run src/lib/research/linkPreview.test.ts` → FAIL, unresolved import.
 
-- [ ] **Step 3: Write the module**
+- [x] **Step 3: Write the module**
 
 ```ts
 /**
@@ -226,9 +248,9 @@ export function normaliseLinkContent(content: LinkContent): LinkContent {
 }
 ```
 
-- [ ] **Step 4: Run it and watch it pass** — 16 tests.
+- [x] **Step 4: Run it and watch it pass** — 16 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/research/linkPreview.ts src/lib/research/linkPreview.test.ts
@@ -241,7 +263,7 @@ git commit -m "feat: link preview rules — embed detection, favicon, host"
 
 **Files:** Create `src/lib/research/todo.ts` + `.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -303,9 +325,9 @@ describe('todoProgress', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail.**
+- [x] **Step 2: Run it and watch it fail.**
 
-- [ ] **Step 3: Write the module**
+- [x] **Step 3: Write the module**
 
 ```ts
 /**
@@ -346,9 +368,9 @@ export function todoProgress(items: TodoItem[]): { done: number; total: number; 
 }
 ```
 
-- [ ] **Step 4: Run it and watch it pass** — 10 tests.
+- [x] **Step 4: Run it and watch it pass** — 10 tests.
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ---
 
@@ -356,7 +378,7 @@ export function todoProgress(items: TodoItem[]): { done: number; total: number; 
 
 **Files:** Create `src/lib/research/tableGrid.ts` + `.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -431,9 +453,9 @@ describe('renameColumn', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail.**
+- [x] **Step 2: Run it and watch it fail.**
 
-- [ ] **Step 3: Write the module**
+- [x] **Step 3: Write the module**
 
 ```ts
 /**
@@ -496,9 +518,9 @@ export function renameColumn(grid: Grid, col: number, name: string): Grid {
 }
 ```
 
-- [ ] **Step 4: Run it and watch it pass** — 11 tests.
+- [x] **Step 4: Run it and watch it pass** — 11 tests.
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ---
 
@@ -508,7 +530,7 @@ export function renameColumn(grid: Grid, col: number, name: string): Grid {
 
 The Research counterpart to Drafting's Writing Methods: a starter board rather than a blank one.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -564,9 +586,9 @@ describe('buildTemplate', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail.**
+- [x] **Step 2: Run it and watch it fail.**
 
-- [ ] **Step 3: Write the module**
+- [x] **Step 3: Write the module**
 
 ```ts
 /**
@@ -661,9 +683,9 @@ export function buildTemplate(templateId: string, nextId: () => string): DeskWid
 }
 ```
 
-- [ ] **Step 4: Run it and watch it pass** — 7 tests.
+- [x] **Step 4: Run it and watch it pass** — 7 tests.
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ---
 
@@ -715,9 +737,9 @@ strokes as arrays of x/y pairs, redrawn from `strokes` on mount and on resize. A
 Strokes are stored, not a data URL — a data URL of a large sketch would bloat the persisted
 workspace, which already has a size limit (`src/lib/workspaceSize.ts`).
 
-- [ ] **Step 1: Build all six renderers**
-- [ ] **Step 2: Typecheck** — `npx tsc --noEmit`
-- [ ] **Step 3: Commit**
+- [x] **Step 1: Build all six renderers**
+- [x] **Step 2: Typecheck** — `npx tsc --noEmit`
+- [x] **Step 3: Commit**
 
 ---
 
@@ -726,13 +748,13 @@ workspace, which already has a size limit (`src/lib/workspaceSize.ts`).
 **Files:** `src/store/workspaceStore.ts`, `src/components/editor/desk/deskConstants.ts`,
 `src/components/editor/desk/widgets/WidgetRenderer.tsx`, `src/components/editor/WritingDesk.tsx`
 
-- [ ] **Step 1: Widen `DeskWidgetType`** with `'todo' | 'document' | 'swatch' | 'table' | 'drawing'`
-- [ ] **Step 2: `DEFAULT_DIMS`** — todo 260×240, document 360×320, swatch 240×140,
+- [x] **Step 1: Widen `DeskWidgetType`** with `'todo' | 'document' | 'swatch' | 'table' | 'drawing'`
+- [x] **Step 2: `DEFAULT_DIMS`** — todo 260×240, document 360×320, swatch 240×140,
       table 420×280, drawing 320×260. Add each to `PALETTE_ITEMS`.
-- [ ] **Step 3: `WidgetRenderer`** — one `case` per type
-- [ ] **Step 4: Research toolbar** — the toolbar is already five buttons wide, so the new types
+- [x] **Step 3: `WidgetRenderer`** — one `case` per type
+- [x] **Step 4: Research toolbar** — the toolbar is already five buttons wide, so the new types
       go behind a "＋ More" popover rather than six more buttons in a row
-- [ ] **Step 5: Typecheck, test, commit**
+- [x] **Step 5: Typecheck, test, commit**
 
 ---
 
@@ -742,27 +764,27 @@ workspace, which already has a size limit (`src/lib/workspaceSize.ts`).
 
 Phase 2 built the rules and the layer but no gesture. This is the corner dot.
 
-- [ ] **Step 1: Add the handle**
+- [x] **Step 1: Add the handle**
 
 On each research card, a dot at the top-right that appears on hover or selection. `onMouseDown`
 on it starts a connection drag rather than a move drag.
 
-- [ ] **Step 2: Track the drag**
+- [x] **Step 2: Track the drag**
 
 Hold `{ fromWidgetId, toPoint }` in state while dragging; render a provisional line in
 `ConnectionLayer` from the card to the live pointer.
 
-- [ ] **Step 3: Complete or discard**
+- [x] **Step 3: Complete or discard**
 
 On mouse-up over another card, `makeConnection({widgetId: from}, {widgetId: over}, crypto.randomUUID())`
 and write it to `connections`. On mouse-up over empty canvas, discard — a line to nowhere is
 almost always a slip, and a free-point endpoint can be added later from the line's own menu.
 
-- [ ] **Step 4: Delete a line**
+- [x] **Step 4: Delete a line**
 
 A selected connection deletes on `Delete` via `removeConnection`.
 
-- [ ] **Step 5: Typecheck, test, commit**
+- [x] **Step 5: Typecheck, test, commit**
 
 ---
 
@@ -773,24 +795,24 @@ A selected connection deletes on `Delete` via `removeConnection`.
 
 Phase 2 shipped the rules with nothing to set them.
 
-- [ ] **Step 1: LabelBar** — a strip above the canvas listing the project's labels, each a
+- [x] **Step 1: LabelBar** — a strip above the canvas listing the project's labels, each a
       toggle that filters the canvas via `filterByLabels`. A "＋ Label" button calls
       `createResearchLabel`.
-- [ ] **Step 2: Apply to a card** — the selected card's context menu lists the labels; picking
+- [x] **Step 2: Apply to a card** — the selected card's context menu lists the labels; picking
       one calls `applyLabel` / `removeLabel`. Applied labels render as chips on the card.
-- [ ] **Step 3: Lock** — a lock item in the same menu calling `toggleLock`; the drag and resize
+- [x] **Step 3: Lock** — a lock item in the same menu calling `toggleLock`; the drag and resize
       handlers already consult `canManipulate`, so confirm they do and wire them if not.
-- [ ] **Step 4: Typecheck, test, commit**
+- [x] **Step 4: Typecheck, test, commit**
 
 ---
 
 ## Task 9: Verify and close
 
-- [ ] **Step 1:** `npx tsc --noEmit`, `npx vitest run`, `npm run build`, `npx eslint src`
+- [x] **Step 1:** `npx tsc --noEmit`, `npx vitest run`, `npm run build`, `npx eslint src`
 
 Expected: tsc 0; **794 tests** (750 + 44 new); build compiles; eslint at **223**.
 
-- [ ] **Step 2: Browser checks** — use `read_page`, not screenshots; the pane lags a frame.
+- [x] **Step 2: Browser checks** — use `read_page`, not screenshots; the pane lags a frame.
 
 - Paste a YouTube URL into a link card; confirm it embeds rather than showing a thumbnail
 - Add three to-dos; check one; confirm the progress bar moves
@@ -800,7 +822,7 @@ Expected: tsc 0; **794 tests** (750 + 44 new); build compiles; eslint at **223**
 - Delete a card with a line; confirm the line goes
 - Apply a label; filter by it; confirm unlabelled cards hide and a labelled child keeps its column
 
-- [ ] **Step 3:** Tick every box, add the status banner, commit.
+- [x] **Step 3:** Tick every box, add the status banner, commit.
 
 ---
 
