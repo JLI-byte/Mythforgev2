@@ -1,5 +1,22 @@
 # Research Phase 2 — Arrangement Implementation Plan
 
+> **Status: complete.** Shipped 2026-09-06. 750 tests, tsc clean, build
+> compiles, eslint at the 223 baseline.
+>
+> Two deviations from the plan as written, both deliberate:
+> - The stylesheet split was dropped. Moving `.researchLayout` and friends out
+>   of the 6,938-line desk stylesheet means re-pointing class references across
+>   a 1,073-line component for no functional gain. Every new Phase 2 style went
+>   into its own per-component module instead, which stops the growth.
+> - `ColumnRenderer` takes the reactive widget array, not `widgetsRef.current`
+>   as Task 7 first specified. Reading the ref during render was both a React
+>   violation and a real bug: a column's count and child list would have gone
+>   stale the moment a card was added.
+>
+> Labels and locking ship as tested rules with no UI yet — the canvas honours
+> `locked` and `labelIds`, but nothing sets them. That surface belongs with the
+> card-type work in Phase 3.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development
 > (recommended) or superpowers:executing-plans. Steps use checkbox (`- [ ]`) syntax.
 
@@ -63,7 +80,7 @@ On `WorkspaceState`:
 A column is a widget of type `column`. Its children are ordinary widgets whose `parentId` is the
 column's id and whose order within it is `columnOrder`. The list stays flat.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -214,12 +231,12 @@ describe('groupIntoColumn', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `npx vitest run src/lib/research/columns.test.ts`
 Expected: FAIL — `Failed to resolve import "./columns"`.
 
-- [ ] **Step 3: Write the module**
+- [x] **Step 3: Write the module**
 
 ```ts
 /**
@@ -346,12 +363,12 @@ export function groupIntoColumn(
 }
 ```
 
-- [ ] **Step 4: Run it and watch it pass**
+- [x] **Step 4: Run it and watch it pass**
 
 Run: `npx vitest run src/lib/research/columns.test.ts`
 Expected: PASS, 16 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/research/columns.ts src/lib/research/columns.test.ts
@@ -365,7 +382,7 @@ git commit -m "feat: column rules — flat widget list, parentId, ordering"
 **Files:**
 - Create: `src/lib/research/connections.ts`, `src/lib/research/connections.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -443,12 +460,12 @@ describe('pruneOrphans', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `npx vitest run src/lib/research/connections.test.ts`
 Expected: FAIL — `Failed to resolve import "./connections"`.
 
-- [ ] **Step 3: Write the module**
+- [x] **Step 3: Write the module**
 
 ```ts
 /**
@@ -522,12 +539,12 @@ export function pruneOrphans(connections: Connection[], widgets: DeskWidget[]): 
 }
 ```
 
-- [ ] **Step 4: Run it and watch it pass**
+- [x] **Step 4: Run it and watch it pass**
 
 Run: `npx vitest run src/lib/research/connections.test.ts`
 Expected: PASS, 10 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/research/connections.ts src/lib/research/connections.test.ts
@@ -544,7 +561,7 @@ git commit -m "feat: connection rules — endpoints, pruning, arrows"
 Locking rides along here: both are per-card metadata that changes what the canvas does with a
 card rather than what the card is.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -637,12 +654,12 @@ describe('toggleLock', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `npx vitest run src/lib/research/labels.test.ts`
 Expected: FAIL — `Failed to resolve import "./labels"`.
 
-- [ ] **Step 3: Write the module**
+- [x] **Step 3: Write the module**
 
 ```ts
 /**
@@ -718,12 +735,12 @@ export function toggleLock(widgets: DeskWidget[], widgetId: string): DeskWidget[
 }
 ```
 
-- [ ] **Step 4: Run it and watch it pass**
+- [x] **Step 4: Run it and watch it pass**
 
 Run: `npx vitest run src/lib/research/labels.test.ts`
 Expected: PASS, 14 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/research/labels.ts src/lib/research/labels.test.ts
@@ -737,7 +754,7 @@ git commit -m "feat: label and lock rules"
 **Files:**
 - Create: `src/lib/research/boardSearch.ts`, `src/lib/research/boardSearch.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -820,12 +837,12 @@ describe('snippetAround', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `npx vitest run src/lib/research/boardSearch.test.ts`
 Expected: FAIL — `Failed to resolve import "./boardSearch"`.
 
-- [ ] **Step 3: Write the module**
+- [x] **Step 3: Write the module**
 
 ```ts
 /**
@@ -911,12 +928,12 @@ export function searchBoards(input: SearchInput, rawQuery: string): SearchHit[] 
 }
 ```
 
-- [ ] **Step 4: Run it and watch it pass**
+- [x] **Step 4: Run it and watch it pass**
 
 Run: `npx vitest run src/lib/research/boardSearch.test.ts`
 Expected: PASS, 11 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/research/boardSearch.ts src/lib/research/boardSearch.test.ts
@@ -933,7 +950,7 @@ git commit -m "feat: cross-board search"
 Milanote's speed is that you never reach for the toolbar. The keymap is a pure function from a
 key event to an intent, so it can be tested without a DOM.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -1013,12 +1030,12 @@ describe('intentFor', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `npx vitest run src/lib/research/shortcuts.test.ts`
 Expected: FAIL — `Failed to resolve import "./shortcuts"`.
 
-- [ ] **Step 3: Write the module**
+- [x] **Step 3: Write the module**
 
 ```ts
 /**
@@ -1098,12 +1115,12 @@ export function intentFor(e: KeyContext): Intent | null {
 }
 ```
 
-- [ ] **Step 4: Run it and watch it pass**
+- [x] **Step 4: Run it and watch it pass**
 
 Run: `npx vitest run src/lib/research/shortcuts.test.ts`
 Expected: PASS, 15 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/research/shortcuts.ts src/lib/research/shortcuts.test.ts
@@ -1117,7 +1134,7 @@ git commit -m "feat: research board keymap"
 **Files:**
 - Modify: `src/store/workspaceStore.ts`
 
-- [ ] **Step 1: Widen `DeskWidget` and `DeskState`**
+- [x] **Step 1: Widen `DeskWidget` and `DeskState`**
 
 On `DeskWidget`, after `scopeId`:
 
@@ -1144,7 +1161,7 @@ Add `'column'` to `DeskWidgetType`, and import the type:
 import type { Connection } from '@/lib/research/connections';
 ```
 
-- [ ] **Step 2: Add the label registry**
+- [x] **Step 2: Add the label registry**
 
 In `WorkspaceState`, beside `researchBoards`:
 
@@ -1156,7 +1173,7 @@ In `WorkspaceState`, beside `researchBoards`:
 with `import type { Label } from '@/lib/research/labels';`, `researchLabels: {}` in the initial
 state, and `researchLabels: state.researchLabels,` in `partialize`.
 
-- [ ] **Step 3: Add the label actions**
+- [x] **Step 3: Add the label actions**
 
 ```ts
     createResearchLabel: (projectId: string, name: string) => string;
@@ -1189,7 +1206,7 @@ state, and `researchLabels: state.researchLabels,` in `partialize`.
 A card keeping a dead label id is harmless — `labelsOn()` skips ids it cannot resolve, so no
 sweep across every board is needed on delete.
 
-- [ ] **Step 4: Typecheck and commit**
+- [x] **Step 4: Typecheck and commit**
 
 ```bash
 npx tsc --noEmit
@@ -1210,7 +1227,7 @@ git commit -m "feat: column, lock, label and connection fields in the store"
 The column draws its own children, so `WritingDesk` must **not** also draw a card whose
 `parentId` is set — see Task 8.
 
-- [ ] **Step 1: Write the renderer**
+- [x] **Step 1: Write the renderer**
 
 ```tsx
 "use client";
@@ -1272,7 +1289,7 @@ export function ColumnRenderer({ widget, allWidgets, content, onChange, onSelect
 }
 ```
 
-- [ ] **Step 2: Write its stylesheet**
+- [x] **Step 2: Write its stylesheet**
 
 ```css
 .column {
@@ -1323,7 +1340,7 @@ export function ColumnRenderer({ widget, allWidgets, content, onChange, onSelect
 .empty { font-size: var(--text-2xs); color: var(--muted); padding: var(--space-2); }
 ```
 
-- [ ] **Step 3: Register it**
+- [x] **Step 3: Register it**
 
 In `WidgetRenderer.tsx`:
 
@@ -1334,7 +1351,7 @@ In `WidgetRenderer.tsx`:
 Add `onSelectChild?: (id: string) => void;` to `WidgetRendererProps` and thread it from
 `WritingDesk`, which already owns `setSelectedId`.
 
-- [ ] **Step 4: Typecheck and commit**
+- [x] **Step 4: Typecheck and commit**
 
 ```bash
 npx tsc --noEmit
@@ -1352,7 +1369,7 @@ git commit -m "feat: column renderer"
 A card inside a column is drawn by that column. If the canvas also draws it at its old x/y it
 appears twice.
 
-- [ ] **Step 1: Filter the rendered list**
+- [x] **Step 1: Filter the rendered list**
 
 Where `activeWidgets` is computed, exclude parented cards:
 
@@ -1367,7 +1384,7 @@ Where `activeWidgets` is computed, exclude parented cards:
 Render `canvasWidgets` in the widget map instead of `activeWidgets`. Leave `widgetsRef` holding
 the **full** list — the column renderer reads it to find its children.
 
-- [ ] **Step 2: Prune orphaned connections when cards go**
+- [x] **Step 2: Prune orphaned connections when cards go**
 
 In `deleteWidget`, after removing the widget:
 
@@ -1378,7 +1395,7 @@ In `deleteWidget`, after removing the widget:
     }
 ```
 
-- [ ] **Step 3: Typecheck and commit**
+- [x] **Step 3: Typecheck and commit**
 
 ```bash
 npx tsc --noEmit
@@ -1395,7 +1412,7 @@ git commit -m "feat: column children are drawn once, by their column"
 - Create: `src/components/editor/desk/ConnectionLayer.tsx`, `ConnectionLayer.module.css`
 - Modify: `src/components/editor/WritingDesk.tsx`
 
-- [ ] **Step 1: Write the layer**
+- [x] **Step 1: Write the layer**
 
 ```tsx
 "use client";
@@ -1461,7 +1478,7 @@ export function ConnectionLayer({ connections, widgets, onSelect }: Props) {
 }
 ```
 
-- [ ] **Step 2: Write its stylesheet**
+- [x] **Step 2: Write its stylesheet**
 
 ```css
 .layer {
@@ -1488,7 +1505,7 @@ export function ConnectionLayer({ connections, widgets, onSelect }: Props) {
 }
 ```
 
-- [ ] **Step 3: Mount it inside the transformed layer**
+- [x] **Step 3: Mount it inside the transformed layer**
 
 In `WritingDesk.tsx`, as the first child of `.deskCanvasInner` — inside the transform, so lines
 pan and zoom with the cards:
@@ -1505,7 +1522,7 @@ pan and zoom with the cards:
 
 with `const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);`
 
-- [ ] **Step 4: Typecheck and commit**
+- [x] **Step 4: Typecheck and commit**
 
 ```bash
 npx tsc --noEmit
@@ -1521,7 +1538,7 @@ git commit -m "feat: connection layer"
 - Create: `src/components/editor/research/BoardSearch.tsx`, `BoardSearch.module.css`
 - Modify: `src/components/editor/ResearchTab.tsx`
 
-- [ ] **Step 1: Write the panel**
+- [x] **Step 1: Write the panel**
 
 ```tsx
 "use client";
@@ -1591,7 +1608,7 @@ export function BoardSearch({ projectId, onClose, onGo }: Props) {
 }
 ```
 
-- [ ] **Step 2: Write its stylesheet**
+- [x] **Step 2: Write its stylesheet**
 
 ```css
 .backdrop {
@@ -1636,7 +1653,7 @@ export function BoardSearch({ projectId, onClose, onGo }: Props) {
 .what { font-size: var(--text-xs); color: var(--foreground); line-height: 1.45; }
 ```
 
-- [ ] **Step 3: Open it on Ctrl+F from ResearchTab**
+- [x] **Step 3: Open it on Ctrl+F from ResearchTab**
 
 Add to `ResearchTab.tsx`:
 
@@ -1669,7 +1686,7 @@ Add to `ResearchTab.tsx`:
 
 Render it when open, and import `intentFor` and `breadcrumbFor`.
 
-- [ ] **Step 4: Typecheck and commit**
+- [x] **Step 4: Typecheck and commit**
 
 ```bash
 npx tsc --noEmit
@@ -1681,7 +1698,7 @@ git commit -m "feat: cross-board search panel on Ctrl+F"
 
 ## Task 11: Verify and close the phase
 
-- [ ] **Step 1: Full check**
+- [x] **Step 1: Full check**
 
 ```bash
 npx tsc --noEmit
@@ -1693,7 +1710,7 @@ npx eslint src
 Expected: `tsc` 0; **749 tests** (683 + 66 new); build compiles; eslint at **223** — the
 baseline. Anything above it is new debt from this phase; fix it before committing.
 
-- [ ] **Step 2: Browser checks**
+- [x] **Step 2: Browser checks**
 
 Use `read_page` rather than screenshots to confirm state — the preview pane's screenshots lag
 behind React by a frame or two, which caused two false failures in Phase 1.
@@ -1706,7 +1723,7 @@ behind React by a frame or two, which caused two false failures in Phase 1.
 - Press `Ctrl U` on a child board; confirm it goes to the parent
 - Delete a card that has a line attached; confirm the line goes with it
 
-- [ ] **Step 3: Mark the phase complete**
+- [x] **Step 3: Mark the phase complete**
 
 Tick every box in this file, add the status banner, and commit.
 
