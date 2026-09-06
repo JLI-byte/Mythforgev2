@@ -4727,36 +4727,9 @@
   width: 100%;
 }
 
-.researchScopeBar {
-  display: flex;
-  gap: var(--space-4);
-  padding: var(--space-4) var(--space-5);
-  flex: 0 0 auto;
-  border-bottom: 1px solid var(--border, rgba(var(--overlay-rgb), 0.2));
-}
 
-.researchScopeBtn {
-  padding: var(--space-3) var(--space-6);
-  font-size: var(--text-sm);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.25));
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  transition: background var(--dur-2) var(--ease-standard), color var(--dur-2) var(--ease-standard);
-}
 
-.researchScopeBtn:hover {
-  color: var(--foreground);
-}
 
-.researchScopeBtnActive {
-  background: var(--accent);
-  border-color: var(--accent);
-  /* Not #fff: the accent is pale in dark mode, where white on it measured
-     1.7:1. --on-accent flips with the theme. */
-  color: var(--on-accent);
-}
 
 /* ── Research board switcher (per scope) ─────────────────── */
 .boardBar {
