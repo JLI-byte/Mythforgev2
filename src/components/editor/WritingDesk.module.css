@@ -572,7 +572,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, rgba(var(--overlay-rgb), 0.8), transparent);
+  background: linear-gradient(to top, rgba(var(--media-rgb), 0.8), transparent);
   padding: var(--space-5) var(--space-5) var(--space-4);
   display: flex;
   flex-direction: column;
@@ -836,7 +836,7 @@
   left: 0;
   right: 0;
   height: 40px;
-  background: linear-gradient(to bottom, rgba(var(--overlay-rgb), 0.4), transparent);
+  background: linear-gradient(to bottom, rgba(var(--shadow-rgb), 0.4), transparent);
   border-bottom: 1px solid rgba(var(--overlay-rgb), 0.05);
   pointer-events: none;
   z-index: 40;
@@ -3453,7 +3453,7 @@
   width: 24px;
   height: 24px;
   border-radius: var(--radius-md);
-  background: rgba(var(--overlay-rgb), 0.6);
+  background: rgba(var(--media-rgb), 0.6);
   color: var(--foreground);
   border: 1px solid rgba(var(--overlay-rgb),0.1);
   font-size: var(--text-2xs);
@@ -4304,7 +4304,7 @@
 .coverEditorUploadOverlay {
   position: absolute;
   inset: 0;
-  background: rgba(var(--overlay-rgb), 0.6);
+  background: rgba(var(--media-rgb), 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5221,7 +5221,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-7);
-  background: rgba(var(--overlay-rgb), 0.5);
+  background: rgba(var(--shadow-rgb), 0.5);
   backdrop-filter: blur(2px);
 }
 

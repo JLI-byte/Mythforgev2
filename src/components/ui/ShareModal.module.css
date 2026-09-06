@@ -4,7 +4,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(var(--overlay-rgb), 0.7);
+    background: rgba(var(--shadow-rgb), 0.7);
     backdrop-filter: blur(4px);
     display: flex;
     align-items: center;

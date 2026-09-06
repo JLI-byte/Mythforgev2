@@ -33,7 +33,7 @@
     left: 0;
     right: 0;
     padding: var(--space-5);
-    background: linear-gradient(transparent, rgba(var(--overlay-rgb), 0.7));
+    background: linear-gradient(transparent, rgba(var(--shadow-rgb), 0.7));
     display: flex;
     align-items: flex-end;
 }
@@ -56,7 +56,7 @@
 }
 
 .heroBtn {
-    background: rgba(var(--overlay-rgb), 0.35);
+    background: rgba(var(--media-rgb), 0.35);
     border: none;
     color: white;
     font-size: var(--text-md);
@@ -69,7 +69,7 @@
 }
 
 .heroBtn:hover {
-    background: rgba(var(--overlay-rgb), 0.55);
+    background: rgba(var(--media-rgb), 0.55);
 }
 
 /* Gold glow when favorited */
