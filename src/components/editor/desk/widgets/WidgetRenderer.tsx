@@ -28,6 +28,8 @@ import { SwatchRenderer } from './SwatchRenderer';
 import { DocumentRenderer } from './DocumentRenderer';
 import { TableRenderer } from './TableRenderer';
 import { DrawingRenderer } from './DrawingRenderer';
+import { ScenePinRenderer } from './ScenePinRenderer';
+import { InterviewCardRenderer } from './InterviewCardRenderer';
 
 // ============================================================
 // WIDGET RENDERERS
@@ -99,6 +101,8 @@ export const WidgetRenderer = React.memo(function WidgetRenderer({
     case 'swatch':      return <SwatchRenderer content={content} onChange={handleChange} />;
     case 'table':       return <TableRenderer content={content} onChange={handleChange} />;
     case 'drawing':     return <DrawingRenderer content={content} onChange={handleChangeImmediate} />;
+    case 'scenePin':    return <ScenePinRenderer content={content} onChange={handleChangeImmediate} />;
+    case 'interview':   return <InterviewCardRenderer content={content} onChange={handleChange} />;
     case 'untyped':     return <UntypedWidgetRenderer />;
     default:            return null;
   }

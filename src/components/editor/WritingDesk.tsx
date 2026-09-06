@@ -34,6 +34,8 @@ const MORE_CARDS: { type: DeskWidgetType; label: string }[] = [
   { type: 'table',    label: 'Table' },
   { type: 'swatch',   label: 'Palette' },
   { type: 'drawing',  label: 'Drawing' },
+  { type: 'scenePin', label: 'Scene pin' },
+  { type: 'interview', label: 'Interview' },
 ];
 
 /** Stable empty array so the draft canvas doesn't re-render on globalWidgets churn. */

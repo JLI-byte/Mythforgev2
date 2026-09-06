@@ -37,6 +37,8 @@ export const DEFAULT_DIMS: Record<DeskWidgetType, { w: number; h: number }> = {
   swatch:      { w: 240, h: 140 },
   table:       { w: 420, h: 280 },
   drawing:     { w: 320, h: 260 },
+  scenePin:    { w: 260, h: 180 },
+  interview:   { w: 320, h: 340 },
   untyped:     { w: 300, h: 200 },
 };
 
@@ -62,6 +64,8 @@ export const PALETTE_ITEMS: { type: DeskWidgetType; icon: string; label: string 
   { type: 'swatch',        icon: '🎨', label: 'Palette' },
   { type: 'table',         icon: '▦', label: 'Table' },
   { type: 'drawing',       icon: '✏️', label: 'Drawing' },
+  { type: 'scenePin',      icon: '🎬', label: 'Scene Pin' },
+  { type: 'interview',     icon: '🧭', label: 'Interview' },
 ];
 
 export const PALETTE_MAP = Object.fromEntries(
