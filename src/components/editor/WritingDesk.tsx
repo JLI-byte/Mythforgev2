@@ -4,6 +4,8 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom';
 import { Anchor, X, Columns3, FolderTree, Image, Link2, Plus, Settings, StickyNote } from 'lucide-react';
 import { pruneOrphans, makeConnection, removeConnection, type Connection } from '@/lib/research/connections';
+import { canManipulate, toggleLock } from '@/lib/research/labels';
+import { intentFor } from '@/lib/research/shortcuts';
 import { ConnectionLayer } from './desk/ConnectionLayer';
 import { useWorkspaceStore, DeskWidget, DeskWidgetType } from '@/store/workspaceStore';
 import styles from './WritingDesk.module.css';
@@ -413,8 +415,30 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
     setSelectedId(prev => prev === id ? null : prev);
   }, [updateWidgets, isResearch, stateKey, updateDeskState, currentConnections]);
 
+  /** Ctrl+L locks or unlocks the selected card. */
+  useEffect(() => {
+    if (!isResearch || !selectedId) return;
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      const intent = intentFor({
+        key: e.key,
+        ctrlKey: e.ctrlKey, metaKey: e.metaKey,
+        shiftKey: e.shiftKey, altKey: e.altKey,
+        inTextField: Boolean(t?.closest('input, textarea, [contenteditable="true"]')),
+        hasSelection: true,
+      });
+      if (intent?.kind !== 'toggleLock') return;
+      e.preventDefault();
+      updateWidgets(toggleLock(widgetsRef.current, selectedId));
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isResearch, selectedId, updateWidgets]);
+
   const handleDragStart = useCallback((e: React.MouseEvent, widget: DeskWidget) => {
     if ((e.target as HTMLElement).closest('button')) return;
+    // A locked card still selects — you need to select it to unlock it.
+    if (!canManipulate(widget)) { setSelectedId(widget.id); return; }
     e.preventDefault(); e.stopPropagation();
     setSelectedId(widget.id);
     const startX = e.clientX, startY = e.clientY, origX = widget.x, origY = widget.y;
@@ -453,6 +477,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
   }, [updateWidgets]);
 
   const handleResizeStart = useCallback((e: React.MouseEvent, widget: DeskWidget, dir: ResizeDir) => {
+    if (!canManipulate(widget)) return;
     e.preventDefault(); e.stopPropagation();
     const startX = e.clientX, startY = e.clientY, { x: oX, y: oY, width: oW, height: oH } = widget;
     const localZoom = widget.dock ? 1 : zoomRef.current;
