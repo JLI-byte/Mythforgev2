@@ -3,7 +3,10 @@
 import React from 'react';
 import styles from './BeginOptions.module.css';
 
-export type BeginDestination = 'template' | 'desk';
+import type { DeskStage } from '@/lib/deskStages';
+
+/** The three ways into a new book are the Workshop's three stages. */
+export type BeginDestination = DeskStage;
 
 interface BeginOptionsProps {
     onChoose: (destination: BeginDestination) => void;
@@ -11,7 +14,7 @@ interface BeginOptionsProps {
 }
 
 /**
- * The two ways into a new book. Shown twice: on step three of the Bookshelf's
+ * The three ways into a new book. Shown twice: on step three of the Bookshelf's
  * new-work wizard, and on Home when the workspace is empty. It is the only
  * place in the app that maps the modes onto what a writer actually wants to do
  * next, which is exactly why a newcomer should not have to find it inside a
@@ -22,7 +25,17 @@ export function BeginOptions({ onChoose, disabled = false }: BeginOptionsProps) 
         <div className={styles.beginOptions}>
             <button
                 className={styles.beginOption}
-                onClick={() => onChoose('template')}
+                onClick={() => onChoose('research')}
+                disabled={disabled}
+            >
+                <span className={styles.beginOptionTitle}>🔎 Research First</span>
+                <span className={styles.beginOptionDesc}>
+                    Gather notes, clippings and links on a board before you write a word
+                </span>
+            </button>
+            <button
+                className={styles.beginOption}
+                onClick={() => onChoose('draft')}
                 disabled={disabled}
             >
                 <span className={styles.beginOptionTitle}>🗺️ Draft First</span>
@@ -32,7 +45,7 @@ export function BeginOptions({ onChoose, disabled = false }: BeginOptionsProps) 
             </button>
             <button
                 className={styles.beginOption}
-                onClick={() => onChoose('desk')}
+                onClick={() => onChoose('write')}
                 disabled={disabled}
             >
                 <span className={styles.beginOptionTitle}>✍️ Start Writing</span>

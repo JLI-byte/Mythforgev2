@@ -21,6 +21,7 @@ export default function FirstRunPanel() {
     const updateDraftState = useWorkspaceStore(s => s.updateDraftState);
     const setActiveProject = useWorkspaceStore(s => s.setActiveProject);
     const setWorkspaceMode = useWorkspaceStore(s => s.setWorkspaceMode);
+    const setDeskStage = useWorkspaceStore(s => s.setDeskStage);
     const setExampleData = useWorkspaceStore(s => s.setExampleData);
     const completeOnboarding = useWorkspaceStore(s => s.completeOnboarding);
 
@@ -46,7 +47,8 @@ export default function FirstRunPanel() {
         addScene(plan.scene);
 
         setActiveProject(plan.project.id);
-        setWorkspaceMode(destination);
+        setWorkspaceMode('desk');
+        setDeskStage(destination);
     };
 
     return (
@@ -54,10 +56,10 @@ export default function FirstRunPanel() {
             <div className={styles.inner}>
                 <h1 className={styles.title}>Let&apos;s start a book</h1>
                 <p className={styles.sub}>
-                    LoreCanvas is three rooms around one manuscript: a board for what you
-                    find out, a table for how it is shaped, and a desk for the writing
-                    itself. Pick where you want to begin — you can move between them
-                    whenever you like.
+                    The Workshop moves through three stages around one manuscript: a
+                    board for what you find out, a table for how it is shaped, and a
+                    desk for the writing itself. Pick where you want to begin — you can
+                    move between them whenever you like.
                 </p>
 
                 <label className={styles.nameLabel} htmlFor="first-run-name">
@@ -68,7 +70,7 @@ export default function FirstRunPanel() {
                     className={styles.nameInput}
                     value={name}
                     onChange={e => setName(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter' && name.trim()) begin('desk'); }}
+                    onKeyDown={e => { if (e.key === 'Enter' && name.trim()) begin('write'); }}
                     placeholder="e.g. The Long Winter"
                     autoFocus
                 />

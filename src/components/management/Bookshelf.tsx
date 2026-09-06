@@ -9,7 +9,7 @@ import { WORK_TYPES, getWorkType, getWorkTypeByWritingMode } from '@/lib/workTyp
 import { getSubTypesFor, getWorkSubType, type ProjectBrief } from '@/lib/workSubTypes';
 import { planNewStory } from '@/lib/newStory';
 import { useModalDialog } from '@/lib/useModalDialog';
-import { BeginOptions } from '@/components/ui/BeginOptions';
+import { BeginOptions, type BeginDestination } from '@/components/ui/BeginOptions';
 import { HintBubble } from '@/components/ui/HintBubble';
 import WorldBibleBook from './WorldBibleBook';
 import WorkTypeArtwork from './WorkTypeArtwork';
@@ -54,6 +54,7 @@ export function Bookshelf() {
     const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
     const setActiveProject = useWorkspaceStore(s => s.setActiveProject);
     const setWorkspaceMode = useWorkspaceStore(s => s.setWorkspaceMode);
+    const setDeskStage = useWorkspaceStore(s => s.setDeskStage);
     const setActiveWorldKey = useWorkspaceStore(s => s.setActiveWorldKey);
     const worldBibles = useWorkspaceStore(s => s.worldBibles);
     const pendingNewStoryWorldKey = useWorkspaceStore(s => s.pendingNewStoryWorldKey);
@@ -237,7 +238,8 @@ export function Bookshelf() {
             sc.content.replace(/<[^>]*>/g, '').trim() !== ''
         );
         setActiveProject(id);
-        setWorkspaceMode(hasWriting ? 'desk' : 'template');
+        setWorkspaceMode('desk');
+        setDeskStage(hasWriting ? 'write' : 'draft');
     };
 
     // ─── STORY CREATION ─────────────────────────────────────
@@ -287,10 +289,10 @@ export function Bookshelf() {
 
     /**
      * Creates the story with its first chapter + scene, then routes to the
-     * chosen starting point: the Draft Table (outline first) or the Writing
-     * Desk (straight into prose).
+     * chosen Workshop stage: Research (gather first), Drafting (outline first)
+     * or Writing (straight into prose).
      */
-    const confirmCreateStory = (destination: 'template' | 'desk') => {
+    const confirmCreateStory = (destination: BeginDestination) => {
         const plan = planNewStory({
             name: storyName,
             workTypeId: storyTypeId ?? '',
@@ -315,7 +317,8 @@ export function Bookshelf() {
         setIsStoryModalOpen(false);
         setStoryName('');
         setActiveProject(plan.project.id);
-        setWorkspaceMode(destination);
+        setWorkspaceMode('desk');
+        setDeskStage(destination);
     };
 
     // ─── RENDERING ─────────────────────────────────────────
@@ -705,7 +708,7 @@ export function Bookshelf() {
                                         value={storyName}
                                         onChange={e => setStoryName(e.target.value)}
                                         onKeyDown={e => {
-                                            if (e.key === 'Enter') { e.preventDefault(); confirmCreateStory('template'); }
+                                            if (e.key === 'Enter') { e.preventDefault(); confirmCreateStory('draft'); }
                                         }}
                                         placeholder={getWorkType(storyTypeId)?.namePlaceholder}
                                         // Both, deliberately, and they cannot fight because

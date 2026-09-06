@@ -151,6 +151,7 @@
 .tileResume    { grid-column: span 2; grid-row: span 2; justify-content: center; gap: var(--space-3); }
 .tileGoal      { grid-column: span 1; align-items: center; position: relative; }
 .tileStreak    { grid-column: span 1; min-height: 250px; }
+.tileAttention { grid-column: span 2; }
 .tileHeatmap   { grid-column: span 4; }
 .tileLore      { grid-column: span 2; }
 .tileLinks     { grid-column: span 2; }
@@ -397,6 +398,23 @@
 .heatmapLegend span:first-child { margin-right: var(--space-2); }
 .heatmapLegend span:last-child { margin-left: var(--space-2); }
 
+/* ── Attention list ────────────────────────────────────── */
+
+.attentionList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  font-size: var(--text-md);
+  color: var(--muted);
+}
+.attentionList strong {
+  color: var(--foreground, var(--surface));
+  font-weight: 700;
+}
+
 /* ── From your world ──────────────────────────────────── */
 
 .loreName {
@@ -523,6 +541,7 @@
   .tileResume,
   .tileGoal,
   .tileStreak,
+  .tileAttention,
   .tileAway,
   .tileHeatmap,
   .tileManuscript,

@@ -13,6 +13,7 @@ import { BetaFeedbackPanel } from '@/components/layout/BetaFeedbackPanel';
 import { VersionHistoryPanel } from '@/components/layout/VersionHistoryPanel';
 import { ErrorBoundary } from '@/components/layout/ErrorBoundary';
 import { useWorkspaceStore, WORKSPACE_MODES, type WorkspaceMode } from '@/store/workspaceStore';
+import { resolveLegacyMode } from '@/lib/deskStages';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
 import ModeBar from '@/components/navigation/ModeBar';
 import DeskLighting from '@/components/theme/DeskLighting';
@@ -22,7 +23,7 @@ import DeskLighting from '@/components/theme/DeskLighting';
 const WorldBibleFolderTree = lazy(() => import('@/components/world/WorldBibleFolderTree'));
 const WorldBibleCenter = lazy(() => import('@/components/world/WorldBibleCenter'));
 const WorldBibleEdit = lazy(() => import('@/components/world/WorldBibleEdit'));
-const WritingDesk = lazy(() => import('@/components/editor/WritingDesk'));
+const Workshop = lazy(() => import('@/components/editor/Workshop'));
 const Bookshelf = lazy(() => import('@/components/management/Bookshelf').then(m => ({ default: m.Bookshelf })));
 const HomePage = lazy(() => import('@/components/home/HomePage'));
 // ExportModal reaches jszip through @/lib/epub. Split so the EPUB writer is
@@ -62,6 +63,7 @@ export default function Home() {
 
   const workspaceMode = useWorkspaceStore((state) => state.workspaceMode);
   const setWorkspaceMode = useWorkspaceStore((state) => state.setWorkspaceMode);
+  const setDeskStage = useWorkspaceStore((state) => state.setDeskStage);
 
   const hasStoreHydrated = useWorkspaceStore((state) => state._hasHydrated);
   const markVisit = useWorkspaceStore((state) => state.markVisit);
@@ -94,11 +96,15 @@ export default function Home() {
   useEffect(() => {
     const view = new URLSearchParams(window.location.search).get('view');
     if (!view) return;
-    if ((WORKSPACE_MODES as readonly string[]).includes(view)) {
-      setWorkspaceMode(view as WorkspaceMode);
+    // ?view=template and ?view=research predate the Workshop; both now name a
+    // stage inside it rather than a mode of their own.
+    const { mode, stage } = resolveLegacyMode(view);
+    if (mode && (WORKSPACE_MODES as readonly string[]).includes(mode)) {
+      setWorkspaceMode(mode as WorkspaceMode);
+      if (stage) setDeskStage(stage);
     }
     window.history.replaceState({}, '', window.location.pathname);
-  }, [setWorkspaceMode]);
+  }, [setWorkspaceMode, setDeskStage]);
 
   // Freeze what "last time" means for this page load. It has to wait for
   // hydration: before that, lastVisitAt is still the initial null and the
@@ -204,14 +210,12 @@ export default function Home() {
                   <WorldBibleCenter />
                 ) : workspaceMode === 'worldBibleEdit' ? (
                   <WorldBibleEdit />
-                ) : workspaceMode === 'template' ? (
-                  <WritingDesk variant="draft" />
                 ) : workspaceMode === 'hierarchy' ? (
                   <WorldBibleFolderTree />
                 ) : workspaceMode === 'bookshelf' ? (
                   <Bookshelf />
                 ) : (
-                  <WritingDesk />
+                  <Workshop />
                 )}
               </Suspense>
             </ErrorBoundary>

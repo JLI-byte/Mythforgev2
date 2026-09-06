@@ -10,6 +10,7 @@ import { logger } from '@/lib/logger';
 import { getStoredValue } from '@/lib/storage';
 import { worldKeyForProject, worldKeyForEntity, type WorldKey } from '@/lib/worldKey';
 import { normalizeDismissedHints, normalizeVisitStamp } from '@/lib/onboarding';
+import { coerceStage, resolveLegacyMode, DEFAULT_STAGE, type DeskStage } from '@/lib/deskStages';
 import { migrateWorkspaceSchema } from './migrateWorkspaceSchema';
 import { DEFAULT_WORLD_BIBLE_LAYOUT } from '@/lib/worldBibleNav';
 import { wouldCreateCycle, fileByType } from '@/lib/folderTree';
@@ -496,7 +497,7 @@ export interface SocialPost {
 // below and the ?view= landing param both check against this list, so adding a
 // mode here is all that is needed to make it valid everywhere.
 export const WORKSPACE_MODES = [
-    'home', 'worldBible', 'worldBibleEdit', 'template', 'desk', 'hierarchy', 'bookshelf',
+    'home', 'worldBible', 'worldBibleEdit', 'desk', 'hierarchy', 'bookshelf',
 ] as const;
 export type WorkspaceMode = typeof WORKSPACE_MODES[number];
 
@@ -511,6 +512,9 @@ export interface StashedExample {
 
 export interface WorkspaceState {
     workspaceMode: WorkspaceMode;
+    /** Which stage the Workshop ('desk') is showing. Persisted separately from
+     *  the mode so leaving the tab and coming back returns to the same stage. */
+    deskStage: DeskStage;
     // --- STATE FIELDS ---
     worlds: World[];
 
@@ -809,6 +813,7 @@ export interface WorkspaceState {
     activeWorldKey: WorldKey | null;
 
     setWorkspaceMode: (mode: WorkspaceMode) => void;
+    setDeskStage: (stage: DeskStage) => void;
     setActiveWorldKey: (key: WorldKey | null) => void;
 
     /** Sprint 70: edit a bible's identity fields (cover title/sub/tint). */
@@ -1419,6 +1424,7 @@ export function partializeWorkspace(state: WorkspaceState) {
         socialHistory: state.socialHistory,
         articleTemplates: state.articleTemplates,
         workspaceMode: state.workspaceMode,
+        deskStage: state.deskStage,
         sceneSnapshots: state.sceneSnapshots,
         entitySnapshots: state.entitySnapshots,
         hierarchyTemplates: state.hierarchyTemplates,
@@ -1536,6 +1542,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             hierarchyTemplates: [],
             draftHierarchyLayout: null,
             workspaceMode: 'home',
+            deskStage: DEFAULT_STAGE,
             worldBibles: {},
             activeWorldKey: null,
 
@@ -2247,6 +2254,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 };
             }),
 
+            setDeskStage: (stage) => set(() => ({ deskStage: stage })),
+
             setActiveWorldKey: (key) => set(() => ({ activeWorldKey: key })),
 
             updateWorldBibleConfig: (key, patch) =>
@@ -2834,6 +2843,13 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         ...state.earnedBadges,
                         ...checkBadges(state.streakState, state.earnedBadges),
                     ];
+
+                    // The Workshop absorbed 'template' and 'research'. Map those
+                    // onto the mode + stage they became, or a writer whose last
+                    // session ended on the Draft Table lands on Home instead.
+                    const migrated = resolveLegacyMode(state.workspaceMode);
+                    state.workspaceMode = migrated.mode as WorkspaceMode;
+                    state.deskStage = migrated.stage ?? coerceStage(state.deskStage);
 
                     // Hydration/Migration: Ensure workspaceMode is initialized correctly for Sprint 99
                     if (!(WORKSPACE_MODES as readonly string[]).includes((state as any).workspaceMode)) {
