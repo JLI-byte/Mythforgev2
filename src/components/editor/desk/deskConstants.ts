@@ -31,6 +31,7 @@ export const DEFAULT_DIMS: Record<DeskWidgetType, { w: number; h: number }> = {
   consistencyFlags: { w: 340, h: 380 },
   worldUnderstanding: { w: 340, h: 360 },
   board:       { w: 220, h: 170 },
+  column:      { w: 260, h: 320 },
   untyped:     { w: 300, h: 200 },
 };
 
@@ -50,6 +51,7 @@ export const PALETTE_ITEMS: { type: DeskWidgetType; icon: string; label: string 
   { type: 'draftNav',      icon: '🗺️', label: 'Draft Nav' },
   { type: 'beatCard',      icon: '🪧', label: 'Beat Card' },
   { type: 'board',         icon: '🗂️', label: 'Board' },
+  { type: 'column',        icon: '🧱', label: 'Column' },
 ];
 
 export const PALETTE_MAP = Object.fromEntries(

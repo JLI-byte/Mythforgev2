@@ -13,6 +13,8 @@ import { normalizeDismissedHints, normalizeVisitStamp } from '@/lib/onboarding';
 import { coerceStage, resolveLegacyMode, DEFAULT_STAGE, type DeskStage } from '@/lib/deskStages';
 import { buildRegistry } from '@/lib/research/boardMigration';
 import { descendantIds, canMove, type BoardRegistry } from '@/lib/research/boardTree';
+import { makeLabel, type Label } from '@/lib/research/labels';
+import type { Connection } from '@/lib/research/connections';
 import { migrateWorkspaceSchema } from './migrateWorkspaceSchema';
 import { DEFAULT_WORLD_BIBLE_LAYOUT } from '@/lib/worldBibleNav';
 import { wouldCreateCycle, fileByType } from '@/lib/folderTree';
@@ -322,7 +324,7 @@ export interface ArticleTab {
 // Writing Desk System Interfaces
 // =============================================
 
-export type DeskWidgetType = 'writingZone' | 'sticky' | 'reference' | 'image' | 'biblePinit' | 'sceneControl' | 'characterState' | 'continuity' | 'structure' | 'research' | 'progress' | 'relMap' | 'draftNav' | 'beatCard' | 'articleSuggestions' | 'consistencyFlags' | 'worldUnderstanding' | 'board' | 'untyped';
+export type DeskWidgetType = 'writingZone' | 'sticky' | 'reference' | 'image' | 'biblePinit' | 'sceneControl' | 'characterState' | 'continuity' | 'structure' | 'research' | 'progress' | 'relMap' | 'draftNav' | 'beatCard' | 'articleSuggestions' | 'consistencyFlags' | 'worldUnderstanding' | 'board' | 'column' | 'untyped';
 
 /** An object attached to the research chat as context for the next message. */
 export interface ChatAttachment {
@@ -347,6 +349,13 @@ export interface DeskWidget {
   /** Linked scope for visibility logic */
   scope?: 'scene' | 'chapter' | 'project' | 'global';
   scopeId?: string;
+  /** Set = this card is laid out by its column, not by its own x/y. */
+  parentId?: string | null;
+  /** Position within the parent column. Ignored when parentId is unset. */
+  columnOrder?: number;
+  /** Pinned in place: excluded from drag, resize and marquee selection. */
+  locked?: boolean;
+  labelIds?: string[];
 }
 
 export interface DeskState {
@@ -357,6 +366,8 @@ export interface DeskState {
    *  A card here keeps its size and content; its x/y mean nothing until it is
    *  dragged out, which is the moment they are set. */
   unsorted?: DeskWidget[];
+  /** Research boards only: lines between cards. Not widgets — they have no box. */
+  connections?: Connection[];
   /** Draft Table only: the writing method currently applied to this canvas ('blank' = started without one). */
   methodId?: string;
   /** Draft Table only: what's being drafted — filters the method library. */
@@ -801,6 +812,9 @@ export interface WorkspaceState {
      *  the legacy keys on first rehydration — see lib/research/boardMigration. */
     researchBoards: BoardRegistry;
 
+    /** Research label set, per project id. */
+    researchLabels: Record<string, Label[]>;
+
     /**
      * Research-chat conversations, keyed by board scope key — so the chat
      * survives collapsing the panel, switching tabs, and reloads. Persisted in
@@ -1047,6 +1061,8 @@ export interface WorkspaceState {
     renameResearchBoard: (boardId: string, name: string) => void;
     deleteResearchBoard: (boardId: string) => void;
     moveResearchBoard: (boardId: string, newParentId: string | null) => void;
+    createResearchLabel: (projectId: string, name: string) => string;
+    deleteResearchLabel: (projectId: string, labelId: string) => void;
     pinEntityToDesk: (projectId: string, entityId: string) => void;
 
 
@@ -1443,6 +1459,7 @@ export function partializeWorkspace(state: WorkspaceState) {
         researchStates: state.researchStates,
         customBoards: state.customBoards,
         researchBoards: state.researchBoards,
+        researchLabels: state.researchLabels,
         // Persist conversations in shrunk form: capped length, image data dropped.
         customInterviews: state.customInterviews,
         worldUnderstanding: state.worldUnderstanding,
@@ -1542,6 +1559,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             researchStates: {},
             customBoards: {},
             researchBoards: {},
+            researchLabels: {},
             customInterviews: [],
             worldUnderstanding: {},
             writingGoal: { dailyTarget: 0, sessionTarget: 0 },
@@ -2297,6 +2315,29 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 for (const id of doomed) delete researchStates[id];
                 return { researchBoards, researchStates };
             }),
+
+            createResearchLabel: (projectId, name) => {
+                const id = crypto.randomUUID();
+                set(state => {
+                    const existing = state.researchLabels[projectId] ?? [];
+                    return {
+                        researchLabels: {
+                            ...state.researchLabels,
+                            [projectId]: [...existing, makeLabel(id, name, existing.length)],
+                        },
+                    };
+                });
+                return id;
+            },
+
+            // A card keeping a dead label id is harmless: labelsOn() skips ids
+            // it cannot resolve, so no sweep across every board is needed here.
+            deleteResearchLabel: (projectId, labelId) => set(state => ({
+                researchLabels: {
+                    ...state.researchLabels,
+                    [projectId]: (state.researchLabels[projectId] ?? []).filter(l => l.id !== labelId),
+                },
+            })),
 
             moveResearchBoard: (boardId, newParentId) => set(state => {
                 const node = state.researchBoards[boardId];

@@ -2,7 +2,9 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Anchor, X, FolderTree, Image, Link2, Settings, StickyNote } from 'lucide-react';
+import { Anchor, X, Columns3, FolderTree, Image, Link2, Settings, StickyNote } from 'lucide-react';
+import { pruneOrphans } from '@/lib/research/connections';
+import { ConnectionLayer } from './desk/ConnectionLayer';
 import { useWorkspaceStore, DeskWidget, DeskWidgetType } from '@/store/workspaceStore';
 import styles from './WritingDesk.module.css';
 
@@ -69,6 +71,11 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
   const widgets = useMemo(() => deskState?.widgets || [], [deskState]);
   const zoom = deskState?.zoom ?? 1;
   const canvasOffset = useMemo(() => deskState?.canvasOffset || { x: 0, y: 0 }, [deskState]);
+
+  const connections = useMemo(() => deskState?.connections ?? [], [deskState]);
+  const connectionsRef = useRef(connections);
+  useEffect(() => { connectionsRef.current = connections; }, [connections]);
+  const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
 
   const widgetsRef = useRef<DeskWidget[]>(widgets);
   const zoomRef = useRef(zoom);
@@ -156,7 +163,8 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
     });
   }, [widgets, globalWidgets, activeDocumentId, activeSceneId]);
 
-  const canvasWidgets = useMemo(() => activeWidgets.filter(w => !w.dock), [activeWidgets]);
+  // A card in a column is drawn by that column, never by the canvas as well.
+  const canvasWidgets = useMemo(() => activeWidgets.filter(w => !w.dock && !w.parentId), [activeWidgets]);
   const dockedWidgets = useMemo(() => activeWidgets.filter(w => !!w.dock), [activeWidgets]);
 
   // New state for creation flow
@@ -311,8 +319,15 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
   const deleteWidget = useCallback((id: string) => {
     const next = widgetsRef.current.filter(w => w.id !== id);
     updateWidgets(next);
+    // A line to a card that no longer exists can never be drawn or removed by
+    // hand, so it goes with the card.
+    if (isResearch && stateKey) {
+      const current = connectionsRef.current;
+      const pruned = pruneOrphans(current, next);
+      if (pruned !== current) updateDeskState(stateKey, { connections: pruned });
+    }
     setSelectedId(prev => prev === id ? null : prev);
-  }, [updateWidgets]);
+  }, [updateWidgets, isResearch, stateKey, updateDeskState]);
 
   const handleDragStart = useCallback((e: React.MouseEvent, widget: DeskWidget) => {
     if ((e.target as HTMLElement).closest('button')) return;
@@ -657,6 +672,14 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
         {!isResearch && <HintBubble surface="desk" />}
 
         <div ref={canvasRef} className={styles.deskCanvasInner} style={{ transform: `translate(${canvasOffset.x}px, ${canvasOffset.y}px) scale(${zoom})` }}>
+          {/* Inside the transform, so lines pan and zoom with the cards. */}
+          {isResearch && (
+            <ConnectionLayer
+              connections={connections}
+              widgets={activeWidgets}
+              onSelect={setSelectedConnectionId}
+            />
+          )}
           {/* Ghost Box (Now inside scaled layer) */}
           <div ref={drawGhostRef} className={styles.deskDrawGhost} style={{ display: 'none', position: 'absolute', pointerEvents: 'none', zIndex: 9999 }} />
           
@@ -766,6 +789,8 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
                   viewportRef={viewportRef}
                   onAddAtCenter={addAtCenter}
                   onOpenBoard={onOpenBoard}
+                  onSelectChild={setSelectedId}
+                  allWidgets={activeWidgets}
                   onDockChange={(dock) => updateDock(w.id, dock)}
                 />
               </div>
@@ -846,6 +871,8 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
                   viewportRef={viewportRef}
                   onAddAtCenter={addAtCenter}
                   onOpenBoard={onOpenBoard}
+                  onSelectChild={setSelectedId}
+                  allWidgets={activeWidgets}
                   onDockChange={(dock) => updateDock(w.id, dock)}
                 />
               </div>
@@ -925,6 +952,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
             <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('image')}><Image size={14} /> Clipping</button>
             <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('reference')}><Link2 size={14} aria-hidden="true" /> Link</button>
             <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('board')}><FolderTree size={14} aria-hidden="true" /> Board</button>
+            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('column')}><Columns3 size={14} aria-hidden="true" /> Column</button>
           </div>
         )}
 

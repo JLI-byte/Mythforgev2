@@ -21,6 +21,7 @@ import { ConsistencyFlagsRenderer } from './ConsistencyFlagsRenderer';
 import { UnderstandingRenderer } from './UnderstandingRenderer';
 import { UntypedWidgetRenderer } from './UntypedWidgetRenderer';
 import { BoardCardRenderer } from './BoardCardRenderer';
+import { ColumnRenderer } from './ColumnRenderer';
 
 // ============================================================
 // WIDGET RENDERERS
@@ -39,11 +40,16 @@ export interface WidgetRendererProps {
   onAddAtCenter: (type: DeskWidgetType) => void;
   /** Research boards only: open a nested board from its card. */
   onOpenBoard?: (boardId: string) => void;
+  /** Research boards only: select a card from inside its column. */
+  onSelectChild?: (id: string) => void;
+  /** The board's full widget list. A column draws its own children from it, so
+   *  it must be the reactive array — a ref would not re-render on a new child. */
+  allWidgets?: DeskWidget[];
 }
 
 export const WidgetRenderer = React.memo(function WidgetRenderer({
   widget, updateContentImmediate, updateContentSilent,
-  handleDragStart, deleteWidget, updateWidgets, widgetsRef, triggerSave, viewportRef, onAddAtCenter, onOpenBoard, onDockChange
+  handleDragStart, deleteWidget, updateWidgets, widgetsRef, triggerSave, viewportRef, onAddAtCenter, onOpenBoard, onSelectChild, allWidgets, onDockChange
 }: WidgetRendererProps & { onDockChange: (dock: DeskWidget['dock']) => void }) {
   // Stable per-widget callbacks — recreated only when widget.id changes.
   // widget.content seeds each renderer's local useState on mount / external update.
@@ -77,6 +83,7 @@ export const WidgetRenderer = React.memo(function WidgetRenderer({
     case 'consistencyFlags': return <ConsistencyFlagsRenderer content={content} onChange={handleChangeImmediate} />;
     case 'worldUnderstanding': return <UnderstandingRenderer />;
     case 'board':       return <BoardCardRenderer content={content} onOpenBoard={onOpenBoard} />;
+    case 'column':      return <ColumnRenderer widget={widget} allWidgets={allWidgets ?? []} content={content} onChange={handleChangeImmediate} onSelectChild={onSelectChild ?? (() => {})} />;
     case 'untyped':     return <UntypedWidgetRenderer />;
     default:            return null;
   }

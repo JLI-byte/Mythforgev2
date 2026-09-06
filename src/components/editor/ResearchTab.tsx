@@ -2,13 +2,15 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
-import { rootBoardIdFor } from '@/lib/research/boardTree';
+import { rootBoardIdFor, breadcrumbFor } from '@/lib/research/boardTree';
+import { intentFor } from '@/lib/research/shortcuts';
 import { fromTray } from '@/lib/research/unsorted';
 import WritingDesk from './WritingDesk';
 import { ResearchEmptyState } from './ResearchEmptyState';
 import { BoardBreadcrumbs } from './research/BoardBreadcrumbs';
 import { UnsortedTray } from './research/UnsortedTray';
 import { ResearchRail } from './research/ResearchRail';
+import { BoardSearch } from './research/BoardSearch';
 import styles from './WritingDesk.module.css';
 
 /**
@@ -32,6 +34,35 @@ export default function ResearchTab() {
 
     const canvasHostRef = useRef<HTMLDivElement>(null);
     const boardId = openBoardId ?? rootId;
+    const [searchOpen, setSearchOpen] = useState(false);
+
+    // Board-level shortcuts. Card-level ones belong to the canvas, which owns
+    // the selection; these two only need to know which board is open.
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            const target = e.target as HTMLElement | null;
+            const typing = Boolean(target?.closest('input, textarea, [contenteditable="true"]'));
+            const intent = intentFor({
+                key: e.key,
+                ctrlKey: e.ctrlKey, metaKey: e.metaKey,
+                shiftKey: e.shiftKey, altKey: e.altKey,
+                inTextField: typing,
+                hasSelection: false,
+            });
+            if (intent?.kind === 'search') {
+                e.preventDefault();
+                setSearchOpen(true);
+            }
+            if (intent?.kind === 'parentBoard' && boardId) {
+                e.preventDefault();
+                const trail = breadcrumbFor(useWorkspaceStore.getState().researchBoards, boardId);
+                const parent = trail.length > 1 ? trail[trail.length - 2] : null;
+                if (parent) setOpenBoardId(parent.id);
+            }
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [boardId]);
 
     /** Tray -> canvas. Screen point in, canvas point out. */
     const handleDragOut = (widgetId: string, at: { x: number; y: number }) => {
@@ -62,6 +93,14 @@ export default function ResearchTab() {
                 </div>
             </div>
             <UnsortedTray boardId={boardId} onDragOut={handleDragOut} />
+
+            {searchOpen && activeProject && (
+                <BoardSearch
+                    projectId={activeProject.id}
+                    onClose={() => setSearchOpen(false)}
+                    onGo={setOpenBoardId}
+                />
+            )}
         </div>
     );
 }
