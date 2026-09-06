@@ -1019,7 +1019,8 @@ export default function ResearchTab() {
                     <WritingDesk variant="research" scopeKey={boardId} onOpenBoard={setOpenBoardId} />
                 </div>
             </div>
-            <UnsortedTray boardId={boardId} onDragOut={handleDragOut}   // implemented in Task 9, Step 4 />
+            {/* handleDragOut is implemented in Task 9, Step 4. */}
+            <UnsortedTray boardId={boardId} onDragOut={handleDragOut} />
         </div>
     );
 }
