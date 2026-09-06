@@ -18,11 +18,30 @@ interface Props {
  * which owns the debouncing.
  */
 export function TodoRenderer({ content, onChange }: Props) {
-    const items = content.items ?? [];
-    const { done, total, percent } = todoProgress(items);
     const [draft, setDraft] = React.useState('');
 
-    const commit = (next: TodoItem[]) => onChange({ ...content, items: next });
+    // The list is held locally as well as in the store. onChange is debounced
+    // by the caller, so two items added inside that window would both read the
+    // same props array and the first would be lost — which is exactly how a
+    // to-do list gets used. Local state leads; props re-seed it when they
+    // genuinely change from outside.
+    const [items, setItems] = React.useState<TodoItem[]>(content.items ?? []);
+    const lastPushed = React.useRef(content.items);
+
+    React.useEffect(() => {
+        if (content.items !== lastPushed.current) {
+            setItems(content.items ?? []);
+            lastPushed.current = content.items;
+        }
+    }, [content.items]);
+
+    const { done, total, percent } = todoProgress(items);
+
+    const commit = (next: TodoItem[]) => {
+        setItems(next);
+        lastPushed.current = next;
+        onChange({ ...content, items: next });
+    };
 
     const submitDraft = () => {
         commit(addItem(items, draft, crypto.randomUUID()));

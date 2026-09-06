@@ -17,9 +17,24 @@ const DEFAULT_COLOUR = '#888888';
  * colour input does the picking rather than a bundled wheel.
  */
 export function SwatchRenderer({ content, onChange }: Props) {
-    const colors = content.colors ?? [];
+    // Local state leads the props. onChange is debounced by the caller, so two
+    // colours added inside that window would both read the same props array
+    // and the first would be lost.
+    const [colors, setColors] = React.useState<string[]>(content.colors ?? []);
+    const lastPushed = React.useRef(content.colors);
 
-    const commit = (next: string[]) => onChange({ ...content, colors: next });
+    React.useEffect(() => {
+        if (content.colors !== lastPushed.current) {
+            setColors(content.colors ?? []);
+            lastPushed.current = content.colors;
+        }
+    }, [content.colors]);
+
+    const commit = (next: string[]) => {
+        setColors(next);
+        lastPushed.current = next;
+        onChange({ ...content, colors: next });
+    };
 
     return (
         <div className={styles.swatch}>

@@ -69,8 +69,16 @@ export function DrawingRenderer({ content, onChange }: Props) {
         }
     }, []);
 
+    // Only re-seed from props when they carry something this card did not
+    // just push. onChange is debounced, so without the guard a second stroke
+    // drawn inside that window would be built from the stale list and the
+    // first would vanish.
+    const lastPushed = useRef(content.strokes);
     useEffect(() => {
-        strokesRef.current = content.strokes ?? EMPTY;
+        if (content.strokes !== lastPushed.current) {
+            strokesRef.current = content.strokes ?? EMPTY;
+            lastPushed.current = content.strokes;
+        }
         redraw();
     }, [content.strokes, redraw]);
 
@@ -111,7 +119,10 @@ export function DrawingRenderer({ content, onChange }: Props) {
             redraw();
             return;
         }
-        onChange({ ...content, strokes: [...strokesRef.current, draft] });
+        const next = [...strokesRef.current, draft];
+        strokesRef.current = next;
+        lastPushed.current = next;
+        onChange({ ...content, strokes: next });
     };
 
     return (
@@ -130,7 +141,11 @@ export function DrawingRenderer({ content, onChange }: Props) {
                 <button
                     className={styles.clear}
                     aria-label="Clear drawing"
-                    onClick={() => onChange({ ...content, strokes: [] })}
+                    onClick={() => {
+                        strokesRef.current = EMPTY;
+                        lastPushed.current = EMPTY;
+                        onChange({ ...content, strokes: [] });
+                    }}
                 >
                     Clear
                 </button>
