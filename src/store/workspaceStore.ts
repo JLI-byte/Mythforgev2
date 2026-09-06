@@ -14,6 +14,7 @@ import { coerceStage, resolveLegacyMode, DEFAULT_STAGE, type DeskStage } from '@
 import { buildRegistry } from '@/lib/research/boardMigration';
 import { descendantIds, canMove, type BoardRegistry } from '@/lib/research/boardTree';
 import { makeLabel, type Label } from '@/lib/research/labels';
+import { makeDossier, type Dossier } from '@/lib/research/dossier';
 import type { Connection } from '@/lib/research/connections';
 import { migrateWorkspaceSchema } from './migrateWorkspaceSchema';
 import { DEFAULT_WORLD_BIBLE_LAYOUT } from '@/lib/worldBibleNav';
@@ -815,6 +816,13 @@ export interface WorkspaceState {
     /** Research label set, per project id. */
     researchLabels: Record<string, Label[]>;
 
+    /** Saved dossiers, per project id. Each is a query over a board tree. */
+    researchDossiers: Record<string, Dossier[]>;
+
+    /** Which dossier the side panel is showing. NOT persisted: a view state,
+     *  not a document. */
+    activeDossierId: string | null;
+
     /**
      * Research-chat conversations, keyed by board scope key — so the chat
      * survives collapsing the panel, switching tabs, and reloads. Persisted in
@@ -1063,6 +1071,10 @@ export interface WorkspaceState {
     moveResearchBoard: (boardId: string, newParentId: string | null) => void;
     createResearchLabel: (projectId: string, name: string) => string;
     deleteResearchLabel: (projectId: string, labelId: string) => void;
+    createDossier: (projectId: string, name: string, rootBoardId: string) => string;
+    deleteDossier: (projectId: string, dossierId: string) => void;
+    updateDossier: (projectId: string, dossierId: string, patch: Partial<Dossier>) => void;
+    setActiveDossierId: (id: string | null) => void;
     pinEntityToDesk: (projectId: string, entityId: string) => void;
 
 
@@ -1460,6 +1472,7 @@ export function partializeWorkspace(state: WorkspaceState) {
         customBoards: state.customBoards,
         researchBoards: state.researchBoards,
         researchLabels: state.researchLabels,
+        researchDossiers: state.researchDossiers,
         // Persist conversations in shrunk form: capped length, image data dropped.
         customInterviews: state.customInterviews,
         worldUnderstanding: state.worldUnderstanding,
@@ -1560,6 +1573,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             customBoards: {},
             researchBoards: {},
             researchLabels: {},
+            researchDossiers: {},
+            activeDossierId: null,
             customInterviews: [],
             worldUnderstanding: {},
             writingGoal: { dailyTarget: 0, sessionTarget: 0 },
@@ -2315,6 +2330,39 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 for (const id of doomed) delete researchStates[id];
                 return { researchBoards, researchStates };
             }),
+
+            createDossier: (projectId, name, rootBoardId) => {
+                const id = crypto.randomUUID();
+                set(state => ({
+                    researchDossiers: {
+                        ...state.researchDossiers,
+                        [projectId]: [
+                            ...(state.researchDossiers[projectId] ?? []),
+                            makeDossier(id, name, projectId, rootBoardId),
+                        ],
+                    },
+                }));
+                return id;
+            },
+
+            deleteDossier: (projectId, dossierId) => set(state => ({
+                researchDossiers: {
+                    ...state.researchDossiers,
+                    [projectId]: (state.researchDossiers[projectId] ?? []).filter(d => d.id !== dossierId),
+                },
+                activeDossierId: state.activeDossierId === dossierId ? null : state.activeDossierId,
+            })),
+
+            updateDossier: (projectId, dossierId, patch) => set(state => ({
+                researchDossiers: {
+                    ...state.researchDossiers,
+                    [projectId]: (state.researchDossiers[projectId] ?? []).map(d =>
+                        d.id === dossierId ? { ...d, ...patch } : d,
+                    ),
+                },
+            })),
+
+            setActiveDossierId: (id) => set(() => ({ activeDossierId: id })),
 
             createResearchLabel: (projectId, name) => {
                 const id = crypto.randomUUID();

@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom';
 import { Anchor, X, Columns3, FolderTree, Image, Link2, Plus, Settings, StickyNote } from 'lucide-react';
 import { pruneOrphans, makeConnection, removeConnection, type Connection } from '@/lib/research/connections';
-import { canManipulate, toggleLock } from '@/lib/research/labels';
+import { canManipulate, toggleLock, filterByLabels } from '@/lib/research/labels';
 import { intentFor } from '@/lib/research/shortcuts';
 import { ConnectionLayer } from './desk/ConnectionLayer';
 import { useWorkspaceStore, DeskWidget, DeskWidgetType } from '@/store/workspaceStore';
@@ -51,9 +51,13 @@ interface WritingDeskProps {
   scopeKey?: string | null;
   /** Research variant only: open a nested board. */
   onOpenBoard?: (boardId: string) => void;
+  /** Research variant only: report the selected card so the label bar can act on it. */
+  onSelectionChange?: (id: string | null) => void;
+  /** Research variant only: show only cards carrying one of these labels. */
+  labelFilter?: string[];
 }
 
-export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenBoard }: WritingDeskProps) {
+export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenBoard, onSelectionChange, labelFilter }: WritingDeskProps) {
   const isDraft = variant === 'draft';
   const isResearch = variant === 'research';
   const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
@@ -170,6 +174,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
   const [hasMounted, setHasMounted] = useState(false);
   useEffect(() => { setHasMounted(true); }, []);
 
+
   // Synchronize refs when store changes (e.g. from World Bible Pin)
   useEffect(() => {
     widgetsRef.current = widgets;
@@ -188,6 +193,8 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
   const contentSaveTimers = useRef<Record<string, any>>({});
   const [isPanning, setIsPanning] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // The label bar lives above this component but acts on its selection.
+  useEffect(() => { onSelectionChange?.(selectedId); }, [selectedId, onSelectionChange]);
   const [typePickerWidgetId, setTypePickerWidgetId] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
@@ -235,8 +242,9 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
   const activeWidgets = useMemo(() => {
     const all = [...widgets, ...globalWidgets];
     return all.filter(w => {
-      // These three are shown in the chat trays now, not on the board.
-      if (TRAY_WIDGET_TYPES.has(w.type)) return false;
+      // On the desk and draft table these live in the trays. On a research
+      // board they are the point: a flag belongs beside the note it contradicts.
+      if (!isResearch && TRAY_WIDGET_TYPES.has(w.type)) return false;
       const scope = w.scope || 'project';
       if (scope === 'global') return true;
       if (scope === 'project') {
@@ -250,7 +258,10 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
   }, [widgets, globalWidgets, activeDocumentId, activeSceneId]);
 
   // A card in a column is drawn by that column, never by the canvas as well.
-  const canvasWidgets = useMemo(() => activeWidgets.filter(w => !w.dock && !w.parentId), [activeWidgets]);
+  const canvasWidgets = useMemo(() => {
+    const free = activeWidgets.filter(w => !w.dock && !w.parentId);
+    return labelFilter && labelFilter.length > 0 ? filterByLabels(free, labelFilter) : free;
+  }, [activeWidgets, labelFilter]);
   const dockedWidgets = useMemo(() => activeWidgets.filter(w => !!w.dock), [activeWidgets]);
 
   // New state for creation flow

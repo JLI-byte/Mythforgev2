@@ -6,6 +6,7 @@ import { variantForStage } from '@/lib/deskStages';
 import { StageRail } from './StageRail';
 import WritingDesk from './WritingDesk';
 import ResearchTab from './ResearchTab';
+import { DossierPanel } from '../research/DossierPanel';
 import styles from './StageRail.module.css';
 
 /**
@@ -22,6 +23,7 @@ import styles from './StageRail.module.css';
  */
 export default function Workshop() {
     const stage = useWorkspaceStore(s => s.deskStage);
+    const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
     const setDeskStage = useWorkspaceStore(s => s.setDeskStage);
 
     return (
@@ -33,9 +35,17 @@ export default function Workshop() {
                 role="tabpanel"
                 aria-labelledby={`stage-tab-${stage}`}
             >
-                {stage === 'research'
-                    ? <ResearchTab />
-                    : <WritingDesk variant={variantForStage(stage)} />}
+                {stage === 'research' ? (
+                    <ResearchTab />
+                ) : (
+                    // The research the writer gathered, beside the writing. Not
+                    // shown on the Research stage itself: a dossier of the board
+                    // you are looking at is noise.
+                    <div className={styles.withDossier}>
+                        <WritingDesk variant={variantForStage(stage)} />
+                        {activeProjectId && <DossierPanel projectId={activeProjectId} />}
+                    </div>
+                )}
             </div>
         </div>
     );

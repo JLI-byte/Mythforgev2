@@ -5,12 +5,14 @@ import { useWorkspaceStore } from '@/store/workspaceStore';
 import { rootBoardIdFor, breadcrumbFor } from '@/lib/research/boardTree';
 import { intentFor } from '@/lib/research/shortcuts';
 import { fromTray } from '@/lib/research/unsorted';
+import { applyLabel, removeLabel } from '@/lib/research/labels';
 import WritingDesk from './WritingDesk';
 import { ResearchEmptyState } from './ResearchEmptyState';
 import { BoardBreadcrumbs } from './research/BoardBreadcrumbs';
 import { UnsortedTray } from './research/UnsortedTray';
 import { ResearchRail } from './research/ResearchRail';
 import { BoardSearch } from './research/BoardSearch';
+import { LabelBar } from './research/LabelBar';
 import styles from './WritingDesk.module.css';
 
 /**
@@ -35,6 +37,27 @@ export default function ResearchTab() {
     const canvasHostRef = useRef<HTMLDivElement>(null);
     const boardId = openBoardId ?? rootId;
     const [searchOpen, setSearchOpen] = useState(false);
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [labelFilter, setLabelFilter] = useState<string[]>([]);
+
+    // The card the canvas has selected, as label ids — null when nothing is
+    // selected, which is what puts the label bar into filter mode.
+    const selectedLabelIds = useWorkspaceStore(s => {
+        if (!boardId || !selectedId) return null;
+        const card = s.researchStates[boardId]?.widgets?.find(w => w.id === selectedId);
+        return card ? (card.labelIds ?? []) : null;
+    });
+
+    const applyToSelection = (labelId: string) => {
+        if (!boardId || !selectedId) return;
+        const widgets = useWorkspaceStore.getState().researchStates[boardId]?.widgets ?? [];
+        const has = widgets.find(w => w.id === selectedId)?.labelIds?.includes(labelId);
+        updateResearchState(boardId, {
+            widgets: has
+                ? removeLabel(widgets, selectedId, labelId)
+                : applyLabel(widgets, selectedId, labelId),
+        });
+    };
 
     // Board-level shortcuts. Card-level ones belong to the canvas, which owns
     // the selection; these two only need to know which board is open.
@@ -88,8 +111,23 @@ export default function ResearchTab() {
             <ResearchRail scopeKey={boardId} />
             <div className={styles.researchMain}>
                 <BoardBreadcrumbs boardId={boardId} onNavigate={setOpenBoardId} />
+                {activeProject && (
+                    <LabelBar
+                        projectId={activeProject.id}
+                        selectedLabelIds={selectedLabelIds}
+                        activeFilter={labelFilter}
+                        onFilterChange={setLabelFilter}
+                        onApplyToSelection={applyToSelection}
+                    />
+                )}
                 <div className={styles.researchCanvasHost} ref={canvasHostRef}>
-                    <WritingDesk variant="research" scopeKey={boardId} onOpenBoard={setOpenBoardId} />
+                    <WritingDesk
+                        variant="research"
+                        scopeKey={boardId}
+                        onOpenBoard={setOpenBoardId}
+                        onSelectionChange={setSelectedId}
+                        labelFilter={labelFilter}
+                    />
                 </div>
             </div>
             <UnsortedTray boardId={boardId} onDragOut={handleDragOut} />
