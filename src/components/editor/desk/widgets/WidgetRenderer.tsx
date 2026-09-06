@@ -22,6 +22,12 @@ import { UnderstandingRenderer } from './UnderstandingRenderer';
 import { UntypedWidgetRenderer } from './UntypedWidgetRenderer';
 import { BoardCardRenderer } from './BoardCardRenderer';
 import { ColumnRenderer } from './ColumnRenderer';
+import { LinkCardRenderer } from './LinkCardRenderer';
+import { TodoRenderer } from './TodoRenderer';
+import { SwatchRenderer } from './SwatchRenderer';
+import { DocumentRenderer } from './DocumentRenderer';
+import { TableRenderer } from './TableRenderer';
+import { DrawingRenderer } from './DrawingRenderer';
 
 // ============================================================
 // WIDGET RENDERERS
@@ -45,11 +51,13 @@ export interface WidgetRendererProps {
   /** The board's full widget list. A column draws its own children from it, so
    *  it must be the reactive array — a ref would not re-render on a new child. */
   allWidgets?: DeskWidget[];
+  /** Research boards get the preview link card; the desk keeps the plain one. */
+  isResearch?: boolean;
 }
 
 export const WidgetRenderer = React.memo(function WidgetRenderer({
   widget, updateContentImmediate, updateContentSilent,
-  handleDragStart, deleteWidget, updateWidgets, widgetsRef, triggerSave, viewportRef, onAddAtCenter, onOpenBoard, onSelectChild, allWidgets, onDockChange
+  handleDragStart, deleteWidget, updateWidgets, widgetsRef, triggerSave, viewportRef, onAddAtCenter, onOpenBoard, onSelectChild, allWidgets, isResearch, onDockChange
 }: WidgetRendererProps & { onDockChange: (dock: DeskWidget['dock']) => void }) {
   // Stable per-widget callbacks — recreated only when widget.id changes.
   // widget.content seeds each renderer's local useState on mount / external update.
@@ -67,7 +75,9 @@ export const WidgetRenderer = React.memo(function WidgetRenderer({
   switch (widget.type) {
     case 'writingZone': return <WritingZoneRenderer content={content} onChange={handleChange} onChangeImmediate={handleChangeImmediate} widget={widget} onDragStart={handleDragStart} onDeleteWidget={deleteWidget} onDockChange={onDockChange} onManualSave={triggerSave} onAddAtCenter={onAddAtCenter} />;
     case 'sticky':      return <StickyNoteRenderer content={content} onChange={handleChange} onChangeImmediate={handleChangeImmediate} />;
-    case 'reference':   return <ReferenceCardRenderer content={content} onChange={handleChange} />;
+    case 'reference':   return isResearch
+      ? <LinkCardRenderer content={content} onChange={handleChange} />
+      : <ReferenceCardRenderer content={content} onChange={handleChange} />;
     case 'image':       return <ImagePinRenderer content={content} onChange={handleChange} onChangeImmediate={handleChangeImmediate} />;
     case 'biblePinit':  return <WorldBiblePinRenderer content={content} onChange={handleChange} />;
     case 'sceneControl':return <SceneControlRenderer content={content} onChange={handleChange} />;
@@ -84,6 +94,11 @@ export const WidgetRenderer = React.memo(function WidgetRenderer({
     case 'worldUnderstanding': return <UnderstandingRenderer />;
     case 'board':       return <BoardCardRenderer content={content} onOpenBoard={onOpenBoard} />;
     case 'column':      return <ColumnRenderer widget={widget} allWidgets={allWidgets ?? []} content={content} onChange={handleChangeImmediate} onSelectChild={onSelectChild ?? (() => {})} />;
+    case 'todo':        return <TodoRenderer content={content} onChange={handleChange} />;
+    case 'document':    return <DocumentRenderer content={content} onChange={handleChange} />;
+    case 'swatch':      return <SwatchRenderer content={content} onChange={handleChange} />;
+    case 'table':       return <TableRenderer content={content} onChange={handleChange} />;
+    case 'drawing':     return <DrawingRenderer content={content} onChange={handleChangeImmediate} />;
     case 'untyped':     return <UntypedWidgetRenderer />;
     default:            return null;
   }

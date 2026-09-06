@@ -2,8 +2,8 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Anchor, X, Columns3, FolderTree, Image, Link2, Settings, StickyNote } from 'lucide-react';
-import { pruneOrphans } from '@/lib/research/connections';
+import { Anchor, X, Columns3, FolderTree, Image, Link2, Plus, Settings, StickyNote } from 'lucide-react';
+import { pruneOrphans, makeConnection, removeConnection, type Connection } from '@/lib/research/connections';
 import { ConnectionLayer } from './desk/ConnectionLayer';
 import { useWorkspaceStore, DeskWidget, DeskWidgetType } from '@/store/workspaceStore';
 import styles from './WritingDesk.module.css';
@@ -24,6 +24,15 @@ import { EmptyState } from '@/components/ui/EmptyState';
 // MAIN COMPONENT
 // ============================================================
 
+
+/** The research toolbar is already five buttons wide; these live behind ＋ More. */
+const MORE_CARDS: { type: DeskWidgetType; label: string }[] = [
+  { type: 'todo',     label: 'To-do' },
+  { type: 'document', label: 'Document' },
+  { type: 'table',    label: 'Table' },
+  { type: 'swatch',   label: 'Palette' },
+  { type: 'drawing',  label: 'Drawing' },
+];
 
 /** Stable empty array so the draft canvas doesn't re-render on globalWidgets churn. */
 const NO_GLOBAL_WIDGETS: DeskWidget[] = [];
@@ -73,9 +82,84 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
   const canvasOffset = useMemo(() => deskState?.canvasOffset || { x: 0, y: 0 }, [deskState]);
 
   const connections = useMemo(() => deskState?.connections ?? [], [deskState]);
-  const connectionsRef = useRef(connections);
-  useEffect(() => { connectionsRef.current = connections; }, [connections]);
+
+  /** The board's lines as the store has them right now. Every caller is an
+   *  event handler, so reading through the store beats holding a ref that
+   *  React would rightly complain about being written during an effect. */
+  const currentConnections = useCallback((): Connection[] => (
+    stateKey ? (useWorkspaceStore.getState().researchStates[stateKey]?.connections ?? []) : []
+  ), [stateKey]);
   const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
+  /** While dragging from a card's corner dot: the source card and the live pointer. */
+  const [linking, setLinking] = useState<{ fromId: string; to: { x: number; y: number } } | null>(null);
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  /** Screen point -> canvas point, undoing the pan and zoom.
+   *  Reads the live pan/zoom through the store rather than the canvas refs:
+   *  a callback that reads those refs makes every write to them elsewhere a
+   *  react-hooks/immutability error, and this only ever runs at event time. */
+  const toCanvasPoint = useCallback((clientX: number, clientY: number) => {
+    const host = viewportRef.current?.getBoundingClientRect();
+    if (!host) return { x: 0, y: 0 };
+    const live = stateKey ? useWorkspaceStore.getState().researchStates[stateKey] : null;
+    const z = live?.zoom ?? 1;
+    const off = live?.canvasOffset ?? { x: 0, y: 0 };
+    return {
+      x: (clientX - host.left - off.x) / z,
+      y: (clientY - host.top - off.y) / z,
+    };
+  }, [stateKey]);
+
+  const startLink = useCallback((e: React.MouseEvent, fromId: string) => {
+    e.preventDefault(); e.stopPropagation();
+    setLinking({ fromId, to: toCanvasPoint(e.clientX, e.clientY) });
+  }, [toCanvasPoint]);
+
+  useEffect(() => {
+    if (!linking) return;
+
+    const onMove = (e: MouseEvent) => {
+      setLinking(prev => (prev ? { ...prev, to: toCanvasPoint(e.clientX, e.clientY) } : prev));
+    };
+
+    const onUp = (e: MouseEvent) => {
+      const overCard = (e.target as HTMLElement | null)?.closest('[data-widget-id]');
+      const targetId = overCard?.getAttribute('data-widget-id') ?? null;
+
+      // A line to nowhere is almost always a slip. Dropping on empty canvas
+      // discards; a free-point end can be added later from the line itself.
+      if (targetId && targetId !== linking.fromId && stateKey) {
+        const next = [
+          ...currentConnections(),
+          makeConnection({ widgetId: linking.fromId }, { widgetId: targetId }, crypto.randomUUID()),
+        ];
+        updateDeskState(stateKey, { connections: next });
+      }
+      setLinking(null);
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [linking, stateKey, toCanvasPoint, updateDeskState, currentConnections]);
+
+  /** Delete removes the selected line, the same key that removes a card. */
+  useEffect(() => {
+    if (!selectedConnectionId || !isResearch || !stateKey) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Delete' && e.key !== 'Backspace') return;
+      const t = e.target as HTMLElement | null;
+      if (t?.closest('input, textarea, [contenteditable="true"]')) return;
+      e.preventDefault();
+      updateDeskState(stateKey, { connections: removeConnection(currentConnections(), selectedConnectionId) });
+      setSelectedConnectionId(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [selectedConnectionId, isResearch, stateKey, updateDeskState, currentConnections]);
 
   const widgetsRef = useRef<DeskWidget[]>(widgets);
   const zoomRef = useRef(zoom);
@@ -322,12 +406,12 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
     // A line to a card that no longer exists can never be drawn or removed by
     // hand, so it goes with the card.
     if (isResearch && stateKey) {
-      const current = connectionsRef.current;
+      const current = currentConnections();
       const pruned = pruneOrphans(current, next);
       if (pruned !== current) updateDeskState(stateKey, { connections: pruned });
     }
     setSelectedId(prev => prev === id ? null : prev);
-  }, [updateWidgets, isResearch, stateKey, updateDeskState]);
+  }, [updateWidgets, isResearch, stateKey, updateDeskState, currentConnections]);
 
   const handleDragStart = useCallback((e: React.MouseEvent, widget: DeskWidget) => {
     if ((e.target as HTMLElement).closest('button')) return;
@@ -675,7 +759,11 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
           {/* Inside the transform, so lines pan and zoom with the cards. */}
           {isResearch && (
             <ConnectionLayer
-              connections={connections}
+              connections={
+                linking
+                  ? [...connections, makeConnection({ widgetId: linking.fromId }, linking.to, '__drag__')]
+                  : connections
+              }
               widgets={activeWidgets}
               onSelect={setSelectedConnectionId}
             />
@@ -684,7 +772,16 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
           <div ref={drawGhostRef} className={styles.deskDrawGhost} style={{ display: 'none', position: 'absolute', pointerEvents: 'none', zIndex: 9999 }} />
           
           {canvasWidgets.map(w => (
-            <div key={w.id} id={`widget-${w.id}`} className={`${styles.deskWidget} ${selectedId === w.id ? styles.deskWidgetSelected : ''}`} style={{ left: w.x, top: w.y, width: w.width, height: w.height, zIndex: selectedId === w.id ? 50 : 1 }} onMouseDown={e => { e.stopPropagation(); setSelectedId(w.id); }}>
+            <div key={w.id} id={`widget-${w.id}`} data-widget-id={w.id} className={`${styles.deskWidget} ${selectedId === w.id ? styles.deskWidgetSelected : ''}`} style={{ left: w.x, top: w.y, width: w.width, height: w.height, zIndex: selectedId === w.id ? 50 : 1 }} onMouseDown={e => { e.stopPropagation(); setSelectedId(w.id); }}>
+              {/* Drag from here to draw a line to another card. */}
+              {isResearch && (
+                <button
+                  className={styles.linkHandle}
+                  onMouseDown={e => startLink(e, w.id)}
+                  aria-label={`Draw a connection from this card`}
+                  title="Drag to another card to connect them"
+                />
+              )}
                 <div className={styles.deskTitleBar} onMouseDown={e => handleDragStart(e, w)}>
                   <div className={styles.deskTitleBarIcon}>{PALETTE_MAP[w.type]?.icon || '❓'}</div>
                   <div className={styles.deskTitleBarLabel}>
@@ -791,6 +888,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
                   onOpenBoard={onOpenBoard}
                   onSelectChild={setSelectedId}
                   allWidgets={activeWidgets}
+                  isResearch={isResearch}
                   onDockChange={(dock) => updateDock(w.id, dock)}
                 />
               </div>
@@ -873,6 +971,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
                   onOpenBoard={onOpenBoard}
                   onSelectChild={setSelectedId}
                   allWidgets={activeWidgets}
+                  isResearch={isResearch}
                   onDockChange={(dock) => updateDock(w.id, dock)}
                 />
               </div>
@@ -953,6 +1052,32 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
             <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('reference')}><Link2 size={14} aria-hidden="true" /> Link</button>
             <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('board')}><FolderTree size={14} aria-hidden="true" /> Board</button>
             <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('column')}><Columns3 size={14} aria-hidden="true" /> Column</button>
+            <div className={styles.moreWrap}>
+              <button
+                className={styles.methodPickerBtn}
+                onMouseDown={e => e.stopPropagation()}
+                onClick={() => setMoreOpen(o => !o)}
+                aria-expanded={moreOpen}
+                aria-haspopup="menu"
+              >
+                <Plus size={14} aria-hidden="true" /> More
+              </button>
+              {moreOpen && (
+                <div className={styles.moreMenu} role="menu">
+                  {MORE_CARDS.map(({ type, label }) => (
+                    <button
+                      key={type}
+                      role="menuitem"
+                      className={styles.moreItem}
+                      onMouseDown={e => e.stopPropagation()}
+                      onClick={() => { addAtCenter(type); setMoreOpen(false); }}
+                    >
+                      <span aria-hidden="true">{PALETTE_MAP[type]?.icon}</span> {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 

@@ -1,0 +1,84 @@
+.card {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column; min-height: 0;
+  gap: var(--space-3);
+  padding: var(--space-3);
+}
+
+/* The table scrolls inside the card; the board never scrolls sideways for it. */
+.scroll {
+  flex: 1 1 auto; min-height: 0;
+  overflow-x: auto; overflow-y: auto;
+}
+
+.table {
+  border-collapse: collapse;
+  width: max-content; min-width: 100%;
+  font-size: var(--text-xs);
+  color: var(--foreground);
+}
+
+.headCell {
+  border: 1px solid var(--border);
+  background: var(--surface-high);
+  padding: 0;
+  text-align: left;
+  min-width: 7rem;
+}
+.headInner { display: flex; align-items: center; gap: var(--space-1); }
+
+.cell {
+  border: 1px solid var(--border);
+  background: var(--surface-mid);
+  padding: 0;
+  min-width: 7rem;
+}
+
+.gutterHead {
+  border: 1px solid var(--border);
+  background: var(--surface-high);
+  width: var(--space-7);
+}
+.gutter {
+  border: 1px solid var(--border);
+  background: var(--surface-mid);
+  text-align: center;
+  width: var(--space-7);
+}
+
+.input {
+  width: 100%; min-width: 0;
+  background: transparent; border: none;
+  padding: var(--space-3);
+  font: inherit; color: var(--foreground);
+}
+.input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.headCell .input { font-weight: 600; }
+
+.remove {
+  flex: 0 0 auto;
+  width: var(--space-6); height: var(--space-6);
+  margin-right: var(--space-1);
+  background: none; border: none; cursor: pointer;
+  color: var(--muted); line-height: 1;
+  font-size: var(--text-xs);
+  border-radius: var(--radius-sm);
+}
+.remove:hover { color: var(--foreground); }
+.remove:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.foot {
+  flex: 0 0 auto;
+  display: flex; gap: var(--space-2);
+}
+.add {
+  background: var(--surface-high);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-2xs); color: var(--muted);
+  cursor: pointer;
+}
+.add:hover { color: var(--foreground); border-color: var(--accent); }
+.add:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
