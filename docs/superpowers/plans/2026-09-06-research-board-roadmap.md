@@ -1,5 +1,10 @@
 # Research Board Roadmap
 
+> **All four phases complete, 2026-09-06.** 810 tests, tsc clean, build
+> compiles, eslint at the 223 baseline. Deferred as planned: comments (needs
+> real-time collaboration) and the web clipper (a browser extension in its own
+> repo). Deliberately not built: map cards.
+
 > **For agentic workers:** each phase below has, or will have, its own plan file in this
 > directory. Execute a phase with superpowers:subagent-driven-development or
 > superpowers:executing-plans. This file is the map, not the instructions.
@@ -137,7 +142,7 @@ Dependency-ordered. Each produces working, shippable software on its own.
 
 ### Phase 1 — The board tree
 
-**Plan:** `2026-09-06-research-phase-1-board-tree.md` (written)
+**Plan:** `2026-09-06-research-phase-1-board-tree.md` — complete.
 
 The foundation. Nothing else can be built until a board can contain a board.
 
@@ -151,7 +156,7 @@ The foundation. Nothing else can be built until a board can contain a board.
 
 ### Phase 2 — Arrangement
 
-**Plan:** to be written at the start of the phase.
+**Plan:** written and complete.
 
 - **Columns** — `parentId` on widgets, titled stack, live count, collapse, "Group into column" from multi-select
 - **Lines** — `connections` on `DeskState`, drag from a card's corner dot, arrows, curves, labels, orphan pruning when a card is deleted
@@ -164,7 +169,7 @@ The foundation. Nothing else can be built until a board can contain a board.
 
 ### Phase 3 — Card types
 
-**Plan:** to be written at the start of the phase.
+**Plan:** written and complete.
 
 - **Link card with preview** — upgrade `reference`: thumbnail, title, description, favicon, each toggleable; embed detection for YouTube, Vimeo, SoundCloud
 - **To-do list** — checkable rows, progress in the header
@@ -181,7 +186,7 @@ The foundation. Nothing else can be built until a board can contain a board.
 
 ### Phase 4 — Native cards and the Dossier
 
-**Plan:** to be written at the start of the phase.
+**Plan:** written and complete.
 
 This is the half Milanote cannot copy.
 

@@ -1,5 +1,16 @@
 # Research Phase 4 — Native Cards and the Dossier
 
+> **Status: complete.** Shipped 2026-09-06. 810 tests, tsc clean, build
+> compiles, eslint at the 223 baseline.
+>
+> Verified in the browser that the dossier is a query and not a copy: a note
+> edited on the board showed its new text in the dossier without the dossier
+> being touched. That is the whole design premise, so it was worth proving
+> rather than asserting.
+>
+> Scope correction carried out: the "live Bible pin" item was already true
+> before this phase and no work was done on it.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: superpowers:subagent-driven-development or
 > superpowers:executing-plans. Steps use checkbox (`- [ ]`) syntax.
 
@@ -43,7 +54,7 @@ The whole point of the phase. A dossier flattens a board tree into ordered, read
 every card type reduced to a title and a body, because a reference you read while writing cannot
 be a canvas.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -174,9 +185,9 @@ describe('collectDossier', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail.**
+- [x] **Step 2: Run it and watch it fail.**
 
-- [ ] **Step 3: Write the module**
+- [x] **Step 3: Write the module**
 
 ```ts
 /**
@@ -340,9 +351,9 @@ export function collectDossier(input: DossierInput, dossier: Dossier): DossierSe
 }
 ```
 
-- [ ] **Step 4: Run it and watch it pass** — 16 tests.
+- [x] **Step 4: Run it and watch it pass** — 16 tests.
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ---
 
@@ -350,13 +361,13 @@ export function collectDossier(input: DossierInput, dossier: Dossier): DossierSe
 
 **Files:** `src/store/workspaceStore.ts`
 
-- [ ] **Step 1:** `researchDossiers: Record<string, Dossier[]>` keyed by project id, in the
+- [x] **Step 1:** `researchDossiers: Record<string, Dossier[]>` keyed by project id, in the
       interface, the initial state (`{}`) and `partialize`.
-- [ ] **Step 2:** actions `createDossier(projectId, name, rootBoardId) => string`,
+- [x] **Step 2:** actions `createDossier(projectId, name, rootBoardId) => string`,
       `deleteDossier(projectId, dossierId)`, `updateDossier(projectId, dossierId, patch)`.
-- [ ] **Step 3:** `activeDossierId: string | null` plus `setActiveDossierId`, **not** persisted —
+- [x] **Step 3:** `activeDossierId: string | null` plus `setActiveDossierId`, **not** persisted —
       which dossier is open is a view state, not a document.
-- [ ] **Step 4:** Typecheck and commit.
+- [x] **Step 4:** Typecheck and commit.
 
 ---
 
@@ -365,15 +376,15 @@ export function collectDossier(input: DossierInput, dossier: Dossier): DossierSe
 **Files:** Create `src/components/research/DossierPanel.tsx` + `.module.css`,
 `src/components/research/DossierRenderer.tsx`
 
-- [ ] **Step 1: DossierRenderer** — takes `sections: DossierSection[]`, draws headings indented
+- [x] **Step 1: DossierRenderer** — takes `sections: DossierSection[]`, draws headings indented
       by `depth` and a definition-style list of cards. Read-only. An unsorted card carries a
       small "unsorted" chip. Nothing is editable — this is a reference, and a stray keystroke
       while drafting must not alter research.
-- [ ] **Step 2: DossierPanel** — a right-hand panel with a dossier picker at the top, then the
+- [x] **Step 2: DossierPanel** — a right-hand panel with a dossier picker at the top, then the
       renderer. Selects `researchBoards` and `researchStates`, calls `collectDossier`.
-- [ ] **Step 3: Mount it in the Workshop** — visible on the Drafting and Writing stages only.
+- [x] **Step 3: Mount it in the Workshop** — visible on the Drafting and Writing stages only.
       The Research stage is the board itself; a dossier of the board you are looking at is noise.
-- [ ] **Step 4:** Typecheck and commit.
+- [x] **Step 4:** Typecheck and commit.
 
 ---
 
@@ -382,17 +393,17 @@ export function collectDossier(input: DossierInput, dossier: Dossier): DossierSe
 **Files:** `src/components/editor/WritingDesk.tsx`, `WidgetRenderer.tsx`, `deskConstants.ts`,
 plus two new renderers
 
-- [ ] **Step 1: Let the lore cards onto the board** — `TRAY_WIDGET_TYPES` currently filters
+- [x] **Step 1: Let the lore cards onto the board** — `TRAY_WIDGET_TYPES` currently filters
       `articleSuggestions` and `consistencyFlags` off every canvas. Keep the filter for the desk
       and draft variants; drop it for research, so a flag can sit beside the note it contradicts.
-- [ ] **Step 2: ScenePinRenderer** — `content: { sceneId }`. Reads the scene live from the
+- [x] **Step 2: ScenePinRenderer** — `content: { sceneId }`. Reads the scene live from the
       store: title, word count, and progress against the project's target. A button opens it in
       the Writing stage. Renders "This scene was deleted." when the id no longer resolves,
       exactly as the Bible pin does for an entity.
-- [ ] **Step 3: InterviewCardRenderer** — `content: { interviewId, answers }`. Lists the
+- [x] **Step 3: InterviewCardRenderer** — `content: { interviewId, answers }`. Lists the
       interview's questions with the answers given so far and a progress count. Reuses
       `buildInterviewSections` from `src/lib/interviews` to create the article when complete.
-- [ ] **Step 4:** Register both, add to `DEFAULT_DIMS` and the ＋ More menu, typecheck, commit.
+- [x] **Step 4:** Register both, add to `DEFAULT_DIMS` and the ＋ More menu, typecheck, commit.
 
 ---
 
@@ -401,25 +412,25 @@ plus two new renderers
 **Files:** Create `src/components/editor/research/LabelBar.tsx` + `.module.css`,
 modify `ResearchTab.tsx`, `WritingDesk.tsx`
 
-- [ ] **Step 1: LabelBar** — a strip under the breadcrumbs listing the project's labels as
+- [x] **Step 1: LabelBar** — a strip under the breadcrumbs listing the project's labels as
       toggles. Toggling filters the canvas through `filterByLabels`. A "＋ Label" button prompts
       for a name and calls `createResearchLabel`.
-- [ ] **Step 2: Apply to the selected card** — with a card selected, clicking a label in the bar
+- [x] **Step 2: Apply to the selected card** — with a card selected, clicking a label in the bar
       applies or removes it via `applyLabel` / `removeLabel`. With nothing selected, clicking
       filters instead. The bar says which mode it is in.
-- [ ] **Step 3: Chips on the card** — a card's labels render as small coloured chips in its
+- [x] **Step 3: Chips on the card** — a card's labels render as small coloured chips in its
       title bar, from `labelsOn`.
-- [ ] **Step 4:** Typecheck and commit.
+- [x] **Step 4:** Typecheck and commit.
 
 ---
 
 ## Task 6: Verify and close
 
-- [ ] **Step 1:** `npx tsc --noEmit`, `npx vitest run`, `npm run build`, `npx eslint src`
+- [x] **Step 1:** `npx tsc --noEmit`, `npx vitest run`, `npm run build`, `npx eslint src`
 
 Expected: tsc 0; **810 tests** (794 + 16); build compiles; eslint at **223**.
 
-- [ ] **Step 2: Browser checks** — `read_page`, not screenshots; the pane lags a frame.
+- [x] **Step 2: Browser checks** — `read_page`, not screenshots; the pane lags a frame.
 
 - Build a two-level board with notes on both, make a dossier of the root, switch to Writing and
   confirm both boards appear with the child indented
@@ -429,7 +440,7 @@ Expected: tsc 0; **810 tests** (794 + 16); build compiles; eslint at **223**.
 - Run the lore check; confirm the flags card can sit on the research canvas
 - Create a label, apply it to a card, filter by it
 
-- [ ] **Step 3:** Tick every box, add the status banner, commit.
+- [x] **Step 3:** Tick every box, add the status banner, commit.
 
 ---
 
