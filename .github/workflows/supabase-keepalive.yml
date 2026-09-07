@@ -5,8 +5,16 @@ name: Supabase keep-alive
 # the docs put it at "a few user requests to the database each day over
 # the previous week", so what matters is sustained volume, not recency.
 #
-# This runs a real (RLS-filtered, zero-row) query against Postgres every
-# hour, which clears that bar with room to spare.
+# This calls public.keepalive() every hour, which clears that bar with room to
+# spare. PostgREST executes it in Postgres, so a 200 means the database
+# genuinely answered.
+#
+# It used to select from public.workspaces instead. 20260904120100 revoked
+# anon's SELECT on that table to take it out of the anonymous GraphQL schema,
+# which broke this workflow silently: every run failed 42501 for two days and
+# nothing surfaced it, because a red scheduled workflow shows up nowhere a
+# pull request would. See supabase/migrations/20260907000000_keepalive_rpc.sql
+# for why the replacement is a function rather than another table.
 #
 # NOTE: GitHub only fires `schedule` triggers from the default branch,
 # so this file has to live on `main` to actually run. GitHub also
@@ -40,10 +48,12 @@ jobs:
           # burn the whole run and leave the project drifting toward a pause.
           for attempt in 1 2 3; do
             code=$(curl -sS -o /tmp/response.txt -w '%{http_code}' \
-              --max-time 30 \
-              "${SUPABASE_URL}/rest/v1/workspaces?select=id&limit=1" \
+              --max-time 30 -X POST \
+              "${SUPABASE_URL}/rest/v1/rpc/keepalive" \
               -H "apikey: ${SUPABASE_ANON_KEY}" \
-              -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" || echo "000")
+              -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{}' || echo "000")
 
             if [ "$code" = "200" ]; then
               echo "Keep-alive OK (HTTP 200) on attempt ${attempt}."
@@ -55,6 +65,7 @@ jobs:
           done
 
           echo "::error::Keep-alive failed after 3 attempts (last HTTP ${code}). \
-          The project may be paused, or the anon key may have been rotated."
+          The project may be paused, the anon key may have been rotated, or \
+          anon may have lost EXECUTE on public.keepalive()."
           cat /tmp/response.txt || true
           exit 1
