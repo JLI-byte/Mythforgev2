@@ -4,7 +4,9 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom';
 import { Anchor, X, Columns3, FolderTree, Image, Link2, Plus, Settings, StickyNote } from 'lucide-react';
 import { pruneOrphans, makeConnection, removeConnection, type Connection } from '@/lib/research/connections';
-import { canManipulate, toggleLock, filterByLabels } from '@/lib/research/labels';
+import { canManipulate, toggleLockAll, filterByLabels } from '@/lib/research/labels';
+import { rectFromDrag, isMarqueeDrag, widgetsInRect, moveWidgets, deleteWidgets } from '@/lib/research/selection';
+import { groupIntoColumn } from '@/lib/research/columns';
 import { intentFor } from '@/lib/research/shortcuts';
 import { ConnectionLayer } from './desk/ConnectionLayer';
 import { useWorkspaceStore, DeskWidget, DeskWidgetType } from '@/store/workspaceStore';
@@ -206,7 +208,15 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
   );
   const contentSaveTimers = useRef<Record<string, any>>({});
   const [isPanning, setIsPanning] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // The selection is a list. `selectedId` is the single-selection case,
+  // derived, so every existing behaviour that assumes one card keeps working.
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const selectedId = selectedIds.length === 1 ? selectedIds[0] : null;
+  const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const setSelectedId = useCallback(
+    (id: string | null) => setSelectedIds(id ? [id] : []),
+    [],
+  );
   // The label bar lives above this component but acts on its selection.
   useEffect(() => { onSelectionChange?.(selectedId); }, [selectedId, onSelectionChange]);
   const [typePickerWidgetId, setTypePickerWidgetId] = useState<string | null>(null);
@@ -353,6 +363,8 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const drawGhostRef = useRef<HTMLDivElement>(null);
+  /** Set by a marquee so the click that follows the drag does not clear it. */
+  const marqueeJustRanRef = useRef(false);
 
   const surfaceCanvasRef = useRef<{ redraw: (off: { x: number; y: number }, z: number) => void }>(null);
   const zoomRafRef = useRef<number | null>(null);
@@ -437,12 +449,12 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
       const pruned = pruneOrphans(current, next);
       if (pruned !== current) updateDeskState(stateKey, { connections: pruned });
     }
-    setSelectedId(prev => prev === id ? null : prev);
+    setSelectedIds(prev => prev.filter(x => x !== id));
   }, [updateWidgets, isResearch, stateKey, updateDeskState, currentConnections]);
 
   /** Ctrl+L locks or unlocks the selected card. */
   useEffect(() => {
-    if (!isResearch || !selectedId) return;
+    if (!isResearch || selectedIds.length === 0) return;
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
       const intent = intentFor({
@@ -452,18 +464,63 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
         inTextField: Boolean(t?.closest('input, textarea, [contenteditable="true"]')),
         hasSelection: true,
       });
+      if (intent?.kind === 'groupIntoColumn' && selectedIds.length > 1) {
+        e.preventDefault();
+        // The column lands where the selection's top-left corner is, so it
+        // appears over the cards it just swallowed rather than somewhere else.
+        const picked = widgetsRef.current.filter(w => selectedIds.includes(w.id));
+        const at = {
+          x: Math.min(...picked.map(w => w.x)),
+          y: Math.min(...picked.map(w => w.y)),
+        };
+        const columnId = crypto.randomUUID();
+        updateWidgets(groupIntoColumn(widgetsRef.current, selectedIds, at, columnId));
+        setSelectedIds([columnId]);
+        return;
+      }
       if (intent?.kind !== 'toggleLock') return;
       e.preventDefault();
-      updateWidgets(toggleLock(widgetsRef.current, selectedId));
+      updateWidgets(toggleLockAll(widgetsRef.current, selectedIds));
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [isResearch, selectedId, updateWidgets]);
+  }, [isResearch, selectedId, selectedIds, updateWidgets]);
 
   const handleDragStart = useCallback((e: React.MouseEvent, widget: DeskWidget) => {
     if ((e.target as HTMLElement).closest('button')) return;
     // A locked card still selects — you need to select it to unlock it.
     if (!canManipulate(widget)) { setSelectedId(widget.id); return; }
+
+    // Dragging one card of a multi-selection drags all of them. Dragging a card
+    // that is NOT in the selection replaces the selection with it, which is what
+    // every canvas tool does and what a writer will expect.
+    const groupIds = selectedSet.has(widget.id) && selectedIds.length > 1 ? selectedIds : null;
+    if (groupIds) {
+      e.preventDefault(); e.stopPropagation();
+      const originX = e.clientX, originY = e.clientY;
+      const before = widgetsRef.current;
+      const onGroupMove = (mv: MouseEvent) => {
+        const dx = (mv.clientX - originX) / zoomRef.current;
+        const dy = (mv.clientY - originY) / zoomRef.current;
+        for (const id of groupIds) {
+          const w0 = before.find(x => x.id === id);
+          const el = document.getElementById('widget-' + id);
+          if (!w0 || !el || w0.locked) continue;
+          el.style.left = (w0.x + dx) + 'px';
+          el.style.top = (w0.y + dy) + 'px';
+        }
+      };
+      const onGroupUp = (up: MouseEvent) => {
+        document.removeEventListener('mousemove', onGroupMove);
+        document.removeEventListener('mouseup', onGroupUp);
+        const dx = (up.clientX - originX) / zoomRef.current;
+        const dy = (up.clientY - originY) / zoomRef.current;
+        if (dx || dy) updateWidgets(moveWidgets(widgetsRef.current, groupIds, dx, dy));
+      };
+      document.addEventListener('mousemove', onGroupMove);
+      document.addEventListener('mouseup', onGroupUp);
+      return;
+    }
     e.preventDefault(); e.stopPropagation();
     setSelectedId(widget.id);
     const startX = e.clientX, startY = e.clientY, origX = widget.x, origY = widget.y;
@@ -499,7 +556,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
       }
     };
     document.addEventListener('mousemove', onMove); document.addEventListener('mouseup', onUp);
-  }, [updateWidgets]);
+  }, [updateWidgets, selectedIds, selectedSet, setSelectedId]);
 
   const handleResizeStart = useCallback((e: React.MouseEvent, widget: DeskWidget, dir: ResizeDir) => {
     if (!canManipulate(widget)) return;
@@ -567,6 +624,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
       const startY = (e.clientY - rect.top - canvasOffsetRef.current.y) / zoomRef.current;
       
       const ghost = drawGhostRef.current;
+      if (ghost) ghost.classList.toggle(styles.deskMarquee, isResearch);
       if (ghost) { 
         ghost.style.display = 'block'; 
         ghost.style.left = startX + 'px'; 
@@ -592,15 +650,23 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
         const y = (up.clientY - rect.top - canvasOffsetRef.current.y) / zoomRef.current;
         const rw = x - startX, rh = y - startY, bw = Math.abs(rw), bh = Math.abs(rh);
         
-        if (bw >= 40 && bh >= 30) {
-          setPendingWidget({
-            x: rw >= 0 ? startX : startX + rw,
-            y: rh >= 0 ? startY : startY + rh,
-            width: bw,
-            height: bh
-          });
-        } else {
+        const dragged = rectFromDrag({ x: startX, y: startY }, { x, y });
+
+        if (isResearch) {
+          // Marquee. A drag selects what it touches; a click just deselects,
+          // which the mousedown above already did.
           if (ghost) ghost.style.display = 'none';
+          if (isMarqueeDrag(dragged)) {
+            setSelectedIds(widgetsInRect(widgetsRef.current, dragged));
+            // mousedown + mouseup on the viewport also fires a click on it,
+            // and that handler clears the selection. Tell it to stand down.
+            marqueeJustRanRef.current = true;
+          }
+        } else if (bw >= 40 && bh >= 30) {
+          // Desk and draft table keep sizing a new widget by dragging a box.
+          setPendingWidget(dragged);
+        } else if (ghost) {
+          ghost.style.display = 'none';
         }
         document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp);
       };
@@ -771,13 +837,24 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
       if (e.key === 'Escape') {
         if (pendingWidget) setPendingWidget(null);
       }
-      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId) {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedIds.length > 0) {
         const t = e.target as HTMLElement;
-        if (t.tagName !== 'INPUT' && t.tagName !== 'TEXTAREA' && !t.isContentEditable) deleteWidget(selectedId);
+        if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable) return;
+        if (selectedIds.length === 1) { deleteWidget(selectedIds[0]); return; }
+        // A group delete is one store write, not one per card, so undo sees it
+        // as the single action the writer performed.
+        const next = deleteWidgets(widgetsRef.current, selectedIds);
+        updateWidgets(next);
+        if (isResearch && stateKey) {
+          const current = currentConnections();
+          const pruned = pruneOrphans(current, next);
+          if (pruned !== current) updateDeskState(stateKey, { connections: pruned });
+        }
+        setSelectedIds([]);
       }
     };
     window.addEventListener('keydown', onKD); return () => window.removeEventListener('keydown', onKD);
-  }, [selectedId, pendingWidget]);
+  }, [selectedIds, pendingWidget, deleteWidget, updateWidgets, isResearch, stateKey, currentConnections, updateDeskState]);
 
   // Sync ghost visibility with pendingWidget
   useEffect(() => {
@@ -816,7 +893,10 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
         surfaceCanvasRef.current?.redraw(canvasOffsetRef.current, nextZoom);
       });
     }}>
-      <div ref={viewportRef} className={`${styles.deskViewport} ${isPanning ? styles.deskViewportPanning : ''}`} onDragOver={e => e.preventDefault()} onDrop={handleDrop} onContextMenu={handleCanvasContextMenu} onClick={(e) => { if (e.target === e.currentTarget || (e.target as HTMLElement).className === styles.rippleCanvas) { setSelectedId(null); } }} onMouseDown={handleCanvasMouseDown}>
+      <div ref={viewportRef} className={`${styles.deskViewport} ${isPanning ? styles.deskViewportPanning : ''}`} onDragOver={e => e.preventDefault()} onDrop={handleDrop} onContextMenu={handleCanvasContextMenu} onClick={(e) => {
+        if (marqueeJustRanRef.current) { marqueeJustRanRef.current = false; return; }
+        if (e.target === e.currentTarget || (e.target as HTMLElement).className === styles.rippleCanvas) { setSelectedId(null); }
+      }} onMouseDown={handleCanvasMouseDown}>
         <SurfaceCanvas ref={surfaceCanvasRef} containerRef={viewportRef} zoom={zoom} offset={canvasOffset} />
         
         <div className={`${styles.saveIndicator} ${isSaved ? styles.saveIndicatorActive : ''}`}>✓ Saved</div>
@@ -849,7 +929,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
           <div ref={drawGhostRef} className={styles.deskDrawGhost} style={{ display: 'none', position: 'absolute', pointerEvents: 'none', zIndex: 9999 }} />
           
           {canvasWidgets.map(w => (
-            <div key={w.id} id={`widget-${w.id}`} data-widget-id={w.id} className={`${styles.deskWidget} ${selectedId === w.id ? styles.deskWidgetSelected : ''}`} style={{ left: w.x, top: w.y, width: w.width, height: w.height, zIndex: selectedId === w.id ? 50 : 1 }} onMouseDown={e => { e.stopPropagation(); setSelectedId(w.id); }}>
+            <div key={w.id} id={`widget-${w.id}`} data-widget-id={w.id} className={`${styles.deskWidget} ${selectedSet.has(w.id) ? styles.deskWidgetSelected : ''}`} style={{ left: w.x, top: w.y, width: w.width, height: w.height, zIndex: selectedSet.has(w.id) ? 50 : 1 }} onMouseDown={e => { e.stopPropagation(); if (!selectedSet.has(w.id)) setSelectedId(w.id); }}>
               {/* Drag from here to draw a line to another card. */}
               {isResearch && (
                 <button

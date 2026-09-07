@@ -69,3 +69,18 @@ export function canManipulate(widget: DeskWidget): boolean {
 export function toggleLock(widgets: DeskWidget[], widgetId: string): DeskWidget[] {
     return widgets.map(w => (w.id === widgetId ? { ...w, locked: !w.locked } : w));
 }
+
+/**
+ * Lock or unlock a whole selection.
+ *
+ * Toggling each card independently would scramble a mixed selection — half
+ * locking, half unlocking — which is never what was meant. Instead the
+ * selection moves to ONE state: if anything in it is still unlocked, lock
+ * everything; only when all of it is locked does this unlock.
+ */
+export function toggleLockAll(widgets: DeskWidget[], ids: string[]): DeskWidget[] {
+    if (ids.length === 0) return widgets;
+    const target = new Set(ids);
+    const anyUnlocked = widgets.some(w => target.has(w.id) && !w.locked);
+    return widgets.map(w => (target.has(w.id) ? { ...w, locked: anyUnlocked } : w));
+}

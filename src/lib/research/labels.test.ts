@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
     LABEL_COLORS, makeLabel, applyLabel, removeLabel, filterByLabels,
-    labelsOn, canManipulate, toggleLock,
+    labelsOn, canManipulate, toggleLock, toggleLockAll,
 } from './labels';
 import type { DeskWidget } from '@/store/workspaceStore';
 
@@ -84,5 +84,27 @@ describe('toggleLock', () => {
         const once = toggleLock([w('a')], 'a');
         expect(once[0].locked).toBe(true);
         expect(toggleLock(once, 'a')[0].locked).toBe(false);
+    });
+});
+
+describe('toggleLockAll', () => {
+    it('locks everything when any of the selection is still unlocked', () => {
+        const r = toggleLockAll([w('a'), w('b', { locked: true })], ['a', 'b']);
+        expect(r.map(x => x.locked)).toEqual([true, true]);
+    });
+
+    it('unlocks everything only once all of it is locked', () => {
+        const r = toggleLockAll([w('a', { locked: true }), w('b', { locked: true })], ['a', 'b']);
+        expect(r.map(x => x.locked)).toEqual([false, false]);
+    });
+
+    it('leaves cards outside the selection alone', () => {
+        const r = toggleLockAll([w('a'), w('other')], ['a']);
+        expect(r.find(x => x.id === 'other')!.locked).toBeUndefined();
+    });
+
+    it('is a no-op for an empty selection', () => {
+        const ws = [w('a')];
+        expect(toggleLockAll(ws, [])).toEqual(ws);
     });
 });

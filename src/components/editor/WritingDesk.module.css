@@ -6964,3 +6964,13 @@
 }
 .moreItem:hover { background: var(--surface-high); }
 .moreItem:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+/* ── Marquee ───────────────────────────────────────────────
+   The drag rectangle doubles as the marquee on a research board. It reads as
+   a selection rather than a placement: filled and accented, not the dashed
+   outline that says "a card will go here". */
+.deskMarquee {
+  background: rgba(var(--accent-rgb), 0.10);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+}
