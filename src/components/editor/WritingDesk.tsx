@@ -600,15 +600,39 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
             height: bh
           });
         } else {
-          // A click rather than a drag. Offer the same picker at that point;
-          // zero dimensions mean "use each type's default size".
           if (ghost) ghost.style.display = 'none';
-          setPendingWidget({ x: startX, y: startY, width: 0, height: 0 });
         }
         document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp);
       };
       document.addEventListener('mousemove', onMove); document.addEventListener('mouseup', onUp);
     }
+  };
+
+  /**
+   * Right-click on empty canvas offers the card picker at that point.
+   *
+   * Only on empty canvas: a right-click on a card is left to the browser, so
+   * the usual copy/paste/inspect menu still works where a writer would expect
+   * it. Zero dimensions tell the picker to use each type's default size, which
+   * is what distinguishes this from the drag-a-box-then-choose path.
+   */
+  const handleCanvasContextMenu = (e: React.MouseEvent) => {
+    if (!isResearch) return;
+    const target = e.target as HTMLElement;
+    const onEmptyCanvas = e.target === e.currentTarget || target.className === styles.rippleCanvas;
+    if (!onEmptyCanvas) return;
+
+    e.preventDefault();
+    const rect = viewportRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    setSelectedId(null);
+    setPendingWidget({
+      x: (e.clientX - rect.left - canvasOffsetRef.current.x) / zoomRef.current,
+      y: (e.clientY - rect.top - canvasOffsetRef.current.y) / zoomRef.current,
+      width: 0,
+      height: 0,
+    });
   };
 
   const handleDrop = async (e: React.DragEvent) => {
@@ -792,7 +816,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
         surfaceCanvasRef.current?.redraw(canvasOffsetRef.current, nextZoom);
       });
     }}>
-      <div ref={viewportRef} className={`${styles.deskViewport} ${isPanning ? styles.deskViewportPanning : ''}`} onDragOver={e => e.preventDefault()} onDrop={handleDrop} onClick={(e) => { if (e.target === e.currentTarget || (e.target as HTMLElement).className === styles.rippleCanvas) { setSelectedId(null); } }} onMouseDown={handleCanvasMouseDown}>
+      <div ref={viewportRef} className={`${styles.deskViewport} ${isPanning ? styles.deskViewportPanning : ''}`} onDragOver={e => e.preventDefault()} onDrop={handleDrop} onContextMenu={handleCanvasContextMenu} onClick={(e) => { if (e.target === e.currentTarget || (e.target as HTMLElement).className === styles.rippleCanvas) { setSelectedId(null); } }} onMouseDown={handleCanvasMouseDown}>
         <SurfaceCanvas ref={surfaceCanvasRef} containerRef={viewportRef} zoom={zoom} offset={canvasOffset} />
         
         <div className={`${styles.saveIndicator} ${isSaved ? styles.saveIndicatorActive : ''}`}>✓ Saved</div>
