@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useId, useState, useEffect } from 'react';
+import { Camera } from 'lucide-react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from '../WritingDesk.module.css';
 
@@ -16,6 +17,7 @@ export function BookCoverEditor({ projectId }: { projectId: string }) {
   const [worldId, setWorldId] = useState('');
   const [attributedEntityId, setAttributedEntityId] = useState('');
   const [coverImageUrl, setCoverImageUrl] = useState('');
+  const fieldId = useId();
 
   useEffect(() => {
     if (project) {
@@ -91,7 +93,7 @@ export function BookCoverEditor({ projectId }: { projectId: string }) {
               onChange={handleFileChange} 
             />
             <label htmlFor="cover-editor-upload" className={styles.coverEditorUploadOverlay}>
-              <span>📷 Change Cover</span>
+              <span><Camera size={14} /> Change Cover</span>
             </label>
           </div>
           {coverImageUrl && (
@@ -106,8 +108,9 @@ export function BookCoverEditor({ projectId }: { projectId: string }) {
 
         <div className={styles.coverEditorForm}>
           <div className={styles.coverEditorField}>
-            <label>Project Title</label>
+            <label htmlFor={`${fieldId}-title`}>Project Title</label>
             <input 
+              id={`${fieldId}-title`}
               value={name}
               onChange={e => { setName(e.target.value); updateProject(projectId, { name: e.target.value }); }}
               placeholder="The Great Novel..."
@@ -115,8 +118,9 @@ export function BookCoverEditor({ projectId }: { projectId: string }) {
           </div>
 
           <div className={styles.coverEditorField}>
-            <label>Author Name</label>
+            <label htmlFor={`${fieldId}-author`}>Author Name</label>
             <input 
+              id={`${fieldId}-author`}
               value={authorName}
               onChange={e => { setAuthorName(e.target.value); updateProject(projectId, { authorName: e.target.value }); }}
               placeholder="Your pen name..."
@@ -124,8 +128,9 @@ export function BookCoverEditor({ projectId }: { projectId: string }) {
           </div>
 
           <div className={styles.coverEditorField}>
-            <label>Associated World Bible</label>
+            <label htmlFor={`${fieldId}-world`}>Associated World Bible</label>
             <select 
+              id={`${fieldId}-world`}
               value={worldId}
               onChange={e => {
                 const wid = e.target.value;
@@ -143,8 +148,9 @@ export function BookCoverEditor({ projectId }: { projectId: string }) {
 
           {worldId && (
             <div className={styles.coverEditorField}>
-              <label>Fictional Character Attribution</label>
+              <label htmlFor={`${fieldId}-attribution`}>Fictional Character Attribution</label>
               <select 
+                id={`${fieldId}-attribution`}
                 value={attributedEntityId}
                 onChange={e => {
                   const aid = e.target.value;
@@ -162,8 +168,9 @@ export function BookCoverEditor({ projectId }: { projectId: string }) {
           )}
 
           <div className={styles.coverEditorField}>
-            <label>Project Description / Blurb</label>
+            <label htmlFor={`${fieldId}-description`}>Project Description / Blurb</label>
             <textarea 
+              id={`${fieldId}-description`}
               value={description}
               onChange={e => { setDescription(e.target.value); updateProject(projectId, { description: e.target.value }); }}
               placeholder="A brief summary of your masterpiece..."

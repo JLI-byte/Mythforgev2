@@ -28,7 +28,7 @@
     max-height: 100%;
     overflow: hidden;
     background: transparent;
-    transition: background-color 500ms ease;
+    transition: background-color var(--dur-5) var(--ease-standard);
 }
 
 /* Sidebar transitions for smooth focus mode animation */
@@ -36,7 +36,7 @@
     flex-shrink: 0;
     height: 100%;
     overflow: hidden;
-    transition: width 200ms ease, opacity 200ms ease;
+    transition: width var(--dur-3) var(--ease-standard), opacity var(--dur-3) var(--ease-standard);
 }
 
 /* Fullscreen Mode Overrides */
@@ -56,12 +56,12 @@
 .focusMode [class*="sideTabContainer"] {
     opacity: 0 !important;
     pointer-events: none !important;
-    transition: opacity 200ms ease !important;
+    transition: opacity var(--dur-3) var(--ease-standard) !important;
 }
 .focusMode [class*="panelContainer"] {
     opacity: 0 !important;
     pointer-events: none !important;
-    transition: opacity 200ms ease !important;
+    transition: opacity var(--dur-3) var(--ease-standard) !important;
 }
 
 /* Remove editor right padding when panels are hidden */
@@ -70,7 +70,7 @@
 }
 
 .toolbarContainer {
-    transition: opacity 0.3s ease;
+    transition: opacity var(--dur-4) var(--ease-standard);
 }
 
 .fullscreenMode .toolbarContainer {
@@ -111,4 +111,26 @@
 .editorScrollContainer > * {
     direction: ltr; /* Reset text direction */
     width: 100%;
+}
+
+/* Skip link. The first tab stop on the page and hidden until it has focus,
+   because it is the one control that only exists for the keyboard. */
+.skipLink {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10000;
+    padding: var(--space-4) var(--space-6);
+    background: var(--accent);
+    color: var(--on-accent);
+    border-bottom-right-radius: var(--radius-md);
+    font-size: var(--text-md);
+    font-weight: 600;
+    text-decoration: none;
+    transform: translateY(-150%);
+}
+
+.skipLink:focus,
+.skipLink:focus-visible {
+    transform: translateY(0);
 }

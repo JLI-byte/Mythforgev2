@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useId, useState, useEffect } from 'react';
+import { Bug, ChevronDown, ChevronRight, Lightbulb, MessageCircle, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import styles from './BetaFeedbackPanel.module.css';
 import { createClient } from '@/lib/supabase/client';
@@ -55,6 +56,7 @@ export function BetaFeedbackPanel({
   const [submitted, setSubmitted] = useState(false);
   const [history, setHistory] = useState<FeedbackEntry[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const fieldId = useId();
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -111,10 +113,10 @@ export function BetaFeedbackPanel({
     URL.revokeObjectURL(url);
   };
 
-  const TYPE_LABELS: Record<FeedbackType, string> = {
-    bug: '🐛 Bug Report',
-    feature: '💡 Feature Request',
-    general: '💬 General Feedback',
+  const TYPE_LABELS: Record<FeedbackType, React.ReactNode> = {
+    bug: <><Bug size={14} aria-hidden="true" /> Bug Report</>,
+    feature: <><Lightbulb size={14} aria-hidden="true" /> Feature Request</>,
+    general: <><MessageCircle size={14} aria-hidden="true" /> General Feedback</>,
   };
 
   const TYPE_PLACEHOLDERS: Record<FeedbackType, string> = {
@@ -181,7 +183,7 @@ export function BetaFeedbackPanel({
           onClick={onClose}
           title="Close Feedback"
         >
-          <span className={styles.ghostTabArrow}>▸</span>
+          <span className={styles.ghostTabArrow} aria-hidden="true"><ChevronRight size={12} /></span>
         </button>,
         document.body
       )}
@@ -189,6 +191,9 @@ export function BetaFeedbackPanel({
       <div
         className={`${styles.panel} ${isOpen ? styles.open : ''}`}
         style={{ width: panelWidth }}
+        // A closed panel is only pushed off-screen, not unmounted — without this it
+        // keeps its tab stops and stays in the accessibility tree.
+        inert={!isOpen}
       >
         <div className={styles.panelInner}>
           {/* Resize handle */}
@@ -219,7 +224,9 @@ export function BetaFeedbackPanel({
               </div>
               <p className={styles.subtitle}>Your feedback shapes LoreCanvas.</p>
             </div>
-            <button className={styles.closeBtn} onClick={onClose}>✕</button>
+            <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
+              <X size={18} />
+            </button>
           </div>
 
           <div className={styles.content} style={{ paddingRight: tabWidth }}>
@@ -238,9 +245,10 @@ export function BetaFeedbackPanel({
 
             {/* Title */}
             <div className={styles.field}>
-              <label className={styles.label}>TITLE</label>
+              <label className={styles.label} htmlFor={`${fieldId}-title`}>TITLE</label>
               <input
                 className={styles.input}
+                id={`${fieldId}-title`}
                 type="text"
                 placeholder={TYPE_PLACEHOLDERS[feedbackType]}
                 value={title}
@@ -252,11 +260,12 @@ export function BetaFeedbackPanel({
 
             {/* Body */}
             <div className={styles.field}>
-              <label className={styles.label}>
+              <label className={styles.label} htmlFor={`${fieldId}-details`}>
                 DETAILS <span className={styles.optional}>— optional</span>
               </label>
               <textarea
                 className={styles.textarea}
+                id={`${fieldId}-details`}
                 placeholder="Steps to reproduce, additional context..."
                 value={body}
                 onChange={e => setBody(e.target.value)}
@@ -281,7 +290,7 @@ export function BetaFeedbackPanel({
             <div className={styles.dividerRow}>
               <div className={styles.dividerLine} />
               <button className={styles.historyToggle} onClick={() => setShowHistory(v => !v)}>
-                {showHistory ? '▾' : '▸'} {history.length} submitted
+                {showHistory ? <ChevronDown size={12} aria-hidden="true" /> : <ChevronRight size={12} aria-hidden="true" />} {history.length} submitted
               </button>
               {history.length > 0 && (
                 <button className={styles.exportBtn} onClick={handleExport}>Export</button>

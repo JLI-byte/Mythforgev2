@@ -4,6 +4,9 @@
  * with wax. Reuses the fantasy theme's fonts and SVG art.
  */
 
+/* Pinned parchment palette. These mirror the app's fantasy-light tokens but
+   must stay literal: /login sets no data-theme-family, so var(--foreground) &c
+   would resolve to the visitor's OS scheme and light-on-parchment under dark. */
 .page {
     --parchment: #f3e8cf;
     --sepia: #3b2c15;
@@ -22,7 +25,7 @@
     background-color: var(--parchment);
     color: var(--sepia);
     font-family: var(--font-garamond), Georgia, serif;
-    font-size: 1.06rem;
+    font-size: var(--text-lg);
     position: relative;
     overflow: hidden;
 }
@@ -63,7 +66,7 @@
     max-width: 27rem;
     background: #f9f2e0;
     border: 1px solid var(--line-faint);
-    border-radius: 3px;
+    border-radius: var(--radius-sm);
     padding: clamp(2rem, 5vw, 2.75rem);
     transform: rotate(-0.5deg);
     box-shadow: 3px 6px 0 rgba(59, 44, 21, 0.12);
@@ -86,19 +89,19 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 0.4rem;
-    margin-bottom: 2rem;
+    gap: var(--space-3);
+    margin-bottom: var(--space-8);
 }
 
 .brandMark {
     color: var(--sepia);
-    margin-bottom: 0.4rem;
+    margin-bottom: var(--space-3);
 }
 
 .brandName {
     font-family: var(--font-fell), serif;
     font-weight: 400;
-    font-size: 2rem;
+    font-size: var(--text-display);
     letter-spacing: 0.01em;
     margin: 0;
 }
@@ -107,7 +110,7 @@
     font-style: italic;
     color: var(--sepia-soft);
     margin: 0;
-    font-size: 1rem;
+    font-size: var(--text-lg);
 }
 
 /* ---------- Form ---------- */
@@ -115,15 +118,15 @@
 .form {
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
+    gap: var(--space-6);
 }
 
 .fieldLabel {
     display: block;
     font-style: italic;
-    font-size: 0.98rem;
+    font-size: var(--text-lg);
     color: var(--sepia-soft);
-    margin-bottom: 0.35rem;
+    margin-bottom: var(--space-3);
 }
 
 .fieldInput {
@@ -134,9 +137,9 @@
     border-radius: 0;
     color: var(--sepia);
     font-family: var(--font-garamond), serif;
-    font-size: 1.08rem;
-    padding: 0.4rem 0.1rem;
-    transition: border-color 160ms ease;
+    font-size: var(--text-lg);
+    padding: var(--space-3) var(--space-1);
+    transition: border-color var(--dur-2) var(--ease-standard);
 }
 
 .fieldInput::placeholder {
@@ -150,19 +153,19 @@
 }
 
 .submit {
-    margin-top: 0.4rem;
+    margin-top: var(--space-3);
     width: 100%;
     background: var(--vermilion);
     color: #f6ddd2;
     border: 1px solid var(--vermilion-deep);
-    border-radius: 3px;
+    border-radius: var(--radius-sm);
     font-family: var(--font-garamond), serif;
     font-weight: 600;
-    font-size: 1.05rem;
-    padding: 0.85rem;
+    font-size: var(--text-lg);
+    padding: var(--space-5);
     cursor: pointer;
     box-shadow: 2px 3px 0 rgba(59, 44, 21, 0.25);
-    transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+    transition: transform var(--dur-2) var(--ease-standard), box-shadow var(--dur-2) var(--ease-standard), opacity var(--dur-2) var(--ease-standard);
 }
 
 .submit:is(:hover, :focus-visible):not(:disabled) {
@@ -183,10 +186,10 @@
 /* ---------- Notices ---------- */
 
 .notice {
-    margin-top: 1.4rem;
-    padding: 0.9rem 1rem;
-    border-radius: 3px;
-    font-size: 0.95rem;
+    margin-top: var(--space-7);
+    padding: var(--space-6) var(--space-6);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-lg);
     text-align: center;
     line-height: 1.5;
     border: 1px solid var(--line-faint);
@@ -217,9 +220,9 @@
 }
 
 .footnote {
-    margin-top: 2rem;
+    margin-top: var(--space-8);
     text-align: center;
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     color: var(--sepia-soft);
 }
 
@@ -228,7 +231,7 @@
     font-style: italic;
     text-decoration: none;
     border-bottom: 1px solid transparent;
-    transition: border-color 160ms ease;
+    transition: border-color var(--dur-2) var(--ease-standard);
 }
 
 .footnoteLink:is(:hover, :focus-visible) {
@@ -238,18 +241,18 @@
 /* ---------- Dev-only button ---------- */
 
 .devButton {
-    margin-top: 1.5rem;
+    margin-top: var(--space-7);
     width: 100%;
     background: none;
     border: 1px dashed color-mix(in oklch, var(--verdigris), transparent 40%);
     color: var(--verdigris);
-    border-radius: 3px;
+    border-radius: var(--radius-sm);
     font-family: var(--font-garamond), serif;
     font-style: italic;
-    font-size: 0.95rem;
-    padding: 0.7rem;
+    font-size: var(--text-lg);
+    padding: var(--space-5);
     cursor: pointer;
-    transition: background 160ms ease;
+    transition: background var(--dur-2) var(--ease-standard);
 }
 
 .devButton:is(:hover, :focus-visible):not(:disabled) {

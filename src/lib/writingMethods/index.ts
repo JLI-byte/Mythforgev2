@@ -21,9 +21,6 @@ export const WRITING_METHODS: WritingMethod[] = [
     ...MEDIUM_METHODS,
 ];
 
-/** The six flagship methods shown before "browse all". */
-export const STARTER_METHODS: WritingMethod[] = WRITING_METHODS.filter(m => m.starter);
-
 export function getMethod(id: string): WritingMethod | undefined {
     return WRITING_METHODS.find(m => m.id === id);
 }

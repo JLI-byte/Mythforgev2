@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { X } from 'lucide-react';
 import {
     useWorkspaceStore,
     selectProjectWorldKey,
@@ -36,10 +37,10 @@ interface Group {
 const DRAG_MIME = 'application/x-lore-suggestion';
 
 /**
- * Article Suggestions widget — the assistant drops article-worthy entities here
- * as it talks. Each suggestion is grouped under the folder it best fits (or a
- * proposed new folder, or Unfiled), can be dragged between groups to re-file,
- * and created into a real World Bible article on demand.
+ * Article Suggestions widget — names the lore check found recurring in your
+ * writing with no World Bible article yet. Each is grouped under the folder it
+ * would be filed in (or Unfiled), can be dragged between groups to re-file, and
+ * created into a real article on demand.
  */
 export function ArticleSuggestionsRenderer({ content, onChange }: RendererProps) {
     const suggestions = content.suggestions ?? [];
@@ -162,7 +163,7 @@ export function ArticleSuggestionsRenderer({ content, onChange }: RendererProps)
             <span className={styles.suggestChipType}>{ENTITY_TYPE_LABELS[s.type as EntityType] ?? s.type}</span>
             <span className={styles.suggestChipName}>{s.name}</span>
             <button className={styles.suggestChipCreate} onClick={() => createOne(s)} disabled={!canCreate} title="Create this article">＋</button>
-            <button className={styles.suggestChipDismiss} onClick={() => dismiss(s.id)} title="Dismiss">✕</button>
+            <button className={styles.suggestChipDismiss} onClick={() => dismiss(s.id)} title="Dismiss"><X size={13} /></button>
         </div>
     );
 
@@ -181,7 +182,7 @@ export function ArticleSuggestionsRenderer({ content, onChange }: RendererProps)
             <div className={styles.suggestBody}>
                 {suggestions.length === 0 && (
                     <div className={styles.suggestEmpty}>
-                        As you talk with the assistant, article ideas it spots will appear here — grouped by where they’d be filed.
+                        Run the lore check (🔍) and names you keep using that have no article yet will appear here — drag one onto a folder to file it.
                     </div>
                 )}
 

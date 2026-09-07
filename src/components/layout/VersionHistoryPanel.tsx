@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useId, useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { Camera, ChevronRight, X } from 'lucide-react';
 import styles from './VersionHistoryPanel.module.css';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import { worldKeyForEntity } from '@/lib/worldKey';
@@ -34,6 +35,7 @@ export function VersionHistoryPanel({
     onPanelWidthChange 
 }: VersionHistoryPanelProps) {
     const [mounted, setMounted] = useState(false);
+    const fieldId = useId();
     const [activeTab, setActiveTab] = useState<'scenes' | 'world'>('scenes');
     
     // Store State
@@ -120,7 +122,7 @@ export function VersionHistoryPanel({
                     style={{
                         width: tabWidth,
                         right: isOpen ? panelWidth : 0,
-                        top: 568, // rail slots are 130px: WB 48, Goals 178, Social 308, Music 438, History 568
+                        top: 438, // rail slots are 130px: WB 48, Goals 178, Social 308, History 438
                         transition: 'right 280ms ease-in-out',
                     }}
                     onClick={onTabClick}
@@ -160,13 +162,13 @@ export function VersionHistoryPanel({
                     style={{
                         width: tabWidth,
                         height: 130,
-                        top: 568,
+                        top: 438,
                         right: 0,
                     }}
                     onClick={onClose}
                     title="Close History"
                 >
-                    <span className={styles.ghostTabArrow}>▸</span>
+                    <span className={styles.ghostTabArrow} aria-hidden="true"><ChevronRight size={12} /></span>
                 </button>,
                 document.body
             )}
@@ -174,6 +176,9 @@ export function VersionHistoryPanel({
             <div
                 className={`${styles.panel} ${isOpen ? styles.open : ''}`}
                 style={{ width: panelWidth }}
+                // A closed panel is only pushed off-screen, not unmounted — without this it
+                // keeps its tab stops and stays in the accessibility tree.
+                inert={!isOpen}
             >
                 <div className={styles.panelInner}>
                     <div
@@ -199,7 +204,7 @@ export function VersionHistoryPanel({
                     
                     <div className={styles.header} style={{ paddingRight: tabWidth }}>
                         <h2 className={styles.title}>Version History</h2>
-                        <button className={styles.closeButton} onClick={onClose} aria-label="Close" title="Close">&times;</button>
+                        <button className={styles.closeButton} onClick={onClose} aria-label="Close" title="Close"><X size={18} /></button>
                     </div>
 
                     <div className={styles.tabSwitcher}>
@@ -219,10 +224,11 @@ export function VersionHistoryPanel({
 
                     <div className={styles.contentWrapper} style={{ paddingRight: tabWidth }}>
                         <div className={styles.selectorSection}>
-                            <label className={styles.selectLabel}>
+                            <label className={styles.selectLabel} htmlFor={`${fieldId}-version-target`}>
                                 {activeTab === 'scenes' ? 'Select Scene' : 'Select Entity'}
                             </label>
                             <select 
+                                id={`${fieldId}-version-target`}
                                 className={styles.selectInput}
                                 value={activeTab === 'scenes' ? selectedSceneId : selectedEntityId}
                                 onChange={(e) => activeTab === 'scenes' ? setSelectedSceneId(e.target.value) : setSelectedEntityId(e.target.value)}
@@ -242,7 +248,7 @@ export function VersionHistoryPanel({
 
                         <div className={styles.saveActions}>
                             <button className={styles.snapshotBtn} onClick={handleManualSave}>
-                                📸 Save Snapshot
+                                <Camera size={15} aria-hidden="true" /> Save Snapshot
                             </button>
                         </div>
 

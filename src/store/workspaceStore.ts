@@ -1,13 +1,29 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { persist, type PersistStorage, type StorageValue } from 'zustand/middleware';
+import { BACKUP_KEY_PREFIX, claimBackup, ownedStorageKeys, readBackupOwner } from '@/lib/workspaceOwner';
+import { describePersistFailure } from '@/lib/persistQuota';
+import {
+    emptyWeekdayTargets, normalizeWeekdayTargets, type WeekdayTargets,
+} from '@/lib/goalSchedule';
+import { recomputeGoalMet } from '@/lib/writingDays';
 import { logger } from '@/lib/logger';
 import { getStoredValue } from '@/lib/storage';
 import { worldKeyForProject, worldKeyForEntity, type WorldKey } from '@/lib/worldKey';
+import { normalizeDismissedHints, normalizeVisitStamp } from '@/lib/onboarding';
+import { coerceStage, resolveLegacyMode, DEFAULT_STAGE, type DeskStage } from '@/lib/deskStages';
+import { buildRegistry } from '@/lib/research/boardMigration';
+import { descendantIds, canMove, type BoardRegistry } from '@/lib/research/boardTree';
+import { makeLabel, type Label } from '@/lib/research/labels';
+import { makeDossier, type Dossier } from '@/lib/research/dossier';
+import type { Connection } from '@/lib/research/connections';
 import { migrateWorkspaceSchema } from './migrateWorkspaceSchema';
 import { DEFAULT_WORLD_BIBLE_LAYOUT } from '@/lib/worldBibleNav';
 import { wouldCreateCycle, fileByType } from '@/lib/folderTree';
+import { partitionExample, SEED_WORLD_NAME } from '@/lib/exampleData';
 import type { Interview } from '@/lib/interviews/types';
-import { sanitizeChatHistories, type ChatMessage as ResearchChatMessage } from '@/lib/researchChatTypes';
+import type { ProjectBrief } from '@/lib/workSubTypes';
+import { resolveFrontMatter, type FrontMatter } from '@/lib/manuscript';
+import { normaliseBackupPayload } from '@/lib/backupEnvelope';
 
 // Cover colors auto-assigned to new projects in rotation
 export const COVER_COLORS = [
@@ -83,12 +99,18 @@ export interface WorldBibleConfig {
   coverSub?: string;
   /** Cover accent color (hex). */
   tint?: string;
+  /**
+   * ISO stamp of the last edit. An ISO string rather than a Date because the
+   * persist reviver only rebuilds Dates inside the dated content arrays, so a
+   * Date here would come back as a string anyway.
+   */
+  updatedAt?: string;
 }
 
 export interface Project {
     id: string;
     name: string;
-    writingMode: 'novel' | 'screenplay' | 'markdown' | 'poetry' | 'real-world';
+    writingMode: 'novel' | 'screenplay' | 'markdown' | 'poetry' | 'real-world' | 'visual-novel';
     coverColor: string;
     coverImageUrl?: string;
     worldId?: string;
@@ -98,7 +120,13 @@ export interface Project {
     attributedEntityId?: string;
     description?: string;
     authorName?: string;
+    /** Compile-step choices: title page, copyright, dedication, contents. */
+    frontMatter?: FrontMatter;
     worldBibleLayout?: WorldBibleLayout;
+    /** Which kind of script or report this is (see WORK_SUB_TYPES). */
+    workSubTypeId?: string;
+    /** Audience, length and goal, answered when the project was created. */
+    brief?: ProjectBrief;
 }
 
 export interface Document {
@@ -109,6 +137,10 @@ export interface Document {
     createdAt: Date;
     updatedAt?: Date;
     wordCount?: number;
+    /** Visual novel projects only: the season this episode belongs to. */
+    seasonId?: string;
+    /** Visual novel projects only: position within its season. */
+    order?: number;
 }
 
 export interface Scene {
@@ -293,7 +325,7 @@ export interface ArticleTab {
 // Writing Desk System Interfaces
 // =============================================
 
-export type DeskWidgetType = 'writingZone' | 'sticky' | 'reference' | 'image' | 'biblePinit' | 'sceneControl' | 'characterState' | 'continuity' | 'structure' | 'research' | 'progress' | 'relMap' | 'draftNav' | 'beatCard' | 'articleSuggestions' | 'consistencyFlags' | 'worldUnderstanding' | 'untyped';
+export type DeskWidgetType = 'writingZone' | 'sticky' | 'reference' | 'image' | 'biblePinit' | 'sceneControl' | 'characterState' | 'continuity' | 'structure' | 'research' | 'progress' | 'relMap' | 'draftNav' | 'beatCard' | 'articleSuggestions' | 'consistencyFlags' | 'worldUnderstanding' | 'board' | 'column' | 'todo' | 'document' | 'swatch' | 'table' | 'drawing' | 'scenePin' | 'interview' | 'untyped';
 
 /** An object attached to the research chat as context for the next message. */
 export interface ChatAttachment {
@@ -318,12 +350,25 @@ export interface DeskWidget {
   /** Linked scope for visibility logic */
   scope?: 'scene' | 'chapter' | 'project' | 'global';
   scopeId?: string;
+  /** Set = this card is laid out by its column, not by its own x/y. */
+  parentId?: string | null;
+  /** Position within the parent column. Ignored when parentId is unset. */
+  columnOrder?: number;
+  /** Pinned in place: excluded from drag, resize and marquee selection. */
+  locked?: boolean;
+  labelIds?: string[];
 }
 
 export interface DeskState {
   widgets: DeskWidget[];
   zoom: number;
   canvasOffset: { x: number; y: number };
+  /** Research boards only: the inbox anything dropped on the board lands in.
+   *  A card here keeps its size and content; its x/y mean nothing until it is
+   *  dragged out, which is the moment they are set. */
+  unsorted?: DeskWidget[];
+  /** Research boards only: lines between cards. Not widgets — they have no box. */
+  connections?: Connection[];
   /** Draft Table only: the writing method currently applied to this canvas ('blank' = started without one). */
   methodId?: string;
   /** Draft Table only: what's being drafted — filters the method library. */
@@ -391,11 +436,18 @@ export interface WritingDay {
     wordsWritten: number;
     minutesWritten: number;
     goalMet: boolean;
+    /** Set only by repairStreak — a purchased day that counts without words. */
+    repaired?: boolean;
 }
 
 /** User-configured goal settings */
 interface GoalConfig {
     dailyWordTarget: number;       // default: 200
+    /**
+     * Per-weekday word targets, index 0 = Sunday. null means "use dailyWordTarget".
+     * Resolve through targetForDateKey/targetForDayIndex rather than reading directly.
+     */
+    weekdayWordTargets: WeekdayTargets;
     dailyTimeTarget: number;       // minutes, default: 20
     primaryMetric: 'words' | 'time'; // default: 'words'
     writingDaysPerWeek: number;    // default: 5
@@ -452,15 +504,6 @@ interface EarnedBadge {
     earnedAt: Date;
 }
 
-/** XP event log — data layer only, not shown in UI yet */
-interface XPEvent {
-    id: string;
-    type: 'goal_met' | 'streak_milestone' | 'project_milestone' | 'first_session';
-    xp: number;
-    projectId?: string;
-    earnedAt: Date;
-}
-
 export interface SocialPost {
     id: string;
     platform: string;
@@ -468,12 +511,37 @@ export interface SocialPost {
     timestamp: string;
 }
 
-export type WorkspaceMode = 'home' | 'worldBible' | 'worldBibleEdit' | 'template' | 'desk' | 'hierarchy' | 'bookshelf' | 'research';
+// Single source of truth for the center-column modes. The rehydration guard
+// below and the ?view= landing param both check against this list, so adding a
+// mode here is all that is needed to make it valid everywhere.
+export const WORKSPACE_MODES = [
+    'home', 'worldBible', 'worldBibleEdit', 'desk', 'hierarchy', 'bookshelf',
+] as const;
+export type WorkspaceMode = typeof WORKSPACE_MODES[number];
+
+/** The example world's five collections, held aside while it is switched off. */
+export interface StashedExample {
+    worlds: World[];
+    projects: Project[];
+    documents: Document[];
+    scenes: Scene[];
+    entities: Entity[];
+}
 
 export interface WorkspaceState {
     workspaceMode: WorkspaceMode;
+    /** Which stage the Workshop ('desk') is showing. Persisted separately from
+     *  the mode so leaving the tab and coming back returns to the same stage. */
+    deskStage: DeskStage;
     // --- STATE FIELDS ---
     worlds: World[];
+
+    /**
+     * Set when the writer asks to start a book from somewhere that does not own
+     * the creation flow (the Home shelf), and consumed by the Bookshelf on
+     * arrival. Intentionally not persisted — a reload must not reopen the modal.
+     */
+    pendingNewStoryWorldKey: string | null;
     projects: Project[];
     documents: Document[];
     scenes: Scene[];
@@ -535,12 +603,55 @@ export interface WorkspaceState {
      * The currently active side panel.
      * Sprint 62: Centralized for beta feedback and future integrations.
      */
-    activePanel: 'worldBible' | 'consistency' | 'writingGoals' | 'socialMedia' | 'aiChatbot' | 'music' | 'beta' | 'versionHistory' | null;
+    activePanel: 'worldBible' | 'consistency' | 'writingGoals' | 'socialMedia' | 'aiChatbot' | 'beta' | 'versionHistory' | null;
 
     /**
      * Typewriter mode keeps the active line centered in the viewport.
      */
     isTypewriterMode: boolean;
+
+    /**
+     * Whether the built-in example world is currently shown. Off moves its
+     * records into stashedExample rather than deleting them.
+     */
+    exampleDataOn: boolean;
+
+    /**
+     * The example world's records while it is switched off. Holds the real
+     * records, including any edits the writer made, so toggling back on
+     * restores exactly what was there.
+     */
+    stashedExample: StashedExample | null;
+
+    /**
+     * The example world's id, recorded at seed time. Selection runs off this
+     * rather than the world's name, which the writer is free to change.
+     */
+    exampleWorldId: string | null;
+
+    /**
+     * Whether this writer has been through first run. Set the moment they own
+     * a book — by creating one, importing one, or loading the example world.
+     * Per-user: it rides inside the persisted workspace blob so an account
+     * switch discards it along with everything else.
+     */
+    hasOnboarded: boolean;
+
+    /**
+     * Ids of contextual hints this writer has closed. Holds the '*' sentinel
+     * (HINTS_ALL_DISMISSED) when they asked not to be shown any more.
+     */
+    dismissedHints: string[];
+
+    /** ISO timestamp of the start of the CURRENT visit. Persisted. */
+    lastVisitAt: string | null;
+
+    /**
+     * The value lastVisitAt held when this page load began — what "away since"
+     * means for the whole session. Transient: derived once by markVisit() and
+     * never persisted, or the digest would reset itself on every save.
+     */
+    previousVisitAt: string | null;
 
     /**
      * Hides the UI layout framing (sidebar, etc) around the editor content.
@@ -588,7 +699,6 @@ export interface WorkspaceState {
      * An object the user attached to the research chat as context for their next
      * message ("Ask about this", or a passage dragged in). Transient; not persisted.
      */
-    chatAttachment: ChatAttachment | null;
 
     /** Whether the World Bible Hierarchy Designer modal is open */
     isHierarchyModalOpen: boolean;
@@ -602,14 +712,24 @@ export interface WorkspaceState {
     _hasHydrated: boolean;
 
     /**
-     * The URL of the Spotify playlist or track attached to the workspace.
+     * The Supabase user id this persisted workspace belongs to, stamped on the
+     * first successful hydrate after sign-in. Persisted, so it survives a closed
+     * tab, a crash or an expired session — which is the common case, and the one
+     * a sign-out handler cannot cover.
+     *
+     * `null` means the blob predates ownership stamping. It is adopted by the
+     * next signed-in user rather than discarded, so nobody loses work on upgrade.
      */
-    spotifyUrl: string | null;
+    ownerUserId: string | null;
 
     /**
-     * Whether the Spotify Mini-Player is currently expanded.
+     * Set when a local save fails, cleared when one succeeds. Deliberately NOT
+     * in partializeWorkspace — persisting the "we could not persist" flag would
+     * be its own joke, and it must not survive a reload that fixed the problem.
      */
-    isSpotifyOpen: boolean;
+    persistError: string | null;
+    setPersistError: (message: string | null) => void;
+
 
 
     /**
@@ -689,12 +809,25 @@ export interface WorkspaceState {
      */
     customBoards: Record<string, ResearchBoard[]>;
 
+    /** Every research board, by id, with its place in the tree. Derived from
+     *  the legacy keys on first rehydration — see lib/research/boardMigration. */
+    researchBoards: BoardRegistry;
+
+    /** Research label set, per project id. */
+    researchLabels: Record<string, Label[]>;
+
+    /** Saved dossiers, per project id. Each is a query over a board tree. */
+    researchDossiers: Record<string, Dossier[]>;
+
+    /** Which dossier the side panel is showing. NOT persisted: a view state,
+     *  not a document. */
+    activeDossierId: string | null;
+
     /**
      * Research-chat conversations, keyed by board scope key — so the chat
      * survives collapsing the panel, switching tabs, and reloads. Persisted in
      * sanitized form (capped length, generated images dropped).
      */
-    chatHistories: Record<string, ResearchChatMessage[]>;
 
     /** User-authored research-chat interview skills (built-ins live in the registry). */
     customInterviews: Interview[];
@@ -712,6 +845,7 @@ export interface WorkspaceState {
     activeWorldKey: WorldKey | null;
 
     setWorkspaceMode: (mode: WorkspaceMode) => void;
+    setDeskStage: (stage: DeskStage) => void;
     setActiveWorldKey: (key: WorldKey | null) => void;
 
     /** Sprint 70: edit a bible's identity fields (cover title/sub/tint). */
@@ -725,6 +859,14 @@ export interface WorkspaceState {
 
     // --- ACTIONS ---
     addWorld: (world: World) => void;
+    /**
+     * Create a world, filling anything not supplied with the standard defaults.
+     * Callers that collect more (the shelf wizard) pass overrides; callers that
+     * only have a name (the Home shelf) pass none. Returns the new id.
+     */
+    createWorld: (name: string, overrides?: Partial<Omit<World, 'id' | 'createdAt'>>) => string;
+    requestNewStory: (worldKey: string | null) => void;
+    clearPendingNewStory: () => void;
     /** Update an existing world's metadata */
     updateWorld: (id: string, updates: Partial<Omit<World, 'id' | 'createdAt'>>) => void;
     /** Delete a world and reassign its projects to Uncategorized */
@@ -796,6 +938,26 @@ export interface WorkspaceState {
     toggleTypewriterMode: () => void;
 
     /**
+     * Show or hide the built-in example world. Hiding moves its records into
+     * stashedExample; showing splices them back, or seeds fresh if there is
+     * nothing stashed and nothing already present.
+     */
+    setExampleData: (on: boolean) => void;
+
+    /** Mark first run complete. Idempotent. */
+    completeOnboarding: () => void;
+
+    /** Close one hint by id, or every hint with HINTS_ALL_DISMISSED. */
+    dismissHint: (id: string) => void;
+
+    /**
+     * Freeze the previous visit stamp and start a new one. Called once per page
+     * load, after hydration. Calling it again in the same load is a no-op, so
+     * a remount cannot erase the absence the writer has not read yet.
+     */
+    markVisit: () => void;
+
+    /**
      * Toggles the distraction-free Fullscreen mode.
      */
     toggleFullscreen: () => void;
@@ -806,11 +968,8 @@ export interface WorkspaceState {
     toggleFocusMode: () => void;
 
     /** Sets the currently active side panel */
-    setActivePanel: (activePanel: 'worldBible' | 'writingGoals' | 'socialMedia' | 'music' | 'beta' | 'versionHistory' | null) => void;
+    setActivePanel: (activePanel: 'worldBible' | 'writingGoals' | 'socialMedia' | 'beta' | 'versionHistory' | null) => void;
 
-    /** Spotify Controls */
-    setSpotifyUrl: (url: string | null) => void;
-    setSpotifyOpen: (isOpen: boolean) => void;
 
     /**
      * Customizes the max-width bounding box for the writing editor text block.
@@ -829,7 +988,6 @@ export interface WorkspaceState {
     setSelectedEntity: (id: string | null) => void;
 
     /** Attach (or clear) an object as context for the next research-chat message. */
-    setChatAttachment: (attachment: ChatAttachment | null) => void;
 
     /** Hierarchy Canvas Management */
     addWorldBibleRoot: (root: WorldBibleRootConfig, isDraft?: boolean) => void;
@@ -869,6 +1027,16 @@ export interface WorkspaceState {
      */
     setHasHydrated: (state: boolean) => void;
 
+    /** Stamp this workspace for a user, and adopt their unowned local backups. */
+    claimWorkspace: (userId: string) => void;
+
+    /**
+     * Put every persisted field back to its initial value and delete the
+     * workspace and backup keys. Called on sign-out, on SIGNED_OUT, and when a
+     * different user signs in on a browser that still holds someone else's work.
+     */
+    resetWorkspace: () => void;
+
     /** Toggles the rich text toolbar visibility */
     toggleToolbarVisible: () => void;
 
@@ -897,15 +1065,20 @@ export interface WorkspaceState {
 
     /** Research Table Actions — parallel canvas keyed by composite scope key. */
     updateResearchState: (scopeKey: string, updates: Partial<DeskState>) => void;
+    createResearchBoard: (name: string, parentId: string, projectId: string) => string;
+    renameResearchBoard: (boardId: string, name: string) => void;
+    deleteResearchBoard: (boardId: string) => void;
+    moveResearchBoard: (boardId: string, newParentId: string | null) => void;
+    createResearchLabel: (projectId: string, name: string) => string;
+    deleteResearchLabel: (projectId: string, labelId: string) => void;
+    createDossier: (projectId: string, name: string, rootBoardId: string) => string;
+    deleteDossier: (projectId: string, dossierId: string) => void;
+    updateDossier: (projectId: string, dossierId: string, patch: Partial<Dossier>) => void;
+    setActiveDossierId: (id: string | null) => void;
     pinEntityToDesk: (projectId: string, entityId: string) => void;
 
-    /** Research boards within a scope — add returns the new board's id. */
-    addResearchBoard: (baseScopeKey: string, name: string) => string;
-    renameResearchBoard: (baseScopeKey: string, boardId: string, name: string) => void;
-    deleteResearchBoard: (baseScopeKey: string, boardId: string) => void;
 
     /** Replace a board's chat conversation (the panel mirrors its state here). */
-    setChatHistory: (scopeKey: string, messages: ResearchChatMessage[]) => void;
 
     /** Custom interview skills — add, update in place, or remove by id. */
     addInterview: (interview: Interview) => void;
@@ -931,7 +1104,6 @@ export interface WorkspaceState {
     goalConfig: GoalConfig;
     streakState: StreakState;
     earnedBadges: EarnedBadge[];
-    xpEvents: XPEvent[];
 
     socialHistory: SocialPost[];
     addSocialPost: (post: Omit<SocialPost, 'id' | 'timestamp'>) => void;
@@ -1099,26 +1271,128 @@ function checkBadges(streak: StreakState, earned: EarnedBadge[]): EarnedBadge[] 
  * every keystroke. This coalesces writes to once per idle window, and flushes on
  * tab hide / unload so the final edit is never lost.
  */
+/**
+ * The localStorage key list as a plain array. Taken as a snapshot because
+ * removing keys while indexing the live object skips entries.
+ */
+function snapshotStorageKeys(): string[] {
+    const keys: string[] = [];
+    if (typeof localStorage === 'undefined') return keys;
+    for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k !== null) keys.push(k);
+    }
+    return keys;
+}
+
+const DATE_ARRAY_KEYS = [
+    'worlds', 'projects', 'documents', 'scenes',
+    'entities', 'articleTemplates', 'earnedBadges',
+    'sceneSnapshots', 'entitySnapshots',
+];
+
+/**
+ * Rebuild native Date objects on the way in. Only arrays that actually contain
+ * dated records are touched — writingDays and earnedBadges would be corrupted
+ * by a blanket reviver. Hoisted out of createJSONStorage so the debounced
+ * adapter can own the parse itself.
+ */
+function reviveDates(key: string, value: unknown): unknown {
+    if (DATE_ARRAY_KEYS.includes(key) && Array.isArray(value)) {
+        return value.map((item: Record<string, unknown>) => {
+            if (typeof item !== 'object' || item === null) return item;
+            return {
+                ...item,
+                ...(item.createdAt ? { createdAt: new Date(item.createdAt as string) } : {}),
+                ...(item.updatedAt ? { updatedAt: new Date(item.updatedAt as string) } : {}),
+                ...(item.earnedAt  ? { earnedAt:  new Date(item.earnedAt  as string) } : {}),
+            };
+        });
+    }
+    return value;
+}
+
+// zustand widens the persisted generic to migrate()'s return type, so the
+// storage adapter is typed against the raw blob, not the partialized shape.
+type PersistedWorkspace = Record<string, unknown>;
+
 const PERSIST_DEBOUNCE_MS = 1200;
 let persistTimer: ReturnType<typeof setTimeout> | null = null;
-let pendingWrite: { name: string; value: string } | null = null;
+let pendingWrite: { name: string; value: StorageValue<PersistedWorkspace> } | null = null;
+
+/**
+ * Drop the queued local save without writing it. Used by restoreDataBackup,
+ * which writes the persist key directly and then reloads: a queued write would
+ * otherwise flush on pagehide and overwrite the restored blob with the state
+ * the user just replaced.
+ */
+export function cancelPendingPersist(): void {
+    if (persistTimer) { clearTimeout(persistTimer); persistTimer = null; }
+    pendingWrite = null;
+}
 
 function flushPersist() {
     if (persistTimer) { clearTimeout(persistTimer); persistTimer = null; }
-    if (pendingWrite) {
-        try { localStorage.setItem(pendingWrite.name, pendingWrite.value); } catch { /* quota */ }
-        pendingWrite = null;
+    if (!pendingWrite) return;
+    const { name, value } = pendingWrite;
+    pendingWrite = null;
+    let serialized: string;
+    try {
+        serialized = JSON.stringify(value);
+    } catch (err) {
+        reportPersistOutcome(describePersistFailure(err, 0));
+        return;
+    }
+    try {
+        localStorage.setItem(name, serialized);
+        reportPersistOutcome(null);
+    } catch (err) {
+        reportPersistOutcome(describePersistFailure(err, serialized.length));
     }
 }
 
-const debouncedLocalStorage = {
-    getItem: (name: string): string | null => localStorage.getItem(name),
-    setItem: (name: string, value: string): void => {
+/**
+ * Record the outcome of a local save, but only when it changed.
+ *
+ * Writing to the store schedules another persist, which on a full browser fails
+ * again — so an unconditional set() here would spin forever. Comparing first
+ * makes the second and every later failure a no-op.
+ */
+function reportPersistOutcome(message: string | null) {
+    const state = useWorkspaceStore.getState();
+    if (state.persistError === message) return;
+    state.setPersistError(message);
+}
+
+/**
+ * Debounced localStorage adapter.
+ *
+ * zustand's persist middleware writes on every `set()`. With the full workspace
+ * that is a multi-megabyte JSON.stringify on every keystroke. The debounce sits
+ * ABOVE the serialise — the adapter holds the state object and stringifies once
+ * per idle window — and flushes on tab hide / unload so the final edit is never
+ * lost. Using createJSONStorage here would serialise before the adapter ever saw
+ * the value, which is the bug this replaces.
+ */
+const debouncedJSONStorage: PersistStorage<PersistedWorkspace> = {
+    getItem: (name) => {
+        const raw = localStorage.getItem(name);
+        if (raw === null) return null;
+        try {
+            return JSON.parse(raw, reviveDates) as StorageValue<PersistedWorkspace>;
+        } catch {
+            return null;
+        }
+    },
+    setItem: (name, value) => {
         pendingWrite = { name, value };
         if (persistTimer) clearTimeout(persistTimer);
         persistTimer = setTimeout(flushPersist, PERSIST_DEBOUNCE_MS);
     },
-    removeItem: (name: string): void => localStorage.removeItem(name),
+    removeItem: (name) => {
+        cancelPendingPersist();
+        localStorage.removeItem(name);
+    },
 };
 
 if (typeof window !== 'undefined') {
@@ -1133,6 +1407,14 @@ export const selectProjectWorldKey = (state: WorkspaceState): WorldKey =>
     worldKeyForProject(state.projects.find(p => p.id === state.activeProjectId));
 
 /**
+ * The active project's front-matter choices, with defaults filled in. Every
+ * reader goes through here, so a project saved before the compile step existed
+ * still gets a title page and a contents list.
+ */
+export const selectProjectFrontMatter = (state: WorkspaceState): FrontMatter =>
+    resolveFrontMatter(state.projects.find(p => p.id === state.activeProjectId)?.frontMatter);
+
+/**
  * The persisted/synced subset of workspace state. Shared by the local persist
  * middleware AND the Supabase cloud sync so both layers always agree on the
  * payload — previously the cloud save shipped the full state (including
@@ -1140,6 +1422,7 @@ export const selectProjectWorldKey = (state: WorkspaceState): WorldKey =>
  */
 export function partializeWorkspace(state: WorkspaceState) {
     return {
+        ownerUserId: state.ownerUserId,
         worlds: state.worlds,
         projects: state.projects,
         documents: state.documents,
@@ -1152,6 +1435,12 @@ export function partializeWorkspace(state: WorkspaceState) {
         themeFamily: state.themeFamily,
         isSidebarOpen: state.isSidebarOpen,
         isTypewriterMode: state.isTypewriterMode,
+        exampleDataOn: state.exampleDataOn,
+        stashedExample: state.stashedExample,
+        exampleWorldId: state.exampleWorldId,
+        hasOnboarded: state.hasOnboarded,
+        dismissedHints: state.dismissedHints,
+        lastVisitAt: state.lastVisitAt,
         isFocusMode: state.isFocusMode,
         editorWidth: state.editorWidth,
         tabRailWidth: state.tabRailWidth,
@@ -1173,6 +1462,7 @@ export function partializeWorkspace(state: WorkspaceState) {
         socialHistory: state.socialHistory,
         articleTemplates: state.articleTemplates,
         workspaceMode: state.workspaceMode,
+        deskStage: state.deskStage,
         sceneSnapshots: state.sceneSnapshots,
         entitySnapshots: state.entitySnapshots,
         hierarchyTemplates: state.hierarchyTemplates,
@@ -1180,8 +1470,10 @@ export function partializeWorkspace(state: WorkspaceState) {
         draftStates: state.draftStates,
         researchStates: state.researchStates,
         customBoards: state.customBoards,
+        researchBoards: state.researchBoards,
+        researchLabels: state.researchLabels,
+        researchDossiers: state.researchDossiers,
         // Persist conversations in shrunk form: capped length, image data dropped.
-        chatHistories: sanitizeChatHistories(state.chatHistories),
         customInterviews: state.customInterviews,
         worldUnderstanding: state.worldUnderstanding,
         worldBibles: state.worldBibles,
@@ -1228,8 +1520,9 @@ migrateRenamedStorageKeys();
 
 export const useWorkspaceStore = create<WorkspaceState>()(
     persist(
-        (set, get) => ({
+        (set, get, store) => ({
             worlds: [],
+            pendingNewStoryWorldKey: null,
             projects: [],
             documents: [],
             scenes: [],
@@ -1249,11 +1542,16 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             isExportOpen: false,
             isSpellcheckEnabled: true,
             isTypewriterMode: false,
+            exampleDataOn: false,
+            stashedExample: null,
+            exampleWorldId: null,
+            hasOnboarded: false,
+            dismissedHints: [],
+            lastVisitAt: null,
+            previousVisitAt: null,
             activePanel: null,
             isFullscreen: false,
             isFocusMode: false,
-            spotifyUrl: null,
-            isSpotifyOpen: false,
             editorWidth: 800,
             navPanelWidth: 220,
             editorMaxWidth: null,
@@ -1264,15 +1562,19 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             panelWidth: 480,
             articleZoneWidth: 680,
             selectedEntityId: null,
-            chatAttachment: null,
             isHierarchyModalOpen: false,
             isHierarchyScratchMode: false,
             _hasHydrated: false,
+            ownerUserId: null,
+            persistError: null,
             deskStates: {},
             draftStates: {},
             researchStates: {},
             customBoards: {},
-            chatHistories: {},
+            researchBoards: {},
+            researchLabels: {},
+            researchDossiers: {},
+            activeDossierId: null,
             customInterviews: [],
             worldUnderstanding: {},
             writingGoal: { dailyTarget: 0, sessionTarget: 0 },
@@ -1284,7 +1586,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             articleTemplates: [],
             hierarchyTemplates: [],
             draftHierarchyLayout: null,
-            workspaceMode: 'bookshelf',
+            workspaceMode: 'home',
+            deskStage: DEFAULT_STAGE,
             worldBibles: {},
             activeWorldKey: null,
 
@@ -1292,6 +1595,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             writingDays: [],
             goalConfig: {
                 dailyWordTarget: 200,
+                weekdayWordTargets: emptyWeekdayTargets(),
                 dailyTimeTarget: 20,
                 primaryMetric: 'words',
                 writingDaysPerWeek: 5,
@@ -1306,7 +1610,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 totalWordsAllTime: 0,
             },
             earnedBadges: [],
-            xpEvents: [],
             socialHistory: [],
 
             addWorld: (world) =>
@@ -1314,6 +1617,34 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     logger.info('World added:', world.name);
                     return { worlds: [...state.worlds, world] };
                 }),
+
+            createWorld: (name, overrides) => {
+                // Only defined values override; a wizard field the writer never
+                // touched arrives as undefined and must not clobber its default.
+                const supplied = Object.fromEntries(
+                    Object.entries(overrides ?? {}).filter(([, v]) => v !== undefined),
+                );
+                const world: World = {
+                    id: crypto.randomUUID(),
+                    name: name.trim(),
+                    // The single home for what a world starts out as.
+                    genre: 'fantasy',
+                    tone: { darkness: 'balanced', scale: 'balanced', humor: 'balanced' },
+                    logline: '',
+                    magicExists: false,
+                    techLevel: 'medieval',
+                    timePeriod: '',
+                    coverColor: COVER_COLORS[Math.floor(Math.random() * COVER_COLORS.length)],
+                    createdAt: new Date(),
+                    ...supplied,
+                };
+                logger.info('World created:', world.name);
+                set((state) => ({ worlds: [...state.worlds, world] }));
+                return world.id;
+            },
+
+            requestNewStory: (worldKey) => set(() => ({ pendingNewStoryWorldKey: worldKey })),
+            clearPendingNewStory: () => set(() => ({ pendingNewStoryWorldKey: null })),
 
             updateWorld: (id, updates) =>
                 set((state) => {
@@ -1348,7 +1679,12 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             addProject: (project) =>
                 set((state) => {
                     logger.info('Project added:', project.name);
-                    return { projects: [...state.projects, project] };
+                    // Owning a book is what ends first run, however it happened —
+                    // created, imported, or seeded from the example world.
+                    return {
+                        projects: [...state.projects, project],
+                        ...(state.hasOnboarded ? {} : { hasOnboarded: true }),
+                    };
                 }),
 
             updateProject: (id, updates) =>
@@ -1524,6 +1860,27 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     return { entities: [...state.entities, entity] };
                 }),
 
+            completeOnboarding: () =>
+                set((state) => (state.hasOnboarded ? {} : { hasOnboarded: true })),
+
+            dismissHint: (id) =>
+                set((state) => (
+                    state.dismissedHints.includes(id)
+                        ? {}
+                        : { dismissedHints: [...state.dismissedHints, id] }
+                )),
+
+            markVisit: () =>
+                set((state) => {
+                    // Once per page load. previousVisitAt is null only before
+                    // the first call, so a second call finds it set and stops.
+                    if (state.previousVisitAt !== null) return {};
+                    return {
+                        previousVisitAt: state.lastVisitAt,
+                        lastVisitAt: new Date().toISOString(),
+                    };
+                }),
+
             setHoveredEntity: (id) =>
                 set(() => ({ hoveredEntityId: id })),
 
@@ -1554,6 +1911,88 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             toggleTypewriterMode: () =>
                 set((state) => ({ isTypewriterMode: !state.isTypewriterMode })),
 
+            setExampleData: (on) => {
+                const state = get();
+
+                if (on) {
+                    const stash = state.stashedExample;
+                    if (stash) {
+                        // Splice the records back exactly as they were stashed.
+                        set({
+                            worlds: [...state.worlds, ...stash.worlds],
+                            projects: [...state.projects, ...stash.projects],
+                            documents: [...state.documents, ...stash.documents],
+                            scenes: [...state.scenes, ...stash.scenes],
+                            entities: [...state.entities, ...stash.entities],
+                            stashedExample: null,
+                            exampleDataOn: true,
+                        });
+                        return;
+                    }
+                    // Nothing stashed — build it. The seeder mutates the store
+                    // through its own actions, so this runs outside set().
+                    //
+                    // The flag flips now rather than when the import resolves: a
+                    // checkbox bound to it would otherwise sit unticked for a beat
+                    // on the first-ever seed and read as a dead control. If the
+                    // import or the seed fails, it flips back, so the control
+                    // reflects what actually happened instead of a hopeful guess.
+                    set({ exampleDataOn: true });
+                    void import('@/lib/betaSeedData')
+                        .then(({ seedBetaData }) => {
+                            const worldId = seedBetaData(get());
+                            set({ exampleWorldId: worldId, exampleDataOn: true });
+                        })
+                        .catch((err) => {
+                            logger.error('Failed to load the example world', err);
+                            set({ exampleDataOn: false });
+                        });
+                    return;
+                }
+
+                // Off. Resolve the world by id, falling back once to the name
+                // for an example seeded before ids were recorded.
+                let worldId = state.exampleWorldId;
+                if (!worldId) {
+                    worldId = state.worlds.find(w => w.name === SEED_WORLD_NAME)?.id ?? null;
+                }
+                if (!worldId || !state.worlds.some(w => w.id === worldId)) {
+                    // Already gone — nothing to stash.
+                    set({ exampleDataOn: false });
+                    return;
+                }
+
+                const { kept, stashed } = partitionExample(
+                    {
+                        worlds: state.worlds,
+                        projects: state.projects,
+                        documents: state.documents,
+                        scenes: state.scenes,
+                        entities: state.entities,
+                    },
+                    worldId,
+                );
+
+                // A pointer into a stashed record would leave the desk holding a
+                // reference to something no longer in its array.
+                const stashedProjects = new Set(stashed.projects.map(p => p.id));
+                const stashedDocuments = new Set(stashed.documents.map(d => d.id));
+                const stashedScenes = new Set(stashed.scenes.map(s => s.id));
+
+                set({
+                    ...kept,
+                    stashedExample: stashed,
+                    exampleWorldId: worldId,
+                    exampleDataOn: false,
+                    activeProjectId: state.activeProjectId && stashedProjects.has(state.activeProjectId)
+                        ? null : state.activeProjectId,
+                    activeDocumentId: state.activeDocumentId && stashedDocuments.has(state.activeDocumentId)
+                        ? null : state.activeDocumentId,
+                    activeSceneId: state.activeSceneId && stashedScenes.has(state.activeSceneId)
+                        ? null : state.activeSceneId,
+                });
+            },
+
             toggleFullscreen: () =>
                 set((state) => ({ isFullscreen: !state.isFullscreen })),
 
@@ -1576,11 +2015,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             toggleFocusMode: () =>
                 set((state) => ({ isFocusMode: !state.isFocusMode })),
 
-            setSpotifyUrl: (url) =>
-                set(() => ({ spotifyUrl: url })),
 
-            setSpotifyOpen: (isOpen) =>
-                set(() => ({ isSpotifyOpen: isOpen })),
 
             setEditorWidth: (width) =>
                 set(() => ({ editorWidth: width })),
@@ -1621,8 +2056,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             setSelectedEntity: (id) =>
                 set(() => ({ selectedEntityId: id })),
 
-            setChatAttachment: (attachment) =>
-                set(() => ({ chatAttachment: attachment })),
 
             setHierarchyModal: (open, scratch = false) =>
                 set(() => ({ 
@@ -1665,6 +2098,38 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             setHasHydrated: (state) =>
                 set(() => ({ _hasHydrated: state })),
 
+            setPersistError: (message) => set(() => ({ persistError: message })),
+
+            claimWorkspace: (userId) => {
+                if (!userId) return;
+                set(() => ({ ownerUserId: userId }));
+                // Backups taken before ownership existed carry no stamp, so
+                // listDataBackups would hide them from the person who made them.
+                if (typeof localStorage === 'undefined') return;
+                for (const key of snapshotStorageKeys()) {
+                    if (!key.startsWith(BACKUP_KEY_PREFIX)) continue;
+                    const raw = localStorage.getItem(key);
+                    if (raw === null) continue;
+                    const claimed = claimBackup(raw, userId);
+                    if (claimed === null) continue;
+                    try {
+                        localStorage.setItem(key, claimed);
+                    } catch {
+                        // Browser full — leaving the backup unowned is safe.
+                    }
+                }
+            },
+
+            resetWorkspace: () => {
+                // The store's own initial state is the single source of truth for
+                // "empty", so this cannot drift out of step with partialize.
+                set(partializeWorkspace(store.getInitialState()));
+                if (typeof localStorage === 'undefined') return;
+                for (const key of ownedStorageKeys(snapshotStorageKeys())) {
+                    localStorage.removeItem(key);
+                }
+            },
+
 
             setWritingGoal: (goal) =>
                 set((state) => ({ writingGoal: { ...state.writingGoal, ...goal } })),
@@ -1705,12 +2170,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                             ...existing,
                             wordsWritten: existing.wordsWritten + wordsAdded,
                             minutesWritten: existing.minutesWritten + minutesSpent,
-                            goalMet: false, // recomputed below
+                            goalMet: false, // restamped from the date total below
                         };
-                        // Compute goalMet based on primaryMetric
-                        updated.goalMet = state.goalConfig.primaryMetric === 'words'
-                            ? updated.wordsWritten >= state.goalConfig.dailyWordTarget
-                            : updated.minutesWritten >= state.goalConfig.dailyTimeTarget;
                         updatedDays = state.writingDays.map(d =>
                             d.id === existing.id ? updated : d
                         );
@@ -1722,12 +2183,16 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                             date: today,
                             wordsWritten: wordsAdded,
                             minutesWritten: minutesSpent,
-                            goalMet: state.goalConfig.primaryMetric === 'words'
-                                ? wordsAdded >= state.goalConfig.dailyWordTarget
-                                : minutesSpent >= state.goalConfig.dailyTimeTarget,
+                            goalMet: false, // restamped from the date total below
                         };
                         updatedDays = [...state.writingDays, newDay];
                     }
+
+                    // Goal met is a property of the DAY, not of one project's row:
+                    // 300 words in one project and 300 in another is a 600-word day.
+                    // Adding words to any project can flip the whole date, so every
+                    // row is restamped from the date totals.
+                    updatedDays = recomputeGoalMet(updatedDays, state.goalConfig);
 
                     // Recompute streak from updated days
                     const streakState = computeStreakFromDays(updatedDays);
@@ -1744,17 +2209,13 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     };
                 }),
 
-            updateGoalConfig: (updates) =>
+            updateGoalConfig: (updates) => {
                 set((state) => {
                     const newConfig = { ...state.goalConfig, ...updates, goalConfigured: true };
 
-                    // Recompute goalMet on existing days with new targets
-                    const updatedDays = state.writingDays.map(d => ({
-                        ...d,
-                        goalMet: newConfig.primaryMetric === 'words'
-                            ? d.wordsWritten >= newConfig.dailyWordTarget
-                            : d.minutesWritten >= newConfig.dailyTimeTarget,
-                    }));
+                    // Recompute goalMet against the new targets, judging each date
+                    // on its combined total across projects.
+                    const updatedDays = recomputeGoalMet(state.writingDays, newConfig);
 
                     const streakState = computeStreakFromDays(updatedDays);
 
@@ -1763,9 +2224,14 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         writingDays: updatedDays,
                         streakState,
                     };
-                }),
+                });
+                // Dropping the target can flip past days to met, which can complete a
+                // streak or cross a word threshold. Awarding here keeps every path
+                // that moves streakState going through one place.
+                get().checkAndAwardBadges();
+            },
 
-            repairStreak: (date) =>
+            repairStreak: (date) => {
                 set((state) => {
                     if (state.goalConfig.streakRepairsAvailable <= 0) return {};
 
@@ -1777,6 +2243,9 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         wordsWritten: 0,
                         minutesWritten: 0,
                         goalMet: true,
+                        // Marks the row as bought, so restamping the date from its
+                        // word totals cannot silently spend the repair.
+                        repaired: true,
                     };
 
                     const updatedDays = [...state.writingDays, repairedDay];
@@ -1790,12 +2259,17 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                         },
                         streakState,
                     };
-                }),
+                });
+                // A bought day can be the one that completes a run, so the badge
+                // has to be checked against the streak the repair just produced.
+                get().checkAndAwardBadges();
+            },
 
             computeStreakState: () => {
                 const state = get();
                 const streakState = computeStreakFromDays(state.writingDays);
                 set({ streakState });
+                get().checkAndAwardBadges();
                 return streakState;
             },
 
@@ -1825,6 +2299,105 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 };
             }),
 
+            setDeskStage: (stage) => set(() => ({ deskStage: stage })),
+
+            createResearchBoard: (name, parentId, projectId) => {
+                const id = crypto.randomUUID();
+                set(state => ({
+                    researchBoards: {
+                        ...state.researchBoards,
+                        [id]: { id, name, parentId, projectId },
+                    },
+                }));
+                return id;
+            },
+
+            renameResearchBoard: (boardId, name) => set(state => {
+                const node = state.researchBoards[boardId];
+                if (!node) return {};
+                return { researchBoards: { ...state.researchBoards, [boardId]: { ...node, name } } };
+            }),
+
+            deleteResearchBoard: (boardId) => set(state => {
+                // The subtree goes too — an orphaned child can never be reached,
+                // because the only way down is through its parent's board card.
+                const doomed = new Set([boardId, ...descendantIds(state.researchBoards, boardId)]);
+                const researchBoards: BoardRegistry = {};
+                for (const [id, node] of Object.entries(state.researchBoards)) {
+                    if (!doomed.has(id)) researchBoards[id] = node;
+                }
+                const researchStates = { ...state.researchStates };
+                for (const id of doomed) delete researchStates[id];
+                return { researchBoards, researchStates };
+            }),
+
+            createDossier: (projectId, name, rootBoardId) => {
+                const id = crypto.randomUUID();
+                set(state => ({
+                    researchDossiers: {
+                        ...state.researchDossiers,
+                        [projectId]: [
+                            ...(state.researchDossiers[projectId] ?? []),
+                            makeDossier(id, name, projectId, rootBoardId),
+                        ],
+                    },
+                }));
+                return id;
+            },
+
+            deleteDossier: (projectId, dossierId) => set(state => ({
+                researchDossiers: {
+                    ...state.researchDossiers,
+                    [projectId]: (state.researchDossiers[projectId] ?? []).filter(d => d.id !== dossierId),
+                },
+                activeDossierId: state.activeDossierId === dossierId ? null : state.activeDossierId,
+            })),
+
+            updateDossier: (projectId, dossierId, patch) => set(state => ({
+                researchDossiers: {
+                    ...state.researchDossiers,
+                    [projectId]: (state.researchDossiers[projectId] ?? []).map(d =>
+                        d.id === dossierId ? { ...d, ...patch } : d,
+                    ),
+                },
+            })),
+
+            setActiveDossierId: (id) => set(() => ({ activeDossierId: id })),
+
+            createResearchLabel: (projectId, name) => {
+                const id = crypto.randomUUID();
+                set(state => {
+                    const existing = state.researchLabels[projectId] ?? [];
+                    return {
+                        researchLabels: {
+                            ...state.researchLabels,
+                            [projectId]: [...existing, makeLabel(id, name, existing.length)],
+                        },
+                    };
+                });
+                return id;
+            },
+
+            // A card keeping a dead label id is harmless: labelsOn() skips ids
+            // it cannot resolve, so no sweep across every board is needed here.
+            deleteResearchLabel: (projectId, labelId) => set(state => ({
+                researchLabels: {
+                    ...state.researchLabels,
+                    [projectId]: (state.researchLabels[projectId] ?? []).filter(l => l.id !== labelId),
+                },
+            })),
+
+            moveResearchBoard: (boardId, newParentId) => set(state => {
+                const node = state.researchBoards[boardId];
+                if (!node || !canMove(state.researchBoards, boardId, newParentId)) return {};
+                return {
+                    researchBoards: {
+                        ...state.researchBoards,
+                        [boardId]: { ...node, parentId: newParentId },
+                    },
+                };
+            }),
+
             setActiveWorldKey: (key) => set(() => ({ activeWorldKey: key })),
 
             updateWorldBibleConfig: (key, patch) =>
@@ -1841,6 +2414,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                                 layout: existingLayout ?? { roots: [] },
                                 ...existingIdentity,
                                 ...patch,
+                                updatedAt: new Date().toISOString(),
                             },
                         },
                     };
@@ -1850,23 +2424,26 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                 set((state) => ({
                     worldBibles: {
                         ...state.worldBibles,
-                        [key]: { ...state.worldBibles[key], layout },
+                        [key]: { ...state.worldBibles[key], layout, updatedAt: new Date().toISOString() },
                     },
                 })),
 
             applyBibleLayout: (key, layout) =>
-                set((state) => ({
-                    worldBibles: {
-                        ...state.worldBibles,
-                        [key]: { ...state.worldBibles[key], layout },
-                    },
-                    // Re-file this world's articles into the new structure by type
-                    // (covers previously-unfiled ones too; presets span all 8 types).
-                    entities: state.entities.map(e => {
-                        if (worldKeyForEntity(e) !== key) return e;
-                        return { ...e, categoryId: fileByType(layout.roots, e.type) };
-                    }),
-                })),
+                set((state) => {
+                    const stamp = new Date();
+                    return {
+                        worldBibles: {
+                            ...state.worldBibles,
+                            [key]: { ...state.worldBibles[key], layout, updatedAt: stamp.toISOString() },
+                        },
+                        // Re-file this world's articles into the new structure by type
+                        // (covers previously-unfiled ones too; presets span all 8 types).
+                        entities: state.entities.map(e => {
+                            if (worldKeyForEntity(e) !== key) return e;
+                            return { ...e, categoryId: fileByType(layout.roots, e.type), updatedAt: stamp };
+                        }),
+                    };
+                }),
 
             deleteWorldEntities: (key) =>
                 set((state) => {
@@ -2202,46 +2779,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     };
                 }),
 
-            addResearchBoard: (baseScopeKey, name) => {
-                const id = crypto.randomUUID();
-                set((state) => ({
-                    customBoards: {
-                        ...state.customBoards,
-                        [baseScopeKey]: [...(state.customBoards[baseScopeKey] ?? []), { id, name }],
-                    },
-                }));
-                return id;
-            },
-
-            renameResearchBoard: (baseScopeKey, boardId, name) =>
-                set((state) => ({
-                    customBoards: {
-                        ...state.customBoards,
-                        [baseScopeKey]: (state.customBoards[baseScopeKey] ?? []).map(b =>
-                            b.id === boardId ? { ...b, name } : b,
-                        ),
-                    },
-                })),
-
-            deleteResearchBoard: (baseScopeKey, boardId) =>
-                set((state) => {
-                    const nextBoards = (state.customBoards[baseScopeKey] ?? []).filter(b => b.id !== boardId);
-                    // Drop the deleted board's canvas state and chat history too.
-                    const boardKey = `${baseScopeKey}::${boardId}`;
-                    const { [boardKey]: _removed, ...restStates } = state.researchStates;
-                    const { [boardKey]: _removedChat, ...restChats } = state.chatHistories;
-                    return {
-                        customBoards: { ...state.customBoards, [baseScopeKey]: nextBoards },
-                        researchStates: restStates,
-                        chatHistories: restChats,
-                    };
-                }),
-
-            setChatHistory: (scopeKey, messages) =>
-                set((state) => ({
-                    chatHistories: { ...state.chatHistories, [scopeKey]: messages },
-                })),
-
             addInterview: (interview) =>
                 set((state) => ({ customInterviews: [...state.customInterviews, interview] })),
 
@@ -2296,7 +2833,17 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     // WORKAROUND(migration): Migrate legacy root-level localStorage data to the new Project architecture.
                     // Root cause: Pre-Sprint 13, documents did not exist natively inside the Zustand workspace structure.
                     // Remove when: After sufficient cycles (e.g. 2 months), assuming all clients have synced.
-                    if (state.projects.length === 0 && state.scenes.length === 0 && state.entities.length === 0) {
+                    // Only when there is genuine legacy content to rescue. Without
+                    // this guard the branch fires for every BRAND-NEW writer too —
+                    // an empty workspace looks identical to a pre-Sprint-13 one —
+                    // and fabricates "My First Project" out of nothing. That made
+                    // the first-run screen unreachable, because a newcomer was
+                    // never allowed to have zero projects.
+                    const legacyTitle = getStoredValue('mythforge-document-title');
+                    const legacyContent = getStoredValue('mythforge-document-content');
+                    const hasLegacyData = Boolean(legacyTitle || legacyContent);
+
+                    if (hasLegacyData && state.projects.length === 0 && state.scenes.length === 0 && state.entities.length === 0) {
                         logger.info('Migrating legacy data to new Project architecture.');
                         const defaultProject: Project = {
                             id: crypto.randomUUID(),
@@ -2309,8 +2856,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                             id: crypto.randomUUID(),
                             projectId: defaultProject.id,
                             // Legacy pre-Sprint-13 keys — written under the old app name, never renamed
-                            title: getStoredValue('mythforge-document-title') || 'Untitled Chapter',
-                            content: getStoredValue('mythforge-document-content') || '',
+                            title: legacyTitle || 'Untitled Chapter',
+                            content: legacyContent || '',
                             createdAt: new Date()
                         };
 
@@ -2371,6 +2918,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     if (!(state as unknown as Record<string, unknown>).goalConfig) {
                         state.goalConfig = {
                             dailyWordTarget: 200,
+                            weekdayWordTargets: emptyWeekdayTargets(),
                             dailyTimeTarget: 20,
                             primaryMetric: 'words',
                             writingDaysPerWeek: 5,
@@ -2378,9 +2926,12 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                             goalConfigured: false,
                         };
                     }
+
+                    // Weekday goal schedules arrived after goalConfig shipped.
+                    state.goalConfig.weekdayWordTargets =
+                        normalizeWeekdayTargets(state.goalConfig.weekdayWordTargets);
                     if (!(state as unknown as Record<string, unknown>).writingDays) state.writingDays = [];
                     if (!(state as unknown as Record<string, unknown>).earnedBadges) state.earnedBadges = [];
-                    if (!(state as unknown as Record<string, unknown>).xpEvents) state.xpEvents = [];
                     if (!(state as unknown as Record<string, unknown>).socialHistory) {
                         state.socialHistory = [];
                     }
@@ -2393,9 +2944,33 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     // Recompute streak on rehydration (streakState is never persisted)
                     state.streakState = computeStreakFromDays(state.writingDays ?? []);
 
+                    // Badges are persisted but streakState is not, so a workspace that
+                    // crossed a threshold on another device arrives here unawarded.
+                    // checkBadges is pure and filters against what is already earned.
+                    state.earnedBadges = [
+                        ...state.earnedBadges,
+                        ...checkBadges(state.streakState, state.earnedBadges),
+                    ];
+
+                    // The Workshop absorbed 'template' and 'research'. Map those
+                    // onto the mode + stage they became, or a writer whose last
+                    // session ended on the Draft Table lands on Home instead.
+                    const migrated = resolveLegacyMode(state.workspaceMode);
+                    state.workspaceMode = migrated.mode as WorkspaceMode;
+                    state.deskStage = migrated.stage ?? coerceStage(state.deskStage);
+
+                    // Boards could not nest before this. Derive the registry from
+                    // the keys researchStates already has — no board data moves.
+                    if (!state.researchBoards || Object.keys(state.researchBoards).length === 0) {
+                        state.researchBoards = buildRegistry(
+                            state.researchStates ?? {},
+                            state.customBoards ?? {},
+                        );
+                    }
+
                     // Hydration/Migration: Ensure workspaceMode is initialized correctly for Sprint 99
-                    if (!['worldBible', 'worldBibleEdit', 'hierarchy', 'template', 'desk', 'bookshelf'].includes((state as any).workspaceMode)) {
-                        state.workspaceMode = 'bookshelf';
+                    if (!(WORKSPACE_MODES as readonly string[]).includes((state as any).workspaceMode)) {
+                        state.workspaceMode = 'home';
                     }
 
                     // Sprint 51: Migrate articleBlocks from order-based to x/y coordinate system
@@ -2437,12 +3012,19 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     if (!state.customBoards || typeof state.customBoards !== 'object') {
                         state.customBoards = {};
                     }
-                    if (!state.chatHistories || typeof state.chatHistories !== 'object') {
-                        state.chatHistories = {};
-                    }
                     if (!state.worldUnderstanding || typeof state.worldUnderstanding !== 'object') {
                         state.worldUnderstanding = {};
                     }
+                    // First-run state arrived after the persisted schema shipped.
+                    if (typeof state.hasOnboarded !== 'boolean') {
+                        // An existing writer with work is not a newcomer.
+                        state.hasOnboarded = state.projects.length > 0;
+                    }
+                    state.dismissedHints = normalizeDismissedHints(state.dismissedHints);
+                    state.lastVisitAt = normalizeVisitStamp(state.lastVisitAt);
+                    // Never restored: it is derived per page load by markVisit().
+                    state.previousVisitAt = null;
+
                     state.setHasHydrated(true);
                 }
             },
@@ -2450,30 +3032,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             // Intercept JSON deserialization to properly reconstruct native JavaScript `Date` objects.
             // Writes go through a debounced adapter so editing doesn't serialize the
             // full workspace on every keystroke (flushes on tab hide / unload).
-            storage: createJSONStorage(() => debouncedLocalStorage, {
-                reviver: (key, value) => {
-                    // Only apply Date reconstruction to arrays that contain objects
-                    // with createdAt/updatedAt. Non-entity arrays (writingDays,
-                    // earnedBadges, xpEvents) are returned as-is to avoid corruption.
-                    const DATE_ARRAY_KEYS = [
-                        'worlds', 'projects', 'documents', 'scenes',
-                        'entities', 'articleTemplates', 'earnedBadges',
-                        'sceneSnapshots', 'entitySnapshots',
-                    ];
-                    if (DATE_ARRAY_KEYS.includes(key) && Array.isArray(value)) {
-                        return value.map((item: Record<string, unknown>) => {
-                            if (typeof item !== 'object' || item === null) return item;
-                            return {
-                                ...item,
-                                ...(item.createdAt ? { createdAt: new Date(item.createdAt as string) } : {}),
-                                ...(item.updatedAt ? { updatedAt: new Date(item.updatedAt as string) } : {}),
-                                ...(item.earnedAt  ? { earnedAt:  new Date(item.earnedAt  as string) } : {}),
-                            };
-                        });
-                    }
-                    return value;
-                },
-            }),
+            storage: debouncedJSONStorage,
             /**
              * Schema Versioning and Migration logic (Sprint 68)
              * version: 2 — Introduced targeted reviver and automatic backups.
@@ -2508,17 +3067,23 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 );
 
 /**
- * Returns a list of available backup snapshots in localStorage,
- * sorted newest-first. Each entry has a key and a timestamp.
+ * The signed-in user's backup snapshots, newest first.
+ *
+ * Backups are stamped with their owner (see `claimWorkspace`). An unstamped
+ * backup is hidden rather than offered: on a shared browser, "restore" on
+ * somebody else's snapshot is a one-click way to take their manuscripts.
  */
-export function listDataBackups(): { key: string; timestamp: number; version: number }[] {
+export function listDataBackups(
+    ownerUserId: string | null,
+): { key: string; timestamp: number; version: number }[] {
     const backups: { key: string; timestamp: number; version: number }[] = [];
     if (typeof localStorage === 'undefined') return [];
-    for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (!k?.startsWith('lorecanvas-backup-')) continue;
+    if (!ownerUserId) return [];
+    for (const k of snapshotStorageKeys()) {
+        if (!k.startsWith(BACKUP_KEY_PREFIX)) continue;
+        if (readBackupOwner(localStorage.getItem(k)) !== ownerUserId) continue;
         // Key format: lorecanvas-backup-v{version}-{timestamp}
-        const parts = k.replace('lorecanvas-backup-', '').split('-');
+        const parts = k.replace(BACKUP_KEY_PREFIX, '').split('-');
         const versionStr = parts[0].replace('v', '');
         const version = parseInt(versionStr) || 0;
         const timestamp = parseInt(parts[1]) || 0;
@@ -2536,7 +3101,19 @@ export function restoreDataBackup(backupKey: string): boolean {
     try {
         const raw = localStorage.getItem(backupKey);
         if (!raw) return false;
-        localStorage.setItem('lorecanvas-workspace', raw);
+        // Automatic backups are taken inside persist's migrate(), which receives
+        // the BARE state rather than the { state, version } envelope. Writing one
+        // back verbatim left zustand with nothing to hydrate, so restoring an
+        // automatic backup emptied the workspace. Normalise first.
+        const payload = normaliseBackupPayload(raw, backupKey);
+        if (!payload) {
+            logger.error('LoreCanvas: backup is unreadable, refusing to restore', backupKey);
+            return false;
+        }
+        // The caller reloads straight after this. A queued local save would
+        // flush on pagehide and overwrite what we just restored.
+        cancelPendingPersist();
+        localStorage.setItem('lorecanvas-workspace', payload);
         return true;
     } catch (e) {
         logger.error('LoreCanvas: restore failed', e);

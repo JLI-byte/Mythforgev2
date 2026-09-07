@@ -3,28 +3,28 @@
   z-index: 9999;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-  padding: 6px;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 12px 40px rgba(var(--shadow-rgb), 0.5);
+  padding: var(--space-3);
   min-width: 240px;
   max-width: 320px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 6px;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-md);
   border: none;
   background: none;
   cursor: pointer;
   width: 100%;
   text-align: left;
-  transition: background 0.1s;
+  transition: background var(--dur-1);
 }
 
 .item:hover {
@@ -38,7 +38,7 @@
 }
 
 .itemIcon {
-  font-size: 1rem;
+  font-size: var(--text-lg);
   flex-shrink: 0;
   width: 20px;
   text-align: center;
@@ -46,7 +46,7 @@
 
 .itemName {
   flex: 1;
-  font-size: 0.9rem;
+  font-size: var(--text-md);
   font-weight: 600;
   color: var(--foreground);
   white-space: nowrap;
@@ -55,7 +55,7 @@
 }
 
 .itemType {
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -63,8 +63,8 @@
 }
 
 .noResults {
-  padding: 10px 12px;
-  font-size: 0.82rem;
+  padding: var(--space-5) var(--space-5);
+  font-size: var(--text-sm);
   color: var(--muted);
   font-style: italic;
   text-align: center;

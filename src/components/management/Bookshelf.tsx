@@ -1,12 +1,19 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useId, useState, useEffect } from 'react';
+import { X, Pencil, Trash2, Check } from 'lucide-react';
 import { useWorkspaceStore, Project, World, COVER_COLORS, WorldGenre } from '@/store/workspaceStore';
 import { STANDALONE_KEY } from '@/lib/worldKey';
 import { getWorldBibleConfig } from '@/lib/worldBibleNav';
-import { WORK_TYPES, getWorkType } from '@/lib/workTypes';
-import { getDraftType } from '@/lib/writingMethods';
+import { WORK_TYPES, getWorkType, getWorkTypeByWritingMode } from '@/lib/workTypes';
+import { getSubTypesFor, getWorkSubType, type ProjectBrief } from '@/lib/workSubTypes';
+import { planNewStory } from '@/lib/newStory';
+import { useModalDialog } from '@/lib/useModalDialog';
+import { BeginOptions, type BeginDestination } from '@/components/ui/BeginOptions';
+import { HintBubble } from '@/components/ui/HintBubble';
 import WorldBibleBook from './WorldBibleBook';
+import WorkTypeArtwork from './WorkTypeArtwork';
+import book from '@/components/ui/bookSurface.module.css';
 import styles from './Bookshelf.module.css';
 
 /** Diamond-lattice shelf layout: fixed columns, 3 rows of slots by default. */
@@ -30,10 +37,13 @@ const greyForId = (id: string): string => {
  * Supports organizing projects via drag-and-drop, and managing shelves via a multi-step wizard.
  */
 export function Bookshelf() {
+    // Namespaced so the wizard's field ids stay unique if this ever mounts twice.
+    const fieldId = useId();
+
     const projects = useWorkspaceStore(s => s.projects);
     const worlds = useWorkspaceStore(s => s.worlds || []);
     const updateProject = useWorkspaceStore(s => s.updateProject);
-    const addWorld = useWorkspaceStore(s => s.addWorld);
+    const createWorld = useWorkspaceStore(s => s.createWorld);
     const updateWorld = useWorkspaceStore(s => s.updateWorld);
     const deleteWorld = useWorkspaceStore(s => s.deleteWorld);
     const addProject = useWorkspaceStore(s => s.addProject);
@@ -44,8 +54,11 @@ export function Bookshelf() {
     const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
     const setActiveProject = useWorkspaceStore(s => s.setActiveProject);
     const setWorkspaceMode = useWorkspaceStore(s => s.setWorkspaceMode);
+    const setDeskStage = useWorkspaceStore(s => s.setDeskStage);
     const setActiveWorldKey = useWorkspaceStore(s => s.setActiveWorldKey);
     const worldBibles = useWorkspaceStore(s => s.worldBibles);
+    const pendingNewStoryWorldKey = useWorkspaceStore(s => s.pendingNewStoryWorldKey);
+    const clearPendingNewStory = useWorkspaceStore(s => s.clearPendingNewStory);
 
     // ─── STATE BLOCKS ──────────────────────────────────────────
 
@@ -58,7 +71,7 @@ export function Bookshelf() {
     const [wizardStep, setWizardStep] = useState<1 | 2 | 3>(1);
     const [editingWorldId, setEditingWorldId] = useState<string | null>(null);
     const [deletingWorldId, setDeletingWorldId] = useState<string | null>(null);
-    /** Book awaiting delete confirmation (two-step, in place on the cover). */
+    /** Book awaiting delete confirmation, shown in the same modal as a shelf delete. */
     const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
 
     /** Extra rows added per shelf beyond the default 3 (keyed by world id / 'standalone'). */
@@ -68,9 +81,15 @@ export function Bookshelf() {
     const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
     const [storyWorldId, setStoryWorldId] = useState<string | undefined>(undefined);
     const [storyName, setStoryName] = useState('');
-    /** New-work modal: pick what you're writing, then name it and choose a start. */
-    const [storyStep, setStoryStep] = useState<'type' | 'details'>('type');
+    /**
+     * New-work modal: pick what you're writing, then name it and choose a start.
+     * A Script / Report asks what KIND first — a YouTube script and a
+     * dissertation want very different research.
+     */
+    const [storyStep, setStoryStep] = useState<'type' | 'kind' | 'details'>('type');
     const [storyTypeId, setStoryTypeId] = useState<string | null>(null);
+    const [storySubTypeId, setStorySubTypeId] = useState<string | null>(null);
+    const [storyBrief, setStoryBrief] = useState<ProjectBrief>({});
 
     /** Wizard Form Data: Holds transient state for world creation/editing */
     const [wizardData, setWizardData] = useState<Partial<World>>({
@@ -82,19 +101,6 @@ export function Bookshelf() {
         tone: { darkness: 'balanced', scale: 'balanced', humor: 'balanced' },
         magicExists: false, // Hidden but required in type
     });
-
-    // ─── EFFECTS ──────────────────────────────────────────────
-
-    /** Escape key listener for closing the wizard modal */
-    useEffect(() => {
-        const handleEsc = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') resetWizard();
-        };
-        if (isWizardOpen) {
-            window.addEventListener('keydown', handleEsc);
-        }
-        return () => window.removeEventListener('keydown', handleEsc);
-    }, [isWizardOpen]);
 
     // ─── HELPERS ──────────────────────────────────────────────
 
@@ -151,20 +157,15 @@ export function Bookshelf() {
                 tone: wizardData.tone,
             });
         } else {
-            // Create new shelf
-            const newWorld: World = {
-                id: crypto.randomUUID(),
-                name: wizardData.name.trim(),
-                genre: wizardData.genre || 'fantasy',
-                tone: wizardData.tone || { darkness: 'balanced', scale: 'balanced', humor: 'balanced' },
-                logline: wizardData.logline || '',
-                magicExists: false,
-                techLevel: wizardData.techLevel || 'medieval',
-                timePeriod: wizardData.timePeriod || '',
-                coverColor: COVER_COLORS[Math.floor(Math.random() * COVER_COLORS.length)],
-                createdAt: new Date()
-            };
-            addWorld(newWorld);
+            // The store owns what a world starts out as; the wizard only passes
+            // the parts it actually collected.
+            createWorld(wizardData.name, {
+                genre: wizardData.genre,
+                tone: wizardData.tone,
+                logline: wizardData.logline,
+                techLevel: wizardData.techLevel,
+                timePeriod: wizardData.timePeriod,
+            });
         }
         resetWizard();
     };
@@ -237,7 +238,8 @@ export function Bookshelf() {
             sc.content.replace(/<[^>]*>/g, '').trim() !== ''
         );
         setActiveProject(id);
-        setWorkspaceMode(hasWriting ? 'desk' : 'template');
+        setWorkspaceMode('desk');
+        setDeskStage(hasWriting ? 'write' : 'draft');
     };
 
     // ─── STORY CREATION ─────────────────────────────────────
@@ -247,77 +249,87 @@ export function Bookshelf() {
         setStoryWorldId(worldId);
         setStoryName('');
         setStoryTypeId(null);
+        setStorySubTypeId(null);
+        setStoryBrief({});
         setStoryStep('type');
         setIsStoryModalOpen(true);
     };
 
-    /** Step one: what kind of work this is, then on to naming it. */
+    /**
+     * Home can ask for a new book but does not own the work-type flow, so it
+     * leaves the shelf to file under here and routes over. Consume it once and
+     * clear it, or arriving here again would reopen the modal.
+     */
+    useEffect(() => {
+        if (!pendingNewStoryWorldKey) return;
+        handleCreateStory(
+            pendingNewStoryWorldKey === STANDALONE_KEY ? undefined : pendingNewStoryWorldKey,
+        );
+        clearPendingNewStory();
+        // The pending key is the only real trigger: handleCreateStory is
+        // redefined every render, so depending on it would refire this forever.
+    }, [pendingNewStoryWorldKey, clearPendingNewStory]);
+
+    /**
+     * Step one: what kind of work this is. Types with sub-types (today, just
+     * Script / Report) ask which one before naming; the rest go straight on.
+     */
     const pickWorkType = (id: string) => {
         setStoryTypeId(id);
+        setStorySubTypeId(null);
+        setStoryBrief({});
+        setStoryStep(getSubTypesFor(id).length > 0 ? 'kind' : 'details');
+    };
+
+    /** Step two, Script / Report only: which kind, then on to naming it. */
+    const pickSubType = (id: string) => {
+        setStorySubTypeId(id);
         setStoryStep('details');
     };
 
     /**
      * Creates the story with its first chapter + scene, then routes to the
-     * chosen starting point: the Research Table (gather first), the Draft
-     * Table (outline first), or the Writing Desk (straight into prose).
+     * chosen Workshop stage: Research (gather first), Drafting (outline first)
+     * or Writing (straight into prose).
      */
-    const confirmCreateStory = (destination: 'template' | 'desk' | 'research') => {
-        const name = storyName.trim();
-        const workType = getWorkType(storyTypeId);
-        if (!name || !workType) return;
-
-        const projectId = crypto.randomUUID();
-        const docId = crypto.randomUUID();
-        const sceneId = crypto.randomUUID();
-
-        addProject({
-            id: projectId,
-            name,
-            writingMode: workType.writingMode,
-            coverColor: COVER_COLORS[Math.floor(Math.random() * COVER_COLORS.length)],
+    const confirmCreateStory = (destination: BeginDestination) => {
+        const plan = planNewStory({
+            name: storyName,
+            workTypeId: storyTypeId ?? '',
+            subTypeId: storySubTypeId,
+            brief: storyBrief,
             worldId: storyWorldId,
-            createdAt: new Date()
+            coverColor: COVER_COLORS[Math.floor(Math.random() * COVER_COLORS.length)],
+            ids: {
+                projectId: crypto.randomUUID(),
+                documentId: crypto.randomUUID(),
+                sceneId: crypto.randomUUID(),
+            },
+            now: new Date(),
         });
+        if (!plan) return;
 
-        // Pre-filter the Draft Table's method library to suit the work, so the
-        // writer isn't offered screenplay beats for an essay.
-        if (workType.draftTypeId) {
-            updateDraftState(projectId, {
-                draftTypeId: workType.draftTypeId,
-                draftFormat: getDraftType(workType.draftTypeId)?.format,
-            });
-        }
-
-        addDocument({
-            id: docId,
-            projectId,
-            title: 'Chapter 1',
-            content: '',
-            createdAt: new Date()
-        });
-
-        addScene({
-            id: sceneId,
-            documentId: docId,
-            projectId,
-            title: 'Scene 1',
-            content: '',
-            order: 0,
-            createdAt: new Date()
-        });
+        addProject(plan.project);
+        if (plan.draftState) updateDraftState(plan.project.id, plan.draftState);
+        addDocument(plan.document);
+        addScene(plan.scene);
 
         setIsStoryModalOpen(false);
         setStoryName('');
-        setActiveProject(projectId);
-        setWorkspaceMode(destination);
+        setActiveProject(plan.project.id);
+        setWorkspaceMode('desk');
+        setDeskStage(destination);
     };
 
     // ─── RENDERING ─────────────────────────────────────────
 
-    /** A book slot — greyscale cover centered inside its diamond, tilts on hover. */
+    /** A book slot — the shared book surface, centered inside its diamond. */
     const renderDiamondBook = (p: Project) => {
         const isDeleting = deletingProjectId === p.id;
+        // A story stays a book cover; the other work types show their medium
+        // instead. A cover the writer chose always wins over either.
+        const workTypeId = getWorkTypeByWritingMode(p.writingMode)?.id;
+        const isPaper = !p.coverImageUrl && !!workTypeId && workTypeId !== 'story';
         return (
             <div
                 key={p.id}
@@ -329,14 +341,15 @@ export function Bookshelf() {
                     onDragEnd={() => setDraggedProjectId(null)}
                     onClick={() => { if (!isDeleting) handleSelectProject(p.id); }}
                     title={p.name}
-                    className={`${styles.book} ${p.id === activeProjectId ? styles.bookActive : ''}`}
+                    className={`${book.cover} ${styles.book} ${isPaper ? styles.bookPaper : ''} ${p.id === activeProjectId ? styles.bookActive : ''}`}
                     style={{
-                        background: p.coverImageUrl ? undefined : greyForId(p.id),
+                        background: p.coverImageUrl || isPaper ? undefined : greyForId(p.id),
                         backgroundImage: p.coverImageUrl ? `url(${p.coverImageUrl})` : undefined,
                     }}
                 >
+                    {isPaper && <WorkTypeArtwork typeId={workTypeId!} />}
                     {!p.coverImageUrl && (
-                        <span className={styles.bookInitials}>
+                        <span className={`${styles.bookInitials} ${isPaper ? styles.bookInitialsInk : ''}`}>
                             {p.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                         </span>
                     )}
@@ -345,33 +358,13 @@ export function Bookshelf() {
 
                 {/* Delete lives on the slot, not the cover: the cover tilts 18°
                     on hover, which would make a button inside it hard to hit. */}
-                {isDeleting ? (
-                    <div className={styles.bookConfirm} onClick={e => e.stopPropagation()}>
-                        <span className={styles.bookConfirmText}>Delete?</span>
-                        <div className={styles.bookConfirmActions}>
-                            <button
-                                className={styles.bookConfirmNo}
-                                onClick={() => setDeletingProjectId(null)}
-                            >
-                                No
-                            </button>
-                            <button
-                                className={styles.bookConfirmYes}
-                                onClick={() => { deleteProject(p.id); setDeletingProjectId(null); }}
-                            >
-                                Yes
-                            </button>
-                        </div>
-                    </div>
-                ) : (
-                    <button
-                        className={styles.bookDeleteBtn}
-                        title={`Delete “${p.name}”`}
-                        onClick={e => { e.stopPropagation(); setDeletingProjectId(p.id); }}
-                    >
-                        ✕
-                    </button>
-                )}
+                <button
+                    className={styles.bookDeleteBtn}
+                    title={`Delete “${p.name}”`}
+                    onClick={e => { e.stopPropagation(); setDeletingProjectId(p.id); }}
+                >
+                    <X size={14} />
+                </button>
             </div>
         );
     };
@@ -421,24 +414,18 @@ export function Bookshelf() {
                     
                     {!isUncategorized && worldObj && !isDeleting && (
                         <>
-                            <button className={styles.editBtn} onClick={() => handleEditShelf(worldObj)} title="Edit Shelf">✏️</button>
-                            <button 
-                                className={styles.deleteBtn} 
+                            <button className={styles.editBtn} onClick={() => handleEditShelf(worldObj)} title="Edit Shelf" aria-label="Edit Shelf">
+                                <Pencil size={14} />
+                            </button>
+                            <button
+                                className={styles.deleteBtn}
                                 onClick={() => setDeletingWorldId(worldId)}
-                                disabled={worlds.length <= 1}
-                                title={worlds.length <= 1 ? "Cannot delete your only shelf" : "Delete Shelf"}
+                                title="Delete Shelf"
+                                aria-label="Delete Shelf"
                             >
-                                🗑️
+                                <Trash2 size={14} />
                             </button>
                         </>
-                    )}
-
-                    {isDeleting && (
-                        <div className={styles.shelfDeleteConfirm}>
-                            <span>Delete this shelf? Stories will move to Uncategorized.</span>
-                            <button className={styles.wizardBtnSecondary} onClick={() => setDeletingWorldId(null)}>Cancel</button>
-                            <button className={styles.wizardBtnPrimary} onClick={() => { deleteWorld(worldId); setDeletingWorldId(null); }}>Delete</button>
-                        </div>
                     )}
 
                     {!isDeleting && (
@@ -513,28 +500,29 @@ export function Bookshelf() {
 
             {/* ─── WIZARD MODAL ─────────────────────────────────────── */}
             {isWizardOpen && (
-                <div className={styles.wizardBackdrop} onClick={resetWizard}>
-                    <div className={styles.wizardModal} onClick={e => e.stopPropagation()}>
+                <ShelfDialog labelledBy={`${fieldId}-wizard-title`} onDismiss={resetWizard}>
                         <div className={styles.wizardStep}>Step {wizardStep} of 3</div>
-                        <h2 className={styles.wizardTitle}>{editingWorldId ? 'Edit Shelf' : 'Create New Shelf'}</h2>
+                        <h2 id={`${fieldId}-wizard-title`} className={styles.wizardTitle}>{editingWorldId ? 'Edit Shelf' : 'Create New Shelf'}</h2>
                         
                         {/* Step 1: Identity */}
                         {wizardStep === 1 && (
                             <>
                                 <div style={{ marginBottom: '16px' }}>
-                                    <label className={styles.shelfLabel}>Shelf Name</label>
-                                    <input 
+                                    <label className={styles.shelfLabel} htmlFor={`${fieldId}-shelf-name`}>Shelf Name</label>
+                                    <input
+                                        id={`${fieldId}-shelf-name`}
                                         className={styles.wizardInput}
                                         value={wizardData.name}
                                         onChange={e => setWizardData({...wizardData, name: e.target.value})}
                                         onKeyDown={handleInputKeyDown}
                                         placeholder="e.g. My Epic Saga"
-                                        autoFocus
+                                        data-autofocus
                                     />
                                 </div>
                                 <div style={{ marginBottom: '16px' }}>
-                                    <label className={styles.shelfLabel}>What is this world about?</label>
-                                    <textarea 
+                                    <label className={styles.shelfLabel} htmlFor={`${fieldId}-logline`}>What is this world about?</label>
+                                    <textarea
+                                        id={`${fieldId}-logline`}
                                         className={styles.wizardTextarea}
                                         value={wizardData.logline}
                                         onChange={e => setWizardData({...wizardData, logline: e.target.value})}
@@ -573,8 +561,9 @@ export function Bookshelf() {
                                     ))}
                                 </div>
 
-                                <label className={styles.shelfLabel}>Time Period</label>
-                                <input 
+                                <label className={styles.shelfLabel} htmlFor={`${fieldId}-period`}>Time Period</label>
+                                <input
+                                    id={`${fieldId}-period`}
                                     className={styles.wizardInput}
                                     value={wizardData.timePeriod}
                                     onChange={e => setWizardData({...wizardData, timePeriod: e.target.value})}
@@ -650,21 +639,19 @@ export function Bookshelf() {
                                     className={`${styles.wizardBtn} ${styles.wizardBtnPrimary}`} 
                                     onClick={handleWizardSubmit}
                                 >
-                                    {editingWorldId ? 'Save Changes' : '✓ Create Shelf'}
+                                    {editingWorldId ? 'Save Changes' : <><Check size={14} /> Create Shelf</>}
                                 </button>
                             )}
                         </div>
-                    </div>
-                </div>
+                </ShelfDialog>
             )}
 
             {/* ─── NEW STORY MODAL ─────────────────────────────────── */}
             {isStoryModalOpen && (
-                <div className={styles.wizardBackdrop} onClick={() => setIsStoryModalOpen(false)}>
-                    <div className={styles.wizardModal} onClick={e => e.stopPropagation()}>
+                <ShelfDialog labelledBy={`${fieldId}-story-title`} onDismiss={() => setIsStoryModalOpen(false)}>
                         {storyStep === 'type' ? (
                             <>
-                                <h2 className={styles.wizardTitle}>What are you writing?</h2>
+                                <h2 id={`${fieldId}-story-title`} className={styles.wizardTitle}>What are you writing?</h2>
                                 <div className={styles.workTypeGrid}>
                                     {WORK_TYPES.map(t => (
                                         <button
@@ -682,61 +669,166 @@ export function Bookshelf() {
                                     <button className={styles.wizardBtnSecondary} onClick={() => setIsStoryModalOpen(false)}>Cancel</button>
                                 </div>
                             </>
-                        ) : (
+                        ) : storyStep === 'kind' ? (
                             <>
-                                <h2 className={styles.wizardTitle}>
-                                    {getWorkType(storyTypeId)?.icon} New {getWorkType(storyTypeId)?.label}
-                                </h2>
-                                <div style={{ marginBottom: '16px' }}>
-                                    <label className={styles.shelfLabel}>Name</label>
-                                    <input
-                                        className={styles.wizardInput}
-                                        value={storyName}
-                                        onChange={e => setStoryName(e.target.value)}
-                                        onKeyDown={e => {
-                                            if (e.key === 'Enter') { e.preventDefault(); confirmCreateStory('template'); }
-                                            if (e.key === 'Escape') setIsStoryModalOpen(false);
-                                        }}
-                                        placeholder={getWorkType(storyTypeId)?.namePlaceholder}
-                                        autoFocus
-                                    />
-                                </div>
-                                <label className={styles.shelfLabel}>Where do you want to begin?</label>
-                                <div className={styles.beginOptions}>
-                                    <button
-                                        className={styles.beginOption}
-                                        onClick={() => confirmCreateStory('research')}
-                                        disabled={!storyName.trim()}
-                                    >
-                                        <span className={styles.beginOptionTitle}>🔎 Research First</span>
-                                        <span className={styles.beginOptionDesc}>Gather notes and build the world with the AI assistant</span>
-                                    </button>
-                                    <button
-                                        className={styles.beginOption}
-                                        onClick={() => confirmCreateStory('template')}
-                                        disabled={!storyName.trim()}
-                                    >
-                                        <span className={styles.beginOptionTitle}>🗺️ Draft First</span>
-                                        <span className={styles.beginOptionDesc}>Outline on the Draft Table with a writing method</span>
-                                    </button>
-                                    <button
-                                        className={styles.beginOption}
-                                        onClick={() => confirmCreateStory('desk')}
-                                        disabled={!storyName.trim()}
-                                    >
-                                        <span className={styles.beginOptionTitle}>✍️ Start Writing</span>
-                                        <span className={styles.beginOptionDesc}>Jump straight in on the Writing Desk</span>
-                                    </button>
+                                <h2 id={`${fieldId}-story-title`} className={styles.wizardTitle}>What kind of script or report?</h2>
+                                <p className={styles.briefHint}>
+                                    This sets the outlining methods you&apos;re offered on the
+                                    Draft Table.
+                                </p>
+                                <div className={styles.workTypeGrid}>
+                                    {getSubTypesFor(storyTypeId).map(t => (
+                                        <button
+                                            key={t.id}
+                                            className={`${styles.workTypeCard} ${styles.workTypeCardCompact}`}
+                                            onClick={() => pickSubType(t.id)}
+                                        >
+                                            <span className={styles.workTypeIcon}>{t.icon}</span>
+                                            <span className={styles.workTypeLabel}>{t.label}</span>
+                                            <span className={styles.workTypeDesc}>{t.desc}</span>
+                                        </button>
+                                    ))}
                                 </div>
                                 <div className={styles.wizardActions}>
                                     <button className={styles.wizardBtnSecondary} onClick={() => setStoryStep('type')}>← Back</button>
                                     <button className={styles.wizardBtnSecondary} onClick={() => setIsStoryModalOpen(false)}>Cancel</button>
                                 </div>
                             </>
+                        ) : (
+                            <>
+                                <h2 id={`${fieldId}-story-title`} className={styles.wizardTitle}>
+                                    {getWorkSubType(storySubTypeId)?.icon ?? getWorkType(storyTypeId)?.icon}
+                                    {' '}New {getWorkSubType(storySubTypeId)?.label ?? getWorkType(storyTypeId)?.label}
+                                </h2>
+                                <div style={{ marginBottom: '16px' }}>
+                                    <label className={styles.shelfLabel} htmlFor={`${fieldId}-story-name`}>Name</label>
+                                    <input
+                                        id={`${fieldId}-story-name`}
+                                        className={styles.wizardInput}
+                                        value={storyName}
+                                        onChange={e => setStoryName(e.target.value)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') { e.preventDefault(); confirmCreateStory('draft'); }
+                                        }}
+                                        placeholder={getWorkType(storyTypeId)?.namePlaceholder}
+                                        // Both, deliberately, and they cannot fight because
+                                        // they name the same element. data-autofocus covers a
+                                        // mount that starts here; autoFocus covers the usual
+                                        // route, where this input appears a step later — long
+                                        // after the hook's mount-time scan, which would
+                                        // otherwise leave focus on the unmounted card's body.
+                                        data-autofocus
+                                        autoFocus
+                                    />
+                                </div>
+
+                                {/* The brief. Optional — a writer who just wants to start can
+                                    skip straight past it to the start options. */}
+                                {getWorkSubType(storySubTypeId) && (
+                                    <div className={styles.briefFields}>
+                                        {getWorkSubType(storySubTypeId)!.fields.map(f => (
+                                            <div key={f.key}>
+                                                <label className={styles.shelfLabel} htmlFor={`${fieldId}-brief-${f.key}`}>{f.label}</label>
+                                                <input
+                                                    id={`${fieldId}-brief-${f.key}`}
+                                                    className={styles.wizardInput}
+                                                    value={storyBrief[f.key] ?? ''}
+                                                    onChange={e => setStoryBrief({ ...storyBrief, [f.key]: e.target.value })}
+                                                    placeholder={f.placeholder}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <label className={styles.shelfLabel}>Where do you want to begin?</label>
+                                <BeginOptions
+                                    onChoose={confirmCreateStory}
+                                    disabled={!storyName.trim()}
+                                />
+                                <div className={styles.wizardActions}>
+                                    <button
+                                        className={styles.wizardBtnSecondary}
+                                        onClick={() => setStoryStep(getSubTypesFor(storyTypeId).length > 0 ? 'kind' : 'type')}
+                                    >
+                                        ← Back
+                                    </button>
+                                    <button className={styles.wizardBtnSecondary} onClick={() => setIsStoryModalOpen(false)}>Cancel</button>
+                                </div>
+                            </>
                         )}
-                    </div>
-                </div>
+                </ShelfDialog>
             )}
+
+            {/* ─── DELETE CONFIRMATION MODAL (shared: book or shelf) ── */}
+            {deletingProjectId && (
+                <ShelfDialog labelledBy={`${fieldId}-delete-book-title`} onDismiss={() => setDeletingProjectId(null)}>
+                        <h2 id={`${fieldId}-delete-book-title`} className={styles.wizardTitle}>
+                            Delete “{projects.find(p => p.id === deletingProjectId)?.name}”?
+                        </h2>
+                        <p className={styles.briefHint}>Its chapters and scenes go with it. This cannot be undone.</p>
+                        <div className={styles.wizardActions}>
+                            <button className={styles.wizardBtnSecondary} onClick={() => setDeletingProjectId(null)}>Cancel</button>
+                            <button
+                                className={styles.wizardBtnPrimary}
+                                onClick={() => { deleteProject(deletingProjectId); setDeletingProjectId(null); }}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                </ShelfDialog>
+            )}
+
+            {deletingWorldId && (
+                <ShelfDialog labelledBy={`${fieldId}-delete-shelf-title`} onDismiss={() => setDeletingWorldId(null)}>
+                        <h2 id={`${fieldId}-delete-shelf-title`} className={styles.wizardTitle}>Delete this shelf?</h2>
+                        <p className={styles.briefHint}>Stories will move to Uncategorized. This cannot be undone.</p>
+                        <div className={styles.wizardActions}>
+                            <button className={styles.wizardBtnSecondary} onClick={() => setDeletingWorldId(null)}>Cancel</button>
+                            <button
+                                className={styles.wizardBtnPrimary}
+                                onClick={() => { deleteWorld(deletingWorldId); setDeletingWorldId(null); }}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                </ShelfDialog>
+            )}
+
+            <HintBubble surface="bookshelf" />
+        </div>
+    );
+}
+
+/**
+ * A dialog shell: dialog semantics, focus trap, Escape, focus restore.
+ * A component rather than a hook call inside Bookshelf, because the hook's
+ * effect has to run on the dialog's OWN mount — Bookshelf itself is always
+ * mounted, so a hook called there would fire once at page load.
+ */
+function ShelfDialog({
+    labelledBy,
+    onDismiss,
+    children,
+}: {
+    labelledBy: string;
+    onDismiss: () => void;
+    children: React.ReactNode;
+}) {
+    const dialogRef = useModalDialog<HTMLDivElement>(onDismiss);
+    return (
+        <div className={styles.wizardBackdrop} onClick={onDismiss} role="presentation">
+            <div
+                ref={dialogRef}
+                className={styles.wizardModal}
+                onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={labelledBy}
+                tabIndex={-1}
+            >
+                {children}
+            </div>
         </div>
     );
 }

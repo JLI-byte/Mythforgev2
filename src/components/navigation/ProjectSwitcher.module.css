@@ -5,7 +5,7 @@
     position: fixed;
     inset: 0;
     z-index: 300;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(var(--shadow-rgb), 0.4);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -18,7 +18,7 @@
     max-width: 92vw;
     max-height: 80vh;
     background: var(--surface);
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
@@ -36,13 +36,13 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.25rem 1.5rem;
+    padding: var(--space-7) var(--space-7);
     border-bottom: 1px solid var(--border);
 }
 
 .header h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: var(--text-lg);
     font-weight: 600;
     color: var(--foreground);
     font-family: var(--font-sans);
@@ -51,12 +51,16 @@
 .closeBtn {
     background: transparent;
     border: none;
-    font-size: 1.5rem;
     cursor: pointer;
     color: var(--muted);
     line-height: 1;
     padding: 0;
-    transition: color 0.15s;
+    min-width: 24px;
+    min-height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--dur-2);
 }
 
 .closeBtn:hover {
@@ -67,13 +71,13 @@
 .body {
     flex: 1;
     overflow-y: auto;
-    padding: 1rem 1.5rem;
+    padding: var(--space-6) var(--space-7);
 }
 
 /* ------ TYPE SECTIONS ------ */
 .typeSection {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1.5rem;
+    margin-bottom: var(--space-7);
+    padding-bottom: var(--space-7);
     border-bottom: 1px solid var(--border);
 }
 
@@ -83,8 +87,8 @@
 }
 
 .sectionHeader {
-    margin: 0 0 0.75rem 0;
-    font-size: 0.9rem;
+    margin: 0 0 var(--space-5) 0;
+    font-size: var(--text-md);
     font-weight: 600;
     color: var(--muted);
     font-family: var(--font-sans);
@@ -95,7 +99,7 @@
 .cardGrid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 180px));
-    gap: 1rem;
+    gap: var(--space-6);
 }
 
 /* ------ BASE CARD ------ */
@@ -103,11 +107,11 @@
     position: relative;
     width: 100%;
     height: 200px;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     overflow: visible;
     display: flex;
     flex-direction: column;
-    transition: transform 200ms ease, box-shadow 200ms ease;
+    transition: transform var(--dur-3) var(--ease-standard), box-shadow var(--dur-3) var(--ease-standard);
     cursor: pointer;
 }
 
@@ -122,11 +126,9 @@
     left: 6px;
     width: 20px;
     height: 20px;
-    border-radius: 50%;
+    border-radius: var(--radius-full);
     background: rgba(var(--overlay-rgb),0.92);
     color: var(--surface-mid);
-    font-size: 0.65rem;
-    font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -151,7 +153,7 @@
     right: 4px;
     z-index: 4;
     opacity: 0;
-    transition: opacity 150ms ease;
+    transition: opacity var(--dur-2) var(--ease-standard);
 }
 
 .card:hover .cardMenu {
@@ -159,19 +161,19 @@
 }
 
 .cardMenuTrigger {
-    background: rgba(0,0,0,0.3);
+    background: rgba(var(--overlay-rgb), 0.3);
     border: none;
     color: white;
-    font-size: 1rem;
-    padding: 0.15rem 0.4rem;
+    font-size: var(--text-lg);
+    padding: var(--space-1) var(--space-3);
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     line-height: 1;
     backdrop-filter: blur(4px);
 }
 
 .cardMenuTrigger:hover {
-    background: rgba(0,0,0,0.5);
+    background: rgba(var(--overlay-rgb), 0.5);
 }
 
 /* Options dropdown menu — reused from old design */
@@ -179,11 +181,11 @@
     position: absolute;
     top: 100%;
     right: 0;
-    margin-top: 4px;
+    margin-top: var(--space-2);
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 0.25rem;
+    border-radius: var(--radius-md);
+    padding: var(--space-2);
     display: flex;
     flex-direction: column;
     min-width: 120px;
@@ -195,10 +197,10 @@
     background: transparent;
     border: none;
     text-align: left;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
+    padding: var(--space-4) var(--space-5);
+    font-size: var(--text-md);
     color: var(--foreground);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
 }
 
@@ -207,7 +209,7 @@
 }
 
 .menuDanger {
-    color: #ef4444 !important;
+    color: var(--danger) !important;
 }
 
 .menuDanger:disabled {
@@ -225,7 +227,7 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 1rem 0.75rem 0.75rem;
+    padding: var(--space-6) var(--space-5) var(--space-5);
     color: inherit;
     width: 100%;
     height: 100%;
@@ -241,7 +243,7 @@
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     line-height: 1.3;
     word-break: break-word;
 }
@@ -253,7 +255,7 @@
     left: 0;
     right: 0;
     text-align: center;
-    font-size: 0.65rem;
+    font-size: var(--text-2xs);
     opacity: 0.5;
     pointer-events: none;
 }
@@ -261,7 +263,7 @@
 /* Doc count — pinned to bottom via flex flow */
 .cardDocCount {
     margin-top: auto;
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
     opacity: 0.7;
     position: relative;
     z-index: 1;
@@ -272,37 +274,37 @@
     position: absolute;
     inset: 0;
     background: rgba(var(--background-rgb), 0.95);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: var(--space-4);
     z-index: 5;
-    padding: 0.75rem;
+    padding: var(--space-5);
 }
 
 .cardEditInput {
     width: 100%;
-    padding: 0.4rem 0.5rem;
+    padding: var(--space-3) var(--space-4);
     background: var(--background);
     border: 1px solid var(--accent);
     color: var(--foreground);
-    border-radius: 4px;
-    font-size: 0.85rem;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-md);
     outline: none;
     text-align: center;
 }
 
 .cardDeleteText {
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     color: var(--foreground);
     font-weight: 600;
 }
 
 .cardDeleteActions {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-4);
 }
 
 
@@ -316,7 +318,7 @@
     color: white;
     box-shadow: 4px 4px 16px rgba(0,0,0,0.45),
                inset -1px 0 0 rgba(var(--overlay-rgb),0.1);
-    border-radius: 2px 6px 6px 2px;
+    border-radius: var(--radius-xs) var(--radius-md) var(--radius-md) var(--radius-xs);
     overflow: hidden;
 }
 
@@ -328,10 +330,10 @@
     top: 0;
     width: 10px;
     height: 100%;
-    background: rgba(0, 0, 0, 0.25);
+    background: rgba(var(--overlay-rgb), 0.25);
     pointer-events: none;
     z-index: 2;
-    border-radius: 2px 0 0 2px;
+    border-radius: var(--radius-xs) 0 0 var(--radius-xs);
 }
 
 .card_novel .cardTitle {
@@ -362,13 +364,13 @@
 .card_screenplay .cardTitle {
     font-family: var(--font-mono, monospace);
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: var(--text-md);
     color: var(--surface-mid);
 }
 
 .card_screenplay .cardDecor {
     font-family: monospace;
-    font-size: 0.65rem;
+    font-size: var(--text-2xs);
     color: #999;
     opacity: 1;
 }
@@ -405,14 +407,14 @@
 .card_poetry .cardTitle {
     font-family: var(--font-serif);
     font-style: italic;
-    font-size: 0.9rem;
+    font-size: var(--text-md);
     color: #3d2b1f;
-    padding: 0.5rem 0;
+    padding: var(--space-4) 0;
 }
 
 .card_poetry .cardDecor {
     color: #c8b89a;
-    font-size: 0.7rem;
+    font-size: var(--text-2xs);
     opacity: 1;
 }
 
@@ -434,7 +436,7 @@
 .card_markdown::before {
     content: '#';
     position: absolute;
-    font-size: 5rem;
+    font-size: var(--text-hero);
     color: var(--foreground);
     opacity: 0.08;
     bottom: 8px;
@@ -448,7 +450,7 @@
 
 .card_markdown .cardTitle {
     font-family: var(--font-mono, monospace);
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     font-weight: 600;
     color: var(--foreground);
     position: relative;
@@ -456,7 +458,7 @@
 }
 
 .card_markdown .cardDocCount {
-    color: rgba(var(--overlay-rgb),0.45);
+    color: var(--muted);
 }
 
 .card_markdown:hover {
@@ -468,7 +470,7 @@
 
 /* ======== FOOTER ======== */
 .footer {
-    padding: 1rem 1.5rem;
+    padding: var(--space-6) var(--space-7);
     border-top: 1px solid var(--border);
     background: rgba(var(--background-rgb), 0.3);
 }
@@ -477,12 +479,12 @@
     width: 100%;
     background: transparent;
     border: 1px dashed var(--border);
-    border-radius: 6px;
-    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
     color: var(--muted);
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--dur-3);
 }
 
 .createTrigger:hover {
@@ -493,25 +495,25 @@
 .createForm {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: var(--space-5);
 }
 
 /* Writing type selector row */
 .typeSelector {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-4);
 }
 
 .typeSelectorBtn {
     flex: 1;
-    padding: 0.5rem 0.25rem;
+    padding: var(--space-4) var(--space-2);
     background: transparent;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     color: var(--muted);
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     cursor: pointer;
-    transition: all 150ms ease;
+    transition: all var(--dur-2) var(--ease-standard);
     text-align: center;
 }
 
@@ -529,12 +531,12 @@
 
 .createInput {
     width: 100%;
-    padding: 0.75rem;
+    padding: var(--space-5);
     background: var(--background);
     color: var(--foreground);
     border: 1px solid var(--border);
-    border-radius: 6px;
-    font-size: 0.95rem;
+    border-radius: var(--radius-md);
+    font-size: var(--text-lg);
     box-sizing: border-box;
 }
 
@@ -546,17 +548,17 @@
 .formActions {
     display: flex;
     justify-content: flex-end;
-    gap: 0.5rem;
+    gap: var(--space-4);
 }
 
 .cancelBtn {
-    padding: 0.4rem 0.75rem;
+    padding: var(--space-3) var(--space-5);
     background: transparent;
     border: none;
     color: var(--muted);
     cursor: pointer;
-    border-radius: 4px;
-    font-size: 0.85rem;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-md);
 }
 
 .cancelBtn:hover {
@@ -564,14 +566,14 @@
 }
 
 .confirmBtn {
-    padding: 0.4rem 0.75rem;
+    padding: var(--space-3) var(--space-5);
     background: var(--accent);
-    color: white;
+    color: var(--on-accent);
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     font-weight: 500;
-    font-size: 0.85rem;
+    font-size: var(--text-md);
 }
 
 .confirmBtn:disabled {
@@ -580,15 +582,26 @@
 }
 
 .dangerBtn {
-    padding: 0.3rem 0.6rem;
-    background: #ef4444;
+    padding: var(--space-2) var(--space-4);
+    background: var(--danger);
     color: white;
     border: none;
-    border-radius: 4px;
-    font-size: 0.8rem;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
     cursor: pointer;
 }
 
 .dangerBtn:hover {
     background: #dc2626;
+}
+/* Text that only assistive tech reads. Matches HomePage.module.css. */
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: calc(var(--space-1) * -1);
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
 }

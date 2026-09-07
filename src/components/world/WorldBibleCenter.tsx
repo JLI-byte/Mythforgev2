@@ -6,7 +6,9 @@ import { getWorldBibleConfig, SUBCATEGORY_LABELS, SUBCATEGORY_ICONS } from '@/li
 import { sanitizeLabel } from '@/lib/sanitize';
 import { worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
 import { folderMemberSet } from '@/lib/folderTree';
+import { FileText } from 'lucide-react';
 import ArticleView from './ArticleView';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 import styles from './WorldBibleCenter.module.css';
 
@@ -312,6 +314,7 @@ export default function WorldBibleCenter() {
                     <input
                         className={styles.newFolderInput}
                         autoFocus
+                        aria-label="Article title"
                         placeholder="Article title…"
                         value={draftName}
                         onChange={(e) => setDraftName(e.target.value)}
@@ -323,6 +326,7 @@ export default function WorldBibleCenter() {
                     {effectiveTypes(currentFolder).length > 1 && (
                         <select
                             className={styles.newFolderSelect}
+                            aria-label="Article category"
                             value={draftType}
                             onChange={(e) => setDraftType(e.target.value as EntityType)}
                         >
@@ -361,6 +365,7 @@ export default function WorldBibleCenter() {
                     <input
                         className={styles.newFolderInput}
                         autoFocus
+                        aria-label="Folder name"
                         placeholder="Folder name…"
                         value={draftName}
                         onChange={(e) => setDraftName(e.target.value)}
@@ -398,6 +403,7 @@ export default function WorldBibleCenter() {
                     <input
                         className={styles.newFolderInput}
                         autoFocus
+                        aria-label="Article title"
                         placeholder="Article title…"
                         value={draftName}
                         onChange={(e) => setDraftName(e.target.value)}
@@ -409,6 +415,7 @@ export default function WorldBibleCenter() {
                     {effectiveTypes(currentFolder).length > 1 && (
                         <select
                             className={styles.newFolderSelect}
+                            aria-label="Article category"
                             value={draftType}
                             onChange={(e) => setDraftType(e.target.value as EntityType)}
                         >
@@ -430,7 +437,7 @@ export default function WorldBibleCenter() {
         ) : (
             <button className={`${styles.strip} ${styles.stripNew}`} onClick={() => openCreate('article', currentFolder)}>
                 <span className={styles.stripBody}>
-                    <span className={styles.stripIcon}>📄</span>
+                    <span className={styles.stripIcon}><FileText size={32} aria-hidden="true" /></span>
                     <span className={styles.stripName}>New Article</span>
                 </span>
             </button>
@@ -452,9 +459,7 @@ export default function WorldBibleCenter() {
                         {looseArticles.map(entity => renderCard(entity, UNCAT_COLOR))}
                     </div>
                 ) : (
-                    <div className={styles.emptyState}>
-                        <p className={styles.emptyText}>Nothing here.</p>
-                    </div>
+                    <EmptyState title="Nothing here." />
                 )}
             </div>
         );
@@ -492,7 +497,7 @@ export default function WorldBibleCenter() {
                                 <span className={styles.stripIcon}>{child.icon}</span>
                                 <span className={styles.stripName}>{child.label}</span>
                                 <span className={styles.stripMeta}>
-                                    {count > 0 ? `${count} ${count === 1 ? 'entry' : 'entries'}` : 'No entries yet'}
+                                    {count > 0 ? `${count} ${count === 1 ? 'entry' : 'entries'}` : 'Empty — open to add'}
                                 </span>
                             </span>
                         </button>

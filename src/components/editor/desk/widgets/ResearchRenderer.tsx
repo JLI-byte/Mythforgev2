@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
+import { LayoutGrid, List, Maximize2, Minimize2, X } from 'lucide-react';
 import styles from '../../WritingDesk.module.css';
 
 export function ResearchRenderer({ content, onChange }: { content: any; onChange: (c: any) => void; }) {
@@ -66,7 +67,7 @@ export function ResearchRenderer({ content, onChange }: { content: any; onChange
       <div className={styles.researchCompact}>
         <span className={styles.researchSparkIcon}>✨</span>
         <span className={styles.researchSpark}>{sparkText || 'No inspirations found...'}</span>
-        <button className={styles.sceneControlCompactToggle} onClick={() => onChange({ ...content, isCompact: false })}>↙️</button>
+        <button className={styles.sceneControlCompactToggle} onClick={() => onChange({ ...content, isCompact: false })} aria-label="Expand widget"><Maximize2 size={13} /></button>
       </div>
     );
   }
@@ -80,10 +81,22 @@ export function ResearchRenderer({ content, onChange }: { content: any; onChange
           <button className={styles.structureBtn} onClick={() => addItem('sensory')}>+ Sensory</button>
         </div>
         <div style={{ display: 'flex', gap: '4px' }}>
-          <button className={styles.paletteControlBtn} onClick={() => onChange({ ...content, viewMode: viewMode === 'gallery' ? 'list' : 'gallery' })} title="Toggle Layout">
-            {viewMode === 'gallery' ? '📋' : '🖼️'}
+          <button
+            className={styles.paletteControlBtn}
+            onClick={() => onChange({ ...content, viewMode: viewMode === 'gallery' ? 'list' : 'gallery' })}
+            title="Toggle Layout"
+            aria-label={viewMode === 'gallery' ? 'Switch to list view' : 'Switch to gallery view'}
+          >
+            {viewMode === 'gallery' ? <List size={14} /> : <LayoutGrid size={14} />}
           </button>
-          <button className={styles.sceneControlCompactToggle} onClick={() => onChange({ ...content, isCompact: true })}>↗️</button>
+          <button
+            className={styles.sceneControlCompactToggle}
+            onClick={() => onChange({ ...content, isCompact: true })}
+            title="Collapse"
+            aria-label="Collapse"
+          >
+            <Minimize2 size={14} />
+          </button>
         </div>
       </div>
 
@@ -91,18 +104,19 @@ export function ResearchRenderer({ content, onChange }: { content: any; onChange
         <div className={viewMode === 'gallery' ? styles.moodboardGrid : styles.beatList}>
           {localItems.map((item: any) => (
             <div key={item.id} className={styles.researchCard}>
-              <button className={styles.researchRemove} onClick={() => removeItem(item.id)}>×</button>
+              <button className={styles.researchRemove} onClick={() => removeItem(item.id)} aria-label="Remove research item"><X size={12} /></button>
               
               {item.type === 'image' && (
                 <>
                   {item.content ? (
                     <img className={styles.researchImage} src={item.content} alt="Mood" />
                   ) : (
-                    <div className={styles.researchImage} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: '0.6rem' }}>No URL provided</div>
+                    <div className={styles.researchImage} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: '0.6875rem' }}>No URL provided</div>
                   )}
                   <input 
+                    aria-label="Image URL"
                     className={styles.beatTitleInput} 
-                    style={{ padding: '4px 8px', fontSize: '0.65rem' }}
+                    style={{ padding: '4px 8px', fontSize: '0.6875rem' }}
                     placeholder="Image URL..."
                     value={item.content}
                     onChange={e => updateItemDebounced(item.id, { content: e.target.value })}
@@ -112,6 +126,7 @@ export function ResearchRenderer({ content, onChange }: { content: any; onChange
 
               {item.type === 'text' && (
                 <textarea 
+                  aria-label="Research note"
                   className={styles.researchTextItem}
                   placeholder="Paste snippet or sensory note here..."
                   value={item.content}
@@ -132,8 +147,9 @@ export function ResearchRenderer({ content, onChange }: { content: any; onChange
                     <div key={s.key} className={styles.researchSensoryItem}>
                       <span className={styles.researchSensoryIcon} title={s.label}>{s.icon}</span>
                       <input 
+                        aria-label={s.label}
                         className={styles.beatTitleInput} 
-                        style={{ fontSize: '0.65rem', padding: 0 }}
+                        style={{ fontSize: '0.6875rem', padding: 0 }}
                         placeholder={`${s.label}...`}
                         value={item.content[s.key] || ''}
                         onChange={e => updateItemDebounced(item.id, { content: { ...item.content, [s.key]: e.target.value } })}
@@ -145,8 +161,9 @@ export function ResearchRenderer({ content, onChange }: { content: any; onChange
 
               <div className={styles.researchTags}>
                 <input 
+                  aria-label="Add a tag"
                   className={styles.beatTitleInput}
-                  style={{ fontSize: '0.55rem', opacity: 0.5 }}
+                  style={{ fontSize: '0.6875rem', opacity: 0.5 }}
                   placeholder="+ Tag"
                   onKeyDown={e => {
                     if (e.key === 'Enter') {

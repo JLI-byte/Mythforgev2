@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { ChevronDown } from 'lucide-react';
 import styles from './GlassDropdown.module.css';
 
 /**
@@ -88,7 +89,7 @@ export function GlassDropdown({ options, value, onChange, width, title }: GlassD
         }}
       >
         <span className={styles.triggerLabel}>{selected?.label ?? value}</span>
-        <span className={styles.chevron}>▾</span>
+        <span className={styles.chevron} aria-hidden="true"><ChevronDown size={12} /></span>
       </button>
 
       {open && createPortal(

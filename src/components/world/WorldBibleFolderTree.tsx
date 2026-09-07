@@ -6,6 +6,7 @@ import { useWorkspaceStore, EntityType, WorldBibleRootConfig } from '@/store/wor
 import { getWorldBibleConfig } from '@/lib/worldBibleNav';
 import { worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
 import { folderMemberSet } from '@/lib/folderTree';
+import { EmptyState } from '@/components/ui/EmptyState';
 import styles from './WorldBibleFolderTree.module.css';
 
 const CONFIRM_TIMEOUT_MS = 4000;
@@ -37,6 +38,7 @@ export default function WorldBibleFolderTree({ isDraft }: WorldBibleFolderTreePr
     const updateWorldBibleRoot = useWorkspaceStore(s => s.updateWorldBibleRoot);
     const deleteWorldBibleRoot = useWorkspaceStore(s => s.deleteWorldBibleRoot);
     const updateEntity = useWorkspaceStore(s => s.updateEntity);
+    const moveWorldBibleType = useWorkspaceStore(s => s.moveWorldBibleType);
 
     const layout = isDraft
         ? (draftLayout ?? { roots: [] })
@@ -93,7 +95,17 @@ export default function WorldBibleFolderTree({ isDraft }: WorldBibleFolderTreePr
         setDragOverId(null);
         const entityId = e.dataTransfer.getData('entityId');
         const folderId = e.dataTransfer.getData('folderId');
-        if (entityId && targetFolderId !== undefined && !isDraft) {
+        const typeMove = e.dataTransfer.getData('typeMove');
+        if (typeMove && targetFolderId !== undefined) {
+            // "<entityType>:<sourceFolderId>" — a claim moving between folders.
+            // The same-folder case is refused rather than passed through: the
+            // store's source branch matches first and returns early, so a move
+            // onto the owning folder would strip the claim instead of keeping it.
+            const [type, fromRootId] = typeMove.split(':');
+            if (type && fromRootId && fromRootId !== targetFolderId) {
+                moveWorldBibleType(type as EntityType, fromRootId, targetFolderId, isDraft);
+            }
+        } else if (entityId && targetFolderId !== undefined && !isDraft) {
             updateEntity(entityId, { categoryId: targetFolderId });
         } else if (folderId && folderId !== targetFolderId) {
             // Store cycle guard silently rejects loops.
@@ -104,7 +116,7 @@ export default function WorldBibleFolderTree({ isDraft }: WorldBibleFolderTreePr
     /** dragover can't read getData; dataTransfer type keys are lowercased. */
     const acceptsDrag = (e: React.DragEvent, allowArticles: boolean) => {
         const t = e.dataTransfer.types;
-        return t.includes('folderid') || (allowArticles && !isDraft && t.includes('entityid'));
+        return t.includes('folderid') || t.includes('typemove') || (allowArticles && !isDraft && t.includes('entityid'));
     };
 
     const renderArticleRow = (entity: (typeof worldEntities)[number], depth: number) => (
@@ -155,6 +167,7 @@ export default function WorldBibleFolderTree({ isDraft }: WorldBibleFolderTreePr
                     <span className={styles.folderIcon}>{folder.icon}</span>
                     <input
                         className={styles.folderName}
+                        aria-label="Folder name"
                         value={folder.label}
                         onChange={(e) => updateWorldBibleRoot(folder.id, { label: e.target.value }, isDraft)}
                         onClick={(e) => e.stopPropagation()}
@@ -164,6 +177,29 @@ export default function WorldBibleFolderTree({ isDraft }: WorldBibleFolderTreePr
                         onDragStart={(e) => { e.preventDefault(); e.stopPropagation(); }}
                     />
                     {!isDraft && <span className={styles.count}>{count}</span>}
+                    {folder.entityTypes.length > 0 && (
+                        <div
+                            className={styles.typeChips}
+                            role="group"
+                            aria-label={`Types filed into ${folder.label} by default: ${folder.entityTypes.join(', ')}`}
+                        >
+                            {folder.entityTypes.map(t => (
+                                <span
+                                    key={t}
+                                    className={styles.typeChip}
+                                    draggable
+                                    title={`${t} — drag onto another folder to move it there`}
+                                    onDragStart={(e) => {
+                                        e.stopPropagation();
+                                        e.dataTransfer.setData('typeMove', `${t}:${folder.id}`);
+                                    }}
+                                    onDragEnd={() => setDragOverId(null)}
+                                >
+                                    {TYPE_ICONS[t]} {t}
+                                </span>
+                            ))}
+                        </div>
+                    )}
                     <div className={styles.rowActions}>
                         <button
                             className={styles.rowBtn}
@@ -212,14 +248,14 @@ export default function WorldBibleFolderTree({ isDraft }: WorldBibleFolderTreePr
                 </div>
                 <p className={styles.hint}>
                     {isDraft
-                        ? 'Design the folder structure — drag folders to nest them.'
-                        : 'Drag articles into folders. Drag folders onto each other to nest them.'}
+                        ? 'Design the folder structure — drag folders to nest them, and drag a type tag to change which folder claims it.'
+                        : 'Drag articles into folders. Drag folders onto each other to nest them. Drag a type tag to change which folder new articles of that type land in.'}
                 </p>
 
                 <div className={styles.tree}>
                     {topFolders.map(f => renderFolder(f, 0))}
                     {topFolders.length === 0 && (
-                        <p className={styles.empty}>No folders yet — create one to get started.</p>
+                        <EmptyState title="No folders yet — create one to get started." />
                     )}
                 </div>
 

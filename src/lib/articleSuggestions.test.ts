@@ -3,7 +3,7 @@ import type { DeskWidget } from '@/store/workspaceStore';
 import {
     makeSuggestionsWidget,
     addSuggestionToWidgets,
-    serializeSuggestions,
+    
     type ArticleSuggestion,
 } from './articleSuggestions';
 
@@ -45,19 +45,3 @@ describe('addSuggestionToWidgets', () => {
     });
 });
 
-describe('serializeSuggestions', () => {
-    it('lists pending suggestions with type and target category', () => {
-        const w = makeSuggestionsWidget([
-            suggestion('The Salt Guild', 'faction', { category: 'Factions' }),
-            suggestion('Kael', 'character'),
-        ]);
-        const text = serializeSuggestions([w]);
-        expect(text).toContain('- The Salt Guild (faction) → Factions');
-        expect(text).toContain('- Kael (character)');
-    });
-
-    it('is empty when there is no widget or no suggestions', () => {
-        expect(serializeSuggestions([])).toBe('');
-        expect(serializeSuggestions([makeSuggestionsWidget([])])).toBe('');
-    });
-});

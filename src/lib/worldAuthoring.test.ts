@@ -9,7 +9,7 @@ import {
     resolveCategoryId,
     makeCategoryRoot,
     findEntityByName,
-    serializeWorld,
+    
 } from './worldAuthoring';
 import type { Entity, WorldBibleRootConfig } from '@/store/workspaceStore';
 
@@ -79,43 +79,6 @@ describe('findEntityByName', () => {
         const list = [entity('Kael', 'character'), entity('Veldrath', 'location')];
         expect(findEntityByName(list, 'kael')?.name).toBe('Kael');
         expect(findEntityByName(list, 'missing')).toBeUndefined();
-    });
-});
-
-describe('serializeWorld', () => {
-    it('outlines nested folders, their articles, and unfiled entries', () => {
-        const roots = [
-            root('places', 'Places'),
-            root('cities', 'Cities', [], 'places'),
-        ];
-        const entities = [
-            entity('Veldrath', 'location', 'cities'),
-            entity('Loose Idea', 'lore', undefined),
-        ];
-        const out = serializeWorld(roots, entities);
-        expect(out).toContain('- 📁 Places');
-        expect(out).toContain('  - 📁 Cities');
-        expect(out).toContain('    • Veldrath (location)');
-        expect(out).toContain('- (unfiled)');
-        expect(out).toContain('• Loose Idea (lore)');
-    });
-    it('reports an empty world clearly', () => {
-        expect(serializeWorld([], [])).toContain('no folders or articles');
-    });
-
-    it('includes descriptions inline and full article contents', () => {
-        const roots = [root('places', 'Places')];
-        const doc = buildArticleDoc([{ heading: 'Overview', body: 'A grey city.' }]);
-        const e: Entity = {
-            id: 'v', projectId: 'p', name: 'Veldrath', type: 'location',
-            description: 'A rain-drowned harbor.', articleDoc: doc, createdAt: new Date(), categoryId: 'places',
-        };
-        const out = serializeWorld(roots, [e]);
-        expect(out).toContain('• Veldrath (location) — A rain-drowned harbor.');
-        expect(out).toContain('Article contents:');
-        expect(out).toContain('### Veldrath (location)');
-        expect(out).toContain('Overview');
-        expect(out).toContain('A grey city.');
     });
 });
 

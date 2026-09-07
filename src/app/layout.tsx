@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 };
 
 import { SupabaseSyncProvider } from "@/components/providers/SupabaseSyncProvider";
+import LiveRegion from "@/components/a11y/LiveRegion";
 
 export default function RootLayout({
   children,
@@ -25,6 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${merriweather.variable} ${imFell.variable} ${ebGaramond.variable}`}>
+        <LiveRegion />
         <SupabaseSyncProvider>
           {children}
         </SupabaseSyncProvider>

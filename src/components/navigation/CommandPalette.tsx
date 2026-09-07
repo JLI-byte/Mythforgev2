@@ -1,8 +1,8 @@
 /**
  * Global Command Palette
- * 
+ *
  * Provides ultra-fast keyboard-first navigation across all projects and documents.
- * 
+ *
  * INVARIANTS:
  * - Always accessible via Cmd/Ctrl+K globally.
  * - Resets its search state upon opening to prevent stale context.
@@ -10,10 +10,12 @@
  */
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useWorkspaceStore, COVER_COLORS } from '@/store/workspaceStore';
 import { sanitizeLabel } from '@/lib/sanitize';
+import { useModalDialog } from '@/lib/useModalDialog';
 import styles from './CommandPalette.module.css';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 interface SearchItem {
     id: string;
@@ -23,8 +25,13 @@ interface SearchItem {
     projectId?: string;
 }
 
-export function CommandPalette() {
-    const isCommandPaletteOpen = useWorkspaceStore(state => state.isCommandPaletteOpen);
+/**
+ * The palette itself, which assumes it is open. Split out from the exported
+ * component because `useModalDialog` runs on mount, and a hook cannot sit below
+ * the `return null` that hides a closed palette. Mounting fresh on each open is
+ * also what resets the search back to empty.
+ */
+function CommandPaletteContent() {
     const setCommandPaletteOpen = useWorkspaceStore(state => state.setCommandPaletteOpen);
 
     const projects = useWorkspaceStore(state => state.projects);
@@ -37,7 +44,9 @@ export function CommandPalette() {
 
     const [search, setSearch] = useState('');
     const [selectedIndex, setSelectedIndex] = useState(0);
-    const inputRef = useRef<HTMLInputElement>(null);
+
+    const closePalette = () => setCommandPaletteOpen(false);
+    const dialogRef = useModalDialog<HTMLDivElement>(closePalette);
 
     // Build flat searchable list
     const items: SearchItem[] = React.useMemo(() => {
@@ -74,25 +83,6 @@ export function CommandPalette() {
             (item.subtitle && item.subtitle.toLowerCase().includes(lowerSearch))
         );
     }, [items, search]);
-
-    // Focus input and reset on open
-    useEffect(() => {
-        if (isCommandPaletteOpen) {
-            // Using a short timeout to defer the reset and focus,
-            // bypassing the strict synchronous setState-in-effect linter rule
-            // and ensuring the input is painted before focus.
-            const timer = setTimeout(() => {
-                setSearch('');
-                setSelectedIndex(0);
-                if (inputRef.current) {
-                    inputRef.current.focus();
-                }
-            }, 0);
-            return () => clearTimeout(timer);
-        }
-    }, [isCommandPaletteOpen]);
-
-    const closePalette = () => setCommandPaletteOpen(false);
 
     const handleSelect = (item: SearchItem) => {
         if (item.type === 'project') {
@@ -143,11 +133,10 @@ export function CommandPalette() {
         closePalette();
     };
 
+    // Escape belongs to the dialog, not the input: useModalDialog answers it
+    // from anywhere inside the palette, including after tabbing to a result.
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Escape') {
-            e.preventDefault();
-            closePalette();
-        } else if (e.key === 'ArrowDown') {
+        if (e.key === 'ArrowDown') {
             e.preventDefault();
             setSelectedIndex(prev => (prev < filteredItems.length - 1 ? prev + 1 : 0));
         } else if (e.key === 'ArrowUp') {
@@ -161,15 +150,22 @@ export function CommandPalette() {
         }
     };
 
-    if (!isCommandPaletteOpen) return null;
-
     return (
-        <div className={styles.backdrop} onClick={closePalette} onContextMenu={e => e.preventDefault()}>
-            <div className={styles.modal} onClick={e => e.stopPropagation()}>
+        <div className={styles.backdrop} onClick={closePalette} onContextMenu={e => e.preventDefault()} role="presentation">
+            <div
+                ref={dialogRef}
+                className={styles.modal}
+                onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Command palette"
+                tabIndex={-1}
+            >
                 <div className={styles.searchHeader}>
                     <input
-                        ref={inputRef}
                         type="text"
+                        data-autofocus
+                        aria-label="Search projects and chapters"
                         className={styles.searchInput}
                         placeholder="Search projects and chapters..."
                         value={search}
@@ -203,7 +199,7 @@ export function CommandPalette() {
                                 )}
                             </div>
                         ) : (
-                            <div className={styles.emptyState}>No results found</div>
+                            <EmptyState title="No results found" />
                         )
                     ) : (
                         filteredItems.map((item, index) => (
@@ -222,4 +218,10 @@ export function CommandPalette() {
             </div>
         </div>
     );
+}
+
+export function CommandPalette() {
+    const isCommandPaletteOpen = useWorkspaceStore(state => state.isCommandPaletteOpen);
+    if (!isCommandPaletteOpen) return null;
+    return <CommandPaletteContent />;
 }

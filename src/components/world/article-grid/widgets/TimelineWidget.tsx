@@ -1,8 +1,10 @@
 "use client";
 
+import { X } from 'lucide-react';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../ArticleGridEditor.module.css';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 interface TimelineEvent {
   id: string;
@@ -70,9 +72,7 @@ export function TimelineWidget({ content, onChange }: { content: any; onChange: 
 
       {/* Timeline display */}
       {events.length === 0 ? (
-        <div className={styles.timelineEmpty}>
-          <span>No events yet — click + Add Event</span>
-        </div>
+        <EmptyState title="No events yet — click + Add Event" />
       ) : orientation === 'horizontal' ? (
         /* ── HORIZONTAL MODE ── */
         <div className={styles.timelineHoriz}>
@@ -87,18 +87,21 @@ export function TimelineWidget({ content, onChange }: { content: any; onChange: 
                 <div className={`${styles.timelineHorizCard} ${i % 2 === 0 ? styles.timelineCardAbove : styles.timelineCardBelow}`}>
                   <input
                     className={styles.timelineDateInput}
+                    aria-label={`Event ${i + 1} date`}
                     value={ev.date}
                     placeholder="Date / Era"
                     onChange={e => updateEvent(ev.id, 'date', e.target.value)}
                   />
                   <input
                     className={styles.timelineLabelInput}
+                    aria-label={`Event ${i + 1} title`}
                     value={ev.label}
                     placeholder="Event title"
                     onChange={e => updateEvent(ev.id, 'label', e.target.value)}
                   />
                   <textarea
                     className={styles.timelineDescInput}
+                    aria-label={`Event ${i + 1} description`}
                     value={ev.description}
                     placeholder="Description (optional)"
                     onChange={e => updateEvent(ev.id, 'description', e.target.value)}
@@ -106,6 +109,7 @@ export function TimelineWidget({ content, onChange }: { content: any; onChange: 
                   />
                   <select
                     className={styles.timelineEntitySelect}
+                    aria-label={`Event ${i + 1} linked entity`}
                     value={ev.entityId}
                     onChange={e => updateEvent(ev.id, 'entityId', e.target.value)}
                   >
@@ -118,7 +122,8 @@ export function TimelineWidget({ content, onChange }: { content: any; onChange: 
                     className={styles.timelineEventDelete}
                     onClick={() => removeEvent(ev.id)}
                     title="Remove event"
-                  >×</button>
+                    aria-label="Remove event"
+                  ><X size={14} /></button>
                 </div>
               </div>
             ))}
@@ -140,6 +145,7 @@ export function TimelineWidget({ content, onChange }: { content: any; onChange: 
                 <div className={styles.timelineVertCardHeader}>
                   <input
                     className={styles.timelineLabelInput}
+                    aria-label={`Event ${i + 1} title`}
                     value={ev.label}
                     placeholder="Event title"
                     onChange={e => updateEvent(ev.id, 'label', e.target.value)}
@@ -148,16 +154,19 @@ export function TimelineWidget({ content, onChange }: { content: any; onChange: 
                     className={styles.timelineEventDelete}
                     onClick={() => removeEvent(ev.id)}
                     title="Remove event"
-                  >×</button>
+                    aria-label="Remove event"
+                  ><X size={14} /></button>
                 </div>
                 <input
                   className={styles.timelineDateInput}
+                  aria-label={`Event ${i + 1} date`}
                   value={ev.date}
                   placeholder="Date / Era"
                   onChange={e => updateEvent(ev.id, 'date', e.target.value)}
                 />
                 <textarea
                   className={styles.timelineDescInput}
+                  aria-label={`Event ${i + 1} description`}
                   value={ev.description}
                   placeholder="Description (optional)"
                   onChange={e => updateEvent(ev.id, 'description', e.target.value)}
@@ -165,6 +174,7 @@ export function TimelineWidget({ content, onChange }: { content: any; onChange: 
                 />
                 <select
                   className={styles.timelineEntitySelect}
+                  aria-label={`Event ${i + 1} linked entity`}
                   value={ev.entityId}
                   onChange={e => updateEvent(ev.id, 'entityId', e.target.value)}
                 >

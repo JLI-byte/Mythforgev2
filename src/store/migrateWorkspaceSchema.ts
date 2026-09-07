@@ -2,6 +2,7 @@
    untyped by design at the migration boundary. */
 import { migratePerShelfBibles } from './migratePerShelfBibles';
 import { migrateArticleFolders } from './migrateArticleFolders';
+import { normaliseWithdrawnModes } from './normaliseWithdrawnModes';
 
 /**
  * The full, ordered workspace-schema migration chain. Both hydration paths
@@ -10,5 +11,5 @@ import { migrateArticleFolders } from './migrateArticleFolders';
  * Every step is idempotent, so re-running the chain is always safe.
  */
 export function migrateWorkspaceSchema(data: Record<string, any>): Record<string, any> {
-    return migrateArticleFolders(migratePerShelfBibles(data));
+    return normaliseWithdrawnModes(migrateArticleFolders(migratePerShelfBibles(data)));
 }

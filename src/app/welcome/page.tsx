@@ -8,7 +8,7 @@ import ThemeSwitcher from './shared/ThemeSwitcher';
 /**
  * LoreCanvas public beta landing — theme shell.
  *
- * Unauthenticated visitors land here (see middleware.ts). The actual page is
+ * Unauthenticated visitors land here (see proxy.ts). The actual page is
  * a self-contained theme component picked from the registry; the visitor's
  * choice persists in localStorage. Fantasy Storybook is the default.
  */

@@ -1,8 +1,10 @@
 "use client";
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useId, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import styles from './NewProjectModal.module.css';
 import { useWorkspaceStore, COVER_COLORS } from '@/store/workspaceStore';
+import { useModalDialog } from '@/lib/useModalDialog';
 
 interface NewProjectModalProps {
     isOpen: boolean;
@@ -19,6 +21,16 @@ const MODES: { id: WritingMode; label: string; icon: string; desc: string }[] = 
 ];
 
 export function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
+    if (!isOpen) return null;
+    return <NewProjectModalContent onClose={onClose} />;
+}
+
+/**
+ * The open dialog. Split out from the wrapper above because useModalDialog
+ * moves focus on mount, which only means anything if the closed dialog is
+ * unmounted rather than returning null from inside the same component.
+ */
+function NewProjectModalContent({ onClose }: Omit<NewProjectModalProps, 'isOpen'>) {
     const projects = useWorkspaceStore(state => state.projects);
     const worlds = useWorkspaceStore(state => state.worlds);
     const addProject = useWorkspaceStore(state => state.addProject);
@@ -29,6 +41,7 @@ export function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
     const setActiveScene = useWorkspaceStore(state => state.setActiveScene);
 
     const [title, setTitle] = useState('');
+    const fieldId = useId();
     const [selectedMode, setSelectedMode] = useState<WritingMode>('novel');
     const [selectedWorldId, setSelectedWorldId] = useState<string>('');
     const [coverImageUrl, setCoverImageUrl] = useState<string>('');
@@ -54,13 +67,7 @@ export function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
         reader.readAsDataURL(file);
     };
 
-    useEffect(() => {
-        const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose(); };
-        if (isOpen) document.addEventListener('keydown', handleKey);
-        return () => document.removeEventListener('keydown', handleKey);
-    }, [isOpen, handleClose]);
-
-    if (!isOpen) return null;
+    const dialogRef = useModalDialog<HTMLDivElement>(handleClose);
 
     const handleCreate = () => {
         if (!title.trim()) return;
@@ -88,11 +95,21 @@ export function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
     if (typeof document === 'undefined') return null;
 
     return createPortal(
-        <div className={styles.overlay} onClick={handleClose}>
-            <div className={styles.modal} onClick={e => e.stopPropagation()}>
+        <div className={styles.overlay} onClick={handleClose} role="presentation">
+            <div
+                ref={dialogRef}
+                className={styles.modal}
+                onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="new-project-dialog-title"
+                tabIndex={-1}
+            >
                 <div className={styles.header}>
-                    <h2 className={styles.title}>New Project</h2>
-                    <button className={styles.closeBtn} onClick={handleClose}>✕</button>
+                    <h2 className={styles.title} id="new-project-dialog-title">New Project</h2>
+                    <button className={styles.closeBtn} onClick={handleClose} aria-label="Close">
+                        <X size={18} />
+                    </button>
                 </div>
 
                 {/* Cover preview */}
@@ -146,17 +163,19 @@ export function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
                 <input
                     className={styles.titleInput}
                     type="text"
+                    aria-label="Project title"
                     placeholder="Project title..."
                     value={title}
                     onChange={e => setTitle(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter' && title.trim()) handleCreate(); }}
-                    autoFocus
+                    data-autofocus
                 />
 
                 {/* World selector */}
                 <div className={styles.selectionGroup}>
-                    <label className={styles.selectionLabel}>Associated World</label>
+                    <label className={styles.selectionLabel} htmlFor={`${fieldId}-world`}>Associated World</label>
                     <select 
+                        id={`${fieldId}-world`}
                         className={styles.worldSelect}
                         value={selectedWorldId}
                         onChange={e => setSelectedWorldId(e.target.value)}

@@ -10,10 +10,12 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { X } from 'lucide-react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from './ArticleGridEditor.module.css';
 import { GridWidget, WidgetType, ResizeDirection, AlignGuide } from './article-grid/gridTypes';
 import { ArticleTab, parseArticleTabs } from './article-grid/articleTabs';
+import { announce } from '@/lib/liveAnnouncer';
 import {
   MIN_WIDTH,
   MIN_HEIGHT,
@@ -101,6 +103,7 @@ export default function ArticleGridEditor({ entityId, hideGrid = false }: { enti
     saveTimer.current = setTimeout(() => {
       updateEntityDoc(entityId, JSON.stringify(nextTabs));
       setSaveLabel('saved');
+      announce('Article saved');
       setTimeout(() => setSaveLabel('idle'), 2000);
     }, 400);
   }, [entityId, updateEntityDoc]);
@@ -582,6 +585,7 @@ export default function ArticleGridEditor({ entityId, hideGrid = false }: { enti
                       {renamingTabId === tab.id ? (
                         <input
                           className={styles.tabRenameInputSmall}
+                          aria-label="Page name"
                           defaultValue={tab.name}
                           autoFocus
                           onBlur={(e) => renameTab(tab.id, e.target.value)}
@@ -594,7 +598,7 @@ export default function ArticleGridEditor({ entityId, hideGrid = false }: { enti
                       )}
                     </div>
                   ))}
-                  <button className={styles.tabAddSmall} onClick={(e) => { e.stopPropagation(); addTab(); }}>＋</button>
+                  <button className={styles.tabAddSmall} aria-label="Add a tab" onClick={(e) => { e.stopPropagation(); addTab(); }}>＋</button>
                 </div>
               </div>
             </div>
@@ -636,7 +640,7 @@ export default function ArticleGridEditor({ entityId, hideGrid = false }: { enti
                         Choose type
                       </button>
                     )}
-                    <button className={styles.widgetDelete} onClick={() => applyTabChangeWithHistory(deleteWidgetById(widgets, widget.id))} title="Delete widget">×</button>
+                    <button className={styles.widgetDelete} onClick={() => applyTabChangeWithHistory(deleteWidgetById(widgets, widget.id))} title="Delete widget" aria-label="Delete widget"><X size={14} /></button>
                   </div>
                 </div>
                 <div className={styles.widgetContent}>

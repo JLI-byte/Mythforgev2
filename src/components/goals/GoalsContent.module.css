@@ -5,49 +5,48 @@
     flex-direction: column;
     overflow-y: auto;
     height: 100%;
-    padding-bottom: 1rem;
+    padding-bottom: var(--space-6);
 }
-
 
 /* ========================================
    ZONE 1 — Goal Setup Banner
    ======================================== */
 .setupBanner {
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    background: linear-gradient(135deg, var(--surface-mid), var(--surface-high));
     border: 1px solid rgba(var(--overlay-rgb), 0.08);
-    border-radius: 10px;
-    padding: 1rem;
-    margin: 0.75rem;
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    margin: var(--space-5);
 }
 
 .setupTitle {
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     font-weight: 600;
-    color: white;
-    margin: 0 0 0.25rem 0;
+    color: var(--foreground);
+    margin: 0 0 var(--space-2) 0;
 }
 
 .setupSubtext {
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     color: rgba(var(--overlay-rgb), 0.6);
-    margin: 0 0 0.75rem 0;
+    margin: 0 0 var(--space-5) 0;
 }
 
 .setupOptions {
     display: flex;
-    gap: 0.4rem;
-    margin-bottom: 0.4rem;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
 }
 
 .setupOption {
     border: 1px solid rgba(var(--overlay-rgb), 0.2);
     background: transparent;
     color: rgba(var(--overlay-rgb), 0.7);
-    border-radius: 6px;
-    padding: 0.4rem 0.8rem;
-    font-size: 0.82rem;
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-5);
+    font-size: var(--text-sm);
     cursor: pointer;
-    transition: all 150ms ease;
+    transition: all var(--dur-2) var(--ease-standard);
     flex: 1;
 }
 
@@ -56,16 +55,16 @@
 }
 
 .setupOptionSelected {
-    background: white;
-    color: #1a1a2e;
-    border-color: white;
+    background: var(--foreground);
+    color: var(--background);
+    border-color: var(--foreground);
     font-weight: 600;
 }
 
 .setupHint {
-    font-size: 0.72rem;
-    color: rgba(var(--overlay-rgb), 0.4);
-    margin: 0.3rem 0 0.75rem 0;
+    font-size: var(--text-xs);
+    color: var(--muted);
+    margin: var(--space-2) 0 var(--space-5) 0;
 }
 
 .setupStartBtn {
@@ -73,18 +72,17 @@
     background: #F5C842;
     color: var(--surface-mid);
     font-weight: 700;
-    font-size: 0.88rem;
+    font-size: var(--text-md);
     border: none;
-    border-radius: 8px;
-    padding: 0.6rem;
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
     cursor: pointer;
-    transition: opacity 150ms ease;
+    transition: opacity var(--dur-2) var(--ease-standard);
 }
 
 .setupStartBtn:hover {
     opacity: 0.9;
 }
-
 
 /* ========================================
    ZONE 2 — Today Card (hero)
@@ -92,12 +90,12 @@
 .todayCard {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    margin: 0 0.75rem 0.75rem 0.75rem;
-    padding: 1rem;
+    border-radius: var(--radius-xl);
+    margin: 0 var(--space-5) var(--space-5) var(--space-5);
+    padding: var(--space-6);
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: var(--space-6);
     min-height: 120px;
 }
 
@@ -123,14 +121,14 @@
 }
 
 .ringWords {
-    font-size: 1.1rem;
+    font-size: var(--text-lg);
     font-weight: 700;
     color: var(--foreground);
     line-height: 1.1;
 }
 
 .ringTarget {
-    font-size: 0.65rem;
+    font-size: var(--text-2xs);
     color: var(--muted);
 }
 
@@ -139,7 +137,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--space-2);
     min-width: 0;
 }
 
@@ -147,18 +145,18 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.1rem;
+    gap: var(--space-1);
 }
 
 .streakNumber {
-    font-size: 1.8rem;
+    font-size: var(--text-display);
     font-weight: 800;
     color: var(--foreground);
     line-height: 1;
 }
 
 .streakLabel {
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
     color: var(--muted);
     line-height: 1;
 }
@@ -167,12 +165,16 @@
     background: none;
     border: none;
     padding: 0;
-    margin-left: 0.5rem;
+    margin-left: var(--space-4);
     color: var(--accent);
     cursor: pointer;
-    font-size: 0.9rem;
     opacity: 0.6;
-    transition: opacity 0.15s ease;
+    transition: opacity var(--dur-2) var(--ease-standard);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
 }
 
 .streakShare:hover {
@@ -181,13 +183,13 @@
 
 .goalMet {
     color: #22c55e;
-    font-size: 0.82rem;
+    font-size: var(--text-sm);
     font-weight: 500;
 }
 
 .goalRemaining {
     color: var(--muted);
-    font-size: 0.82rem;
+    font-size: var(--text-sm);
 }
 
 /* Right: session info */
@@ -195,7 +197,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 0.6rem;
+    gap: var(--space-4);
     flex-shrink: 0;
 }
 
@@ -206,57 +208,55 @@
 }
 
 .sessionNumber {
-    font-size: 1.1rem;
+    font-size: var(--text-lg);
     font-weight: 600;
     color: var(--foreground);
     line-height: 1.1;
 }
 
 .sessionLabel {
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
     color: var(--muted);
 }
-
 
 /* ========================================
    Shared section header
    ======================================== */
 .sectionHeader {
-    font-size: 0.78rem;
+    font-size: var(--text-xs);
     font-weight: 600;
     color: var(--muted);
     margin: 0;
-    padding: 0 0.75rem 0.4rem;
+    padding: 0 var(--space-5) var(--space-3);
     text-transform: uppercase;
     letter-spacing: 0.03em;
 }
-
 
 /* ========================================
    ZONE 3 — Calendar Heatmap
    ======================================== */
 .calendarWrap {
-    padding: 0 0.75rem 0.75rem;
+    padding: 0 var(--space-5) var(--space-5);
 }
 
 .calHeaders {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 2px;
-    margin-bottom: 2px;
+    gap: var(--space-1);
+    margin-bottom: var(--space-1);
 }
 
 .calHeaderDay {
     text-align: center;
-    font-size: 0.65rem;
+    font-size: var(--text-2xs);
     color: var(--muted);
-    padding: 0.15rem 0;
+    padding: var(--space-1) 0;
 }
 
 .calGrid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 2px;
+    gap: var(--space-1);
 }
 
 /* Base day cell */
@@ -264,7 +264,7 @@
     width: 100%;
     aspect-ratio: 1;
     max-width: 28px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -273,7 +273,7 @@
 }
 
 .calDayNum {
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
     color: var(--muted);
     line-height: 1;
     opacity: 1;
@@ -341,14 +341,36 @@
     outline-offset: -1px;
 }
 
+/* A missed past day the writer can buy back. Styled as an affordance, not a
+   state: the heatmap colour still says what happened, the dashed ring says it
+   is actionable. A plain hover would be invisible until the pointer arrives. */
+.calDayRepairable {
+    border: 1px dashed rgba(var(--overlay-rgb), 0.45);
+    cursor: pointer;
+    padding: 0;
+    font: inherit;
+    transition: border-color var(--dur-2) var(--ease-standard),
+                background var(--dur-2) var(--ease-standard);
+}
+
+.calDayRepairable:hover,
+.calDayRepairable:focus-visible {
+    border-color: var(--accent);
+    background: var(--accent-subtle);
+}
+
+.repairCount {
+    color: var(--muted);
+}
+
 /* Stats below calendar */
 .calStats {
     display: flex;
     justify-content: space-between;
-    padding: 0.4rem 0 0;
+    padding: var(--space-3) 0 0;
     width: 100%;
     box-sizing: border-box;
-    font-size: 0.78rem;
+    font-size: var(--text-xs);
     color: var(--muted);
     overflow: visible;
 }
@@ -358,34 +380,33 @@
     flex-shrink: 0;
 }
 
-
 /* ========================================
    ZONE 4 — Project Progress
    ======================================== */
 .projectsList {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    padding: 0 0.75rem;
-    margin-bottom: 0.75rem;
+    gap: var(--space-4);
+    padding: 0 var(--space-5);
+    margin-bottom: var(--space-5);
 }
 
 .projectCard {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.75rem;
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
 }
 
 .projectTop {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.4rem;
+    margin-bottom: var(--space-3);
 }
 
 .projectName {
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     font-weight: 600;
     color: var(--foreground);
     overflow: hidden;
@@ -395,15 +416,19 @@
     min-width: 0;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: var(--space-3);
 }
 
 .projectShareIcon {
     opacity: 0.4;
     cursor: pointer;
-    transition: opacity 0.15s ease;
-    font-size: 0.8rem;
+    transition: opacity var(--dur-2) var(--ease-standard);
     color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
 }
 
 .projectShareIcon:hover {
@@ -411,40 +436,30 @@
 }
 
 .projectWords {
-    font-size: 0.78rem;
+    font-size: var(--text-xs);
     color: var(--muted);
     flex-shrink: 0;
-    margin-left: 0.5rem;
+    margin-left: var(--space-4);
 }
 
 .progressBar {
     height: 4px;
-    border-radius: 2px;
+    border-radius: var(--radius-xs);
     background: var(--border);
     overflow: hidden;
-    margin-bottom: 0.25rem;
+    margin-bottom: var(--space-2);
 }
 
 .progressFill {
     height: 100%;
-    border-radius: 2px;
-    transition: width 300ms ease;
+    border-radius: var(--radius-xs);
+    transition: width var(--dur-4) var(--ease-standard);
 }
 
 .projectPct {
-    font-size: 0.7rem;
+    font-size: var(--text-2xs);
     color: var(--muted);
 }
-
-.emptyState {
-    font-size: 0.82rem;
-    color: var(--muted);
-    font-style: italic;
-    text-align: center;
-    padding: 1rem 0.75rem;
-    margin: 0;
-}
-
 
 /* ========================================
    ZONE 5 — Achievements
@@ -453,29 +468,29 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 0.75rem 0.4rem;
+    padding: 0 var(--space-5) var(--space-3);
 }
 
 .achievementsCount {
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
     color: var(--muted);
 }
 
 .badgeGrid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-    padding: 0 0.75rem 0.75rem;
+    gap: var(--space-4);
+    padding: 0 var(--space-5) var(--space-5);
 }
 
 .badgeCard {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.6rem;
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--space-4);
     position: relative;
     overflow: hidden;
 }
@@ -493,9 +508,10 @@
     position: absolute;
     top: 3px;
     right: 5px;
-    font-size: 0.6rem;
     color: #F5C842;
-    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .badgeShare {
@@ -504,12 +520,16 @@
     right: 4px;
     background: none;
     border: none;
-    padding: 2px;
+    padding: var(--space-1);
     color: var(--accent);
     cursor: pointer;
-    font-size: 0.8rem;
     opacity: 0;
-    transition: opacity 0.15s ease;
+    transition: opacity var(--dur-2) var(--ease-standard);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
 }
 
 .badgeCard:hover .badgeShare {
@@ -522,7 +542,7 @@
 
 /* Badge icon */
 .badgeIcon {
-    font-size: 1.5rem;
+    font-size: var(--text-2xl);
     line-height: 1;
     flex-shrink: 0;
 }
@@ -540,7 +560,7 @@
 }
 
 .badgeName {
-    font-size: 0.78rem;
+    font-size: var(--text-xs);
     font-weight: 600;
     color: var(--foreground);
     overflow: hidden;
@@ -553,7 +573,7 @@
 }
 
 .badgeDesc {
-    font-size: 0.68rem;
+    font-size: var(--text-2xs);
     color: var(--muted);
     overflow: hidden;
     text-overflow: ellipsis;

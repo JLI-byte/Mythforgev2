@@ -1,66 +1,84 @@
 .container {
     width: 100%;
     height: 100%;
-    padding: 24px;
+    padding: var(--space-7);
     overflow-y: auto;
+    /* positioned ancestor for the absolutely-placed HintBubble */
+    position: relative;
     /* Same charcoal grunge backdrop as the World Bible */
     background: var(--background) url("/LoreCanvasbg.webp") center / cover no-repeat fixed;
+
+    /* That backdrop is dark in every theme, but the tokens beneath it are not:
+       in light theme --foreground resolves to near-black and the shelf label,
+       story count, "Add Story" and "New Shelf" all rendered dark-on-dark. The
+       ground here is fixed, so the tokens that describe it are pinned to their
+       dark values for this subtree and every descendant inherits them.
+
+       A custom property that references itself is invalid at computed-value
+       time, so `--foreground: var(--foreground)` pinned nothing at all and the
+       bug this paragraph describes was still live. --overlay-rgb IS pinned
+       white just below, so both are derived from it instead. */
+    --foreground: rgb(var(--overlay-rgb));
+    --muted: rgba(var(--overlay-rgb), 0.62);
+    --border: rgba(var(--overlay-rgb), 0.08);
+    --glass-border: rgba(var(--overlay-rgb), 0.08);
+    --overlay-rgb: 255, 255, 255;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: var(--space-7);
     scrollbar-gutter: stable;
 }
 
 .header {
-    margin-bottom: 24px;
+    margin-bottom: var(--space-7);
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
 .title {
-    font-size: 1.4rem;
+    font-size: var(--text-2xl);
     font-weight: 800;
-    color: #fff;
+    color: rgba(var(--overlay-rgb), 1);
     letter-spacing: -0.01em;
 }
 
 .shelf {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 12px 16px;
+    gap: var(--space-4);
+    padding: var(--space-5) var(--space-6);
     /* frosted white glass panel — matches the World Bible strips */
-    background: linear-gradient(165deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.04) 100%);
+    background: linear-gradient(165deg, rgba(var(--overlay-rgb), 0.1) 0%, rgba(var(--overlay-rgb), 0.04) 100%);
     backdrop-filter: blur(28px) saturate(1.5);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 16px;
+    border: 1px solid rgba(var(--overlay-rgb), 0.14);
+    border-radius: var(--radius-2xl);
     box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.18),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.18),
-        0 10px 38px rgba(0, 0, 0, 0.35);
+        inset 0 1px 0 rgba(var(--overlay-rgb), 0.18),
+        inset 0 -1px 0 rgba(var(--shadow-rgb), 0.18),
+        0 10px 38px rgba(var(--shadow-rgb), 0.35);
     /* no transform here — animating it would suppress the backdrop blur */
-    transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    transition: border-color var(--dur-4) var(--ease-standard), background-color var(--dur-4) var(--ease-standard), box-shadow var(--dur-4) var(--ease-standard);
     min-height: 100px;
 }
 
 .shelfActive {
-    background: linear-gradient(165deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.07) 100%);
-    border-color: rgba(255, 255, 255, 0.34);
+    background: linear-gradient(165deg, rgba(var(--overlay-rgb), 0.16) 0%, rgba(var(--overlay-rgb), 0.07) 100%);
+    border-color: rgba(var(--overlay-rgb), 0.34);
     box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.28),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.18),
-        0 16px 44px rgba(0, 0, 0, 0.45);
+        inset 0 1px 0 rgba(var(--overlay-rgb), 0.28),
+        inset 0 -1px 0 rgba(var(--shadow-rgb), 0.18),
+        0 16px 44px rgba(var(--shadow-rgb), 0.45);
 }
 
 .shelfHeader {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--space-5);
 }
 
 .shelfLabel {
-    font-size: 0.65rem;
+    font-size: var(--text-2xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -69,10 +87,10 @@
 }
 
 .shelfCount {
-    font-size: 0.7rem;
+    font-size: var(--text-2xs);
     background: rgba(var(--overlay-rgb),0.08);
-    padding: 2px 8px;
-    border-radius: 10px;
+    padding: var(--space-1) var(--space-4);
+    border-radius: var(--radius-xl);
     color: var(--muted);
 }
 
@@ -80,7 +98,7 @@
 .shelfBody {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--space-5);
 }
 
 /* --- Diamond lattice (books sit in offset diamond slots) --- */
@@ -96,7 +114,7 @@
     width: max-content;
     max-width: 100%;
     margin: 0 auto;
-    padding: 4px 0 2px;
+    padding: var(--space-2) 0 var(--space-1);
 }
 
 .dRow {
@@ -144,31 +162,24 @@
 }
 
 /* the cover (the pen's img): rises out of the pocket, bottom tucked behind
-   the lip. 44% + translateY(-60%) keeps the bottom corners under the band. */
+   the lip. 44% + translateY(-60%) keeps the bottom corners under the band.
+   Proportion, corners, spine light and shadow come from bookSurface; what is
+   local here is the pocket — the absolute placement inside the diamond and the
+   tilt that slides the cover out of it. */
 .book {
+    --book-w: 44%;
+    /* The pocket's gesture, handed to the shared hover rule. */
+    --book-hover-lift: translateX(-40%) translateY(-78%) rotate(18deg);
     position: absolute;
-    width: 44%;
     left: 50%;
     top: 50%;
     transform: translateX(-50%) translateY(-60%);
-    aspect-ratio: 2 / 3;
-    border-radius: 3px 3px 0 0;
-    background-size: cover;
-    background-position: center;
-    filter: grayscale(1);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 5px -5px 10px rgba(0, 0, 0, 0.35);
     cursor: grab;
     user-select: none;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
     z-index: 1;
-}
-/* pen hover: the book slides up out of the pocket and tilts */
-.book:hover {
-    transform: translateX(-40%) translateY(-78%) rotate(18deg);
-    box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.5);
 }
 
 /* Active project: light up its pocket instead of boxing the cover. */
@@ -178,15 +189,33 @@
 .slot:has(.bookActive)::after {
     background: #3c3c3a;
 }
-.bookActive {
-    box-shadow: 5px -5px 10px rgba(0, 0, 0, 0.35), 0 0 12px rgba(255, 255, 255, 0.28);
+/* Doubled class on purpose: this has to beat bookSurface's own --book-drop,
+   and which file wins a specificity tie is a bundler detail. */
+.book.bookActive {
+    --book-drop: var(--shadow-3), 0 0 12px rgba(var(--overlay-rgb), 0.28);
+}
+
+/* Screenplays, reports and lyrics are loose sheets, not bound covers: squarer
+   letter proportions, and no rounded fore-edge because there is no board. */
+.bookPaper {
+    --book-ratio: 17 / 22;
+    --book-fore-radius: var(--radius-xs);
+    overflow: hidden;
 }
 
 .bookInitials {
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     font-weight: 800;
-    color: rgba(255, 255, 255, 0.85);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    color: rgba(var(--overlay-rgb), 0.85);
+    text-shadow: 0 1px 2px rgba(var(--shadow-rgb), 0.5);
+}
+
+/* Initials sit in the title position on paper — dark ink, above the artwork. */
+.bookInitialsInk {
+    position: relative;
+    z-index: 1;
+    color: #26262b;
+    text-shadow: none;
 }
 
 /* + affordance for an empty slot, where a cover would sit */
@@ -200,18 +229,18 @@
     appearance: none;
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.25);
-    font-size: 1.4rem;
+    color: rgba(var(--overlay-rgb), 0.25);
+    font-size: var(--text-2xl);
     line-height: 1;
     cursor: pointer;
     z-index: 1;
-    transition: color 0.2s ease;
+    transition: color var(--dur-3) var(--ease-standard);
 }
 .slotAdd::before {
     content: '+';
 }
 .slotAdd:hover {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(var(--overlay-rgb), 0.6);
 }
 
 /* full name, shown on hover so the lattice stays clean */
@@ -220,19 +249,19 @@
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
-    margin-bottom: 4px;
+    margin-bottom: var(--space-2);
     max-width: 150px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 0.6rem;
-    color: #fff;
-    background: rgba(0, 0, 0, 0.8);
-    padding: 2px 7px;
-    border-radius: 4px;
+    font-size: var(--text-2xs);
+    color: rgba(var(--overlay-rgb), 1);
+    background: rgba(var(--shadow-rgb), 0.8);
+    padding: var(--space-1) var(--space-4);
+    border-radius: var(--radius-sm);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.2s ease;
+    transition: opacity var(--dur-3) var(--ease-standard);
     z-index: 4;
 }
 .book:hover .bookLabel {
@@ -246,63 +275,63 @@
 .rowControls {
     display: flex;
     justify-content: center;
-    margin-top: 6px;
+    margin-top: var(--space-3);
 }
 
 .addRowBtn {
     appearance: none;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px dashed rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 0.68rem;
-    padding: 4px 14px;
-    border-radius: 12px;
+    background: rgba(var(--overlay-rgb), 0.04);
+    border: 1px dashed rgba(var(--overlay-rgb), 0.12);
+    color: rgba(var(--overlay-rgb), 0.5);
+    font-size: var(--text-2xs);
+    padding: var(--space-2) var(--space-6);
+    border-radius: var(--radius-xl);
     cursor: pointer;
-    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    transition: color var(--dur-3) var(--ease-standard), border-color var(--dur-3) var(--ease-standard), background var(--dur-3) var(--ease-standard);
 }
 .addRowBtn:hover {
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.08);
+    color: rgba(var(--overlay-rgb), 1);
+    border-color: rgba(var(--overlay-rgb), 0.3);
+    background: rgba(var(--overlay-rgb), 0.08);
 }
 
 .actionBtn {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 18px;
-    background: rgba(255, 255, 255, 0.09);
+    gap: var(--space-4);
+    padding: var(--space-5) var(--space-6);
+    background: rgba(var(--overlay-rgb), 0.09);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 12px;
-    color: var(--foreground, #f2f0ef);
-    font-size: 0.85rem;
+    border: 1px solid rgba(var(--overlay-rgb), 0.18);
+    border-radius: var(--radius-xl);
+    color: var(--foreground, var(--surface));
+    font-size: var(--text-md);
     font-weight: 700;
     cursor: pointer;
-    transition: border-color 0.2s ease, background-color 0.2s ease;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    transition: border-color var(--dur-3) var(--ease-standard), background-color var(--dur-3) var(--ease-standard);
+    box-shadow: inset 0 1px 0 rgba(var(--overlay-rgb), 0.14);
 }
 
 .actionBtn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.36);
+    background: rgba(var(--overlay-rgb), 0.15);
+    border-color: rgba(var(--overlay-rgb), 0.36);
 }
 
 .addStoryBtn {
     background: rgba(var(--overlay-rgb), 0.05);
     border: 1px solid rgba(var(--overlay-rgb), 0.1);
     color: var(--muted);
-    font-size: 0.7rem;
-    padding: 4px 10px;
-    border-radius: 12px;
+    font-size: var(--text-2xs);
+    padding: var(--space-2) var(--space-5);
+    border-radius: var(--radius-xl);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--dur-3) var(--ease-standard);
     margin-left: auto;
 }
 
 .addStoryBtn:hover {
     background: rgba(var(--overlay-rgb), 0.1);
-    color: #fff;
+    color: rgba(var(--overlay-rgb), 1);
     border-color: rgba(var(--overlay-rgb), 0.2);
 }
 
@@ -311,7 +340,7 @@
 .wizardBackdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(var(--shadow-rgb), 0.7);
     backdrop-filter: blur(4px);
     z-index: 2000;
     display: flex;
@@ -328,11 +357,15 @@
 .wizardModal {
     background: var(--surface-mid);
     border: 1px solid rgba(var(--overlay-rgb), 0.1);
-    border-radius: 12px;
-    padding: 28px;
+    border-radius: var(--radius-xl);
+    padding: var(--space-8);
     width: 480px;
     max-width: 90vw;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    /* The Script / Report kind step is the tallest — let it scroll rather than
+       run off a short screen. */
+    max-height: 88vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 50px rgba(var(--shadow-rgb), 0.5);
     animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -342,30 +375,30 @@
 }
 
 .wizardStep {
-    font-size: 0.7rem;
+    font-size: var(--text-2xs);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--muted);
-    margin-bottom: 8px;
+    margin-bottom: var(--space-4);
     opacity: 0.6;
 }
 
 .wizardTitle {
-    font-size: 1.1rem;
+    font-size: var(--text-lg);
     font-weight: 700;
-    color: #fff;
-    margin: 0 0 20px 0;
+    color: rgba(var(--overlay-rgb), 1);
+    margin: 0 0 var(--space-7) 0;
 }
 
 .wizardInput {
     width: 100%;
     background: rgba(var(--overlay-rgb), 0.05);
     border: 1px solid rgba(var(--overlay-rgb), 0.1);
-    border-radius: 6px;
-    padding: 10px 14px;
-    color: #fff;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
+    border-radius: var(--radius-md);
+    padding: var(--space-5) var(--space-6);
+    color: rgba(var(--overlay-rgb), 1);
+    font-size: var(--text-md);
+    transition: all var(--dur-3) var(--ease-standard);
 }
 
 .wizardInput:focus {
@@ -374,64 +407,17 @@
     border-color: var(--accent);
 }
 
-/* New-story begin choices: Draft First vs Start Writing */
-/* One per row: three side-by-side left no room for the descriptions.
-   (Grid, so .beginOption's flex:1 no longer stretches them unevenly.) */
-.beginOptions {
-    display: grid;
-    gap: 8px;
-    margin: 8px 0 16px;
-}
-
-.beginOption {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    text-align: left;
-    padding: 13px 14px;
-    border-radius: 10px;
-    border: 1px solid rgba(var(--overlay-rgb), 0.1);
-    background: rgba(var(--overlay-rgb), 0.04);
-    cursor: pointer;
-    transition: all 0.18s ease;
-}
-
-.beginOption:hover:not(:disabled) {
-    border-color: var(--accent);
-    background: rgba(var(--accent-rgb), 0.1);
-    transform: translateY(-2px);
-}
-
-.beginOption:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-}
-
-.beginOptionTitle {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #fff;
-}
-
-.beginOptionDesc {
-    font-size: 0.68rem;
-    line-height: 1.4;
-    color: rgba(var(--overlay-rgb), 0.6);
-}
-
 .wizardTextarea {
     width: 100%;
     background: rgba(var(--overlay-rgb), 0.05);
     border: 1px solid rgba(var(--overlay-rgb), 0.1);
-    border-radius: 6px;
-    padding: 10px 14px;
-    color: #fff;
-    font-size: 0.9rem;
+    border-radius: var(--radius-md);
+    padding: var(--space-5) var(--space-6);
+    color: rgba(var(--overlay-rgb), 1);
+    font-size: var(--text-md);
     min-height: 80px;
     resize: vertical;
-    transition: all 0.2s ease;
+    transition: all var(--dur-3) var(--ease-standard);
 }
 
 .wizardTextarea:focus {
@@ -443,42 +429,42 @@
 .pillGroup {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 20px;
+    gap: var(--space-4);
+    margin-bottom: var(--space-7);
 }
 
 .pill {
     background: transparent;
     border: 1px solid rgba(var(--overlay-rgb), 0.15);
-    border-radius: 20px;
-    padding: 6px 14px;
+    border-radius: var(--radius-3xl);
+    padding: var(--space-3) var(--space-6);
     color: rgba(var(--overlay-rgb), 0.6);
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--dur-3) var(--ease-standard);
 }
 
 .pill:hover {
     border-color: rgba(var(--overlay-rgb), 0.3);
-    color: #fff;
+    color: rgba(var(--overlay-rgb), 1);
 }
 
 .pillActive {
-    background: rgba(255, 255, 255, 0.14);
-    border-color: rgba(255, 255, 255, 0.5);
-    color: #fff;
+    background: rgba(var(--overlay-rgb), 0.14);
+    border-color: rgba(var(--overlay-rgb), 0.5);
+    color: rgba(var(--overlay-rgb), 1);
 }
 
 .toneRow {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
+    gap: var(--space-5);
+    margin-bottom: var(--space-5);
 }
 
 .toneLabel {
     width: 80px;
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     color: var(--muted);
     font-weight: 500;
 }
@@ -486,17 +472,17 @@
 .wizardActions {
     display: flex;
     justify-content: flex-end;
-    gap: 12px;
-    margin-top: 32px;
+    gap: var(--space-5);
+    margin-top: var(--space-8);
 }
 
 .wizardBtn {
-    padding: 8px 20px;
-    border-radius: 8px;
-    font-size: 0.85rem;
+    padding: var(--space-4) var(--space-7);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-md);
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--dur-3) var(--ease-standard);
 }
 
 .wizardBtnPrimary {
@@ -524,7 +510,7 @@
 .wizardBtnSecondary:hover {
     background: rgba(var(--overlay-rgb), 0.05);
     border-color: rgba(var(--overlay-rgb), 0.3);
-    color: #fff;
+    color: rgba(var(--overlay-rgb), 1);
 }
 
 /* --- Shelf Action Buttons --- */
@@ -532,11 +518,11 @@
 .editBtn, .deleteBtn {
     background: transparent;
     border: none;
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     cursor: pointer;
     opacity: 0.4;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    padding: 4px;
+    transition: opacity var(--dur-3) var(--ease-standard), transform var(--dur-3) var(--ease-standard);
+    padding: var(--space-2);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -553,47 +539,27 @@
     opacity: 0.2;
 }
 
-.shelfDeleteConfirm {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 0.7rem;
-    color: #ff6b6b;
-    background: rgba(255, 107, 107, 0.05);
-    padding: 4px 12px;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 107, 107, 0.2);
-    animation: fadeIn 0.2s ease-out;
-}
-
-.shelfDeleteConfirm button {
-    padding: 4px 10px;
-    font-size: 0.65rem;
-    border-radius: 12px;
-}
-
 /* ── New-work step 1: what are you writing? ─────────────── */
 
 .workTypeGrid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 18px;
+    gap: var(--space-5);
+    margin-bottom: var(--space-6);
 }
 
 .workTypeCard {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
+    gap: var(--space-2);
     text-align: left;
-    padding: 16px 15px;
-    border-radius: 12px;
+    padding: var(--space-6) var(--space-6);
+    border-radius: var(--radius-xl);
     border: 1px solid rgba(var(--overlay-rgb), 0.1);
     background: rgba(var(--overlay-rgb), 0.04);
     cursor: pointer;
-    transition: all 0.18s ease;
+    transition: all var(--dur-3) var(--ease-standard);
 }
 
 .workTypeCard:hover {
@@ -603,20 +569,50 @@
 }
 
 .workTypeIcon {
-    font-size: 1.5rem;
+    font-size: var(--text-2xl);
     line-height: 1;
-    margin-bottom: 4px;
+    margin-bottom: var(--space-2);
 }
 
 .workTypeLabel {
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     font-weight: 700;
 }
 
 .workTypeDesc {
-    font-size: 0.76rem;
+    font-size: var(--text-xs);
     line-height: 1.4;
     opacity: 0.65;
+}
+
+/* Seven kinds instead of four, so the cards tighten up to stay on one screen. */
+.workTypeCardCompact {
+    padding: var(--space-5) var(--space-5);
+    gap: var(--space-1);
+}
+.workTypeCardCompact .workTypeIcon {
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-1);
+}
+.workTypeCardCompact .workTypeLabel {
+    font-size: var(--text-md);
+}
+.workTypeCardCompact .workTypeDesc {
+    font-size: var(--text-2xs);
+}
+
+/* The three brief questions, between the name and the start options. */
+.briefFields {
+    display: grid;
+    gap: var(--space-5);
+    margin-bottom: var(--space-6);
+}
+
+.briefHint {
+    font-size: var(--text-xs);
+    line-height: 1.4;
+    opacity: 0.55;
+    margin-bottom: var(--space-5);
 }
 
 @media (max-width: 520px) {
@@ -625,7 +621,7 @@
     }
 }
 
-/* ── Book delete (hover ✕ → in-place confirm) ───────────── */
+/* ── Book delete (hover ✕ → confirmation modal) ──────────── */
 
 .bookDeleteBtn {
     position: absolute;
@@ -637,15 +633,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
+    font-size: var(--text-2xs);
     line-height: 1;
-    color: #fff;
-    background: rgba(0, 0, 0, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 50%;
+    color: rgba(var(--overlay-rgb), 1);
+    background: rgba(var(--shadow-rgb), 0.55);
+    border: 1px solid rgba(var(--overlay-rgb), 0.25);
+    border-radius: var(--radius-full);
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.15s ease, background 0.15s ease;
+    transition: opacity var(--dur-2) var(--ease-standard), background var(--dur-2) var(--ease-standard);
 }
 
 .slot:hover .bookDeleteBtn {
@@ -653,55 +649,6 @@
 }
 
 .bookDeleteBtn:hover {
-    background: var(--danger, #e5484d);
-    border-color: var(--danger, #e5484d);
-}
-
-.bookConfirm {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 76%;
-    z-index: 3;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 6px;
-    background: rgba(0, 0, 0, 0.82);
-    border-radius: 8px;
-}
-
-.bookConfirmText {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: #fff;
-}
-
-.bookConfirmActions {
-    display: flex;
-    gap: 5px;
-}
-
-.bookConfirmNo,
-.bookConfirmYes {
-    padding: 3px 9px;
-    font-size: 0.68rem;
-    font-weight: 600;
-    border-radius: 6px;
-    cursor: pointer;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-}
-
-.bookConfirmYes {
-    background: var(--danger, #e5484d);
-    border-color: var(--danger, #e5484d);
-}
-
-.bookConfirmNo:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--danger);
+    border-color: var(--danger);
 }

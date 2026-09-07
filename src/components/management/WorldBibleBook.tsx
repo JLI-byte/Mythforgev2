@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { BOOK_VERBS, BookAction, nextVerb } from './bookVerbs';
+import book from '@/components/ui/bookSurface.module.css';
 import styles from './WorldBibleBook.module.css';
 
 /** One wheel notch per step; tames trackpad delta storms. */
@@ -62,7 +63,7 @@ export default function WorldBibleBook({ title, subtitle, tint, onAction }: Worl
         <div className={styles.wrap}>
             <figure
                 ref={bookRef}
-                className={styles.book}
+                className={`${book.proportion} ${styles.book}`}
                 role="button"
                 tabIndex={0}
                 aria-label={`${verb.label} the ${title} World Bible`}
@@ -86,7 +87,7 @@ export default function WorldBibleBook({ title, subtitle, tint, onAction }: Worl
                 <ul className={styles.hardcoverFront}>
                     <li>
                         <div
-                            className={styles.coverDesign}
+                            className={`${book.face} ${styles.coverDesign}`}
                             style={tint ? { backgroundColor: tint, backgroundImage: 'none' } : undefined}
                         >
                             <h2 className={styles.coverTitle}>{title}</h2>

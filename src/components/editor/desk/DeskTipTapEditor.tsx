@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
+import { PenLine } from 'lucide-react';
 import { useEditor, EditorContent, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -12,6 +13,9 @@ import Color from '@tiptap/extension-color';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { useWritingSession, useSeedWritingBaseline } from '@/lib/useWritingSession';
 import { FontSize } from './extensions';
+import { EntityMark } from '@/lib/EntityMark';
+import { EntitySuggest } from '@/lib/EntitySuggest';
+import EntitySuggestDropdown from '../EntitySuggestDropdown';
 import { GlassDropdown } from './GlassDropdown';
 import styles from '../WritingDesk.module.css';
 
@@ -25,6 +29,9 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
   const lastSavedContentRef = useRef<string>(content || '');
   const trackSession = useWritingSession();
   const isSpellcheckEnabled = useWorkspaceStore(s => s.isSpellcheckEnabled);
+  const isStandardFormat = useWorkspaceStore(s => s.isStandardFormat);
+  const editorMaxWidth = useWorkspaceStore(s => s.editorMaxWidth);
+  const toggleStandardFormat = useWorkspaceStore(s => s.toggleStandardFormat);
 
   const editor = useEditor({
     extensions: [
@@ -36,6 +43,8 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
       Highlight.configure({ multicolor: true }),
       Color,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      EntityMark,
+      EntitySuggest,
     ],
     content: content || '',
     immediatelyRender: false,
@@ -69,6 +78,11 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
     sceneId,
     editor ? editor.getText().split(/\s+/).filter(w => w.length > 0).length : undefined,
   );
+
+  // The suggest dropdown reads the live editor through a ref, so it survives
+  // the editor being rebuilt when the scene or the spellcheck setting changes.
+  const editorRef = useRef<Editor | null>(null);
+  useEffect(() => { editorRef.current = editor ?? null; }, [editor]);
 
   useEffect(() => {
     return () => {
@@ -109,12 +123,14 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
               { value: 'h2', label: 'Heading 2' },
               { value: 'h3', label: 'Heading 3' },
               { value: 'blockquote', label: 'Quote' },
+              { value: 'codeBlock', label: 'Code' },
             ]}
             value={
               editor.isActive('heading', { level: 1 }) ? 'h1' :
               editor.isActive('heading', { level: 2 }) ? 'h2' :
               editor.isActive('heading', { level: 3 }) ? 'h3' :
-              editor.isActive('blockquote') ? 'blockquote' : 'p'
+              editor.isActive('blockquote') ? 'blockquote' :
+              editor.isActive('codeBlock') ? 'codeBlock' : 'p'
             }
             onChange={val => {
               if (val === 'p') editor.chain().focus().setParagraph().run();
@@ -122,6 +138,10 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
               if (val === 'h2') editor.chain().focus().toggleHeading({ level: 2 }).run();
               if (val === 'h3') editor.chain().focus().toggleHeading({ level: 3 }).run();
               if (val === 'blockquote') editor.chain().focus().toggleBlockquote().run();
+              // StarterKit registers codeBlock already; it had no way in and no
+              // styling, so it was reachable only by a ``` input rule nobody
+              // could discover, and rendered unstyled if you found it.
+              if (val === 'codeBlock') editor.chain().focus().toggleCodeBlock().run();
             }}
           />
           <GlassDropdown
@@ -173,7 +193,7 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
             className={`${styles.deskFmtBtn} ${editor.isActive('highlight') ? styles.deskFmtBtnActive : ''}`}
             onMouseDown={e => { e.preventDefault(); editor.chain().focus().toggleHighlight().run(); }}
             title="Highlight"
-          >🖊️</button>
+          ><PenLine size={14} /></button>
         </div>
         <span className={styles.deskFmtSep} />
         <div className={styles.deskToolbarGroup}>
@@ -228,11 +248,23 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
             onMouseDown={e => { e.preventDefault(); editor.chain().focus().unsetAllMarks().clearNodes().run(); }}
             title="Clear Formatting"
           >Ø</button>
+          <button
+            className={`${styles.deskFmtBtn} ${isStandardFormat ? styles.deskFmtBtnActive : ''}`}
+            onMouseDown={e => { e.preventDefault(); toggleStandardFormat(); }}
+            title="Standard manuscript format — 12pt monospace, double-spaced, indented paragraphs"
+            aria-label="Standard manuscript format"
+            aria-pressed={isStandardFormat}
+          >MS</button>
         </div>
       </div>
-      <div className={styles.deskEditorBody} onClick={() => editor.chain().focus().run()}>
+      <div
+        className={`${styles.deskEditorBody} ${isStandardFormat ? styles.deskEditorBodyStandard : ''}`}
+        style={{ '--desk-measure': editorMaxWidth ? `${editorMaxWidth}px` : '76ch' } as React.CSSProperties}
+        onClick={() => editor.chain().focus().run()}
+      >
         <EditorContent editor={editor} />
       </div>
+      <EntitySuggestDropdown editorRef={editorRef} />
     </div>
   );
 }

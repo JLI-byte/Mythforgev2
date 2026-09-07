@@ -1,5 +1,6 @@
 "use client";
 
+import { BookOpen } from 'lucide-react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from './WritingDesk.module.css';
 
@@ -52,7 +53,7 @@ export function ResearchEmptyState() {
         ) : (
           <div className={styles.emptyWelcomeActions}>
             <button className={styles.welcomeActionBtn} onClick={() => setWorkspaceMode('bookshelf')}>
-              <span className={styles.welcomeActionIcon}>📚</span>
+              <span className={styles.welcomeActionIcon} aria-hidden="true"><BookOpen size={20} /></span>
               <span className={styles.welcomeActionLabel}>Go to Bookshelf</span>
             </button>
           </div>

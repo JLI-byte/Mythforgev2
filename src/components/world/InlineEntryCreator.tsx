@@ -1,56 +1,42 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import styles from './InlineEntryCreator.module.css';
 import { useWorkspaceStore, Entity, EntityType, ENTITY_TYPE_LABELS, selectProjectWorldKey } from '@/store/workspaceStore';
 import { sanitizeLabel } from '@/lib/sanitize';
 import { STANDALONE_KEY } from '@/lib/worldKey';
 import { getWorldBibleConfig } from '@/lib/worldBibleNav';
 import { fileByType } from '@/lib/folderTree';
+import { useModalDialog } from '@/lib/useModalDialog';
 
 /**
- * Inline Entry Creator
- * 
- * A lightweight modal overlay designed to quickly capture a new world entity
- * triggered from the WritingEditor without breaking flow. 
- * Reads from global Zustand store to determine visibility and predefined names.
+ * The form itself, which assumes the modal is open. It is a separate component
+ * because `useModalDialog` runs on mount, and a hook cannot sit below the
+ * `return null` that hides a closed creator.
  */
-export default function InlineEntryCreator() {
-    // Subscribe to store state and actions
+function InlineEntryCreatorForm() {
     const activeProjectId = useWorkspaceStore((state) => state.activeProjectId);
     const projectWorldKey = useWorkspaceStore(selectProjectWorldKey);
     const worldBibles = useWorkspaceStore((state) => state.worldBibles);
-    const isInlineCreatorOpen = useWorkspaceStore((state) => state.isInlineCreatorOpen);
     const pendingEntityName = useWorkspaceStore((state) => state.pendingEntityName);
     const closeInlineCreator = useWorkspaceStore((state) => state.closeInlineCreator);
     const addEntity = useWorkspaceStore((state) => state.addEntity);
 
-    // Refs for focus management
     const formRef = useRef<HTMLFormElement>(null);
-    const initialInputRef = useRef<HTMLInputElement>(null);
-
-    // Focus the input automatically when the modal opens
-    useEffect(() => {
-        if (isInlineCreatorOpen && initialInputRef.current) {
-            initialInputRef.current.focus();
-        }
-    }, [isInlineCreatorOpen]);
-
-    // Render nothing if the modal shouldn't be visible
-    if (!isInlineCreatorOpen) {
-        return null;
-    }
 
     /**
-     * Helper to close the modal and explicitly return focus to the editor
-     * without creating a tight dependency between the two components.
-     * We use a custom DOM event that WritingEditor listens for.
+     * Close the modal and hand focus back to the editor. The editor listens for
+     * this rather than being wired to the modal directly, so neither has to
+     * know the other exists. The dialog hook restores focus to whatever opened
+     * the modal; this event fires last and puts the caret in the manuscript,
+     * which is the better destination.
      */
     const closeAndReturnFocus = () => {
         closeInlineCreator();
-        // Dispatch custom event right after state updates
         window.dispatchEvent(new CustomEvent('lorecanvas:returnFocusToEditor'));
     };
+
+    const dialogRef = useModalDialog<HTMLDivElement>(closeAndReturnFocus);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -81,13 +67,17 @@ export default function InlineEntryCreator() {
         };
 
         // Save to global state and dismiss
+        // Save to global state, say what was made, and dismiss.
         addEntity(newEntity);
+        window.dispatchEvent(new CustomEvent('lorecanvas:entityCreated', {
+            detail: { id: newEntity.id, name: newEntity.name },
+        }));
         closeAndReturnFocus();
     };
 
     /**
      * Backdrop click handler.
-     * We ensure the user actually clicked the overlay background, 
+     * We ensure the user actually clicked the overlay background,
      * not a child element inside the modal.
      */
     const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -97,10 +87,17 @@ export default function InlineEntryCreator() {
     };
 
     return (
-        <div className={styles.creatorOverlay} onClick={handleBackdropClick}>
-            <div className={styles.creatorModal}>
+        <div className={styles.creatorOverlay} onClick={handleBackdropClick} role="presentation">
+            <div
+                ref={dialogRef}
+                className={styles.creatorModal}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="inline-entry-title"
+                tabIndex={-1}
+            >
                 <div className={styles.modalHeader}>
-                    <h3>New World Entry</h3>
+                    <h3 id="inline-entry-title">New World Entry</h3>
                     <p className={styles.hintText}>Define a new entity to track in your Codex.</p>
                 </div>
 
@@ -108,7 +105,7 @@ export default function InlineEntryCreator() {
                     <div className={styles.formGroup}>
                         <label htmlFor="entry-name">Name</label>
                         <input
-                            ref={initialInputRef}
+                            data-autofocus
                             type="text"
                             id="entry-name"
                             name="name"
@@ -152,4 +149,22 @@ export default function InlineEntryCreator() {
             </div>
         </div>
     );
+}
+
+/**
+ * Inline Entry Creator
+ *
+ * A lightweight modal overlay designed to quickly capture a new world entity
+ * triggered from the WritingEditor without breaking flow.
+ * Reads from global Zustand store to determine visibility and predefined names.
+ */
+export default function InlineEntryCreator() {
+    const isInlineCreatorOpen = useWorkspaceStore((state) => state.isInlineCreatorOpen);
+
+    // Render nothing if the modal shouldn't be visible
+    if (!isInlineCreatorOpen) {
+        return null;
+    }
+
+    return <InlineEntryCreatorForm />;
 }

@@ -1,6 +1,14 @@
 /*
  * Login page — Minimalist theme (the default), matching StandardLanding:
  * near-black surface, animated dot field, lamp glow, sans type, pill CTA.
+ *
+ * PINNED ART DIRECTION - do not convert these literals to theme tokens.
+ * /login and /welcome never set data-theme or data-theme-family (only the
+ * authenticated app root in src/app/page.tsx does), so every semantic token
+ * here resolves to the visitor's OS colour scheme, not to this page's ground.
+ * The page pins its own near-black palette, so the whites below must stay
+ * white: rgba(var(--overlay-rgb), a) flips to ink under a light-preference
+ * OS and the lamp turns into a dark smudge on a dark page.
  */
 
 .page {
@@ -66,7 +74,7 @@
     width: 24rem;
     height: 9rem;
     transform: translateY(-40%);
-    border-radius: 999px;
+    border-radius: var(--radius-full);
     background: rgba(255, 255, 255, 0.45);
     filter: blur(80px);
     animation: lc-login-glow 0.9s ease-in-out 0.25s both;
@@ -101,13 +109,13 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.5rem clamp(1.25rem, 4vw, 3rem);
+    padding: var(--space-7) clamp(1.25rem, 4vw, 3rem);
 }
 
 .brand {
     font-weight: 600;
     letter-spacing: 0.02em;
-    font-size: 1.1rem;
+    font-size: var(--text-lg);
     color: #ececec;
     text-decoration: none;
 }
@@ -115,8 +123,8 @@
 .navBack {
     color: rgba(236, 236, 236, 0.7);
     text-decoration: none;
-    font-size: 0.9rem;
-    transition: color 150ms ease;
+    font-size: var(--text-md);
+    transition: color var(--dur-2) var(--ease-standard);
 }
 .navBack:hover { color: #fff; }
 
@@ -127,7 +135,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem clamp(1.25rem, 5vw, 4rem) 3rem;
+    padding: var(--space-8) clamp(1.25rem, 5vw, 4rem) var(--space-10);
 }
 
 /* ---- Card ---- */
@@ -138,7 +146,7 @@
     padding: clamp(1.75rem, 4vw, 2.5rem);
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(236, 236, 236, 0.12);
-    border-radius: 16px;
+    border-radius: var(--radius-2xl);
     backdrop-filter: blur(12px);
     box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.8);
     animation: lc-login-rise 0.8s ease-in-out 0.25s both;
@@ -151,14 +159,14 @@
 
 .title {
     margin: 0;
-    font-size: 1.9rem;
+    font-size: var(--text-display);
     font-weight: 600;
     letter-spacing: -0.02em;
 }
 
 .sub {
-    margin: 0.5rem 0 1.75rem;
-    font-size: 0.95rem;
+    margin: var(--space-4) 0 var(--space-8);
+    font-size: var(--text-lg);
     line-height: 1.55;
     color: rgba(236, 236, 236, 0.62);
 }
@@ -171,23 +179,23 @@
 }
 
 .fieldLabel {
-    font-size: 0.82rem;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: rgba(236, 236, 236, 0.72);
-    margin-bottom: 0.45rem;
+    margin-bottom: var(--space-4);
 }
 
 .fieldInput {
     width: 100%;
-    padding: 0.75rem 0.9rem;
+    padding: var(--space-5) var(--space-6);
     font-family: inherit;
-    font-size: 0.95rem;
+    font-size: var(--text-lg);
     color: #ececec;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(236, 236, 236, 0.16);
-    border-radius: 10px;
+    border-radius: var(--radius-xl);
     outline: none;
-    transition: border-color 150ms ease, background 150ms ease;
+    transition: border-color var(--dur-2) var(--ease-standard), background var(--dur-2) var(--ease-standard);
 }
 
 .fieldInput::placeholder { color: rgba(236, 236, 236, 0.32); }
@@ -199,18 +207,18 @@
 
 .submit {
     appearance: none;
-    margin-top: 1.25rem;
+    margin-top: var(--space-7);
     width: 100%;
-    padding: 0.8rem 1.6rem;
+    padding: var(--space-5) var(--space-7);
     font-family: inherit;
-    font-size: 0.98rem;
+    font-size: var(--text-lg);
     font-weight: 600;
     color: #0a0a0b;
     background: #f5f5f5;
     border: none;
-    border-radius: 999px;
+    border-radius: var(--radius-full);
     cursor: pointer;
-    transition: transform 150ms ease, background 150ms ease, opacity 150ms ease;
+    transition: transform var(--dur-2) var(--ease-standard), background var(--dur-2) var(--ease-standard), opacity var(--dur-2) var(--ease-standard);
 }
 
 .submit:hover:not(:disabled) {
@@ -226,10 +234,10 @@
 /* ---- Notices ---- */
 
 .notice {
-    margin-top: 1.15rem;
-    padding: 0.8rem 0.95rem;
-    border-radius: 10px;
-    font-size: 0.88rem;
+    margin-top: var(--space-6);
+    padding: var(--space-5) var(--space-6);
+    border-radius: var(--radius-xl);
+    font-size: var(--text-md);
     line-height: 1.5;
     text-align: center;
     border: 1px solid rgba(236, 236, 236, 0.14);
@@ -262,9 +270,9 @@
 }
 
 .footnote {
-    margin: 1.6rem 0 0;
+    margin: var(--space-7) 0 0;
     text-align: center;
-    font-size: 0.88rem;
+    font-size: var(--text-md);
     color: rgba(236, 236, 236, 0.55);
 }
 
@@ -272,7 +280,7 @@
     color: rgba(236, 236, 236, 0.85);
     text-decoration: none;
     border-bottom: 1px solid rgba(236, 236, 236, 0.3);
-    transition: color 150ms ease, border-color 150ms ease;
+    transition: color var(--dur-2) var(--ease-standard), border-color var(--dur-2) var(--ease-standard);
 }
 
 .footnoteLink:hover {
@@ -283,17 +291,17 @@
 /* ---- Dev-only button ---- */
 
 .devButton {
-    margin-top: 1.25rem;
+    margin-top: var(--space-7);
     width: 100%;
-    padding: 0.65rem;
+    padding: var(--space-5);
     font-family: inherit;
-    font-size: 0.86rem;
+    font-size: var(--text-md);
     color: rgba(236, 236, 236, 0.6);
     background: none;
     border: 1px dashed rgba(236, 236, 236, 0.22);
-    border-radius: 10px;
+    border-radius: var(--radius-xl);
     cursor: pointer;
-    transition: background 150ms ease, color 150ms ease;
+    transition: background var(--dur-2) var(--ease-standard), color var(--dur-2) var(--ease-standard);
 }
 
 .devButton:hover:not(:disabled) {
@@ -310,8 +318,8 @@
     position: relative;
     z-index: 1;
     text-align: center;
-    padding: 1.5rem;
-    font-size: 0.82rem;
+    padding: var(--space-7);
+    font-size: var(--text-sm);
     color: rgba(236, 236, 236, 0.5);
 }
 

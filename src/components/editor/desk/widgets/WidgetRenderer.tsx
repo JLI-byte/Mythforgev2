@@ -20,6 +20,16 @@ import { ArticleSuggestionsRenderer } from './ArticleSuggestionsRenderer';
 import { ConsistencyFlagsRenderer } from './ConsistencyFlagsRenderer';
 import { UnderstandingRenderer } from './UnderstandingRenderer';
 import { UntypedWidgetRenderer } from './UntypedWidgetRenderer';
+import { BoardCardRenderer } from './BoardCardRenderer';
+import { ColumnRenderer } from './ColumnRenderer';
+import { LinkCardRenderer } from './LinkCardRenderer';
+import { TodoRenderer } from './TodoRenderer';
+import { SwatchRenderer } from './SwatchRenderer';
+import { DocumentRenderer } from './DocumentRenderer';
+import { TableRenderer } from './TableRenderer';
+import { DrawingRenderer } from './DrawingRenderer';
+import { ScenePinRenderer } from './ScenePinRenderer';
+import { InterviewCardRenderer } from './InterviewCardRenderer';
 
 // ============================================================
 // WIDGET RENDERERS
@@ -36,11 +46,20 @@ export interface WidgetRendererProps {
   triggerSave: () => void;
   viewportRef: React.RefObject<HTMLDivElement | null>;
   onAddAtCenter: (type: DeskWidgetType) => void;
+  /** Research boards only: open a nested board from its card. */
+  onOpenBoard?: (boardId: string) => void;
+  /** Research boards only: select a card from inside its column. */
+  onSelectChild?: (id: string) => void;
+  /** The board's full widget list. A column draws its own children from it, so
+   *  it must be the reactive array — a ref would not re-render on a new child. */
+  allWidgets?: DeskWidget[];
+  /** Research boards get the preview link card; the desk keeps the plain one. */
+  isResearch?: boolean;
 }
 
 export const WidgetRenderer = React.memo(function WidgetRenderer({
   widget, updateContentImmediate, updateContentSilent,
-  handleDragStart, deleteWidget, updateWidgets, widgetsRef, triggerSave, viewportRef, onAddAtCenter, onDockChange
+  handleDragStart, deleteWidget, updateWidgets, widgetsRef, triggerSave, viewportRef, onAddAtCenter, onOpenBoard, onSelectChild, allWidgets, isResearch, onDockChange
 }: WidgetRendererProps & { onDockChange: (dock: DeskWidget['dock']) => void }) {
   // Stable per-widget callbacks — recreated only when widget.id changes.
   // widget.content seeds each renderer's local useState on mount / external update.
@@ -58,7 +77,9 @@ export const WidgetRenderer = React.memo(function WidgetRenderer({
   switch (widget.type) {
     case 'writingZone': return <WritingZoneRenderer content={content} onChange={handleChange} onChangeImmediate={handleChangeImmediate} widget={widget} onDragStart={handleDragStart} onDeleteWidget={deleteWidget} onDockChange={onDockChange} onManualSave={triggerSave} onAddAtCenter={onAddAtCenter} />;
     case 'sticky':      return <StickyNoteRenderer content={content} onChange={handleChange} onChangeImmediate={handleChangeImmediate} />;
-    case 'reference':   return <ReferenceCardRenderer content={content} onChange={handleChange} />;
+    case 'reference':   return isResearch
+      ? <LinkCardRenderer content={content} onChange={handleChange} />
+      : <ReferenceCardRenderer content={content} onChange={handleChange} />;
     case 'image':       return <ImagePinRenderer content={content} onChange={handleChange} onChangeImmediate={handleChangeImmediate} />;
     case 'biblePinit':  return <WorldBiblePinRenderer content={content} onChange={handleChange} />;
     case 'sceneControl':return <SceneControlRenderer content={content} onChange={handleChange} />;
@@ -73,6 +94,15 @@ export const WidgetRenderer = React.memo(function WidgetRenderer({
     case 'articleSuggestions': return <ArticleSuggestionsRenderer content={content} onChange={handleChangeImmediate} />;
     case 'consistencyFlags': return <ConsistencyFlagsRenderer content={content} onChange={handleChangeImmediate} />;
     case 'worldUnderstanding': return <UnderstandingRenderer />;
+    case 'board':       return <BoardCardRenderer content={content} onOpenBoard={onOpenBoard} />;
+    case 'column':      return <ColumnRenderer widget={widget} allWidgets={allWidgets ?? []} content={content} onChange={handleChangeImmediate} onSelectChild={onSelectChild ?? (() => {})} />;
+    case 'todo':        return <TodoRenderer content={content} onChange={handleChange} />;
+    case 'document':    return <DocumentRenderer content={content} onChange={handleChange} />;
+    case 'swatch':      return <SwatchRenderer content={content} onChange={handleChange} />;
+    case 'table':       return <TableRenderer content={content} onChange={handleChange} />;
+    case 'drawing':     return <DrawingRenderer content={content} onChange={handleChangeImmediate} />;
+    case 'scenePin':    return <ScenePinRenderer content={content} onChange={handleChangeImmediate} />;
+    case 'interview':   return <InterviewCardRenderer content={content} onChange={handleChange} />;
     case 'untyped':     return <UntypedWidgetRenderer />;
     default:            return null;
   }

@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
     BUILTIN_INTERVIEWS,
     makeBlankInterview,
-    interviewLaunchLine,
-    renderInterviewGuide,
+    buildInterviewSections,
+    interviewDescription,
 } from './index';
 
 describe('built-in interviews', () => {
@@ -24,47 +24,58 @@ describe('built-in interviews', () => {
         }
         expect(new Set(BUILTIN_INTERVIEWS.map(i => i.id)).size).toBe(BUILTIN_INTERVIEWS.length);
     });
-});
 
-describe('renderInterviewGuide', () => {
-    it('numbers the questions and includes the confirm-before-create protocol', () => {
-        const character = BUILTIN_INTERVIEWS.find(i => i.id === 'build-a-character')!;
-        const guide = renderInterviewGuide(character);
-        expect(guide).toContain('GUIDED INTERVIEW: "Character"');
-        expect(guide).toContain('1. Core want');
-        expect(guide).toContain('10. The test');
-        expect(guide).toContain('ONE question at a time');
-        expect(guide).toContain('create_article');
-        // A single-subject interview names its target type.
-        expect(guide).toContain('character article');
-    });
-
-    it('describes the World interview as producing many grouped articles, not one', () => {
-        const world = BUILTIN_INTERVIEWS.find(i => i.id === 'build-a-world')!;
-        const guide = renderInterviewGuide(world);
-        expect(guide).toContain('grouped into sensible folders');
-        // The single-subject protocol line ("the main <type> article") must not appear.
-        expect(guide).not.toContain('the main');
-    });
-
-    it('skips blank questions when rendering', () => {
-        const iv = makeBlankInterview('draft');
-        iv.questions = [
-            { label: 'A', prompt: 'Real question?', seeds: '' },
-            { label: 'B', prompt: '   ', seeds: '' },
-        ];
-        const guide = renderInterviewGuide(iv);
-        expect(guide).toContain('1. A');
-        expect(guide).not.toContain('2. B');
-        expect(guide).toContain('THE 1 QUESTIONS');
+    it('gives a blank custom interview one starter question', () => {
+        const draft = makeBlankInterview('draft');
+        expect(draft.id).toBe('draft');
+        expect(draft.questions).toHaveLength(1);
+        expect(draft.builtIn).toBeUndefined();
     });
 });
 
-describe('interviewLaunchLine', () => {
-    it('produces a natural opening line from the title', () => {
-        const city = BUILTIN_INTERVIEWS.find(i => i.id === 'build-a-city')!;
-        expect(interviewLaunchLine(city)).toBe(
-            "Let's build a city — walk me through it, one question at a time.",
-        );
+describe('buildInterviewSections', () => {
+    it('turns each answered question into a heading and its prose', () => {
+        const sections = buildInterviewSections([
+            { prompt: 'Who is this character?', answer: 'A thief called Kestrel.' },
+            { prompt: 'What do they want?', answer: 'Out.' },
+        ]);
+        expect(sections).toEqual([
+            { heading: 'Who is this character?', body: 'A thief called Kestrel.' },
+            { heading: 'What do they want?', body: 'Out.' },
+        ]);
+    });
+
+    it('omits a skipped question entirely rather than leaving an empty heading', () => {
+        const sections = buildInterviewSections([
+            { prompt: 'Who is this character?', answer: 'A thief.' },
+            { prompt: 'What do they want?', answer: '   ' },
+            { prompt: 'Their wound?', answer: '' },
+        ]);
+        expect(sections).toHaveLength(1);
+        expect(sections[0].heading).toBe('Who is this character?');
+    });
+
+    it('returns nothing when every question was skipped', () => {
+        expect(buildInterviewSections([{ prompt: 'Q', answer: '  ' }])).toEqual([]);
+    });
+});
+
+describe('interviewDescription', () => {
+    it('takes the first line of the first answered question', () => {
+        expect(interviewDescription([
+            { prompt: 'Q1', answer: '  ' },
+            { prompt: 'Q2', answer: 'A thief called Kestrel.\nMore below.' },
+        ])).toBe('A thief called Kestrel.');
+    });
+
+    it('clips a long first line and marks it', () => {
+        const long = 'x'.repeat(300);
+        const out = interviewDescription([{ prompt: 'Q', answer: long }], 240);
+        expect(out).toHaveLength(241);
+        expect(out.endsWith('…')).toBe(true);
+    });
+
+    it('is empty when nothing was answered', () => {
+        expect(interviewDescription([{ prompt: 'Q', answer: '' }])).toBe('');
     });
 });

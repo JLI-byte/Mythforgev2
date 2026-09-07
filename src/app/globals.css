@@ -1,6 +1,25 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* ──────────────────────────────────────────────────────────────
+   Cascade order.
+
+   Tailwind goes into a layer; everything else in this file, and every
+   CSS Module, stays unlayered. Unlayered rules beat ANY layer regardless
+   of specificity, so this one line stops a Tailwind utility from ever
+   out-specifying app CSS — which is the whole practical benefit here.
+
+   The rest of this file is deliberately NOT layered. The plan proposed a
+   trailing `a11y` layer "so the accessibility floor beats everything
+   without needing !important", but that is backwards: Next injects CSS
+   Modules unlayered, and unlayered wins over every layer. Putting the
+   focus ring in a layer would make it WEAKER than any module rule, not
+   stronger. :focus-visible below is already designed as a floor that a
+   component with a better ring may override on specificity, and it does
+   that correctly today.
+   ────────────────────────────────────────────────────────────── */
+@layer tailwind {
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+}
 
 /* 
  * Global Styles for LoreCanvas
@@ -11,17 +30,49 @@
   --background: #fdfdfd;
   --background-rgb: 253, 253, 253;
   --surface: #f7f7f7;
+  /* Raised surfaces step away from the background, as they do in dark. */
+  --surface-mid: #efefef;
+  --surface-high: #e7e7e7;
   --foreground: #222222;
+  /* These three, and the two surfaces above, existed only in the dark block,
+     so light theme had no values for them at all and merely inherited whatever
+     the OS-dark block leaked. Chosen to clear 4.5:1 on --background, --surface
+     and --surface-mid alike, each keeping its dark partner's hue family. */
+  --muted: #66666f;
+  /* Destructive actions. Like --accent it has to flip: a red readable on
+     a white ground is not readable on a near-black one. Defined per
+     palette rather than hardcoded at the call site. Chosen against the
+     translucent modal ground, which composites to rgb(219,219,219) rather
+     than the page white - a red picked against #fff falls short there. */
+  --danger: #a81b12;
+  --secondary: #0e7490;
+  --tertiary: #a1541a;
   --accent: #005bb5;
+  /* Text that sits ON the accent. Every block that redefines --accent must
+     redefine this with it: the accent is a dark blue here, a pale lavender in
+     dark mode and a red or orange in the fantasy family, so one fixed
+     foreground fails at least one of them. Paired at each definition rather
+     than set once, because a block that overrides only the accent lets the
+     previous foreground leak — which is exactly what happened when explicit
+     light mode kept dark mode's near-black on a dark blue button. */
+  --on-accent: #ffffff;
+  /* The accent's deeper partner, used for gradients and secondary fills.
+     Defined here too: it was only set in the dark and fantasy blocks, so
+     light theme fell through to a hardcoded purple from another palette. */
+  --accent-dim: #003d7a;
   --border: #eaeaea;
 
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-serif: 'Merriweather', 'Georgia', serif;
 
-  /* RGB used for subtle hover/surface overlays (rgba(var(--overlay-rgb), a)).
-     White by default to preserve the original glass-on-dark look; the fantasy
-     family overrides it with ink (light) / warm cream (dark). */
-  --overlay-rgb: 255, 255, 255;
+  /* RGB for hover and surface overlays: rgba(var(--overlay-rgb), a). It must
+     be whatever contrasts with the ground, so it flips per theme — ink here,
+     white in the dark blocks, exactly as the fantasy family already does.
+     It was white everywhere "to preserve the original glass-on-dark look",
+     which meant white-on-white in light theme: all 259 uses measured a
+     luminance delta of exactly zero at every alpha. Every hover state,
+     divider and surface tint was invisible. */
+  --overlay-rgb: 20, 22, 28;
 
   /* Wash painted over the main content area (e.g. Bookshelf container). Dark by
      default so default themes are unchanged; fantasy goes faint so the wood
@@ -33,6 +84,158 @@
   --glass-blur: 20px;
   --glass-border: rgba(255, 255, 255, 0.12);
   --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+
+  --manuscript-ink: var(--foreground);
+
+
+  /* ========================================================================
+     ON-MEDIA and ON-FILL. These do not follow the theme, deliberately.
+     A caption over a user's photograph needs a dark scrim and white ink
+     whether the app is light or dark - binding it to --foreground is what
+     made the article hero's inactive tabs go dark-on-dark-scrim in light
+     theme. Likewise white is the readable ink on a saturated --danger or
+     --success fill in both palettes.
+     ======================================================================== */
+  --media-rgb: 15, 15, 16;
+  --on-media: #ffffff;
+  --on-fill: #ffffff;
+
+  /* Success and favourite had no token at all, so components hardcoded a
+     green and a gold - and hardcoded the DARK theme's version of each. */
+  --success: #0f7a4d;
+  --favourite: #b8860b;
+
+
+  /* ========================================================================
+     SPACING - a 4px grid with a 6px half-step, because the audit found 193
+     uses of 8px, 148 of 4px and 138 of 6px: the app already thinks in fours
+     and sixes, it just spelled them 30 different ways (1,074 px-unit uses
+     across 30 distinct values). rem, not px, so a browser text-size setting
+     scales the layout with the text instead of leaving it behind.
+     ======================================================================== */
+  --space-1: 0.125rem;   /* 2px  */
+  --space-2: 0.25rem;    /* 4px  */
+  --space-3: 0.375rem;   /* 6px  */
+  --space-4: 0.5rem;     /* 8px  */
+  --space-5: 0.75rem;    /* 12px */
+  --space-6: 1rem;       /* 16px */
+  --space-7: 1.5rem;     /* 24px */
+  --space-8: 2rem;       /* 32px */
+  --space-9: 2.5rem;     /* 40px */
+  --space-10: 3rem;      /* 48px */
+  --space-11: 4rem;      /* 64px */
+  --space-12: 6rem;      /* 96px */
+
+  /* ========================================================================
+     TYPE - seven steps. The audit found 54 distinct rem sizes plus 8 px ones
+     across 951 declarations, and most of those uses sit below 1rem: this is
+     a dense tool, so the scale is dense at the bottom (11/12/13/14px) and
+     opens up only above the body size. --text-display and --text-hero are
+     deliberately NOT scale steps - they are the marketing route's fluid
+     title sizes. One seven-step scale cannot span an 11px badge and a 96px
+     hero without a 2x gap between neighbours, so the display sizes sit
+     outside the scale rather than distorting it.
+     ======================================================================== */
+  --text-2xs: 0.6875rem; /* 11px - badges, meta, counts */
+  --text-xs: 0.75rem;    /* 12px - secondary labels */
+  --text-sm: 0.8125rem;  /* 13px - dense control text */
+  --text-md: 0.875rem;   /* 14px - the app's default UI text */
+  --text-lg: 1rem;       /* 16px - manuscript body, dialog prose */
+  --text-xl: 1.25rem;    /* 20px - section headings */
+  --text-2xl: 1.5rem;    /* 24px - panel and modal titles */
+
+  --text-display: clamp(1.75rem, 1.2rem + 2.4vw, 2.5rem);
+  --text-hero: clamp(2.5rem, 1.5rem + 5vw, 6rem);
+
+  /* Line heights ride with the step rather than being restated per rule. */
+  --leading-tight: 1.2;
+  --leading-snug: 1.4;
+  --leading-normal: 1.6;
+  --leading-prose: 1.75;
+
+  /* ========================================================================
+     RADII - 21 distinct values across 554 uses collapse to seven plus a pill.
+     The three biggest clusters (4px x116, 6px x109, 8px x102) each keep their
+     own step; the long tail snaps to the nearest, ties rounding up.
+     ======================================================================== */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+  --radius-full: 999px;
+
+  /* ========================================================================
+     MOTION - 49 distinct transition durations. Two clusters carry most of it
+     (0.15s + 150ms = 178 uses, 0.2s + 200ms about 96), so the scale is built
+     around them. Keyframe animations are NOT on this scale: a 9s candle
+     flicker and a 150ms hover are not the same kind of thing. The
+     reduced-motion block below already floors both at 1ms.
+     ======================================================================== */
+  --dur-1: 100ms;
+  --dur-2: 150ms;   /* the default */
+  --dur-3: 200ms;
+  --dur-4: 300ms;
+  --dur-5: 500ms;
+
+  /* 15 distinct easings were in use; plain `ease` alone appeared hundreds of times. */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.55, 0.06, 0.68, 0.19);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ========================================================================
+     TYPEFACES. --font-manuscript is new (item 09); --font-mono had five
+     references and no definition anywhere.
+     ======================================================================== */
+  --font-mono: ui-monospace, 'JetBrains Mono', 'Courier New', monospace;
+
+  /* ========================================================================
+     Channel triplets. --accent-rgb was defined ONLY in the two fantasy
+     blocks, so its 93 references across 9 stylesheets were invalid at
+     computed-value time in both default themes - every
+     rgba(var(--accent-rgb), a) focus ring, tab tint and hover fill silently
+     dropped unless the user was in the fantasy family. Verified in the
+     browser: the token resolved to "" and the declaration painted
+     rgba(0,0,0,0). --foreground-rgb had the same hole with 5 uses.
+     ======================================================================== */
+  --accent-rgb: 0, 91, 181;        /* #005bb5 */
+  --foreground-rgb: 34, 34, 34;    /* #222222 */
+  /* Shadows are cast by light, so they stay ink in every default palette -
+     unlike --overlay-rgb, which has to contrast with the ground and flips. */
+  --shadow-rgb: 0, 0, 0;
+
+  /* Aliases for names components already reference. Defining them as aliases
+     rather than new colours keeps the palette at one source of truth. */
+  --surface-2: var(--surface-mid);
+  --surface-raised: var(--surface-mid);
+  --surface-elevated: var(--surface-high);
+  --surface-hover: rgba(var(--overlay-rgb), 0.06);
+  --border-subtle: rgba(var(--overlay-rgb), 0.08);
+  --accent-subtle: rgba(var(--accent-rgb), 0.12);
+  --accent-hover: var(--accent-dim);
+  --input-bg: var(--surface-mid);
+  --error: var(--danger);
+  --text-muted: var(--muted);
+  --text-primary: var(--foreground);
+
+  /* ========================================================================
+     ELEVATION - 118 distinct box-shadow recipes across 155 uses. Five steps
+     plus the glass shadow that already exists. Theme-dependent: the same
+     shadow that reads as depth on white is invisible on #0e0e0e, so each
+     block sets its own alphas.
+     ======================================================================== */
+  --shadow-1: 0 1px 2px rgba(var(--shadow-rgb), 0.06);
+  --shadow-2: 0 2px 6px rgba(var(--shadow-rgb), 0.10);
+  --shadow-3: 0 4px 12px rgba(var(--shadow-rgb), 0.14);
+  --shadow-4: 0 12px 32px rgba(var(--shadow-rgb), 0.18);
+  --shadow-5: 0 24px 64px rgba(var(--shadow-rgb), 0.24);
+  --shadow-ring: 0 0 0 3px rgba(var(--accent-rgb), 0.28);
+  --shadow-lg: var(--shadow-3);
+  --shadow-2xl: var(--shadow-5);
+
 }
 
 input,
@@ -48,17 +251,26 @@ option {
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  /* Guarded so an explicit light choice beats a dark OS. Without it, this
+     block still applied under [data-theme="light"] for every token the
+     light block does not re-declare - which left --muted, --secondary,
+     --tertiary and the surface tones at their dark values on a white
+     ground, measuring 3.16:1 across 37 elements on Home alone. */
+  :root:not([data-theme="light"]) {
     --background: #0e0e0e;
+    /* Ink in light, white here — see the base :root note. */
+    --overlay-rgb: 255, 255, 255;
     --background-rgb: 14, 14, 14;
     --surface: #131313;
     --surface-mid: #1c1b1b;
     --surface-high: #201f1f;
     --foreground: #e5e2e1;
     --accent: #d0bcff;
+    --on-accent: #17121f;
     --accent-dim: #a078ff;
     --border: rgba(255, 255, 255, 0.08);
     --muted: #958ea0;
+    --danger: #ff6b6d;
     --secondary: #4cd7f6;
     --tertiary: #ffb869;
 
@@ -67,21 +279,59 @@ option {
     --glass-blur: 24px;
     --glass-border: rgba(255, 255, 255, 0.08);
     --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+
+    --manuscript-ink: var(--foreground);
+
+
+    --success: #2ec27e;
+    --favourite: #ffc800;
+
+
+    --accent-rgb: 208, 188, 255;      /* #d0bcff */
+    --foreground-rgb: 229, 226, 225;  /* #e5e2e1 */
+    --shadow-rgb: 0, 0, 0;
+
+    --surface-2: var(--surface-mid);
+    --surface-raised: var(--surface-mid);
+    --surface-elevated: var(--surface-high);
+    --surface-hover: rgba(var(--overlay-rgb), 0.08);
+    --border-subtle: rgba(var(--overlay-rgb), 0.10);
+    --accent-subtle: rgba(var(--accent-rgb), 0.16);
+    --accent-hover: var(--accent-dim);
+    --input-bg: var(--surface-mid);
+    --error: var(--danger);
+    --text-muted: var(--muted);
+    --text-primary: var(--foreground);
+
+    /* Deeper and blacker than light: on #0e0e0e a 6% shadow is nothing. */
+    --shadow-1: 0 1px 2px rgba(var(--shadow-rgb), 0.30);
+    --shadow-2: 0 2px 6px rgba(var(--shadow-rgb), 0.40);
+    --shadow-3: 0 4px 12px rgba(var(--shadow-rgb), 0.50);
+    --shadow-4: 0 12px 32px rgba(var(--shadow-rgb), 0.60);
+    --shadow-5: 0 24px 64px rgba(var(--shadow-rgb), 0.70);
+    --shadow-ring: 0 0 0 3px rgba(var(--accent-rgb), 0.35);
+    --shadow-lg: var(--shadow-3);
+    --shadow-2xl: var(--shadow-5);
+
   }
 }
 
 /* Manual overrides driven by JS toggle */
 :root[data-theme="dark"] {
   --background: #0e0e0e;
+  /* Ink in light, white here — see the base :root note. */
+  --overlay-rgb: 255, 255, 255;
   --background-rgb: 14, 14, 14;
   --surface: #131313;
   --surface-mid: #1c1b1b;
   --surface-high: #201f1f;
   --foreground: #e5e2e1;
   --accent: #d0bcff;
+  --on-accent: #17121f;
   --accent-dim: #a078ff;
   --border: rgba(255, 255, 255, 0.08);
   --muted: #958ea0;
+  --danger: #ff6b6d;
   --secondary: #4cd7f6;
   --tertiary: #ffb869;
 
@@ -90,6 +340,40 @@ option {
   --glass-blur: 24px;
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+
+  --manuscript-ink: var(--foreground);
+
+
+  --success: #2ec27e;
+  --favourite: #ffc800;
+
+
+  --accent-rgb: 208, 188, 255;      /* #d0bcff */
+  --foreground-rgb: 229, 226, 225;  /* #e5e2e1 */
+  --shadow-rgb: 0, 0, 0;
+
+  --surface-2: var(--surface-mid);
+  --surface-raised: var(--surface-mid);
+  --surface-elevated: var(--surface-high);
+  --surface-hover: rgba(var(--overlay-rgb), 0.08);
+  --border-subtle: rgba(var(--overlay-rgb), 0.10);
+  --accent-subtle: rgba(var(--accent-rgb), 0.16);
+  --accent-hover: var(--accent-dim);
+  --input-bg: var(--surface-mid);
+  --error: var(--danger);
+  --text-muted: var(--muted);
+  --text-primary: var(--foreground);
+
+  /* Deeper and blacker than light: on #0e0e0e a 6% shadow is nothing. */
+  --shadow-1: 0 1px 2px rgba(var(--shadow-rgb), 0.30);
+  --shadow-2: 0 2px 6px rgba(var(--shadow-rgb), 0.40);
+  --shadow-3: 0 4px 12px rgba(var(--shadow-rgb), 0.50);
+  --shadow-4: 0 12px 32px rgba(var(--shadow-rgb), 0.60);
+  --shadow-5: 0 24px 64px rgba(var(--shadow-rgb), 0.70);
+  --shadow-ring: 0 0 0 3px rgba(var(--accent-rgb), 0.35);
+  --shadow-lg: var(--shadow-3);
+  --shadow-2xl: var(--shadow-5);
+
 }
 
 :root[data-theme="light"] {
@@ -99,11 +383,17 @@ option {
   --foreground: #171717;
   --border: #e2e8f0;
   --accent: #005bb5;
+  --on-accent: #ffffff;
 
   --glass-bg: rgba(255, 255, 255, 0.75);
   --glass-blur: 24px;
   --glass-border: rgba(0, 0, 0, 0.05);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+
+  --accent-rgb: 0, 91, 181;
+  --foreground-rgb: 23, 23, 23;    /* matches this block's #171717 */
+  --shadow-rgb: 0, 0, 0;
+
 }
 
 /*
@@ -126,10 +416,12 @@ option {
   --foreground: #3b2c15;
   --foreground-rgb: 59, 44, 21;
   --accent: #c8401f;
+  --on-accent: #ffffff;
   --accent-dim: #a32d12;
   --accent-rgb: 200, 64, 31;
   --border: rgba(59, 44, 21, 0.20);
   --muted: #75603f;
+  --danger: #a3301f;
   --secondary: #3d7068;
   --tertiary: #b08d2f;
   --overlay-rgb: 59, 44, 21;
@@ -144,6 +436,12 @@ option {
   --glass-blur: 20px;
   --glass-border: rgba(59, 44, 21, 0.12);
   --glass-shadow: 0 8px 28px 0 rgba(59, 44, 21, 0.14);
+
+  --manuscript-ink: #2c2113;   /* ink on the parchment sheet */
+
+
+  --shadow-rgb: 59, 44, 21;   /* the parchment family casts warm ink shadows */
+
 }
 
 /* Fantasy DARK — candlelit library: aged leather, ember, gold */
@@ -156,10 +454,12 @@ option {
   --foreground: #ece0c4;
   --foreground-rgb: 236, 224, 196;
   --accent: #e0642f;
+  --on-accent: #17121f;
   --accent-dim: #c8401f;
   --accent-rgb: 224, 100, 47;
   --border: rgba(236, 224, 196, 0.14);
   --muted: #b09a72;
+  --danger: #f08a7a;
   --secondary: #5a9b8f;
   --tertiary: #d8b15a;
   --overlay-rgb: 236, 224, 196;
@@ -174,6 +474,12 @@ option {
   --glass-blur: 24px;
   --glass-border: rgba(236, 224, 196, 0.10);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.55);
+
+  --manuscript-ink: #2c2113;   /* ink on the parchment sheet */
+
+
+  --shadow-rgb: 0, 0, 0;
+
 }
 
 /* Cartographer's-desk wood photo behind the whole app. The parchment surfaces
@@ -226,14 +532,12 @@ option {
 :root[data-theme-family="fantasy"] [data-scroll="main"] {
   font-family: var(--font-garamond), 'Merriweather', Georgia, serif;
 }
+/* The face, size and leading now come from --font-manuscript and the type
+   scale, which apply in every theme. The family only needs its own ink: the
+   fantasy manuscript page is a parchment sheet in both modes, so the writing
+   stays dark even in the candlelit dark palette. */
 :root[data-theme-family="fantasy"] .ProseMirror {
-  font-family: var(--font-garamond), 'Merriweather', Georgia, serif;
-  font-size: 1.18rem;
-  line-height: 1.75;
-}
-:root[data-theme-family="fantasy"] .ProseMirror {
-  /* Dark ink in both modes — the manuscript page is a parchment sheet either way. */
-  color: #2c2113;
+  color: var(--manuscript-ink);
 }
 
 * {
@@ -243,6 +547,12 @@ option {
 }
 
 body {
+  /* --font-manuscript lives HERE, not on :root. next/font sets --font-garamond
+     via a className on <body>, so a :root declaration referencing it computes
+     to guaranteed-invalid and the manuscript silently fell back to Inter.
+     A custom property is resolved where it is DECLARED, not where it is used. */
+  --font-manuscript: var(--font-garamond), 'Merriweather', Georgia, serif;
+
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
@@ -264,7 +574,7 @@ a:hover {
 .entity-tag {
   border-bottom: 1px solid var(--accent);
   cursor: pointer;
-  transition: border-bottom-color 0.2s ease;
+  transition: border-bottom-color var(--dur-3) var(--ease-standard);
 }
 
 .entity-tag:hover {
@@ -280,7 +590,7 @@ a:hover {
 }
 [data-scroll="main"]::-webkit-scrollbar-thumb {
     background: var(--border);
-    border-radius: 99px;
+    border-radius: var(--radius-full);
 }
 [data-scroll="main"]::-webkit-scrollbar-thumb:hover {
     background: var(--accent);
@@ -295,8 +605,8 @@ a:hover {
   background: #0e0e0e;
 }
 ::-webkit-scrollbar-thumb {
-  background: #353534;
-  border-radius: 10px;
+  background: rgba(var(--overlay-rgb), 0.2);
+  border-radius: var(--radius-lg);
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent);
@@ -305,17 +615,96 @@ a:hover {
 /* FindReplace ProseMirror decorations — applied by custom FindReplace extension */
 .lorecanvas-search-match {
     background-color: rgba(255, 215, 0, 0.35);
-    border-radius: 2px;
+    border-radius: var(--radius-xs);
 }
 .lorecanvas-search-current {
     background-color: rgba(255, 140, 0, 0.55);
-    border-radius: 2px;
+    border-radius: var(--radius-xs);
     outline: 1px solid rgba(255, 140, 0, 0.7);
 }
 
 /* @Entity suggest — highlight the @query text while typing */
 .entity-suggest-query {
-  background: rgba(208, 188, 255, 0.15);
-  border-radius: 3px;
+  background: rgba(var(--accent-rgb), 0.15);
+  border-radius: var(--radius-xs);
   color: var(--accent);
+}
+/* ──────────────────────────────────────────────────────────────
+   Reduced motion.
+
+   A system-level setting, not a preference to sample per component.
+   55 of this app's 61 stylesheets animate; before this, seven honoured
+   the setting. A module may still opt a specific transition back in
+   where the motion carries meaning — this is the floor, not a ban.
+
+   Durations go to 1ms rather than 0 so transitionend still fires and
+   any handler waiting on it does not hang.
+   ────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Focus.
+
+   :focus-visible rather than :focus, so a pointer user never gets a
+   ring they did not ask for and a keyboard user always does. Only 8 of
+   61 stylesheets defined one; components with their own better ring
+   still win on specificity.
+   ────────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+/* Never strip the ring without replacing it. */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Hit areas.
+
+   Grows the touchable region without changing how big the control
+   looks. Apply to any icon-only control that renders under 44px —
+   Apple's minimum — so the icon stays small and the target does not.
+   ────────────────────────────────────────────────────────────── */
+.hit-target { position: relative; }
+.hit-target::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100%, 44px);
+  height: max(100%, 44px);
+  transform: translate(-50%, -50%);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Screen-reader-only text.
+
+   Clipped rather than display:none or visibility:hidden — both of
+   those take the node out of the accessibility tree, which would make
+   a live region permanently silent. Global, like .hit-target, because
+   the live regions are mounted from the root layout.
+   ────────────────────────────────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }

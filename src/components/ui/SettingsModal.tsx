@@ -1,14 +1,24 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
+import { X } from 'lucide-react';
 import styles from './SettingsModal.module.css';
-import AISettingsSection from './AISettingsSection';
 import {
     useWorkspaceStore,
     listDataBackups,
     restoreDataBackup,
     createManualBackup,
+    partializeWorkspace,
+    cancelPendingPersist,
 } from '@/store/workspaceStore';
+import { useModalDialog } from '@/lib/useModalDialog';
+import {
+    WORKSPACE_SCHEMA_VERSION,
+    buildWorkspaceExport,
+    exportFileName,
+} from '@/lib/workspaceExport';
+import { describeDeleteFailure, isDeleteConfirmed } from '@/lib/accountDeletion';
+import { createClient } from '@/lib/supabase/client';
 
 interface SettingsModalProps {
     onClose: () => void;
@@ -35,6 +45,10 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
     const setSpellcheckEnabled = useWorkspaceStore((state) => state.setSpellcheckEnabled);
     const themeFamily = useWorkspaceStore((state) => state.themeFamily);
     const setThemeFamily = useWorkspaceStore((state) => state.setThemeFamily);
+    const exampleDataOn = useWorkspaceStore(s => s.exampleDataOn);
+    const setExampleData = useWorkspaceStore(s => s.setExampleData);
+    const ownerUserId = useWorkspaceStore(s => s.ownerUserId);
+    const resetWorkspace = useWorkspaceStore(s => s.resetWorkspace);
 
 
     const [dailyTarget, setDailyTarget] = useState(writingGoal.dailyTarget);
@@ -42,12 +56,33 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
 
     const [localWidth, setLocalWidth] = useState(editorWidth);
 
-    const [backups, setBackups] = useState(() => listDataBackups());
+    const [backups, setBackups] = useState(() => listDataBackups(ownerUserId));
     const [backupMsg, setBackupMsg] = useState('');
+    const fieldId = useId();
+
+    // The signed-in account, read from the session rather than from the store,
+    // because the delete path below must act on whoever Supabase says is signed
+    // in and never on an id this component could be talked into holding.
+    const [account, setAccount] = useState<{ id: string; email?: string } | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        createClient().auth.getUser().then(({ data }) => {
+            if (cancelled || !data.user) return;
+            setAccount({ id: data.user.id, email: data.user.email ?? undefined });
+        });
+        return () => { cancelled = true; };
+    }, []);
+
+    const [deleteInput, setDeleteInput] = useState('');
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState('');
+
+    const canDelete = isDeleteConfirmed(deleteInput, account?.email);
 
     const handleCreateBackup = () => {
         const key = createManualBackup();
-        setBackups(listDataBackups());
+        setBackups(listDataBackups(ownerUserId));
         setBackupMsg(key ? 'Backup created.' : 'Nothing to back up yet.');
         setTimeout(() => setBackupMsg(''), 3000);
     };
@@ -64,20 +99,71 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
         }
     };
 
+    // Serialises the live store rather than reading localStorage, which could be
+    // one persist debounce stale and produced nothing at all when the key was
+    // missing. The envelope states the format, the account, what is in the file
+    // and — the part usually left out — what is not.
     const handleDownloadBackup = () => {
-        const raw = typeof localStorage !== 'undefined'
-            ? localStorage.getItem('lorecanvas-workspace')
-            : null;
-        if (!raw) { setBackupMsg('Nothing to export yet.'); return; }
-        const blob = new Blob([raw], { type: 'application/json' });
+        const workspace = partializeWorkspace(useWorkspaceStore.getState()) as Record<string, unknown>;
+        const exportedAt = new Date().toISOString();
+        const payload = buildWorkspaceExport(workspace, {
+            schemaVersion: WORKSPACE_SCHEMA_VERSION,
+            exportedAt,
+            userId: account?.id,
+            email: account?.email,
+        });
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `lorecanvas-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        a.download = exportFileName(exportedAt);
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        setBackupMsg('Downloaded everything in your workspace.');
+        setTimeout(() => setBackupMsg(''), 3000);
+    };
+
+    /**
+     * Deletes the signed-in account. Irreversible, with no grace period.
+     *
+     * The RPC takes no arguments: it deletes auth.uid() and nothing else, so
+     * there is no id here that could point somewhere it should not.
+     * public.workspaces cascades off auth.users, so the cloud copy goes with it.
+     */
+    const handleDeleteAccount = async () => {
+        if (!canDelete || isDeleting) return;
+        setIsDeleting(true);
+        setDeleteError('');
+
+        const supabase = createClient();
+        const { error } = await supabase.rpc('delete_own_account');
+        if (error) {
+            setDeleteError(describeDeleteFailure(error));
+            setIsDeleting(false);
+            return;
+        }
+
+        // The account is gone. Clear this device before the redirect, or the
+        // next person to open this browser rehydrates a deleted user's work.
+        //
+        // cancelPendingPersist is load-bearing, not tidiness: the local save is
+        // debounced and flushes on pagehide, which the redirect below fires. A
+        // queued write would otherwise rewrite lorecanvas-workspace on the way
+        // out, putting the deleted account's manuscript straight back.
+        resetWorkspace();
+        cancelPendingPersist();
+        try {
+            localStorage.removeItem('lorecanvas-workspace');
+            Object.keys(localStorage)
+                .filter(k => k.startsWith('lorecanvas-backup-'))
+                .forEach(k => localStorage.removeItem(k));
+        } catch {
+            // localStorage unavailable — the sign-out below still ends the session.
+        }
+        await supabase.auth.signOut();
+        window.location.href = '/welcome';
     };
 
     const handleSave = () => {
@@ -100,12 +186,22 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
         setLocalWidth(800);
     };
 
+    const dialogRef = useModalDialog<HTMLDivElement>(onClose);
+
     return (
-        <div className={styles.backdrop} onClick={onClose}>
-            <div className={styles.panel} onClick={e => e.stopPropagation()}>
+        <div className={styles.backdrop} onClick={onClose} role="presentation">
+            <div
+                ref={dialogRef}
+                className={styles.panel}
+                onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="settings-dialog-title"
+                tabIndex={-1}
+            >
                 <div className={styles.header}>
-                    <h2>Settings</h2>
-                    <button className={styles.closeBtn} onClick={onClose}>×</button>
+                    <h2 id="settings-dialog-title">Settings</h2>
+                    <button className={styles.closeBtn} onClick={onClose} aria-label="Close settings"><X size={18} /></button>
                 </div>
 
                 <div className={styles.content}>
@@ -159,9 +255,10 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                             <h3>Writing Goals</h3>
                         </div>
                         <div className={styles.inputGroup}>
-                            <label className={styles.label}>Daily Word Target</label>
+                            <label className={styles.label} htmlFor={`${fieldId}-daily-target`}>Daily Word Target</label>
                             <input
                                 type="number"
+                                id={`${fieldId}-daily-target`}
                                 value={dailyTarget || ''}
                                 onChange={(e) => setDailyTarget(Number(e.target.value))}
                                 className={styles.input}
@@ -170,9 +267,10 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                             />
                         </div>
                         <div className={styles.inputGroup}>
-                            <label className={styles.label}>Session Word Target</label>
+                            <label className={styles.label} htmlFor={`${fieldId}-session-target`}>Session Word Target</label>
                             <input
                                 type="number"
+                                id={`${fieldId}-session-target`}
                                 value={sessionTarget || ''}
                                 onChange={(e) => setSessionTarget(Number(e.target.value))}
                                 className={styles.input}
@@ -187,8 +285,9 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                             <h3>Editor Layout</h3>
                         </div>
                         <div className={styles.inputGroup}>
-                            <label className={styles.label}>Editor width: {localWidth}px</label>
+                            <label className={styles.label} htmlFor={`${fieldId}-editor-width`}>Editor width: {localWidth}px</label>
                             <input
+                                id={`${fieldId}-editor-width`}
                                 type="range"
                                 min="500"
                                 max="1400"
@@ -220,7 +319,23 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                         </label>
                     </section>
 
-                    <AISettingsSection />
+                    <section className={styles.section} style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
+                        <div className={styles.providerHeader}>
+                            <h3>Example Data</h3>
+                        </div>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem', cursor: 'pointer' }}>
+                            <input
+                                type="checkbox"
+                                checked={exampleDataOn}
+                                onChange={(e) => setExampleData(e.target.checked)}
+                            />
+                            Show example data (a sample world with three projects, so you can see a populated workspace)
+                        </label>
+                        <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: 'var(--muted)' }}>
+                            Turning this off puts the example away without deleting it. Anything you
+                            wrote inside it comes back when you turn it on again.
+                        </p>
+                    </section>
 
                     <section className={styles.section} style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
                         <div className={styles.providerHeader}>
@@ -231,7 +346,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                                 Create backup now
                             </button>
                             <button type="button" onClick={handleDownloadBackup} className={styles.presetBtn}>
-                                Download backup (.json)
+                                Download everything (.json)
                             </button>
                         </div>
                         {backupMsg && (
@@ -250,6 +365,72 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                             </div>
                         )}
                     </section>
+
+                    {account && (
+                        <section className={`${styles.section} ${styles.dangerZone}`}>
+                            <div className={styles.providerHeader}>
+                                <h3>Delete your account</h3>
+                            </div>
+                            <p className={styles.dangerLead}>
+                                This removes, permanently and immediately:
+                            </p>
+                            <ul className={styles.dangerList}>
+                                <li>your sign-in — <strong>{account.email}</strong> will no longer work</li>
+                                <li>your cloud workspace — every world, project, document, scene and article stored on our servers</li>
+                                <li>the copy in this browser</li>
+                            </ul>
+                            <p className={styles.dangerNote}>
+                                It does <strong>not</strong> remove copies in other browsers you
+                                have signed in on (those clear when you next open them), files you
+                                have already exported, or beta feedback you sent — that stays, with
+                                your account detached from it.
+                            </p>
+                            <p className={styles.dangerNote}>
+                                There is no undo and no grace period. Take your writing with you
+                                first — the button below is the same one as under Backup &amp;
+                                Restore, and it writes every word you have.
+                            </p>
+                            <button
+                                type="button"
+                                onClick={handleDownloadBackup}
+                                className={`${styles.presetBtn} ${styles.dangerExportBtn}`}
+                            >
+                                Download everything (.json)
+                            </button>
+                            <label className={styles.label} htmlFor={`${fieldId}-delete`}>
+                                Type <strong>{account.email}</strong> to confirm.
+                            </label>
+                            <input
+                                id={`${fieldId}-delete`}
+                                type="text"
+                                value={deleteInput}
+                                autoComplete="off"
+                                autoCapitalize="none"
+                                spellCheck={false}
+                                onChange={(e) => setDeleteInput(e.target.value)}
+                                className={styles.deleteInput}
+                            />
+                            <button
+                                type="button"
+                                className={styles.deleteBtn}
+                                disabled={!canDelete || isDeleting}
+                                onClick={handleDeleteAccount}
+                                aria-describedby={`${fieldId}-delete-status`}
+                            >
+                                {isDeleting ? 'Deleting…' : 'Delete my account permanently'}
+                            </button>
+                            <p
+                                id={`${fieldId}-delete-status`}
+                                role="status"
+                                className={deleteError ? styles.deleteError : styles.dangerNote}
+                            >
+                                {deleteError
+                                    || (canDelete
+                                        ? 'Confirmed. Pressing the button deletes your account.'
+                                        : 'The button stays disabled until the address above matches exactly.')}
+                            </p>
+                        </section>
+                    )}
 
                 </div>
 

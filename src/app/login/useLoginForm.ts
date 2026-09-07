@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from 'react';
+import { sendMagicLink } from '@/lib/supabase/signIn';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 
 /**
  * Sign-in logic shared by every login theme.
@@ -22,14 +22,10 @@ export function useLoginForm() {
     const [error, setError] = useState<string | null>(null);
     const [notInvited, setNotInvited] = useState(false);
     const router = useRouter();
-
-    const supabase = createClient();
-    // Dev login also shows in local production builds when explicitly opted in
-    // at build time (NEXT_PUBLIC_ALLOW_DEV_LOGIN=1) — the API route still 404s
-    // unless the server is started with ALLOW_DEV_LOGIN=1.
-    const isDev =
-        process.env.NODE_ENV === 'development' ||
-        process.env.NEXT_PUBLIC_ALLOW_DEV_LOGIN === '1';
+    // Development only. The opt-in build flag is gone: the API route is gated
+    // on NODE_ENV alone, so showing the button anywhere else would offer a
+    // control that always 404s.
+    const isDev = process.env.NODE_ENV === 'development';
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -38,24 +34,14 @@ export function useLoginForm() {
         setError(null);
         setNotInvited(false);
 
-        const { error } = await supabase.auth.signInWithOtp({
-            email,
-            options: {
-                // Invite-only beta: never create accounts from the login form
-                shouldCreateUser: false,
-                emailRedirectTo: `${window.location.origin}/auth/callback`,
-            },
-        });
+        const result = await sendMagicLink(email);
 
-        if (error) {
-            // GoTrue surfaces unknown emails as a signup-disallowed error
-            if (/signup|not allowed|not found/i.test(error.message)) {
-                setNotInvited(true);
-            } else {
-                setError(error.message);
-            }
+        if (result.notInvited) {
+            setNotInvited(true);
+        } else if (!result.ok) {
+            setError(result.message);
         } else {
-            setMessage('A magic link is on its way — check your inbox.');
+            setMessage(result.message);
         }
 
         setIsLoading(false);
@@ -70,7 +56,7 @@ export function useLoginForm() {
             if (!res.ok) {
                 setError(body.error || 'Dev login failed');
             } else {
-                router.replace('/');
+                router.replace('/?view=home');
                 router.refresh();
             }
         } catch {

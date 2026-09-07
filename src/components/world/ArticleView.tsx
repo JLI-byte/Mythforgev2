@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useRef, useState } from 'react';
+import { X, Pencil, BookOpen, Plus } from 'lucide-react';
 import { useWorkspaceStore, Entity, EntityType, GalleryImage, ArticleTab } from '@/store/workspaceStore';
 import { SUBCATEGORY_LABELS, SUBCATEGORY_ICONS } from '@/lib/worldBibleNav';
 import { worldKeyForEntity, worldKeyForProject } from '@/lib/worldKey';
@@ -188,6 +189,7 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
       {editing ? (
         <input
           className={styles.gCapEdit}
+          aria-label={`Gallery image ${i + 1} caption`}
           defaultValue={img.caption}
           onChange={e => { img.caption = e.target.value; }}
           onClick={e => e.stopPropagation()}
@@ -200,7 +202,8 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
         <button
           className={`${styles.xBtn} ${styles.rmImg}`}
           onClick={e => { e.stopPropagation(); d.images.splice(i, 1); bump(); }}
-        >×</button>
+          aria-label="Remove image"
+        ><X size={12} /></button>
       )}
     </div>
   );
@@ -221,7 +224,7 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
             if (currentKey === key) setActiveKey(d.tabs[0]?.id ?? 'conn');
             bump();
           }}
-        >×</span>
+        ><X size={12} /></span>
       )}
     </button>
   );
@@ -230,11 +233,11 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
     <>
       {d.facts.map((f, i) => (
         <div key={i} className={styles.factRow}>
-          <input className={`${styles.eInput} ${styles.eInputK}`} defaultValue={f.label}
+          <input className={`${styles.eInput} ${styles.eInputK}`} aria-label={`Fact ${i + 1} label`} defaultValue={f.label}
             onChange={e => { f.label = e.target.value; }} />
-          <input className={`${styles.eInput} ${styles.eInputV}`} defaultValue={f.value}
+          <input className={`${styles.eInput} ${styles.eInputV}`} aria-label={`Fact ${i + 1} value`} defaultValue={f.value}
             onChange={e => { f.value = e.target.value; }} />
-          <button className={styles.xBtn} onClick={() => { d.facts.splice(i, 1); bump(); }}>×</button>
+          <button className={styles.xBtn} onClick={() => { d.facts.splice(i, 1); bump(); }} aria-label="Remove fact"><X size={12} /></button>
         </div>
       ))}
       <div style={{ marginTop: 10 }}>
@@ -259,12 +262,13 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
       {d.tags.map((t, i) => (
         <span key={i} className={styles.tag}>
           {t}
-          {editing && <button className={styles.xBtn} onClick={() => { d.tags.splice(i, 1); bump(); }}>×</button>}
+          {editing && <button className={styles.xBtn} onClick={() => { d.tags.splice(i, 1); bump(); }} aria-label="Remove tag"><X size={12} /></button>}
         </span>
       ))}
       {editing && (
         <input
           className={styles.eInput}
+          aria-label="Add a tag"
           placeholder="＋ tag"
           style={{ width: 74 }}
           onKeyDown={e => {
@@ -295,7 +299,7 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
             </span>
             {editing && (
               <span className={styles.xBtn} style={{ marginLeft: 'auto' }}
-                onClick={e => { e.stopPropagation(); d.relatedIds.splice(i, 1); bump(); }}>×</span>
+                onClick={e => { e.stopPropagation(); d.relatedIds.splice(i, 1); bump(); }}><X size={12} /></span>
             )}
           </button>
         ))}
@@ -305,16 +309,16 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
       </div>
       {editing && (
         <div className={styles.relPicker}>
-          <select className={styles.relSelect} id="lc-rel-picker" defaultValue="">
+          <select className={styles.relSelect} id="lc-rel-picker" aria-label="Link an article" defaultValue="">
             <option value="" disabled>Link an article…</option>
             {relatable.map(e => (
               <option key={e.id} value={e.id}>{SUBCATEGORY_ICONS[e.type]} {e.name}</option>
             ))}
           </select>
-          <span className={styles.addBtn} onClick={() => {
+          <button type="button" className={styles.addBtn} onClick={() => {
             const sel = document.getElementById('lc-rel-picker') as HTMLSelectElement | null;
             if (sel?.value) { d.relatedIds.push(sel.value); bump(); }
-          }}>＋ Link</span>
+          }}><Plus size={12} aria-hidden="true" /> Link</button>
         </div>
       )}
       {attributedWorks.length > 0 && (
@@ -324,7 +328,7 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
             {attributedWorks.map(w => (
               <button key={w.id} className={styles.relCard}
                 onClick={() => { setActiveProject(w.id); setWorkspaceMode('desk'); }}>
-                <span className={styles.relDot} style={{ background: w.coverColor || '#1f1f1e' }}>📖</span>
+                <span className={styles.relDot} style={{ background: w.coverColor || '#1f1f1e' }}><BookOpen size={16} aria-hidden="true" /></span>
                 <span>
                   <div className={styles.relName}>{w.name}</div>
                   <div className={styles.relType}>{w.writingMode}</div>
@@ -389,7 +393,7 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
               title={entity.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             >{entity.isFavorite ? '⭐' : '☆'}</button>
             {!editing && (
-              <button className={styles.actionBtn} onClick={startEdit}>✏️ Edit article</button>
+              <button className={styles.actionBtn} onClick={startEdit}><Pencil size={14} /> Edit article</button>
             )}
           </div>
         </div>
@@ -468,6 +472,7 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
         ref={fileRef}
         type="file"
         accept="image/*"
+        aria-label="Upload gallery image"
         style={{ display: 'none' }}
         onChange={e => { addImage(e.target.files?.[0] ?? null); e.target.value = ''; }}
       />
@@ -486,7 +491,9 @@ export default function ArticleView({ entityId, onBack, onOpenEntity }: ArticleV
             <div className={styles.lbCap}>
               {lightbox.caption === entity.name ? entity.name : `${lightbox.caption} — ${entity.name}`}
             </div>
-            <button className={styles.lbClose} onClick={() => setLightbox(null)}>✕</button>
+            <button className={styles.lbClose} onClick={() => setLightbox(null)} aria-label="Close">
+              <X size={18} />
+            </button>
           </div>
         </div>
       )}

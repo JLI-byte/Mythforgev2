@@ -3,7 +3,7 @@ import type { DeskWidget } from '@/store/workspaceStore';
 import {
     makeFlagsWidget,
     addFlagToWidgets,
-    serializeFlags,
+    
     type ConsistencyFlag,
 } from './consistencyFlags';
 
@@ -40,19 +40,3 @@ describe('addFlagToWidgets', () => {
     });
 });
 
-describe('serializeFlags', () => {
-    it('lists pending flags with their kind', () => {
-        const w = makeFlagsWidget([
-            flag('Two dates given for the founding', 'contradiction'),
-            flag('No article for the harbor', 'gap'),
-        ]);
-        const text = serializeFlags([w]);
-        expect(text).toContain('- [contradiction] Two dates given for the founding');
-        expect(text).toContain('- [gap] No article for the harbor');
-    });
-
-    it('is empty with no widget or no flags', () => {
-        expect(serializeFlags([])).toBe('');
-        expect(serializeFlags([makeFlagsWidget([])])).toBe('');
-    });
-});

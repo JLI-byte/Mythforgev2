@@ -8,6 +8,7 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
+import { Pencil, Check, Camera, X } from 'lucide-react';
 import styles from './WorldBibleEntry.module.css';
 import { useWorkspaceStore, EntityType } from '@/store/workspaceStore';
 import { WBView, SUBCATEGORY_LABELS, SUBCATEGORY_ICONS } from '@/lib/worldBibleNav';
@@ -141,7 +142,7 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
                         onClick={() => setSelectedEntity(entity.id)}
                         title="Edit entity"
                     >
-                        ✏️
+                        <Pencil size={14} />
                     </button>
                     {/* Opens article in the center column — editing happens in ArticleReadView, not inline */}
                     <button
@@ -170,12 +171,13 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
                 className={styles.uploadBtn}
                 onClick={() => fileInputRef.current?.click()}
             >
-                📷 Change image
+                <Camera size={14} /> Change image
             </button>
             <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                aria-label="Change entry image"
                 className={styles.hiddenInput}
                 onChange={handleImageUpload}
             />
@@ -240,6 +242,7 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
                     <div className={styles.addFieldForm}>
                         <input
                             type="text"
+                            aria-label="Field label"
                             placeholder="Label"
                             value={fieldLabel}
                             onChange={e => setFieldLabel(e.target.value)}
@@ -248,13 +251,16 @@ export default function WorldBibleEntry({ entityId, onNavigate }: WorldBibleEntr
                         />
                         <input
                             type="text"
+                            aria-label="Field value"
                             placeholder="Value"
                             value={fieldValue}
                             onChange={e => setFieldValue(e.target.value)}
                             className={styles.addFieldInput}
                         />
-                        <button className={styles.addFieldConfirm} onClick={handleAddField}>✓</button>
-                        <button className={styles.addFieldCancel} onClick={() => { setAddingField(false); setFieldLabel(''); setFieldValue(''); }}>×</button>
+                        <button className={styles.addFieldConfirm} onClick={handleAddField} aria-label="Add field">
+                            <Check size={14} />
+                        </button>
+                        <button className={styles.addFieldCancel} onClick={() => { setAddingField(false); setFieldLabel(''); setFieldValue(''); }} aria-label="Cancel adding field"><X size={14} /></button>
                     </div>
                 )}
             </div>

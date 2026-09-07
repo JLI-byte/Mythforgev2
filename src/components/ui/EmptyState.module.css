@@ -1,0 +1,68 @@
+/* The one empty state. Tokens only — no raw pixels, no literal colours. */
+
+.root {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--muted);
+}
+
+.inline {
+    gap: var(--space-3);
+    padding: var(--space-7) var(--space-5);
+}
+
+.page {
+    gap: var(--space-4);
+    padding: var(--space-11) var(--space-6);
+}
+
+/* Decorative: aria-hidden in the component, so it never reaches a reader. */
+.icon {
+    font-size: var(--text-display);
+    line-height: 1;
+    opacity: 0.5;
+}
+
+.title {
+    margin: 0;
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.page .title {
+    font-size: var(--text-xl);
+}
+
+.hint {
+    margin: 0;
+    font-size: var(--text-sm);
+    max-width: 42ch;
+    line-height: var(--leading-snug);
+    color: var(--muted);
+}
+
+.action {
+    margin-block-start: var(--space-2);
+    padding: var(--space-3) var(--space-5);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--on-accent);
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background var(--dur-2) var(--ease-standard);
+}
+
+.action:hover {
+    background: var(--accent-hover);
+}
+
+.action:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-ring);
+}

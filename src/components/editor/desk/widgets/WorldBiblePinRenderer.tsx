@@ -37,6 +37,7 @@ export function WorldBiblePinRenderer({ content, onChange }: { content: any; onC
       <div className={styles.biblePinCard}>
         <div className={styles.biblePinSearchWrap}>
           <input
+            aria-label="Search entities"
             className={styles.biblePinSearch}
             placeholder="Search entities..."
             autoFocus

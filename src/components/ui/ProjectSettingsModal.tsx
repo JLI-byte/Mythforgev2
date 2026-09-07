@@ -1,8 +1,10 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useId, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import styles from './NewProjectModal.module.css'; // Reusing modal base styles
 import { useWorkspaceStore, Project } from '@/store/workspaceStore';
+import { useModalDialog } from '@/lib/useModalDialog';
 
 interface ProjectSettingsModalProps {
     isOpen: boolean;
@@ -11,6 +13,16 @@ interface ProjectSettingsModalProps {
 }
 
 export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSettingsModalProps) {
+    if (!isOpen) return null;
+    return <ProjectSettingsModalContent onClose={onClose} projectId={projectId} />;
+}
+
+/**
+ * The open dialog. Split out from the wrapper above because useModalDialog
+ * moves focus on mount, which only means anything if the closed dialog is
+ * unmounted rather than returning null from inside the same component.
+ */
+function ProjectSettingsModalContent({ onClose, projectId }: Omit<ProjectSettingsModalProps, 'isOpen'>) {
     const project = useWorkspaceStore(s => s.projects.find(p => p.id === projectId));
     const worlds = useWorkspaceStore(s => s.worlds);
     const entities = useWorkspaceStore(s => s.entities);
@@ -22,9 +34,10 @@ export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSett
     const [worldId, setWorldId] = useState('');
     const [attributedEntityId, setAttributedEntityId] = useState('');
     const [coverImageUrl, setCoverImageUrl] = useState('');
+    const fieldId = useId();
 
     useEffect(() => {
-        if (project && isOpen) {
+        if (project) {
             setName(project.name);
             setAuthorName(project.authorName || '');
             setDescription(project.description || '');
@@ -32,9 +45,11 @@ export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSett
             setAttributedEntityId(project.attributedEntityId || '');
             setCoverImageUrl(project.coverImageUrl || '');
         }
-    }, [project, isOpen]);
+    }, [project]);
 
-    if (!isOpen || !project) return null;
+    const dialogRef = useModalDialog<HTMLDivElement>(onClose);
+
+    if (!project) return null;
 
     const handleSave = () => {
         updateProject(projectId, {
@@ -69,26 +84,39 @@ export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSett
     if (typeof document === 'undefined') return null;
 
     return createPortal(
-        <div className={styles.overlay} onClick={onClose}>
-            <div className={styles.modal} style={{ maxWidth: '520px' }} onClick={e => e.stopPropagation()}>
+        <div className={styles.overlay} onClick={onClose} role="presentation">
+            <div
+                ref={dialogRef}
+                className={styles.modal}
+                style={{ maxWidth: '520px' }}
+                onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="project-settings-dialog-title"
+                tabIndex={-1}
+            >
                 <div className={styles.header}>
-                    <h2 className={styles.title}>Project Settings</h2>
-                    <button className={styles.closeBtn} onClick={onClose}>✕</button>
+                    <h2 className={styles.title} id="project-settings-dialog-title">Project Settings</h2>
+                    <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
+                        <X size={18} />
+                    </button>
                 </div>
 
                 <div className={styles.selectionGroup}>
-                    <label className={styles.selectionLabel}>Project Title</label>
+                    <label className={styles.selectionLabel} htmlFor={`${fieldId}-title`}>Project Title</label>
                     <input 
                         className={styles.titleInput}
+                        id={`${fieldId}-title`}
                         value={name}
                         onChange={e => setName(e.target.value)}
                     />
                 </div>
 
                 <div className={styles.selectionGroup}>
-                    <label className={styles.selectionLabel}>Author Name</label>
+                    <label className={styles.selectionLabel} htmlFor={`${fieldId}-author`}>Author Name</label>
                     <input 
                         className={styles.titleInput}
+                        id={`${fieldId}-author`}
                         placeholder="Pen name..."
                         value={authorName}
                         onChange={(e) => setAuthorName(e.target.value)}
@@ -96,9 +124,10 @@ export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSett
                 </div>
 
                 <div className={styles.selectionGroup}>
-                    <label className={styles.selectionLabel}>Associated World Bible</label>
+                    <label className={styles.selectionLabel} htmlFor={`${fieldId}-world`}>Associated World Bible</label>
                     <select 
                         className={styles.worldSelect}
+                        id={`${fieldId}-world`}
                         value={worldId}
                         onChange={e => {
                             setWorldId(e.target.value);
@@ -114,9 +143,10 @@ export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSett
 
                 {worldId && (
                     <div className={styles.selectionGroup}>
-                        <label className={styles.selectionLabel}>Fictional Character Attribution</label>
+                        <label className={styles.selectionLabel} htmlFor={`${fieldId}-attribution`}>Fictional Character Attribution</label>
                         <select 
                             className={styles.worldSelect}
+                            id={`${fieldId}-attribution`}
                             value={attributedEntityId}
                             onChange={e => setAttributedEntityId(e.target.value)}
                         >
@@ -132,9 +162,10 @@ export function ProjectSettingsModal({ isOpen, onClose, projectId }: ProjectSett
                 )}
 
                 <div className={styles.selectionGroup}>
-                    <label className={styles.selectionLabel}>Project Description / Blurb</label>
+                    <label className={styles.selectionLabel} htmlFor={`${fieldId}-description`}>Project Description / Blurb</label>
                     <textarea 
                         className={styles.titleInput}
+                        id={`${fieldId}-description`}
                         style={{ minHeight: '80px', resize: 'vertical' }}
                         value={description}
                         onChange={e => setDescription(e.target.value)}

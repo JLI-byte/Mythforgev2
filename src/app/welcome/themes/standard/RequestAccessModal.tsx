@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
     submitBetaRequest,
     type BetaRequestResult,
 } from "../../shared/betaRequest";
+import { useModalDialog } from "@/lib/useModalDialog";
 import styles from "./requestModal.module.css";
 
 interface RequestAccessModalProps {
@@ -22,13 +23,7 @@ export default function RequestAccessModal({ onClose }: RequestAccessModalProps)
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [result, setResult] = useState<BetaRequestResult | null>(null);
 
-    useEffect(() => {
-        const onKey = (e: KeyboardEvent) => {
-            if (e.key === "Escape") onClose();
-        };
-        document.addEventListener("keydown", onKey);
-        return () => document.removeEventListener("keydown", onKey);
-    }, [onClose]);
+    const dialogRef = useModalDialog<HTMLDivElement>(onClose);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -42,11 +37,13 @@ export default function RequestAccessModal({ onClose }: RequestAccessModalProps)
     return (
         <div className={styles.backdrop} onClick={onClose} role="presentation">
             <div
+                ref={dialogRef}
                 className={styles.modal}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="request-title"
                 onClick={(e) => e.stopPropagation()}
+                tabIndex={-1}
             >
                 <button
                     type="button"
@@ -91,6 +88,7 @@ export default function RequestAccessModal({ onClose }: RequestAccessModalProps)
                                 id="req-email"
                                 className={styles.input}
                                 type="email"
+                                data-autofocus
                                 required
                                 placeholder="name@example.com"
                                 value={email}
@@ -128,6 +126,12 @@ export default function RequestAccessModal({ onClose }: RequestAccessModalProps)
                         {result === "duplicate" && (
                             <p className={styles.note}>
                                 This email is already on the list.
+                            </p>
+                        )}
+                        {result === "throttled" && (
+                            <p className={styles.note}>
+                                We&apos;ve had a lot of requests in the last hour. Try again shortly —
+                                your details were not lost.
                             </p>
                         )}
                         {result === "error" && (

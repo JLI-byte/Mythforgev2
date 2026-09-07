@@ -13,6 +13,7 @@ import { useWorkspaceStore, EntityType } from '@/store/workspaceStore';
 import { WBView, getWorldBibleConfig } from '@/lib/worldBibleNav';
 import { worldKeyForEntity, STANDALONE_KEY } from '@/lib/worldKey';
 import { folderMemberSet } from '@/lib/folderTree';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 interface WorldBibleRootProps {
     root: string;
@@ -97,7 +98,7 @@ export default function WorldBibleRoot({ root, onNavigate }: WorldBibleRootProps
                                     {child.label}
                                 </span>
                                 <span className={styles.subcategoryCount}>
-                                    {count > 0 ? `${count} ${count === 1 ? 'entry' : 'entries'}` : 'No entries yet'}
+                                    {count > 0 ? `${count} ${count === 1 ? 'entry' : 'entries'}` : 'Empty — open to add'}
                                 </span>
                             </button>
                         );
@@ -156,16 +157,11 @@ export default function WorldBibleRoot({ root, onNavigate }: WorldBibleRootProps
                 </div>
             ) : !hasContents ? (
                 /* Empty state */
-                <div className={styles.emptyState}>
-                    <span className={styles.emptyIcon}>{category?.icon ?? '📁'}</span>
-                    <p className={styles.emptyText}>Nothing filed here yet</p>
-                    <button
-                        className={styles.emptyAddBtn}
-                        onClick={() => openInlineCreator()}
-                    >
-                        + Add one
-                    </button>
-                </div>
+                <EmptyState
+                    icon={category?.icon ?? '📁'}
+                    title="Nothing filed here yet"
+                    action={{ label: '+ Add one', onClick: () => openInlineCreator() }}
+                />
             ) : null}
 
             {/* Creates a nested custom category and opens the hierarchy canvas to arrange it */}

@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useId, useState, useEffect, useRef } from 'react';
+import { Download, X } from 'lucide-react';
 import styles from './ShareModal.module.css';
 import { ShareCardOptions, generateShareCard } from '@/lib/shareCard';
 import { logger } from '@/lib/logger';
+import { useModalDialog } from '@/lib/useModalDialog';
 
 interface ShareModalProps {
     isOpen: boolean;
@@ -12,11 +14,22 @@ interface ShareModalProps {
 }
 
 export default function ShareModal({ isOpen, onClose, shareData }: ShareModalProps) {
+    if (!isOpen) return null;
+    return <ShareModalContent onClose={onClose} shareData={shareData} />;
+}
+
+/**
+ * The open dialog. Split out from the wrapper above because useModalDialog
+ * moves focus on mount, which only means anything if the closed dialog is
+ * unmounted rather than returning null from inside the same component.
+ */
+function ShareModalContent({ onClose, shareData }: Omit<ShareModalProps, 'isOpen'>) {
     const [imageBlob, setImageBlob] = useState<Blob | null>(null);
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [caption, setCaption] = useState('');
     const [isGenerating, setIsGenerating] = useState(true);
     const [copySuccess, setCopySuccess] = useState(false);
+    const fieldId = useId();
     const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // 1. Generate the initial caption based on milestone type
@@ -46,8 +59,6 @@ export default function ShareModal({ isOpen, onClose, shareData }: ShareModalPro
 
     // 2. Generate the share card image
     useEffect(() => {
-        if (!isOpen) return;
-
         async function createCard() {
             setIsGenerating(true);
             try {
@@ -67,9 +78,7 @@ export default function ShareModal({ isOpen, onClose, shareData }: ShareModalPro
         return () => {
             if (imageUrl) URL.revokeObjectURL(imageUrl);
         };
-    }, [isOpen, shareData]);
-
-    if (!isOpen) return null;
+    }, [shareData]);
 
     const handleDownload = () => {
         if (!imageUrl) return;
@@ -100,12 +109,22 @@ export default function ShareModal({ isOpen, onClose, shareData }: ShareModalPro
         });
     };
 
+    const dialogRef = useModalDialog<HTMLDivElement>(onClose);
+
     return (
-        <div className={styles.backdrop} onClick={onClose}>
-            <div className={styles.panel} onClick={e => e.stopPropagation()}>
+        <div className={styles.backdrop} onClick={onClose} role="presentation">
+            <div
+                ref={dialogRef}
+                className={styles.panel}
+                onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="share-dialog-title"
+                tabIndex={-1}
+            >
                 <div className={styles.header}>
-                    <h2>Share Milestone</h2>
-                    <button className={styles.closeBtn} onClick={onClose} aria-label="Close">×</button>
+                    <h2 id="share-dialog-title">Share Milestone</h2>
+                    <button className={styles.closeBtn} onClick={onClose} aria-label="Close"><X size={18} /></button>
                 </div>
 
                 <div className={styles.content}>
@@ -123,8 +142,9 @@ export default function ShareModal({ isOpen, onClose, shareData }: ShareModalPro
                     </section>
 
                     <section className={styles.captionSection}>
-                        <h3>Caption</h3>
+                        <h3 id={`${fieldId}-caption`}>Caption</h3>
                         <textarea
+                            aria-labelledby={`${fieldId}-caption`}
                             className={styles.captionArea}
                             value={caption}
                             onChange={(e) => setCaption(e.target.value)}
@@ -138,7 +158,7 @@ export default function ShareModal({ isOpen, onClose, shareData }: ShareModalPro
                             onClick={handleDownload}
                             disabled={isGenerating || !imageUrl}
                         >
-                            <span>↓</span> Download Image
+                            <Download size={16} /> Download Image
                         </button>
                         
                         <button 

@@ -1,19 +1,19 @@
 "use client";
 
 import React, { useEffect, useState, lazy, Suspense } from 'react';
+import PersistQuotaBanner from '@/components/ui/PersistQuotaBanner';
 import styles from './page.module.css';
 import { WorldBiblePanel } from '@/components/layout/WorldBiblePanel';
 import { WritingGoalsPanel } from '@/components/layout/WritingGoalsPanel';
 import { SocialMediaPanel } from '@/components/layout/SocialMediaPanel';
-import { MusicPlayerPanel } from '@/components/layout/MusicPlayerPanel';
 import InlineEntryCreator from '@/components/world/InlineEntryCreator';
 import HoverPreview from '@/components/world/HoverPreview';
 import { EntityDetailPanel } from '@/components/world/EntityDetailPanel';
 import { BetaFeedbackPanel } from '@/components/layout/BetaFeedbackPanel';
 import { VersionHistoryPanel } from '@/components/layout/VersionHistoryPanel';
 import { ErrorBoundary } from '@/components/layout/ErrorBoundary';
-import ExportModal from '@/components/ui/ExportModal';
-import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useWorkspaceStore, WORKSPACE_MODES, type WorkspaceMode } from '@/store/workspaceStore';
+import { resolveLegacyMode } from '@/lib/deskStages';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
 import ModeBar from '@/components/navigation/ModeBar';
 import DeskLighting from '@/components/theme/DeskLighting';
@@ -23,10 +23,12 @@ import DeskLighting from '@/components/theme/DeskLighting';
 const WorldBibleFolderTree = lazy(() => import('@/components/world/WorldBibleFolderTree'));
 const WorldBibleCenter = lazy(() => import('@/components/world/WorldBibleCenter'));
 const WorldBibleEdit = lazy(() => import('@/components/world/WorldBibleEdit'));
-const WritingDesk = lazy(() => import('@/components/editor/WritingDesk'));
+const Workshop = lazy(() => import('@/components/editor/Workshop'));
 const Bookshelf = lazy(() => import('@/components/management/Bookshelf').then(m => ({ default: m.Bookshelf })));
 const HomePage = lazy(() => import('@/components/home/HomePage'));
-const ResearchTab = lazy(() => import('@/components/editor/ResearchTab'));
+// ExportModal reaches jszip through @/lib/epub. Split so the EPUB writer is
+// downloaded when a writer actually opens Export, not on first paint.
+const ExportModal = lazy(() => import('@/components/ui/ExportModal'));
 
 /**
  * Main Workspace View
@@ -37,10 +39,10 @@ const ResearchTab = lazy(() => import('@/components/editor/ResearchTab'));
 // Note: Configured as a Client Component to dynamically bind Zustand layout state natively.
 export default function Home() {
   // One active panel at a time — null means all closed
-  const [activePanel, setActivePanel] = useState<'worldBible' | 'writingGoals' | 'socialMedia' | 'music' | 'beta' | 'versionHistory' | null>(null);
+  const [activePanel, setActivePanel] = useState<'worldBible' | 'writingGoals' | 'socialMedia' | 'beta' | 'versionHistory' | null>(null);
 
 
-  const handlePanelToggle = (id: 'worldBible' | 'writingGoals' | 'socialMedia' | 'music' | 'beta' | 'versionHistory') => {
+  const handlePanelToggle = (id: 'worldBible' | 'writingGoals' | 'socialMedia' | 'beta' | 'versionHistory') => {
     setActivePanel(prev => prev === id ? null : id);
   };
 
@@ -60,6 +62,11 @@ export default function Home() {
   const focusedArticleEntityId = useWorkspaceStore((state) => state.focusedArticleEntityId);
 
   const workspaceMode = useWorkspaceStore((state) => state.workspaceMode);
+  const setWorkspaceMode = useWorkspaceStore((state) => state.setWorkspaceMode);
+  const setDeskStage = useWorkspaceStore((state) => state.setDeskStage);
+
+  const hasStoreHydrated = useWorkspaceStore((state) => state._hasHydrated);
+  const markVisit = useWorkspaceStore((state) => state.markVisit);
 
 
   // Clamp panelWidth to a safe maximum based on current viewport.
@@ -79,6 +86,32 @@ export default function Home() {
     ? Math.min(panelWidth, maxPanelWidth)
     : panelWidth;
 
+
+  // Landing view. /auth/callback and the dev-login button send freshly signed-in
+  // writers to "/?view=home", so signing in always opens the Home dashboard
+  // instead of whichever mode the previous session left persisted.
+  // Read from window rather than useSearchParams: this page would otherwise need
+  // a Suspense boundary. The param is stripped afterwards so a later refresh
+  // keeps whatever mode the writer navigated to.
+  useEffect(() => {
+    const view = new URLSearchParams(window.location.search).get('view');
+    if (!view) return;
+    // ?view=template and ?view=research predate the Workshop; both now name a
+    // stage inside it rather than a mode of their own.
+    const { mode, stage } = resolveLegacyMode(view);
+    if (mode && (WORKSPACE_MODES as readonly string[]).includes(mode)) {
+      setWorkspaceMode(mode as WorkspaceMode);
+      if (stage) setDeskStage(stage);
+    }
+    window.history.replaceState({}, '', window.location.pathname);
+  }, [setWorkspaceMode, setDeskStage]);
+
+  // Freeze what "last time" means for this page load. It has to wait for
+  // hydration: before that, lastVisitAt is still the initial null and the
+  // absence would be measured against nothing.
+  useEffect(() => {
+    if (hasStoreHydrated) markVisit();
+  }, [hasStoreHydrated, markVisit]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -148,13 +181,16 @@ export default function Home() {
 
 
   return (
-    <main
+    <div
       className={`${styles.workspace} ${isFullscreen ? styles.fullscreenMode : ''} ${isFocusMode ? styles.focusMode : ''}`}
     >
+      <a href="#main-content" className={styles.skipLink}>Skip to the writing area</a>
       <DeskLighting />
       <ModeBar />
       <div className={styles.workspaceRow}>
-        <div
+        <main
+          id="main-content"
+          tabIndex={-1}
           className={styles.editorContainer}
           style={{
             paddingRight: tabRailWidth + 8,
@@ -174,23 +210,19 @@ export default function Home() {
                   <WorldBibleCenter />
                 ) : workspaceMode === 'worldBibleEdit' ? (
                   <WorldBibleEdit />
-                ) : workspaceMode === 'template' ? (
-                  <WritingDesk variant="draft" />
                 ) : workspaceMode === 'hierarchy' ? (
                   <WorldBibleFolderTree />
                 ) : workspaceMode === 'bookshelf' ? (
                   <Bookshelf />
-                ) : workspaceMode === 'research' ? (
-                  <ResearchTab />
                 ) : (
-                  <WritingDesk />
+                  <Workshop />
                 )}
               </Suspense>
             </ErrorBoundary>
           </div>
-        </div>
+        </main>
 
-        {/* 
+        {/*
           Right-edge panels & filing cabinet tabs
           Fixed to the right edge. Does not shift the editor.
         */}
@@ -221,15 +253,6 @@ export default function Home() {
           panelWidth={effectivePanelWidth}
           onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
         />
-        <MusicPlayerPanel
-          isOpen={activePanel === 'music'}
-          onClose={() => setActivePanel(null)}
-          onTabClick={() => handlePanelToggle('music')}
-          tabWidth={tabRailWidth}
-          onTabWidthChange={setTabRailWidth}
-          panelWidth={effectivePanelWidth}
-          onPanelWidthChange={(w) => setPanelWidth(Math.min(w, window.innerWidth - tabRailWidth - MIN_EDITOR_WIDTH))}
-        />
         <BetaFeedbackPanel
           isOpen={activePanel === 'beta'}
           onClose={() => setActivePanel(null)}
@@ -250,7 +273,11 @@ export default function Home() {
         />
 
         {/* Global modal overlays */}
-        {isExportOpen && <ExportModal onClose={() => setExportOpen(false)} />}
+        {isExportOpen && (
+          <Suspense fallback={null}>
+            <ExportModal onClose={() => setExportOpen(false)} />
+          </Suspense>
+        )}
         <InlineEntryCreator />
         <EntityDetailPanel />
         <CommandPalette />
@@ -263,8 +290,9 @@ export default function Home() {
           rect bounding boxes.
         */}
         <HoverPreview />
+        <PersistQuotaBanner />
       </div>
-    </main>
+    </div>
   );
 }
 

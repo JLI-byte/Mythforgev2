@@ -1,16 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { WORK_TYPES, getWorkType } from './workTypes';
+import { WORK_TYPES, getWorkType, getWorkTypeByWritingMode } from './workTypes';
 import { getDraftType } from './writingMethods/draftTypes';
 
 describe('WORK_TYPES', () => {
-    it('offers exactly the four choices the new-work flow asks about', () => {
-        expect(WORK_TYPES.map(t => t.id)).toEqual([
-            'story', 'screenplay', 'script-report', 'lyrics',
-        ]);
+    it('offers exactly one choice — the product is manuscript and lore', () => {
+        expect(WORK_TYPES.map(t => t.id)).toEqual(['story']);
     });
 
     it('gives every type a writing mode the store accepts', () => {
-        const allowed = ['novel', 'screenplay', 'markdown', 'poetry', 'real-world'];
+        const allowed = ['novel', 'real-world'];
         for (const t of WORK_TYPES) {
             expect(allowed).toContain(t.writingMode);
         }
@@ -21,10 +19,6 @@ describe('WORK_TYPES', () => {
             if (!t.draftTypeId) continue;
             expect(getDraftType(t.draftTypeId), `${t.id} → ${t.draftTypeId}`).toBeDefined();
         }
-    });
-
-    it('leaves lyrics without a draft type — no outlining method fits songs', () => {
-        expect(getWorkType('lyrics')!.draftTypeId).toBeUndefined();
     });
 
     it('gives every type a label, icon and its own name placeholder', () => {
@@ -41,9 +35,15 @@ describe('WORK_TYPES', () => {
 });
 
 describe('getWorkType', () => {
-    it('finds a type by id', () => {
-        expect(getWorkType('screenplay')?.writingMode).toBe('screenplay');
-        expect(getWorkType('script-report')?.writingMode).toBe('markdown');
+    it('finds the story type by id', () => {
+        expect(getWorkType('story')?.writingMode).toBe('novel');
+    });
+
+    it('returns undefined for withdrawn types', () => {
+        expect(getWorkType('screenplay')).toBeUndefined();
+        expect(getWorkType('script-report')).toBeUndefined();
+        expect(getWorkType('lyrics')).toBeUndefined();
+        expect(getWorkType('visual-novel')).toBeUndefined();
     });
 
     it('returns undefined for unknown, null or empty ids', () => {
@@ -51,5 +51,24 @@ describe('getWorkType', () => {
         expect(getWorkType(null)).toBeUndefined();
         expect(getWorkType(undefined)).toBeUndefined();
         expect(getWorkType('')).toBeUndefined();
+    });
+});
+
+describe('getWorkTypeByWritingMode', () => {
+    it('recovers the story type from its mode', () => {
+        expect(getWorkTypeByWritingMode('novel')?.id).toBe('story');
+    });
+
+    it('returns undefined for withdrawn modes, so legacy projects fall back', () => {
+        expect(getWorkTypeByWritingMode('screenplay')).toBeUndefined();
+        expect(getWorkTypeByWritingMode('markdown')).toBeUndefined();
+        expect(getWorkTypeByWritingMode('poetry')).toBeUndefined();
+        expect(getWorkTypeByWritingMode('visual-novel')).toBeUndefined();
+    });
+
+    it('returns undefined for real-world and for missing modes', () => {
+        expect(getWorkTypeByWritingMode('real-world')).toBeUndefined();
+        expect(getWorkTypeByWritingMode(null)).toBeUndefined();
+        expect(getWorkTypeByWritingMode(undefined)).toBeUndefined();
     });
 });

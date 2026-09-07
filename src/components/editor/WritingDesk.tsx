@@ -2,6 +2,11 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { Anchor, X, Columns3, FolderTree, Image, Link2, Plus, Settings, StickyNote } from 'lucide-react';
+import { pruneOrphans, makeConnection, removeConnection, type Connection } from '@/lib/research/connections';
+import { canManipulate, toggleLock, filterByLabels } from '@/lib/research/labels';
+import { intentFor } from '@/lib/research/shortcuts';
+import { ConnectionLayer } from './desk/ConnectionLayer';
 import { useWorkspaceStore, DeskWidget, DeskWidgetType } from '@/store/workspaceStore';
 import styles from './WritingDesk.module.css';
 
@@ -13,12 +18,37 @@ import { DraftExport, collectExportBeats, ExportBeat } from './desk/DraftExport'
 import { SurfaceCanvas } from './desk/SurfaceCanvas';
 import { EmptyDeskWelcome } from './desk/EmptyDeskWelcome';
 import { WidgetRenderer } from './desk/widgets/WidgetRenderer';
-import { chatAttachmentForWidget } from '@/lib/chatAttachmentForWidget';
+import { HintBubble } from '@/components/ui/HintBubble';
+import { announce } from '@/lib/liveAnnouncer';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
 
+
+/**
+ * The cards that belong on a research board, in the order the picker shows
+ * them. The desk's own widgets — Writing Zone, Scene Control, Draft Nav, Beat
+ * Card and the rest — are about a manuscript, not about gathering, so they are
+ * left out rather than offered and then regretted.
+ */
+const RESEARCH_PALETTE: DeskWidgetType[] = [
+  'sticky', 'image', 'reference', 'board', 'column',
+  'todo', 'document', 'table', 'swatch', 'drawing',
+  'biblePinit', 'scenePin', 'interview',
+];
+
+/** The research toolbar is already five buttons wide; these live behind ＋ More. */
+const MORE_CARDS: { type: DeskWidgetType; label: string }[] = [
+  { type: 'todo',     label: 'To-do' },
+  { type: 'document', label: 'Document' },
+  { type: 'table',    label: 'Table' },
+  { type: 'swatch',   label: 'Palette' },
+  { type: 'drawing',  label: 'Drawing' },
+  { type: 'scenePin', label: 'Scene pin' },
+  { type: 'interview', label: 'Interview' },
+];
 
 /** Stable empty array so the draft canvas doesn't re-render on globalWidgets churn. */
 const NO_GLOBAL_WIDGETS: DeskWidget[] = [];
@@ -31,11 +61,17 @@ interface WritingDeskProps {
    *  'draft' = the Draft Table: a blank per-project canvas, no Writing Zone.
    *  'research' = the Research Table: a blank canvas keyed by scopeKey. */
   variant?: 'desk' | 'draft' | 'research';
-  /** Research variant only: composite scope key (`project:<id>` | `world:<key>`). */
+  /** Research variant only: the board id whose canvas this is. */
   scopeKey?: string | null;
+  /** Research variant only: open a nested board. */
+  onOpenBoard?: (boardId: string) => void;
+  /** Research variant only: report the selected card so the label bar can act on it. */
+  onSelectionChange?: (id: string | null) => void;
+  /** Research variant only: show only cards carrying one of these labels. */
+  labelFilter?: string[];
 }
 
-export default function WritingDesk({ variant = 'desk', scopeKey = null }: WritingDeskProps) {
+export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenBoard, onSelectionChange, labelFilter }: WritingDeskProps) {
   const isDraft = variant === 'draft';
   const isResearch = variant === 'research';
   const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
@@ -59,14 +95,91 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
   // Draft and Research are blank canvases — global desk widgets don't bleed on.
   const globalWidgetsRaw = useWorkspaceStore(s => s.globalWidgets);
   const globalWidgets = (isDraft || isResearch) ? NO_GLOBAL_WIDGETS : globalWidgetsRaw;
-  const updateGlobalWidgets = useWorkspaceStore(s => s.updateGlobalWidgets);
-  // Research only: "Ask the AI about this" attaches a board element to the chat.
-  const setChatAttachment = useWorkspaceStore(s => s.setChatAttachment);
 
   // Derived state from store
   const widgets = useMemo(() => deskState?.widgets || [], [deskState]);
   const zoom = deskState?.zoom ?? 1;
   const canvasOffset = useMemo(() => deskState?.canvasOffset || { x: 0, y: 0 }, [deskState]);
+
+  const connections = useMemo(() => deskState?.connections ?? [], [deskState]);
+
+  /** The board's lines as the store has them right now. Every caller is an
+   *  event handler, so reading through the store beats holding a ref that
+   *  React would rightly complain about being written during an effect. */
+  const currentConnections = useCallback((): Connection[] => (
+    stateKey ? (useWorkspaceStore.getState().researchStates[stateKey]?.connections ?? []) : []
+  ), [stateKey]);
+  const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
+  /** While dragging from a card's corner dot: the source card and the live pointer. */
+  const [linking, setLinking] = useState<{ fromId: string; to: { x: number; y: number } } | null>(null);
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  /** Screen point -> canvas point, undoing the pan and zoom.
+   *  Reads the live pan/zoom through the store rather than the canvas refs:
+   *  a callback that reads those refs makes every write to them elsewhere a
+   *  react-hooks/immutability error, and this only ever runs at event time. */
+  const toCanvasPoint = useCallback((clientX: number, clientY: number) => {
+    const host = viewportRef.current?.getBoundingClientRect();
+    if (!host) return { x: 0, y: 0 };
+    const live = stateKey ? useWorkspaceStore.getState().researchStates[stateKey] : null;
+    const z = live?.zoom ?? 1;
+    const off = live?.canvasOffset ?? { x: 0, y: 0 };
+    return {
+      x: (clientX - host.left - off.x) / z,
+      y: (clientY - host.top - off.y) / z,
+    };
+  }, [stateKey]);
+
+  const startLink = useCallback((e: React.MouseEvent, fromId: string) => {
+    e.preventDefault(); e.stopPropagation();
+    setLinking({ fromId, to: toCanvasPoint(e.clientX, e.clientY) });
+  }, [toCanvasPoint]);
+
+  useEffect(() => {
+    if (!linking) return;
+
+    const onMove = (e: MouseEvent) => {
+      setLinking(prev => (prev ? { ...prev, to: toCanvasPoint(e.clientX, e.clientY) } : prev));
+    };
+
+    const onUp = (e: MouseEvent) => {
+      const overCard = (e.target as HTMLElement | null)?.closest('[data-widget-id]');
+      const targetId = overCard?.getAttribute('data-widget-id') ?? null;
+
+      // A line to nowhere is almost always a slip. Dropping on empty canvas
+      // discards; a free-point end can be added later from the line itself.
+      if (targetId && targetId !== linking.fromId && stateKey) {
+        const next = [
+          ...currentConnections(),
+          makeConnection({ widgetId: linking.fromId }, { widgetId: targetId }, crypto.randomUUID()),
+        ];
+        updateDeskState(stateKey, { connections: next });
+      }
+      setLinking(null);
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [linking, stateKey, toCanvasPoint, updateDeskState, currentConnections]);
+
+  /** Delete removes the selected line, the same key that removes a card. */
+  useEffect(() => {
+    if (!selectedConnectionId || !isResearch || !stateKey) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Delete' && e.key !== 'Backspace') return;
+      const t = e.target as HTMLElement | null;
+      if (t?.closest('input, textarea, [contenteditable="true"]')) return;
+      e.preventDefault();
+      updateDeskState(stateKey, { connections: removeConnection(currentConnections(), selectedConnectionId) });
+      setSelectedConnectionId(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [selectedConnectionId, isResearch, stateKey, updateDeskState, currentConnections]);
 
   const widgetsRef = useRef<DeskWidget[]>(widgets);
   const zoomRef = useRef(zoom);
@@ -74,6 +187,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
   const offsetRef = useRef(canvasOffset);
   const [hasMounted, setHasMounted] = useState(false);
   useEffect(() => { setHasMounted(true); }, []);
+
 
   // Synchronize refs when store changes (e.g. from World Bible Pin)
   useEffect(() => {
@@ -93,6 +207,8 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
   const contentSaveTimers = useRef<Record<string, any>>({});
   const [isPanning, setIsPanning] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // The label bar lives above this component but acts on its selection.
+  useEffect(() => { onSelectionChange?.(selectedId); }, [selectedId, onSelectionChange]);
   const [typePickerWidgetId, setTypePickerWidgetId] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
@@ -107,6 +223,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
     updateDeskState(stateKey, { widgets: next });
     if (!silentUI) {
       setIsSaved(true);
+      announce('Desk saved');
       setTimeout(() => setIsSaved(false), 2000);
     }
   }, [stateKey, updateDeskState]);
@@ -139,8 +256,9 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
   const activeWidgets = useMemo(() => {
     const all = [...widgets, ...globalWidgets];
     return all.filter(w => {
-      // These three are shown in the chat trays now, not on the board.
-      if (TRAY_WIDGET_TYPES.has(w.type)) return false;
+      // On the desk and draft table these live in the trays. On a research
+      // board they are the point: a flag belongs beside the note it contradicts.
+      if (!isResearch && TRAY_WIDGET_TYPES.has(w.type)) return false;
       const scope = w.scope || 'project';
       if (scope === 'global') return true;
       if (scope === 'project') {
@@ -153,7 +271,11 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
     });
   }, [widgets, globalWidgets, activeDocumentId, activeSceneId]);
 
-  const canvasWidgets = useMemo(() => activeWidgets.filter(w => !w.dock), [activeWidgets]);
+  // A card in a column is drawn by that column, never by the canvas as well.
+  const canvasWidgets = useMemo(() => {
+    const free = activeWidgets.filter(w => !w.dock && !w.parentId);
+    return labelFilter && labelFilter.length > 0 ? filterByLabels(free, labelFilter) : free;
+  }, [activeWidgets, labelFilter]);
   const dockedWidgets = useMemo(() => activeWidgets.filter(w => !!w.dock), [activeWidgets]);
 
   // New state for creation flow
@@ -308,11 +430,40 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
   const deleteWidget = useCallback((id: string) => {
     const next = widgetsRef.current.filter(w => w.id !== id);
     updateWidgets(next);
+    // A line to a card that no longer exists can never be drawn or removed by
+    // hand, so it goes with the card.
+    if (isResearch && stateKey) {
+      const current = currentConnections();
+      const pruned = pruneOrphans(current, next);
+      if (pruned !== current) updateDeskState(stateKey, { connections: pruned });
+    }
     setSelectedId(prev => prev === id ? null : prev);
-  }, [updateWidgets]);
+  }, [updateWidgets, isResearch, stateKey, updateDeskState, currentConnections]);
+
+  /** Ctrl+L locks or unlocks the selected card. */
+  useEffect(() => {
+    if (!isResearch || !selectedId) return;
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      const intent = intentFor({
+        key: e.key,
+        ctrlKey: e.ctrlKey, metaKey: e.metaKey,
+        shiftKey: e.shiftKey, altKey: e.altKey,
+        inTextField: Boolean(t?.closest('input, textarea, [contenteditable="true"]')),
+        hasSelection: true,
+      });
+      if (intent?.kind !== 'toggleLock') return;
+      e.preventDefault();
+      updateWidgets(toggleLock(widgetsRef.current, selectedId));
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isResearch, selectedId, updateWidgets]);
 
   const handleDragStart = useCallback((e: React.MouseEvent, widget: DeskWidget) => {
     if ((e.target as HTMLElement).closest('button')) return;
+    // A locked card still selects — you need to select it to unlock it.
+    if (!canManipulate(widget)) { setSelectedId(widget.id); return; }
     e.preventDefault(); e.stopPropagation();
     setSelectedId(widget.id);
     const startX = e.clientX, startY = e.clientY, origX = widget.x, origY = widget.y;
@@ -351,6 +502,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
   }, [updateWidgets]);
 
   const handleResizeStart = useCallback((e: React.MouseEvent, widget: DeskWidget, dir: ResizeDir) => {
+    if (!canManipulate(widget)) return;
     e.preventDefault(); e.stopPropagation();
     const startX = e.clientX, startY = e.clientY, { x: oX, y: oY, width: oW, height: oH } = widget;
     const localZoom = widget.dock ? 1 : zoomRef.current;
@@ -448,7 +600,10 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
             height: bh
           });
         } else {
+          // A click rather than a drag. Offer the same picker at that point;
+          // zero dimensions mean "use each type's default size".
           if (ghost) ghost.style.display = 'none';
+          setPendingWidget({ x: startX, y: startY, width: 0, height: 0 });
         }
         document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp);
       };
@@ -552,7 +707,16 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
     if (!viewportRef.current) return;
     const vW = viewportRef.current.clientWidth, vH = viewportRef.current.clientHeight, dims = DEFAULT_DIMS[type];
     const wx = (vW / 2 - canvasOffsetRef.current.x) / zoomRef.current - dims.w / 2, wy = (vH / 2 - canvasOffsetRef.current.y) / zoomRef.current - dims.h / 2;
-    const nw: DeskWidget = { id: crypto.randomUUID(), type, x: wx, y: wy, width: dims.w, height: dims.h, content: {}, dock: type === 'writingZone' ? 'center' : null };
+    // A board card is a pointer. Register the board it points at, or the card
+    // renders as "This board was deleted" the moment it appears.
+    let content: Record<string, unknown> = {};
+    if (type === 'board' && isResearch && stateKey && activeProjectId) {
+      const newId = useWorkspaceStore.getState()
+        .createResearchBoard('New board', stateKey, activeProjectId);
+      content = { boardId: newId };
+    }
+
+    const nw: DeskWidget = { id: crypto.randomUUID(), type, x: wx, y: wy, width: dims.w, height: dims.h, content, dock: type === 'writingZone' ? 'center' : null };
     updateWidgets([...widgetsRef.current, nw]); setSelectedId(nw.id);
   };
 
@@ -632,13 +796,45 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
         <SurfaceCanvas ref={surfaceCanvasRef} containerRef={viewportRef} zoom={zoom} offset={canvasOffset} />
         
         <div className={`${styles.saveIndicator} ${isSaved ? styles.saveIndicatorActive : ''}`}>✓ Saved</div>
-        
+
+        {isResearch && widgets.length === 0 && (
+          <EmptyState
+            className={styles.canvasEmptyHint}
+            title="Nothing on this board yet"
+            hint={<>Notes, clippings and links about this project, arranged however you think.
+              Drag a box anywhere on the canvas to place one.</>}
+          />
+        )}
+
+        {!isResearch && <HintBubble surface="desk" />}
+
         <div ref={canvasRef} className={styles.deskCanvasInner} style={{ transform: `translate(${canvasOffset.x}px, ${canvasOffset.y}px) scale(${zoom})` }}>
+          {/* Inside the transform, so lines pan and zoom with the cards. */}
+          {isResearch && (
+            <ConnectionLayer
+              connections={
+                linking
+                  ? [...connections, makeConnection({ widgetId: linking.fromId }, linking.to, '__drag__')]
+                  : connections
+              }
+              widgets={activeWidgets}
+              onSelect={setSelectedConnectionId}
+            />
+          )}
           {/* Ghost Box (Now inside scaled layer) */}
           <div ref={drawGhostRef} className={styles.deskDrawGhost} style={{ display: 'none', position: 'absolute', pointerEvents: 'none', zIndex: 9999 }} />
           
           {canvasWidgets.map(w => (
-            <div key={w.id} id={`widget-${w.id}`} className={`${styles.deskWidget} ${selectedId === w.id ? styles.deskWidgetSelected : ''}`} style={{ left: w.x, top: w.y, width: w.width, height: w.height, zIndex: selectedId === w.id ? 50 : 1 }} onMouseDown={e => { e.stopPropagation(); setSelectedId(w.id); }}>
+            <div key={w.id} id={`widget-${w.id}`} data-widget-id={w.id} className={`${styles.deskWidget} ${selectedId === w.id ? styles.deskWidgetSelected : ''}`} style={{ left: w.x, top: w.y, width: w.width, height: w.height, zIndex: selectedId === w.id ? 50 : 1 }} onMouseDown={e => { e.stopPropagation(); setSelectedId(w.id); }}>
+              {/* Drag from here to draw a line to another card. */}
+              {isResearch && (
+                <button
+                  className={styles.linkHandle}
+                  onMouseDown={e => startLink(e, w.id)}
+                  aria-label={`Draw a connection from this card`}
+                  title="Drag to another card to connect them"
+                />
+              )}
                 <div className={styles.deskTitleBar} onMouseDown={e => handleDragStart(e, w)}>
                   <div className={styles.deskTitleBarIcon}>{PALETTE_MAP[w.type]?.icon || '❓'}</div>
                   <div className={styles.deskTitleBarLabel}>
@@ -670,7 +866,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                           onClick={() => updateContentImmediate(w.id, { ...w.content, showSettings: true })}
                           title="Project Settings"
                         >
-                          ⚙️ Settings
+                          <Settings size={14} /> Settings
                         </button>
 
                         <button 
@@ -699,16 +895,6 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                   <div className={styles.dockedHandleDots}><span/><span/><span/></div>
 
                   <div className={styles.deskHeaderControls}>
-                    {isResearch && (
-                      <button
-                        className={styles.deskHeaderBtn}
-                        title="Ask the AI about this"
-                        onMouseDown={e => e.stopPropagation()}
-                        onClick={() => setChatAttachment(chatAttachmentForWidget({ ...w, content: liveContentRef.current[w.id] ?? w.content }))}
-                      >
-                        💬
-                      </button>
-                    )}
                     {w.type === 'untyped' && (
                       <button className={styles.deskTypePickerTrigger} onClick={() => setTypePickerWidgetId(w.id)}>Choose</button>
                     )}
@@ -719,7 +905,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                       onMouseDown={e => e.stopPropagation()}
                       onClick={() => updateDock(w.id, w.dock ? null : 'center')}
                     >
-                      ⚓
+                      <Anchor size={14} />
                     </button>
                     <button 
                       className={styles.deskHeaderBtn} 
@@ -735,7 +921,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                       onClick={() => deleteWidget(w.id)}
                       title="Close Widget"
                     >
-                      ✕
+                      <X size={14} />
                     </button>
                   </div>
                 </div>
@@ -752,6 +938,10 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                   triggerSave={triggerSave}
                   viewportRef={viewportRef}
                   onAddAtCenter={addAtCenter}
+                  onOpenBoard={onOpenBoard}
+                  onSelectChild={setSelectedId}
+                  allWidgets={activeWidgets}
+                  isResearch={isResearch}
                   onDockChange={(dock) => updateDock(w.id, dock)}
                 />
               </div>
@@ -792,23 +982,13 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                 <div className={styles.dockedHandleDots}><span/><span/><span/></div>
 
                 <div className={styles.deskHeaderControls}>
-                  {isResearch && (
-                    <button
-                      className={styles.deskHeaderBtn}
-                      title="Ask the AI about this"
-                      onMouseDown={e => e.stopPropagation()}
-                      onClick={() => setChatAttachment(chatAttachmentForWidget({ ...w, content: liveContentRef.current[w.id] ?? w.content }))}
-                    >
-                      💬
-                    </button>
-                  )}
                   <button
                     className={`${styles.deskHeaderBtn} ${w.dock ? styles.deskHeaderBtnActive : ''}`}
                     title={w.dock ? "Unlock & Move Freely" : "Dock to Center"}
                     onMouseDown={e => e.stopPropagation()}
                     onClick={() => updateDock(w.id, w.dock ? null : 'center')}
                   >
-                    ⚓
+                    <Anchor size={14} />
                   </button>
                   <button
                     className={styles.deskHeaderBtn}
@@ -824,7 +1004,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                     onClick={() => deleteWidget(w.id)}
                     title="Close Widget"
                   >
-                    ✕
+                    <X size={14} />
                   </button>
                 </div>
               </div>
@@ -841,22 +1021,41 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
                   triggerSave={triggerSave}
                   viewportRef={viewportRef}
                   onAddAtCenter={addAtCenter}
+                  onOpenBoard={onOpenBoard}
+                  onSelectChild={setSelectedId}
+                  allWidgets={activeWidgets}
+                  isResearch={isResearch}
                   onDockChange={(dock) => updateDock(w.id, dock)}
                 />
               </div>
               )}
-              <div className={`${styles.deskResizeHandle} ${styles.deskResizeE}`} onMouseDown={e => handleResizeStart(e, w, 'e')} />
-              <div className={`${styles.deskResizeHandle} ${styles.deskResizeW}`} onMouseDown={e => handleResizeStart(e, w, 'w')} />
+              <div
+                className={`${styles.deskResizeHandle} ${styles.deskResizeE}`}
+                onMouseDown={e => handleResizeStart(e, w, 'e')}
+                role="separator"
+                aria-orientation="vertical"
+                aria-label="Drag to widen or narrow the writing column"
+                title="Drag to resize"
+              />
+              <div
+                className={`${styles.deskResizeHandle} ${styles.deskResizeW}`}
+                onMouseDown={e => handleResizeStart(e, w, 'w')}
+                role="separator"
+                aria-orientation="vertical"
+                aria-label="Drag to widen or narrow the writing column"
+                title="Drag to resize"
+              />
             </div>
           ))}
         </div>
         
         <div className={styles.deskZoomControls}>
-          <button className={styles.zoomBtn} onClick={() => { setZoomValue(Math.max(0.2, zoom - 0.1)); }}>−</button>
+          <button className={styles.zoomBtn} aria-label="Zoom out" onClick={() => { setZoomValue(Math.max(0.2, zoom - 0.1)); }}>−</button>
           
           <input 
             type="range" 
             className={styles.zoomSlider} 
+            aria-label="Canvas zoom"
             min="0.2" 
             max="2" 
             step="0.01" 
@@ -870,6 +1069,7 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
             <input
               autoFocus
               className={styles.zoomInput}
+              aria-label="Zoom percentage"
               value={zoomInputValue}
               onChange={(e) => setZoomInputValue(e.target.value)}
               onBlur={commitZoomInput}
@@ -879,29 +1079,58 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
               }}
             />
           ) : (
-            <span 
-              className={styles.zoomValue} 
+            <button
+              type="button"
+              className={styles.zoomValue}
               onClick={() => {
                 setZoomInputValue(Math.round(zoom * 100).toString());
                 setIsEditingZoom(true);
               }}
-              title="Click to type zoom %"
+              aria-label={`Zoom is ${Math.round(zoom * 100)} percent. Activate to type a value.`}
             >
               {Math.round(zoom * 100)}%
-            </span>
+            </button>
           )}
 
-          <button className={styles.zoomBtn} onClick={() => { setZoomValue(Math.min(2, zoom + 0.1)); }}>+</button>
+          <button className={styles.zoomBtn} aria-label="Zoom in" onClick={() => { setZoomValue(Math.min(2, zoom + 0.1)); }}>+</button>
           <div className={styles.deskFmtSep} style={{ height: '16px', margin: '0 4px' }} />
-          <button className={styles.fitBtn} style={{ background: 'transparent', color: 'var(--muted)', fontSize: '0.65rem' }} onClick={() => { setZoomValue(1); }}>100%</button>
+          <button className={styles.fitBtn} aria-label="Reset zoom to 100%" style={{ background: 'transparent', color: 'var(--muted)', fontSize: '0.6875rem' }} onClick={() => { setZoomValue(1); }}>100%</button>
           <button className={styles.fitBtn} onClick={handleFit}>Fit</button>
         </div>
 
         {isResearch && (
           <div className={styles.topCenterControls}>
-            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('sticky')}>📝 Note</button>
-            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('image')}>🖼️ Clipping</button>
-            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('reference')}>🔗 Link</button>
+            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('sticky')}><StickyNote size={14} aria-hidden="true" /> Note</button>
+            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('image')}><Image size={14} /> Clipping</button>
+            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('reference')}><Link2 size={14} aria-hidden="true" /> Link</button>
+            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('board')}><FolderTree size={14} aria-hidden="true" /> Board</button>
+            <button className={styles.methodPickerBtn} onMouseDown={e => e.stopPropagation()} onClick={() => addAtCenter('column')}><Columns3 size={14} aria-hidden="true" /> Column</button>
+            <div className={styles.moreWrap}>
+              <button
+                className={styles.methodPickerBtn}
+                onMouseDown={e => e.stopPropagation()}
+                onClick={() => setMoreOpen(o => !o)}
+                aria-expanded={moreOpen}
+                aria-haspopup="menu"
+              >
+                <Plus size={14} aria-hidden="true" /> More
+              </button>
+              {moreOpen && (
+                <div className={styles.moreMenu} role="menu">
+                  {MORE_CARDS.map(({ type, label }) => (
+                    <button
+                      key={type}
+                      role="menuitem"
+                      className={styles.moreItem}
+                      onMouseDown={e => e.stopPropagation()}
+                      onClick={() => { addAtCenter(type); setMoreOpen(false); }}
+                    >
+                      <span aria-hidden="true">{PALETTE_MAP[type]?.icon}</span> {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -1002,7 +1231,9 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
       {/* Select-Before-Create (or Upgrade) Picker */}
       {(pendingWidget || typePickerWidgetId) && (() => {
         const pickerWidth = 280;
-        const pickerHeight = 240;
+        // Matches .typePicker's max-height, so the clamp below is honest about
+        // how tall the thing it is positioning can actually be.
+        const pickerHeight = Math.min(520, window.innerHeight * 0.7);
         const padding = 20;
 
         let sx = 0, sy = 0, targetId: string | null = null;
@@ -1029,20 +1260,33 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null }: Writi
 
         const picker = (
           <div className={styles.typePicker} style={{ left: sx, top: sy }} onMouseDown={e => e.stopPropagation()}>
-            <div className={styles.typePickerTitle}>Select widget type</div>
-            <div className={styles.typePickerGrid}>{PALETTE_ITEMS.map(item => (
-              <button key={item.type} className={styles.typePickerBtn} onClick={() => { 
+            <div className={styles.typePickerTitle}>{isResearch ? 'Add to the board' : 'Select widget type'}</div>
+            <div className={styles.typePickerGrid}>{(isResearch
+              ? RESEARCH_PALETTE.map(t => PALETTE_MAP[t]).filter((i): i is NonNullable<typeof i> => Boolean(i))
+              : PALETTE_ITEMS
+            ).map(item => (
+              <button key={item.type} className={styles.typePickerBtn} aria-label={item.label} onClick={() => { 
                 if (targetId) {
                   updateWidgets(widgetsRef.current.map(w => w.id === targetId ? { ...w, type: item.type } : w));
                 } else if (pendingWidget) {
+                  const dims = DEFAULT_DIMS[item.type];
+                  // A board card is a pointer; register the board it points at,
+                  // exactly as the toolbar button does.
+                  let content: Record<string, unknown> = {};
+                  if (item.type === 'board' && isResearch && stateKey && activeProjectId) {
+                    content = {
+                      boardId: useWorkspaceStore.getState()
+                        .createResearchBoard('New board', stateKey, activeProjectId),
+                    };
+                  }
                   const nw: DeskWidget = {
                     id: crypto.randomUUID(),
                     type: item.type,
                     x: pendingWidget.x,
                     y: pendingWidget.y,
-                    width: pendingWidget.width,
-                    height: pendingWidget.height,
-                    content: {},
+                    width: pendingWidget.width || dims.w,
+                    height: pendingWidget.height || dims.h,
+                    content,
                   };
                   updateWidgets([...widgetsRef.current, nw]);
                   setSelectedId(nw.id);

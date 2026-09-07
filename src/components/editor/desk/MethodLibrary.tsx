@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { BookOpen, Sparkles, X } from 'lucide-react';
 import {
     DRAFT_TYPES, getDraftType, getMethod, methodsForType,
     WRITING_METHODS, WritingMethod, MethodFamily, FAMILY_LABELS,
 } from '@/lib/writingMethods';
+import { useModalDialog } from '@/lib/useModalDialog';
 import styles from './MethodLibrary.module.css';
 
 interface MethodLibraryProps {
@@ -43,11 +45,7 @@ export function MethodLibrary({ onClose, onApply, draftTypeId, onDraftTypeChange
     const [isShowingEverything, setIsShowingEverything] = useState(false);
     const [isChangingType, setIsChangingType] = useState(false);
 
-    useEffect(() => {
-        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [onClose]);
+    const dialogRef = useModalDialog<HTMLDivElement>(onClose);
 
     const draftType = draftTypeId ? getDraftType(draftTypeId) : undefined;
     const needsTypePick = !draftType || isChangingType;
@@ -59,14 +57,23 @@ export function MethodLibrary({ onClose, onApply, draftTypeId, onDraftTypeChange
     const browseGroups = groupByFamily(isShowingEverything ? WRITING_METHODS : pool);
 
     const modal = (
-        <div className={styles.backdrop} onClick={onClose}>
-            <div className={styles.modal} onClick={e => e.stopPropagation()} style={{ position: 'relative' }}>
-                <button className={styles.closeBtn} onClick={onClose} aria-label="Close method library">×</button>
+        <div className={styles.backdrop} onClick={onClose} role="presentation">
+            <div
+                ref={dialogRef}
+                className={styles.modal}
+                onClick={e => e.stopPropagation()}
+                style={{ position: 'relative' }}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="method-library-title"
+                tabIndex={-1}
+            >
+                <button className={styles.closeBtn} onClick={onClose} aria-label="Close method library"><X size={16} /></button>
 
                 {needsTypePick ? (
                     <>
                         <div className={styles.header}>
-                            <h2 className={styles.title}>What are you writing?</h2>
+                            <h2 id="method-library-title" className={styles.title}>What are you writing?</h2>
                             <p className={styles.subtitle}>
                                 This shapes which methods fit best. You can change it anytime.
                             </p>
@@ -90,12 +97,12 @@ export function MethodLibrary({ onClose, onApply, draftTypeId, onDraftTypeChange
                 ) : (
                     <>
                         <div className={styles.header}>
-                            <h2 className={styles.title}>Choose a Writing Method</h2>
+                            <h2 id="method-library-title" className={styles.title}>Choose a Writing Method</h2>
                             <p className={styles.subtitle}>
                                 Guided cards appear on your canvas — fill them in any order, rearrange freely.
                                 {onOpenFinder && (
                                     <>
-                                        {' '}<button className={styles.finderLink} onClick={onOpenFinder}>Not sure? ✨ Help me choose</button>
+                                        {' '}<button className={styles.finderLink} onClick={onOpenFinder}>Not sure? <Sparkles size={13} aria-hidden="true" /> Help me choose</button>
                                     </>
                                 )}
                             </p>
@@ -169,17 +176,22 @@ interface ConfirmDialogProps {
 
 /** Small destructive-action confirm (native confirm() is unsupported in this runtime). */
 export function ConfirmDialog({ title, body, confirmLabel, onConfirm, onCancel }: ConfirmDialogProps) {
-    useEffect(() => {
-        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [onCancel]);
+    const dialogRef = useModalDialog<HTMLDivElement>(onCancel);
 
     return createPortal(
-        <div className={styles.backdrop} onClick={onCancel}>
-            <div className={`${styles.modal} ${styles.confirmModal}`} onClick={e => e.stopPropagation()}>
-                <h2 className={styles.title}>{title}</h2>
-                <p className={styles.subtitle}>{body}</p>
+        <div className={styles.backdrop} onClick={onCancel} role="presentation">
+            <div
+                ref={dialogRef}
+                className={`${styles.modal} ${styles.confirmModal}`}
+                onClick={e => e.stopPropagation()}
+                role="alertdialog"
+                aria-modal="true"
+                aria-labelledby="confirm-dialog-title"
+                aria-describedby="confirm-dialog-body"
+                tabIndex={-1}
+            >
+                <h2 id="confirm-dialog-title" className={styles.title}>{title}</h2>
+                <p id="confirm-dialog-body" className={styles.subtitle}>{body}</p>
                 <div className={styles.confirmActions}>
                     <button className={styles.welcomeSecondary} onClick={onCancel}>Cancel</button>
                     <button className={styles.confirmDanger} onClick={onConfirm}>{confirmLabel}</button>
@@ -208,10 +220,10 @@ export function DraftTableWelcome({ onPickMethod, onFindMethod, onStartBlank }: 
                 </p>
                 <div className={styles.welcomeActions}>
                     <button className={styles.welcomePrimary} onClick={onPickMethod}>
-                        📚 Pick a Method
+                        <BookOpen size={14} aria-hidden="true" /> Pick a Method
                     </button>
                     <button className={styles.welcomePrimary} onClick={onFindMethod}>
-                        ✨ Help Me Choose
+                        <Sparkles size={14} aria-hidden="true" /> Help Me Choose
                     </button>
                     <button className={styles.welcomeSecondary} onClick={onStartBlank}>
                         Start Blank

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Home, Library, NotebookPen, Globe, LayoutTemplate, Telescope } from 'lucide-react';
+import { Home, Library, LogOut, Globe, Hammer, Settings } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 import { useWorkspaceStore, Project, Document, Entity, Scene, World } from '@/store/workspaceStore';
 import styles from './ModeBar.module.css';
@@ -10,6 +10,7 @@ import { NewProjectModal } from '../ui/NewProjectModal';
 import { ProjectLibraryModal } from '../ui/ProjectLibraryModal';
 import LoginModal from '../ui/LoginModal';
 import { createClient } from '@/lib/supabase/client';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 // ── User Profile Component ─────────────────────────────
 
@@ -47,6 +48,10 @@ function UserProfilePill({ onShowLogin }: { onShowLogin: () => void }) {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+    // Layer 2. The store reset also sweeps lorecanvas-workspace and every
+    // lorecanvas-backup-* key, so nothing of this account is left on the
+    // machine for whoever sits down next.
+    useWorkspaceStore.getState().resetWorkspace();
     window.location.href = '/login';
   };
 
@@ -75,7 +80,7 @@ function UserProfilePill({ onShowLogin }: { onShowLogin: () => void }) {
             <div className={styles.dropdownEmail}>{email}</div>
           </div>
           <button className={`${styles.dropdownItem} ${styles.dropdownItemSignOut}`} onClick={handleSignOut}>
-            <span>🚪</span> Sign Out
+            <LogOut size={14} aria-hidden="true" /> Sign Out
           </button>
         </div>
       )}
@@ -210,9 +215,7 @@ function computeResults(
 /** Top-bar tabs the limelight indicator tracks. */
 const MODE_TABS = [
   { mode: 'bookshelf', label: 'Bookshelf', Icon: Library },
-  { mode: 'research', label: 'Research', Icon: Telescope },
-  { mode: 'template', label: 'Draft Table', Icon: LayoutTemplate },
-  { mode: 'desk', label: 'Writing Desk', Icon: NotebookPen },
+  { mode: 'desk', label: 'Workshop', Icon: Hammer },
   { mode: 'worldBible', label: 'World Bible', Icon: Globe },
 ] as const;
 
@@ -435,6 +438,7 @@ export default function ModeBar() {
             ref={inputRef}
             type="text"
             className={styles.searchInput}
+            aria-label="Search everything"
             placeholder="Search everything..."
             value={query}
             onChange={handleSearchChange}
@@ -446,6 +450,7 @@ export default function ModeBar() {
           {query && (
             <button
               className={styles.searchClear}
+              aria-label="Clear search"
               onMouseDown={e => { e.preventDefault(); setQuery(''); setResults([]); setIsOpen(false); }}
             >
               ×
@@ -457,9 +462,7 @@ export default function ModeBar() {
         {isOpen && (
           <div ref={dropdownRef} className={styles.searchDropdown}>
             {results.length === 0 ? (
-              <div className={styles.searchEmpty}>
-                No results for &quot;{query}&quot;
-              </div>
+              <EmptyState title={<>No results for &quot;{query}&quot;</>} />
             ) : (
               results.map((result, i) => (
                 <button
@@ -508,7 +511,7 @@ export default function ModeBar() {
           onClick={() => setShowSettings(true)}
           title="Settings"
         >
-          ⚙️
+          <Settings size={16} />
         </button>
 
         <button

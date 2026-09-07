@@ -40,25 +40,25 @@ export function BeatCardRenderer({ content, onChange }: { content: any; onChange
     const hasSequence = typeof localContent.beatIndex === 'number' && typeof localContent.beatCount === 'number';
 
     return (
-        <div className={styles.beatCard}>
-            <div className={styles.beatCardHeader}>
-                <div className={styles.beatCardTitles}>
-                    {group && <span className={styles.beatCardGroup}>{group}</span>}
+        <div className={styles.beatWidget}>
+            <div className={styles.beatWidgetHeader}>
+                <div className={styles.beatWidgetTitles}>
+                    {group && <span className={styles.beatWidgetGroup}>{group}</span>}
                     <input
-                        className={styles.beatCardLabel}
+                        className={styles.beatWidgetLabel}
                         value={label}
                         onChange={e => handleChange({ beatLabel: e.target.value })}
                         onMouseDown={e => e.stopPropagation()}
                         aria-label="Beat title"
                     />
                 </div>
-                <div className={styles.beatCardMeta}>
+                <div className={styles.beatWidgetMeta}>
                     {hasSequence && (
-                        <span className={styles.beatCardStep}>{localContent.beatIndex + 1}/{localContent.beatCount}</span>
+                        <span className={styles.beatWidgetStep}>{localContent.beatIndex + 1}/{localContent.beatCount}</span>
                     )}
                     {guidance && (
                         <button
-                            className={`${styles.beatCardInfoBtn} ${showGuidance ? styles.beatCardInfoBtnActive : ''}`}
+                            className={`${styles.beatWidgetInfoBtn} ${showGuidance ? styles.beatWidgetInfoBtnActive : ''}`}
                             onMouseDown={e => e.stopPropagation()}
                             onClick={() => setShowGuidance(v => !v)}
                             title="What goes here?"
@@ -71,11 +71,12 @@ export function BeatCardRenderer({ content, onChange }: { content: any; onChange
             </div>
 
             {showGuidance && guidance && (
-                <div className={styles.beatCardGuidance}>{guidance}</div>
+                <div className={styles.beatWidgetGuidance}>{guidance}</div>
             )}
 
             <textarea
-                className={styles.beatCardTextarea}
+                aria-label="Beat text"
+                className={styles.beatWidgetTextarea}
                 placeholder={localContent.placeholder || 'What happens in this beat?'}
                 value={localContent.text || ''}
                 onChange={e => handleChange({ text: e.target.value })}

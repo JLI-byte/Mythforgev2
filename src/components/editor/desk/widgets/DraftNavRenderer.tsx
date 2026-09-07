@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useMemo, useCallback } from 'react';
+import { MapPin, Maximize2, Minimize2 } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import styles from '../../WritingDesk.module.css';
@@ -81,7 +82,7 @@ export function DraftNavRenderer({ content, onChange }: { content: any; onChange
   if (isCompact) {
     return (
       <div className={styles.draftNavCompact}>
-        <button className={styles.compactToggleBtn} onClick={() => onChange({ ...content, isCompact: false })}>↙️</button>
+        <button className={styles.compactToggleBtn} onClick={() => onChange({ ...content, isCompact: false })} aria-label="Expand widget"><Maximize2 size={13} /></button>
         {filteredScenes.filter(s => s.documentId === activeDocumentId).map(s => (
           <div 
             key={s.id} 
@@ -98,12 +99,13 @@ export function DraftNavRenderer({ content, onChange }: { content: any; onChange
     <div className={styles.draftNav}>
       <div className={styles.structureHeader}>
         <div className={styles.progressLabel} style={{ marginTop: 0, opacity: 0.6 }}>Draft Navigator</div>
-        <button className={styles.sceneControlCompactToggle} onClick={() => onChange({ ...content, isCompact: true })}>↗️</button>
+        <button className={styles.sceneControlCompactToggle} onClick={() => onChange({ ...content, isCompact: true })} aria-label="Collapse widget"><Minimize2 size={13} /></button>
       </div>
 
       <div className={styles.draftNavSearch}>
         <div style={{ display: 'flex', gap: '8px' }}>
           <input 
+            aria-label="Search scenes"
             className={styles.relMapInput} 
             placeholder="Search scenes..." 
             style={{ flex: 1 }}
@@ -135,7 +137,7 @@ export function DraftNavRenderer({ content, onChange }: { content: any; onChange
       </div>
 
       <div className={styles.draftNavFooter}>
-         <button className={styles.jumpActiveBtn} onClick={scrollToActive}>📍 Jump to Active</button>
+         <button className={styles.jumpActiveBtn} onClick={scrollToActive}><MapPin size={12} aria-hidden="true" /> Jump to Active</button>
       </div>
     </div>
   );

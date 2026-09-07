@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import { DRAFT_TYPES, getMethod } from '@/lib/writingMethods';
 import { WorkStyle, StructureAppetite, recommendMethods } from '@/lib/writingMethods/finder';
+import { useModalDialog } from '@/lib/useModalDialog';
 import styles from './MethodLibrary.module.css';
 
 interface MethodFinderProps {
@@ -36,12 +38,6 @@ export function MethodFinder({ onClose, onApply, onBrowseLibrary }: MethodFinder
     const [workStyle, setWorkStyle] = useState<WorkStyle | null>(null);
     const [structure, setStructure] = useState<StructureAppetite | null>(null);
 
-    useEffect(() => {
-        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [onClose]);
-
     const showResults = step === 4 && draftTypeId && workStyle && structure;
     const recommendations = showResults ? recommendMethods({ draftTypeId, workStyle, structure }) : [];
 
@@ -59,13 +55,24 @@ export function MethodFinder({ onClose, onApply, onBrowseLibrary }: MethodFinder
         </div>
     );
 
+    const dialogRef = useModalDialog<HTMLDivElement>(onClose);
+
     const modal = (
-        <div className={styles.backdrop} onClick={onClose}>
-            <div className={`${styles.modal} ${styles.finderModal}`} onClick={e => e.stopPropagation()} style={{ position: 'relative' }}>
-                <button className={styles.closeBtn} onClick={onClose} aria-label="Close method finder">×</button>
+        <div className={styles.backdrop} onClick={onClose} role="presentation">
+            <div
+                ref={dialogRef}
+                className={`${styles.modal} ${styles.finderModal}`}
+                onClick={e => e.stopPropagation()}
+                style={{ position: 'relative' }}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="method-finder-title"
+                tabIndex={-1}
+            >
+                <button className={styles.closeBtn} onClick={onClose} aria-label="Close method finder"><X size={16} /></button>
 
                 <div className={styles.header}>
-                    <h2 className={styles.title}>{showResults ? 'Your matches' : 'Find your method'}</h2>
+                    <h2 id="method-finder-title" className={styles.title}>{showResults ? 'Your matches' : 'Find your method'}</h2>
                     <p className={styles.subtitle}>
                         {showResults
                             ? 'Two methods that fit how you work. Pick one — you can always switch later.'

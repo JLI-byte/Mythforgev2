@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useId } from 'react';
+import { X } from 'lucide-react';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../ArticleGridEditor.module.css';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 interface RelEdge {
   id: string;
@@ -24,6 +26,7 @@ interface RelNode {
 }
 
 export function RelationshipWidget({ content, onChange }: { content: any; onChange: (c: any) => void }) {
+  const fieldId = useId();
   const entities = useWorkspaceStore(s => s.entities);
   const scenes = useWorkspaceStore(s => s.scenes);
   const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
@@ -358,8 +361,9 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
     <div className={styles.relationshipWidget}>
       {/* Toolbar */}
       <div className={styles.relationshipToolbar}>
-        <label className={styles.relationshipToggle}>
+        <label className={styles.relationshipToggle} htmlFor={`${fieldId}-auto-detect`}>
           <input
+            id={`${fieldId}-auto-detect`}
             type="checkbox"
             checked={autoDetect}
             onChange={e => onChange({ ...content, autoDetect: e.target.checked })}
@@ -382,6 +386,7 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
         <div className={styles.relationshipAddForm}>
           <select
             className={styles.relationshipSelect}
+            aria-label="From entity"
             value={newEdge.sourceId}
             onChange={e => setNewEdge(v => ({ ...v, sourceId: e.target.value }))}
           >
@@ -392,6 +397,7 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
           </select>
           <select
             className={styles.relationshipSelect}
+            aria-label="To entity"
             value={newEdge.targetId}
             onChange={e => setNewEdge(v => ({ ...v, targetId: e.target.value }))}
           >
@@ -402,6 +408,7 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
           </select>
           <input
             className={styles.relationshipLabelInput}
+            aria-label="Relationship label"
             placeholder="Relationship label (e.g. ally, enemy, parent)"
             value={newEdge.label}
             onChange={e => setNewEdge(v => ({ ...v, label: e.target.value }))}
@@ -419,7 +426,7 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
                 return (
                   <div key={me.id} className={styles.manualEdgeItem}>
                     <span>{src} → {me.label ? `${me.label} → ` : ''}{tgt}</span>
-                    <button className={styles.manualEdgeDelete} onClick={() => removeManualEdge(me.id)}>×</button>
+                    <button className={styles.manualEdgeDelete} onClick={() => removeManualEdge(me.id)} aria-label="Remove relationship"><X size={12} /></button>
                   </div>
                 );
               })}
@@ -430,10 +437,10 @@ export function RelationshipWidget({ content, onChange }: { content: any; onChan
 
       {/* Graph canvas */}
       {worldEntities.length === 0 ? (
-        <div className={styles.relationshipEmpty}>
-          <span>No entities in this world yet.</span>
-          <span>Add entities to the World Bible to see them here.</span>
-        </div>
+        <EmptyState
+          title="No entities in this world yet."
+          hint="Add entities to the World Bible to see them here."
+        />
       ) : (
         <canvas
           ref={canvasRef}

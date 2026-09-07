@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from 'react';
+import { X } from 'lucide-react';
 import { useWorkspaceStore, selectProjectWorldKey } from '@/store/workspaceStore';
 import { worldKeyForEntity } from '@/lib/worldKey';
 import styles from '../../ArticleGridEditor.module.css';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 interface PronunciationEntry {
   id: string;
@@ -60,7 +62,7 @@ export function PronunciationWidget({ content, onChange }: { content: any; onCha
 
       {showAdd && (
         <div className={styles.pronForm}>
-          <select className={styles.pronSelect} value={newEntry.entityId}
+          <select className={styles.pronSelect} aria-label="Link entry to entity" value={newEntry.entityId}
             onChange={e => setNewEntry(v => ({
               ...v, entityId: e.target.value,
               name: e.target.value ? (entities.find(en => en.id === e.target.value)?.name ?? '') : v.name,
@@ -68,10 +70,10 @@ export function PronunciationWidget({ content, onChange }: { content: any; onCha
             <option value="">Link entity (optional)</option>
             {worldEntities.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
           </select>
-          <input className={styles.pronInput} placeholder="Name *  (e.g. Aerindel)" value={newEntry.name} onChange={e => setNewEntry(v => ({ ...v, name: e.target.value }))} />
-          <input className={styles.pronInput} placeholder="Phonetic  (e.g. ay-RIN-del)" value={newEntry.phonetic} onChange={e => setNewEntry(v => ({ ...v, phonetic: e.target.value }))} />
-          <input className={styles.pronInput} placeholder="Syllables  (e.g. Ae·rin·del)" value={newEntry.syllables} onChange={e => setNewEntry(v => ({ ...v, syllables: e.target.value }))} />
-          <input className={styles.pronInput} placeholder="Notes  (e.g. stress second syllable)" value={newEntry.notes} onChange={e => setNewEntry(v => ({ ...v, notes: e.target.value }))} />
+          <input className={styles.pronInput} aria-label="Name" placeholder="Name *  (e.g. Aerindel)" value={newEntry.name} onChange={e => setNewEntry(v => ({ ...v, name: e.target.value }))} />
+          <input className={styles.pronInput} aria-label="Phonetic spelling" placeholder="Phonetic  (e.g. ay-RIN-del)" value={newEntry.phonetic} onChange={e => setNewEntry(v => ({ ...v, phonetic: e.target.value }))} />
+          <input className={styles.pronInput} aria-label="Syllable breakdown" placeholder="Syllables  (e.g. Ae·rin·del)" value={newEntry.syllables} onChange={e => setNewEntry(v => ({ ...v, syllables: e.target.value }))} />
+          <input className={styles.pronInput} aria-label="Pronunciation notes" placeholder="Notes  (e.g. stress second syllable)" value={newEntry.notes} onChange={e => setNewEntry(v => ({ ...v, notes: e.target.value }))} />
           <div className={styles.pronFormBtns}>
             <button className={styles.pronConfirmBtn} onClick={addEntry}>Add</button>
             <button className={styles.pronCancelBtn} onClick={() => setShowAdd(false)}>Cancel</button>
@@ -80,10 +82,7 @@ export function PronunciationWidget({ content, onChange }: { content: any; onCha
       )}
 
       {entries.length === 0 && !showAdd ? (
-        <div className={styles.pronEmpty}>
-          <span>🗣️</span>
-          <span>Add entries to build your pronunciation guide</span>
-        </div>
+        <EmptyState icon="🗣️" title="Add entries to build your pronunciation guide" />
       ) : (
         <div className={styles.pronList}>
           {entries.map(entry => (
@@ -92,6 +91,7 @@ export function PronunciationWidget({ content, onChange }: { content: any; onCha
                 {editingId === entry.id ? (
                   <input
                     className={styles.pronEntryNameInput}
+                    aria-label="Entry name"
                     value={entry.name}
                     onChange={e => updateEntry(entry.id, 'name', e.target.value)}
                     onBlur={() => setEditingId(null)}
@@ -102,7 +102,7 @@ export function PronunciationWidget({ content, onChange }: { content: any; onCha
                     {entry.name}
                   </span>
                 )}
-                <button className={styles.pronEntryDelete} onClick={() => removeEntry(entry.id)}>×</button>
+                <button className={styles.pronEntryDelete} onClick={() => removeEntry(entry.id)} aria-label="Remove pronunciation entry"><X size={14} /></button>
               </div>
               {entry.phonetic && (
                 <div className={styles.pronEntryPhonetic}>/{entry.phonetic}/</div>

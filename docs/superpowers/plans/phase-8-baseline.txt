@@ -1,0 +1,82 @@
+stylesheets: 54
+
+=== font-size (rem): 54 distinct values, 927 uses ===
+   0.6875rem     113
+   0.72rem        79
+   0.85rem        77
+   0.78rem        75
+   0.75rem        74
+   0.7rem         74
+   0.8rem         56
+   0.82rem        55
+   0.9rem         51
+   0.95rem        40
+   1rem           35
+   1.1rem         27
+   0.88rem        14
+   0.74rem        13
+   1.2rem         12
+   0.76rem        12
+   0.875rem       10
+   1.05rem        10
+   ... 36 more distinct values
+
+=== font-size (px): 8 distinct values, 24 uses ===
+   11px           10
+   13px            5
+   12px            4
+   16px            1
+   14px            1
+   18px            1
+   30px            1
+   48px            1
+
+=== spacing: padding/margin/gap literal values ===
+   67 distinct values, 1460 uses
+   px values: 30 distinct (1074 uses)
+   rem values: 37 distinct (386 uses)
+   most common: 8px x193, 4px x148, 6px x138, 2px x95, 12px x94, 10px x86, 0.5rem x69, 0.75rem x54, 5px x52, 16px x50, 1rem x46, 3px x41
+
+=== border-radius: 21 distinct values, 554 uses ===
+   4px           116
+   6px           109
+   8px           102
+   12px           52
+   10px           32
+   2px            27
+   3px            24
+   999px          18
+   16px           14
+   7px            13
+   20px           12
+   14px            8
+   9px             8
+   5px             7
+   ... 7 more distinct values
+
+=== box-shadow: distinct definitions ===
+   118 distinct shadow definitions across 155 uses
+    13 x  var(--glass-shadow)
+     5 x  -3px 2px 10px rgba(0, 0, 0, 0.10)
+     5 x  none
+     2 x  2px 3px 0 rgba(59, 44, 21, 0.25)
+     2 x  4px 6px 0 rgba(59, 44, 21, 0.22)
+
+=== transition durations ===
+   49 distinct, most common: 0.15s x135, 0.2s x96, 150ms x43, 0.3s x20, 0.18s x11, 120ms x10, 160ms x8, 0.9s x7, 0.8s x6, 0.1s x6
+
+=== token usage vs literals ===
+   var(--...) references : 2426
+   raw hex colours      : 663
+   raw rgb/rgba()       : 674
+   ratio tokens:literals = 1.81 : 1
+
+=== how many stylesheets define their own font-size scale ===
+   WritingDesk.module.css                               26 distinct sizes
+   HomePage.module.css                                  19 distinct sizes
+   ArticleView.module.css                               17 distinct sizes
+   ArticleGridEditor.module.css                         16 distinct sizes
+   fantasy.module.css                                   14 distinct sizes
+   ArticleReadView.module.css                           14 distinct sizes
+   Bookshelf.module.css                                 13 distinct sizes
+   SettingsModal.module.css                             13 distinct sizes

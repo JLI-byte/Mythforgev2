@@ -30,6 +30,15 @@ export const DEFAULT_DIMS: Record<DeskWidgetType, { w: number; h: number }> = {
   articleSuggestions: { w: 340, h: 420 },
   consistencyFlags: { w: 340, h: 380 },
   worldUnderstanding: { w: 340, h: 360 },
+  board:       { w: 220, h: 170 },
+  column:      { w: 260, h: 320 },
+  todo:        { w: 260, h: 240 },
+  document:    { w: 360, h: 320 },
+  swatch:      { w: 240, h: 140 },
+  table:       { w: 420, h: 280 },
+  drawing:     { w: 320, h: 260 },
+  scenePin:    { w: 260, h: 180 },
+  interview:   { w: 320, h: 340 },
   untyped:     { w: 300, h: 200 },
 };
 
@@ -48,6 +57,15 @@ export const PALETTE_ITEMS: { type: DeskWidgetType; icon: string; label: string 
   { type: 'relMap',        icon: '🕸️', label: 'Rel Map' },
   { type: 'draftNav',      icon: '🗺️', label: 'Draft Nav' },
   { type: 'beatCard',      icon: '🪧', label: 'Beat Card' },
+  { type: 'board',         icon: '🗂️', label: 'Board' },
+  { type: 'column',        icon: '🧱', label: 'Column' },
+  { type: 'todo',          icon: '☑️', label: 'To-do' },
+  { type: 'document',      icon: '📄', label: 'Document' },
+  { type: 'swatch',        icon: '🎨', label: 'Palette' },
+  { type: 'table',         icon: '▦', label: 'Table' },
+  { type: 'drawing',       icon: '✏️', label: 'Drawing' },
+  { type: 'scenePin',      icon: '🎬', label: 'Scene Pin' },
+  { type: 'interview',     icon: '🧭', label: 'Interview' },
 ];
 
 export const PALETTE_MAP = Object.fromEntries(

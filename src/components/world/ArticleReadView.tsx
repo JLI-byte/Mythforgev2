@@ -1,10 +1,12 @@
 "use client";
 
 import React from 'react';
+import { Pencil } from 'lucide-react';
 import { useWorkspaceStore, EntityType } from '@/store/workspaceStore';
 import { SUBCATEGORY_LABELS, SUBCATEGORY_ICONS } from '@/lib/worldBibleNav';
 import { worldKeyForEntity, worldKeyForProject } from '@/lib/worldKey';
 import { ArticleTabViewer } from './ArticleViewerShared';
+import { EmptyState } from '@/components/ui/EmptyState';
 import styles from './ArticleReadView.module.css';
 
 interface ArticleReadViewProps {
@@ -165,9 +167,7 @@ export default function ArticleReadView({ entityId, onBack }: ArticleReadViewPro
     return (
       <div className={styles.readContainer}>
         <button className={styles.backBtn} onClick={onBack}>← Back</button>
-        <div className={styles.emptyState}>
-          <p className={styles.emptyText}>Entity not found.</p>
-        </div>
+        <EmptyState title="Entity not found." />
       </div>
     );
   }
@@ -196,7 +196,7 @@ export default function ArticleReadView({ entityId, onBack }: ArticleReadViewPro
             onClick={() => setSelectedEntity(entity.id)}
             title="Edit entity details"
           >
-            ✏️ Edit Details
+            <Pencil size={14} /> Edit Details
           </button>
         </div>
       </div>
@@ -264,11 +264,11 @@ export default function ArticleReadView({ entityId, onBack }: ArticleReadViewPro
               )}
             </div>
           ) : (
-            <div className={styles.emptyState}>
-              <div className={styles.emptyIcon}>📄</div>
-              <p className={styles.emptyText}>No article yet</p>
-              <p className={styles.emptyHint}>Use the Designer to create a layout, then apply it to this entity.</p>
-            </div>
+            <EmptyState
+              icon="📄"
+              title="No article yet"
+              hint="Use the Designer to create a layout, then apply it to this entity."
+            />
           )}
 
           {attributedWorks.length > 0 && (
@@ -308,15 +308,11 @@ export default function ArticleReadView({ entityId, onBack }: ArticleReadViewPro
         /* Mentions panel */
         <div className={styles.mentionsPanel}>
           {mentions.length === 0 ? (
-            <div className={styles.mentionsEmpty}>
-              <span className={styles.mentionsEmptyIcon}>🔍</span>
-              <p className={styles.mentionsEmptyText}>
-                No mentions of <strong>{entity.name}</strong> found in any scene.
-              </p>
-              <p className={styles.mentionsEmptyHint}>
-                Start writing to see where this entity appears.
-              </p>
-            </div>
+            <EmptyState
+              icon="🔍"
+              title={<>No mentions of <strong>{entity.name}</strong> found in any scene.</>}
+              hint="Start writing to see where this entity appears."
+            />
           ) : (
             <div className={styles.mentionsList}>
               <p className={styles.mentionsCount}>

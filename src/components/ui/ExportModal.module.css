@@ -4,7 +4,7 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(var(--shadow-rgb), 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -25,10 +25,10 @@
 .panel {
     background: var(--background);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     width: 500px;
     max-width: 90vw;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 20px rgba(var(--shadow-rgb), 0.15);
     display: flex;
     flex-direction: column;
     animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -50,13 +50,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.25rem;
+    padding: var(--space-6) var(--space-7);
     border-bottom: 1px solid var(--border);
 }
 
 .header h2 {
     margin: 0;
-    font-size: 1rem;
+    font-size: var(--text-lg);
     font-weight: 500;
     color: var(--foreground);
 }
@@ -65,10 +65,15 @@
     background: transparent;
     border: none;
     color: var(--muted);
-    font-size: 1.25rem;
+    font-size: var(--text-xl);
     cursor: pointer;
     line-height: 1;
-    padding: 0.25rem;
+    padding: var(--space-2);
+    min-width: 24px;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .closeBtn:hover {
@@ -76,45 +81,45 @@
 }
 
 .content {
-    padding: 1.5rem 1.25rem;
+    padding: var(--space-7) var(--space-7);
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: var(--space-7);
 }
 
 .section {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: var(--space-5);
 }
 
 .sectionDivider {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    padding-top: 1.5rem;
+    gap: var(--space-5);
+    padding-top: var(--space-7);
     border-top: 1px solid var(--border);
 }
 
 .section h3,
 .sectionDivider h3 {
     margin: 0;
-    font-size: 0.875rem;
+    font-size: var(--text-md);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--muted);
 }
 
 .subtext {
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     color: var(--muted);
     margin: 0;
 }
 
 .actionRow {
     display: flex;
-    gap: 0.75rem;
-    margin-top: 0.5rem;
+    gap: var(--space-5);
+    margin-top: var(--space-4);
 }
 
 .fullWidthButtonWrapper {
@@ -126,16 +131,16 @@
     background: var(--surface);
     border: 1px solid var(--border);
     color: var(--foreground);
-    padding: 0.75rem 1rem;
-    border-radius: 6px;
-    font-size: 0.85rem;
+    padding: var(--space-5) var(--space-6);
+    border-radius: var(--radius-md);
+    font-size: var(--text-md);
     font-weight: 500;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    transition: background 0.2s, border-color 0.2s;
+    gap: var(--space-4);
+    transition: background var(--dur-3), border-color var(--dur-3);
 }
 
 .fullWidthBtn {
@@ -152,25 +157,27 @@
 }
 
 .icon {
-    font-size: 1rem;
+    font-size: var(--text-lg);
+    display: inline-flex;
+    align-items: center;
 }
 
 .errorBox {
-    margin-top: 1rem;
-    padding: 0.75rem 1rem;
+    margin-top: var(--space-6);
+    padding: var(--space-5) var(--space-6);
     background: rgba(255, 77, 79, 0.1);
-    border: 1px solid var(--error, #ff4d4f);
-    border-radius: 4px;
-    color: var(--error, #ff4d4f);
-    font-size: 0.85rem;
+    border: 1px solid var(--error);
+    border-radius: var(--radius-sm);
+    color: var(--error);
+    font-size: var(--text-md);
 }
 
 .spinner {
     height: 14px;
     width: 14px;
-    border: 2px solid rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(var(--overlay-rgb), 0.1);
     border-top: 2px solid var(--foreground);
-    border-radius: 50%;
+    border-radius: var(--radius-full);
     animation: spin 1s linear infinite;
     display: inline-block;
 }
@@ -183,4 +190,117 @@
     100% {
         transform: rotate(360deg);
     }
+}.scopeTabs {
+    display: flex;
+    gap: var(--space-2);
+    margin-bottom: var(--space-5);
+}
+
+.scopeTab {
+    flex: 1;
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    border-radius: var(--radius-md);
+    font-size: var(--text-md);
+    cursor: pointer;
+    transition: background var(--dur-2) var(--ease-standard), color var(--dur-2) var(--ease-standard);
+}
+
+.scopeTab:hover:not(:disabled) {
+    background: var(--surface);
+    color: var(--text-primary);
+}
+
+.scopeTab:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.scopeTabActive,
+.scopeTabActive:hover:not(:disabled) {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+}
+
+.compileGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-6);
+    margin-bottom: var(--space-5);
+}
+
+.compileToggle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--text-md);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.compileField {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-5);
+}
+
+.compileField label {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+}
+
+.compileField textarea {
+    width: 100%;
+    resize: vertical;
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: var(--text-md);
+}
+
+.compileField textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+.chapterList {
+    display: flex;
+    flex-direction: column;
+    max-height: 190px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.chapterRow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-md);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.chapterRow:not(:last-child) {
+    border-bottom: 1px solid var(--border);
+}
+
+.chapterIndex {
+    min-width: 1.5rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.chapterTitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

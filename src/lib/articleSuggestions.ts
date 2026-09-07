@@ -63,12 +63,3 @@ export function addSuggestionToWidgets(
     return widgets.map(w => (w.id === widget.id ? next : w));
 }
 
-/** Names of the pending suggestions, for the assistant's context. */
-export function serializeSuggestions(widgets: DeskWidget[]): string {
-    const widget = widgets.find(w => w.type === 'articleSuggestions');
-    const list: ArticleSuggestion[] = widget?.content?.suggestions ?? [];
-    if (!list.length) return '';
-    return list
-        .map(s => `- ${s.name} (${s.type})${s.category ? ` → ${s.category}` : ''}`)
-        .join('\n');
-}

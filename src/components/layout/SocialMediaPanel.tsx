@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useId, useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { ChevronRight, X } from 'lucide-react';
 import styles from './SocialMediaPanel.module.css';
 import { useWorkspaceStore, SocialPost } from '@/store/workspaceStore';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 interface SocialMediaPanelProps {
     isOpen: boolean;
@@ -62,6 +64,7 @@ export function SocialMediaPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
     const [activeTab, setActiveTab] = useState<SocialPlatform>('x');
     const [draftText, setDraftText] = useState('');
     const [toastMsg, setToastMsg] = useState('');
+    const fieldId = useId();
 
     const showToast = (msg: string) => {
         setToastMsg(msg);
@@ -70,6 +73,7 @@ export function SocialMediaPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
     
     const socialHistory = useWorkspaceStore(state => state.socialHistory);
     const addSocialPost = useWorkspaceStore(state => state.addSocialPost);
+    const deleteSocialPost = useWorkspaceStore(state => state.deleteSocialPost);
     const streakState = useWorkspaceStore(state => state.streakState);
     const sessionWordCount = useWorkspaceStore(state => state.sessionWordCount);
     const projects = useWorkspaceStore(state => state.projects);
@@ -178,12 +182,14 @@ export function SocialMediaPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
                     onClick={onClose}
                     title="Close Panel"
                 >
-                    <span className={styles.ghostTabArrow}>▸</span>
+                    <span className={styles.ghostTabArrow} aria-hidden="true"><ChevronRight size={12} /></span>
                 </button>,
                 document.body
             )}
 
-            <div className={`${styles.panel} ${isOpen ? styles.open : ''}`} style={{ width: panelWidth }}>
+            <div className={`${styles.panel} ${isOpen ? styles.open : ''}`} style={{ width: panelWidth }} // A closed panel is only pushed off-screen, not unmounted — without this it
+                // keeps its tab stops and stays in the accessibility tree.
+                inert={!isOpen}>
                 <div className={styles.panelInner}>
                     <div className={styles.panelResizeHandle} onMouseDown={(e) => {
                         e.preventDefault();
@@ -204,7 +210,7 @@ export function SocialMediaPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
                         <h2 className={styles.title}>
                             Social Media Hub
                         </h2>
-                        <button className={styles.closeBtn} onClick={onClose}>&times;</button>
+                        <button className={styles.closeBtn} onClick={onClose} aria-label="Close social panel"><X size={18} /></button>
                     </div>
 
                     <div className={styles.serviceBar} style={{ paddingRight: tabWidth }}>
@@ -223,7 +229,7 @@ export function SocialMediaPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
                     <div className={styles.content} style={{ paddingRight: tabWidth }}>
                         <div className={styles.composeArea}>
                             <div className={styles.composeHeader}>
-                                <span className={styles.composeTitle}>Draft Update for {platform.name}</span>
+                                <span className={styles.composeTitle} id={`${fieldId}-compose-title`}>Draft Update for {platform.name}</span>
                                 {platform.charLimit && (
                                     <span className={`${styles.charCount} ${isOverLimit ? styles.error : (charCount > platform.charLimit * 0.9 ? styles.warning : '')}`}>
                                         {charCount} / {platform.charLimit}
@@ -233,6 +239,7 @@ export function SocialMediaPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
 
                             <textarea 
                                 className={styles.textArea}
+                                aria-labelledby={`${fieldId}-compose-title`}
                                 placeholder="What's happening in your story?..."
                                 value={draftText}
                                 onChange={(e) => setDraftText(e.target.value)}
@@ -273,13 +280,27 @@ export function SocialMediaPanel({ isOpen, onClose, onTabClick, tabWidth, onTabW
                         <div className={styles.historySection}>
                             <h3 className={styles.historyTitle}>Recent Updates</h3>
                             {socialHistory.length === 0 ? (
-                                <div className={styles.bridgeHint}>No posts shared yet.</div>
+                                <EmptyState
+                                    title="No posts shared yet."
+                                    hint="Draft an update above and it will be logged here."
+                                />
                             ) : (
                                 socialHistory.map(post => (
                                     <div key={post.id} className={styles.historyItem}>
                                         <div className={styles.historyHeader}>
                                             <span className={styles.historyPlatform}>{post.platform}</span>
                                             <span className={styles.historyDate}>{new Date(post.timestamp).toLocaleDateString()}</span>
+                                            {/* No confirm step: this row is a local note that something was
+                                                shared, not the writing itself. The post stays on the platform. */}
+                                            <button
+                                                type="button"
+                                                className={styles.historyDelete}
+                                                title="Remove from history"
+                                                aria-label={`Remove the ${post.platform} update of ${new Date(post.timestamp).toLocaleDateString()} from history`}
+                                                onClick={() => deleteSocialPost(post.id)}
+                                            >
+                                                <X size={14} aria-hidden="true" />
+                                            </button>
                                         </div>
                                         <div className={styles.historyContent}>{post.content}</div>
                                     </div>

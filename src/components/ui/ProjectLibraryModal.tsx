@@ -1,8 +1,10 @@
 "use client";
 import React from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import styles from './NewProjectModal.module.css'; // Reusing modal base styles
 import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useModalDialog } from '@/lib/useModalDialog';
 
 interface ProjectLibraryModalProps {
     isOpen: boolean;
@@ -10,6 +12,16 @@ interface ProjectLibraryModalProps {
 }
 
 export function ProjectLibraryModal({ isOpen, onClose }: ProjectLibraryModalProps) {
+    if (!isOpen) return null;
+    return <ProjectLibraryModalContent onClose={onClose} />;
+}
+
+/**
+ * The open dialog. Split out from the wrapper above because useModalDialog
+ * moves focus on mount, which only means anything if the closed dialog is
+ * unmounted rather than returning null from inside the same component.
+ */
+function ProjectLibraryModalContent({ onClose }: Omit<ProjectLibraryModalProps, 'isOpen'>) {
     const projects = useWorkspaceStore(s => s.projects);
     const worlds = useWorkspaceStore(s => s.worlds);
     const activeProjectId = useWorkspaceStore(s => s.activeProjectId);
@@ -17,7 +29,7 @@ export function ProjectLibraryModal({ isOpen, onClose }: ProjectLibraryModalProp
     const setActiveDocument = useWorkspaceStore(s => s.setActiveDocument);
     const docs = useWorkspaceStore(s => s.documents);
 
-    if (!isOpen) return null;
+    const dialogRef = useModalDialog<HTMLDivElement>(onClose);
 
     const handleSelect = (id: string) => {
         setActiveProject(id);
@@ -45,11 +57,22 @@ export function ProjectLibraryModal({ isOpen, onClose }: ProjectLibraryModalProp
     });
 
     return createPortal(
-        <div className={styles.overlay} onClick={onClose}>
-            <div className={styles.modal} style={{ maxWidth: '800px', maxHeight: '85vh', width: '90%' }} onClick={e => e.stopPropagation()}>
+        <div className={styles.overlay} onClick={onClose} role="presentation">
+            <div
+                ref={dialogRef}
+                className={styles.modal}
+                style={{ maxWidth: '800px', maxHeight: '85vh', width: '90%' }}
+                onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="library-dialog-title"
+                tabIndex={-1}
+            >
                 <div className={styles.header}>
-                    <h2 className={styles.title}>Your Library</h2>
-                    <button className={styles.closeBtn} onClick={onClose}>✕</button>
+                    <h2 className={styles.title} id="library-dialog-title">Your Library</h2>
+                    <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
+                        <X size={18} />
+                    </button>
                 </div>
 
                 <div 
@@ -115,7 +138,7 @@ export function ProjectLibraryModal({ isOpen, onClose }: ProjectLibraryModalProp
                                                 {!p.coverImageUrl && <span className={styles.coverInitials}>{p.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>}
                                             </div>
                                             <span className={styles.modeLabel} style={{ fontSize: '0.85rem', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</span>
-                                            <span className={styles.modeDesc} style={{ fontSize: '0.6rem', opacity: 0.6 }}>{p.writingMode.toUpperCase()}</span>
+                                            <span className={styles.modeDesc} style={{ fontSize: '0.6875rem', opacity: 0.6 }}>{p.writingMode.toUpperCase()}</span>
                                         </div>
                                     ))}
                             </div>

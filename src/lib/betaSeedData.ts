@@ -6,6 +6,7 @@
  */
 
 import { WorkspaceState, COVER_COLORS } from '@/store/workspaceStore';
+import { SEED_WORLD_NAME } from '@/lib/exampleData';
 
 /** Default-layout folder for each seeded entity type (ids from DEFAULT_WORLD_BIBLE_LAYOUT). */
 const SEED_FOLDER: Record<string, string> = {
@@ -85,9 +86,14 @@ const SCENE_CONTENT: Record<string, string> = {
   s9: `<p>EXT. VELDRATH ROOFTOPS - NIGHT</p><p>KAEL and MIRA move fast and low across the slanted tiles. Below, a PATROL crosses the lane. They press flat. Wait. The patrol passes.</p><p>MIRA (whispering): North tower. Thirty seconds.</p><p>KAEL (whispering): The signal?</p><p>MIRA: Three flashes if it's clear. One if it isn't.</p><p>She moves. He follows. The city spreads below them, lit by a thousand lanterns, oblivious to the two figures passing across its face like shadows over a map.</p>`,
 };
 
-export function seedBetaData(store: WorkspaceState): void {
-  // Guard — don't seed twice
-  if (store.worlds.some(w => w.name === 'The Shattered Realm')) return;
+/**
+ * Build the example world. Returns the id of the world it created, or the id of
+ * the existing one if it was already seeded — the caller records this so the
+ * example can be found later by id rather than by a name the writer may change.
+ */
+export function seedBetaData(store: WorkspaceState): string {
+  const existing = store.worlds.find(w => w.name === SEED_WORLD_NAME);
+  if (existing) return existing.id;
 
   const worldId = uuid();
   const proj1Id = uuid(); // novel
@@ -811,47 +817,5 @@ export function seedBetaData(store: WorkspaceState): void {
       ]),
     ]),
   });
-}
-
-/**
- * removeBetaData — removes all seed data from the store.
- * Finds "The Shattered Realm" world and cascades deletes across
- * projects, documents, scenes, and entities.
- * Safe to call when seed data does not exist — no-op.
- */
-export function removeBetaData(store: WorkspaceState): void {
-  const seedWorld = store.worlds.find(w => w.name === 'The Shattered Realm');
-  if (!seedWorld) return;
-
-  // Collect IDs for cascade
-  const seedProjectIds = new Set(
-    store.projects
-      .filter(p => p.worldId === seedWorld.id)
-      .map(p => p.id)
-  );
-
-  const seedDocIds = new Set(
-    store.documents
-      .filter(d => seedProjectIds.has(d.projectId))
-      .map(d => d.id)
-  );
-
-  // Delete entities
-  [...store.entities]
-    .filter(e => seedProjectIds.has(e.projectId))
-    .forEach(e => store.deleteEntity(e.id));
-
-  // Delete scenes
-  [...store.scenes]
-    .filter(s => seedDocIds.has(s.documentId))
-    .forEach(s => store.deleteScene(s.id));
-
-  // Delete documents
-  [...seedDocIds].forEach(id => store.deleteDocument(id));
-
-  // Delete projects (handles activeProjectId reset)
-  [...seedProjectIds].forEach(id => store.deleteProject(id));
-
-  // Delete world
-  store.deleteWorld(seedWorld.id);
+  return worldId;
 }

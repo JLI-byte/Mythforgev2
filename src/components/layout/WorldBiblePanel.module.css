@@ -2,13 +2,18 @@
 /* Closed: translates right keeping 44px tab visible. Open: fully visible. */
 /* Glassmorphism — Sprint 98 */
 .panel {
+    /* The user drags .panelResizeHandle, so this panel's width is set by them
+       and is independent of the viewport's. Its children must size against the
+       panel, not the window — a viewport media query cannot see this width. */
+    container-type: inline-size;
+    container-name: panel;
     position: fixed;
     top: 48px;
     right: 0;
     height: calc(100vh - 48px);
     width: 480px;
     transform: translateX(100%);
-    transition: transform 280ms ease-in-out;
+    transition: transform var(--dur-4) var(--ease-standard);
     z-index: 60;
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
@@ -41,21 +46,21 @@
     top: 48px;
     height: 130px;
     box-sizing: border-box;
-    padding: 16px 10px;
+    padding: var(--space-6) var(--space-5);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-4);
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-border);
     border-right: none;
-    margin-right: -1px;
-    border-radius: 8px 0 0 8px;
+    margin-right: calc(var(--space-1) * -1);
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
     cursor: pointer;
     color: var(--muted);
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all var(--dur-3) var(--ease-spring);
     z-index: 9999;
 }
 
@@ -72,9 +77,9 @@
     background: var(--glass-bg);
     color: var(--foreground);
     border-right: none;
-    box-shadow: -3px 2px 10px rgba(0, 0, 0, 0.10);
+    box-shadow: -3px 2px 10px rgba(var(--shadow-rgb), 0.10);
     /* Extend tab right edge into the panel so it looks flush */
-    padding-right: 16px;
+    padding-right: var(--space-6);
     border-right: 2px solid var(--glass-border);
 }
 
@@ -88,8 +93,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s;
-  border-radius: 8px 0 0 8px;
+  transition: background var(--dur-2);
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
 }
 
 .ghostTab:hover {
@@ -98,15 +103,18 @@
 
 .ghostTabArrow {
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: var(--text-2xs);
   opacity: 0.5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sideTabLabel {
     writing-mode: vertical-rl;
     text-orientation: mixed;
     transform: rotate(180deg);
-    font-size: 0.7rem;
+    font-size: var(--text-2xs);
     font-weight: 500;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -119,13 +127,13 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem;
+    padding: var(--space-6);
     border-bottom: 1px solid var(--glass-border);
     flex-shrink: 0;
 }
 
 .title {
-    font-size: 0.9rem;
+    font-size: var(--text-md);
     font-weight: 600;
     color: var(--foreground);
     margin: 0;
@@ -136,10 +144,15 @@
     border: none;
     cursor: pointer;
     color: var(--muted);
-    font-size: 1.2rem;
+    font-size: var(--text-xl);
     line-height: 1;
-    padding: 0.2rem 0.4rem;
-    border-radius: 4px;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    min-width: 24px;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .closeButton:hover {
@@ -162,11 +175,11 @@
     width: 6px;
     cursor: ew-resize;
     background: transparent;
-    transition: background 150ms ease;
+    transition: background var(--dur-2) var(--ease-standard);
 }
 
 .dragHandle:hover {
-    background: rgba(128, 128, 128, 0.2);
+    background: rgba(var(--overlay-rgb), 0.2);
 }
 
 /* Drag handle on left edge of panel content — resize the drawer */
@@ -179,9 +192,23 @@
     cursor: ew-resize;
     background: transparent;
     z-index: 10;
-    transition: background 150ms ease;
+    transition: background var(--dur-2) var(--ease-standard);
 }
 
 .panelResizeHandle:hover {
-    background: rgba(128, 128, 128, 0.25);
+    background: rgba(var(--overlay-rgb), 0.25);
+}
+/* The panel drags down to 300px, and .header carries an inline paddingRight
+   equal to the side tab (44–120px), so its usable row can fall to ~160px.
+   Below 24rem the padding is pulled in and the title steps down so
+   "World Bible" and the close button stay on one line. */
+@container panel (max-width: 24rem) {
+    .header {
+        padding: var(--space-5) var(--space-5);
+        gap: var(--space-4);
+    }
+
+    .title {
+        font-size: var(--text-sm);
+    }
 }

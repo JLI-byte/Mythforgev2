@@ -4,14 +4,14 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(var(--shadow-rgb), 0.4);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: var(--space-7);
   animation: fadeIn 0.3s ease-out;
 }
 
@@ -27,8 +27,8 @@
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
-  border-radius: 24px;
-  padding: 32px;
+  border-radius: var(--radius-3xl);
+  padding: var(--space-8);
   box-shadow: var(--glass-shadow);
   position: relative;
   animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -48,14 +48,14 @@
   height: 32px;
   background: rgba(var(--overlay-rgb), 0.05);
   border: none;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   color: white;
-  font-size: 1.2rem;
+  font-size: var(--text-xl);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
 }
 
 .closeBtn:hover {
@@ -65,47 +65,47 @@
 
 .header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: var(--space-8);
 }
 
 .logo {
-  font-size: 2.5rem;
-  margin-bottom: 12px;
+  font-size: var(--text-display);
+  margin-bottom: var(--space-5);
 }
 
 .title {
-  font-size: 1.5rem;
+  font-size: var(--text-2xl);
   font-weight: 700;
   color: white;
   letter-spacing: -0.02em;
 }
 
 .subtitle {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--muted);
-  margin-top: 4px;
+  margin-top: var(--space-2);
 }
 
 .oauthGroup {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-7);
 }
 
 .googleBtn {
   width: 100%;
-  padding: 12px;
+  padding: var(--space-5);
   background: white;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: var(--space-5);
   color: #1a1a1a;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: var(--text-md);
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform var(--dur-3), box-shadow var(--dur-3);
+  box-shadow: 0 4px 12px rgba(var(--shadow-rgb), 0.1);
 }
 
 .googleBtn:hover {
@@ -116,10 +116,10 @@
 .divider {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 24px 0;
-  color: rgba(var(--overlay-rgb), 0.2);
-  font-size: 0.75rem;
+  gap: var(--space-5);
+  margin: var(--space-7) 0;
+  color: var(--muted);
+  font-size: var(--text-xs);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -133,48 +133,48 @@
 }
 
 .formGroup {
-  margin-bottom: 20px;
+  margin-bottom: var(--space-7);
 }
 
 .label {
   display: block;
-  font-size: 0.7rem;
+  font-size: var(--text-2xs);
   font-weight: 700;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 10px;
+  margin-bottom: var(--space-5);
 }
 
 .input {
   width: 100%;
-  padding: 14px;
-  background: rgba(0, 0, 0, 0.3);
+  padding: var(--space-6);
+  background: rgba(var(--overlay-rgb), 0.3);
   border: 1px solid rgba(var(--overlay-rgb), 0.1);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   color: white;
-  font-size: 0.9rem;
+  font-size: var(--text-md);
   outline: none;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
 }
 
 .input:focus {
   border-color: var(--accent);
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(var(--overlay-rgb), 0.5);
   box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.1);
 }
 
 .submitBtn {
   width: 100%;
-  padding: 14px;
+  padding: var(--space-6);
   background: var(--accent);
   border: none;
-  border-radius: 12px;
-  color: white;
+  border-radius: var(--radius-xl);
+  color: var(--on-accent);
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: var(--text-md);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dur-3);
 }
 
 .submitBtn:hover:not(:disabled) {
@@ -188,10 +188,10 @@
 }
 
 .message {
-  margin-top: 20px;
-  padding: 12px;
-  border-radius: 12px;
-  font-size: 0.8rem;
+  margin-top: var(--space-7);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  font-size: var(--text-sm);
   text-align: center;
 }
 
@@ -203,6 +203,6 @@
 
 .messageError {
   background: rgba(231, 76, 60, 0.1);
-  color: #e74c3c;
+  color: var(--danger);
   border: 1px solid rgba(231, 76, 60, 0.2);
 }

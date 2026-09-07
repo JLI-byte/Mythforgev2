@@ -1,13 +1,18 @@
 /* VersionHistoryPanel — slide-out panel, fixed right edge */
 /* Glassmorphism — Sprint 98 */
 .panel {
+    /* The user drags .panelResizeHandle, so this panel's width is set by them
+       and is independent of the viewport's. Its children must size against the
+       panel, not the window — a viewport media query cannot see this width. */
+    container-type: inline-size;
+    container-name: panel;
     position: fixed;
     top: 48px;
     right: 0;
     height: calc(100vh - 48px);
     width: 360px;
     transform: translateX(100%);
-    transition: transform 280ms ease-in-out;
+    transition: transform var(--dur-4) var(--ease-standard);
     z-index: 57; /* Slightly behind active modals but in front of editor */
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
@@ -36,27 +41,27 @@
 /* Glassmorphism — Sprint 98 */
 .sideTab {
     position: fixed;
-    top: 568px; /* Rail slots are 130px tall: WB 48, Goals 178, Social 308, Music 438, History 568 */
+    top: 438px; /* Rail slots are 130px tall: WB 48, Goals 178, Social 308, History 438 */
     height: 130px;
     box-sizing: border-box;
-    padding: 16px 10px;
+    padding: var(--space-6) var(--space-5);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-4);
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-border);
     border-right: none;
-    margin-right: -1px;
-    border-radius: 8px 0 0 8px;
+    margin-right: calc(var(--space-1) * -1);
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
     cursor: pointer;
     color: var(--muted);
-    transition: color 150ms ease, background-color 150ms ease;
-    box-shadow: -3px 2px 10px rgba(0, 0, 0, 0.10);
+    transition: color var(--dur-2) var(--ease-standard), background-color var(--dur-2) var(--ease-standard);
+    box-shadow: -3px 2px 10px rgba(var(--shadow-rgb), 0.10);
     z-index: 9999;
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all var(--dur-3) var(--ease-spring);
 }
 
 /* Glassmorphism — Sprint 98 */
@@ -71,8 +76,8 @@
     background: var(--glass-bg);
     color: var(--foreground);
     border-right: none;
-    box-shadow: -3px 2px 10px rgba(0, 0, 0, 0.10);
-    padding-right: 16px;
+    box-shadow: -3px 2px 10px rgba(var(--shadow-rgb), 0.10);
+    padding-right: var(--space-6);
     border-right: 2px solid var(--glass-border);
 }
 
@@ -86,8 +91,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s;
-  border-radius: 8px 0 0 8px;
+  transition: background var(--dur-2);
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
 }
 
 .ghostTab:hover {
@@ -96,15 +101,18 @@
 
 .ghostTabArrow {
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: var(--text-2xs);
   opacity: 0.5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sideTabLabel {
     writing-mode: vertical-rl;
     text-orientation: mixed;
     transform: rotate(180deg);
-    font-size: 0.7rem;
+    font-size: var(--text-2xs);
     font-weight: 500;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -117,13 +125,13 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem;
+    padding: var(--space-6);
     border-bottom: 1px solid var(--glass-border);
     flex-shrink: 0;
 }
 
 .title {
-    font-size: 0.9rem;
+    font-size: var(--text-md);
     font-weight: 600;
     color: var(--foreground);
     margin: 0;
@@ -134,10 +142,15 @@
     border: none;
     cursor: pointer;
     color: var(--muted);
-    font-size: 1.2rem;
+    font-size: var(--text-xl);
     line-height: 1;
-    padding: 0.2rem 0.4rem;
-    border-radius: 4px;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    min-width: 24px;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .closeButton:hover {
@@ -156,8 +169,8 @@
 /* Tabs for Scenes vs World Bible */
 .tabSwitcher {
     display: flex;
-    padding: 8px 16px;
-    gap: 8px;
+    padding: var(--space-4) var(--space-6);
+    gap: var(--space-4);
     background: var(--background);
     border-bottom: 1px solid var(--border);
 }
@@ -166,31 +179,31 @@
     flex: 1;
     background: transparent;
     border: none;
-    padding: 6px 4px;
-    font-size: 0.75rem;
+    padding: var(--space-3) var(--space-2);
+    font-size: var(--text-xs);
     font-weight: 500;
     color: var(--muted);
     cursor: pointer;
-    border-radius: 6px;
-    transition: all 0.2s;
+    border-radius: var(--radius-md);
+    transition: all var(--dur-3);
 }
 
 .tabBtnActive {
     background: var(--surface);
     color: var(--foreground);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 4px rgba(var(--shadow-rgb), 0.2);
 }
 
 .selectorSection {
-    padding: 16px;
+    padding: var(--space-6);
     border-bottom: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: var(--space-5);
 }
 
 .selectLabel {
-    font-size: 0.7rem;
+    font-size: var(--text-2xs);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--muted);
@@ -201,16 +214,16 @@
     background: var(--background);
     border: 1px solid var(--border);
     color: var(--foreground);
-    padding: 8px;
-    border-radius: 6px;
-    font-size: 0.85rem;
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    font-size: var(--text-md);
     outline: none;
 }
 
 .saveActions {
     display: flex;
-    padding: 16px;
-    gap: 10px;
+    padding: var(--space-6);
+    gap: var(--space-5);
 }
 
 .snapshotBtn {
@@ -218,15 +231,15 @@
     background: var(--primary);
     color: white;
     border: none;
-    padding: 10px;
-    border-radius: 6px;
-    font-size: 0.85rem;
+    padding: var(--space-5);
+    border-radius: var(--radius-md);
+    font-size: var(--text-md);
     font-weight: 500;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: var(--space-4);
 }
 
 .snapshotBtn:hover {
@@ -239,8 +252,8 @@
 }
 
 .listTitle {
-    padding: 12px 16px;
-    font-size: 0.75rem;
+    padding: var(--space-5) var(--space-6);
+    font-size: var(--text-xs);
     font-weight: 600;
     color: var(--muted);
     background: var(--background);
@@ -250,13 +263,13 @@
 }
 
 .snapshotItem {
-    padding: 12px 16px;
+    padding: var(--space-5) var(--space-6);
     border-bottom: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: var(--space-2);
     cursor: default;
-    transition: background 0.2s;
+    transition: background var(--dur-3);
 }
 
 .snapshotItem:hover {
@@ -270,7 +283,7 @@
 }
 
 .snapshotLabel {
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     font-weight: 500;
     color: var(--foreground);
     flex: 1;
@@ -280,38 +293,38 @@
 }
 
 .autoPill {
-    background: rgba(128, 128, 128, 0.15);
+    background: rgba(var(--overlay-rgb), 0.15);
     color: var(--muted);
-    font-size: 0.6rem;
-    padding: 2px 6px;
-    border-radius: 4px;
+    font-size: var(--text-2xs);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-sm);
     text-transform: uppercase;
     font-weight: 700;
 }
 
 .itemMeta {
-    font-size: 0.7rem;
+    font-size: var(--text-2xs);
     color: var(--muted);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-4);
 }
 
 .itemActions {
     display: flex;
-    gap: 8px;
-    margin-top: 8px;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
 }
 
 .actionBtn {
     background: var(--background);
     border: 1px solid var(--border);
     color: var(--foreground);
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.75rem;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--dur-3);
 }
 
 .restoreBtn {
@@ -330,10 +343,10 @@
 }
 
 .emptyState {
-    padding: 40px 20px;
+    padding: var(--space-9) var(--space-7);
     text-align: center;
     color: var(--muted);
-    font-size: 0.85rem;
+    font-size: var(--text-md);
     font-style: italic;
 }
 
@@ -346,11 +359,11 @@
     width: 6px;
     cursor: ew-resize;
     background: transparent;
-    transition: background 150ms ease;
+    transition: background var(--dur-2) var(--ease-standard);
 }
 
 .dragHandle:hover {
-    background: rgba(128, 128, 128, 0.2);
+    background: rgba(var(--overlay-rgb), 0.2);
 }
 
 .panelResizeHandle {
@@ -362,9 +375,50 @@
     cursor: ew-resize;
     background: transparent;
     z-index: 10;
-    transition: background 150ms ease;
+    transition: background var(--dur-2) var(--ease-standard);
 }
 
 .panelResizeHandle:hover {
-    background: rgba(128, 128, 128, 0.25);
+    background: rgba(var(--overlay-rgb), 0.25);
+}
+
+/* The panel drags down to 300px and .contentWrapper carries an inline
+   paddingRight equal to the side tab (44–120px), so a snapshot row can be left
+   with ~130px. Three rows here are hard flex rows with no wrap: the header,
+   .itemMeta (date + time + word count) and .itemActions (Restore + Delete).
+   Below 24rem they are allowed to wrap and the padding is pulled in. */
+@container panel (max-width: 24rem) {
+    .header {
+        padding: var(--space-5) var(--space-5);
+        gap: var(--space-4);
+    }
+
+    .title {
+        font-size: var(--text-sm);
+    }
+
+    .tabSwitcher,
+    .selectorSection,
+    .saveActions,
+    .listTitle,
+    .snapshotItem {
+        padding-left: var(--space-5);
+        padding-right: var(--space-5);
+    }
+
+    /* Date, time and word count no longer fit on one line. */
+    .itemMeta {
+        flex-wrap: wrap;
+        gap: var(--space-2) var(--space-4);
+    }
+
+    /* Restore and Delete sit side by side down to about 130px; below that they
+       stack rather than shrinking past a comfortable tap target. */
+    .itemActions {
+        flex-wrap: wrap;
+    }
+
+    .actionBtn {
+        flex: 1 1 auto;
+    }
 }

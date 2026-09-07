@@ -1,0 +1,61 @@
+.doc {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column; min-height: 0;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.bar {
+  display: flex; gap: var(--space-1); flex: 0 0 auto;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.btn {
+  min-width: 26px; height: 24px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--muted); cursor: pointer;
+  font-size: var(--text-2xs); padding: 0 var(--space-2);
+  line-height: 1;
+}
+.btn:hover { color: var(--foreground); background: var(--surface-high); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btnOn { color: var(--accent); border-color: var(--border); background: var(--surface-high); }
+
+.body {
+  flex: 1 1 auto; min-height: 0;
+  overflow-y: auto;
+  font-size: var(--text-xs);
+  color: var(--foreground);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+/* The editable surface is rendered by TipTap inside .body. */
+.body :global(.ProseMirror) {
+  outline: none;
+  min-height: 100%;
+}
+.body :global(.ProseMirror p) { margin: 0 0 var(--space-3); }
+.body :global(.ProseMirror h1),
+.body :global(.ProseMirror h2),
+.body :global(.ProseMirror h3) {
+  margin: var(--space-4) 0 var(--space-2);
+  line-height: 1.25;
+  color: var(--foreground);
+}
+.body :global(.ProseMirror h1) { font-size: var(--text-lg); }
+.body :global(.ProseMirror h2) { font-size: var(--text-md); }
+.body :global(.ProseMirror h3) { font-size: var(--text-sm); }
+.body :global(.ProseMirror ul),
+.body :global(.ProseMirror ol) { margin: 0 0 var(--space-3); padding-left: var(--space-6); }
+.body :global(.ProseMirror li) { margin-bottom: var(--space-1); }
+.body :global(.ProseMirror p.is-editor-empty:first-child::before) {
+  content: attr(data-placeholder);
+  color: var(--muted);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

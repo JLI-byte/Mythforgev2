@@ -4,7 +4,7 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(var(--shadow-rgb), 0.4);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     display: flex;
@@ -29,7 +29,7 @@
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-border);
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
     width: 400px;
     max-width: 90vw;
     max-height: 90vh;
@@ -55,14 +55,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.25rem;
+    padding: var(--space-6) var(--space-7);
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
 }
 
 .header h2 {
     margin: 0;
-    font-size: 1rem;
+    font-size: var(--text-lg);
     font-weight: 500;
     color: var(--foreground);
 }
@@ -71,10 +71,15 @@
     background: transparent;
     border: none;
     color: var(--muted);
-    font-size: 1.25rem;
+    font-size: var(--text-xl);
     cursor: pointer;
     line-height: 1;
-    padding: 0.25rem;
+    padding: var(--space-2);
+    min-width: 24px;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .closeBtn:hover {
@@ -82,7 +87,7 @@
 }
 
 .content {
-    padding: 1.25rem;
+    padding: var(--space-7);
     overflow-y: auto;
     flex: 1;
 }
@@ -90,12 +95,12 @@
 .section {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--space-6);
 }
 
 .section h3 {
     margin: 0;
-    font-size: 0.875rem;
+    font-size: var(--text-md);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--muted);
@@ -104,34 +109,34 @@
 .inputGroup {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--space-4);
 }
 
 .label {
-    font-size: 0.875rem;
+    font-size: var(--text-md);
     font-weight: 500;
     color: var(--foreground);
 }
 
 .subtext {
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     color: var(--muted);
     margin: 0;
 }
 
 .inputWrapper {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-4);
 }
 
 .input {
     flex: 1;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    padding: var(--space-4);
     color: var(--foreground);
-    font-size: 0.875rem;
+    font-size: var(--text-md);
 }
 
 .input:focus {
@@ -140,8 +145,10 @@
 }
 
 .rangeInput {
+    /* 24px hit target for the thumb's track. */
+    min-height: 24px;
     width: 100%;
-    margin: 0.5rem 0;
+    margin: var(--space-4) 0;
     cursor: pointer;
 }
 
@@ -149,9 +156,9 @@
     background: var(--surface);
     border: 1px solid var(--border);
     color: var(--foreground);
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.70rem;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-2xs);
     cursor: pointer;
     white-space: nowrap;
 }
@@ -164,9 +171,9 @@
     background: var(--surface);
     border: 1px solid var(--border);
     color: var(--foreground);
-    padding: 0 0.75rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
+    padding: 0 var(--space-5);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
     cursor: pointer;
 }
 
@@ -175,7 +182,7 @@
 }
 
 .previewText {
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     color: var(--muted);
     margin: 0;
     font-family: monospace;
@@ -184,12 +191,12 @@
 .footer {
     display: flex;
     justify-content: flex-end;
-    gap: 0.75rem;
-    padding: 1rem 1.25rem;
+    gap: var(--space-5);
+    padding: var(--space-6) var(--space-7);
     border-top: 1px solid var(--glass-border);
     background: rgba(var(--overlay-rgb), 0.05);
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
+    border-bottom-left-radius: var(--radius-xl);
+    border-bottom-right-radius: var(--radius-xl);
     flex-shrink: 0;
 }
 
@@ -197,9 +204,9 @@
     background: var(--foreground);
     color: var(--background);
     border: none;
-    padding: 0.375rem 1rem;
-    border-radius: 4px;
-    font-size: 0.875rem;
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-md);
     font-weight: 500;
     cursor: pointer;
 }
@@ -210,29 +217,30 @@
 
 .clearBtn {
     background: transparent;
-    color: #ff4d4f;
-    border: 1px solid #ff4d4f;
-    padding: 0.375rem 0.75rem;
-    border-radius: 4px;
-    font-size: 0.875rem;
+    /* Was a fixed #ff4d4f, which measured 3.27:1 on the light modal. */
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    padding: var(--space-3) var(--space-5);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-md);
     cursor: pointer;
 }
 
 .clearBtn:hover {
-    background: rgba(255, 77, 79, 0.1);
+    background: rgba(var(--overlay-rgb), 0.08);
 }
 
 .providerHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-4);
 }
 
 .badge {
-    padding: 0.25rem 0.5rem;
-    border-radius: 12px;
-    font-size: 0.75rem;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-xl);
+    font-size: var(--text-xs);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -261,10 +269,10 @@
 
 .docsLink {
     display: inline-block;
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     color: var(--accent);
     text-decoration: none;
-    margin-top: 0.25rem;
+    margin-top: var(--space-2);
 }
 
 .docsLink:hover {
@@ -272,175 +280,99 @@
 }
 
 .ollamaHelper {
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     color: var(--muted);
     font-style: italic;
-    margin-top: 0.25rem;
+    margin-top: var(--space-2);
 }
-/* ── AI settings ─────────────────────────────────────────── */
 
-.aiGroupTitle {
-    margin: 1.4rem 0 0.6rem;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+/* --- Danger zone ------------------------------------------------------- */
+/* Separated from the sections above by a --danger rule rather than the usual
+   --border, so the boundary reads as a change of consequence and not just the
+   next group of settings. */
+.dangerZone {
+    margin-top: var(--space-8);
+    padding-top: var(--space-7);
+    border-top: 1px solid var(--danger);
+}
+
+.dangerZone h3 {
+    color: var(--danger);
+}
+
+.dangerLead {
+    margin: 0;
+    font-size: var(--text-md);
+}
+
+.dangerList {
+    margin: 0;
+    padding-left: var(--space-7);
+    font-size: var(--text-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.dangerNote {
+    margin: 0;
+    font-size: var(--text-sm);
     color: var(--muted);
 }
 
-.aiInput {
+.deleteInput {
     width: 100%;
-    padding: 0.5rem 0.65rem;
-    font-family: inherit;
-    font-size: 0.85rem;
-    color: var(--foreground);
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
+    padding: var(--space-4);
+    color: var(--foreground);
+    font-size: var(--text-md);
+}
+
+.deleteInput:focus {
     outline: none;
-    transition: border-color 0.15s ease, background-color 0.15s ease;
+    border-color: var(--danger);
 }
 
-.aiInput:focus-visible {
-    border-color: var(--accent);
-    background: rgba(255, 255, 255, 0.07);
-}
-
-.aiField {
-    margin-top: 0.5rem;
-}
-
-.aiFieldHead {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 0.5rem;
-    margin-bottom: 0.3rem;
-}
-
-.aiRow {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-}
-
-.aiHelp {
-    margin: 0.35rem 0 0;
-    font-size: 0.76rem;
-    line-height: 1.5;
-    color: var(--muted);
-}
-
-.aiCode {
-    padding: 0.05rem 0.3rem;
-    font-size: 0.72rem;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.07);
-    word-break: break-all;
-}
-
-.aiBadgeOk,
-.aiBadgeOff {
-    flex: 0 0 auto;
-    padding: 0.1rem 0.4rem;
-    font-size: 0.68rem;
-    font-weight: 600;
-    border-radius: 999px;
-}
-
-.aiBadgeOk {
-    color: #6ee7b7;
-    background: rgba(110, 231, 183, 0.12);
-}
-
-.aiBadgeOff {
-    color: var(--muted);
-    background: rgba(255, 255, 255, 0.06);
-}
-
-.aiSegmented {
-    display: flex;
-    gap: 0.4rem;
-    flex-wrap: wrap;
-    margin-top: 0.35rem;
-}
-
-.aiSeg,
-.aiSegActive {
-    padding: 0.45rem 0.8rem;
-    font-family: inherit;
-    font-size: 0.82rem;
-    border-radius: 8px;
-    cursor: pointer;
-    border: 1px solid var(--border);
+/* Outlined rather than filled, following .clearBtn. --danger is a light red in
+   the dark themes, so white-on-danger would land near 2.7:1 — the same class of
+   contrast failure Phase 8 fixed on .clearBtn. Danger ink on the panel passes in
+   every palette. */
+.deleteBtn {
+    align-self: flex-start;
     background: transparent;
-    color: var(--foreground);
-    transition: background-color 0.15s ease, border-color 0.15s ease;
-}
-
-.aiSeg:hover {
-    background: rgba(255, 255, 255, 0.06);
-}
-
-.aiSegActive {
-    border-color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 18%, transparent);
-}
-
-.aiCheckRow {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.8rem;
-    font-size: 0.83rem;
-    cursor: pointer;
-}
-
-.aiSaveBtn,
-.aiClearBtn,
-.aiTestBtn {
-    flex: 0 0 auto;
-    padding: 0.4rem 0.7rem;
-    font-family: inherit;
-    font-size: 0.78rem;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-md);
     font-weight: 600;
-    border-radius: 8px;
     cursor: pointer;
-    border: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--foreground);
-    transition: background-color 0.15s ease, border-color 0.15s ease;
+    transition: background var(--dur-2) ease;
 }
 
-.aiSaveBtn {
-    margin-top: 0.5rem;
-    border-color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 20%, transparent);
+.deleteBtn:hover:not(:disabled) {
+    background: rgba(var(--overlay-rgb), 0.08);
 }
 
-.aiSaveBtn:hover,
-.aiClearBtn:hover,
-.aiTestBtn:hover {
-    background: rgba(255, 255, 255, 0.12);
-}
-
-.aiTestRow {
-    display: flex;
-    align-items: center;
-    gap: 0.55rem;
-    flex-wrap: wrap;
-    margin-top: 0.7rem;
-}
-
-.aiTestOk,
-.aiTestBad {
-    font-size: 0.76rem;
-}
-
-.aiTestOk { color: #6ee7b7; }
-.aiTestBad { color: #f87171; }
-
-.aiStatus {
-    font-size: 0.74rem;
+/* Disabled is the resting state here, so it has to look inert rather than
+   merely dimmed — this is the control you do not want anyone poking at. */
+.deleteBtn:disabled {
+    background: transparent;
     color: var(--muted);
+    border-color: var(--border);
+    cursor: not-allowed;
+}
+
+.deleteError {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--danger);
+}
+
+/* The section is a column flexbox, so without this the export button stretches
+   the full width and reads as heavier than the delete button below it. */
+.dangerExportBtn {
+    align-self: flex-start;
 }

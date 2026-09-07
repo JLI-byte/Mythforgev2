@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useId } from 'react';
 import styles from '../../ArticleGridEditor.module.css';
 
 /**
@@ -65,6 +65,7 @@ function getRhymeScheme(lines: string[]): string[] {
 }
 
 export function SyllableWidget({ content, onChange }: { content: any; onChange: (c: any) => void }) {
+  const fieldId = useId();
   const text: string = content.text || '';
   const showBreakdown: boolean = content.showBreakdown ?? true;
 
@@ -78,8 +79,9 @@ export function SyllableWidget({ content, onChange }: { content: any; onChange: 
         <span className={styles.syllableStats}>
           {totalSyllables} syllable{totalSyllables !== 1 ? 's' : ''} · {wordCount} word{wordCount !== 1 ? 's' : ''}
         </span>
-        <label className={styles.syllableToggle}>
+        <label className={styles.syllableToggle} htmlFor={`${fieldId}-breakdown`}>
           <input
+            id={`${fieldId}-breakdown`}
             type="checkbox"
             checked={showBreakdown}
             onChange={e => onChange({ ...content, showBreakdown: e.target.checked })}
@@ -90,6 +92,7 @@ export function SyllableWidget({ content, onChange }: { content: any; onChange: 
 
       <textarea
         className={styles.syllableTextarea}
+        aria-label="Text to count syllables"
         placeholder="Type or paste text to count syllables..."
         value={text}
         onChange={e => onChange({ ...content, text: e.target.value })}
@@ -113,6 +116,7 @@ interface LyricLine { id: string; text: string; }
 interface LyricStanza { id: string; lines: LyricLine[]; }
 
 export function LyricWidget({ content, onChange }: { content: any; onChange: (c: any) => void }) {
+  const fieldId = useId();
   const stanzas: LyricStanza[] = content.stanzas || [{ id: crypto.randomUUID(), lines: [{ id: crypto.randomUUID(), text: '' }] }];
   const showSyllables: boolean = content.showSyllables ?? true;
   const showRhyme: boolean = content.showRhyme ?? true;
@@ -162,12 +166,12 @@ export function LyricWidget({ content, onChange }: { content: any; onChange: (c:
   return (
     <div className={styles.lyricWidget}>
       <div className={styles.lyricToolbar}>
-        <label className={styles.lyricToggle}>
-          <input type="checkbox" checked={showSyllables} onChange={e => onChange({ ...content, showSyllables: e.target.checked })} />
+        <label className={styles.lyricToggle} htmlFor={`${fieldId}-syllables`}>
+          <input id={`${fieldId}-syllables`} type="checkbox" checked={showSyllables} onChange={e => onChange({ ...content, showSyllables: e.target.checked })} />
           <span>Syllables</span>
         </label>
-        <label className={styles.lyricToggle}>
-          <input type="checkbox" checked={showRhyme} onChange={e => onChange({ ...content, showRhyme: e.target.checked })} />
+        <label className={styles.lyricToggle} htmlFor={`${fieldId}-rhyme`}>
+          <input id={`${fieldId}-rhyme`} type="checkbox" checked={showRhyme} onChange={e => onChange({ ...content, showRhyme: e.target.checked })} />
           <span>Rhyme</span>
         </label>
         <button className={styles.lyricAddStanzaBtn} onClick={addStanza}>+ Stanza</button>
@@ -191,6 +195,7 @@ export function LyricWidget({ content, onChange }: { content: any; onChange: (c:
                   )}
                   <input
                     className={styles.lyricLineInput}
+                    aria-label="Lyric line"
                     value={line.text}
                     placeholder="Write a line..."
                     onChange={e => updateLine(stanza.id, line.id, e.target.value)}

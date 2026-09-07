@@ -22,6 +22,7 @@ export default function MeterField({ editing, meter, onChange, barClassName }: M
         <div className={barClassName} style={{ ['--level' as string]: `${meter.level}%` }}>
             <input
                 className={styles.meterLabelInput}
+                aria-label="Meter label"
                 value={meter.label}
                 placeholder="label"
                 onChange={(e) => onChange({ ...meter, label: e.target.value })}
@@ -29,6 +30,7 @@ export default function MeterField({ editing, meter, onChange, barClassName }: M
             <div className={styles.rangeRow}>
                 <input
                     type="range"
+                    aria-label={meter.label ? `${meter.label} level` : 'Meter level'}
                     min={0}
                     max={100}
                     value={meter.level}

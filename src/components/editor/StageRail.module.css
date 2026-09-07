@@ -1,0 +1,92 @@
+/* ── Workshop stage rail ──────────────────────────────────
+   Research -> Drafting -> Writing. A segmented control rather than three loose
+   buttons: the stages are one choice, and grouping them says so. Follows the
+   research scope bar's vocabulary so the Workshop does not read as a different
+   app from the surfaces it contains. */
+
+.rail {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 0 0 auto;
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--border, rgba(var(--overlay-rgb), 0.2));
+  /* The stages sit on the same ground as the canvas below them, so the border
+     is the only separation. A filled bar would read as a second toolbar. */
+  background: transparent;
+}
+
+.stage {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-sm);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border, rgba(var(--overlay-rgb), 0.25));
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--dur-2) var(--ease-standard),
+    color var(--dur-2) var(--ease-standard),
+    border-color var(--dur-2) var(--ease-standard);
+}
+
+.stage:hover {
+  color: var(--foreground);
+  background: rgba(var(--overlay-rgb), 0.06);
+}
+
+.stage:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.stageActive {
+  background: var(--accent);
+  border-color: var(--accent);
+  /* Not #fff: the accent is pale in dark mode. --on-accent flips with it. */
+  color: var(--on-accent);
+}
+
+.stageActive:hover {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* The stage body owns the rest of the tab. */
+.panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+}
+
+.workshop {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage { transition: none; }
+}
+
+/* Narrow viewports: the labels are the point, so drop the padding before them. */
+@media (max-width: 640px) {
+  .rail { padding: var(--space-2) var(--space-3); overflow-x: auto; }
+  .stage { padding: var(--space-2) var(--space-4); }
+}
+
+/* Stage body split between the canvas and the dossier panel. */
+.withDossier {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+}
+.withDossier > :first-child { flex: 1 1 auto; min-width: 0; min-height: 0; }

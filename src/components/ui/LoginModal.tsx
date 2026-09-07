@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
+import { sendMagicLink, signInWithGoogle } from '@/lib/supabase/signIn';
+import { X } from 'lucide-react';
 import styles from './LoginModal.module.css';
-import { createClient } from '@/lib/supabase/client';
+import { useModalDialog } from '@/lib/useModalDialog';
 
 interface LoginModalProps {
   onClose: () => void;
@@ -17,10 +19,9 @@ interface LoginModalProps {
 export default function LoginModal({ onClose }: LoginModalProps) {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const fieldId = useId();
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const supabase = createClient();
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,17 +29,17 @@ export default function LoginModal({ onClose }: LoginModalProps) {
     setMessage(null);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    // Same invite policy as the login page. This surface used to omit
+    // shouldCreateUser entirely, which GoTrue reads as true — so it created
+    // accounts the login page refused.
+    const result = await sendMagicLink(email);
 
-    if (error) {
-      setError(error.message);
+    if (result.notInvited) {
+      setError('That email is not on the invite list yet.');
+    } else if (!result.ok) {
+      setError(result.message);
     } else {
-      setMessage('Check your email for a magic link.');
+      setMessage(result.message);
     }
     
     setIsLoading(false);
@@ -46,24 +47,29 @@ export default function LoginModal({ onClose }: LoginModalProps) {
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    const result = await signInWithGoogle();
 
-    if (error) {
-      setError(error.message);
+    if (!result.ok) {
+      setError(result.message);
       setIsLoading(false);
     }
     // Note: Sucessful OAuth will redirect the whole page
   };
 
+  const dialogRef = useModalDialog<HTMLDivElement>(onClose);
+
   return (
-    <div className={styles.backdrop} onClick={onClose}>
-      <div className={styles.panel} onClick={e => e.stopPropagation()}>
-        <button className={styles.closeBtn} onClick={onClose}>×</button>
+    <div className={styles.backdrop} onClick={onClose} role="presentation">
+      <div
+        ref={dialogRef}
+        className={styles.panel}
+        onClick={e => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Sign in to LoreCanvas"
+        tabIndex={-1}
+      >
+        <button className={styles.closeBtn} onClick={onClose} aria-label="Close sign in"><X size={18} /></button>
 
         <div className={styles.header}>
           <div className={styles.logo}>📖</div>
@@ -91,8 +97,9 @@ export default function LoginModal({ onClose }: LoginModalProps) {
 
         <form onSubmit={handleMagicLink} className={styles.form}>
           <div className={styles.formGroup}>
-            <label className={styles.label}>Email Address</label>
+            <label className={styles.label} htmlFor={`${fieldId}-email`}>Email Address</label>
             <input 
+              id={`${fieldId}-email`}
               type="email" 
               className={styles.input} 
               placeholder="name@example.com"

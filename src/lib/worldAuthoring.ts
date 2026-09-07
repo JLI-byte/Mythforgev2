@@ -123,11 +123,13 @@ export function appendSectionsToDoc(existingDoc: string | undefined, sections: A
     return JSON.stringify(tabs);
 }
 
-function stripHtmlText(html: string): string {
+/** Tags out, entities decoded, blank lines collapsed. Shared with loreRules. */
+export function stripHtmlText(html: string): string {
     return html
         .replace(/<br\s*\/?>/gi, '\n')
         .replace(/<\/p>/gi, '\n\n')
         .replace(/<[^>]+>/g, '')
+        .replace(/&nbsp;/gi, ' ')
         .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
         .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&')
         .replace(/\n{3,}/g, '\n\n')
@@ -243,53 +245,3 @@ function shortDesc(description: string | undefined): string {
     return d.length > 100 ? d.slice(0, 100) + '…' : d;
 }
 
-/**
- * Plain-text view of the world for the assistant: a nested folder outline with
- * a one-line description per article, then the full text of each article so it
- * can read, expand, and check consistency.
- */
-export function serializeWorld(
-    roots: ReadonlyArray<WorldBibleRootConfig>,
-    entities: ReadonlyArray<WorldArticle>,
-): string {
-    const lines: string[] = [];
-    const folderIds = new Set(roots.map(r => r.id));
-    const childrenOf = (parentId: string | undefined) =>
-        roots.filter(r => r.parentId === parentId);
-    const articlesIn = (folderId: string) => entities.filter(e => e.categoryId === folderId);
-    const outlineArticle = (a: WorldArticle, indent: string) => {
-        const desc = shortDesc(a.description);
-        lines.push(`${indent}• ${a.name} (${a.type})${desc ? ` — ${desc}` : ''}`);
-    };
-
-    const walk = (parentId: string | undefined, depth: number) => {
-        for (const folder of childrenOf(parentId)) {
-            lines.push(`${'  '.repeat(depth)}- ${folder.icon} ${folder.label}`);
-            for (const a of articlesIn(folder.id)) outlineArticle(a, '  '.repeat(depth + 1));
-            walk(folder.id, depth + 1);
-        }
-    };
-    walk(undefined, 0);
-
-    const unfiled = entities.filter(e => !e.categoryId || !folderIds.has(e.categoryId));
-    if (unfiled.length) {
-        lines.push('- (unfiled)');
-        for (const a of unfiled) outlineArticle(a, '  ');
-    }
-
-    const outline = lines.length ? lines.join('\n') : '(this world has no folders or articles yet)';
-
-    // Full article text, so the assistant can read and revise existing content.
-    const details: string[] = [];
-    for (const a of entities) {
-        const body = articleDocToText(a.articleDoc);
-        const desc = (a.description ?? '').trim();
-        if (!desc && !body) continue;
-        details.push(`### ${a.name} (${a.type})`);
-        if (desc) details.push(desc);
-        if (body) details.push(body);
-        details.push('');
-    }
-
-    return details.length ? `${outline}\n\nArticle contents:\n${details.join('\n').trim()}` : outline;
-}
