@@ -15,6 +15,9 @@ import { BoardSearch } from './research/BoardSearch';
 import { LabelBar } from './research/LabelBar';
 import styles from './WritingDesk.module.css';
 
+/** Stable empty array: a fresh one would defeat the reference check above. */
+const NO_LABELS: string[] = [];
+
 /**
  * Research Tab — the Workshop's first stage.
  *
@@ -40,13 +43,18 @@ export default function ResearchTab() {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [labelFilter, setLabelFilter] = useState<string[]>([]);
 
-    // The card the canvas has selected, as label ids — null when nothing is
-    // selected, which is what puts the label bar into filter mode.
-    const selectedLabelIds = useWorkspaceStore(s => {
-        if (!boardId || !selectedId) return null;
-        const card = s.researchStates[boardId]?.widgets?.find(w => w.id === selectedId);
-        return card ? (card.labelIds ?? []) : null;
-    });
+    // Select the WIDGET, not a derived array. `card.labelIds ?? []` inside the
+    // selector builds a fresh array on every store read, so useSyncExternalStore
+    // sees a new snapshot each tick and re-renders forever.
+    const selectedCard = useWorkspaceStore(s => (
+        boardId && selectedId
+            ? s.researchStates[boardId]?.widgets?.find(w => w.id === selectedId)
+            : undefined
+    ));
+
+    // Derived outside the selector, against a module-level constant, so the
+    // reference is stable when a selected card carries no labels yet.
+    const selectedLabelIds = selectedCard ? (selectedCard.labelIds ?? NO_LABELS) : null;
 
     const applyToSelection = (labelId: string) => {
         if (!boardId || !selectedId) return;

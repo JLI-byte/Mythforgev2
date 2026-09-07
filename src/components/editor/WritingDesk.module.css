@@ -1198,6 +1198,12 @@
   padding: var(--space-6);
   z-index: 10000;
   width: 280px;
+  /* Bounded so the clamp below can always keep it on screen: the research
+     palette is 13 cards, and a fixed height guess overflowed the viewport. */
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
   transform: translate(-50%, -50%);
   animation: typePickerIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
@@ -1218,6 +1224,8 @@
 }
 
 .typePickerGrid {
+  overflow-y: auto;
+  min-height: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-4);

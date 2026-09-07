@@ -27,6 +27,18 @@ import { EmptyState } from '@/components/ui/EmptyState';
 // ============================================================
 
 
+/**
+ * The cards that belong on a research board, in the order the picker shows
+ * them. The desk's own widgets — Writing Zone, Scene Control, Draft Nav, Beat
+ * Card and the rest — are about a manuscript, not about gathering, so they are
+ * left out rather than offered and then regretted.
+ */
+const RESEARCH_PALETTE: DeskWidgetType[] = [
+  'sticky', 'image', 'reference', 'board', 'column',
+  'todo', 'document', 'table', 'swatch', 'drawing',
+  'biblePinit', 'scenePin', 'interview',
+];
+
 /** The research toolbar is already five buttons wide; these live behind ＋ More. */
 const MORE_CARDS: { type: DeskWidgetType; label: string }[] = [
   { type: 'todo',     label: 'To-do' },
@@ -588,7 +600,10 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
             height: bh
           });
         } else {
+          // A click rather than a drag. Offer the same picker at that point;
+          // zero dimensions mean "use each type's default size".
           if (ghost) ghost.style.display = 'none';
+          setPendingWidget({ x: startX, y: startY, width: 0, height: 0 });
         }
         document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp);
       };
@@ -1216,7 +1231,9 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
       {/* Select-Before-Create (or Upgrade) Picker */}
       {(pendingWidget || typePickerWidgetId) && (() => {
         const pickerWidth = 280;
-        const pickerHeight = 240;
+        // Matches .typePicker's max-height, so the clamp below is honest about
+        // how tall the thing it is positioning can actually be.
+        const pickerHeight = Math.min(520, window.innerHeight * 0.7);
         const padding = 20;
 
         let sx = 0, sy = 0, targetId: string | null = null;
@@ -1243,20 +1260,33 @@ export default function WritingDesk({ variant = 'desk', scopeKey = null, onOpenB
 
         const picker = (
           <div className={styles.typePicker} style={{ left: sx, top: sy }} onMouseDown={e => e.stopPropagation()}>
-            <div className={styles.typePickerTitle}>Select widget type</div>
-            <div className={styles.typePickerGrid}>{PALETTE_ITEMS.map(item => (
-              <button key={item.type} className={styles.typePickerBtn} onClick={() => { 
+            <div className={styles.typePickerTitle}>{isResearch ? 'Add to the board' : 'Select widget type'}</div>
+            <div className={styles.typePickerGrid}>{(isResearch
+              ? RESEARCH_PALETTE.map(t => PALETTE_MAP[t]).filter((i): i is NonNullable<typeof i> => Boolean(i))
+              : PALETTE_ITEMS
+            ).map(item => (
+              <button key={item.type} className={styles.typePickerBtn} aria-label={item.label} onClick={() => { 
                 if (targetId) {
                   updateWidgets(widgetsRef.current.map(w => w.id === targetId ? { ...w, type: item.type } : w));
                 } else if (pendingWidget) {
+                  const dims = DEFAULT_DIMS[item.type];
+                  // A board card is a pointer; register the board it points at,
+                  // exactly as the toolbar button does.
+                  let content: Record<string, unknown> = {};
+                  if (item.type === 'board' && isResearch && stateKey && activeProjectId) {
+                    content = {
+                      boardId: useWorkspaceStore.getState()
+                        .createResearchBoard('New board', stateKey, activeProjectId),
+                    };
+                  }
                   const nw: DeskWidget = {
                     id: crypto.randomUUID(),
                     type: item.type,
                     x: pendingWidget.x,
                     y: pendingWidget.y,
-                    width: pendingWidget.width,
-                    height: pendingWidget.height,
-                    content: {},
+                    width: pendingWidget.width || dims.w,
+                    height: pendingWidget.height || dims.h,
+                    content,
                   };
                   updateWidgets([...widgetsRef.current, nw]);
                   setSelectedId(nw.id);
