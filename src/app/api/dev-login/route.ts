@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from '@/lib/logger';
 
 /**
  * Developer sign-in — DEVELOPMENT ONLY.
@@ -26,11 +27,25 @@ export async function POST() {
         );
     }
 
-    const supabase = await createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    // A rejected sign-in and an unreachable auth service are different
+    // failures and deserve different answers. Without this try/catch a network
+    // error surfaced to the writer as the raw string "fetch failed", which
+    // says nothing about what broke or whether their work is safe.
+    try {
+        const supabase = await createClient();
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-        return NextResponse.json({ error: error.message }, { status: 401 });
+        if (error) {
+            return NextResponse.json({ error: error.message }, { status: 401 });
+        }
+        return NextResponse.json({ ok: true });
+    } catch (cause) {
+        // The cause stays in the server log, never in the response: it can
+        // carry hostnames and provider internals.
+        logger.error('dev-login: auth service unreachable', cause);
+        return NextResponse.json(
+            { error: 'Could not reach the sign-in service. Your work is safe — try again in a moment.' },
+            { status: 503 },
+        );
     }
-    return NextResponse.json({ ok: true });
 }
