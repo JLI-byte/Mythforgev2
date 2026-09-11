@@ -652,3 +652,18 @@
     background: var(--danger);
     border-color: var(--danger);
 }
+
+/* Keyboard focus on a cover. The cover tilts on hover and sits inside a
+   clipping shelf, so a plain outline gets cut off at the shelf edge — an
+   outline plus a ring that draws inside the element survives both. */
+.book:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--accent);
+}
+
+.bookDeleteBtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  opacity: 1;
+}

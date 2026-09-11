@@ -40,7 +40,14 @@ export function ImagePinRenderer({ content, onChange, onChangeImmediate }: { con
       {content.src ? (
         <>
           <div className={styles.imagePinImgWrap} onMouseDown={e => e.stopPropagation()}>
-            <img src={content.src} className={styles.imagePinImg} />
+            {/* The caption when there is one. When there is not, a generic
+                descriptor rather than alt="": the image IS the card's content,
+                so hiding it from a screen reader would hide the card. */}
+            <img
+              src={content.src}
+              alt={localLabel || 'Pinned image, no caption'}
+              className={styles.imagePinImg}
+            />
           </div>
           <div className={styles.imagePinControls} onMouseDown={e => e.stopPropagation()}>
             <input

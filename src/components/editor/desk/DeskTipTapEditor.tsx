@@ -4,7 +4,6 @@ import React, { useRef, useEffect, useState } from 'react';
 import { PenLine } from 'lucide-react';
 import { useEditor, EditorContent, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import { TextStyle } from '@tiptap/extension-text-style';
 import FontFamily from '@tiptap/extension-font-family';
@@ -35,8 +34,9 @@ export function DeskTipTapEditor({ sceneId, content, onUpdate, onFocus }: {
 
   const editor = useEditor({
     extensions: [
+      // StarterKit 3.x ships underline; registering it again warns
+      // "Duplicate extension names found: ['underline']" on every mount.
       StarterKit,
-      Underline,
       TextStyle,
       FontFamily,
       FontSize,

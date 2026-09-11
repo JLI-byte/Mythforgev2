@@ -84,7 +84,11 @@ export function WorldBiblePinRenderer({ content, onChange }: { content: any; onC
     <div className={styles.biblePinCard}>
       <div className={styles.biblePinHeader}>
         {entity.imageUrl ? (
-          <img src={entity.imageUrl} className={styles.biblePinThumb} />
+          <img
+            src={entity.imageUrl}
+            alt={`${entity.name}`}
+            className={styles.biblePinThumb}
+          />
         ) : (
           <div className={styles.biblePinThumbPlaceholder}>📖</div>
         )}

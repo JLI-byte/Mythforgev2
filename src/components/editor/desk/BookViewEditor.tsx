@@ -3,7 +3,6 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { useEditor, EditorContent, ReactNodeViewRenderer } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import { TextStyle } from '@tiptap/extension-text-style';
 import FontFamily from '@tiptap/extension-font-family';
@@ -40,8 +39,9 @@ export function BookViewEditor({ activeSceneId }: { activeSceneId?: string }) {
 
   const editor = useEditor({
     extensions: [
+      // StarterKit 3.x ships underline; registering it again warns
+      // "Duplicate extension names found: ['underline']" on every mount.
       StarterKit,
-      Underline,
       TextStyle,
       FontFamily,
       Highlight.configure({ multicolor: true }),

@@ -335,7 +335,23 @@ export function Bookshelf() {
                 key={p.id}
                 className={`${styles.slot} ${draggedProjectId === p.id ? styles.dragging : ''}`}
             >
+                {/* A cover is a control, so it answers to the keyboard. It stays a
+                    div rather than becoming a <button>: it is also a drag source, and
+                    a draggable button is inconsistent across browsers. The button
+                    role plus Enter/Space is the supported way to have both. */}
                 <div
+                    role="button"
+                    tabIndex={isDeleting ? -1 : 0}
+                    aria-current={p.id === activeProjectId ? 'true' : undefined}
+                    aria-label={`Open ${p.name}${p.id === activeProjectId ? ', currently open' : ''}`}
+                    onKeyDown={(e) => {
+                        if (isDeleting) return;
+                        if (e.key !== 'Enter' && e.key !== ' ') return;
+                        // Space scrolls the shelf otherwise, which moves the thing
+                        // the writer was aiming at.
+                        e.preventDefault();
+                        handleSelectProject(p.id);
+                    }}
                     draggable={!isDeleting}
                     onDragStart={(e) => handleDragStart(e, p.id)}
                     onDragEnd={() => setDraggedProjectId(null)}
@@ -360,6 +376,7 @@ export function Bookshelf() {
                     on hover, which would make a button inside it hard to hit. */}
                 <button
                     className={styles.bookDeleteBtn}
+                    aria-label={`Delete “${p.name}”`}
                     title={`Delete “${p.name}”`}
                     onClick={e => { e.stopPropagation(); setDeletingProjectId(p.id); }}
                 >
